@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import Link from 'next/link';
 
 const Menu = () => {
@@ -27,8 +28,15 @@ const Menu = () => {
     };
   }, []);
 
+  const pathname = usePathname();
+  const noTopNavPages = [''];
+
+  if (noTopNavPages.includes(pathname)) {
+    return null; 
+  }
+
   return (
-    <header id="navbar">
+    <>
       {/* Add new links as we go */}
       <div className="flex bg-slate-400 justify-center space-x-8">
         <Link
@@ -54,14 +62,14 @@ const Menu = () => {
                   onClick={toggleLoginOptions}
                   className="hover:text-[white] cursor-pointer"
                 >
-                  Login As Official
+                  Login For Official
                 </Link>
                 <Link
                   href={"/resident"}
                   onClick={toggleLoginOptions}
                   className="hover:text-[white] cursor-pointer"
                 >
-                  Login As Resident
+                  Login For Resident
                 </Link>
                 <Link
                   href={"/register"}
@@ -75,7 +83,7 @@ const Menu = () => {
           )}
         </div>
       </div>
-    </header>
+    </>
   );
 };
 
