@@ -62,12 +62,11 @@ const registerForm:React.FC = () => {
                 createdAt: new Date(),
             });
             //await sendEmailVerification(user);
-            alert("Register sucessful!");
         }
         catch(error: string | any){
             alert("Register failed! " + error.message);
         }
-
+        alert("Register sucessful!");
         
       }
 

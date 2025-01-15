@@ -1,4 +1,5 @@
 TO DO for this branch
-1. Test the db and api routes
-2. create the user creation (Resident and Officials for now (specific officials roles will be added later))
-3. Start doing the MIS pages or  (Officials Facing Side)
+Test the db and api routes(Works)
+Partial Implementations of Resident User Creation (didnt include image upload) after do  either the login funcs or the Barangay facing side pages
+
+
