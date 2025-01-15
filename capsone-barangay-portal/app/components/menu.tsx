@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from 'next/link';
 
-const Menu = () => {
+const Menu:React.FC = () => {
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const loginMenuRef = useRef<HTMLDivElement | null>(null);
 
