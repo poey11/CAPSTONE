@@ -1,5 +1,5 @@
 "use client"
-import {auth,db} from "../api/firebase";
+import {auth,db,storage} from "../api/firebase";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
@@ -12,7 +12,7 @@ interface Resident {
     phone: string;
     address: string;
     password: string;
-    upload: string|undefined;
+    upload: File | null;
   };
   
   type residentUser = Resident & {
@@ -30,17 +30,25 @@ const registerForm:React.FC = () => {
         address: "",
         password: "",
         role: "resident",
-        upload: "",
+        upload: null,
       });
-    
+
       const handleChange = (
         e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
       ) => {
-        const { name, value } = e.target;
-        setResident({
-          ...resident,
-          [name]: value,
-        });
+        const { name, value, type } = e.target;
+        if(type=== "file" && e.target instanceof HTMLInputElement && e.target.files){
+          setResident({
+            ...resident,
+            upload: e.target.files[0],
+          })
+        }
+        else{
+          setResident({
+            ...resident,
+            [name]:value,
+          })
+        }
       };
 
       const handleSubmit =async(e: React.FormEvent<HTMLFormElement>) => {
@@ -48,7 +56,6 @@ const registerForm:React.FC = () => {
         console.log("Form submitted: ", resident);
         try{
            const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, resident.password);
-            
           
             const user = userCredentials.user;
             await setDoc(doc(db, "ResidentUsers", user.uid), {
@@ -61,7 +68,12 @@ const registerForm:React.FC = () => {
                 role: resident.role,
                 createdAt: new Date(),
             });
-            //await sendEmailVerification(user);
+
+            
+            if(resident.upload){
+              const storageRef = ref(storage, `valid_id_image/${user.uid}`);
+              await uploadBytes(storageRef,  resident.upload)
+            }
         }
         catch(error: string | any){
             alert("Register failed! " + error.message);
@@ -108,7 +120,7 @@ const registerForm:React.FC = () => {
             <input id="terms" onChange={handleCheckBox}  type="checkbox" name="terms" className="" />
             
             <label htmlFor="upload">Upload Valid ID with address: </label>
-            <input id="upload" type="file" name="upload" className=""  />
+            <input onChange={handleChange} id="upload" type="file" name="upload" className="" accept="image/*"  />
             <button
                 type="submit"
                 className={`bg-slate-200 mt-2 ${
