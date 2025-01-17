@@ -1,9 +1,10 @@
 "use client"
 import {auth,db,storage} from "../api/firebase";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { useState, ChangeEvent,FormEvent } from "react";
+
 interface Resident {
     sex: string;
     first_name: string;
@@ -17,6 +18,7 @@ interface Resident {
   
   type residentUser = Resident & {
     role: "resident";
+    status: "unverified";
   };
   
 const registerForm:React.FC = () => {
@@ -31,6 +33,7 @@ const registerForm:React.FC = () => {
         password: "",
         role: "resident",
         upload: null,
+        status: "unverified"
       });
 
       const handleChange = (
@@ -58,28 +61,38 @@ const registerForm:React.FC = () => {
            const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, resident.password);
           
             const user = userCredentials.user;
-            await setDoc(doc(db, "ResidentUsers", user.uid), {
-                first_name: resident.first_name,  
-                last_name: resident.last_name,
-                email: resident.email,
-                phone: resident.phone,
-                address: resident.address,
-                sex: resident.sex,
-                role: resident.role,
-                createdAt: new Date(),
-            });
 
-            
+            let fileName ='';
             if(resident.upload){
-              const storageRef = ref(storage, `valid_id_image/${user.uid}`);
+              const timeStamp = Date.now()
+              const fileExtention = resident.upload.name.split('.').pop();
+              fileName = `valid_id_${user.uid}_${timeStamp}.${fileExtention}`
+              const storageRef = ref(storage, `valid_id_image/${fileName}`);
               await uploadBytes(storageRef,  resident.upload)
             }
+
+            await setDoc(doc(db, "ResidentUsers", user.uid), {
+              first_name: resident.first_name,  
+              last_name: resident.last_name,
+              email: resident.email,
+              phone: resident.phone,
+              address: resident.address,
+              sex: resident.sex,
+              role: resident.role,
+              createdAt: new Date(),
+              status: resident.status,
+              validIdDocID: fileName
+          });
+            /*email verification */
+            
+
+            alert("Register sucessful!");
+            /*redirect back to homepage if successful*/
+
         }
         catch(error: string | any){
             alert("Register failed! " + error.message);
-        }
-        alert("Register sucessful!");
-        
+        }        
       }
 
       const handleCheckBox = (e:ChangeEvent<HTMLInputElement>) => {
