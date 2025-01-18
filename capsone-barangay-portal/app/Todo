@@ -1,5 +1,4 @@
-TO DO for this branch
-Test the db and api routes(Works)
-Partial Implementations of Resident User Creation (didnt include image upload) after do  either the login funcs or the Barangay facing side pages
-
-
+TODO
+fix register logic process, data should not go into db when a error occurs
+if successful, clear form and redirect to homepage or login
+proceed to do login func

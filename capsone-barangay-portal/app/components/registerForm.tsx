@@ -1,9 +1,10 @@
 "use client"
-import {auth,db,storage} from "../api/firebase";
+import {auth,db,storage} from "../db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import { useState, ChangeEvent,FormEvent } from "react";
+import { useState, ChangeEvent } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 
 interface Resident {
     sex: string;
@@ -22,6 +23,8 @@ interface Resident {
   };
   
 const registerForm:React.FC = () => {
+    const captchaSiteKey = process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY || "";
+    const [captchaToken, setCaptchaToken] = useState<string>("");
     const [isTermChecked, setIsTermChecked] = useState<boolean>(false);
     const [resident, setResident] = useState<residentUser>({
         sex: "",
@@ -56,17 +59,16 @@ const registerForm:React.FC = () => {
 
       const handleSubmit =async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("Form submitted: ", resident);
+      
         try{
            const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, resident.password);
           
             const user = userCredentials.user;
-
             let fileName ='';
             if(resident.upload){
               const timeStamp = Date.now()
               const fileExtention = resident.upload.name.split('.').pop();
-              fileName = `valid_id_${user.uid}_${timeStamp}.${fileExtention}`
+              fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtention}`
               const storageRef = ref(storage, `valid_id_image/${fileName}`);
               await uploadBytes(storageRef,  resident.upload)
             }
@@ -83,11 +85,21 @@ const registerForm:React.FC = () => {
               status: resident.status,
               validIdDocID: fileName
           });
-            /*email verification */
-            
-
-            alert("Register sucessful!");
-            /*redirect back to homepage if successful*/
+          
+          const response = await fetch('/api/registerForm', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ captchaToken }),
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.message || 'Something went wrong');
+          }
+            const emailVerification = await sendEmailVerification(user);
+            alert("Register sucessful! Email verification sent to your email address");
+            /*clear form and redirect back to homepage if successful*/
 
         }
         catch(error: string | any){
@@ -98,6 +110,14 @@ const registerForm:React.FC = () => {
       const handleCheckBox = (e:ChangeEvent<HTMLInputElement>) => {
         setIsTermChecked(e.target.checked);
       }
+
+      const handleToken = (token: string | null) => {
+        if(token){
+          setCaptchaToken(token);
+        }
+      }
+
+     
     return ( 
         <div>
         <form onSubmit={handleSubmit} className="flex flex-col  justify-center">
@@ -134,6 +154,7 @@ const registerForm:React.FC = () => {
             
             <label htmlFor="upload">Upload Valid ID with address: </label>
             <input onChange={handleChange} id="upload" type="file" name="upload" className="" accept="image/*"  />
+            <ReCAPTCHA sitekey= {captchaSiteKey} onChange={handleToken}  />
             <button
                 type="submit"
                 className={`bg-slate-200 mt-2 ${
