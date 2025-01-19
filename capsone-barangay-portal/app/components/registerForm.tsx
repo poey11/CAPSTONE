@@ -8,7 +8,9 @@ import ReCAPTCHA from "react-google-recaptcha";
 
 /*Fixed the register func logic where any failure in the process will delete any partial passed through the db
  however form validation is still partially implemented.
- the only validation added are sex, email, and password requirement (confirm password is not yet added ). ill added it later */
+ the only validation added are sex, email, and password requirement (confirm password is not yet added ). 
+ if register the user is successful, the user will be redirected to the homepage (not yet added) and the form should be cleared.
+ ill added it later */
 
 interface Resident {
     sex: string;
@@ -107,7 +109,9 @@ const registerForm:React.FC = () => {
          
          await sendEmailVerification(user);
             alert("Register sucessful! Email verification sent to your email address");
-            /*clear form and redirect back to homepage if successful*/
+            /*clear form*/  
+            
+            /* then redirect back to homepage if successful*/
           
         }
         catch(error: string | any){
