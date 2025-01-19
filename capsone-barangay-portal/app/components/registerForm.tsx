@@ -1,10 +1,14 @@
 "use client"
 import {auth,db,storage} from "../db/firebase";
-import { ref, uploadBytes } from "firebase/storage";
-import { doc, setDoc } from "firebase/firestore";
+import { deleteObject,ref, uploadBytes } from "firebase/storage";
+import { deleteDoc,doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { useState, ChangeEvent } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
+
+/*Fixed the register func logic where any failure in the process will delete any partial passed through the db
+ however form validation is still partially implemented.
+ the only validation added are sex, email, and password requirement (confirm password is not yet added ). ill added it later */
 
 interface Resident {
     sex: string;
@@ -59,21 +63,36 @@ const registerForm:React.FC = () => {
 
       const handleSubmit =async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-      
+        let user = null;
+        let docRef = null;
+        let storageRef = null;
         try{
            const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, resident.password);
-          
-            const user = userCredentials.user;
+            user = userCredentials.user;
+            
             let fileName ='';
             if(resident.upload){
               const timeStamp = Date.now()
               const fileExtention = resident.upload.name.split('.').pop();
               fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtention}`
-              const storageRef = ref(storage, `valid_id_image/${fileName}`);
+              storageRef = ref(storage, `valid_id_image/${fileName}`);
               await uploadBytes(storageRef,  resident.upload)
             }
-
-            await setDoc(doc(db, "ResidentUsers", user.uid), {
+              
+ 
+            const response = await fetch('/api/registerForm', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ captchaToken }),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+              throw new Error(data.message || 'Something went wrong');
+            }
+            docRef = doc(db, "ResidentUsers", user.uid);
+            await setDoc(docRef, {
               first_name: resident.first_name,  
               last_name: resident.last_name,
               email: resident.email,
@@ -85,25 +104,41 @@ const registerForm:React.FC = () => {
               status: resident.status,
               validIdDocID: fileName
           });
-          
-          const response = await fetch('/api/registerForm', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ captchaToken }),
-          });
-          const data = await response.json();
-          if (!response.ok) {
-            throw new Error(data.message || 'Something went wrong');
-          }
-            const emailVerification = await sendEmailVerification(user);
+         
+         await sendEmailVerification(user);
             alert("Register sucessful! Email verification sent to your email address");
             /*clear form and redirect back to homepage if successful*/
-
+          
         }
         catch(error: string | any){
             alert("Register failed! " + error.message);
+            if(docRef){
+              try{
+                await deleteDoc(docRef);
+              }
+              catch(e){
+                console.log("Error deleting document: ", e);
+              }
+            }
+            if(storageRef){
+              try{
+                await deleteObject(storageRef);
+              }
+              catch(e){
+                console.log("Error deleting file: ", e);
+              }
+            }
+
+            if(user){
+              try{
+                await user.delete();
+              }
+              catch(e){
+                console.log("Error deleting user: ", e);
+              }
+            }
+            
+            
         }        
       }
 

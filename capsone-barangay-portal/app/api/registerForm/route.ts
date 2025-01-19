@@ -18,8 +18,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "CAPTCHA verification failed" }, { status: 400 });
     }
 
-    // Add additional logic for registration, e.g., saving to Firebase
-    return NextResponse.json({ success: true, message: "Registration successful!" });
+    return NextResponse.json({ success: true, message: "CAPTCHA verification successful!" });
   } catch (error) {
     return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
   }
