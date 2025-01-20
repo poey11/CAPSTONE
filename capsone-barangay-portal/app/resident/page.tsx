@@ -7,7 +7,7 @@ export const metadata:Metadata = {
 
 export default function Resident() {
 
-    
+
     return (
         <div>
             LOGIN FOR RESIDENT
