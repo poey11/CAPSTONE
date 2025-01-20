@@ -2,15 +2,17 @@
 import {auth,db,storage} from "../db/firebase";
 import { deleteObject,ref, uploadBytes } from "firebase/storage";
 import { deleteDoc,doc, setDoc } from "firebase/firestore";
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification,signOut } from "firebase/auth";
 import { useState, ChangeEvent } from "react";
+import { useRouter } from 'next/navigation';
 import ReCAPTCHA from "react-google-recaptcha";
 
 /*Fixed the register func logic where any failure in the process will delete any partial passed through the db
  however form validation is still partially implemented.
  the only validation added are sex, email, and password requirement (confirm password is not yet added ). 
  if register the user is successful, the user will be redirected to the homepage (not yet added) and the form should be cleared.
- ill added it later */
+ ill added it later. have to double check the error handling of register process.
+ terms and condition havent been implemented */
 
 interface Resident {
     sex: string;
@@ -29,6 +31,7 @@ interface Resident {
   };
   
 const registerForm:React.FC = () => {
+    const router = useRouter();
     const captchaSiteKey = process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY || "";
     const [captchaToken, setCaptchaToken] = useState<string>("");
     const [isTermChecked, setIsTermChecked] = useState<boolean>(false);
@@ -108,10 +111,15 @@ const registerForm:React.FC = () => {
           });
          
          await sendEmailVerification(user);
+
+         await signOut(auth);
+
+
             alert("Register sucessful! Email verification sent to your email address");
             /*clear form*/  
-            
+
             /* then redirect back to homepage if successful*/
+            router.push("/");
           
         }
         catch(error: string | any){

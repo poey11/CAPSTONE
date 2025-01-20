@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import LoginForm from "../components/loginForm";
 
 export const metadata:Metadata = { 
     title: "Login For Residents",
@@ -6,11 +7,11 @@ export const metadata:Metadata = {
   };
 
 export default function Resident() {
-
-    
+   
     return (
-        <div>
-            LOGIN FOR RESIDENT
+        <div  className="flex flex-col items-center">
+            Login For Residents
+            <LoginForm />
         </div>
     );
 }

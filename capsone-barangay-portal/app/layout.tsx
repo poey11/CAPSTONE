@@ -1,4 +1,5 @@
 import TopNav from './components/menu';
+import { AuthProvider } from './context/authContext';
 import "./globals.css";
 
 export default function RootLayout({
@@ -10,8 +11,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="">
-       <TopNav />
-      {children}
+       <AuthProvider> 
+          <TopNav />
+          {children}
+       </AuthProvider>
       </body>
     </html>
   );
