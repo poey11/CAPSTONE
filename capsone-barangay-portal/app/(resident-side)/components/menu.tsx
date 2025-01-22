@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from 'next/link';
+import SideNav from '../../(barangay-side)/components/bMenu';
 
 const Menu = () => {
   const [showLoginOptions, setShowLoginOptions] = useState(false);
@@ -29,10 +30,10 @@ const Menu = () => {
   }, []);
 
   const pathname = usePathname();
-  const noTopNavPages = [''];
+  const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages
 
-  if (noTopNavPages.includes(pathname)) {
-    return null; 
+  if (noTopNavPages.some((page) => pathname.includes(page))) {
+    return <SideNav />; 
   }
 
   return (
