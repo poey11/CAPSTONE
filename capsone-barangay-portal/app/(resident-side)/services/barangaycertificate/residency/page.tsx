@@ -2,14 +2,14 @@
 import type { Metadata } from "next";
 import { useState } from "react";
 
-
+/*TO ADD: appointment system*/
 
 
 const metadata:Metadata = { 
-  title: "Barangay Clearance Others",
-  description: "Barangay Clearance Others form page for the barangay website",
+  title: "Barangay Certificate Residency",
+  description: "Barangay Certificate Residency form page for the barangay website",
 };
-export default function BarangayClearanceOthers() {
+export default function BarangayCertificateResidency() {
 
 
 
@@ -69,48 +69,19 @@ export default function BarangayClearanceOthers() {
 
       <div className="form-content">
         <h1 className="form-title">
-            Barangay Clearance
+            Barangay Certificate
+        </h1>
+
+        
+
+        <h1 className="form-subtitle">
+            Residency
         </h1>
 
         <hr/>
 
         
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="purpose" className="form-label">Barangay Clearance Purpose</label>
-              <select 
-                id="purpose" 
-                name="purpose" 
-                className="form-input" 
-                required
-                defaultValue=""  
-              >
-                <option value="" disabled>Select purpose</option>
-                <option value="Loan">Loan</option>
-                <option value="Bank Transaction">Bank Transaction</option>
-                <option value="Local Employment">Local Employment</option>
-                <option value="Maynilad">Maynilad</option>
-                <option value="Meralco">Meralco</option>
-                <option value="Bail Bond">Bail Bond</option>
-                <option value="Character Reputation">Character Reputation</option>
-                <option value="Request for Referral">Request for Referral</option>
-                <option value="Issuance of Postal ID">Issuance of Postal ID</option>
-                <option value="MWSI connection">MWSI connection</option>
-                <option value="Business Clearance">Business Clearance</option>
-                <option value="Others">Others</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="otherpurpose" className="form-label">Other Purpose</label>
-              <input 
-                type="text"  
-                id="otherpurpose"  
-                name="otherpurpose"  
-                className="form-input"    
-                placeholder="Enter Other Purpose" 
-              />
-            </div>
 
             <div className="form-group">
               <label htmlFor="date" className="form-label">Date</label>
@@ -601,6 +572,15 @@ export default function BarangayClearanceOthers() {
           text-align: center;
           font-weight: bold;  
           margin-top: 20px;
+          margin-bottom: 10px;
+        }
+
+        .form-subtitle{
+          font-size: 20px; 
+          color: rgba(0, 0, 0, 0.5);
+          text-align: center;
+          font-weight: bold;  
+          margin-top: 10px;
           margin-bottom: 10px;
         }
 
