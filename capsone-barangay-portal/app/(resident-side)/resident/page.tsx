@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import LoginForm from "../components/loginForm";
+import LoginForm from "../components/rLoginForm";
 
 export const metadata:Metadata = { 
     title: "Login For Residents",

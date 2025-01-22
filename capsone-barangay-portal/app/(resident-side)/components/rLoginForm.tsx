@@ -1,7 +1,7 @@
 "use client";
 import Link from 'next/link';
 import { useState } from "react";
-import { auth } from '../db/firebase';
+import { auth } from '../../db/firebase';
 import { signInWithEmailAndPassword,signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 interface Resident {
@@ -11,7 +11,7 @@ interface Resident {
 }
 
 
-const loginForm:React.FC = () => {
+const rLoginForm:React.FC = () => {
     const router = useRouter(); 
     const [resident, setResident] = useState<Resident>({
         email: "",
@@ -86,4 +86,4 @@ const loginForm:React.FC = () => {
     );
 }
  
-export default loginForm;
+export default rLoginForm;

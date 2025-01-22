@@ -1,5 +1,5 @@
 "use client"
-import {auth,db,storage} from "../db/firebase";
+import {auth,db,storage} from "../../db/firebase";
 import { deleteObject,ref, uploadBytes } from "firebase/storage";
 import { deleteDoc,doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, sendEmailVerification,signOut } from "firebase/auth";

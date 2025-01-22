@@ -1,9 +1,10 @@
 "use client"
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import {useAuth} from "../context/authContext";
+import {useAuth} from "../../context/authContext";
 import { signOut } from "firebase/auth";
-import { auth } from "../db/firebase";
+import { auth } from "../../db/firebase";
+import SideNav from '../../(barangay-side)/components/bMenu';
 import Link from 'next/link';
 
 const Menu:React.FC = () => {
@@ -37,10 +38,10 @@ const Menu:React.FC = () => {
   }, []);
 
   const pathname = usePathname();
-  const noTopNavPages = [''];// this is the list of pages that should not have the top nav aka the barangay user pages
+  const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages
 
-  if (noTopNavPages.includes(pathname)) {
-    return null; 
+  if (noTopNavPages.some((page) => pathname.includes(page))) {
+    return <SideNav />; 
   }
 
   return (

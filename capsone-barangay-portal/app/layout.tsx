@@ -1,4 +1,5 @@
-import TopNav from './components/menu';
+import TopNav from './(resident-side)/components/menu';
+
 import { AuthProvider } from './context/authContext';
 import "./globals.css";
 

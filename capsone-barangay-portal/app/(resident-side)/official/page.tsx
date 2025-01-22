@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-
+import BLoginForm from "../components/bLoginForm";
 
 export const metadata:Metadata = { 
   title: "Login For Officials",
@@ -7,9 +7,9 @@ export const metadata:Metadata = {
 };
 export default function Official() {
   return (
-    <div>
-    
-        LOGIN FOR OFFICIAL
+    <div  className="flex flex-col items-center">
+      Login For Barangay Officials
+      <BLoginForm/>
     </div>
   );
 }
