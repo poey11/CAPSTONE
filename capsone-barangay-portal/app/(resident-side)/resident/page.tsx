@@ -7,7 +7,8 @@ export const metadata:Metadata = {
   };
 
 export default function Resident() {
-   
+
+    
     return (
         <div  className="flex flex-col items-center">
             Login For Residents
