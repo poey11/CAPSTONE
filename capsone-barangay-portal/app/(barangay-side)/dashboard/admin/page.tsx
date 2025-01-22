@@ -1,7 +1,7 @@
 const admin = () => {
     return (  
         <div>
-           admin page   
+          
         </div>
 
     );

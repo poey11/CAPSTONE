@@ -2,6 +2,7 @@
 import Link from "next/link";
 
 const bMenu: React.FC = () => {
+  /* Will add role base access later */
   return (
     <div className="flex flex-col justify-center bg-slate-400 w-32 h-screen fixed">
       <Link
