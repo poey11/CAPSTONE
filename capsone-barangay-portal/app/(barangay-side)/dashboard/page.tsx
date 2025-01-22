@@ -1,10 +1,8 @@
-"use client";
-import Dboard from '../components/dashboardForm';
 
 const dashboard = () => {
     return (  
         <div>
-           <Dboard/>   
+           dashboard 
         </div>
 
     );
