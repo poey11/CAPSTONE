@@ -11,7 +11,7 @@ export default function AboutUs() {
 
     <div className="aboutus-container">
       
-      <div className="aboutus-headerpic">
+      <div className="headerpic">
         <p>ABOUT US</p>
       </div>
       
@@ -107,7 +107,7 @@ export default function AboutUs() {
           height: 100%;
         }
 
-        .aboutus-headerpic {
+        .headerpic {
           position: relative; /* Required for pseudo-elements */
           height: 200px;
           display: flex;
@@ -119,7 +119,7 @@ export default function AboutUs() {
           overflow: hidden; /* Ensures blur doesn't spill outside */
         }
 
-        .aboutus-headerpic::before {
+        .headerpic::before {
           content: '';
           position: absolute;
           top: 0;
@@ -134,7 +134,7 @@ export default function AboutUs() {
           z-index: 1; /* Place the blurred background below the text */
         }
 
-        .aboutus-headerpic > * {
+        .headerpic > * {
           position: relative;
           z-index: 2; /* Ensure text is above the blurred background */
         }

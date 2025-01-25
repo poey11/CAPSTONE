@@ -133,10 +133,6 @@ export default function Announcement() {
 
       <style jsx>{`
         .Page {
-          background-image: url('/Images/Background.jpeg');
-          background-size: cover; 
-          background-position: 50% 50%;
-          background-repeat: no-repeat; 
           height: 200px; 
           display: flex;
           align-items: center;
@@ -155,8 +151,12 @@ export default function Announcement() {
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: rgba(255, 255, 255, 0.1); /* White overlay with 30% opacity */
+          background-image: url('/Images/Background.jpeg');
+          background-size: cover; 
+          background-position: 50% 50%;
+          background-repeat: no-repeat; 
           z-index: 1; /* Ensure the overlay appears above the background image */
+          filter: blur(2px); /* Adjust the blur intensity */
         }
 
         .Page > * {

@@ -45,30 +45,68 @@ const Menu = () => {
           <img src="/images/brgylogo.jpg" alt="Barangay Logo" className="header-brgylogo" />
     
           <div className="navbar-links">
+            <div className="navbar-indiv-container">
+              <Link
+                href="/"
+                className="hover:text-[white] cursor-pointer"
+                onClick={toggleLoginOptionsOff}
+              >
+                Home
+              </Link>
+            </div>
+            <div className="navbar-indiv-container">
+              <Link
+                href="/aboutus"
+                className="hover:text-[white] cursor-pointer"
+                onClick={toggleLoginOptionsOff}
+              >
+                About Us
+              </Link>
+            </div>
+            
+            <div className="navbar-indiv-container dropdown-container">
+              
+                <p className="hover:text-[white] cursor-pointer">Services</p>
+                <div className="dropdown">
+                  <Link href="/services">
+                    <p>Request Documents</p>
+                  </Link>
+                  <Link href="/Programs">
+                    <p>Programs</p>
+                  </Link>
+                  <Link href="/services/barangaycertificate/residency">
+                    <p>File an Incident</p>
+                  </Link>
+                </div>
+              
+            </div>
+            
             <Link
-              href="/"
-              className="hover:text-[white] cursor-pointer"
-              onClick={toggleLoginOptionsOff}
-            >
-              Home
-            </Link>
-            <Link
-              href="/aboutus"
-              className="hover:text-[white] cursor-pointer"
-              onClick={toggleLoginOptionsOff}
-            >
-              About Us
-            </Link>
-            <Link
-              href="/services"
-              className="hover:text-[white] cursor-pointer"
-              onClick={toggleLoginOptionsOff}
-            >
-              Services
-            </Link>
+                href="/Announcements"
+                className="hover:text-[white] cursor-pointer"
+                onClick={toggleLoginOptionsOff}
+              >
+                News
+              </Link>
 
-            <p>News</p>
-            <p>Officials</p>
+            <div className="navbar-indiv-container dropdown-container">
+              
+                <p className="hover:text-[white] cursor-pointer">Officials</p>
+                <div className="dropdown">
+                  <Link href="/OfficialsPage">
+                    <p>Barangay Officials</p>
+                  </Link>
+                  <Link href="/OfficialsPage/HOAOfficersPage">
+                    <p>HOA Officers</p>
+                  </Link>
+                  <Link href="/OfficialsPage/SitioOfficersPage">
+                    <p>Sitio Officers</p>
+                  </Link>
+                </div>
+              
+            </div>
+            
+            
 
             <div className="relative" ref={loginMenuRef}>
               <p
@@ -80,7 +118,7 @@ const Menu = () => {
               </p>
 
               {showLoginOptions && (
-                <div className="dropdown-container">
+                <div className="dropdown-containerr">
                   <div className="dropdown-content">
                     <Link
                       href="/official"
@@ -116,7 +154,7 @@ const Menu = () => {
 
         <style jsx>{`
 
-          .dropdown-container {
+          .dropdown-containerr {
             position: absolute;
             top: 100%; /* Aligns dropdown below the trigger button */
             left: 0;
@@ -189,6 +227,39 @@ const Menu = () => {
             text-decoration: none; /* Remove underline */
             color: black; /* Text color */
           }
+
+          .dropdown-container:hover .dropdown,
+        .dropdown-container .dropdown:hover {
+            display: block; /* Ensure the dropdown stays open when interacting with it */
+        }
+
+        .dropdown-container {
+            position: relative;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 23px; /* Aligns directly below the container */
+            left: 0;
+            background-color:  #ed7014;
+            padding: 10px;
+            z-index: 100; /* Ensure dropdown is above other elements */
+            width: 200px; /* Optional: Set a minimum width for the dropdown */
+        }
+
+        .dropdown p {
+            margin: 0;
+            padding: 5px 10px;
+            color: black;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .dropdown p:hover {
+            color: white;
+            background-color:rgb(220, 98, 11);
+        }
 
           
 
