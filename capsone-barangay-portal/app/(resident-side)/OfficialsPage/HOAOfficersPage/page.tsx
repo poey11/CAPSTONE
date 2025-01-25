@@ -3,7 +3,7 @@
 import type { Metadata } from "next";
 
 const metadata: Metadata = {
-  title: "Sitio Officers Page for Residents",
+  title: "HOA Officers Page for Residents",
   description: "Stay updated with the latest lists of Sitio Officers",
 };
 
@@ -84,17 +84,13 @@ export default function HOAOfficersPage() {
 
       <style jsx>{`
         .Page {
-          background-image: url('/Images/Background.jpeg');
-          background-size: cover;
-          background-position: 50% 50%;
-          background-repeat: no-repeat;
-          height: 200px;
+          height: 200px; 
           display: flex;
           align-items: center;
-          justify-content: center;
-          color: white;
-          font-size: 40px;
-          font-weight: bold;
+          justify-content: center; 
+          color: white; 
+          font-size: 40px; 
+          font-weight: bold; 
           position: relative;
           margin-bottom: 50px;
         }
@@ -106,13 +102,17 @@ export default function HOAOfficersPage() {
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: rgba(255, 255, 255, 0.1);
-          z-index: 1;
+          background-image: url('/Images/Background.jpeg');
+          background-size: cover; 
+          background-position: 50% 50%;
+          background-repeat: no-repeat; 
+          z-index: 1; /* Ensure the overlay appears above the background image */
+          filter: blur(2px); /* Adjust the blur intensity */
         }
 
         .Page > * {
           position: relative;
-          z-index: 2;
+          z-index: 2; /* Ensure text is above the overlay */
         }
 
         .main-container {

@@ -81,12 +81,29 @@ const Menu = () => {
               
             </div>
             
-            <div className="navbar-indiv-container">
-              <p>News</p>
-            </div>
+            <Link
+                href="/Announcements"
+                className="hover:text-[white] cursor-pointer"
+                onClick={toggleLoginOptionsOff}
+              >
+                News
+              </Link>
 
-            <div className="navbar-indiv-container">
-              <p>Officials</p>
+            <div className="navbar-indiv-container dropdown-container">
+              
+                <p className="hover:text-[white] cursor-pointer">Officials</p>
+                <div className="dropdown">
+                  <Link href="/OfficialsPage">
+                    <p>Barangay Officials</p>
+                  </Link>
+                  <Link href="/OfficialsPage/HOAOfficersPage">
+                    <p>HOA Officers</p>
+                  </Link>
+                  <Link href="/OfficialsPage/SitioOfficersPage">
+                    <p>Sitio Officers</p>
+                  </Link>
+                </div>
+              
             </div>
             
             

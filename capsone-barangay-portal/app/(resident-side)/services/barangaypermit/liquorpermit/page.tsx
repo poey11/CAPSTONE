@@ -63,7 +63,7 @@ export default function BarangayLiquorPermit() {
 
     <div className="form-container">
 
-      <div className="documents-headerpic">
+      <div className="headerpic">
         <p>SERVICES</p>
       </div>
 
@@ -547,35 +547,36 @@ export default function BarangayLiquorPermit() {
           height: 100%;
         }
 
-        .documents-headerpic {
-          background-image: url('/images/header.jpg');
-          background-size: cover; 
-          background-position: 50% 50%;
-          background-repeat: no-repeat; 
-          height: 200px; 
+        .headerpic {
+          position: relative; /* Required for pseudo-elements */
+          height: 200px;
           display: flex;
           align-items: center;
-          justify-content: center; 
-          color: white; 
-          font-size: 40px; 
-          font-weight: bold; 
-          position: relative;
+          justify-content: center;
+          color: white;
+          font-size: 40px;
+          font-weight: bold;
+          overflow: hidden; /* Ensures blur doesn't spill outside */
         }
 
-        .documents-headerpic::before {
+        .headerpic::before {
           content: '';
           position: absolute;
           top: 0;
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: rgba(255, 255, 255, 0.1); /* White overlay with 30% opacity */
-          z-index: 1; /* Ensure the overlay appears above the background image */
+          background-image: url('/images/header.jpg');
+          background-size: cover;
+          background-position: 50% 50%;
+          background-repeat: no-repeat;
+          filter: blur(2px); /* Adjust the blur intensity */
+          z-index: 1; /* Place the blurred background below the text */
         }
 
-        .documents-headerpic > * {
+        .headerpic > * {
           position: relative;
-          z-index: 2; /* Ensure text is above the overlay */
+          z-index: 2; /* Ensure text is above the blurred background */
         }
 
         .form-content {
