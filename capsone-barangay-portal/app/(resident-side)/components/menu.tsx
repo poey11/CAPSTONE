@@ -42,7 +42,7 @@ const Menu = () => {
       <div className="navbar-container">
 
         <div className="navbar-card">
-          <img src="/images/brgylogo.jpg" alt="Barangay Logo" className="header-brgylogo" />
+          <img src="/images/brgylogo.png" alt="Barangay Logo" className="header-brgylogo" />
     
           <div className="navbar-links">
             <div className="navbar-indiv-container">
