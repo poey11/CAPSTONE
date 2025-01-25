@@ -156,13 +156,13 @@ const Menu = () => {
 
           .dropdown-containerr {
             position: absolute;
-            top: 100%; /* Aligns dropdown below the trigger button */
+            top: 100%; 
             left: 0;
-            width: 10rem; /* Equivalent to w-40 */
-            z-index: 50; /* Ensures it appears above other elements */
+            width: 10rem;
+            z-index: 50;
           }
 
-          /* Dropdown content box */
+       
           .dropdown-content {
             background-color: #cbd5e1; /* bg-slate-300 */
             border-radius: 0.375rem; /* rounded-md */
@@ -171,7 +171,7 @@ const Menu = () => {
             flex-direction: column;
           }
 
-          /* Dropdown item styles */
+          
           .dropdown-item {
             cursor: pointer;
             text-decoration: none;
@@ -180,57 +180,57 @@ const Menu = () => {
           }
 
           .dropdown-item:hover {
-            color: white; /* Hover state for links */
+            color: white; 
           }
 
           .navbar-container{
             position: sticky;
-            top: 0; /* Sticks to the top of the page */
-            z-index: 1000; /* Ensures it stays above other content when scrolling */
-            background-color: #ffe0ca; /* Optional: background color */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: adds a shadow for better separation */
+            top: 0; 
+            z-index: 1000; 
+            background-color: #ffe0ca; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
           }
 
           .navbar-card {
             background-color: #ed7014;
-            display: flex; /* Enable Flexbox */
-            justify-content: space-between; /* Space between logo and links */
-            align-items: center; /* Center items vertically */
-            height: 90px; /* Adjust height as needed */
-            padding: 0 20px; /* Add padding to the sides */
+            display: flex;
+            justify-content: space-between; 
+            align-items: center; 
+            height: 120px; 
+            padding: 0 20px; 
           }
 
           .header-brgylogo {
-            max-width: 100%; /* Ensure the image is responsive */
+            max-width: 100%; 
             height: auto;
-            width: 70px; /* Adjust image size */
+            width: 100px; 
             margin-left:20px;
           }
 
           .header-usericon{
-            max-width: 100%; /* Ensure the image is responsive */
+            max-width: 100%; 
             height: auto;
-            width: 35px; /* Adjust image size */
+            width: 35px;
             margin-right:20px;
           }
 
           .navbar-links {
-            display: flex; /* Group links together */
-            justify-content: center; /* Center the links horizontally */
-            align-items: center; /* Align links vertically */
-            flex-grow: 1; /* Take up remaining space after the logo */
-            gap: 50px; /* Add space between links */
-            text-align: center; /* Align text within the links */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            gap: 50px; 
+            text-align: center;
           }
 
           .navbar-links a {
-            text-decoration: none; /* Remove underline */
-            color: black; /* Text color */
+            text-decoration: none;
+            color: black; 
           }
 
           .dropdown-container:hover .dropdown,
         .dropdown-container .dropdown:hover {
-            display: block; /* Ensure the dropdown stays open when interacting with it */
+            display: block; 
         }
 
         .dropdown-container {
@@ -240,12 +240,12 @@ const Menu = () => {
         .dropdown {
             display: none;
             position: absolute;
-            top: 23px; /* Aligns directly below the container */
+            top: 23px;
             left: 0;
             background-color:  #ed7014;
             padding: 10px;
-            z-index: 100; /* Ensure dropdown is above other elements */
-            width: 200px; /* Optional: Set a minimum width for the dropdown */
+            z-index: 100; 
+            width: 200px;
         }
 
         .dropdown p {
