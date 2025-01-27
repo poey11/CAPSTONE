@@ -24,31 +24,31 @@ const bMenu: React.FC = () => {
         Resident Managment
       </Link>
       <Link
-        href="/officials"
+        href="/dashboard/officials"
         className="p-4 text-black hover:bg-slate-500 hover:text-white"
       >
         Officials Module
       </Link>
       <Link
-        href="/reports"
+        href="/dashboard/reports"
         className="p-4 text-black hover:bg-slate-500 hover:text-white"
       >
         Reports Module
       </Link>
       <Link
-        href="/services"
+        href="/dashboard/services"
         className="p-4 text-black hover:bg-slate-500 hover:text-white"
       >
         Services Module
       </Link>
       <Link
-        href="/incidentManagement"
+        href="/dashboard/incidentManagement"
         className="p-4 text-black hover:bg-slate-500 hover:text-white"
       >
         Incident Management Module
       </Link>
       <Link
-        href="/programs"
+        href="/dashboard/programs"
         className="p-4 text-black hover:bg-slate-500 hover:text-white"
       >
         Programs Module
