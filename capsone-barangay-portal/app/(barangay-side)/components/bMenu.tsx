@@ -18,7 +18,7 @@ const bMenu: React.FC = () => {
         Admin Module
       </Link>
       <Link
-        href="/residentManagement"
+        href="/dashboard/residentManagement"
         className="p-4 text-black hover:bg-slate-500 hover:text-white"
       >
         Resident Managment
