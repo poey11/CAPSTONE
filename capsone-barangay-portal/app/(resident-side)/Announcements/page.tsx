@@ -1,4 +1,4 @@
-"use client";
+import "@/CSS/Announcements/Announcements.css";
 
 import type { Metadata } from "next";
 import Link from 'next/link';
@@ -86,7 +86,7 @@ export default function Announcement() {
       </div>
 
       <div className="TitlePage">
-        <p>"Strengthening our community through information"</p>
+        <p>Strengthening our community through information</p>
         <img 
           src="/images/QCLogo.png" 
           alt="Barangay Captain" 
@@ -131,146 +131,7 @@ export default function Announcement() {
         ))}
       </section>
 
-      <style jsx>{`
-        .Page {
-          height: 200px; 
-          display: flex;
-          align-items: center;
-          justify-content: center; 
-          color: white; 
-          font-size: 40px; 
-          font-weight: bold; 
-          position: relative;
-          margin-bottom: 50px;
-        }
-
-        .Page::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-image: url('/Images/Background.jpeg');
-          background-size: cover; 
-          background-position: 50% 50%;
-          background-repeat: no-repeat; 
-          z-index: 1; /* Ensure the overlay appears above the background image */
-          filter: blur(2px); /* Adjust the blur intensity */
-        }
-
-        .Page > * {
-          position: relative;
-          z-index: 2; /* Ensure text is above the overlay */
-        }
-
-        .TitlePage {
-          background-color: #FFE0CA;
-          width: 800px;
-          height: 100px;
-          border-radius: 25px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin: 0 auto;
-          margin-bottom: 2rem;
-          padding-left: 1rem;
-          padding-right: 1rem;
-          word-wrap: break-word; 
-          overflow: hidden; 
-        }
-
-        .TitlePage p {
-          color: black;
-          font-size: 24px;
-          font-weight: bold;
-          text-overflow: ellipsis; 
-          white-space: normal; 
-          overflow: hidden;
-          width: 100%; 
-        }
-
-        .aboutus-image {
-          width: 160px;
-          height: 80px;
-        }
-
-        .main-container {
-          background-color: #f7e5d5;
-        }
-
-        .announcements-section {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 3.5rem;
-          padding: 2rem;
-        }
-
-        @media (min-width: 640px) {
-          .announcements-section {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .announcements-section {
-            grid-template-columns: repeat(3, 1fr);
-          }
-        }
-
-        .announcement-card {
-          background-color: white;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          border-radius: 0.5rem;
-          overflow: hidden;
-          width: 100%;
-          height: 500px; /* Fixed height for consistency */
-          display: flex;
-          flex-direction: column;
-        }
-
-        .announcement-image {
-          width: 100%;
-          height: 12rem;
-          object-fit: cover;
-        }
-
-        .announcement-content {
-          padding: 1rem;
-          flex-grow: 1; /* Ensures the content section fills available space */
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-        }
-
-        .announcement-title {
-          font-size: 1.25rem;
-          font-weight: bold;
-          margin-top: 15px;
-          color: #e56723;
-          text-align: center;
-
-        }
-
-        .announcement-description {
-          font-size: 0.875rem;
-          color: #4a4a4a;
-         
-         
-        }
-
-        .announcement-date {
-          font-size: 0.75rem;
-          color: #9e9e9e;
-        }
-
-        .read-more {
-          font-size: 0.875rem;
-          color: #0066cc;
-          cursor: pointer;
-          text-decoration: underline;
-        }
-      `}</style>
+      
     </main>
   );
 }

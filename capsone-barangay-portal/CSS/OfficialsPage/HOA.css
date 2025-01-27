@@ -32,6 +32,8 @@
 
   .main-container {
     background-color: #f7e5d5;
+    width: 100%;
+    height: 100%;
   }
 
   /* Officials Section */
@@ -51,6 +53,15 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 1rem;
     padding: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 2px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+  }
+
+  .official-card:hover {
+    transform: translateY(-10px); 
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   }
 
   .official-image {
