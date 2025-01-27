@@ -104,7 +104,7 @@ export default function AboutUs() {
           color: #333;
           margin: 0;
           width: 100%; 
-          height: 3000px;
+          height: 3100px;
         }
 
         .headerpic {

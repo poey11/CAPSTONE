@@ -544,7 +544,7 @@ export default function BarangayClearanceOthers() {
           color: #333;
           margin: 0;
           width: 100%; 
-          height: 100%;
+          height: 2700px;
         }
 
         .headerpic {

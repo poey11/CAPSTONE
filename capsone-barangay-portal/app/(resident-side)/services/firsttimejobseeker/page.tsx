@@ -551,7 +551,7 @@ export default function FirstTimeJobSeeker() {
           color: #333;
           margin: 0;
           width: 100%; 
-          height: 100%;
+          height: 2800px;
         }
 
         .headerpic {
