@@ -221,7 +221,7 @@ export default function Home() {
         </div>
   
 
-      </div>
+       </div>
 
 
      
@@ -527,6 +527,8 @@ export default function Home() {
          display: flex;
          
         }
+
+        
 
 
 

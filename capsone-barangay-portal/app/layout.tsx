@@ -1,5 +1,8 @@
+"use client";
+
+import { usePathname } from 'next/navigation';
 import TopNav from './(resident-side)/components/menu';
-import Footer from './(resident-side)/components/footer'
+import Footer from './(resident-side)/components/footer';
 import { AuthProvider } from './context/authContext';
 import "./globals.css";
 
@@ -8,15 +11,17 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
 
   return (
     <html lang="en">
       <body className="">
-       <AuthProvider> 
+        <AuthProvider> 
           <TopNav />
           {children}
-          <Footer />
-       </AuthProvider>
+          {/* Conditionally render Footer */}
+          {pathname !== '/official/login' && <Footer />}
+        </AuthProvider>
       </body>
     </html>
   );
