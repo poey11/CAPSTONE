@@ -34,49 +34,6 @@
     background-color: #f7e5d5;
   }
 
-  /* Captain Section */
-  .Captain-section {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 2rem;
-  }
-
-  .captain-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    background-color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 1rem;
-    padding: 1rem; /* Increased padding for larger card */
-    max-width: 450px; /* Larger width */
-  }
-
-  .Captain-image {
-    width: 350px; /* Larger image */
-    height: 350px; /* Larger image */
-    border-radius: 10px;
-    margin-bottom: 1rem;
-    object-fit: cover;
-  }
-
-  .Captain-content {
-    padding: 1rem;
-  }
-
-  .Captain-content .official-name {
-    font-size: 2rem; /* Larger font size for captain name */
-    font-weight: bold;
-    margin-bottom: 1rem;
-    color: orange;
-  }
-
-  .Captain-content .official-role {
-      font-weight: bold;
-      color: grey;
-  }
-
   /* Officials Section */
   .Officials-section {
     display: grid;
@@ -96,8 +53,8 @@
   }
 
   .official-image {
-    width: 350px; /* Slightly smaller image than captain */
-    height: 350px;
+    width: 300px; 
+    height: 300px;
     border-radius: 10px;
     margin-bottom: 1rem;
     object-fit: cover;

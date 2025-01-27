@@ -1,5 +1,7 @@
 
-import "../../../CSS/OfficialPages/OfficialsPage.css";
+
+import "@/CSS/OfficialsPage/OfficialsPage.css";
+
 
 
 import type { Metadata } from "next";
