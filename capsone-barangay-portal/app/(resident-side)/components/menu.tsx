@@ -122,8 +122,8 @@ const Menu = () => {
                 <div className="dropdown-containerr">
                   <div className="dropdown-content">
                     <Link
-                   //   href="/official"
-                         href="/official/login"
+                      href="/official"
+                         //href="/official/login"
 
                       onClick={toggleLoginOptions}
                       className="dropdown-item"
@@ -131,8 +131,8 @@ const Menu = () => {
                       Login For Official
                     </Link>
                     <Link
-                      //href="/resident"
-                      href="/resident/login"
+                      href="/resident"
+                      //href="/resident/login"
                       onClick={toggleLoginOptions}
                       className="dropdown-item"
                     >

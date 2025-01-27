@@ -20,7 +20,7 @@ export default function RootLayout({
           <TopNav />
           {children}
           {/* Conditionally render Footer */}
-          {pathname !== '/official/login' && <Footer />}
+          {pathname !== '/official/login' && pathname !== '/resident/login' && <Footer />}
         </AuthProvider>
       </body>
     </html>
