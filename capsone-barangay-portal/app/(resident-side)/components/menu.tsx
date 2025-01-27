@@ -74,7 +74,7 @@ const Menu = () => {
                   <Link href="/Programs">
                     <p>Programs</p>
                   </Link>
-                  <Link href="/services/barangaycertificate/residency">
+                  <Link href="/IncidentReport">
                     <p>File an Incident</p>
                   </Link>
                 </div>
