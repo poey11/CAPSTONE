@@ -152,7 +152,7 @@ const Menu = () => {
           </div>
 
 
-          <img src="/images/user.png" alt="Barangay Logo" className="header-usericon" />
+          <img src="/images/user.png" alt="User Icon" className="header-usericon" />
         </div>
 
 
