@@ -550,7 +550,7 @@ export default function BarangayBusinessPermitNew() {
           color: #333;
           margin: 0;
           width: 100%; 
-          height: 100%;
+          height: 2500px;
         }
 
         .headerpic {
