@@ -128,7 +128,8 @@ const Menu = () => {
                       Login For Official
                     </Link>
                     <Link
-                      href="/resident"
+                      //href="/resident"
+                      href="/resident/login"
                       onClick={toggleLoginOptions}
                       className="dropdown-item"
                     >
