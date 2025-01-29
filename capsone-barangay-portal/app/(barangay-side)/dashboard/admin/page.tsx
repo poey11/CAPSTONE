@@ -188,16 +188,16 @@ const admin = () => {
                     <tbody>
                     {residentUsers.map((user) => (
                         <tr key={user.id}>
-                        <td className="border border-gray-300 p-2">{user.id}</td>
-                        <td className="border border-gray-300 p-2">{user.first_name} {user.last_name}</td>
-                        <td className="border border-gray-300 p-2">{user.address}</td>
-                        <td className="border border-gray-300 p-2">{user.phone}</td>
-                        <td className="border border-gray-300 p-2">{user.sex}</td>
-                        <td className="border border-gray-300 p-2">{user.status}</td>
-                        <td className="border border-gray-300 p-2">{user.validIdDoc}</td>
-                        <td className="border border-gray-300 p-2">{user.role}</td>
-                        <td className="border border-gray-300 p-2">{user.email}</td>
-                        <td className="border border-gray-300 p-2">
+                        <td className="border border-gray-300 p-2 text-center">{user.id}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.first_name} {user.last_name}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.address}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.phone}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.sex}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.status}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.validIdDoc}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.role}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.email}</td>
+                        <td className="border border-gray-300 p-2 text-center">
                             <button className="bg-green-500 text-white px-4 py-2  rounded">Accept</button>
                             <button className="bg-red-500 text-white px-4 py-2 ml-1 rounded">Reject</button>
                         </td>
@@ -224,12 +224,12 @@ const admin = () => {
                     <tbody>
                     {barangayUsers.map((user) => (
                         <tr key={user.id}>
-                        <td className="border border-gray-300 p-2">{user.id}</td>
-                        <td className="border border-gray-300 p-2">{user.userid}</td>
-                        <td className="border border-gray-300 p-2">{user.position}</td>
-                        <td className="border flex justify-center border-gray-300 p-2">{user.firstTimelogin ? "True" : "False"}</td>
-                        <td className="border border-gray-300 p-2">{user.createdBy}</td>
-                        <td className="border border-gray-300 p-2">{user.createdAt}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.id}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.userid}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.position}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.firstTimelogin ? "True" : "False"}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.createdBy}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.createdAt}</td>
                         <td className="border flex  border-gray-300 p-2 justify-center">
                             <button className="bg-red-500 text-white px-4 py-2  rounded">Delete</button>
                         </td>
