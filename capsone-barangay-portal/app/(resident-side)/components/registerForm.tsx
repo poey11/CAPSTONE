@@ -105,7 +105,7 @@ const registerForm:React.FC = () => {
               address: resident.address,
               sex: resident.sex,
               role: resident.role,
-              createdAt: new Date(),
+              createdAt: new Date().toISOString,
               status: resident.status,
               validIdDocID: fileName
           });

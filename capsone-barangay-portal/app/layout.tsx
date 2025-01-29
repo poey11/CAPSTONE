@@ -1,22 +1,30 @@
 import TopNav from './(resident-side)/components/menu';
-
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { AuthProvider } from './context/authContext';
 import "./globals.css";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  return (
-    <html lang="en">
-      <body className="">
-       <AuthProvider> 
-          <TopNav />
-          {children}
-       </AuthProvider>
-      </body>
-    </html>
-  );
+  const cookieStore = await cookies();
+  const barangayToken = cookieStore.get("barangayToken");
+  if(barangayToken){
+      redirect("/dashboard");
+  }
+  else{
+    return (
+      <html>
+        <body>
+          <AuthProvider> 
+            <TopNav />
+            {children}
+          </AuthProvider>
+        </body>
+      </html>
+    );
+  }
+ 
 }

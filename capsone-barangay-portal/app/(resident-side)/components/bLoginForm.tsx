@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-
+import { useRouter } from 'next/navigation';
 interface official{
     username: string;
     password: string;
@@ -8,13 +8,14 @@ interface official{
 }
 
 const bLoginForm:React.FC = () => {
+    const router = useRouter();
     const [official, setOfficial] = useState<official>({
         username: "",
         password: "",
         remember: false
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
         if(type === "checkbox"){
             setOfficial({
@@ -33,6 +34,23 @@ const bLoginForm:React.FC = () => {
     const handleLogin = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log(official);
+        try{
+            const response = await fetch("/api/barangayLogin", {
+                method: "POST",
+                headers:{
+                    "Content-Type": "application/json"},
+                body: JSON.stringify({userId: official.username, password: official.password})
+            });
+            if(response.ok){
+                router.push("/dashboard");
+            }else{
+                const data = await response.json();
+                console.log(data.error || "Login Failed");
+            }
+        }
+        catch(error:string|any){
+            console.log("Error: " + error.message)
+        }
     }
 
     return (  
