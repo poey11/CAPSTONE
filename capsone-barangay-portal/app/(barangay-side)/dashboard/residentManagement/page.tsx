@@ -1,40 +1,54 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
-import {db} from "../../../db/firebase";
-import {collection, addDoc, getDocs} from "firebase/firestore";
-
-
+import { db } from "../../../db/firebase";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 
 interface Resident {
   id?: string;
   name: string;
   address: string;
-  dateOfBirth: string;
-  placeOfBirth: string;
+  dateofBirth: string;
+  placeofBirth: string;
   age: number;
   sex: string;
   civilStatus: string;
   occupation: string;
   contactNumber: string;
-  email: string;
+  emailAddress: string;
   precinctNumber: string;
 }
 
-const residentManagement = () => {
+const ResidentManagement = () => {
   const [residents, setResidents] = useState<Resident[]>([]);
   const [newResident, setNewResident] = useState<Partial<Resident>>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [file, setFile] = useState<File | null>(null);
 
-  // fetch from firestore db
+  // Fetch residents data from Firestore
   useEffect(() => {
     const fetchResidents = async () => {
       try {
         const residentCollection = collection(db, "Residents");
         const residentSnapshot = await getDocs(residentCollection);
-        const residentData: Resident[] = residentSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Resident[];
+        const residentData: Resident[] = residentSnapshot.docs.map((doc) => {
+          const data = doc.data();
+          // Map Firestore fields to the structure of the Resident interface
+          return {
+            id: doc.id,
+            name: data.name,
+            address: data.address,
+            dateofBirth: data.dateofBirth,
+            placeofBirth: data.placeofBirth,
+            age: data.age,
+            sex: data.sex,
+            civilStatus: data.civilStatus,
+            occupation: data.occupation,
+            contactNumber: data.contactNumber,
+            emailAddress: data.emailAddress,
+            precinctNumber: data.precinctNumber,
+          };
+        });
+        console.log(residentData);  // Log the fetched data for debugging
         setResidents(residentData);
       } catch (error) {
         console.error("Error fetching residents:", error);
@@ -43,25 +57,36 @@ const residentManagement = () => {
     fetchResidents();
   }, []);
 
-  // Handle Input Change
+  // Handle input change for form fields
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setNewResident({ ...newResident, [e.target.name]: e.target.value });
   };
 
-  // add new resident
+  // Handle file upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (file) {
+      setFile(file);
+    }
+  };
+
+  // Add new resident to Firestore
   const addResident = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const residentCollection = collection(db, "Residents");
-      await addDoc(residentCollection, newResident);
-      setResidents((prev) => [...prev, { ...newResident } as Resident]);
+        const newResidentData = { ...newResident };
+  
+      await addDoc(residentCollection, newResidentData);
+      setResidents((prev) => [...prev, { ...newResidentData } as Resident]);
       setNewResident({});
     } catch (error) {
       console.error("Error adding resident:", error);
     }
   };
+  
 
-  // to filter residents based on search
+  // Filter residents based on search query
   const filteredResidents = residents.filter((resident) =>
     resident.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     resident.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -71,24 +96,108 @@ const residentManagement = () => {
   return (
     <div>
       <h1>Resident Management Module</h1>
+
+      {/* Resident Registration Form */}
       <h2>Resident Registration</h2>
       <form className="flex flex-col gap-2" onSubmit={addResident}>
-        <input type="text" name="name" placeholder="Name" value={newResident.name || ""} onChange={handleInputChange} required />
-        <input type="text" name="address" placeholder="Address" value={newResident.address || ""} onChange={handleInputChange} required />
-        <input type="date" name="dateOfBirth" value={newResident.dateOfBirth || ""} onChange={handleInputChange} required />
-        <input type="text" name="placeOfBirth" placeholder="Place of Birth" value={newResident.placeOfBirth || ""} onChange={handleInputChange} required />
-        <input type="number" name="age" placeholder="Age" value={newResident.age || ""} onChange={handleInputChange} required />
-        <select name="sex" value={newResident.sex || ""} onChange={handleInputChange} required>
-          <option value="" disabled>Select Sex</option>
+        <input
+          type="text"
+          name="name"
+          placeholder="Name"
+          value={newResident.name || ""}
+          onChange={handleInputChange}
+          required
+        />
+        <input
+          type="text"
+          name="address"
+          placeholder="Address"
+          value={newResident.address || ""}
+          onChange={handleInputChange}
+          required
+        />
+        <input
+          type="text"
+          name="dateofBirth"
+          placeholder="Date of Birth"
+          value={newResident.dateofBirth || ""}
+          onChange={handleInputChange}
+          required
+        />
+        <input
+          type="text"
+          name="placeofBirth"
+          placeholder="Place of Birth"
+          value={newResident.placeofBirth || ""}
+          onChange={handleInputChange}
+          required
+        />
+        <input
+          type="number"
+          name="age"
+          placeholder="Age"
+          value={newResident.age || ""}
+          onChange={handleInputChange}
+          required
+        />
+        <select
+          name="sex"
+          value={newResident.sex || ""}
+          onChange={handleInputChange}
+          required
+        >
+          <option value="" disabled>
+            Select Sex
+          </option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
         </select>
-        <input type="text" name="civilStatus" placeholder="Civil Status" value={newResident.civilStatus || ""} onChange={handleInputChange} required />
-        <input type="text" name="occupation" placeholder="Occupation" value={newResident.occupation || ""} onChange={handleInputChange} required />
-        <input type="text" name="contactNumber" placeholder="Contact Number" value={newResident.contactNumber || ""} onChange={handleInputChange} required />
-        <input type="email" name="email" placeholder="Email" value={newResident.email || ""} onChange={handleInputChange} required />
-        <input type="text" name="precinctNumber" placeholder="Precinct Number" value={newResident.precinctNumber || ""} onChange={handleInputChange} required />
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Add Resident</button>
+        <input
+          type="text"
+          name="civilStatus"
+          placeholder="Civil Status"
+          value={newResident.civilStatus || ""}
+          onChange={handleInputChange}
+          required
+        />
+        <input
+          type="text"
+          name="occupation"
+          placeholder="Occupation"
+          value={newResident.occupation || ""}
+          onChange={handleInputChange}
+          required
+        />
+        <input
+          type="text"
+          name="contactNumber"
+          placeholder="Contact Number"
+          value={newResident.contactNumber || ""}
+          onChange={handleInputChange}
+          required
+        />
+        <input
+          type="text"
+          name="emailAddress"
+          placeholder="Email"
+          value={newResident.emailAddress || ""}
+          onChange={handleInputChange}
+          required
+        />
+        <input
+          type="text"
+          name="precinctNumber"
+          placeholder="Precinct Number"
+          value={newResident.precinctNumber || ""}
+          onChange={handleInputChange}
+          required
+        />
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Add Resident
+        </button>
       </form>
 
       <h2>Resident Information</h2>
@@ -121,14 +230,14 @@ const residentManagement = () => {
               <tr key={resident.id}>
                 <td className="border border-gray-300 p-2">{resident.name}</td>
                 <td className="border border-gray-300 p-2">{resident.address}</td>
-                <td className="border border-gray-300 p-2">{resident.dateOfBirth}</td>
-                <td className="border border-gray-300 p-2">{resident.placeOfBirth}</td>
+                <td className="border border-gray-300 p-2">{resident.dateofBirth}</td>
+                <td className="border border-gray-300 p-2">{resident.placeofBirth}</td>
                 <td className="border border-gray-300 p-2">{resident.age}</td>
                 <td className="border border-gray-300 p-2">{resident.sex}</td>
                 <td className="border border-gray-300 p-2">{resident.civilStatus}</td>
                 <td className="border border-gray-300 p-2">{resident.occupation}</td>
                 <td className="border border-gray-300 p-2">{resident.contactNumber}</td>
-                <td className="border border-gray-300 p-2">{resident.email}</td>
+                <td className="border border-gray-300 p-2">{resident.emailAddress}</td>
                 <td className="border border-gray-300 p-2">{resident.precinctNumber}</td>
               </tr>
             ))}
@@ -139,4 +248,4 @@ const residentManagement = () => {
   );
 };
 
-export default residentManagement;
+export default ResidentManagement;
