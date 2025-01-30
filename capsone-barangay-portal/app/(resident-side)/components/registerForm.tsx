@@ -77,7 +77,7 @@ const registerForm:React.FC = () => {
             
             let fileName ='';
             if(resident.upload){
-              const timeStamp = Date.now()
+              const timeStamp = Date.now().toString();
               const fileExtention = resident.upload.name.split('.').pop();
               fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtention}`
               storageRef = ref(storage, `valid_id_image/${fileName}`);
@@ -105,7 +105,7 @@ const registerForm:React.FC = () => {
               address: resident.address,
               sex: resident.sex,
               role: resident.role,
-              createdAt: new Date().toISOString,
+              createdAt: Date.now().toString(),
               status: resident.status,
               validIdDocID: fileName
           });

@@ -1,8 +1,19 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
-const bMenu: React.FC = () => {
-  /* Will add role base access later */
+const bMenu: React.FC =  () => {
+  const router = useRouter();
+  const handleLogout = async() => {
+    const respone = await fetch("/api/barangayLogout", {
+      method: "POST", 
+    })
+
+    if(respone.ok){
+      router.push('/');
+    }
+  }
+
   return (
     <div className="flex flex-col justify-center bg-slate-400 w-32 h-screen fixed">
       <Link
@@ -53,12 +64,12 @@ const bMenu: React.FC = () => {
       >
         Programs Module
       </Link>
-      <Link
-        href="/"
-        className="p-4 text-black hover:bg-slate-500 hover:text-white hover:cursor-pointer"
+      <button
+        onClick={handleLogout}
+        className="p-4 text-black hover:bg-slate-500 hover:text-white hover:cursor-pointer text-left"
       >
         Log Out
-      </Link>
+      </button>
     </div>
   );
 };

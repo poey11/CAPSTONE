@@ -9,22 +9,23 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const barangayToken = cookieStore.get("barangayToken");
-  if(barangayToken){
-      redirect("/dashboard");
-  }
-  else{
-    return (
-      <html>
-        <body>
-          <AuthProvider> 
-            <TopNav />
-            {children}
-          </AuthProvider>
-        </body>
-      </html>
-    );
-  }
+  // const cookieStore = await cookies();
+  // const barangayToken = cookieStore.get("barangayToken");
+  // if(barangayToken){
+  //   redirect("/dashboard");
+  // }
+  // else{
+  // }
+  return (
+    /*there should be a checker here to prevent barangay user accesing the resident side */
+    <html>
+      <body>
+        <AuthProvider> 
+          <TopNav />
+          {children}
+        </AuthProvider>
+      </body>
+    </html>
+  );
  
 }

@@ -39,13 +39,14 @@ const bLoginForm:React.FC = () => {
                 method: "POST",
                 headers:{
                     "Content-Type": "application/json"},
-                body: JSON.stringify({userId: official.username, password: official.password})
+                body: JSON.stringify({userid: official.username, password: official.password})
             });
             if(response.ok){
+                /* should check the first time login column to check if it would have to redirect to the account setup first or if the account has alr been setuped */
                 router.push("/dashboard");
             }else{
                 const data = await response.json();
-                console.log(data.error || "Login Failed");
+                alert("Login Failed " +  data.message)
             }
         }
         catch(error:string|any){

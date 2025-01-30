@@ -22,7 +22,7 @@ export default async function DashboardLayout({
     // else{
        
     // }
-
+    /* there should be a checker to prevent resident and guest user accesing the barangay side */
     return (
         <div className="ml-32  flex bg-gray-200">
             {children}
