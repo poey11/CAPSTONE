@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { db } from "../../../db/firebase";
+import { db } from "../../../../db/firebase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 
 interface Resident {
@@ -98,7 +98,7 @@ const ResidentManagement = () => {
       <h1>Resident Management Module</h1>
 
       {/* Resident Registration Form */}
-      <h2>Resident Registration</h2>
+      <h2>Registered Resident Voters</h2>
       <form className="flex flex-col gap-2" onSubmit={addResident}>
         <input
           type="text"

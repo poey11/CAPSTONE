@@ -1,8 +1,10 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 
 const bMenu: React.FC = () => {
-  /* Will add role base access later */
+  const [isResidentOpen, setIsResidentOpen] = useState(false);
+
   return (
     <div className="flex flex-col justify-center bg-slate-400 w-32 h-screen fixed">
       <Link
@@ -17,12 +19,34 @@ const bMenu: React.FC = () => {
       >
         Admin Module
       </Link>
-      <Link
-        href="/dashboard/residentManagement"
-        className="p-4 text-black hover:bg-slate-500 hover:text-white"
-      >
-        Resident Managment
-      </Link>
+
+      {/* Resident Management Dropdown */}
+      <div className="relative">
+        <button
+          onClick={() => setIsResidentOpen(!isResidentOpen)}
+          className="p-4 text-black hover:bg-slate-500 hover:text-white w-full text-left"
+        >
+          Resident Management
+        </button>
+
+        {isResidentOpen && (
+          <div className="flex flex-col bg-white border rounded shadow-lg">
+            <Link
+              href="/dashboard/residentManagement/mainResidents"
+              className="px-4 py-2 text-black hover:bg-slate-500 hover:text-white"
+            >
+              Main Residents
+            </Link>
+            <Link
+              href="/dashboard/residentManagement/registeredVoters"
+              className="px-4 py-2 text-black hover:bg-slate-500 hover:text-white"
+            >
+              Registered Voters
+            </Link>
+          </div>
+        )}
+      </div>
+
       <Link
         href="/dashboard/officials"
         className="p-4 text-black hover:bg-slate-500 hover:text-white"
