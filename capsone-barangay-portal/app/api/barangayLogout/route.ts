@@ -5,7 +5,7 @@ export async function POST(){
 
     response.headers.set(
         "Set-Cookie",
-        "barangayCookie=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict"
+        "barangayToken=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict"
     )
 
     return response;

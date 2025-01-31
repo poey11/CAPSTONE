@@ -16,47 +16,28 @@ export default async function DashboardLayout({
 }){
     const cookieStore = await cookies();
     const barangayToken = cookieStore.get("barangayToken");
-    // if(!barangayToken){
-    //     redirect("/");
-    // }
-    // else{
-       
-    // }
-    /* there should be a checker to prevent resident and guest user accesing the barangay side */
-    return (
-        <div className="ml-32  flex bg-gray-200">
-            {children}
-        </div>
-    )        
-
-
-
-    // try{
-    //     const userCollection = collection(db, "BarangayUsers");
-    //     const usernameQuery = query(userCollection, where("userId", "==", barangayToken));
-    //     const querySnapshot = await getDocs(usernameQuery);
-    //     if(querySnapshot.empty){
-    //         cookieStore.delete({
-    //             name: "barangayToken", 
-    //             path: "/",
-    //             sameSite: "strict",
-    //             httpOnly: true,
-    //         });
-    //         redirect("/");
-    //     }
-    //     else{
-    //         return (
-    //             <div className="ml-32  flex bg-gray-200">
-    //                 {children}
-    //             </div>
-    //         )        
-    //     }
-       
-    // }
-    // catch(error:string|any){
-    //     console.log(error.message);
-    //     //redirect("/");
-
-    // }
-   
+    if(!barangayToken?.value){
+        redirect("/");
+    }
+    else{
+        try{
+            const userCollection = collection(db, "BarangayUsers")
+            const userQuery = query(userCollection, where("id", "==", barangayToken.value));
+            const querySnapshot = await getDocs(userQuery)   
+            if(querySnapshot.empty){
+                cookieStore.delete("barangayToken");
+                redirect("/");
+            }  
+            else{
+                return (
+                    <div className="ml-32  flex bg-gray-200">
+                        {children}
+                    </div>
+                )        
+            }
+        }
+        catch(e:string|any){
+            console.log("Error: "+ e.message)
+        }        
+    }
 }

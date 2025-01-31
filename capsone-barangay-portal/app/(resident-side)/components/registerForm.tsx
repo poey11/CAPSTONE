@@ -72,8 +72,9 @@ const registerForm:React.FC = () => {
         let docRef = null;
         let storageRef = null;
         try{
-           const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, resident.password);
-            user = userCredentials.user;
+          const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, resident.password);
+          user = userCredentials.user;
+          await signOut(auth); 
             
             let fileName ='';
             if(resident.upload){
@@ -110,16 +111,13 @@ const registerForm:React.FC = () => {
               validIdDocID: fileName
           });
          
-         await sendEmailVerification(user);
-
-         await signOut(auth);
+          await sendEmailVerification(user);
 
 
-            alert("Register sucessful! Email verification sent to your email address");
-            /*clear form*/  
 
-            /* then redirect back to homepage if successful*/
-            router.push("/");
+          alert("Register sucessful! Email verification sent to your email address");
+          
+          router.push("/resident");
           
         }
         catch(error: string | any){
