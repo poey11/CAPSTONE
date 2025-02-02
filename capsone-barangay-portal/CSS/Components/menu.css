@@ -72,16 +72,16 @@
   color: black; 
 }
 
-.dropdown-container:hover .dropdown,
-.dropdown-container .dropdown:hover {
+.dropdown-Container:hover .Dropdown,
+.dropdown-Container .Dropdown:hover {
   display: block; 
 }
 
-.dropdown-container {
+.dropdown-Container {
   position: relative;
 }
 
-.dropdown {
+.Dropdown {
   display: none;
   position: absolute;
   top: 23px;
@@ -92,7 +92,7 @@
   width: 200px;
 }
 
-.dropdown p {
+.Dropdown p {
   margin: 0;
   padding: 5px 10px;
   color: black;
@@ -100,7 +100,7 @@
   cursor: pointer;
 }
 
-.dropdown p:hover {
+.Dropdown p:hover {
   color: white;
   background-color:rgb(220, 98, 11);
 }

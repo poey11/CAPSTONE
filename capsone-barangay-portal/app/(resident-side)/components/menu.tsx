@@ -72,10 +72,10 @@ const Menu = () => {
               </Link>
             </div>
             
-            <div className="navbar-indiv-container dropdown-container">
+            <div className="navbar-indiv-container dropdown-Container">
               
                 <p className="hover:text-[white] cursor-pointer">Services</p>
-                <div className="dropdown">
+                <div className="Dropdown">
                   <Link href="/services">
                     <p>Request Documents</p>
                   </Link>
@@ -97,10 +97,10 @@ const Menu = () => {
                 News
               </Link>
 
-            <div className="navbar-indiv-container dropdown-container">
+            <div className="navbar-indiv-container dropdown-Container">
               
                 <p className="hover:text-[white] cursor-pointer">Officials</p>
-                <div className="dropdown">
+                <div className="Dropdown">
                   <Link href="/OfficialsPage">
                     <p>Barangay Officials</p>
                   </Link>
@@ -129,8 +129,8 @@ const Menu = () => {
                 <div className="dropdown-containerr">
                   <div className="dropdown-content">
                     <Link
-                      href="/official"
-                      //href="/official/login"
+                      //href="/official"
+                      href="/official/login"
 
                       onClick={toggleLoginOptions}
                       className="dropdown-item"
@@ -138,8 +138,8 @@ const Menu = () => {
                       Login For Official
                     </Link>
                     <Link
-                      href="/resident"
-                      //href="/resident/login"
+                      //href="/resident"
+                      href="/resident/login"
                       onClick={toggleLoginOptions}
                       className="dropdown-item"
                     >
