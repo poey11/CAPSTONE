@@ -4,14 +4,8 @@
     background-color: #f9f9f9;
     padding:30px;
     z-index: 10;
+    margin-left: 2rem; 
 }
-
-.main-container hr{
-    border: none; 
-    border-top: 2px solid #ddd;
-    margin-top: 35px;
-}
-
 
 .section-1{
     display: flex;
