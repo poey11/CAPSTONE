@@ -128,7 +128,7 @@
     width: 25px; 
     margin: 20px;
     height: auto; 
-    
+    filter: grayscale(100%) brightness(0%) invert(50%);
 }
 
 .aboutus-contactinfo-email-section, 

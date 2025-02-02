@@ -45,24 +45,24 @@
     font-weight: bold;
 }
 
-.aboutus-contacticon {
+.contacticon {
   width: 25px; 
   margin: 20px;
   height: auto; 
   filter: invert(100%);
 }
 
-.aboutus-contactinfo-email{
+.contactinfo-email{
   display: flex; 
   align-items: center; 
 }
 
-.aboutus-contactinfo-phone{
+.contactinfo-phone{
   display: flex; 
   align-items: center; 
 }
 
-.aboutus-contactinfo-loc{
+.contactinfo-loc{
   display: flex; 
   align-items: center; 
 }

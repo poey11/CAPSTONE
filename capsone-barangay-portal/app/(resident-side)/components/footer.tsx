@@ -41,16 +41,16 @@ const Footer = () => {
 
         <div className="footer-section2">
             <h1>Contact Us</h1>
-                  <div className="aboutus-contactinfo-email">
-                    <img src="/images/email1.png" alt="Image 1" className="aboutus-contacticon" />
+                  <div className="contactinfo-email">
+                    <img src="/images/email1.png" alt="Image 1" className="contacticon" />
                     <p>barangayfairviewpark@gmail.com</p>
                   </div>
-                  <div className="aboutus-contactinfo-phone">
-                    <img src="/images/phone1.png" alt="Image 2" className="aboutus-contacticon" />
+                  <div className="contactinfo-phone">
+                    <img src="/images/phone1.png" alt="Image 2" className="contacticon" />
                     <p>893-00040 | 0943-675-5020 | 0916-530-0593</p>
                   </div>
-                  <div className="aboutus-contactinfo-loc">
-                    <img src="/images/location1.png" alt="Image 3" className="aboutus-contacticon" />
+                  <div className="contactinfo-loc">
+                    <img src="/images/location1.png" alt="Image 3" className="contacticon" />
                     <p>West Fairview, 9 A Dahlia Ave, West Fairview, Quezon City, 1118 Metro Manila</p>
                   </div>
         </div>
