@@ -1,5 +1,8 @@
 "use client";
 import Link from "next/link";
+import SideNav from '../../(barangay-side)/components/bMenu';
+
+import { usePathname } from "next/navigation";
 
 
 const Footer = () => {
@@ -9,7 +12,18 @@ const Footer = () => {
       top: 0,
       behavior: "smooth",
     });
+    
   };
+
+  const pathname = usePathname();
+  const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages
+
+  if (noTopNavPages.some((page) => pathname.includes(page))) {
+    return <SideNav />; 
+  }
+
+ 
+
   return (
     <footer className="footer-container">
       <div className="footer-content">

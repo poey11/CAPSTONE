@@ -1,0 +1,48 @@
+.header {
+    display: flex;
+    flex-direction: column; 
+    justify-content: flex-start; 
+    align-items: center; 
+    width: 13rem;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 1rem; 
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    z-index: 1000; 
+  }
+  
+  .contents {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; 
+    align-items: center;
+    width: 100%;
+  }
+  
+  .module {
+    padding: 1rem;
+    color: grey;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center; 
+    width: 100%;
+  
+  }
+
+  .module:hover {
+    background-color: #D9D9D9;
+  }
+  
+  
+  .module:not(:last-child) {
+    margin-bottom: 0.50rem;
+  }
+
+  .logo {
+     padding: 1rem;
+    
+  }
+  
