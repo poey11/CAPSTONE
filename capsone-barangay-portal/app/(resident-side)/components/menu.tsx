@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import SideNav from '../../(barangay-side)/components/bMenu';
 //import TopMenu from '../../(barangay-side)/components/topMenu';
 import Link from 'next/link';
+import "@/CSS/Components/menu.css";
 
 const Menu = () => {
   const [showLoginOptions, setShowLoginOptions] = useState(false);
@@ -160,120 +161,6 @@ const Menu = () => {
 
           <img src="/images/user.png" alt="User Icon" className="header-usericon" />
         </div>
-
-
-        <style jsx>{`
-
-          .dropdown-containerr {
-            position: absolute;
-            top: 100%; 
-            left: 0;
-            width: 10rem;
-            z-index: 50;
-          }
-
-       
-          .dropdown-content {
-            background-color: #cbd5e1; /* bg-slate-300 */
-            border-radius: 0.375rem; /* rounded-md */
-            padding: 0.25rem 0.75rem; /* py-1 px-3 */
-            display: flex;
-            flex-direction: column;
-          }
-
-          
-          .dropdown-item {
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            transition: color 0.2s ease-in-out;
-          }
-
-          .dropdown-item:hover {
-            color: white; 
-          }
-
-          .navbar-container{
-            position: sticky;
-            top: 0; 
-            z-index: 1000; 
-            background-color: #ffe0ca; 
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
-          }
-
-          .navbar-card {
-            background-color: #ed7014;
-            display: flex;
-            justify-content: space-between; 
-            align-items: center; 
-            height: 120px; 
-            padding: 0 20px; 
-          }
-
-          .header-brgylogo {
-            max-width: 100%; 
-            height: auto;
-            width: 100px; 
-            margin-left:20px;
-          }
-
-          .header-usericon{
-            max-width: 100%; 
-            height: auto;
-            width: 35px;
-            margin-right:20px;
-          }
-
-          .navbar-links {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-grow: 1;
-            gap: 50px; 
-            text-align: center;
-          }
-
-          .navbar-links a {
-            text-decoration: none;
-            color: black; 
-          }
-
-          .dropdown-container:hover .dropdown,
-        .dropdown-container .dropdown:hover {
-            display: block; 
-        }
-
-        .dropdown-container {
-            position: relative;
-        }
-
-        .dropdown {
-            display: none;
-            position: absolute;
-            top: 23px;
-            left: 0;
-            background-color:  #ed7014;
-            padding: 10px;
-            z-index: 100; 
-            width: 200px;
-        }
-
-        .dropdown p {
-            margin: 0;
-            padding: 5px 10px;
-            color: black;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .dropdown p:hover {
-            color: white;
-            background-color:rgb(220, 98, 11);
-        }
-
-          
-
-        `}</style>
       </div>
     </>
   );
