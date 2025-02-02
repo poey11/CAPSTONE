@@ -1,0 +1,87 @@
+.aboutus-main-container {
+    background-color: #f7e5d5;
+    height: 100%;
+    width: 100%;
+}
+
+.headerpic {
+    position: relative; /* Required for pseudo-elements */
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    overflow: hidden; /* Ensures blur doesn't spill outside */
+  }
+
+.headerpic::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/images/header.jpg');
+    background-size: cover;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    filter: blur(2px); /* Adjust the blur intensity */
+    z-index: 1; /* Place the blurred background below the text */
+}
+
+.headerpic > * {
+    position: relative;
+    z-index: 2; /* Ensure text is above the blurred background */
+}
+
+.aboutus-inner-container{
+    display: flex;
+    flex-direction:column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.kap-info-container{
+    display: flex;
+    background-color: rgba(255, 255, 255, 0.7);
+    width: 75%;
+    border-radius: 10px;
+    margin-top: 50px;
+    border: 1px solid #ddd;
+    padding: 30px;
+
+}
+
+.kap-info-container-sec1{
+    width: 50%;
+}
+
+.kapImage {
+    height: auto;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.kap-info-container-sec2{
+    display: flex;
+    flex-direction:column;
+    gap: 10px;
+}
+
+.aboutus-kapinfo-name {
+    font-size: 50px; /* Adjust the title size */
+    font-weight: bold;
+    color: #e56723;
+}
+
+.aboutus-kapinfo-position{
+    font-size: 20px;
+    color: #e56723;
+    font-weight: bold;
+  }
+
+
+  
