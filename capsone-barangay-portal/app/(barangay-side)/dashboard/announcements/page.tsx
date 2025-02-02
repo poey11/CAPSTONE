@@ -1,7 +1,8 @@
 "use client"
 
+import { useRouter } from "next/navigation";
 import type { Metadata } from "next";
-import "@/CSS/barangaySide/announcements.css";
+import "@/CSS/barangaySide/announcements/announcements.css";
 
 
 
@@ -12,12 +13,24 @@ const metadata:Metadata = {
 };
 
 export default function Announcements() {
+
+    const router = useRouter();
+
+    const handleAddAnnouncement = () => {
+      router.push("/dashboard/announcements/addAnnouncement");
+    };
+
     return (
       
       <main className="main-container">
          <div className="section-1">
           <h1>Announcements</h1>
-          <button className="add-announcement-btn">Add Announcement</button>
+          <button
+            className="add-announcement-btn"
+            onClick={handleAddAnnouncement}
+          >
+            Add Announcement
+          </button>
          </div>
          <div className="section-2">
           <input 
