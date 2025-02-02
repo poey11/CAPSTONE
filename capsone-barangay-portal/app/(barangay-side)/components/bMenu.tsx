@@ -63,7 +63,7 @@ const bMenu: React.FC = () => {
             Incident Management Module
           </Link>
           <Link
-            href="/programs"
+            href="/dashboard/announcements"
             className="module"
           >
             Announcements
