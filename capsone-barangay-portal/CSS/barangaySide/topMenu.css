@@ -1,0 +1,91 @@
+body {
+    padding-top: 90px; /* Prevents content from being hidden under the fixed menu */
+}
+
+.main-container{
+    width: auto;
+    height: 90px;
+    background-color: #FFFFFF;
+    border-bottom: 2px solid rgb(202, 202, 202);
+
+    display: flex;  /* Enables flexbox */
+    justify-content: flex-end; /* Moves children (user-container) to the right */
+    align-items: center; /* Centers items vertically */
+    padding-right: 30px; /* Optional: Adds spacing from the right edge */
+    
+    position: fixed;  /* Keeps it at the top */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+}
+
+.user-container{
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.user-section{
+    display: flex;
+    flex-direction: column;
+}
+
+.user-section h1{
+    font-size: 20px;
+    color: #e56723; 
+    font-weight: bold;
+}
+
+.user-section p{
+    font-size: 15px;
+    color: #a29f9e; 
+    font-weight: bold;
+}
+
+.userIcon{
+    width: 45px;
+    height: 45px;
+}
+
+.menuIcon{
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    filter: grayscale(100%);
+}
+
+.dropdown {
+    position: absolute;
+    top: 40px; /* Adjust as needed */
+    left: -140px; /* Moves it to the leftmost part of the screen */
+    background-color: #f9f9f9;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    min-width: 160px;
+    z-index: 1000;
+    padding: 5px 0;
+    display: none; /* Hide dropdown by default */
+}
+
+.dropdown.show {
+    display: block; /* Show dropdown when toggled */
+}
+
+.menu-section{
+    position: relative;
+}
+
+.dropdown ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dropdown li {
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.dropdown li:hover {
+    background-color: #ddd;
+}
