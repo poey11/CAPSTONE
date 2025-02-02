@@ -1,7 +1,7 @@
 "use client"
 import type { Metadata } from "next";
 import { useState } from "react";
-import "@/CSS/ServicesPage/barangaycertificate/others.css";
+import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 
 
 
@@ -62,8 +62,7 @@ export default function BarangayClearanceOthers() {
 
   return (
 
-    <div className="form-container">
-
+    <main className="main-form-container">
       <div className="headerpic">
         <p>SERVICES</p>
       </div>
@@ -75,9 +74,8 @@ export default function BarangayClearanceOthers() {
 
         <hr/>
 
-        
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
+        <form className="doc-req-form" onSubmit={handleSubmit}>
+          <div className="form-group">
               <label htmlFor="purpose" className="form-label">Barangay Certificate Purpose</label>
               <select 
                 id="purpose" 
@@ -268,13 +266,12 @@ export default function BarangayClearanceOthers() {
                 placeholder="Enter Citizenship"  
               />
             </div>
-          
 
-          <hr/>
+            <hr/>
 
-          <h1 className="form-requirements-title">Requirements</h1>
+            <h1 className="form-requirements-title">Requirements</h1>
 
-          <div className="signature/printedname-container">
+            <div className="signature/printedname-container">
             <h1 className="form-label"> Upload Signature Over Printed Name</h1>
 
             <div className="file-upload-container">
@@ -334,6 +331,7 @@ export default function BarangayClearanceOthers() {
               </div>
             </div>
           </div>
+
 
           <h1 className="form-label-reqs"> Upload either of the following requirements</h1>
           <br/>
@@ -531,8 +529,10 @@ export default function BarangayClearanceOthers() {
           </div>
 
         </form>
+
       </div>
-    </div>
+
+    </main>
     
     );
 }

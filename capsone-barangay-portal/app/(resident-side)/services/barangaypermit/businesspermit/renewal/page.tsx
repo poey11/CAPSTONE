@@ -1,7 +1,7 @@
 "use client"
 import type { Metadata } from "next";
 import { useState } from "react";
-import "@/CSS/ServicesPage/barangaypermit/businesspermit/renewal.css";
+import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 
 
 const metadata:Metadata = { 
@@ -61,8 +61,7 @@ export default function BarangayBusinessPermitRenewal() {
 
   return (
 
-    <div className="form-container">
-
+    <main className="main-form-container">
       <div className="headerpic">
         <p>SERVICES</p>
       </div>
@@ -72,8 +71,6 @@ export default function BarangayBusinessPermitRenewal() {
             Barangay Business Permit
         </h1>
 
-        
-
         <h1 className="form-subtitle">
             Renewal Business
         </h1>
@@ -81,7 +78,7 @@ export default function BarangayBusinessPermitRenewal() {
         <hr/>
 
         
-          <form onSubmit={handleSubmit}>
+          <form className="doc-req-form" onSubmit={handleSubmit}>
 
             <div className="form-group">
               <label htmlFor="date" className="form-label">Date</label>
@@ -537,7 +534,7 @@ export default function BarangayBusinessPermitRenewal() {
 
         </form>
       </div>
-    </div>
+    </main>
     
     );
 }

@@ -1,6 +1,6 @@
 "use client";
 import type { Metadata } from "next";
-import "@/CSS/ServicesPage/requestdocuments/requestdocuments.css";
+import "@/CSS/ServicesPage/requestdocumentsmain/requestdocumentsmain.css";
 import Link from "next/link";
 
 const metadata: Metadata = {

@@ -1,7 +1,7 @@
 "use client"
 import type { Metadata } from "next";
 import { useState } from "react";
-import "@/CSS/ServicesPage/barangayindigency/barangayindigency.css";
+import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 
 /*TO DO: add appointment system*/
 
@@ -62,8 +62,7 @@ export default function BarangayIndigency() {
 
   return (
 
-    <div className="form-container">
-
+    <main className="main-form-container">
       <div className="headerpic">
         <p>SERVICES</p>
       </div>
@@ -76,7 +75,7 @@ export default function BarangayIndigency() {
         <hr/>
 
         
-          <form onSubmit={handleSubmit}>
+        <form className="doc-req-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="purpose" className="form-label">Barangay Clearance Purpose</label>
               <select 
@@ -528,7 +527,7 @@ export default function BarangayIndigency() {
 
         </form>
       </div>
-    </div>
+    </main>
 
     );
 }      
