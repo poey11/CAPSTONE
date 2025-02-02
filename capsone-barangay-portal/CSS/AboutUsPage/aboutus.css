@@ -1,5 +1,4 @@
-.aboutus-main-container {
-    background-color: #f7e5d5;
+.aboutus-container {
     height: 100%;
     width: 100%;
 }
@@ -36,27 +35,48 @@
     z-index: 2; /* Ensure text is above the blurred background */
 }
 
-.aboutus-inner-container{
+.aboutus-main-container{
     display: flex;
     flex-direction:column;
     justify-content: center;
     align-items: center;
+    background-color: #f7e5d5;
 }
 
-
-.kap-info-container{
-    display: flex;
+.container{
     background-color: rgba(255, 255, 255, 0.7);
     width: 75%;
     border-radius: 10px;
     margin-top: 50px;
     border: 1px solid #ddd;
     padding: 30px;
-
+    gap: 40px;
+    margin-bottom: 100px;
 }
 
+.container hr{
+    border: none; 
+    border-top: 2px solid rgba(0, 0, 0, 0.20);
+    margin: 80px 0; 
+}
+
+.kap-info-container{
+    display: flex;
+    border-radius: 10px;
+    gap: 40px;
+    align-items: center;
+    flex: 1 1 calc(50% - 20px);
+    background-color: white;
+    padding: 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+
 .kap-info-container-sec1{
-    width: 50%;
+    width: 60%;
 }
 
 .kapImage {
@@ -66,21 +86,172 @@
 }
 
 .kap-info-container-sec2{
+    width: 50%;
     display: flex;
     flex-direction:column;
     gap: 10px;
 }
 
+.kap-info-container-sec2 hr{
+    border: none; 
+    border-top: 2px solid rgba(0, 0, 0, 0.20);
+    margin: 20px 0; 
+}
+
 .aboutus-kapinfo-name {
-    font-size: 50px; /* Adjust the title size */
+    font-size: 50px;
     font-weight: bold;
     color: #e56723;
 }
 
 .aboutus-kapinfo-position{
     font-size: 20px;
+    color: #7c7876;
+    font-weight: bold;
+}
+
+.aboutus-kapinfo-description {
+    font-size: 16px; 
+    text-align: justify;
+    color: grey;
+}
+
+.contactinfo-container{
+ 
+    display: block; 
+    justify-content: space-between; 
+    gap: 20px; 
+    padding: 20px;
+}
+
+.aboutus-contacticon {
+    width: 25px; 
+    margin: 20px;
+    height: auto; 
+    
+}
+
+.aboutus-contactinfo-email-section, 
+.aboutus-contactinfo-phone-section,
+.aboutus-contactinfo-loc-section{
+    display: flex; 
+    align-items: center; 
+}
+
+.aboutus-contactinfo-email-section, 
+.aboutus-contactinfo-phone-section,
+.aboutus-contactinfo-loc-section p{   
+    font-size: 16px; 
+    text-align: justify;
+    color: grey;   
+    word-wrap: break-word;  /* Ensures long words break */
+    overflow-wrap: break-word;  /* Provides better browser support */
+    max-width: 100%; 
+}
+
+.history-container{
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+    flex: 1 1 calc(50% - 20px);
+    background-color: white;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.aboutus-history-title {
+    font-size: 30px;
     color: #e56723;
     font-weight: bold;
+    margin-bottom: 10px;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+.aboutus-history-text{
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+  }
+
+  .aboutus-history-text p{
+    color: grey;    
+    font-size: 16px;
+    line-height: 1.2;
+    text-align: justify;
+    text-indent: 60px;
+  }
+
+
+.vision-mission-container{
+    display: flex;
+    margin-top: 50px;
+    gap: 40px;
+    align-items: center;
+}
+
+.visionmission-card {
+    flex: 1 1 calc(50% - 20px);
+    background-color: white;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .visionmission-title {
+    font-size: 30px;
+    color: #e56723;
+    font-weight: bold;
+    margin-bottom: 15px;
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .visionmission-text {
+    font-size: 16px;
+    line-height: 1.6;
+    text-align: justify;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    color: grey;
+  }
+
+
+  .map-container{
+    display: flex;
+    gap: 40px;
+    align-items: center;
+}
+
+.aboutus-map-card {
+    flex: 1 1 calc(50% - 20px);
+    background-color: white;
+    padding: 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top:20px;
+  }
+
+  .aboutus-map-title{
+    font-size: 30px;
+    color: #e56723;
+    font-weight: bold;
+    margin-bottom: 15px;
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .aboutus-map-image {
+    height: auto;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
   }
 
 
