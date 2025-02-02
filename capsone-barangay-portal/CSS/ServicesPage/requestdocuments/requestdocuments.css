@@ -1,0 +1,214 @@
+
+.services-container {
+    height: 100%;
+    width: 100%;
+}
+
+.headerpic {
+  position: relative; /* Required for pseudo-elements */
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 40px;
+  font-weight: bold;
+  overflow: hidden; /* Ensures blur doesn't spill outside */
+}
+
+.headerpic::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/images/header.jpg');
+  background-size: cover;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  filter: blur(2px); /* Adjust the blur intensity */
+  z-index: 1; /* Place the blurred background below the text */
+}
+
+.headerpic > * {
+  position: relative;
+  z-index: 2; /* Ensure text is above the blurred background */
+}
+
+
+.services-main-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f7e5d5;
+ 
+}
+
+.documents-container{
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    margin-top: 70px;
+    margin-bottom:70px;
+    border: 1px solid #ddd;
+    padding: 30px;
+    gap: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 90%; /* Make it flexible */
+    max-width: 1000px; /* Restrict maximum width */
+
+}
+
+.documents-container h1 {
+  color: #ed7014;
+  font-size: 20px;
+}
+
+.documents-container-row {
+  margin-top: 20px;
+  display: block;
+  flex-wrap: wrap;
+}
+
+.documents-card {
+  flex: 1 1 calc(50% - 20px);
+  background-color: rgba(237, 112, 20, 0.3);
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  height: 70px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  z-index: 10;
+  width: 350px; /* Adjusted for better fit */
+  max-width: 90%; /* Responsive width */
+}
+
+.documents-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  background-color: rgba(237, 112, 20, 0.4);
+  cursor: pointer;
+}
+
+.document-icon {
+  max-width: 100%;
+  height: 40px;
+  width: 40px;
+}
+
+.dropdown-container:hover .dropdown,
+.dropdown-container .dropdown:hover {
+    display: block; /* Ensure the dropdown stays open when interacting with it */
+}
+
+.dropdown-container {
+    position: relative;
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    top: 70px; /* Aligns directly below the container */
+    left: 0;
+    background-color: rgb(246, 195, 159);
+    border: 1px solid #ddd;
+    border-radius: 0px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    z-index: 100; /* Ensure dropdown is above other elements */
+    width: 310px; /* Optional: Set a minimum width for the dropdown */
+}
+
+.dropdown p {
+    margin: 0;
+    padding: 5px 10px;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.dropdown p:hover {
+    background-color: rgba(237, 112, 20, 0.3); /* Highlight option on hover */
+}
+
+
+/* Nested Dropdown */
+.nested-dropdown-container {
+    position: relative;
+}
+
+.nested-trigger {
+    margin: 0;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.nested-dropdown {
+    display: none; /* Hidden by default */
+    padding: 5px 10px;
+    background-color: #f6c39f;
+    border-radius: 8px;
+    margin-top: 5px;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.nested-dropdown p {
+    margin: 0;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+/* Hover Behavior */
+    .nested-trigger:hover + .nested-dropdown {
+    display: block;
+}
+
+/* Optional: Animation */
+@keyframes fadeIn {
+from {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+to {
+    opacity: 1;
+    transform: translateY(0);
+}
+}
+
+
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .documents-card {
+    width: 90%; 
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .documents-container {
+    padding: 20px;
+  }
+
+  .dropdown, .nested-dropdown {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerpic {
+    font-size: 24px; 
+  }
+
+  .documents-card {
+    width: 100%;
+    padding: 10px;
+    gap: 10px;
+  }
+}
