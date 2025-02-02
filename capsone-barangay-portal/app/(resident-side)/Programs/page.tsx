@@ -1,4 +1,5 @@
-"use client";
+
+import "@/CSS/Programs/Programs.css";
 
 import type { Metadata } from "next";
 import Link from 'next/link';
@@ -67,7 +68,7 @@ export default function Programs() {
       </div>
 
       <div className="TitlePage">
-        <p>"Discover Programs Offered by the Barangay"</p>
+        <p>Discover Programs Offered by the Barangay</p>
         <img 
           src="/images/QCLogo.png" 
           alt="Barangay Captain" 
@@ -110,143 +111,6 @@ export default function Programs() {
         ))}
       </section>
 
-      <style jsx>{`
-        .Page {
-          height: 200px; 
-          display: flex;
-          align-items: center;
-          justify-content: center; 
-          color: white; 
-          font-size: 40px; 
-          font-weight: bold; 
-          position: relative;
-          margin-bottom: 50px;
-        }
-
-        .Page::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-image: url('/Images/Background.jpeg');
-          background-size: cover; 
-          background-position: 50% 50%;
-          background-repeat: no-repeat; 
-          z-index: 1; /* Ensure the overlay appears above the background image */
-          filter: blur(2px); /* Adjust the blur intensity */
-        }
-
-        .Page > * {
-          position: relative;
-          z-index: 2; /* Ensure text is above the overlay */
-        }
-
-        .TitlePage {
-          background-color: #FFE0CA;
-          width: 800px;
-          height: 100px;
-          border-radius: 25px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin: 0 auto;
-          margin-bottom: 2rem;
-          padding-left: 1rem;
-          padding-right: 1rem;
-          word-wrap: break-word; 
-          overflow: hidden; 
-        }
-
-        .TitlePage p {
-          color: black;
-          font-size: 24px;
-          font-weight: bold;
-          text-overflow: ellipsis; 
-          white-space: normal; 
-          overflow: hidden;
-          width: 100%; 
-        }
-
-        .aboutus-image {
-          width: 160px;
-          height: 80px;
-        }
-          
-        .main-container {
-          background-color: #f7e5d5;
-        }
-
-        .programs-section {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 3.5rem;
-          padding-top: 3rem;
-          padding-left: 10rem;
-          padding-right: 10rem; 
-          padding-bottom: 3rem;
-        }
-
-        @media (min-width: 640px) {
-          .programs-section {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .programs-section {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-
-        .programs-card {
-          background-color: white;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          border-radius: 0.5rem;
-          overflow: hidden;
-          width: 100%;
-          height: 350px; /* Fixed height for consistency */
-          display: flex;
-          flex-direction: column;
-          border: 3px solid #ddd;
-          transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover effects */
-        }
-
-        .programs-card:hover {
-            transform: translateY(-10px); /* Slight lift effect */
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Enhanced shadow for hover */
-            border-color: #aaa; /* Optional: Change border color on hover */
-          }
-
-        .programs-image {
-          width: 100%;
-          height: 12rem;
-          object-fit: cover;
-        }
-
-        .programs-content {
-          padding: 1rem;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .programs-title {
-          font-size: 1.70rem;
-          font-weight: bold;
-          margin-top: 20px;
-          color: #e56723;
-          text-align: center;
-
-        }
-        .programs-date {
-          font-size: 0.75rem;
-          color: #9e9e9e;
-          text-align: left;
-        }
-
-      
-      `}</style>
     </main>
   );
 }
