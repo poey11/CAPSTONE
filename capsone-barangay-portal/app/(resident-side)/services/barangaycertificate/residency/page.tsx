@@ -1,6 +1,7 @@
 "use client"
 import type { Metadata } from "next";
 import { useState } from "react";
+import "@/CSS/ServicesPage/barangaycertificate/residency.css";
 
 /*TO ADD: appointment system*/
 
