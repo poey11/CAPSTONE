@@ -21,7 +21,7 @@ interface BarangayUser{
     role:string;
 }
 const admin = () => {
-    /* for the reside user table: there should be a button where you can press to accept button and the status should change to verified. 
+    /* for the resident user table: there should be a button where you can press to accept button and the status should change to verified. 
     the buttons should tube disabled if the stas is already verified. and the reject button is pressed should be pressed, a reason be given and be sent to the email of the User    
     the valid id column should have a downloadable link for the pic to check if its valid? not sure yet on what to here.
     will continue later the creation for the barangay user account */
