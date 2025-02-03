@@ -50,7 +50,7 @@ const bMenu: React.FC = () => {
       </div>
 
       <Link
-        href="/dashboard/officials"
+        href="/dashboard/OfficialsModule"
         className="p-4 text-black hover:bg-slate-500 hover:text-white"
       >
         Officials Module
