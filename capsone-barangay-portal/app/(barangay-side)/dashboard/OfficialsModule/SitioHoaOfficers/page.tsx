@@ -1,4 +1,4 @@
-import "@/CSS/OfficialsModuleBarangdaySide/module.css";
+import "@/CSS/OfficialsModuleBarangdaySide/SitioModule.css";
 import type { Metadata } from "next";
 import Link from 'next/link';
 
@@ -8,17 +8,17 @@ const metadata: Metadata = {
   description: "Stay updated with the latest announcements",
 };
 
-export default function OfficialsModule() {
+export default function SitioHoaOfficersModule() {
 
 
   return (
     <main className="main-container">
 
       <div className="section-1">
-          <h1>Officials Lists</h1>
+          <h1>Sitio Officers Lists</h1>
 
           
-          <Link href="/dashboard/OfficialsModule/AddOfficial">
+          <Link href="/dashboard/OfficialsModule/SitioHoaOfficers/AddSitioHoaOfficer">
           <button className="add-announcement-btn">Add New Official</button>
           </Link>
 
@@ -30,6 +30,25 @@ export default function OfficialsModule() {
               className="search-bar" 
               placeholder="Enter Name" 
           />
+
+         <select 
+            id="featuredStatus" 
+            name="featuredStatus" 
+            className="featuredStatus" 
+            required
+            defaultValue=""  
+          >
+            <option value="">Sitio/Hoa</option>
+            <option value="active">Sitio Officer</option>
+            <option value="inactive">Hoa Officer</option>
+          </select>
+
+          <input 
+              type="text" 
+              className="search-bar" 
+              placeholder="Enter Location" 
+          />
+
         
           <select 
             id="featuredStatus" 
@@ -52,7 +71,7 @@ export default function OfficialsModule() {
       <tr>
         <th>Name</th>
         <th>Role</th>
-        <th>Term Duration</th>
+        <th>Location</th>
         <th>Contact Information</th>
         <th>Created By</th>
         <th>Actions</th>
@@ -74,7 +93,7 @@ export default function OfficialsModule() {
               </div>
             </td>
             <td>Barangay Captain</td>
-            <td>2022-2025</td>
+            <td>Rabosna HOA, Ruby Street </td>
             <td>09171218101</td>
             <td>Super Tester</td>
             <td>
