@@ -16,6 +16,7 @@ interface Resident {
   contactNumber: string;
   emailAddress: string;
   precinctNumber: string;
+  isVoter: boolean;
 }
 
 const ResidentManagement = () => {
@@ -46,6 +47,7 @@ const ResidentManagement = () => {
             contactNumber: data.contactNumber,
             emailAddress: data.emailAddress,
             precinctNumber: data.precinctNumber,
+            isVoter: data.isVoter
           };
         });
         console.log(residentData);  // Log the fetched data for debugging
@@ -192,6 +194,18 @@ const ResidentManagement = () => {
           onChange={handleInputChange}
           required
         />
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="isVoter"
+            checked={newResident.isVoter || false}
+            onChange={(e) =>
+              setNewResident({ ...newResident, isVoter: e.target.checked })
+            }
+          />
+          Is Voter?
+        </label>
+
         <button
           type="submit"
           className="bg-blue-500 text-white px-4 py-2 rounded"
