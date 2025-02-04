@@ -114,7 +114,7 @@ const bMenu: React.FC = () => {
           Announcements
         </Link>
         <Link
-          href="/dashboard/programs"
+          href="/dashboard/announcements"
           className="module"
         >
           Programs and Events
