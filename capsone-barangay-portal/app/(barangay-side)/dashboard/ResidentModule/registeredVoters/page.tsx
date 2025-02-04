@@ -10,7 +10,7 @@ const metadata: Metadata = {
 export default function ResidentManagementModule() {
   const residentData = [
     {
-      name: "Jonnell Quebal",
+      name: "Voter Quebal",
       address: "123 East Fairview",
       birthday: "1990-02-14",
       placeOfBirth: "Quezon City",
@@ -38,7 +38,7 @@ export default function ResidentManagementModule() {
         isVoter: "true",
       },
       {
-        name: "Jonnell Quebal",
+        name: "Jonnell Not Voter",
         address: "123 East Fairview",
         birthday: "1990-02-14",
         placeOfBirth: "Quezon City",
@@ -49,10 +49,10 @@ export default function ResidentManagementModule() {
         contact: "09171218101",
         email: "jonnell@example.com",
         precinct: "101",
-        isVoter: "true",
+        isVoter: "false",
       },
       {
-        name: "Jonnell Quebal",
+        name: "Jonnell Voter",
         address: "123 East Fairview",
         birthday: "1990-02-14",
         placeOfBirth: "Quezon City",
