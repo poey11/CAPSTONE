@@ -7,8 +7,15 @@ import Link from "next/link";
 
 export default function RegisteredVotersModule() {
   const [residents, setResidents] = useState<any[]>([]);
+  const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Filter state variables
+  const [searchName, setSearchName] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
+  const [residentType, setResidentType] = useState<string>("");
+  const [showCount, setShowCount] = useState<number>(5);
 
   useEffect(() => {
     const fetchResidents = async () => {
@@ -19,6 +26,7 @@ export default function RegisteredVotersModule() {
         // Filter to only include voters
         const filteredVoters = data.filter((resident: any) => resident.isVoter === true);
         setResidents(filteredVoters);
+        setFilteredResidents(filteredVoters); // Initialize with filtered voters
       } catch (err) {
         setError("Failed to load residents");
         console.error(err);
@@ -30,6 +38,31 @@ export default function RegisteredVotersModule() {
     fetchResidents();
   }, []);
 
+  // Apply filters
+  useEffect(() => {
+    let filtered = [...residents];
+
+    if (searchName) {
+      filtered = filtered.filter((resident) =>
+        resident.name.toLowerCase().includes(searchName.toLowerCase())
+      );
+    }
+
+    if (location) {
+      filtered = filtered.filter((resident) => resident.location === location);
+    }
+
+    if (residentType) {
+      filtered = filtered.filter((resident) => resident.residentType === residentType);
+    }
+
+    if (showCount) {
+      filtered = filtered.slice(0, showCount);
+    }
+
+    setFilteredResidents(filtered);
+  }, [searchName, location, residentType, showCount, residents]);
+
   return (
     <main className="main-container">
       <div className="section-1">
@@ -40,22 +73,39 @@ export default function RegisteredVotersModule() {
       </div>
 
       <div className="section-2">
-        <input type="text" className="search-bar" placeholder="Enter Name" />
-        <select className="featuredStatus" defaultValue="">
+        <input
+          type="text"
+          className="search-bar"
+          placeholder="Enter Name"
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+        />
+        <select
+          className="featuredStatus"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        >
           <option value="" disabled>Location</option>
           <option value="east-fairview">East Fairview</option>
           <option value="west-fairview">West Fairview</option>
           <option value="south-fairview">South Fairview</option>
         </select>
-        <select className="featuredStatus" defaultValue="">
+        <select
+          className="featuredStatus"
+          value={residentType}
+          onChange={(e) => setResidentType(e.target.value)}
+        >
           <option value="" disabled>Resident Type</option>
           <option value="senior-citizen">Senior Citizen</option>
           <option value="student">Student</option>
           <option value="pwd">PWD</option>
           <option value="single-mom">Single Mom</option>
         </select>
-        <select className="featuredStatus" defaultValue="">
-          <option value="" disabled>Show...</option>
+        <select
+          className="featuredStatus"
+          value={showCount}
+          onChange={(e) => setShowCount(Number(e.target.value))}
+        >
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
         </select>
@@ -84,7 +134,7 @@ export default function RegisteredVotersModule() {
               </tr>
             </thead>
             <tbody>
-              {residents.map((resident) => (
+              {filteredResidents.map((resident) => (
                 <tr key={resident.id}>
                   <td>{resident.name}</td>
                   <td>{resident.address}</td>
