@@ -22,8 +22,16 @@ const bMenu: React.FC = () => {
         Admin Module
       </Link>
 
-      {/* Resident Management Dropdown */}
-      <div className="relative">
+      <div className="contents">
+
+          <Link
+            href="/dashboard/admin"
+              className="module"
+          >
+            User and Roles
+          </Link>
+     {/* Resident Management Dropdown */}
+     <div className="relative">
         <button
           onClick={() => setIsResidentOpen(!isResidentOpen)}
           className="p-4 text-black hover:bg-slate-500 hover:text-white w-full text-left"
@@ -34,13 +42,13 @@ const bMenu: React.FC = () => {
         {isResidentOpen && (
           <div className="flex flex-col bg-white border rounded shadow-lg">
             <Link
-              href="/dashboard/residentManagement/mainResidents"
+              href="/dashboard/ResidentModule"
               className="px-4 py-2 text-black hover:bg-slate-500 hover:text-white"
             >
               Main Residents
             </Link>
             <Link
-              href="/dashboard/residentManagement/registeredVoters"
+              href="/dashboard/ResidentModule/registeredVoters"
               className="px-4 py-2 text-black hover:bg-slate-500 hover:text-white"
             >
               Registered Voters
@@ -48,27 +56,6 @@ const bMenu: React.FC = () => {
           </div>
         )}
       </div>
-
-      <div className="contents">
-
-          <Link
-            href="/dashboard"
-            className="module"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/dashboard/admin"
-              className="module"
-          >
-            User and Roles
-          </Link>
-          <Link
-            href="/dashboard/ResidentModule"
-            className="module"
-          >
-            Resident Management Module
-          </Link>
           <Link
             href="/dashboard/OfficialsModule"
             className="module"
@@ -76,20 +63,20 @@ const bMenu: React.FC = () => {
             Officials Module
           </Link>
           <Link
-            href="/reports"
+            href="/dashboard/reports"
             className="module"
             
           >
             Reports Module
           </Link>
           <Link
-            href="/services"
+            href="/dashboard/services"
             className="module"
           >
             Services Module
           </Link>
           <Link
-            href="/incidentManagement"
+            href="/dashboard/incidentManagement"
             className="module"
           >
             Incident Management Module
@@ -102,7 +89,7 @@ const bMenu: React.FC = () => {
           </Link>
 
           <Link
-            href="/programs"
+            href="/dashboard/programs"
             className="module"
           >
            Programs and Events

@@ -135,13 +135,15 @@ export default function ResidentManagementModule() {
         precinct: "101",
         isVoter: "false",
       },
-    
   ];
+
+  // Filter to show only voters
+  const votersData = residentData.filter((resident) => resident.isVoter === "true");
 
   return (
     <main className="main-container">
       <div className="section-1">
-        <h1>Residents Lists</h1>
+        <h1>Registered Voter List</h1>
 
         <Link href="/dashboard/ResidentModule/AddResident">
           <button className="add-announcement-btn">Add New Resident</button>
@@ -198,11 +200,9 @@ export default function ResidentManagementModule() {
             </tr>
           </thead>
           <tbody>
-            {residentData.map((resident, index) => (
+            {votersData.map((resident, index) => (
               <tr key={index}>
-                <td>
-                 {resident.name}
-                </td>
+                <td>{resident.name}</td>
                 <td>{resident.address}</td>
                 <td>{resident.birthday}</td>
                 <td>{resident.placeOfBirth}</td>
