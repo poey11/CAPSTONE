@@ -7,8 +7,14 @@ import Link from "next/link";
 
 export default function ResidentModule() {
   const [residents, setResidents] = useState<any[]>([]);
+  const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [searchName, setSearchName] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
+  const [residentType, setResidentType] = useState<string>("");
+  const [showCount, setShowCount] = useState<number>(5);
 
   useEffect(() => {
     const fetchResidents = async () => {
@@ -27,6 +33,30 @@ export default function ResidentModule() {
     fetchResidents();
   }, []);
 
+  useEffect(() => {
+    let filtered = [...residents];
+
+    if (searchName) {
+      filtered = filtered.filter((resident) =>
+        resident.name.toLowerCase().includes(searchName.toLowerCase())
+      );
+    }
+
+    if (location) {
+      filtered = filtered.filter((resident) => resident.location === location);
+    }
+
+    if (residentType) {
+      filtered = filtered.filter((resident) => resident.residentType === residentType);
+    }
+
+    if (showCount) {
+      filtered = filtered.slice(0, showCount);
+    }
+
+    setFilteredResidents(filtered);
+  }, [searchName, location, residentType, showCount, residents]);
+
   return (
     <main className="main-container">
       <div className="section-1">
@@ -37,22 +67,39 @@ export default function ResidentModule() {
       </div>
 
       <div className="section-2">
-        <input type="text" className="search-bar" placeholder="Enter Name" />
-        <select className="featuredStatus" defaultValue="">
+        <input
+          type="text"
+          className="search-bar"
+          placeholder="Enter Name"
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+        />
+        <select
+          className="featuredStatus"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        >
           <option value="" disabled>Location</option>
-          <option value="East Fairview">East Fairview</option>
-          <option value="West Fairview">West Fairview</option>
-          <option value="South Fairview">South Fairview</option>
+          <option value="east-fairview">East Fairview</option>
+          <option value="west-fairview">West Fairview</option>
+          <option value="south-fairview">South Fairview</option>
         </select>
-        <select className="featuredStatus" defaultValue="">
+        <select
+          className="featuredStatus"
+          value={residentType}
+          onChange={(e) => setResidentType(e.target.value)}
+        >
           <option value="" disabled>Resident Type</option>
           <option value="senior-citizen">Senior Citizen</option>
           <option value="student">Student</option>
           <option value="pwd">PWD</option>
           <option value="single-mom">Single Mom</option>
         </select>
-        <select className="featuredStatus" defaultValue="">
-          <option value="" disabled>Show...</option>
+        <select
+          className="featuredStatus"
+          value={showCount}
+          onChange={(e) => setShowCount(Number(e.target.value))}
+        >
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
         </select>

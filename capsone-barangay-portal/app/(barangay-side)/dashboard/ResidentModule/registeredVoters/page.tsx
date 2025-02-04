@@ -11,7 +11,6 @@ export default function RegisteredVotersModule() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter state variables
   const [searchName, setSearchName] = useState<string>("");
   const [location, setLocation] = useState<string>("");
   const [residentType, setResidentType] = useState<string>("");
@@ -38,7 +37,6 @@ export default function RegisteredVotersModule() {
     fetchResidents();
   }, []);
 
-  // Apply filters
   useEffect(() => {
     let filtered = [...residents];
 
