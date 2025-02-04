@@ -32,7 +32,7 @@ const bMenu: React.FC = () => {
             User and Roles
           </Link>
           <Link
-            href="/residentManagement"
+            href="/dashboard/ResidentModule"
             className="module"
           >
             Resident Management Module
