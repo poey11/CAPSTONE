@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import "@/CSS/BMenu/header.css";
+
 
 const bMenu: React.FC = () => {
   const [isResidentOpen, setIsResidentOpen] = useState(false);
@@ -47,42 +49,68 @@ const bMenu: React.FC = () => {
         )}
       </div>
 
-      <Link
-        href="/dashboard/officials"
-        className="p-4 text-black hover:bg-slate-500 hover:text-white"
-      >
-        Officials Module
-      </Link>
-      <Link
-        href="/dashboard/reports"
-        className="p-4 text-black hover:bg-slate-500 hover:text-white"
-      >
-        Reports Module
-      </Link>
-      <Link
-        href="/dashboard/services"
-        className="p-4 text-black hover:bg-slate-500 hover:text-white"
-      >
-        Services Module
-      </Link>
-      <Link
-        href="/dashboard/incidentManagement"
-        className="p-4 text-black hover:bg-slate-500 hover:text-white"
-      >
-        Incident Management Module
-      </Link>
-      <Link
-        href="/dashboard/programs"
-        className="p-4 text-black hover:bg-slate-500 hover:text-white"
-      >
-        Programs Module
-      </Link>
-      <Link
-        href="/"
-        className="p-4 text-black hover:bg-slate-500 hover:text-white hover:cursor-pointer"
-      >
-        Log Out
-      </Link>
+      <div className="contents">
+
+          <Link
+            href="/dashboard"
+            className="module"
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/dashboard/admin"
+              className="module"
+          >
+            User and Roles
+          </Link>
+          <Link
+            href="/dashboard/ResidentModule"
+            className="module"
+          >
+            Resident Management Module
+          </Link>
+          <Link
+            href="/dashboard/OfficialsModule"
+            className="module"
+          >
+            Officials Module
+          </Link>
+          <Link
+            href="/reports"
+            className="module"
+            
+          >
+            Reports Module
+          </Link>
+          <Link
+            href="/services"
+            className="module"
+          >
+            Services Module
+          </Link>
+          <Link
+            href="/incidentManagement"
+            className="module"
+          >
+            Incident Management Module
+          </Link>
+          <Link
+            href="/dashboard/announcements"
+            className="module"
+          >
+            Announcements
+          </Link>
+
+          <Link
+            href="/programs"
+            className="module"
+          >
+           Programs and Events
+          </Link>
+         
+
+      </div>
+    
     </div>
   );
 };
