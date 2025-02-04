@@ -12,7 +12,7 @@ export default function RegisteredVotersModule() {
   const [error, setError] = useState<string | null>(null);
 
   const [searchName, setSearchName] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
+  const [searchAddress, setSearchAddress] = useState<string>("");
   const [residentType, setResidentType] = useState<string>("");
   const [showCount, setShowCount] = useState<number>(5);
 
@@ -40,26 +40,32 @@ export default function RegisteredVotersModule() {
   useEffect(() => {
     let filtered = [...residents];
 
+    // Filter by search term for name
     if (searchName) {
       filtered = filtered.filter((resident) =>
         resident.name.toLowerCase().includes(searchName.toLowerCase())
       );
     }
 
-    if (location) {
-      filtered = filtered.filter((resident) => resident.location === location);
+    // Filter by search term for address
+    if (searchAddress) {
+      filtered = filtered.filter((resident) =>
+        resident.address.toLowerCase().includes(searchAddress.toLowerCase())
+      );
     }
 
+    // Filter by resident type
     if (residentType) {
       filtered = filtered.filter((resident) => resident.residentType === residentType);
     }
 
+    // Limit number of items to show
     if (showCount) {
       filtered = filtered.slice(0, showCount);
     }
 
     setFilteredResidents(filtered);
-  }, [searchName, location, residentType, showCount, residents]);
+  }, [searchName, searchAddress, residentType, showCount, residents]);
 
   return (
     <main className="main-container">
@@ -74,20 +80,17 @@ export default function RegisteredVotersModule() {
         <input
           type="text"
           className="search-bar"
-          placeholder="Enter Name"
+          placeholder="Search by Name"
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
-        <select
-          className="featuredStatus"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-        >
-          <option value="" disabled>Location</option>
-          <option value="east-fairview">East Fairview</option>
-          <option value="west-fairview">West Fairview</option>
-          <option value="south-fairview">South Fairview</option>
-        </select>
+        <input
+          type="text"
+          className="search-bar"
+          placeholder="Search by Address"
+          value={searchAddress}
+          onChange={(e) => setSearchAddress(e.target.value)}
+        />
         <select
           className="featuredStatus"
           value={residentType}

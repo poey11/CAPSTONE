@@ -12,6 +12,7 @@ export default function ResidentModule() {
   const [error, setError] = useState<string | null>(null);
 
   const [searchName, setSearchName] = useState<string>("");
+  const [searchAddress, setSearchAddress] = useState<string>("");
   const [location, setLocation] = useState<string>("");
   const [residentType, setResidentType] = useState<string>("");
   const [showCount, setShowCount] = useState<number>(5);
@@ -36,26 +37,37 @@ export default function ResidentModule() {
   useEffect(() => {
     let filtered = [...residents];
 
+    // Filter by search term for name
     if (searchName) {
       filtered = filtered.filter((resident) =>
         resident.name.toLowerCase().includes(searchName.toLowerCase())
       );
     }
 
+    // Filter by search term for address
+    if (searchAddress) {
+      filtered = filtered.filter((resident) =>
+        resident.address.toLowerCase().includes(searchAddress.toLowerCase())
+      );
+    }
+
+    // Filter by location
     if (location) {
       filtered = filtered.filter((resident) => resident.location === location);
     }
 
+    // Filter by resident type
     if (residentType) {
       filtered = filtered.filter((resident) => resident.residentType === residentType);
     }
 
+    // Limit number of items to show
     if (showCount) {
       filtered = filtered.slice(0, showCount);
     }
 
     setFilteredResidents(filtered);
-  }, [searchName, location, residentType, showCount, residents]);
+  }, [searchName, searchAddress, location, residentType, showCount, residents]);
 
   return (
     <main className="main-container">
@@ -70,9 +82,16 @@ export default function ResidentModule() {
         <input
           type="text"
           className="search-bar"
-          placeholder="Enter Name"
+          placeholder="Search by Name"
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
+        />
+        <input
+          type="text"
+          className="search-bar"
+          placeholder="Search by Address"
+          value={searchAddress}
+          onChange={(e) => setSearchAddress(e.target.value)}
         />
         <select
           className="featuredStatus"
@@ -128,7 +147,7 @@ export default function ResidentModule() {
               </tr>
             </thead>
             <tbody>
-              {residents.map((resident) => (
+              {filteredResidents.map((resident) => (
                 <tr key={resident.id}>
                   <td>{resident.name}</td>
                   <td>{resident.address}</td>
