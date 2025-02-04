@@ -1,0 +1,169 @@
+
+
+.main-container{
+    width: 100%;
+    height: 100vh;
+    background-color: #f9f9f9;
+    padding:30px;
+    margin-left: 2rem; 
+    overflow-y: auto; 
+}
+
+
+ .main-section {
+    flex: 1; /* Makes it take up remaining space */
+    display: flex; /* Ensures proper alignment */
+    flex-direction: column;
+    padding: 0;
+    margin: 0; /* Remove default margin */
+    overflow: auto; /* Allow scrolling if content overflows */
+    width: 100%;
+    height: 100%; /* Full height */
+    margin-top: 2rem;
+}
+
+.main-section table {
+    width: 100%; /* Ensures the table spans the full width */
+    border-collapse: collapse; /* Removes unnecessary spacing between table cells */
+}
+
+.main-section td {
+    padding: 1rem; 
+    text-align: center; 
+    border-bottom: 2px solid #ddd;
+    color: grey;
+    font-weight: lighter;
+}
+
+.main-section th {
+    padding: 1rem; 
+    text-align: left; 
+    border-bottom: 2px solid #ddd;
+    color: grey;
+    text-align: center;
+    
+}
+
+.main-section .official-info {
+    display: flex;
+    align-items: center; /* Center align the image and text */
+    gap: 1rem; /* Add space between the image and text */
+}
+
+.main-section .official-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; /* Make the image circular */
+    object-fit: cover; /* Ensure the image is properly scaled */
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem; /* Space between action buttons */
+}
+
+.action-view,
+.action-edit,
+.action-delete {
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+
+}
+
+.action-view {
+    background-color: #4caf50; /* Green */
+    color: white;
+}
+
+.action-edit {
+    background-color: #ff9800; /* Orange */
+    color: white;
+}
+
+.action-delete {
+    background-color: #f44336; /* Red */
+    color: white;
+}
+.action-view {
+    background-color: #4caf50; /* Green */
+    color: white;
+}
+
+.action-view:hover {
+    background-color: #3e8f41; /* Green */
+}
+
+.action-edit {
+    background-color: #ff9800; /* Orange */
+    color: white;
+}
+.action-edit:hover {
+    background-color: #d58102; /* Orange */
+}
+
+.action-delete {
+    background-color: #f44336; /* Red */
+    color: white;
+}
+.action-delete:hover {
+    background-color: #d73c31; /* Red */
+}
+
+.section-1{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+
+}
+
+.section-1 h1{
+    font-size: 20px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.5);
+   
+}
+
+.add-announcement-btn {
+    background-color:#e56723;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .add-announcement-btn:hover {
+    background-color:#cc591b;
+  }
+
+  .section-2{
+    display: flex;
+    gap: 20px;
+    padding: 0;
+    margin-top: 25px;
+  }
+
+  .search-bar, .featuredStatus{
+    padding: 8px;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: rgba(0, 0, 0, 0.4);
+    text-align: center;
+  }
+
+  .featuredStatus option {
+    color: rgba(0, 0, 0, 0.4); 
+  }
+
+
+
+  
