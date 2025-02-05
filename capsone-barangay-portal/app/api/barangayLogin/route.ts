@@ -25,17 +25,39 @@ export async function POST(req: Request) {
         if(!isValidPassword){
             return NextResponse.json({message: 'Invalid password'}, {status: 401});
         }
-        const response = NextResponse.json({
-            message: "Login Successful",
+
+        if(userData.firstTimelogin){
+            /*If firsttimeLogin is true then the account has not been setup */
+            const response = NextResponse.json({
+            message: "Login Successful but user has not setup account",
             user:{
                 userid: userData.userid,
                 role: userData.role,
                 position: userData.position,
-            }
-        },{status: 200})
+                }
+            },{status: 200})
+            
+            response.headers.set("Set-Cookie", `barangayToken=${userDoc.id}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict`);
+            return response;
+                
+        }
+        else{
+            /*If firsttimeLogin is false then the account has alr been setup */
+            const response = NextResponse.json({
+                message: "Login Successful and user has already setup account",
+                user:{
+                    userid: userData.userid,
+                    role: userData.role,
+                    position: userData.position,
+                }
+            },{status: 201})
+            response.headers.set("Set-Cookie", `barangayToken=${userDoc.id}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict`);
+            return response;
+        }
+
+
+
         
-        response.headers.set("Set-Cookie", `barangayToken=${userDoc.id}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict`);
-        return response;
     }
     catch(error: string | any){
         return NextResponse.json({

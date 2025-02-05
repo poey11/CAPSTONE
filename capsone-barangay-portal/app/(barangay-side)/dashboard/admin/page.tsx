@@ -32,7 +32,11 @@ interface dbBarangayUser{
     role: string;
     createdBy: string;
     createdAt: string;
-    firstTimelogin: boolean;
+    address: string;
+    phone: string;
+    fName: string;
+    lName: string;
+
 }
 const admin = () => {
     const [users, setUsers] = useState<BarangayUser>({
@@ -212,10 +216,11 @@ const admin = () => {
                 <table className="w-full border-collapse">
                     <thead>
                     <tr>
-                        <th className="border border-gray-300 p-2">Document ID</th>
                         <th className="border border-gray-300 p-2">User ID</th>
+                        <th className="border border-gray-300 p-2">Official Name</th>
+                        <th className="border border-gray-300 p-2">Address</th>
+                        <th className="border border-gray-300 p-2">Phone</th>
                         <th className="border border-gray-300 p-2">Position</th>
-                        <th className="border border-gray-300 p-2">First Time Login Status</th>
                         <th className="border border-gray-300 p-2">Created By</th>
                         <th className="border border-gray-300 p-2">Created At</th>
                         <th className="border border-gray-300 p-2 ">Actions</th>
@@ -224,10 +229,11 @@ const admin = () => {
                     <tbody>
                     {barangayUsers.map((user) => (
                         <tr key={user.id}>
-                        <td className="border border-gray-300 p-2 text-center">{user.id}</td>
                         <td className="border border-gray-300 p-2 text-center">{user.userid}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.fName} {user.lName}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.address}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.phone}</td>
                         <td className="border border-gray-300 p-2 text-center">{user.position}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.firstTimelogin ? "True" : "False"}</td>
                         <td className="border border-gray-300 p-2 text-center">{user.createdBy}</td>
                         <td className="border border-gray-300 p-2 text-center">{user.createdAt}</td>
                         <td className="border flex  border-gray-300 p-2 justify-center">

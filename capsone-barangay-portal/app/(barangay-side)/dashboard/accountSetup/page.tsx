@@ -16,7 +16,7 @@ const accountSetup = () => {
             <label htmlFor="phone">Cellphone / Telephone #: </label>
             <input id="fName" type="text" name="phone" className="border-2 border-black" required />
         
-            <button   className="bg-blue-500 text-white">Submitr</button>
+            <button   className="bg-blue-500 mt-3 text-white">Submit</button>
         </form>
     );
 }

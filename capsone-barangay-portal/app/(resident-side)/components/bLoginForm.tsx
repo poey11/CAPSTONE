@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from 'next/navigation';
+import {  useRouter } from 'next/navigation';
+
 interface official{
     username: string;
     password: string;
@@ -41,16 +42,19 @@ const bLoginForm:React.FC = () => {
                     "Content-Type": "application/json"},
                 body: JSON.stringify({userid: official.username, password: official.password})
             });
-            if(response.ok){
-                /* should check the first time login column to check if it would have to redirect to the account setup first or if the account has alr been setuped */
-                router.push("/dashboard");
-            }else{
-                const data = await response.json();
-                alert("Login Failed " +  data.message)
+            console.log(response);
+            if(response.status == 200){
+                /*If firsttimeLogin is true then the account has not been setup */
+                router.push("/dashboard/accountSetup");
             }
+            else if(response.status == 201){
+               /*If firsttimeLogin is false then the account has alr been setup */
+               router.push("/dashboard");
+            }
+            
         }
         catch(error:string|any){
-            console.log("Error: " + error.message)
+            console.log("2Error: " + error.message)
         }
     }
 
