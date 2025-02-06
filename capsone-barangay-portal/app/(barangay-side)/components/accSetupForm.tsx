@@ -13,6 +13,7 @@ interface accountSetupProps {
     bday: string;
     address: string;
     phone: string;
+    sex: string;
 }
 
 
@@ -23,11 +24,12 @@ const accSetupForm: React.FC<AccSetupFormProps> = ({ cookies }) => {
         lName: '',
         bday: '',
         address: '',
-        phone: ''
+        phone: '',
+        sex: ''
     });
     
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setUser({
             ...User,
@@ -51,6 +53,7 @@ const accSetupForm: React.FC<AccSetupFormProps> = ({ cookies }) => {
                 birthDate: User.bday,
                 address: User.address,
                 phone: User.phone,
+                sex: User.sex,
                 firstTimelogin: false
             });
             console.log('New attribute added');
@@ -70,6 +73,13 @@ const accSetupForm: React.FC<AccSetupFormProps> = ({ cookies }) => {
 
             <label htmlFor="lName">Last Name: </label>
             <input onChange={handleChange} value={User.lName} id="lName" type="text" name="lName" className="border-2 border-black" required />
+
+            <label htmlFor="sex">Sex: </label>
+            <select  value={User.sex}  onChange={handleChange} id="sex" name="sex" className="border-2 border-black" required>
+              <option value="" disabled>Select a Sex</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
 
             <label htmlFor="bday">Birth date: </label>
             <input onChange={handleChange} value={User.bday} id="bday" type="text" name="bday" className="border-2 border-black" required />
