@@ -13,7 +13,6 @@ export default function ResidentModule() {
 
   const [searchName, setSearchName] = useState<string>("");
   const [searchAddress, setSearchAddress] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
   const [residentType, setResidentType] = useState<string>("");
   const [showCount, setShowCount] = useState<number>(5);
 
@@ -49,11 +48,6 @@ export default function ResidentModule() {
       filtered = filtered.filter((resident) =>
         resident.address.toLowerCase().includes(searchAddress.toLowerCase())
       );
-    }
-
-    // Filter by location
-    if (location) {
-      filtered = filtered.filter((resident) => resident.location === location);
     }
 
     // Filter by resident type
@@ -93,16 +87,7 @@ export default function ResidentModule() {
           value={searchAddress}
           onChange={(e) => setSearchAddress(e.target.value)}
         />
-        <select
-          className="featuredStatus"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-        >
-          <option value="" disabled>Location</option>
-          <option value="east-fairview">East Fairview</option>
-          <option value="west-fairview">West Fairview</option>
-          <option value="south-fairview">South Fairview</option>
-        </select>
+
         <select
           className="featuredStatus"
           value={residentType}
