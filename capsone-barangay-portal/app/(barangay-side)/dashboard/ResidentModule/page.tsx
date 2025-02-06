@@ -1,8 +1,9 @@
 "use client";
 import "@/CSS/ResidentModule/module.css";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { db } from "../../../db/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
 
 export default function ResidentModule() {
@@ -15,6 +16,8 @@ export default function ResidentModule() {
   const [searchAddress, setSearchAddress] = useState<string>("");
   const [residentType, setResidentType] = useState<string>("");
   const [showCount, setShowCount] = useState<number>(5);
+
+  const router = useRouter(); 
 
   useEffect(() => {
     const fetchResidents = async () => {
@@ -36,32 +39,41 @@ export default function ResidentModule() {
   useEffect(() => {
     let filtered = [...residents];
 
-    // Filter by search term for name
     if (searchName) {
       filtered = filtered.filter((resident) =>
         resident.name.toLowerCase().includes(searchName.toLowerCase())
       );
     }
 
-    // Filter by search term for address
     if (searchAddress) {
       filtered = filtered.filter((resident) =>
         resident.address.toLowerCase().includes(searchAddress.toLowerCase())
       );
     }
 
-    // Filter by resident type
     if (residentType) {
       filtered = filtered.filter((resident) => resident.residentType === residentType);
     }
 
-    // Limit number of items to show
     if (showCount) {
       filtered = filtered.slice(0, showCount);
     }
 
     setFilteredResidents(filtered);
-  }, [searchName, searchAddress, location, residentType, showCount, residents]);
+  }, [searchName, searchAddress, residentType, showCount, residents]);
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this resident?")) {
+      try {
+        await deleteDoc(doc(db, "Residents", id));
+        setResidents((prev) => prev.filter(resident => resident.id !== id));
+        alert("Resident deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting resident:", error);
+        alert("Failed to delete resident.");
+      }
+    }
+  };
 
   return (
     <main className="main-container">
@@ -93,7 +105,7 @@ export default function ResidentModule() {
           value={residentType}
           onChange={(e) => setResidentType(e.target.value)}
         >
-          <option value="" disabled>Resident Type</option>
+          <option value="">Resident Type</option>
           <option value="senior-citizen">Senior Citizen</option>
           <option value="student">Student</option>
           <option value="pwd">PWD</option>
@@ -147,9 +159,26 @@ export default function ResidentModule() {
                   <td>{resident.precinctNumber}</td>
                   <td>
                     <div className="actions">
-                      <button className="action-view">View</button>
-                      <button className="action-edit">Edit</button>
-                      <button className="action-delete">Delete</button>
+                      <button 
+                        className="action-view" 
+                        onClick={() => router.push(`/dashboard/ResidentModule/ViewResident?id=${resident.id}`)}
+                      >
+                        View
+                      </button>
+
+                      <button 
+                        className="action-edit" 
+                        onClick={() => router.push(`/dashboard/ResidentModule/EditResident?id=${resident.id}`)}
+                      >
+                        Edit
+                      </button>
+
+                      <button 
+                        className="action-delete" 
+                        onClick={() => handleDelete(resident.id)}
+                      >
+                        Delete
+                      </button>
                     </div>
                   </td>
                 </tr>

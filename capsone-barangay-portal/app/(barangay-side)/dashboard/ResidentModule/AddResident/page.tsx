@@ -1,13 +1,13 @@
 "use client";
 import "@/CSS/ResidentModule/addresident.css";
 import { useState } from "react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 import { db } from "../../../../db/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
 
 export default function AddResident() {
-  const router = useRouter(); 
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -20,13 +20,21 @@ export default function AddResident() {
     emailAddress: "",
     precinctNumber: "",
     placeofBirth: "",
+    isVoter: false, // New boolean field
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type } = e.target;
+  
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+    });
   };
+  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,11 +44,10 @@ export default function AddResident() {
     try {
       await addDoc(collection(db, "Residents"), {
         ...formData,
-        createdAt: serverTimestamp(), 
+        createdAt: serverTimestamp(),
       });
 
       alert("Resident added successfully!");
-      
       router.push("/dashboard/ResidentModule");
     } catch (err) {
       setError("Failed to add resident");
@@ -78,7 +85,15 @@ export default function AddResident() {
             <input type="date" name="dateofBirth" value={formData.dateofBirth} onChange={handleChange} required />
 
             <p>Age</p>
-            <input type="text" name="age" value={formData.age} onChange={handleChange} required />
+            <input
+              type="number"
+              name="age"
+              value={formData.age}
+              onChange={handleChange}
+              required
+              min="1"
+              max="120"
+            />
 
             <p>Sex</p>
             <select name="sex" value={formData.sex} onChange={handleChange} required>
@@ -101,13 +116,30 @@ export default function AddResident() {
             <input type="text" name="occupation" value={formData.occupation} onChange={handleChange} required />
 
             <p>Contact Number</p>
-            <input type="text" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required />
+            <input
+              type="tel"
+              name="contactNumber"
+              value={formData.contactNumber}
+              onChange={handleChange}
+              required
+              pattern="[0-9]{11}"
+              placeholder="Enter 11-digit phone number"
+            />
 
             <p>Email Address</p>
             <input type="email" name="emailAddress" value={formData.emailAddress} onChange={handleChange} required />
 
             <p>Precinct Number</p>
             <input type="text" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required />
+
+            <p>Voter</p>
+            <div className="checkbox-container">
+              <label className="checkbox-label">
+                <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
+                Is this resident a registered voter?
+              </label>
+            </div>
+
           </div>
         </form>
         {error && <p className="error">{error}</p>}
