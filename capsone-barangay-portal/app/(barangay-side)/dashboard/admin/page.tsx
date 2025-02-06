@@ -34,8 +34,9 @@ interface dbBarangayUser{
     createdAt: string;
     address: string;
     phone: string;
-    fName: string;
-    lName: string;
+    firstName: string;
+    lastName: string;
+    birthDate: string;
 
 }
 const admin = () => {
@@ -219,6 +220,7 @@ const admin = () => {
                         <th className="border border-gray-300 p-2">User ID</th>
                         <th className="border border-gray-300 p-2">Official Name</th>
                         <th className="border border-gray-300 p-2">Address</th>
+                        <th className="border border-gray-300 p-2">Birth Date</th>
                         <th className="border border-gray-300 p-2">Phone</th>
                         <th className="border border-gray-300 p-2">Position</th>
                         <th className="border border-gray-300 p-2">Created By</th>
@@ -230,8 +232,9 @@ const admin = () => {
                     {barangayUsers.map((user) => (
                         <tr key={user.id}>
                         <td className="border border-gray-300 p-2 text-center">{user.userid}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.fName} {user.lName}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.firstName} {user.lastName}</td>
                         <td className="border border-gray-300 p-2 text-center">{user.address}</td>
+                        <td className="border border-gray-300 p-2 text-center">{user.birthDate}</td>
                         <td className="border border-gray-300 p-2 text-center">{user.phone}</td>
                         <td className="border border-gray-300 p-2 text-center">{user.position}</td>
                         <td className="border border-gray-300 p-2 text-center">{user.createdBy}</td>
