@@ -338,6 +338,8 @@
     transition: transform 0.2s ease;
   }
   
+
+  /* for isVoter checkbox */
 .checkbox-label {
   font-size: 1rem; 
   color: grey;
@@ -347,8 +349,8 @@
 }
 
 .checkbox-label input[type="checkbox"] {
-  transform: scale(2); /* Increase size by 2 times */
-  margin: 0; /* Remove default margin */
+  transform: scale(2); 
+  margin: 0; 
   cursor: pointer;
 }
 
