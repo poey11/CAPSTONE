@@ -40,6 +40,7 @@ interface dbBarangayUser{
     sex: string;
 }
 const admin = () => {
+    /*add search and filter func */
     const [users, setUsers] = useState<BarangayUser>({
         userId:"",
         position:"",
