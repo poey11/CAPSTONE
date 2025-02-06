@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import {  useRouter } from 'next/navigation';
 
 interface official{
@@ -34,28 +35,51 @@ const bLoginForm:React.FC = () => {
 
     const handleLogin = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log(official);
-        try{
-            const response = await fetch("/api/barangayLogin", {
-                method: "POST",
-                headers:{
-                    "Content-Type": "application/json"},
-                body: JSON.stringify({userid: official.username, password: official.password})
-            });
-            console.log(response);
-            if(response.status == 200){
-                /*If firsttimeLogin is true then the account has not been setup */
-                router.push("/dashboard/accountSetup");
-            }
-            else if(response.status == 201){
-               /*If firsttimeLogin is false then the account has alr been setup */
-               router.push("/dashboard");
-            }
+
+        const result = await signIn("credentials", {
+            userid: official.username,
+            password: official.password,
+            redirect: false
+        });
+
+        console.log(result);
+
+        if(result?.error){
+            console.log("Error: " + result.error);
+            return;
+        }
+
+        const session = await fetch("/api/auth/session").then((res) => res.json());
+
+        console.log(session);
+
+        if(session.user.firstTimeLogin){
+            router.push("/dashboard/accountSetup");
+        }
+        else{
+            router.push("/dashboard");
+        }  
+        // try{
+        //     const response = await fetch("/api/barangayLogin", {
+        //         method: "POST",
+        //         headers:{
+        //             "Content-Type": "application/json"},
+        //         body: JSON.stringify({userid: official.username, password: official.password})
+        //     });
+        //     console.log(response);
+        //     if(response.status == 200){
+        //         /*If firsttimeLogin is true then the account has not been setup */
+        //         router.push("/dashboard/accountSetup");
+        //     }
+        //     else if(response.status == 201){
+        //        /*If firsttimeLogin is false then the account has alr been setup */
+        //        router.push("/dashboard");
+        //     }
             
-        }
-        catch(error:string|any){
-            console.log("2Error: " + error.message)
-        }
+        // }
+        // catch(error:string|any){
+        //     console.log("2Error: " + error.message)
+        // }
     }
 
     return (  
