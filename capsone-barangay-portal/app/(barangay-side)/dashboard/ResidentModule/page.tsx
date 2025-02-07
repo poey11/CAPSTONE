@@ -215,8 +215,15 @@ export default function ResidentManagementModule() {
                 <td>{resident.precinct}</td>
                 <td>
                   <div className="actions">
+
+                  <Link href="/dashboard/ResidentModule/ViewResident">
                     <button className="action-view">View</button>
+                  </Link>
+                    
+                    <Link href="/dashboard/ResidentModule/EditResident">
                     <button className="action-edit">Edit</button>
+                    </Link>
+
                     <button className="action-delete">Delete</button>
                   </div>
                 </td>

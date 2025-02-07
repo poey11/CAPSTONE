@@ -11,9 +11,7 @@ const metadata: Metadata = {
   description: "Stay updated with the latest announcements",
 };
 
-export default function AddResident() {
-
-  
+export default function EditResident() {
 
     const [isActive, setIsActive] = useState(false);
 
@@ -63,23 +61,6 @@ export default function AddResident() {
         }
       };
 
-      const residentData = [
-        {
-          name: "Jonnell Quebal",
-          address: "123 East Fairview",
-          birthday: "1990-02-14",
-          placeOfBirth: "Quezon City",
-          age: 33,
-          sex: "Male",
-          civilStatus: "Single",
-          occupation: "Software Developer",
-          contact: "09171218101",
-          email: "jonnell@example.com",
-          precinct: "101",
-          isVoter: "true",
-        },
-      ];
-
   return (
     <main className="main-container">
 
@@ -91,7 +72,7 @@ export default function AddResident() {
         </Link>
 
             <div className="section-1">
-                <p className="NewResident"> New Resident</p>
+                <p className="NewResident"> Edit Resident</p>
 
                     <div className="actions">
                         <button className="action-delete">Delete</button>

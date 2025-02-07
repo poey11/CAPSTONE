@@ -4,9 +4,9 @@ import Link from "next/link";
 import "@/CSS/BMenu/header.css";
 
 const BMenu: React.FC = () => {
-  const [openDropdown, setOpenDropdown] = useState<"resident" | "officials" | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<"resident" | "officials" | "incidents"|null>(null);
 
-  const toggleDropdown = (menu: "resident" | "officials") => {
+  const toggleDropdown = (menu: "resident" | "officials" | "incidents") => {
     setOpenDropdown(openDropdown === menu ? null : menu);
   };
 
@@ -44,7 +44,22 @@ const BMenu: React.FC = () => {
 
         <Link href="/reports" className="module">Reports Module</Link>
         <Link href="/services" className="module">Services Module</Link>
-        <Link href="/incidentManagement" className="module">Incident Management Module</Link>
+
+
+
+         {/* Incident Module */}
+         <div className="dropdown-wrapper">
+          <button onClick={() => toggleDropdown("incidents")} className="dropdown-button">Incident Module</button>
+          {openDropdown === "incidents" && (
+            <div className="dropdown-container">
+              <Link href="/dashboard/IncidentModule/Lupon" className="dropdown-item">Lupon</Link>
+              <Link href="/dashboard/IncidentModule/GAD" className="dropdown-item">GAD</Link>
+              <Link href="/dashboard/IncidentModule/BCPC" className="dropdown-item">BCPC</Link>
+              <Link href="/dashboard/IncidentModule/VAWC" className="dropdown-item">VAWC</Link>
+            </div>
+          )}
+        </div>
+
         <Link href="/dashboard/announcements" className="module">Announcements</Link>
         <Link href="/programs" className="module">Programs and Events</Link>
       </div>
