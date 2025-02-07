@@ -20,21 +20,34 @@ export default function AddResident() {
     emailAddress: "",
     precinctNumber: "",
     placeofBirth: "",
-    isVoter: false, // New boolean field
+    isVoter: false,
   });
 
+  const [files, setFiles] = useState<{ name: string; preview: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-  
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     });
   };
-  
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const uploadedFiles = Array.from(e.target.files).map((file) => ({
+        name: file.name,
+        preview: URL.createObjectURL(file),
+      }));
+      setFiles([...files, ...uploadedFiles]);
+    }
+  };
+
+  const handleFileDelete = (fileName: string) => {
+    setFiles(files.filter((file) => file.name !== fileName));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -71,22 +84,43 @@ export default function AddResident() {
           </div>
         </div>
         <form id="addResidentForm" onSubmit={handleSubmit} className="section-2">
-          <div className="section-2-left-side">
+        <div className="section-2-left-side">
             <p>Name</p>
-            <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+            <input type="text" 
+            className="search-bar" 
+            placeholder="Enter Name"  
+            name="name" 
+            value={formData.name} 
+            onChange={handleChange} required />
 
             <p>Address</p>
-            <input type="text" name="address" value={formData.address} onChange={handleChange} required />
+            <input type="text" 
+            className="search-bar" 
+            placeholder="Enter Address" 
+            name="address" 
+            value={formData.address} 
+            onChange={handleChange} required />
 
             <p>Place of Birth</p>
-            <input type="text" name="placeofBirth" value={formData.placeofBirth} onChange={handleChange} required />
+            <input type="text" 
+            className="search-bar" 
+            placeholder="Enter Place of Birth" 
+            name="placeofBirth" 
+            value={formData.placeofBirth} 
+            onChange={handleChange} required />
 
             <p>Date of Birth</p>
-            <input type="date" name="dateofBirth" value={formData.dateofBirth} onChange={handleChange} required />
+            <input type="date" 
+            className="search-bar" 
+            name="dateofBirth" 
+            value={formData.dateofBirth} 
+            onChange={handleChange} required />
 
             <p>Age</p>
             <input
               type="number"
+              className="search-bar" 
+              placeholder="Enter Age" 
               name="age"
               value={formData.age}
               onChange={handleChange}
@@ -96,14 +130,14 @@ export default function AddResident() {
             />
 
             <p>Sex</p>
-            <select name="sex" value={formData.sex} onChange={handleChange} required>
+            <select name="sex" className="featuredStatus" value={formData.sex} onChange={handleChange} required>
               <option value="" disabled>Choose Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
             </select>
 
             <p>Civil Status</p>
-            <select name="civilStatus" value={formData.civilStatus} onChange={handleChange} required>
+            <select name="civilStatus" className="featuredStatus" value={formData.civilStatus} onChange={handleChange} required>
               <option value="" disabled>Choose Civil Status</option>
               <option value="Single">Single</option>
               <option value="Married">Married</option>
@@ -113,11 +147,17 @@ export default function AddResident() {
             </select>
 
             <p>Occupation</p>
-            <input type="text" name="occupation" value={formData.occupation} onChange={handleChange} required />
+            <input type="text" 
+            className="search-bar"           
+            placeholder="Enter Occupation"  
+            name="occupation" 
+            value={formData.occupation} 
+            onChange={handleChange} required />
 
             <p>Contact Number</p>
             <input
               type="tel"
+              className="search-bar"                       
               name="contactNumber"
               value={formData.contactNumber}
               onChange={handleChange}
@@ -127,10 +167,20 @@ export default function AddResident() {
             />
 
             <p>Email Address</p>
-            <input type="email" name="emailAddress" value={formData.emailAddress} onChange={handleChange} required />
+            <input type="email" 
+            className="search-bar"           
+            placeholder="Enter Email Address"              
+            name="emailAddress" 
+            value={formData.emailAddress} 
+            onChange={handleChange} required />
 
             <p>Precinct Number</p>
-            <input type="text" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required />
+            <input type="text" 
+            className="search-bar"           
+            placeholder="Enter Precinct Number"              
+            name="precinctNumber" 
+            value={formData.precinctNumber} 
+            onChange={handleChange} required />
 
             <p>Voter</p>
             <div className="checkbox-container">
@@ -139,8 +189,59 @@ export default function AddResident() {
                 Is this resident a registered voter?
               </label>
             </div>
+            </div>
+            <div className="section-2-right-side">
+  <div className="file-upload-container">
+    <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
+    <input
+      id="file-upload"
+      type="file"
+      className="file-upload-input"
+      multiple
+      accept=".jpg,.jpeg,.png"
+      required
+      onChange={handleFileChange}
+    />
+    <div className="uploadedFiles-container">
+      {files.length > 0 && (
+        <div className="file-name-image-display">
+          <ul>
+            {files.map((file, index) => (
+              <div className="file-name-image-display-indiv" key={index}>
+                <li>
+                  {file.preview && (
+                    <div className="filename&image-container">
+                      <img
+                        src={file.preview}
+                        alt={file.name}
+                        style={{ width: "50px", height: "50px", marginRight: "5px" }}
+                      />
+                    </div>
+                  )}
+                  {file.name}
+                  <div className="delete-container">
+                    <button
+                      type="button"
+                      onClick={() => handleFileDelete(file.name)}
+                      className="delete-button"
+                    >
+                      <img
+                        src="/images/trash.png"
+                        alt="Delete"
+                        className="delete-icon"
+                      />
+                    </button>
+                  </div>
+                </li>
+              </div>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
 
-          </div>
         </form>
         {error && <p className="error">{error}</p>}
       </div>
