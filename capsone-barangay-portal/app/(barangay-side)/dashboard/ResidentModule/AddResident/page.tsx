@@ -199,7 +199,7 @@ export default function AddResident() {
       className="file-upload-input"
       multiple
       accept=".jpg,.jpeg,.png"
-      required
+      // required 
       onChange={handleFileChange}
     />
     <div className="uploadedFiles-container">
