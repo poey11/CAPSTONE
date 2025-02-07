@@ -1,5 +1,5 @@
 "use client"
-import "@/CSS/ResidentModule/addresident.css";
+import "@/CSS/IncidentModule/AddNewIncident.css";
 import type { Metadata } from "next";
 import { useState } from "react";
 
@@ -11,7 +11,7 @@ const metadata: Metadata = {
   description: "Stay updated with the latest announcements",
 };
 
-export default function EditResident() {
+export default function AddGADIncident() {
 
     const [isActive, setIsActive] = useState(false);
 
@@ -67,12 +67,12 @@ export default function EditResident() {
         
         <div className="main-content">
             
-        <Link href="/dashboard/ResidentModule">    
+        <Link href="/dashboard/IncidentModule/GAD">    
         <button type="submit" className="back-button"></button>
         </Link>
 
             <div className="section-1">
-                <p className="NewResident"> Edit Resident</p>
+                <p className="NewOfficial"> New Incident</p>
 
                     <div className="actions">
                         <button className="action-delete">Delete</button>
@@ -85,93 +85,44 @@ export default function EditResident() {
              <div className="section-2">
 
                 <div className="section-2-left-side">
-                  
+
+                    <p >Complainant's Information</p>
                     <p>Name</p>
+
                     <input 
                     type="text" 
                     className="search-bar" 
-                    placeholder="Enter Name" 
+                    placeholder="Enter Official Name" 
                     />
 
-                   <p>Address</p>
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder="Enter Address" 
-                    />
+                    <p>Sex?</p>
+                     <select 
+                    id="featuredStatus" 
+                    name="featuredStatus" 
+                    className="featuredStatus" 
+                    required
+                    defaultValue=""  
+                   >
+                    <option value="" disabled>Choose</option>
+                    <option value="active">Yes</option>
+                    <option value="inactive">No</option>
+                  </select>
 
-                  <p>Birthday</p>
-                    <input 
-                    type="date" 
-                    className="search-bar" 
-                    placeholder="Enter Address" 
-                    />
+                    <p>Age</p>
 
-                  <p>Age</p>
                     <input 
                     type="text" 
                     className="search-bar" 
                     placeholder="Enter Age" 
                     />
 
-                    <p>Sex</p>
-                     <select 
-                    id="featuredStatus" 
-                    name="featuredStatus" 
-                    className="featuredStatus" 
-                    required
-                    defaultValue=""  
-                >
-                    <option value="" disabled>Choose Gender</option>
-                    <option value="active">Male</option>
-                    <option value="inactive">Female</option>
-                </select>
+                    <p>Contact Information</p>
 
-                 <p>Civil Status</p>
-                     <select 
-                    id="featuredStatus" 
-                    name="featuredStatus" 
-                    className="featuredStatus" 
-                    required
-                    defaultValue=""  
-                >
-                    <option value="" disabled>Choose Civil Status</option>
-                    <option value="active">Single</option>
-                    <option value="inactive">Married</option>
-                    <option value="inactive">Widowed</option>
-                    <option value="inactive">Divorced</option>
-                    <option value="inactive">Separated</option>
-                </select>
-
-                 <p>Occupation</p>
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder="Enter Occupation" 
-                    />
-
-                  <p>Contact Number</p>
                     <input 
                     type="text" 
                     className="search-bar" 
                     placeholder="Enter Contact Number" 
                     />
-
-                  <p>Email Address</p>
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder="Enter Email Address" 
-                  />
-
-                  <p>Precint Number</p>
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder="Enter Precint Number" 
-                  />
-
-                   
 
                     
 
@@ -180,7 +131,97 @@ export default function EditResident() {
 
                 <div className="section-2-right-side">
 
-                     <div className="file-upload-container">
+                <p>Respondent's Information</p>
+                  <p>Name</p>
+
+                  <input 
+                  type="text" 
+                  className="search-bar" 
+                  placeholder="Enter Official Name" 
+                  />
+
+                  <p>Sex?</p>
+                  <select 
+                  id="featuredStatus" 
+                  name="featuredStatus" 
+                  className="featuredStatus" 
+                  required
+                  defaultValue=""  
+                  >
+                  <option value="" disabled>Choose</option>
+                  <option value="active">Male</option>
+                  <option value="inactive">Female</option>
+                  </select>
+
+                  <p>Age</p>
+
+                  <input 
+                  type="text" 
+                  className="search-bar" 
+                  placeholder="Enter Age" 
+                  />
+
+                  <p>Contact Information</p>
+
+                  <input 
+                  type="text" 
+                  className="search-bar" 
+                  placeholder="Enter Contact Number" 
+                  />
+                   
+
+                </div>
+
+            </div>
+
+
+              <div className="section-3">
+                <p className="title">Other Information</p>
+                
+                <div className="bars">
+                    <div className="input-group">
+                        <p>Nature of Complaint</p>
+                        <input type="text" className="search-bar" placeholder="Enter Nature of Complaint" />
+                    </div>
+
+                    <div className="input-group">
+                        <p>Date Filed</p>
+                        <input type="date" className="search-bar" placeholder="Enter Date" />
+                    </div>
+
+                    <div className="input-group">
+                        <p>Location</p>
+                        <input type="text" className="search-bar" placeholder="Enter Location" />
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div className="section-4">
+
+                <div className="section-4-left-side">
+
+                  <div className="fields-section">
+                              <p>Description</p>
+                                  <textarea 
+                                      className="description" 
+                                      placeholder="Enter Description"
+                                      rows={15}
+                               ></textarea>
+                    </div>
+
+                 </div>
+
+            <div className="section-4-right-side">
+
+              <div className="title">
+                    <p> Photo</p>
+              </div> 
+            
+               <div className="file-upload-container">
+
+
                     <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
                         <input
                         id="file-upload2"
@@ -237,15 +278,17 @@ export default function EditResident() {
                     </div>
                     </div>
 
-                </div>
+               </div>
+                
 
             </div>
+           
 
 
 
 
 
-        </div>
+        </div> 
 
     
     </main>

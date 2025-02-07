@@ -141,6 +141,53 @@ export default function ResidentModule() {
                 <th>Email Address</th>
                 <th>Precinct Number</th>
                 <th>Actions</th>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Address</th>
+              <th>Birthday</th>
+              <th>Place of Birth</th>
+              <th>Age</th>
+              <th>Sex</th>
+              <th>Civil Status</th>
+              <th>Occupation</th>
+              <th>Contact</th>
+              <th>Email Address</th>
+              <th>Precinct #</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {residentData.map((resident, index) => (
+              <tr key={index}>
+                <td>
+                 {resident.name}
+                </td>
+                <td>{resident.address}</td>
+                <td>{resident.birthday}</td>
+                <td>{resident.placeOfBirth}</td>
+                <td>{resident.age}</td>
+                <td>{resident.sex}</td>
+                <td>{resident.civilStatus}</td>
+                <td>{resident.occupation}</td>
+                <td>{resident.contact}</td>
+                <td>{resident.email}</td>
+                <td>{resident.precinct}</td>
+                <td>
+                  <div className="actions">
+
+                  <Link href="/dashboard/ResidentModule/ViewResident">
+                    <button className="action-view">View</button>
+                  </Link>
+                    
+                    <Link href="/dashboard/ResidentModule/EditResident">
+                    <button className="action-edit">Edit</button>
+                    </Link>
+
+                    <button className="action-delete">Delete</button>
+                  </div>
+                </td>
               </tr>
             </thead>
             <tbody>
