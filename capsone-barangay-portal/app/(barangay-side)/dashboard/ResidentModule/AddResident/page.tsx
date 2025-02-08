@@ -89,11 +89,15 @@ export default function AddResident() {
         },
       ];
 
+      const handleBack = () => {
+        window.location.href = "/dashboard/ResidentModule";
+      };
+
   return (
     <main className="main-container">
       <div className="main-content">
         <Link href="/dashboard/ResidentModule">
-          <button type="button" className="back-button"></button>
+        <button type="button" className="back-button" onClick={handleBack}></button>;
         </Link>
         <div className="section-1">
           <p className="NewResident">New Resident</p>
