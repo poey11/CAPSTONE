@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import type { Metadata } from "next";
 import { useState } from "react";
-import "@/CSS/barangaySide/announcements/addAnnouncement.css";
+import "@/CSS/barangaySide/ServicesModule/BarangayDocs/LiquorPermit.css";
 
 
 
@@ -17,8 +17,8 @@ export default function addAnnouncements() {
 
     const router = useRouter();
 
-    const handleAddAnnouncement = () => {
-      router.push("/dashboard/announcements");
+    const handleBackToGenerateDocument = () => {
+      router.push("/dashboard/ServicesModule/GenerateDocument");
     };
 
     const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
@@ -51,17 +51,17 @@ export default function addAnnouncements() {
     return (
         <main className="addAnnouncement-main-container">
             <div className="section-1">
-                <h1>New Announcement</h1>
+                <h1>Generate Document</h1>
             </div>
 
             <div className="addAnnouncement-main-section">
                 <div className="addAnnouncement-main-section1">
                     <div className="addAnnouncement-main-section1-left">
-                        <button onClick={handleAddAnnouncement}>
+                        <button onClick={handleBackToGenerateDocument}>
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/>
                         </button>
 
-                        <h1>New Announcement</h1>
+                        <h1>Liquor Permit</h1>
                     </div>
 
                     <div className="action-btn-section">
@@ -74,50 +74,152 @@ export default function addAnnouncements() {
                 <hr/>
 
                 <div className="main-fields-container">
+                    <div className="main-fields-container-section1">
+                        <div className="section-left">
+                            <div className="fields-container">
+                                <div className="fields-section">
+                                    <p>Type of Business Activity</p>
+                                    <select 
+                                        id="businessActivity" 
+                                        name="businessActivity" 
+                                        className="input-field" 
+                                        required
+                                        defaultValue=""  
+                                    >
+                                        <option value="" disabled>Business Activity</option>
+                                        <option value="Male">New</option>
+                                        <option value="Female">Renewal</option>
+                                    </select>
+                                </div>
 
-                    <div className="section-left">
-                        <div className="switch-container">
-                            <label className="switch">
-                                <input type="checkbox" />
-                                <span className="slider"></span>
-                            </label>
-                            <span className="switch-label">Featured in Announcements</span>
+                            </div>
+
+                            </div>
+
+                            <div className="section-right">
+                            <div className="fields-container">
+                                <div className="fields-section">
+                                    <p>Date Requested</p>
+                                    <input 
+                                        type="date" 
+                                        className="input-field" 
+                                        placeholder="Select Date From" 
+                                    />
+                                    
+                                </div>
+                                
+                            </div>
                         </div>
+                            
+                    </div>
 
+                    <div className="main-fields-container-section2">
                         <div className="fields-container">
                             <div className="fields-section">
-                                <p>Announcement Headline</p>
+                                <p>Applicant's First Name</p>
                                 <input 
                                     type="text" 
                                     className="headline" 
-                                    placeholder="Enter Announcement Headline" 
+                                    placeholder="First Name" 
                                 />
                             </div>
 
                             <div className="fields-section">
-                                <p>Published Date</p>
+                                <p>Applicant's Middle Name</p>
                                 <input 
                                     type="text" 
-                                    className="date" 
-                                    placeholder="Enter Date" 
+                                    className="headline" 
+                                    placeholder="Middle Name" 
                                 />
                             </div>
 
                             <div className="fields-section">
-                            <p>Description</p>
-                                <textarea 
-                                    className="description" 
-                                    placeholder="Enter Description"
-                                    rows={4}
-                                ></textarea>
+                                <p>Applicant's Last Name</p>
+                                <input 
+                                    type="text" 
+                                    className="headline" 
+                                    placeholder="Last Name" 
+                                />
+                            </div>
+                            <div className="fields-section">
+                                <p>Home Address</p>
+                                <input 
+                                    type="text" 
+                                    className="headline" 
+                                    placeholder="Home Address" 
+                                />
                             </div>
 
+                        </div>
+                    </div>
+
+                    <div className="main-fields-container-section3">
+                        <div className="section-left">
+                            <div className="fields-container">
+                                <div className="fields-section">
+                                    <p>Business Name</p>
+                                    <input 
+                                        type="text" 
+                                        className="input-field" 
+                                        placeholder="Business Name" 
+                                    />
+                                </div>
+
+                                <div className="fields-section">
+                                    <p>Business Location</p>
+                                    <input 
+                                        type="text" 
+                                        className="input-field" 
+                                        placeholder="Business Location" 
+                                    />
+                                </div>
+
+                                <div className="fields-section">
+                                    <p>Nature of Business</p>
+                                    <input 
+                                        type="text" 
+                                        className="input-field" 
+                                        placeholder="Nature of Business" 
+                                    />
+                                </div>
+
+                            </div>
+
+                            </div>
+
+                        <div className="section-right">
+                            <div className="fields-container">
+                             <div className="fields-section">
+                                    <p>Estimated Capital</p>
+                                    <input 
+                                        type="number" 
+                                        className="input-field" 
+                                        placeholder="Estimated Capital" 
+                                    />
+                                </div>
+
+                                <div className="fields-section">
+                                    <p>Contact Number</p>
+                                    <input 
+                                        type="tel"  
+                                        id="contactnumber"  
+                                        name="contactnumber"  
+                                        className="input-field" 
+                                        required 
+                                        placeholder="Enter Contact Number"  
+                                        maxLength={10}  // Restrict the input to 10 characters as a number
+                                        pattern="^[0-9]{10}$"  // Regular expression to enforce a 10-digit number format
+                                        title="Please enter a valid 10-digit contact number"  // Tooltip for invalid input
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                     </div>
 
-                    <div className="section-right">
-                        <div className="file-upload-container">
+                    <div className="main-fields-container-section4">
+                        <p>Requirements</p>
+                        <div className="requirements-file-upload-container">
                             <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
                                 <input
                                 id="file-upload1"
@@ -173,6 +275,8 @@ export default function addAnnouncements() {
                         </div>
 
                     </div>
+
+
 
                 </div>
 
