@@ -26,6 +26,9 @@ export default function AddResident() {
   const [files, setFiles] = useState<{ name: string; preview: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
+
+    const [isActive, setIsActive] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -68,6 +71,23 @@ export default function AddResident() {
     }
     setLoading(false);
   };
+
+      const residentData = [
+        {
+          name: "Jonnell Quebal",
+          address: "123 East Fairview",
+          birthday: "1990-02-14",
+          placeOfBirth: "Quezon City",
+          age: 33,
+          sex: "Male",
+          civilStatus: "Single",
+          occupation: "Software Developer",
+          contact: "09171218101",
+          email: "jonnell@example.com",
+          precinct: "101",
+          isVoter: "true",
+        },
+      ];
 
   return (
     <main className="main-container">
@@ -199,7 +219,7 @@ export default function AddResident() {
       className="file-upload-input"
       multiple
       accept=".jpg,.jpeg,.png"
-      required
+      // required 
       onChange={handleFileChange}
     />
     <div className="uploadedFiles-container">

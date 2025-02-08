@@ -131,7 +131,7 @@ export default function ResidentModule() {
               <tr>
                 <th>Name</th>
                 <th>Address</th>
-                <th>Birthday</th>
+                <th>Date of Birth</th>
                 <th>Place of Birth</th>
                 <th>Age</th>
                 <th>Sex</th>
@@ -165,14 +165,12 @@ export default function ResidentModule() {
                       >
                         View
                       </button>
-
                       <button 
                         className="action-edit" 
                         onClick={() => router.push(`/dashboard/ResidentModule/EditResident?id=${resident.id}`)}
                       >
                         Edit
                       </button>
-
                       <button 
                         className="action-delete" 
                         onClick={() => handleDelete(resident.id)}
