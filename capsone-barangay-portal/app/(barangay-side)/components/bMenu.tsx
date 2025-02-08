@@ -4,9 +4,9 @@ import Link from "next/link";
 import "@/CSS/BMenu/header.css";
 
 const BMenu: React.FC = () => {
-  const [openDropdown, setOpenDropdown] = useState<"resident" | "officials" | "incidents"|null>(null);
+  const [openDropdown, setOpenDropdown] = useState<"resident" | "officials" | "services" |null>(null);
 
-  const toggleDropdown = (menu: "resident" | "officials" | "incidents") => {
+  const toggleDropdown = (menu: "resident" | "officials"| "services") => {
     setOpenDropdown(openDropdown === menu ? null : menu);
   };
 
@@ -43,23 +43,20 @@ const BMenu: React.FC = () => {
         </div>
 
         <Link href="/reports" className="module">Reports Module</Link>
-        <Link href="/services" className="module">Services Module</Link>
 
-
-
-         {/* Incident Module */}
-         <div className="dropdown-wrapper">
-          <button onClick={() => toggleDropdown("incidents")} className="dropdown-button">Incident Module</button>
-          {openDropdown === "incidents" && (
+        {/* Services Module */}
+        <div className="dropdown-wrapper">
+          <button onClick={() => toggleDropdown("services")} className="dropdown-button">Services Module</button>
+          {openDropdown === "services" && (
             <div className="dropdown-container">
-              <Link href="/dashboard/IncidentModule/Lupon" className="dropdown-item">Lupon</Link>
-              <Link href="/dashboard/IncidentModule/GAD" className="dropdown-item">GAD</Link>
-              <Link href="/dashboard/IncidentModule/BCPC" className="dropdown-item">BCPC</Link>
-              <Link href="/dashboard/IncidentModule/VAWC" className="dropdown-item">VAWC</Link>
+              <Link href="/dashboard/ServicesModule/InBarangayRequests" className="dropdown-item">In Barangay Requests</Link>
+              <Link href="/dashboard/OfficialsModule/SitioHoaOfficers" className="dropdown-item">Online Requests</Link>
+              <Link href="/dashboard/OfficialsModule/SitioHoaOfficers" className="dropdown-item">Appointments</Link>
             </div>
           )}
         </div>
 
+        <Link href="/incidentManagement" className="module">Incident Management Module</Link>
         <Link href="/dashboard/announcements" className="module">Announcements</Link>
         <Link href="/programs" className="module">Programs and Events</Link>
       </div>
