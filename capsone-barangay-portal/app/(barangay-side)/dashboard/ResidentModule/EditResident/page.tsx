@@ -1,253 +1,172 @@
-"use client"
-import "@/CSS/ResidentModule/addresident.css";
-import type { Metadata } from "next";
-import { useState } from "react";
-
-import Link from 'next/link';
-
-
-const metadata: Metadata = {
-  title: "Announcement Page for Residents",
-  description: "Stay updated with the latest announcements",
-};
+"use client";
+import "@/CSS/ResidentModule/addresident.css"; // Reuses existing CSS
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { db } from "../../../../db/firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import Link from "next/link";
 
 export default function EditResident() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const residentId = searchParams.get("id"); 
 
-    const [isActive, setIsActive] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    address: "",
+    dateofBirth: "",
+    age: "",
+    sex: "",
+    civilStatus: "",
+    occupation: "",
+    contactNumber: "",
+    emailAddress: "",
+    precinctNumber: "",
+    placeofBirth: "",
+    isVoter: false,
+  });
 
-    // State for all file containers
-    const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
-        container1: [],
-        container2: [],
-        container3: [],
-        container4: [],
-      });
-  
-    // Handle file selection for any container
-    const handleFileChange = (container: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFiles = event.target.files;
-        if (selectedFiles) {
-          const fileArray = Array.from(selectedFiles).map((file) => {
-            const preview = URL.createObjectURL(file);
-            return { name: file.name, preview };
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!residentId) return;
+
+    const fetchResident = async () => {
+      try {
+        const docRef = doc(db, "Residents", residentId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setFormData({
+            name: data.name || "",
+            address: data.address || "",
+            dateofBirth: data.dateofBirth || "",
+            age: data.age || "",
+            sex: data.sex || "",
+            civilStatus: data.civilStatus || "",
+            occupation: data.occupation || "",
+            contactNumber: data.contactNumber || "",
+            emailAddress: data.emailAddress || "",
+            precinctNumber: data.precinctNumber || "",
+            placeofBirth: data.placeofBirth || "",
+            isVoter: data.isVoter ?? false,
           });
-          setFiles((prevFiles) => ({
-            ...prevFiles,
-            [container]: [...prevFiles[container], ...fileArray], // Append new files to the specified container
-          }));
-        }
-      };
-  
-      // Handle file deletion for any container
-      const handleFileDelete = (container: string, fileName: string) => {
-        setFiles((prevFiles) => ({
-          ...prevFiles,
-          [container]: prevFiles[container].filter((file) => file.name !== fileName),
-        }));
-      };
-  
-      // Handle form submission
-      const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault(); // Prevent default form submission
-  
-        // Manually trigger form validation
-        const form = event.target as HTMLFormElement;
-        if (form.checkValidity()) {
-          // Redirect to the Notification page after form submission if validation is successful
-          document.location.href = '/services/notification'; // Use JavaScript redirection
         } else {
-          // If the form is invalid, trigger the validation
-          form.reportValidity(); // This will show validation messages for invalid fields
+          setError("Resident not found.");
         }
-      };
+      } catch (error) {
+        console.error("Error fetching resident:", error);
+        setError("Failed to load resident data.");
+      }
+    };
+
+    fetchResident();
+  }, [residentId]);
+
+  //  input changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+    });
+  };
+
+  // form submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!residentId) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const docRef = doc(db, "Residents", residentId);
+      await updateDoc(docRef, formData);
+
+      alert("Resident updated successfully!");
+      router.push("/dashboard/ResidentModule");
+    } catch (err) {
+      console.error("Update failed:", err);
+      setError("Failed to update resident.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="main-container">
-
-        
-        <div className="main-content">
-            
-        <Link href="/dashboard/ResidentModule">    
-        <button type="submit" className="back-button"></button>
+      <div className="main-content">
+        <Link href="/dashboard/ResidentModule">
+          <button type="button" className="back-button"></button>
         </Link>
-
-            <div className="section-1">
-                <p className="NewResident"> Edit Resident</p>
-
-                    <div className="actions">
-                        <button className="action-delete">Delete</button>
-                        <button className="action-view">Save</button>
-                    </div>
-                
-             </div>
-
-
-             <div className="section-2">
-
-                <div className="section-2-left-side">
-                  
-                    <p>Name</p>
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder="Enter Name" 
-                    />
-
-                   <p>Address</p>
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder="Enter Address" 
-                    />
-
-                  <p>Birthday</p>
-                    <input 
-                    type="date" 
-                    className="search-bar" 
-                    placeholder="Enter Address" 
-                    />
-
-                  <p>Age</p>
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder="Enter Age" 
-                    />
-
-                    <p>Sex</p>
-                     <select 
-                    id="featuredStatus" 
-                    name="featuredStatus" 
-                    className="featuredStatus" 
-                    required
-                    defaultValue=""  
-                >
-                    <option value="" disabled>Choose Gender</option>
-                    <option value="active">Male</option>
-                    <option value="inactive">Female</option>
-                </select>
-
-                 <p>Civil Status</p>
-                     <select 
-                    id="featuredStatus" 
-                    name="featuredStatus" 
-                    className="featuredStatus" 
-                    required
-                    defaultValue=""  
-                >
-                    <option value="" disabled>Choose Civil Status</option>
-                    <option value="active">Single</option>
-                    <option value="inactive">Married</option>
-                    <option value="inactive">Widowed</option>
-                    <option value="inactive">Divorced</option>
-                    <option value="inactive">Separated</option>
-                </select>
-
-                 <p>Occupation</p>
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder="Enter Occupation" 
-                    />
-
-                  <p>Contact Number</p>
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder="Enter Contact Number" 
-                    />
-
-                  <p>Email Address</p>
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder="Enter Email Address" 
-                  />
-
-                  <p>Precint Number</p>
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder="Enter Precint Number" 
-                  />
-
-                   
-
-                    
-
-
-                </div>
-
-                <div className="section-2-right-side">
-
-                     <div className="file-upload-container">
-                    <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
-                        <input
-                        id="file-upload2"
-                        type="file"
-                        className="file-upload-input" 
-                        multiple
-                        accept=".jpg,.jpeg,.png"
-                        required
-                        onChange={handleFileChange('container2')} // Handle file selection
-                        />
-
-                    <div className="uploadedFiles-container">
-                        {/* Display the file names with image previews */}
-                        {files.container2.length > 0 && (
-                        <div className="file-name-image-display">
-                            <ul>
-                            {files.container2.map((file, index) => (
-                                <div className="file-name-image-display-indiv" key={index}>
-                                <li> 
-                                    {/* Display the image preview */}
-                                    {file.preview && (
-                                        <div className="filename&image-container">
-                                        <img
-                                            src={file.preview}
-                                            alt={file.name}
-                                            style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                        />
-                                        </div>
-                                        )}
-                                    {file.name}  
-                                    <div className="delete-container">
-                                    {/* Delete button with image */}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleFileDelete('container2', file.name)}
-                                        className="delete-button"
-                                        >
-                                        <img
-                                            src="/images/trash.png"  
-                                            alt="Delete"
-                                            className="delete-icon"
-                                        />
-                                        </button>
-
-                                    </div>
-                                                
-                                    
-                                </li>
-                                </div>
-                            ))}  
-                            </ul>
-                        </div>
-                        )}
-                    </div>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-
-
+        <div className="section-1">
+          <p className="NewResident">Edit Resident</p>
+          <div className="actions">
+            <button className="action-view" type="submit" form="editResidentForm" disabled={loading}>
+              {loading ? "Saving..." : "Save"}
+            </button>
+          </div>
         </div>
+        <form id="editResidentForm" onSubmit={handleSubmit} className="section-2">
+          <div className="section-2-left-side">
+            <p>Name</p>
+            <input type="text" className="search-bar" name="name" value={formData.name} onChange={handleChange} required />
 
-    
+            <p>Address</p>
+            <input type="text" className="search-bar" name="address" value={formData.address} onChange={handleChange} required />
+
+            <p>Place of Birth</p>
+            <input type="text" className="search-bar" name="placeofBirth" value={formData.placeofBirth} onChange={handleChange} required />
+
+            <p>Date of Birth</p>
+            <input type="date" className="search-bar" name="dateofBirth" value={formData.dateofBirth} onChange={handleChange} required />
+
+            <p>Age</p>
+            <input type="number" className="search-bar" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
+
+            <p>Sex</p>
+            <select name="sex" className="featuredStatus" value={formData.sex} onChange={handleChange} required>
+              <option value="" disabled>Choose Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+
+            <p>Civil Status</p>
+            <select name="civilStatus" className="featuredStatus" value={formData.civilStatus} onChange={handleChange} required>
+              <option value="" disabled>Choose Civil Status</option>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Widowed">Widowed</option>
+              <option value="Divorced">Divorced</option>
+              <option value="Separated">Separated</option>
+            </select>
+
+            <p>Occupation</p>
+            <input type="text" className="search-bar" name="occupation" value={formData.occupation} onChange={handleChange} required />
+
+            <p>Contact Number</p>
+            <input type="tel" className="search-bar" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
+
+            <p>Email Address</p>
+            <input type="email" className="search-bar" name="emailAddress" value={formData.emailAddress} onChange={handleChange} required />
+
+            <p>Precinct Number</p>
+            <input type="text" className="search-bar" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required />
+
+            <p>Voter</p>
+            <div className="checkbox-container">
+              <label className="checkbox-label">
+                <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
+                Is this resident a registered voter?
+              </label>
+            </div>
+          </div>
+        </form>
+        {error && <p className="error">{error}</p>}
+      </div>
     </main>
   );
 }
