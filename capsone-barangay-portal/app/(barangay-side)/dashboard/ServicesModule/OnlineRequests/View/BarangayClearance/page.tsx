@@ -2,83 +2,43 @@
 
 import { useRouter } from "next/navigation";
 import type { Metadata } from "next";
-import "@/CSS/barangaySide/ServicesModule/OnlineRequests.css";
+import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 
 
 const metadata: Metadata = {
-    title: "Online Request",
-    description: "Online Request in Services Module",
+    title: "In Barangay Request",
+    description: "In Barangay Request in Services Module",
   };
 
 
-  export default function OnlineRequests() {
+  export default function ViewOnlineRequest() {
     const requestData = [
         {
             documentType: "Indigency",
             name: "Jonnell Quebal",
             contact: "09171218101",
             date: "january 17, 2024",
-            status: "Pick Up",
+            status: "In Progress",
         },
-        {
-            documentType: "Clearance",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "january 17, 2024",
-            status: "Pick Up",
-        },
-        {
-            documentType: "Indigency",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "january 17, 2024",
-            status: "Completed",
-        },
-        {
-            documentType: "Indigency",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "january 17, 2024",
-            status: "Completed",
-        },
-        {
-            documentType: "Indigency",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "january 17, 2024",
-            status: "Completed",
-        },
-        {
-            documentType: "Indigency",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "january 17, 2024",
-            status: "Pick Up",
-        },
-        
-      
     ];
 
     const router = useRouter();
 
-    const handleView = (documentType: string) => {
-        const documentRoutes: { [key: string]: string } = {
-            "Clearance": "/dashboard/ServicesModule/OnlineRequests/View/BarangayClearance",
-            "Indigency": "/dashboard/ServicesModule/OnlineRequests/View/Indigency",
-            "Residency": "/dashboard/ServicesModule/OnlineRequests/View/Residency",
-            "Business Permit": "/dashboard/ServicesModule/OnlineRequests/View/BusinessPermit",
-        };
-        
-        const route = documentRoutes[documentType] || "/dashboard/ServicesModule/OnlineRequests/View";
-        router.push(route);
+    const handleAddAnnouncement = () => {
+      router.push("/dashboard/ServicesModule/GenerateDocument");
     };
 
     return (
 
         <main className="main-container">
          <div className="section-1">
-          <h1>Online Document Requests</h1>
-          
+          <h1>In Barangay Document Requests</h1>
+          <button
+            className="add-announcement-btn"
+            onClick={handleAddAnnouncement}
+          >
+            Generate Document
+          </button>
          </div>
          <div className="section-2">
           <input 
@@ -104,10 +64,9 @@ const metadata: Metadata = {
             defaultValue=""  
           >
             <option value="" disabled>Select Status</option>
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-            <option value="rejected">Rejected</option>
-            <option value="forpickup">For Pick Up</option>
+            <option value="active">New</option>
+            <option value="inactive">Completed</option>
+            <option value="inactive">In Progress</option>
           </select>
           <select 
             id="featuredStatus" 
@@ -150,12 +109,7 @@ const metadata: Metadata = {
                 </td>
                 <td>
                   <div className="actions">
-                    <button
-                        className="action-view"
-                        onClick={() => handleView(request.documentType)}
-                    >
-                        View
-                    </button>
+                    <button className="action-view">View</button>
                     <button className="action-edit">Edit</button>
                     <button className="action-delete">Delete</button>
                   </div>
