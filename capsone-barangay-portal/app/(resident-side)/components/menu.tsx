@@ -1,14 +1,21 @@
 "use client"
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { auth } from "../../db/firebase";
+import {useAuth} from "../../context/authContext";
+import { signOut } from "firebase/auth";
 import SideNav from '../../(barangay-side)/components/bMenu';
-//import TopMenu from '../../(barangay-side)/components/topMenu';
 import Link from 'next/link';
 import "@/CSS/Components/menu.css";
 
 const Menu = () => {
+  const {user, loading} = useAuth();
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const loginMenuRef = useRef<HTMLDivElement | null>(null);
+  
+  const handleLogout = async() => {
+    await signOut(auth);
+  }
 
   const toggleLoginOptions = () => {
     setShowLoginOptions((prev) => !prev);
@@ -111,55 +118,83 @@ const Menu = () => {
                     <p>Sitio Officers</p>
                   </Link>
                 </div>
-              
             </div>
-            
-            
 
-            <div className="relative" ref={loginMenuRef}>
-              <p
-                id="login-link"
-                className="hover:text-[white] cursor-pointer"
-                onClick={toggleLoginOptions}
-              >
-                Login
-              </p>
-
-              {showLoginOptions && (
-                <div className="dropdown-containerr">
-                  <div className="dropdown-content">
-                    <Link
-                      //href="/official"
-                      href="/official/login"
-
-                      onClick={toggleLoginOptions}
-                      className="dropdown-item"
-                    >
-                      Login For Official
-                    </Link>
-                    <Link
-                      //href="/resident"
-                      href="/resident/login"
-                      onClick={toggleLoginOptions}
-                      className="dropdown-item"
-                    >
-                      Login For Resident
-                    </Link>
-                    <Link
-                      href="/register"
-                      onClick={toggleLoginOptions}
-                      className="dropdown-item"
-                    >
-                      Register
-                    </Link>
+            {!loading && user ? (
+              <div  className="relative" ref={loginMenuRef}>
+                  <p
+                  id="profile-link"
+                  className="hover:text-[white] cursor-pointer"
+                  onClick={toggleLoginOptions}
+                >
+                  <img src="/images/user.png" alt="User Icon" className="header-usericon" />
+                </p>
+                {showLoginOptions && (
+                  <div className="absolute w-40 bg-slate-300 rounded-md py-1 px-3">
+                    <div className="flex flex-col">
+                      <Link
+                        href={"/"}
+                        onClick={toggleLoginOptions}
+                        className="hover:text-[white] cursor-pointer"
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        href={"/"}
+                        onClick={handleLogout}
+                        className="hover:text-[white] cursor-pointer"
+                      >
+                        Logout
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+          ):(
+              <div className="relative" ref={loginMenuRef}>
+                <p
+                  id="login-link"
+                  className="hover:text-[white] cursor-pointer"
+                  onClick={toggleLoginOptions}
+                >
+                  Login
+                </p>
+
+                {showLoginOptions && (
+                  <div className="dropdown-containerr">
+                    <div className="dropdown-content">
+                      <Link
+                        //href="/official"
+                        href="/official/login"
+
+                        onClick={toggleLoginOptions}
+                        className="dropdown-item"
+                      >
+                        Login For Official
+                      </Link>
+                      <Link
+                        //href="/resident"
+                        href="/resident/login"
+                        onClick={toggleLoginOptions}
+                        className="dropdown-item"
+                      >
+                        Login For Resident
+                      </Link>
+                      <Link
+                        href="/register"
+                        onClick={toggleLoginOptions}
+                        className="dropdown-item"
+                      >
+                        Register
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
 
-          <img src="/images/user.png" alt="User Icon" className="header-usericon" />
         </div>
       </div>
     </>

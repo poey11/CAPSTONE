@@ -1,6 +1,6 @@
 "use client"
 import "@/CSS/Announcements/SpecificAnnouncement.css";
-
+import type { Metadata } from "next";
 import { useSearchParams } from "next/navigation";
 
 export default function AnnouncementDetails() {

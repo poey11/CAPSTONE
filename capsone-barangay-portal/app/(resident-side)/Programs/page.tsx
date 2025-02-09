@@ -4,7 +4,7 @@ import "@/CSS/Programs/Programs.css";
 import type { Metadata } from "next";
 import Link from 'next/link';
 
-const metadata: Metadata = {
+export const metadata: Metadata = {
   title: "Programs Page for Residents",
   description: "Stay updated with the latest Programs",
 };

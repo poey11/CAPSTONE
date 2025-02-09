@@ -3,7 +3,7 @@ import "@/CSS/Announcements/Announcements.css";
 import type { Metadata } from "next";
 import Link from 'next/link';
 
-const metadata: Metadata = {
+export const metadata: Metadata = {
   title: "Announcement Page for Residents",
   description: "Stay updated with the latest announcements",
 };

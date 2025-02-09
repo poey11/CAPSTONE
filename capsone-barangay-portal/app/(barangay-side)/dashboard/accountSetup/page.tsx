@@ -6,9 +6,15 @@ import { doc, collection, getDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import Form from "@/app/(barangay-side)/components/accSetupForm";
 
-export default async function AccountSetupPage() {
-  const session = await getServerSession(authOptions);
+interface AccountSetupPageProps {
+  searchParams: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
+}
 
+
+export default async function AccountSetupPage({searchParams}: AccountSetupPageProps) {
+  const params = await searchParams;
+  const returnUrl = (params.returnUrl as string) || "/dashboard";
+  const session = await getServerSession(authOptions);
   if (!session) {
     redirect("/");
     return null;
@@ -20,10 +26,10 @@ export default async function AccountSetupPage() {
   const userData = userDoc.data();
 
   if (!userData?.firstTimelogin) {
-    redirect("/dashboard");
-    return null; 
+    console.log(returnUrl);
+    redirect(returnUrl);
+    return null;
   }
-
   return (
     <div>
       <h1>Account Setup</h1>

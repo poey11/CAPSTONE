@@ -1,8 +1,7 @@
-"use client"
 import type { Metadata } from "next";
 import "@/CSS/AboutUsPage/aboutus.css";
 
-const metadata:Metadata = { 
+export const metadata:Metadata = { 
   title: "About Us",
   description: "About Us page for the barangay website",
 };

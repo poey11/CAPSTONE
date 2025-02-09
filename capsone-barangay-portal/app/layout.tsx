@@ -1,5 +1,4 @@
 "use client";
-
 import { usePathname } from 'next/navigation';
 import Footer from './(resident-side)/components/footer';
 import { SessionProvider } from 'next-auth/react';
@@ -19,7 +18,6 @@ export default function RootLayout({
     <html lang="en">
       <body className="">
         <AuthProvider> 
-          <TopNav />
             <SessionProvider>
               <TopNav />
               <RoleChecker children={children}/>

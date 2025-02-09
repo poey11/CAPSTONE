@@ -12,7 +12,7 @@ const BMenu: React.FC = () => {
   };
 
   return (
-    <div className="header">
+    <div className="header bg-slate-400">
       <div className="logo">
         <img src="/Images/QClogo.png" alt="Barangay Captain" className="logo-image" />
       </div>
@@ -61,9 +61,9 @@ const BMenu: React.FC = () => {
         <Link href="/dashboard/announcements" className="module">Announcements</Link>
         <Link href="/programs" className="module">Programs and Events</Link>
         <button
-        onClick={() => signOut({callbackUrl: "/"})}
-        className="p-4 text-black hover:bg-slate-500 hover:text-white hover:cursor-pointer text-left">
-        Log Out
+          onClick={() => signOut({callbackUrl: "/"})}
+          className="module">
+          Log Out
         </button>
       </div>
     </div>
