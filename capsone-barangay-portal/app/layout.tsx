@@ -1,9 +1,11 @@
+"use client"
+import { SessionProvider } from 'next-auth/react';
 import TopNav from './(resident-side)/components/menu';
-
 import { AuthProvider } from './context/authContext';
+import RoleChecker from './(resident-side)/components/roleCheckers';
 import "./globals.css";
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -13,8 +15,10 @@ export default async function RootLayout({
         <html>
             <body>
                 <AuthProvider> 
-                    <TopNav />
-                    {children}
+                    <SessionProvider>
+                        <TopNav />
+                        <RoleChecker children={children}/>
+                    </SessionProvider>
                 </AuthProvider>
             </body>
         </html>

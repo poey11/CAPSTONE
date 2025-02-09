@@ -1,18 +1,9 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
+import { signOut } from "next-auth/react";
 
 const bMenu: React.FC =  () => {
-  const router = useRouter();
-  const handleLogout = async() => {
-    const respone = await fetch("/api/barangayLogout", {
-      method: "POST", 
-    })
 
-    if(respone.ok){
-      router.push('/');
-    }
-  }
 
   return (
     <div className="flex flex-col justify-center bg-slate-400 w-32 h-screen fixed">
@@ -65,7 +56,7 @@ const bMenu: React.FC =  () => {
         Programs Module
       </Link>
       <button
-        onClick={handleLogout}
+        onClick={() => signOut({callbackUrl: "/"})}
         className="p-4 text-black hover:bg-slate-500 hover:text-white hover:cursor-pointer text-left"
       >
         Log Out

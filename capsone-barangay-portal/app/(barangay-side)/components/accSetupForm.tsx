@@ -4,7 +4,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { useState } from 'react';
 import {useRouter} from 'next/navigation';
 interface AccSetupFormProps {
-    cookies: string|undefined;
+    userID: string | undefined;
 }
 
 interface accountSetupProps {
@@ -17,7 +17,7 @@ interface accountSetupProps {
 }
 
 
-const accSetupForm: React.FC<AccSetupFormProps> = ({ cookies }) => {
+const accSetupForm: React.FC<AccSetupFormProps> = ({userID}) => {
     const router = useRouter();
     const [User, setUser] = useState<accountSetupProps>({
         fName: '',
@@ -39,14 +39,14 @@ const accSetupForm: React.FC<AccSetupFormProps> = ({ cookies }) => {
 
 
     const addNewAttribute = async() => {
-        console.log(User);
-        console.log(cookies);
+        if (!userID) {
+            console.log("asdasdasdasd User ID is undefined");
+            return;
+        }
         
-        try{
-            if (!cookies) {
-                throw new Error("Cookies are undefined");
-            }
-            const docRef = doc(db, 'BarangayUsers', cookies);
+        try{    
+        
+            const docRef = doc(db, 'BarangayUsers', userID);
             await updateDoc(docRef, {
                 firstName: User.fName,
                 lastName: User.lName,

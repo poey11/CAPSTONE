@@ -1,34 +1,31 @@
+// middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import {db} from '@/app/db/firebase'
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
-    const barangayToken = req.cookies.get("barangayToken");
-    
-    if (barangayToken?.value) {
-        try{
-            const userCollection = collection(db, "BarangayUsers")
-            const userQuery = query(userCollection, where("__name__", "==", barangayToken.value));
-            const querySnapshot = await getDocs(userQuery)
-            if(querySnapshot.empty){
-                return NextResponse.redirect("/");
-            }
-            const userDoc = querySnapshot.docs[0];
-            const userData = userDoc.data();
-            console.log(userData);
-            if(userData.firstTimelogin){
-                return NextResponse.redirect("/dashboard/accountSetup");
-            }
-        }
-        catch(e){
-            console.log(e);
-        }
+  // Only check if the current path is within the account setup page.
+  if (req.nextUrl.pathname.startsWith("/dashboard/accountSetup")) {
+    // Retrieve the NextAuth token from the request. Make sure your NextAuth callbacks
+    // include the "firstTimelogin" flag in the token.
+    const token = await getToken({ req });
+
+    // If a token exists and the account setup is already completed (firstTimelogin is false),
+    // redirect the user to the dashboard.
+    if (token && token.firstTimelogin === false) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
- 
-    return NextResponse.redirect('/');
+
+    // If there's no token (i.e. the user is not authenticated), redirect to the home page.
+    if (!token) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+  }
+  // For any other path under /dashboard (or if none of the conditions above are met),
+  // allow the request to proceed.
+  return NextResponse.next();
 }
 
 export const config = { 
-    matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*"],
 };
