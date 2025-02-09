@@ -1,52 +1,69 @@
-"use client"
+"use client";
 import "@/CSS/ResidentModule/viewresident.css";
-import type { Metadata } from "next";
-import { useState } from "react";
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { db } from "../../../../db/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
-const metadata: Metadata = {
-  title: "Announcement Page for Residents",
-  description: "Stay updated with the latest announcements",
-};
+export default function ViewResident() {
+  const searchParams = useSearchParams();
+  const residentId = searchParams.get("id");
 
-export default function ViewIncident() {
+  const [residentData, setResidentData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const residentData = {
-    name: "Jonnell Quebal",
-    address: "123 East Fairview",
-    birthday: "1990-02-14",
-    placeOfBirth: "Quezon City",
-    age: 33,
-    sex: "Male",
-    civilStatus: "Single",
-    occupation: "Software Developer",
-    contact: "09171218101",
-    email: "jonnell@example.com",
-    precinct: "101",
-    isVoter: "true",
-  };
+  useEffect(() => {
+    if (!residentId) return;
+    
+    const fetchResident = async () => {
+      try {
+        const docRef = doc(db, "Residents", residentId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setResidentData(docSnap.data());
+        } else {
+          console.error("Resident not found");
+        }
+      } catch (error) {
+        console.error("Error fetching resident:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResident();
+  }, [residentId]);
+
+  if (loading) return <p>Loading...</p>;
+  if (!residentData) return <p>Resident not found</p>;
 
   const residentFields = [
     { label: "Name", key: "name" },
     { label: "Address", key: "address" },
-    { label: "Birthday", key: "birthday" },
+    { label: "Date of Birth", key: "dateofBirth" },
     { label: "Place of Birth", key: "placeOfBirth" },
     { label: "Age", key: "age" },
     { label: "Sex", key: "sex" },
     { label: "Civil Status", key: "civilStatus" },
     { label: "Occupation", key: "occupation" },
-    { label: "Contact", key: "contact" },
-    { label: "Email", key: "email" },
-    { label: "Precinct", key: "precinct" },
+    { label: "Contact Number", key: "contactNumber" },
+    { label: "Email Address", key: "emailAddress" },
+    { label: "Precinct Number", key: "precinctNumber" },
     { label: "Voter", key: "isVoter" }
   ];
+
+  const handleBack = () => {
+    window.location.href = "/dashboard/ResidentModule";
+  };
 
   return (
     <main className="main-container">
       <div className="main-content">
         <div className="section-1">
-          <Link href="/dashboard/ResidentModule">    
-            <button type="submit" className="back-button"></button>
+          <Link href="/dashboard/ResidentModule">
+          <button type="button" className="back-button" onClick={handleBack}></button>;
           </Link>
           <p>Resident Details</p>
         </div>
@@ -57,7 +74,7 @@ export default function ViewIncident() {
               <p>{field.label}</p>
             </div>
             <div className="description">
-              <p>{residentData[field.key as keyof typeof residentData]}</p>
+              <p>{residentData[field.key] ?? "N/A"}</p>
             </div>
           </div>
         ))}

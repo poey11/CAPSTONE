@@ -1,5 +1,5 @@
 "use client"
-import "@/CSS/ResidentModule/ViewIncident.css";
+import "@/CSS/IncidentModule/ViewIncident.css";
 import type { Metadata } from "next";
 import { useState } from "react";
 import Link from 'next/link';
@@ -10,25 +10,12 @@ const metadata: Metadata = {
 };
 
 export default function ViewIncident() {
-
-  const residentData = {
-    name: "Jonnell Quebal",
-    address: "123 East Fairview",
-    birthday: "1990-02-14",
-    placeOfBirth: "Quezon City",
-    age: 33,
-    sex: "Male",
-    civilStatus: "Single",
-    occupation: "Software Developer",
-    contact: "09171218101",
-    email: "jonnell@example.com",
-    precinct: "101",
-    isVoter: "true",
-  };
+  const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
+  const status = "Pending"; // Example status
 
   const complainantsData = {
     name: "Jonnell Quebal",
-    Sex: "Male",
+    sex: "Male",
     age: 33,
     civilStatus: "Single",
     contact: "09171218101",
@@ -36,18 +23,17 @@ export default function ViewIncident() {
 
   const respondentsData = {
     name: "Jonnell Quebal",
-    Sex: "Male",
+    sex: "Male",
     age: 33,
     civilStatus: "Single",
     contact: "09171218101",
   };
 
   const otherinformation = {
-    nature: "Roberry",
+    nature: "Robbery",
     date: "2025-01-03",
     location: "Fairview",
   };
-
 
   const complainantsFields = [
     { label: "Name", key: "name" },
@@ -71,15 +57,35 @@ export default function ViewIncident() {
     { label: "Location", key: "location" },
   ];
 
+  const getStatusClass = (status: string) => {
+    switch (status) {
+      case "Pending":
+        return "pending";
+      case "Resolved":
+        return "resolved";
+      case "Settled":
+        return "settled";
+      case "Archived":
+        return "archived";
+      default:
+        return "";
+    }
+  };
 
   return (
     <main className="main-container">
+
+          <div className="status-section">
+          <p className={`status-badge ${getStatusClass(status)}`}>{status}</p> 
+          </div>
+
+     
       <div className="main-content">
         <div className="section-1">
-          <Link href="/dashboard/ResidentModule">    
+          <Link href="/dashboard/IncidentModule/BCPC">    
             <button type="submit" className="back-button"></button>
           </Link>
-          <p>Resident Details</p>
+          <p>Complainant's Details</p>
         </div>
 
         {complainantsFields.map((field) => (
@@ -88,7 +94,41 @@ export default function ViewIncident() {
               <p>{field.label}</p>
             </div>
             <div className="description">
-              <p>{residentData[field.key as keyof typeof residentData]}</p>
+              <p>{complainantsData[field.key as keyof typeof complainantsData]}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="main-content">
+        <div className="section-1">
+          <p>Respondent's Details</p>
+        </div>
+
+        {respondentsFields.map((field) => (
+          <div className="details-section" key={field.key}>
+            <div className="title">
+              <p>{field.label}</p>
+            </div>
+            <div className="description">
+              <p>{respondentsData[field.key as keyof typeof respondentsData]}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="main-content">
+        <div className="section-1">
+          <p>Other's Information</p>
+        </div>
+
+        {otherinformationFields.map((field) => (
+          <div className="details-section" key={field.key}>
+            <div className="title">
+              <p>{field.label}</p>
+            </div>
+            <div className="description">
+              <p>{otherinformation[field.key as keyof typeof otherinformation]}</p>
             </div>
           </div>
         ))}

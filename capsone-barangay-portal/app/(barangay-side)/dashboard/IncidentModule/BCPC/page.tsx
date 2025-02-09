@@ -81,7 +81,9 @@ export default function BCPCDepartment() {
                 </td>
                 <td>
                   <div className="actions">
+                  <Link href="/dashboard/IncidentModule/BCPC/ViewIncident">
                     <button className="action-view">View</button>
+                  </Link>
                     <button className="action-edit">Edit</button>
                     <button className="action-delete">Delete</button>
                   </div>
