@@ -72,12 +72,13 @@ const registerForm:React.FC = () => {
         let docRef = null;
         let storageRef = null;
         try{
-           const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, resident.password);
-            user = userCredentials.user;
+          const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, resident.password);
+          user = userCredentials.user;
+          await signOut(auth); 
             
             let fileName ='';
             if(resident.upload){
-              const timeStamp = Date.now()
+              const timeStamp = Date.now().toString();
               const fileExtention = resident.upload.name.split('.').pop();
               fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtention}`
               storageRef = ref(storage, `valid_id_image/${fileName}`);
@@ -105,21 +106,18 @@ const registerForm:React.FC = () => {
               address: resident.address,
               sex: resident.sex,
               role: resident.role,
-              createdAt: new Date(),
+              createdAt: Date.now().toString(),
               status: resident.status,
               validIdDocID: fileName
           });
          
-         await sendEmailVerification(user);
-
-         await signOut(auth);
+          await sendEmailVerification(user);
 
 
-            alert("Register sucessful! Email verification sent to your email address");
-            /*clear form*/  
 
-            /* then redirect back to homepage if successful*/
-            router.push("/");
+          alert("Register sucessful! Email verification sent to your email address");
+          
+          router.push("/resident");
           
         }
         catch(error: string | any){

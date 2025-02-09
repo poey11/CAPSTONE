@@ -1,9 +1,11 @@
 "use client";
 
 import { usePathname } from 'next/navigation';
-import TopNav from './(resident-side)/components/menu';
 import Footer from './(resident-side)/components/footer';
+import { SessionProvider } from 'next-auth/react';
+import TopNav from './(resident-side)/components/menu';
 import { AuthProvider } from './context/authContext';
+import RoleChecker from './(resident-side)/components/roleCheckers';
 import "./globals.css";
 
 export default function RootLayout({
@@ -18,11 +20,16 @@ export default function RootLayout({
       <body className="">
         <AuthProvider> 
           <TopNav />
-          {children}
-          {/* Conditionally render Footer */}
-          {pathname !== '/official/login' && pathname !== '/resident/login' && <Footer />}
+            <SessionProvider>
+              <TopNav />
+              <RoleChecker children={children}/>
+              {/* Conditionally render Footer */}
+              {pathname !== '/official/login' && pathname !== '/resident/login' && <Footer />}
+            </SessionProvider>
         </AuthProvider>
       </body>
     </html>
   );
 }
+    
+  

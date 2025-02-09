@@ -5,7 +5,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { captchaToken } = body;
    
-    const secretKey = process.env.NEXT_PUBLIC_CAPTCHA_SECRET_KEY;
+    const secretKey = process.env.CAPTCHA_SECRET_KEY;
   
     
     const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captchaToken}`;

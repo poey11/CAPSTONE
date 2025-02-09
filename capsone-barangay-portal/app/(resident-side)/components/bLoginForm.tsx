@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from 'next/navigation';
 
 interface official{
     username: string;
@@ -8,13 +10,17 @@ interface official{
 }
 
 const bLoginForm:React.FC = () => {
+    const router = useRouter();
     const [official, setOfficial] = useState<official>({
         username: "",
         password: "",
         remember: false
     });
+    
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  
+
+    const handleChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
         if(type === "checkbox"){
             setOfficial({
@@ -32,12 +38,25 @@ const bLoginForm:React.FC = () => {
 
     const handleLogin = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log(official);
+    
+        const result = await signIn("credentials", {
+            userid: official.username,
+            password: official.password,
+            redirect: false,
+        });
+
+      
+        if(result?.error){
+            alert("Invalid User ID or Password");
+            return;
+        }
+        router.push("/dashboard/accountSetup");
+     
     }
 
     return (  
         <form   onSubmit={handleLogin} className="flex flex-col  justify-center">
-            <label htmlFor="username">Username: </label>
+            <label htmlFor="username">User ID: </label>
             <input onChange={handleChange} value={official.username}   id="username" type="text" name="username" className="border-2 border-black" required />
             
             <label htmlFor="password">Password: </label>
