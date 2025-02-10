@@ -3,6 +3,7 @@ import "@/CSS/IncidentModule/MainDashboardIncident.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const metadata: Metadata = {
   title: "Incident Management Module",
@@ -33,13 +34,29 @@ export default function VAWCDepartment() {
     );
   };
   
+
+  const router = useRouter();
+
+    const handleViewVAWC = () => {
+      router.push("/dashboard/IncidentModule/VAWC/ViewIncident");
+    };
+
+    const handleEditVAWC = () => {
+      router.push("/dashboard/IncidentModule/VAWC/EditIncident");
+    };
+
+    const handleAddVAWC = () => {
+      router.push("/dashboard/IncidentModule/VAWC/AddIncident");
+    };
+
+
+
+
   return (
     <main className="main-container">
       <div className="section-1">
         <h1>VAWC Department</h1>
-        <Link href="/dashboard/IncidentModule/VAWC/AddIncident">
-          <button className="add-announcement-btn">Add New Incident</button>
-        </Link>
+          <button className="add-announcement-btn" onClick={handleAddVAWC} >Add New Incident</button>
       </div>
 
       <div className="section-2">
@@ -81,8 +98,8 @@ export default function VAWCDepartment() {
                 </td>
                 <td>
                   <div className="actions">
-                    <button className="action-view">View</button>
-                    <button className="action-edit">Edit</button>
+                  <button className="action-view" onClick={handleViewVAWC}>View</button>
+                  <button className="action-edit" onClick={handleEditVAWC}>Edit</button>
                     <button className="action-delete">Delete</button>
                   </div>
                 </td>

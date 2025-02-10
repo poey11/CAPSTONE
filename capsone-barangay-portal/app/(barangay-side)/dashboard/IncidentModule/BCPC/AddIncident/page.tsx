@@ -2,6 +2,7 @@
 import "@/CSS/IncidentModule/AddNewIncident.css";
 import type { Metadata } from "next";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import Link from 'next/link';
 
@@ -61,15 +62,22 @@ export default function AddBCPCIncident() {
         }
       };
 
+      const router = useRouter();
+
+    const handleAddBCPC = () => {
+      router.push("/dashboard/IncidentModule/BCPC");
+    };
+
+
   return (
     <main className="main-container">
 
         
         <div className="main-content">
             
-        <Link href="/dashboard/IncidentModule/BCPC">    
-        <button type="submit" className="back-button"></button>
-        </Link>
+       
+        <button type="submit" className="back-button" onClick={handleAddBCPC}></button>
+       
 
             <div className="section-1">
                 <p className="NewOfficial"> New Incident</p>

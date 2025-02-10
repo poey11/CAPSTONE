@@ -10,7 +10,7 @@ const metadata: Metadata = {
   description: "Stay updated with the latest announcements",
 };
 
-export default function ViewBCPC() {
+export default function ViewVAWC() {
   const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
   const status = "Pending"; // Example status
 
@@ -75,23 +75,23 @@ export default function ViewBCPC() {
 
   const router = useRouter();
 
-    const handleViewBCPC = () => {
-      router.push("/dashboard/IncidentModule/BCPC");
-    };
+  const handleViewVAWC = () => {
+      router.push("/dashboard/IncidentModule/VAWC");
+  };
 
+  
   return (
     <main className="main-container">
 
-          <div className="status-section">
-          <p className={`status-badge ${getStatusClass(status)}`}>{status}</p> 
-          </div>
+        <div className="status-section">
+            <p className={`status-badge ${getStatusClass(status)}`}>{status}</p> 
+        </div>
 
      
       <div className="main-content">
         <div className="section-1">
     
-            <button type="submit" className="back-button" onClick={handleViewBCPC}></button>
-  
+            <button type="submit" className="back-button" onClick={handleViewVAWC}></button>
           <p>Complainant's Details</p>
         </div>
 

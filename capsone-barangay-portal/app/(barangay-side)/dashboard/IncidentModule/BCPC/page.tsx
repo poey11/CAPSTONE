@@ -3,6 +3,7 @@ import "@/CSS/IncidentModule/MainDashboardIncident.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const metadata: Metadata = {
   title: "Incident Management Module",
@@ -32,6 +33,18 @@ export default function BCPCDepartment() {
       prev.map((incident, i) => (i === index ? { ...incident, Status: newStatus } : incident))
     );
   };
+
+  const router = useRouter();
+
+    const handleViewBCPC = () => {
+      router.push("/dashboard/IncidentModule/BCPC/ViewIncident");
+    };
+
+    const handleEditBCPC = () => {
+      router.push("/dashboard/IncidentModule/BCPC/EditIncident");
+    };
+
+   
   
   return (
     <main className="main-container">
@@ -81,11 +94,9 @@ export default function BCPCDepartment() {
                 </td>
                 <td>
                   <div className="actions">
-                  <Link href="/dashboard/IncidentModule/BCPC/ViewIncident">
-                    <button className="action-view">View</button>
-                  </Link>
-                    <button className="action-edit">Edit</button>
-                    <button className="action-delete">Delete</button>
+                  <button className="action-view" onClick={handleViewBCPC}>View</button>
+                  <button className="action-edit" onClick={handleEditBCPC}>Edit</button>
+                   <button className="action-delete">Delete</button>
                   </div>
                 </td>
               </tr>

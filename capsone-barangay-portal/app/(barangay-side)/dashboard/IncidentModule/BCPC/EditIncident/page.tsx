@@ -1,5 +1,5 @@
 "use client"
-import "@/CSS/IncidentModule/AddNewIncident.css";
+import "@/CSS/IncidentModule/EditIncident.css";
 import type { Metadata } from "next";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -12,7 +12,7 @@ const metadata: Metadata = {
   description: "Stay updated with the latest announcements",
 };
 
-export default function AddLuponIncident() {
+export default function EditBCPCIncident() {
 
     const [isActive, setIsActive] = useState(false);
 
@@ -62,12 +62,12 @@ export default function AddLuponIncident() {
         }
       };
 
-      const router = useRouter();
+    const router = useRouter();
 
-      const handleAddLupon = () => {
-        router.push("/dashboard/IncidentModule/Lupon");
-      };
-  
+    const handleAddBCPC = () => {
+      router.push("/dashboard/IncidentModule/BCPC");
+    };
+
 
   return (
     <main className="main-container">
@@ -75,9 +75,9 @@ export default function AddLuponIncident() {
         
         <div className="main-content">
             
-        
-        <button type="submit" className="back-button" onClick={handleAddLupon}></button>
-        
+       
+         <button type="submit" className="back-button" onClick={handleAddBCPC}></button>
+       
 
             <div className="section-1">
                 <p className="NewOfficial"> New Incident</p>
@@ -292,11 +292,78 @@ export default function AddLuponIncident() {
             </div>
            
 
-
-
-
-
         </div> 
+
+    <div className="dialouge-meeting-section">
+
+     
+       <div className="title-section">
+            <button type="submit" className="back-button" onClick={handleAddBCPC}></button>
+            <p className="NewOfficial"> Dialouge Meeting</p>
+       </div>
+
+
+       <div className="section-2-dialouge">
+            <p >Complainant's Information</p>
+
+            <div className="bars">
+                    <div className="input-group">
+                        <p>Date</p>
+                        <input type="date" className="search-bar" placeholder="Enter Date" />
+                    </div>
+
+                    <div className="input-group">
+                        <p>For</p>
+                        <input type="text" className="search-bar" placeholder="Enter For" />
+                    </div>
+    
+                    <div className="input-group">
+                        <p>Time</p>
+                        <input type="time" className="search-bar" placeholder="Enter Location" />
+                    </div>
+            </div>
+
+       </div>
+
+
+         <div className="section-3-dialouge">
+
+            <div className="fields-section">
+                <p>Minutes of Dialouge</p>
+                    <textarea 
+                    className="description" 
+                    placeholder="Enter Minutes of Dialouge"
+                    rows={13}
+                    ></textarea>
+            </div>
+
+
+        </div>
+
+        <div className="section-4-dialouge">
+            
+        <div className="fields-section">
+                <p>Remarks</p>
+                    <textarea 
+                    className="description" 
+                    placeholder="Enter Remarks"
+                    rows={10}
+                    ></textarea>
+        </div>
+
+        <div className="fields-section">
+                <p>Parties</p>
+                    <textarea 
+                    className="description" 
+                    placeholder="Enter Parties"
+                    rows={10}
+                ></textarea>
+        </div>
+
+
+        </div>
+
+    </div>
 
     
     </main>

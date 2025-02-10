@@ -2,7 +2,7 @@
 import "@/CSS/IncidentModule/AddNewIncident.css";
 import type { Metadata } from "next";
 import { useState } from "react";
-
+import { useRouter } from "next/navigation";
 import Link from 'next/link';
 
 
@@ -61,15 +61,21 @@ export default function AddVAWCIncident() {
         }
       };
 
+      const router = useRouter();
+
+      const handleAddVAWC = () => {
+        router.push("/dashboard/IncidentModule/VAWC");
+      };
+
   return (
     <main className="main-container">
 
         
         <div className="main-content">
             
-        <Link href="/dashboard/IncidentModule/VAWC">    
-        <button type="submit" className="back-button"></button>
-        </Link>
+         
+        <button type="submit" className="back-button" onClick={handleAddVAWC}></button>
+ 
 
             <div className="section-1">
                 <p className="NewOfficial"> New Incident</p>
