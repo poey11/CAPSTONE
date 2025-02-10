@@ -6,8 +6,8 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 
 
 const metadata: Metadata = {
-    title: "View Online Barangay Clearance Request",
-    description: "View Online Barangay Clearance Request in Services Module",
+    title: "View Online Barangay Indigency Request",
+    description: "View Online Barangay Indigency Request in Services Module",
   };
 
 
@@ -34,13 +34,13 @@ const metadata: Metadata = {
 export default function ViewOnlineRequest() {
     const requestData = [
         {
-            documentType: "Barangay Clearance",
-            purpose: "Loan",
+            documentType: "Barangay Indigency",
+            purpose: "No Income",
             date: "January 17, 2024",
             residentsince: "January 14, 2002",
-            firstname: "Rose",
+            firstname: "Jennie",
             middlename: "Yap",
-            lastname: "Fernandez",
+            lastname: "Mendoza",
             address: "Calamba, Laguna",
             age: "23",
             civilstatus: "Single",

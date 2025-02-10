@@ -23,6 +23,8 @@ margin:  auto;
 }
 
 
+
+
 .back-button {
     background-image: url('/Images/left-arrow.png');
     background-size: contain;
@@ -44,6 +46,13 @@ margin:  auto;
     border-bottom: 2px solid #ddd;
     width: 100%;
     padding: 2rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .left-section{
+    display: flex;
+    align-items: center;
   }
 
   .section-1 p {
@@ -82,3 +91,24 @@ margin:  auto;
     color: grey;
     font-size: 1rem;
   }
+
+
+.status-badge {
+    padding: 8px 12px;            
+    border-radius: 5px;          
+    font-size: 13px;              
+    color: white;                
+    display: inline-block;        
+    text-transform: capitalize;   
+    text-align: center;    
+    width: 100px;       
+}
+
+.status-badge.pick-up {
+    background-color: #be5cb6;    
+}
+
+
+.spacer {
+    margin-top: 30px; /* Adds space between the two tables */
+}

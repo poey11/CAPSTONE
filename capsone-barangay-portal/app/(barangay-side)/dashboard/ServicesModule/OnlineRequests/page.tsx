@@ -14,42 +14,42 @@ const metadata: Metadata = {
   export default function OnlineRequests() {
     const requestData = [
         {
-            documentType: "Indigency",
+            documentType: "Barangay Clearance",
             name: "Jonnell Quebal",
             contact: "09171218101",
             date: "january 17, 2024",
             status: "Pick Up",
         },
         {
-            documentType: "Clearance",
+            documentType: "Barangay Indigency",
             name: "Jonnell Quebal",
             contact: "09171218101",
             date: "january 17, 2024",
             status: "Pick Up",
         },
         {
-            documentType: "Indigency",
+            documentType: "Barangay ID",
             name: "Jonnell Quebal",
             contact: "09171218101",
             date: "january 17, 2024",
             status: "Completed",
         },
         {
-            documentType: "Indigency",
+            documentType: "Barangay Indigency",
             name: "Jonnell Quebal",
             contact: "09171218101",
             date: "january 17, 2024",
-            status: "Completed",
+            status: "Pending",
         },
         {
-            documentType: "Indigency",
+            documentType: "Barangay Certificate",
             name: "Jonnell Quebal",
             contact: "09171218101",
             date: "january 17, 2024",
-            status: "Completed",
+            status: "Rejected",
         },
         {
-            documentType: "Indigency",
+            documentType: "First Time Jobseeker",
             name: "Jonnell Quebal",
             contact: "09171218101",
             date: "january 17, 2024",
@@ -63,10 +63,9 @@ const metadata: Metadata = {
 
     const handleView = (documentType: string) => {
         const documentRoutes: { [key: string]: string } = {
-            "Clearance": "/dashboard/ServicesModule/OnlineRequests/View/BarangayClearance",
-            "Indigency": "/dashboard/ServicesModule/OnlineRequests/View/Indigency",
-            "Residency": "/dashboard/ServicesModule/OnlineRequests/View/Residency",
-            "Business Permit": "/dashboard/ServicesModule/OnlineRequests/View/BusinessPermit",
+            "Barangay Clearance": "/dashboard/ServicesModule/OnlineRequests/View/BarangayClearance",
+            "Barangay Indigency": "/dashboard/ServicesModule/OnlineRequests/View/BarangayIndigency",
+            "Barangay ID": "/dashboard/ServicesModule/OnlineRequests/View/BarangayID",
         };
         
         const route = documentRoutes[documentType] || "/dashboard/ServicesModule/OnlineRequests/View";
