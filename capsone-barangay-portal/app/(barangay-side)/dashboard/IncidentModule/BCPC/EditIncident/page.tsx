@@ -68,9 +68,24 @@ export default function EditBCPCIncident() {
       router.push("/dashboard/IncidentModule/BCPC");
     };
 
+    const handleGenerateDialouge = () => {
+        router.push("/dashboard/IncidentModule/BCPC/EditIncident/DialogueLetter");
+      };
+
+      const handleGenerateSummonLetter = () => {
+        router.push("/dashboard/IncidentModule/BCPC/EditIncident/SummonLetter");
+      };
+
+
 
   return (
     <main className="main-container">
+
+
+       <div className="letters-content">
+            <button className="letter-announcement-btn" onClick={handleGenerateDialouge}>Generate Dialouge Letter</button>
+            <button className="letter-announcement-btn" onClick={handleGenerateSummonLetter}>Generate Summon Letter</button>
+       </div>
 
         
         <div className="main-content">
@@ -80,7 +95,7 @@ export default function EditBCPCIncident() {
        
 
             <div className="section-1">
-                <p className="NewOfficial"> New Incident</p>
+                <p className="NewOfficial"> Robbery Incident</p>
 
                     <div className="actions">
                         <button className="action-delete">Delete</button>
@@ -103,18 +118,19 @@ export default function EditBCPCIncident() {
                     placeholder="Enter Official Name" 
                     />
 
-                    <p>Sex?</p>
-                     <select 
-                    id="featuredStatus" 
-                    name="featuredStatus" 
-                    className="featuredStatus" 
-                    required
-                    defaultValue=""  
-                   >
-                    <option value="" disabled>Choose</option>
-                    <option value="active">Yes</option>
-                    <option value="inactive">No</option>
+                 <p>Sex</p>
+                  <select 
+                  id="featuredStatus" 
+                  name="featuredStatus" 
+                  className="featuredStatus" 
+                  required
+                  defaultValue=""  
+                  >
+                  <option value="" disabled>Choose</option>
+                  <option value="active">Male</option>
+                  <option value="inactive">Female</option>
                   </select>
+
 
                     <p>Age</p>
 
@@ -148,7 +164,7 @@ export default function EditBCPCIncident() {
                   placeholder="Enter Official Name" 
                   />
 
-                  <p>Sex?</p>
+                  <p>Sex</p>
                   <select 
                   id="featuredStatus" 
                   name="featuredStatus" 
@@ -362,6 +378,14 @@ export default function EditBCPCIncident() {
 
 
         </div>
+
+    </div>
+
+
+    <div className="first-hearing-section">
+        
+
+
 
     </div>
 

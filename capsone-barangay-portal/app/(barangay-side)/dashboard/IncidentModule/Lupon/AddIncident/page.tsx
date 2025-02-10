@@ -103,18 +103,19 @@ export default function AddLuponIncident() {
                     placeholder="Enter Official Name" 
                     />
 
-                    <p>Sex?</p>
-                     <select 
+                  <p>Sex</p>
+                  <select 
                     id="featuredStatus" 
                     name="featuredStatus" 
                     className="featuredStatus" 
                     required
                     defaultValue=""  
-                   >
+                    >
                     <option value="" disabled>Choose</option>
-                    <option value="active">Yes</option>
-                    <option value="inactive">No</option>
+                    <option value="active">Male</option>
+                    <option value="inactive">Female</option>
                   </select>
+
 
                     <p>Age</p>
 
@@ -148,17 +149,17 @@ export default function AddLuponIncident() {
                   placeholder="Enter Official Name" 
                   />
 
-                  <p>Sex?</p>
+                  <p>Sex</p>
                   <select 
-                  id="featuredStatus" 
-                  name="featuredStatus" 
-                  className="featuredStatus" 
-                  required
-                  defaultValue=""  
-                  >
-                  <option value="" disabled>Choose</option>
-                  <option value="active">Male</option>
-                  <option value="inactive">Female</option>
+                    id="featuredStatus" 
+                    name="featuredStatus" 
+                    className="featuredStatus" 
+                    required
+                    defaultValue=""  
+                    >
+                    <option value="" disabled>Choose</option>
+                    <option value="active">Male</option>
+                    <option value="inactive">Female</option>
                   </select>
 
                   <p>Age</p>

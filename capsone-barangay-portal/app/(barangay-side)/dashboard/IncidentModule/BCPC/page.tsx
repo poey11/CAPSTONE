@@ -44,15 +44,19 @@ export default function BCPCDepartment() {
       router.push("/dashboard/IncidentModule/BCPC/EditIncident");
     };
 
+    const handleAddBCPC = () => {
+      router.push("/dashboard/IncidentModule/BCPC/AddIncident");
+    };
+
    
   
   return (
     <main className="main-container">
       <div className="section-1">
         <h1>BCPC Department</h1>
-        <Link href="/dashboard/IncidentModule/BCPC/AddIncident">
-          <button className="add-announcement-btn">Add New Incident</button>
-        </Link>
+      
+          <button className="add-announcement-btn" onClick={handleAddBCPC}>Add New Incident</button>
+    
       </div>
 
       <div className="section-2">

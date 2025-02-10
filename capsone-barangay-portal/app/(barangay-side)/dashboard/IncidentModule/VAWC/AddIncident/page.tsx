@@ -101,18 +101,19 @@ export default function AddVAWCIncident() {
                     placeholder="Enter Official Name" 
                     />
 
-                    <p>Sex?</p>
-                     <select 
-                    id="featuredStatus" 
-                    name="featuredStatus" 
-                    className="featuredStatus" 
-                    required
-                    defaultValue=""  
-                   >
-                    <option value="" disabled>Choose</option>
-                    <option value="active">Yes</option>
-                    <option value="inactive">No</option>
+                  <p>Sex</p>
+                  <select 
+                  id="featuredStatus" 
+                  name="featuredStatus" 
+                  className="featuredStatus" 
+                  required
+                  defaultValue=""  
+                  >
+                  <option value="" disabled>Choose</option>
+                  <option value="active">Male</option>
+                  <option value="inactive">Female</option>
                   </select>
+
 
                     <p>Age</p>
 
@@ -131,8 +132,6 @@ export default function AddVAWCIncident() {
                     />
 
                     
-
-
                 </div>
 
                 <div className="section-2-right-side">
@@ -146,7 +145,7 @@ export default function AddVAWCIncident() {
                   placeholder="Enter Official Name" 
                   />
 
-                  <p>Sex?</p>
+                  <p>Sex</p>
                   <select 
                   id="featuredStatus" 
                   name="featuredStatus" 
@@ -162,18 +161,19 @@ export default function AddVAWCIncident() {
                   <p>Age</p>
 
                   <input 
-                  type="text" 
-                  className="search-bar" 
-                  placeholder="Enter Age" 
+                    type="text" 
+                    className="search-bar" 
+                    placeholder="Enter Age" 
                   />
 
                   <p>Contact Information</p>
 
                   <input 
-                  type="text" 
-                  className="search-bar" 
-                  placeholder="Enter Contact Number" 
+                    type="text" 
+                    className="search-bar" 
+                    placeholder="Enter Contact Number" 
                   />
+                   
                    
 
                 </div>

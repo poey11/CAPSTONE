@@ -1,10 +1,10 @@
 "use client"
-import "@/CSS/IncidentModule/AddNewIncident.css";
+import "@/CSS/IncidentModule/EditIncident.css";
 import type { Metadata } from "next";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import Link from 'next/link';
-import { useRouter } from "next/navigation";
 
 
 const metadata: Metadata = {
@@ -12,7 +12,7 @@ const metadata: Metadata = {
   description: "Stay updated with the latest announcements",
 };
 
-export default function AddGADIncident() {
+export default function EditVAWCIncident() {
 
     const [isActive, setIsActive] = useState(false);
 
@@ -62,26 +62,40 @@ export default function AddGADIncident() {
         }
       };
 
-      const router = useRouter();
+    const router = useRouter();
 
-      const handleAddGAD = () => {
-        router.push("/dashboard/IncidentModule/GAD");
+    const handleAddVAWC = () => {
+      router.push("/dashboard/IncidentModule/VAWC");
+    };
+    
+    const handleGenerateDialouge = () => {
+        router.push("/dashboard/IncidentModule/VAWC/EditIncident/DialogueLetter");
       };
-  
+
+      const handleGenerateSummonLetter = () => {
+        router.push("/dashboard/IncidentModule/VAWC/EditIncident/SummonLetter");
+      };
+
 
 
   return (
     <main className="main-container">
 
+
+       <div className="letters-content">
+            <button className="letter-announcement-btn" onClick={handleGenerateDialouge}>Generate Dialouge Letter</button>
+            <button className="letter-announcement-btn" onClick={handleGenerateSummonLetter}>Generate Summon Letter</button>
+       </div>
+
         
         <div className="main-content">
             
-      
-        <button type="submit" className="back-button" onClick={handleAddGAD}></button>
-      
+       
+         <button type="submit" className="back-button" onClick={handleAddVAWC}></button>
+       
 
             <div className="section-1">
-                <p className="NewOfficial"> New Incident</p>
+                <p className="NewOfficial"> Robbery Incident</p>
 
                     <div className="actions">
                         <button className="action-delete">Delete</button>
@@ -105,17 +119,17 @@ export default function AddGADIncident() {
                     />
 
                    
-                  <p>Sex</p>
+                 <p>Sex</p>
                   <select 
-                    id="featuredStatus" 
-                    name="featuredStatus" 
-                    className="featuredStatus" 
-                    required
-                    defaultValue=""  
-                    >
-                    <option value="" disabled>Choose</option>
-                    <option value="active">Male</option>
-                    <option value="inactive">Female</option>
+                  id="featuredStatus" 
+                  name="featuredStatus" 
+                  className="featuredStatus" 
+                  required
+                  defaultValue=""  
+                  >
+                  <option value="" disabled>Choose</option>
+                  <option value="active">Male</option>
+                  <option value="inactive">Female</option>
                   </select>
 
 
@@ -164,8 +178,8 @@ export default function AddGADIncident() {
                   <option value="inactive">Female</option>
                   </select>
 
-                  <p>Age</p>
 
+                  <p>Age</p>
                   <input 
                   type="text" 
                   className="search-bar" 
@@ -295,11 +309,78 @@ export default function AddGADIncident() {
             </div>
            
 
-
-
-
-
         </div> 
+
+    <div className="dialouge-meeting-section">
+
+     
+       <div className="title-section">
+            <button type="submit" className="back-button" ></button>
+            <p className="NewOfficial"> Dialouge Meeting</p>
+       </div>
+
+
+       <div className="section-2-dialouge">
+            <p >Complainant's Information</p>
+
+            <div className="bars">
+                    <div className="input-group">
+                        <p>Date</p>
+                        <input type="date" className="search-bar" placeholder="Enter Date" />
+                    </div>
+
+                    <div className="input-group">
+                        <p>For</p>
+                        <input type="text" className="search-bar" placeholder="Enter For" />
+                    </div>
+    
+                    <div className="input-group">
+                        <p>Time</p>
+                        <input type="time" className="search-bar" placeholder="Enter Location" />
+                    </div>
+            </div>
+
+       </div>
+
+
+         <div className="section-3-dialouge">
+
+            <div className="fields-section">
+                <p>Minutes of Dialouge</p>
+                    <textarea 
+                    className="description" 
+                    placeholder="Enter Minutes of Dialouge"
+                    rows={13}
+                    ></textarea>
+            </div>
+
+
+        </div>
+
+        <div className="section-4-dialouge">
+            
+        <div className="fields-section">
+                <p>Remarks</p>
+                    <textarea 
+                    className="description" 
+                    placeholder="Enter Remarks"
+                    rows={10}
+                    ></textarea>
+        </div>
+
+        <div className="fields-section">
+                <p>Parties</p>
+                    <textarea 
+                    className="description" 
+                    placeholder="Enter Parties"
+                    rows={10}
+                ></textarea>
+        </div>
+
+
+        </div>
+
+    </div>
 
     
     </main>

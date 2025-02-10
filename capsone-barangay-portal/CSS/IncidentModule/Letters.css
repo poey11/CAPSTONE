@@ -13,28 +13,7 @@
    flex-direction: column;
 }
 
-.letters-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-    padding: 3rem;
-}
 
-
-.letter-announcement-btn {
-    background-color:#e56723;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .letter-announcement-btn:hover {
-    background-color:#cc591b;
-  }
 
 
 .main-content {
@@ -52,17 +31,16 @@
 
 .section-1 {
     display: flex;
-    justify-content: space-between;
     width: 100%;
     border-bottom: 2px solid #ddd;
-    padding-bottom: 1rem;
-    padding-top: 1rem;
+    padding: 1rem;
 }
 
 .NewOfficial {
     color: grey;
     font-size: 1.5rem;
     font-weight: bold;
+    margin-left: 1rem;
 }
 
 .actions {
@@ -115,6 +93,7 @@
 .section-2 {
     display: flex;
     width: 100%;
+    padding: 1rem;
 }
 
 .section-2-left-side {
@@ -372,6 +351,7 @@
     flex-direction: column;
     width: 100%;
     justify-content: space-between;
+    padding: 1rem;
   }
 
   .title {
@@ -379,10 +359,11 @@
     color: grey;
     font-weight: bold;
     font-size: 1rem;
-    margin-left: 1.5rem;
+    margin-left: 2.5rem;
   }
 .bars {
     display: flex;
+    padding: 1rem;
 }
 
 .input-group {
@@ -440,57 +421,30 @@
   padding: 1rem;
 }
 
-.dialouge-meeting-section {
-display: flex;
-flex-direction: column;
-align-self: center;
-width: 90%;
-border-radius: 1rem;
-border: 2px solid  #ddd;
-padding: 5rem;
-height: auto;
-margin: auto;
-background-color: #f4f2f2;
-margin-top: 2rem;
-}
-
-.title-section {
-display: flex;
-width: 100%;
-border-bottom: 2px solid #ddd;
-padding-bottom: 1rem;
-padding-top: 1rem;
-}
-
-.section-2-dialouge {
-    color: grey;
-    font-weight: bold;
-    font-size: 1rem;
-    
-}
-
-
-.section-2-dialouge p {
-    color: grey;
-    font-weight: bold;
-    font-size: 1rem;
-    padding: 1rem;
-    
-}
-
-.section-3-dialouge {
-     color: grey;
-    font-weight: bold;
-    font-size: 1rem;
-   
-}
-.section-4-dialouge {
+.section-4 {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 5rem;
-    
+    gap: 2rem;
+    padding: 3rem;
 }
+
+
+.letter-announcement-btn {
+    background-color:#e56723;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 200px;
+  }
+  
+  .letter-announcement-btn:hover {
+    background-color:#cc591b;
+  }
+
 
 
   
