@@ -7,8 +7,7 @@
     margin-left: 2rem; 
     overflow-y: auto; 
    display: flex;
-   align-items: center;
-   justify-content: center;
+   flex-direction: column;
 }
 
 .main-content {
@@ -21,6 +20,19 @@ border: 2px solid  #ddd;
 height: auto;
 margin:  auto; 
 }
+
+.emergency-details-content{
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    width: 90%;
+    border-radius: 1rem;
+    border: 2px solid  #ddd;
+    height: auto;
+    margin:  auto; 
+    margin-top: 50px;
+}
+
 
 
 
@@ -73,6 +85,7 @@ margin:  auto;
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;
   }
 
   .title p {
@@ -92,6 +105,11 @@ margin:  auto;
     font-size: 1rem;
   }
 
+.requirement-image{
+  width: 200px;
+  height: 200px;
+}
+
 
 .status-badge {
     padding: 8px 12px;            
@@ -104,11 +122,18 @@ margin:  auto;
     width: 100px;       
 }
 
+.status-badge.rejected {
+    background-color: #e22929;    
+}
+
+.status-badge.completed {
+    background-color: #4caf50;    
+}
+
 .status-badge.pick-up {
     background-color: #be5cb6;    
 }
 
-
-.spacer {
-    margin-top: 30px; /* Adds space between the two tables */
+.status-badge.pending {
+    background-color: #325bd4;    
 }

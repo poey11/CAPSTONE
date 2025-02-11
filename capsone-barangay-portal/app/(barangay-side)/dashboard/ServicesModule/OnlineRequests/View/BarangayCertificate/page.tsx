@@ -6,8 +6,8 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 
 
 const metadata: Metadata = {
-    title: "View Online Barangay Indigency Request",
-    description: "View Online Barangay Indigency Request in Services Module",
+    title: "View Online Barangay Certificate Request",
+    description: "View Online Barangay Certificate Request in Services Module",
   };
 
 
@@ -34,13 +34,13 @@ const metadata: Metadata = {
 export default function ViewOnlineRequest() {
     const requestData = [
         {
-            documentType: "Barangay Indigency",
-            purpose: "No Income",
-            daterequested: "January 17, 2024",
+            documentType: "Barangay Certificate",
+            purpose: "Death Residency",
+            date: "January 17, 2024",
             residentsince: "January 14, 2002",
-            firstname: "Jennie",
+            firstname: "Rose",
             middlename: "Yap",
-            lastname: "Mendoza",
+            lastname: "Fernandez",
             address: "Calamba, Laguna",
             age: "23",
             civilstatus: "Single",
@@ -48,7 +48,7 @@ export default function ViewOnlineRequest() {
             birthday: "September 6, 2002",
             gender: "Female",
             contact: "09171218101",
-            status: "Pick Up",
+            status: "Rejected",
             requirements: "/Images/document.png",
         },
     ];

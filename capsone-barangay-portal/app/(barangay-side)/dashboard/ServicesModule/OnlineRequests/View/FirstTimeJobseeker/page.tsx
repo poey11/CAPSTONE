@@ -6,15 +6,14 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 
 
 const metadata: Metadata = {
-    title: "View Online Barangay Indigency Request",
-    description: "View Online Barangay Indigency Request in Services Module",
+    title: "View Online First Time Jobseeker Request",
+    description: "View Online First Time Jobseekery Request in Services Module",
   };
 
 
   
   const residentFields = [
     { key: "documentType", label: "Document Type" },
-    { key: "purpose", label: "Purpose" },
     { key: "daterequested", label: "Date Requested" },
     { key: "residentsince", label: "Resident Since" },
     { key: "firstname", label: "First Name" },
@@ -27,6 +26,9 @@ const metadata: Metadata = {
     { key: "birthday", label: "Birthday" },
     { key: "gender", label: "Gender" },
     { key: "contact", label: "Contact" },
+    { key: "educationalattainment", label: "Educational Attainment" },
+    { key: "course", label: "Course" },
+    { key: "beneficiary", label: "Benefficiary of JobStart Program" },
     { key: "status", label: "Status" },
     { key: "requirements", label: "Requirements" },
 ];
@@ -34,8 +36,7 @@ const metadata: Metadata = {
 export default function ViewOnlineRequest() {
     const requestData = [
         {
-            documentType: "Barangay Indigency",
-            purpose: "No Income",
+            documentType: "First Time Jobseeker",
             daterequested: "January 17, 2024",
             residentsince: "January 14, 2002",
             firstname: "Jennie",
@@ -48,6 +49,9 @@ export default function ViewOnlineRequest() {
             birthday: "September 6, 2002",
             gender: "Female",
             contact: "09171218101",
+            educationalattainment: "College Graduate",
+            course: "Pharmacy",
+            beneficiary: "Yes",
             status: "Pick Up",
             requirements: "/Images/document.png",
         },

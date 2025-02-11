@@ -4,15 +4,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 
-
 const metadata: Metadata = {
     title: "View Online Barangay ID Request",
     description: "View Online Barangay ID Request in Services Module",
-  };
+};
 
-
-  
-  const residentFields = [
+const residentFields = [
     { key: "documentType", label: "Document Type" },
     { key: "daterequested", label: "Date Requested" },
     { key: "residentsince", label: "Resident Since" },
@@ -28,26 +25,30 @@ const metadata: Metadata = {
     { key: "nationality", label: "Nationality" },
     { key: "religion", label: "Religion" },
     { key: "birthday", label: "Birthday" },
+    { key: "birthplace", label: "Birthplace" },
     { key: "gender", label: "Gender" },
     { key: "contact", label: "Contact" },
     { key: "height", label: "Height" },
     { key: "weight", label: "Weight" },
     { key: "bloodtype", label: "Blood Type" },
-    { key: "emergencyfirstname", label: "Emergency Contact First Name" },
-    { key: "emergencymiddlename", label: "Emergency Contact Middle Name" },
-    { key: "emergencylastname", label: "Emergency Contact Last Name" },
-    { key: "emergencyaddress", label: "Emergency Address" },
-    { key: "emergencycontact", label: "Emergency Contact" },
-    { key: "emergencyrelationship", label: "Relationship" },
     { key: "status", label: "Status" },
     { key: "requirements", label: "Requirements" },
+];
+
+const emergencyFields = [
+    { key: "emergencyfirstname", label: "First Name" },
+    { key: "emergencymiddlename", label: "Middle Name" },
+    { key: "emergencylastname", label: "Last Name" },
+    { key: "emergencyaddress", label: "Address" },
+    { key: "emergencycontact", label: "Contact" },
+    { key: "emergencyrelationship", label: "Relationship" },
 ];
 
 export default function ViewOnlineRequest() {
     const requestData = [
         {
             documentType: "Barangay ID",
-            date: "January 17, 2024",
+            daterequested: "January 17, 2024",
             residentsince: "January 14, 2002",
             precinctnumber: "1234567",
             firstname: "Jisoo",
@@ -61,17 +62,19 @@ export default function ViewOnlineRequest() {
             nationality: "Filipino",
             religion: "Catholic",
             birthday: "September 6, 2002",
+            birthplace: "Calamba, Laguna",
             gender: "Female",
             contact: "09171218101",
-            height: "151 cm",
-            weight: "45 kg",
+            height: "151",
+            weight: "45",
             bloodtype: "A+",
             emergencyfirstname: "Mia",
             emergencymiddlename: "Yap",
             emergencylastname: "Martinez",
+            emergencyaddress: "Calamba, Laguna",
             emergencycontact: "09175674321",
             emergencyrelationship: "Sibling",
-            status: "Pick Up",
+            status: "Completed",
             requirements: "/Images/document.png",
         },
     ];
@@ -86,18 +89,17 @@ export default function ViewOnlineRequest() {
         <main className="main-container">
             <div className="main-content">
                 <div className="section-1">
-                  <div className="left-section">
-                    <Link href="/dashboard/ServicesModule/OnlineRequests">
-                        <button type="button" className="back-button" onClick={handleBack}></button>
-                    </Link>
-                    <p>Online Request Details</p>
-                  </div>
-                  <div className="right-section">
-                      <span className={`status-badge ${residentData.status.toLowerCase().replace(" ", "-")}`}>
-                          {residentData.status ?? "N/A"}
-                      </span>
-                  </div>
-                    
+                    <div className="left-section">
+                        <Link href="/dashboard/ServicesModule/OnlineRequests">
+                            <button type="button" className="back-button" onClick={handleBack}></button>
+                        </Link>
+                        <p>Online Request Details</p>
+                    </div>
+                    <div className="right-section">
+                        <span className={`status-badge ${residentData.status.toLowerCase().replace(" ", "-")}`}>
+                            {residentData.status ?? "N/A"}
+                        </span>
+                    </div>
                 </div>
 
                 {residentFields.map((field) => (
@@ -106,7 +108,6 @@ export default function ViewOnlineRequest() {
                             <p>{field.label}</p>
                         </div>
                         <div className="description">
-                            {/* For 'requirements' field, check if it's an image path */}
                             {field.key === "requirements" ? (
                                 <img src={residentData[field.key] ?? ""} alt="Requirement" className="requirement-image" />
                             ) : (
@@ -116,6 +117,24 @@ export default function ViewOnlineRequest() {
                     </div>
                 ))}
             </div>
+
+            <div className="emergency-details-content">
+                <div className="section-1">
+                    <p>Emergency Contact Details</p> 
+                </div>
+
+                {emergencyFields.map((field) => (
+                    <div className="details-section" key={field.key}>
+                        <div className="title">
+                            <p>{field.label}</p>
+                        </div>
+                        <div className="description">
+                            <p>{residentData[field.key] ?? "N/A"}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
         </main>
     );
 }

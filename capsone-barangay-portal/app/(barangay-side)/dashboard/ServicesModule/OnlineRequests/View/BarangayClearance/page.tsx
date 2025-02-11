@@ -36,7 +36,7 @@ export default function ViewOnlineRequest() {
         {
             documentType: "Barangay Clearance",
             purpose: "Loan",
-            date: "January 17, 2024",
+            daterequested: "January 17, 2024",
             residentsince: "January 14, 2002",
             firstname: "Rose",
             middlename: "Yap",

@@ -6,8 +6,8 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 
 
 const metadata: Metadata = {
-    title: "View Online Barangay Indigency Request",
-    description: "View Online Barangay Indigency Request in Services Module",
+    title: "View Online Temporary Business Permit Request",
+    description: "View Online Temporary Business Permit Request in Services Module",
   };
 
 
@@ -16,16 +16,15 @@ const metadata: Metadata = {
     { key: "documentType", label: "Document Type" },
     { key: "purpose", label: "Purpose" },
     { key: "daterequested", label: "Date Requested" },
-    { key: "residentsince", label: "Resident Since" },
     { key: "firstname", label: "First Name" },
     { key: "middlename", label: "Middle Name" },
     { key: "lastname", label: "Last Name" },
-    { key: "address", label: "Address" },
-    { key: "age", label: "Age" },
-    { key: "civilstatus", label: "Civil Status" },
-    { key: "citizenship", label: "Citizenship" },
-    { key: "birthday", label: "Birthday" },
-    { key: "gender", label: "Gender" },
+    { key: "address", label: "Home Address" },
+    { key: "businessactivity", label: "Business Activity" },
+    { key: "businessname", label: "Business Name" },
+    { key: "businesslocation", label: "Business Location" },
+    { key: "businessnature", label: "Nature of Business" },
+    { key: "estimatedcapital", label: "Estimated Capital" },
     { key: "contact", label: "Contact" },
     { key: "status", label: "Status" },
     { key: "requirements", label: "Requirements" },
@@ -34,21 +33,20 @@ const metadata: Metadata = {
 export default function ViewOnlineRequest() {
     const requestData = [
         {
-            documentType: "Barangay Indigency",
-            purpose: "No Income",
+            documentType: "Barangay Permit",
+            purpose: "Temporary Business Permit",
             daterequested: "January 17, 2024",
-            residentsince: "January 14, 2002",
             firstname: "Jennie",
             middlename: "Yap",
             lastname: "Mendoza",
             address: "Calamba, Laguna",
-            age: "23",
-            civilstatus: "Single",
-            citizenship: "Filipino",
-            birthday: "September 6, 2002",
-            gender: "Female",
+            businessactivity: "Renewal",
+            businessname: "Jennie's Salon",
+            businesslocation: "Calamba, Laguna",
+            businessnature: "Salon",
+            estimatedcapital: "1,000,000.00",
             contact: "09171218101",
-            status: "Pick Up",
+            status: "Pending",
             requirements: "/Images/document.png",
         },
     ];

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import type { Metadata } from "next";
 import { useState } from "react";
-import "@/CSS/barangaySide/ServicesModule/BarangayDocs/FirstTimeJobseeker.css";
+import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BusinessPermit.css";
 
 
 
@@ -17,8 +17,8 @@ export default function addAnnouncements() {
 
     const router = useRouter();
 
-    const handleBackToGenerateDocument = () => {
-      router.push("/dashboard/ServicesModule/GenerateDocument");
+    const handleBack = () => {
+      router.push("/dashboard/ServicesModule/OnlineRequests");
     };
 
     const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
@@ -48,20 +48,42 @@ export default function addAnnouncements() {
         }));
       };
 
+      const requestData = [
+        {
+            documentType: "Barangay Permit",
+            purpose: "Business Permit",
+            daterequested: "2024-01-17",
+            firstname: "Jennie",
+            middlename: "Yap",
+            lastname: "Mendoza",
+            address: "Calamba, Laguna",
+            businessactivity: "New",
+            businessname: "Jennie's Bakeshop",
+            businesslocation: "Calamba, Laguna",
+            businessnature: "Bakery",
+            estimatedcapital: "500000",
+            contact: "09171218101",
+            status: "Pending",
+            requirements: "/Images/document.png",
+        },
+    ];
+
+    const residentData = requestData[0] as Record<string, string>;
+
     return (
         <main className="addAnnouncement-main-container">
             <div className="section-1">
-                <h1>Generate Document</h1>
+                <h1>Barangay Permit Online Request</h1>
             </div>
 
             <div className="addAnnouncement-main-section">
                 <div className="addAnnouncement-main-section1">
                     <div className="addAnnouncement-main-section1-left">
-                        <button onClick={handleBackToGenerateDocument}>
+                        <button onClick={handleBack}>
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/>
                         </button>
 
-                        <h1>First Time Jobseeker</h1>
+                        <h1>Business Permit</h1>
                     </div>
 
                     <div className="action-btn-section">
@@ -76,33 +98,38 @@ export default function addAnnouncements() {
                 <div className="main-fields-container">
                     <div className="main-fields-container-section1">
                         <div className="section-left">
-                            <div className="fields-section">
+                            <div className="fields-container">
+                                <div className="fields-section">
                                     <p>Date Requested</p>
                                     <input 
                                         type="date" 
                                         className="input-field" 
-                                        placeholder="Select Date From" 
-                                    />
-                                    
+                                        placeholder="Select Date From"
+                                        defaultValue={residentData.daterequested} 
+                                    /> 
+                                </div>
+
                             </div>
-    
 
-                        </div>
-
-                            
+                            </div>
 
                         <div className="section-right">
-                            <div className="fields-container">
-                                <div className="fields-section">
-                                    <p>Resident Since</p>
-                                    <input 
-                                        type="date" 
-                                        className="input-field" 
-                                        placeholder="Select Date From" 
-                                    />
+                            <div className="fields-section">
+                                    <p>Status</p>
+                                    <select
+                                        id="status"
+                                        name="status"
+                                        className="input-field"
+                                        required
+                                        defaultValue={residentData.status}
+                                    >
+                                        <option value="Pending">Pending</option>
+                                        <option value="Pickup">Pickup</option>
+                                        <option value="Completed">Completed</option>
+                                        <option value="Rejected">Rejected</option>
+                                    </select>
                                 </div>
-                                
-                            </div>
+                            
                         </div>
                             
                     </div>
@@ -110,37 +137,41 @@ export default function addAnnouncements() {
                     <div className="main-fields-container-section2">
                         <div className="fields-container">
                             <div className="fields-section">
-                                <p>First Name</p>
+                                <p>Applicant's First Name</p>
                                 <input 
                                     type="text" 
                                     className="headline" 
-                                    placeholder="First Name" 
+                                    placeholder="First Name"
+                                    defaultValue={residentData.firstname} 
                                 />
                             </div>
 
                             <div className="fields-section">
-                                <p>Middle Name</p>
+                                <p>Applicant's Middle Name</p>
                                 <input 
                                     type="text" 
                                     className="headline" 
                                     placeholder="Middle Name" 
+                                    defaultValue={residentData.middlename}
                                 />
                             </div>
 
                             <div className="fields-section">
-                                <p>Last Name</p>
+                                <p>Applicant's Last Name</p>
                                 <input 
                                     type="text" 
                                     className="headline" 
                                     placeholder="Last Name" 
+                                    defaultValue={residentData.lastname}
                                 />
                             </div>
                             <div className="fields-section">
-                                <p>Address</p>
+                                <p>Home Address</p>
                                 <input 
                                     type="text" 
                                     className="headline" 
-                                    placeholder="Address" 
+                                    placeholder="Home Address" 
+                                    defaultValue={residentData.address}
                                 />
                             </div>
 
@@ -151,96 +182,64 @@ export default function addAnnouncements() {
                         <div className="section-left">
                             <div className="fields-container">
                                 <div className="fields-section">
-                                    <p>Age</p>
-                                    <input 
-                                        type="number"  // Ensures the input accepts only numbers
-                                        id="age"  
-                                        name="age"  
-                                        className="input-field" 
-                                        required 
-                                        min="1"  // Minimum age (you can adjust this as needed)
-                                        max="150"  // Maximum age (you can adjust this as needed)
-                                        placeholder="Enter Age"  
-                                        step="1"  // Ensures only whole numbers can be entered
-                                    />
-                                </div>
-
-                                <div className="fields-section">
-                                    <p>Civil Status</p>  
-                                    <select 
-                                        id="civilstatus" 
-                                        name="civilstatus" 
-                                        className="input-field" 
-                                        required
-                                        defaultValue=""  
-                                    >
-                                        <option value="" disabled>Select civil status</option>
-                                        <option value="Single">Single</option>
-                                        <option value="Married">Married</option>
-                                        <option value="Widow">Widow</option>
-                                        <option value="Separated">Separated</option>
-                                    </select>
-                                </div>
-
-                                <div className="fields-section">
-                                    <p>Citizenship</p>
+                                    <p>Business Name</p>
                                     <input 
                                         type="text" 
                                         className="input-field" 
-                                        placeholder="Address" 
-                                    />
-                                </div>
-                                <div className="fields-section">
-                                    <p>Educational Attainment</p>
-                                    <input 
-                                        type="text" 
-                                        className="input-field" 
-                                        placeholder="Educational Attainment" 
+                                        placeholder="Business Name" 
+                                        defaultValue={residentData.businessname}
                                     />
                                 </div>
 
                                 <div className="fields-section">
-                                    <p>Benefficiary of JobStart Program</p>
-                                    <select 
-                                        id="beneficiary" 
-                                        name="beneficiary" 
+                                    <p>Business Location</p>
+                                    <input 
+                                        type="text" 
                                         className="input-field" 
-                                        required
-                                        defaultValue=""  
-                                    >
-                                        <option value="" disabled>Beneficiary</option>
-                                        <option value="Male">Yes</option>
-                                        <option value="Female">No</option>
-                                    </select>
+                                        placeholder="Business Location" 
+                                        defaultValue={residentData.businesslocation}
+                                    />
+                                </div>
+
+                                <div className="fields-section">
+                                    <p>Nature of Business</p>
+                                    <input 
+                                        type="text" 
+                                        className="input-field" 
+                                        placeholder="Nature of Business" 
+                                        defaultValue={residentData.businessnature}
+                                    />
                                 </div>
 
                             </div>
 
-                        </div>
+                            </div>
 
                         <div className="section-right">
                             <div className="fields-container">
                                 <div className="fields-section">
-                                    <p>Birthday</p>
-                                    <input 
-                                        type="date" 
-                                        className="input-field" 
-                                        placeholder="Select Date From" 
-                                    />    
-                                </div>
-                                <div className="fields-section">
-                                    <p>Gender</p>
+                                    <p>Type of Business Activity</p>
                                     <select 
-                                        id="gender" 
-                                        name="gender" 
+                                        id="businessActivity" 
+                                        name="businessActivity" 
                                         className="input-field" 
                                         required
-                                        defaultValue=""  
+                                        defaultValue={residentData.businessactivity}
                                     >
-                                        <option value="" disabled>Select gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
+                                        <option value="" disabled>Business Activity</option>
+                                        <option value="Male">New</option>
+                                        <option value="Female">Renewal</option>
                                     </select>
+                                </div>
+                            
+                                <div className="fields-section">
+                                    <p>Estimated Capital</p>
+                                    <input 
+                                        type="number" 
+                                        className="input-field" 
+                                        placeholder="Estimated Capital" 
+                                        defaultValue={residentData.estimatedcapital}
+                                    />
                                 </div>
 
                                 <div className="fields-section">
@@ -255,15 +254,7 @@ export default function addAnnouncements() {
                                         maxLength={10}  // Restrict the input to 10 characters as a number
                                         pattern="^[0-9]{10}$"  // Regular expression to enforce a 10-digit number format
                                         title="Please enter a valid 10-digit contact number"  // Tooltip for invalid input
-                                    />
-                                </div>
-
-                                <div className="fields-section">
-                                    <p>Course</p>
-                                    <input 
-                                        type="text" 
-                                        className="input-field" 
-                                        placeholder="Course" 
+                                        defaultValue={residentData.contact}
                                     />
                                 </div>
                             </div>
@@ -329,20 +320,7 @@ export default function addAnnouncements() {
                         </div>
 
                     </div>
-
-
-
                 </div>
-
-                
-
-                
-        
-
-
-
-                
-                
             </div>
             
         </main>
