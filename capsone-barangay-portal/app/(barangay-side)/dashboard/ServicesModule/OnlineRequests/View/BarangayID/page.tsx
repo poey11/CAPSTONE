@@ -135,6 +135,9 @@ export default function ViewOnlineRequest() {
                 ))}
             </div>
 
+            <div className="Actions-Section">
+                    <button type="button" className="actions-button">Print</button>
+            </div>
         </main>
     );
 }

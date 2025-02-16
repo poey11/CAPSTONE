@@ -135,6 +135,10 @@ const metadata: Metadata = {
       }
   };
 
+  const handleSMS = () => {
+    window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
+};
+
     return (
 
         <main className="main-container">
@@ -225,6 +229,9 @@ const metadata: Metadata = {
                         Edit
                     </button>
                     <button className="action-delete">Delete</button>
+
+
+                    <button type="button" className="action-view" onClick={handleSMS}>SMS</button>
                   </div>
                 </td>
               </tr>

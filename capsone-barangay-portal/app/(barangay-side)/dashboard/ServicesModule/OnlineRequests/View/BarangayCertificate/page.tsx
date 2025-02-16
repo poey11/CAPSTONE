@@ -73,6 +73,7 @@ export default function ViewOnlineRequest() {
                       <span className={`status-badge ${residentData.status.toLowerCase().replace(" ", "-")}`}>
                           {residentData.status ?? "N/A"}
                       </span>
+        
                   </div>
                     
                 </div>
@@ -92,6 +93,11 @@ export default function ViewOnlineRequest() {
                         </div>
                     </div>
                 ))}
+
+            </div>
+
+            <div className="Actions-Section">
+                    <button type="button" className="actions-button">Print</button>
             </div>
         </main>
     );

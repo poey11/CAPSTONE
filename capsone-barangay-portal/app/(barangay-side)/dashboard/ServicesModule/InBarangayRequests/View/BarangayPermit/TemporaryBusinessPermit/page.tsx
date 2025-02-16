@@ -91,6 +91,11 @@ export default function ViewInBarangayRequest() {
                     </div>
                 ))}
             </div>
+
+
+            <div className="Actions-Section">
+                    <button type="button" className="actions-button">Print</button>
+            </div>
         </main>
     );
 }

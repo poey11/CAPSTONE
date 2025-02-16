@@ -6,8 +6,9 @@
     padding: 30px;
     margin-left: 2rem; 
     overflow-y: auto; 
-   display: flex;
-   flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .main-content {
@@ -108,6 +109,25 @@ margin:  auto;
 .requirement-image{
   width: 200px;
   height: 200px;
+}
+
+
+
+.Actions-Section{
+  display: flex;
+}
+
+.actions-button{
+    padding: 8px 12px;            
+    border-radius: 5px;          
+    font-size: 13px;              
+    color: white;                
+    display: inline-block;        
+    text-transform: capitalize;   
+    text-align: center;    
+    width: 150px;  
+    background-color: #f78e33;
+    margin-top: 50px;
 }
 
 
