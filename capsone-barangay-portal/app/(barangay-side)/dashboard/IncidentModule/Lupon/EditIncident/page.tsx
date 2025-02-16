@@ -76,9 +76,14 @@ export default function EditLuponIncident() {
         router.push("/dashboard/IncidentModule/Lupon/EditIncident/SummonLetter");
       };
 
-      const [status, setStatus] = useState("pending");
+      const [status, setStatus] = useState("pending"); //REMOVE PAG IMPLEMENTED NA SA BACKEND
 
-      
+      const [showDialogueContent, setShowDialogueContent] = useState(false); // Initially hidden
+
+      const handleToggleClick = () => {
+          setShowDialogueContent(prevState => !prevState); // Toggle visibility
+      };
+
 
 
 
@@ -218,7 +223,7 @@ export default function EditLuponIncident() {
             </div>
 
 
-              <div className="section-3">
+            <div className="section-3">
                 <p className="title">Other Information</p>
                 
                 <div className="bars">
@@ -329,76 +334,81 @@ export default function EditLuponIncident() {
 
         </div> 
 
-    <div className="dialouge-meeting-section">
-
-     
-       <div className="title-section">
-            <button type="submit" className="back-button" onClick={handleAddLupon}></button>
-            <p className="NewOfficial"> Dialouge Meeting</p>
-       </div>
-
-
-       <div className="section-2-dialouge">
-            <p >Complainant's Information</p>
-
-            <div className="bars">
-                    <div className="input-group">
-                        <p>Date</p>
-                        <input type="date" className="search-bar" placeholder="Enter Date" />
-                    </div>
-
-                    <div className="input-group">
-                        <p>For</p>
-                        <input type="text" className="search-bar" placeholder="Enter For" />
-                    </div>
     
-                    <div className="input-group">
-                        <p>Time</p>
-                        <input type="time" className="search-bar" placeholder="Enter Location" />
-                    </div>
+        <div className="dialouge-meeting-section">
+             
+                <div className="title-section">
+                    <button type="button" className="plus-button" onClick={handleToggleClick}></button>
+                    <p className="NewOfficial">Dialogue Meeting</p>
+                </div>
+
+                {showDialogueContent && (
+                    <>
+                        <div className="section-2-dialouge">
+                            <p>Complainant's Information</p>
+                            <div className="bars">
+                                <div className="input-group">
+                                    <p>Date</p>
+                                    <input type="date" className="search-bar" placeholder="Enter Date" />
+                                </div>
+                                <div className="input-group">
+                                    <p>For</p>
+                                    <input type="text" className="search-bar" placeholder="Enter For" />
+                                </div>
+                                <div className="input-group">
+                                    <p>Time</p>
+                                    <input type="time" className="search-bar" placeholder="Enter Time" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="section-3-dialouge">
+                            <div className="fields-section">
+                                <p>Minutes of Dialogue</p>
+                                <textarea className="description" placeholder="Enter Minutes of Dialogue" rows={13}></textarea>
+                            </div>
+                        </div>
+
+                        <div className="section-4-dialouge">
+                            <div className="fields-section">
+                                <p>Remarks</p>
+                                <textarea className="description" placeholder="Enter Remarks" rows={10}></textarea>
+                            </div>
+                            <div className="fields-section">
+                                <p>Parties</p>
+                                <textarea className="description" placeholder="Enter Parties" rows={10}></textarea>
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
 
-       </div>
-
-
-         <div className="section-3-dialouge">
-
-            <div className="fields-section">
-                <p>Minutes of Dialouge</p>
-                    <textarea 
-                    className="description" 
-                    placeholder="Enter Minutes of Dialouge"
-                    rows={13}
-                    ></textarea>
+    <div className="hearing-section">
+        
+            <div className="title-section">
+                <button type="button" className="plus-button" onClick={handleToggleClick}></button>
+                <p className="NewOfficial">First Hearing</p>
             </div>
 
-
-        </div>
-
-        <div className="section-4-dialouge">
-            
-        <div className="fields-section">
-                <p>Remarks</p>
-                    <textarea 
-                    className="description" 
-                    placeholder="Enter Remarks"
-                    rows={10}
-                    ></textarea>
-        </div>
-
-        <div className="fields-section">
-                <p>Parties</p>
-                    <textarea 
-                    className="description" 
-                    placeholder="Enter Parties"
-                    rows={10}
-                ></textarea>
-        </div>
-
-
-        </div>
 
     </div>
+
+    <div className="hearing-section">
+        
+            <div className="title-section">
+                <button type="button" className="plus-button" onClick={handleToggleClick}></button>
+                <p className="NewOfficial">Second Hearing</p>
+            </div>
+    </div>
+
+    <div className="hearing-section">
+        
+        <div className="title-section">
+            <button type="button" className="plus-button" onClick={handleToggleClick}></button>
+            <p className="NewOfficial">Third Hearing</p>
+        </div>
+    </div>
+
 
     
     </main>

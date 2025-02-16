@@ -76,7 +76,13 @@ export default function EditBCPCIncident() {
         router.push("/dashboard/IncidentModule/BCPC/EditIncident/SummonLetter");
       };
 
+      const [status, setStatus] = useState("pending"); // REMOVE PAG IMPLEMENTED NA SA BACKEND
 
+      const [showDialogueContent, setShowDialogueContent] = useState(false); // Initially hidden
+
+      const handleToggleClick = () => {
+          setShowDialogueContent(prevState => !prevState); // Toggle visibility
+      };
 
   return (
     <main className="main-container">
@@ -85,6 +91,18 @@ export default function EditBCPCIncident() {
        <div className="letters-content">
             <button className="letter-announcement-btn" onClick={handleGenerateDialouge}>Generate Dialouge Letter</button>
             <button className="letter-announcement-btn" onClick={handleGenerateSummonLetter}>Generate Summon Letter</button>
+            <select
+                        id="status"
+                        className={`status-dropdown ${status}`}
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        >
+                        <option value="pending">Pending</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="settled">Settled</option>
+                        <option value="archived">Archived</option>
+              </select>
+            
        </div>
 
         
@@ -310,84 +328,84 @@ export default function EditBCPCIncident() {
 
         </div> 
 
-    <div className="dialouge-meeting-section">
+        <div className="dialouge-meeting-section">
+             
+                <div className="title-section">
+                    <button type="button" className="plus-button" onClick={handleToggleClick}></button>
+                    <p className="NewOfficial">Dialogue Meeting</p>
+                </div>
 
-     
-       <div className="title-section">
-            <button type="submit" className="back-button" onClick={handleAddBCPC}></button>
-            <p className="NewOfficial"> Dialouge Meeting</p>
-       </div>
+                {showDialogueContent && (
+                    <>
+                        <div className="section-2-dialouge">
+                            <p>Complainant's Information</p>
+                            <div className="bars">
+                                <div className="input-group">
+                                    <p>Date</p>
+                                    <input type="date" className="search-bar" placeholder="Enter Date" />
+                                </div>
+                                <div className="input-group">
+                                    <p>For</p>
+                                    <input type="text" className="search-bar" placeholder="Enter For" />
+                                </div>
+                                <div className="input-group">
+                                    <p>Time</p>
+                                    <input type="time" className="search-bar" placeholder="Enter Time" />
+                                </div>
+                            </div>
+                        </div>
 
+                        <div className="section-3-dialouge">
+                            <div className="fields-section">
+                                <p>Minutes of Dialogue</p>
+                                <textarea className="description" placeholder="Enter Minutes of Dialogue" rows={13}></textarea>
+                            </div>
+                        </div>
 
-       <div className="section-2-dialouge">
-            <p >Complainant's Information</p>
-
-            <div className="bars">
-                    <div className="input-group">
-                        <p>Date</p>
-                        <input type="date" className="search-bar" placeholder="Enter Date" />
-                    </div>
-
-                    <div className="input-group">
-                        <p>For</p>
-                        <input type="text" className="search-bar" placeholder="Enter For" />
-                    </div>
-    
-                    <div className="input-group">
-                        <p>Time</p>
-                        <input type="time" className="search-bar" placeholder="Enter Location" />
-                    </div>
+                        <div className="section-4-dialouge">
+                            <div className="fields-section">
+                                <p>Remarks</p>
+                                <textarea className="description" placeholder="Enter Remarks" rows={10}></textarea>
+                            </div>
+                            <div className="fields-section">
+                                <p>Parties</p>
+                                <textarea className="description" placeholder="Enter Parties" rows={10}></textarea>
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
 
-       </div>
-
-
-         <div className="section-3-dialouge">
-
-            <div className="fields-section">
-                <p>Minutes of Dialouge</p>
-                    <textarea 
-                    className="description" 
-                    placeholder="Enter Minutes of Dialouge"
-                    rows={13}
-                    ></textarea>
-            </div>
-
-
-        </div>
-
-        <div className="section-4-dialouge">
-            
-        <div className="fields-section">
-                <p>Remarks</p>
-                    <textarea 
-                    className="description" 
-                    placeholder="Enter Remarks"
-                    rows={10}
-                    ></textarea>
-        </div>
-
-        <div className="fields-section">
-                <p>Parties</p>
-                    <textarea 
-                    className="description" 
-                    placeholder="Enter Parties"
-                    rows={10}
-                ></textarea>
-        </div>
-
-
-        </div>
-
-    </div>
-
-
-    <div className="first-hearing-section">
+    <div className="hearing-section">
         
-
+            <div className="title-section">
+                <button type="button" className="plus-button" onClick={handleToggleClick}></button>
+                <p className="NewOfficial">First Hearing</p>
+            </div>
 
 
     </div>
+
+    <div className="hearing-section">
+        
+            <div className="title-section">
+                <button type="button" className="plus-button" onClick={handleToggleClick}></button>
+                <p className="NewOfficial">Second Hearing</p>
+            </div>
+    </div>
+
+    <div className="hearing-section">
+        
+        <div className="title-section">
+            <button type="button" className="plus-button" onClick={handleToggleClick}></button>
+            <p className="NewOfficial">Third Hearing</p>
+        </div>
+    </div>
+
+
+
+       
+
 
     
     </main>
