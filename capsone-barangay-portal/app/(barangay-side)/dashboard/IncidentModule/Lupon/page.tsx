@@ -93,7 +93,7 @@ export default function LuponDepartment() {
                     <span className={`status-badge ${incident.Status.toLowerCase().replace(" ", "-")}`}>
                         {incident.Status}
                     </span>
-                </td>
+                </td>   
                 <td>
                   <div className="actions">
                     <button className="action-view" onClick={handleViewLupon}>View</button>

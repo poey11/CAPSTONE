@@ -19,6 +19,10 @@
     align-items: center;
     gap: 2rem;
     padding: 3rem;
+    background-color: #f4f2f2;
+    border: 2px solid  #ddd;
+    border-radius: 1rem;
+    margin-bottom: 2rem
 }
 
 
@@ -494,3 +498,39 @@ padding-top: 1rem;
 
 
   
+.status-dropdown {
+    border-radius: 6px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    width: 150px;
+    padding: 14px 24px;
+    font-size: 14px;
+  }
+  
+  .pending {
+    background-color: #d4d64f;
+    color: white;
+    font-size: 15px;
+    
+  }
+  
+  .resolved {
+    background-color: #66c47a;
+    color: white;
+    
+  }
+  
+  .settled {
+    background-color: #1e5128;
+    color: white;
+    font-size: 15px;
+  }
+  
+  .archived {
+    background-color: #7f7f7f;
+    color: white;
+    font-size: 15px;
+  }
+

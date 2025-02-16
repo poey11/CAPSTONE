@@ -76,6 +76,10 @@ export default function EditLuponIncident() {
         router.push("/dashboard/IncidentModule/Lupon/EditIncident/SummonLetter");
       };
 
+      const [status, setStatus] = useState("pending");
+
+      
+
 
 
   return (
@@ -85,6 +89,19 @@ export default function EditLuponIncident() {
        <div className="letters-content">
             <button className="letter-announcement-btn" onClick={handleGenerateDialouge}>Generate Dialouge Letter</button>
             <button className="letter-announcement-btn" onClick={handleGenerateSummonLetter}>Generate Summon Letter</button>
+            <select
+                        id="status"
+                        className={`status-dropdown ${status}`}
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        >
+                        <option value="pending">Pending</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="settled">Settled</option>
+                        <option value="archived">Archived</option>
+              </select>
+            
+
        </div>
 
         
@@ -92,16 +109,17 @@ export default function EditLuponIncident() {
             
        
          <button type="submit" className="back-button" onClick={handleAddLupon}></button>
+
        
 
             <div className="section-1">
                 <p className="NewOfficial"> Robbery Incident</p>
-
                     <div className="actions">
                         <button className="action-delete">Delete</button>
                         <button className="action-view">Save</button>
-                    </div>
+
                 
+                    </div>
              </div>
 
 
