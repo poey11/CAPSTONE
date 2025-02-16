@@ -3,6 +3,7 @@ import "@/CSS/IncidentModule/MainDashboardIncident.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const metadata: Metadata = {
   title: "Incident Management Module",
@@ -32,14 +33,29 @@ export default function GADDepartment() {
       prev.map((incident, i) => (i === index ? { ...incident, Status: newStatus } : incident))
     );
   };
-  
+
+  const router = useRouter();
+
+    const handleViewGAD = () => {
+      router.push("/dashboard/IncidentModule/GAD/ViewIncident");
+    };
+
+    const handleEditGAD = () => {
+      router.push("/dashboard/IncidentModule/GAD/EditIncident");
+    };
+
+    const handleAddGAD = () => {
+      router.push("/dashboard/IncidentModule/GAD/AddIncident");
+    };
+
+
+
   return (
     <main className="main-container">
       <div className="section-1">
         <h1>GAD Department</h1>
-        <Link href="/dashboard/IncidentModule/GAD/AddIncident">
-          <button className="add-announcement-btn">Add New Incident</button>
-        </Link>
+       
+          <button className="add-announcement-btn" onClick={handleAddGAD}>Add New Incident</button>
       </div>
 
       <div className="section-2">
@@ -81,8 +97,8 @@ export default function GADDepartment() {
                 </td>
                 <td>
                   <div className="actions">
-                    <button className="action-view">View</button>
-                    <button className="action-edit">Edit</button>
+                  <button className="action-view" onClick={handleViewGAD}>View</button>
+                  <button className="action-edit" onClick={handleEditGAD}>Edit</button>
                     <button className="action-delete">Delete</button>
                   </div>
                 </td>

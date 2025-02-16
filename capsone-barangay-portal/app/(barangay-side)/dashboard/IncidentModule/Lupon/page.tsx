@@ -3,6 +3,7 @@ import "@/CSS/IncidentModule/MainDashboardIncident.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const metadata: Metadata = {
   title: "Incident Management Module",
@@ -26,7 +27,6 @@ export default function LuponDepartment() {
     { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
     { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
     { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
-
   ]);
 
   const handleStatusChange = (index: number, newStatus: string) => {
@@ -34,14 +34,27 @@ export default function LuponDepartment() {
       prev.map((incident, i) => (i === index ? { ...incident, Status: newStatus } : incident))
     );
   };
-  
+
+   const router = useRouter();
+
+    const handleViewLupon = () => {
+      router.push("/dashboard/IncidentModule/Lupon/ViewIncident");
+    };
+
+    const handleEditLupon = () => {
+      router.push("/dashboard/IncidentModule/Lupon/EditIncident");
+    };
+
+    const handleAddLupon = () => {
+      router.push("/dashboard/IncidentModule/Lupon/AddIncident");
+    };
+
+
   return (
     <main className="main-container">
       <div className="section-1">
         <h1>Lupon Tagapamayapa</h1>
-        <Link href="/dashboard/IncidentModule/Lupon/AddIncident">
-          <button className="add-announcement-btn">Add New Incident</button>
-        </Link>
+          <button className="add-announcement-btn" onClick={handleAddLupon}>Add New Incident</button>
       </div>
 
       <div className="section-2">
@@ -80,11 +93,11 @@ export default function LuponDepartment() {
                     <span className={`status-badge ${incident.Status.toLowerCase().replace(" ", "-")}`}>
                         {incident.Status}
                     </span>
-                </td>
+                </td>   
                 <td>
                   <div className="actions">
-                    <button className="action-view">View</button>
-                    <button className="action-edit">Edit</button>
+                    <button className="action-view" onClick={handleViewLupon}>View</button>
+                    <button className="action-edit" onClick={handleEditLupon}>Edit</button>
                     <button className="action-delete">Delete</button>
                   </div>
                 </td>

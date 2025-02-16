@@ -1,10 +1,10 @@
 "use client"
-import "@/CSS/IncidentModule/AddNewIncident.css";
+import "@/CSS/IncidentModule/EditIncident.css";
 import type { Metadata } from "next";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import Link from 'next/link';
-import { useRouter } from "next/navigation";
 
 
 const metadata: Metadata = {
@@ -12,7 +12,7 @@ const metadata: Metadata = {
   description: "Stay updated with the latest announcements",
 };
 
-export default function AddGADIncident() {
+export default function EditLuponIncident() {
 
     const [isActive, setIsActive] = useState(false);
 
@@ -62,32 +62,69 @@ export default function AddGADIncident() {
         }
       };
 
-      const router = useRouter();
+    const router = useRouter();
 
-      const handleAddGAD = () => {
-        router.push("/dashboard/IncidentModule/GAD");
+    const handleAddLupon = () => {
+      router.push("/dashboard/IncidentModule/Lupon");
+    };
+    
+    const handleGenerateDialouge = () => {
+        router.push("/dashboard/IncidentModule/Lupon/EditIncident/DialogueLetter");
       };
-  
+
+      const handleGenerateSummonLetter = () => {
+        router.push("/dashboard/IncidentModule/Lupon/EditIncident/SummonLetter");
+      };
+
+      const [status, setStatus] = useState("pending"); //REMOVE PAG IMPLEMENTED NA SA BACKEND
+
+      const [showDialogueContent, setShowDialogueContent] = useState(false); // Initially hidden
+
+      const handleToggleClick = () => {
+          setShowDialogueContent(prevState => !prevState); // Toggle visibility
+      };
+
+
 
 
   return (
     <main className="main-container">
 
+
+       <div className="letters-content">
+            <button className="letter-announcement-btn" onClick={handleGenerateDialouge}>Generate Dialouge Letter</button>
+            <button className="letter-announcement-btn" onClick={handleGenerateSummonLetter}>Generate Summon Letter</button>
+            <select
+                        id="status"
+                        className={`status-dropdown ${status}`}
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        >
+                        <option value="pending">Pending</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="settled">Settled</option>
+                        <option value="archived">Archived</option>
+              </select>
+            
+
+       </div>
+
         
         <div className="main-content">
             
-      
-        <button type="submit" className="back-button" onClick={handleAddGAD}></button>
-      
+       
+         <button type="submit" className="back-button" onClick={handleAddLupon}></button>
+
+       
 
             <div className="section-1">
-                <p className="NewOfficial"> New Incident</p>
-
+                <p className="NewOfficial"> Robbery Incident</p>
                     <div className="actions">
                         <button className="action-delete">Delete</button>
                         <button className="action-view">Save</button>
-                    </div>
+
                 
+                    </div>
              </div>
 
 
@@ -105,17 +142,17 @@ export default function AddGADIncident() {
                     />
 
                    
-                  <p>Sex</p>
+                <p>Sex</p>
                   <select 
-                    id="featuredStatus" 
-                    name="featuredStatus" 
-                    className="featuredStatus" 
-                    required
-                    defaultValue=""  
-                    >
-                    <option value="" disabled>Choose</option>
-                    <option value="active">Male</option>
-                    <option value="inactive">Female</option>
+                  id="featuredStatus" 
+                  name="featuredStatus" 
+                  className="featuredStatus" 
+                  required
+                  defaultValue=""  
+                  >
+                  <option value="" disabled>Choose</option>
+                  <option value="active">Male</option>
+                  <option value="inactive">Female</option>
                   </select>
 
 
@@ -186,7 +223,7 @@ export default function AddGADIncident() {
             </div>
 
 
-              <div className="section-3">
+            <div className="section-3">
                 <p className="title">Other Information</p>
                 
                 <div className="bars">
@@ -295,11 +332,83 @@ export default function AddGADIncident() {
             </div>
            
 
-
-
-
-
         </div> 
+
+    
+        <div className="dialouge-meeting-section">
+             
+                <div className="title-section">
+                    <button type="button" className="plus-button" onClick={handleToggleClick}></button>
+                    <p className="NewOfficial">Dialogue Meeting</p>
+                </div>
+
+                {showDialogueContent && (
+                    <>
+                        <div className="section-2-dialouge">
+                            <p>Complainant's Information</p>
+                            <div className="bars">
+                                <div className="input-group">
+                                    <p>Date</p>
+                                    <input type="date" className="search-bar" placeholder="Enter Date" />
+                                </div>
+                                <div className="input-group">
+                                    <p>For</p>
+                                    <input type="text" className="search-bar" placeholder="Enter For" />
+                                </div>
+                                <div className="input-group">
+                                    <p>Time</p>
+                                    <input type="time" className="search-bar" placeholder="Enter Time" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="section-3-dialouge">
+                            <div className="fields-section">
+                                <p>Minutes of Dialogue</p>
+                                <textarea className="description" placeholder="Enter Minutes of Dialogue" rows={13}></textarea>
+                            </div>
+                        </div>
+
+                        <div className="section-4-dialouge">
+                            <div className="fields-section">
+                                <p>Remarks</p>
+                                <textarea className="description" placeholder="Enter Remarks" rows={10}></textarea>
+                            </div>
+                            <div className="fields-section">
+                                <p>Parties</p>
+                                <textarea className="description" placeholder="Enter Parties" rows={10}></textarea>
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
+
+    <div className="hearing-section">
+        
+            <div className="title-section">
+                <button type="button" className="plus-button" onClick={handleToggleClick}></button>
+                <p className="NewOfficial">First Hearing</p>
+            </div>
+
+
+    </div>
+
+    <div className="hearing-section">
+        
+            <div className="title-section">
+                <button type="button" className="plus-button" onClick={handleToggleClick}></button>
+                <p className="NewOfficial">Second Hearing</p>
+            </div>
+    </div>
+
+    <div className="hearing-section">
+        
+        <div className="title-section">
+            <button type="button" className="plus-button" onClick={handleToggleClick}></button>
+            <p className="NewOfficial">Third Hearing</p>
+        </div>
+    </div>
+
 
     
     </main>
