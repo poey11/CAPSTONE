@@ -3,22 +3,22 @@
 import { useRouter } from "next/navigation";
 import type { Metadata } from "next";
 import { useState } from "react";
-import "@/CSS/barangaySide/ServicesModule/BarangayDocs/TemporaryBusinessPermit.css";
+import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BusinessPermit.css";
 
 
 
 
 const metadata:Metadata = { 
-  title: "Edit Online Temporary Business Permit Request",
-  description: "Edit Online Temporary Business Permit Request",
+  title: "Edit In Barangay Business Permit Request",
+  description: "Edit In Barangay Business Permit Request",
 };
 
-export default function EditOnlineRequest() {
+export default function EditInBarangayRequest() {
 
     const router = useRouter();
 
     const handleBack = () => {
-      router.push("/dashboard/ServicesModule/OnlineRequests");
+      router.push("/dashboard/ServicesModule/InBarangayRequests");
     };
 
     const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
@@ -51,19 +51,19 @@ export default function EditOnlineRequest() {
       const requestData = [
         {
             documentType: "Barangay Permit",
-            purpose: "Temporary Business Permit",
+            purpose: "Business Permit",
             daterequested: "2024-01-17",
             firstname: "Jennie",
             middlename: "Yap",
             lastname: "Mendoza",
             address: "Calamba, Laguna",
-            businessactivity: "Renewal",
-            businessname: "Jennie's Salon",
+            businessactivity: "New",
+            businessname: "Jennie's Bakeshop",
             businesslocation: "Calamba, Laguna",
-            businessnature: "Salon",
-            estimatedcapital: "1000000",
+            businessnature: "Bakery",
+            estimatedcapital: "500000",
             contact: "09171218101",
-            status: "Pending",
+            status: "Completed",
             requirements: "/Images/document.png",
         },
     ];
@@ -73,7 +73,7 @@ export default function EditOnlineRequest() {
     return (
         <main className="addAnnouncement-main-container">
             <div className="section-1">
-                <h1>Barangay Permit Online Request</h1>
+                <h1>Barangay Permit In Barangay Request</h1>
             </div>
 
             <div className="addAnnouncement-main-section">
@@ -83,7 +83,7 @@ export default function EditOnlineRequest() {
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/>
                         </button>
 
-                        <h1>Temporary Business Permit</h1>
+                        <h1>Business Permit</h1>
                     </div>
 
                     <div className="action-btn-section">
@@ -123,10 +123,9 @@ export default function EditOnlineRequest() {
                                         required
                                         defaultValue={residentData.status}
                                     >
-                                        <option value="Pending">Pending</option>
-                                        <option value="Pickup">Pickup</option>
+                                        <option value="New">New</option>
+                                        <option value="In Progress">In Progress</option>
                                         <option value="Completed">Completed</option>
-                                        <option value="Rejected">Rejected</option>
                                     </select>
                                 </div>
                             

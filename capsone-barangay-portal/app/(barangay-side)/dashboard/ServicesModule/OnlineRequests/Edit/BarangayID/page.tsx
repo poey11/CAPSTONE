@@ -9,8 +9,8 @@ import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayID.css";
 
 
 const metadata:Metadata = { 
-  title: "View Online Barangay Certificate Request",
-  description: "View Online Barangay Certificate Request for Barangay Side",
+  title: "Edit Online Barangay ID Request",
+  description: "Edit Online Barangay ID Request for Barangay Side",
 };
 
 export default function EditOnlineRequest() {

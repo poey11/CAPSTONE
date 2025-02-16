@@ -6,45 +6,53 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 
 
 const metadata: Metadata = {
-    title: "View Online Construction Permit Request",
-    description: "View Online Construction Permit Request in Services Module",
+    title: "View In Barangay First Time Jobseeker Request",
+    description: "View In Barangay First Time Jobseekery Request in Services Module",
   };
 
 
   
   const residentFields = [
     { key: "documentType", label: "Document Type" },
-    { key: "purpose", label: "Purpose" },
     { key: "daterequested", label: "Date Requested" },
+    { key: "residentsince", label: "Resident Since" },
     { key: "firstname", label: "First Name" },
     { key: "middlename", label: "Middle Name" },
     { key: "lastname", label: "Last Name" },
-    { key: "address", label: "Home / Office Address" },
-    { key: "constructionactivity", label: "Construction Activity" },
-    { key: "projecttitle", label: "Project Title" },
-    { key: "projectlocation", label: "Project Location" },
-    { key: "buildingtype", label: "Type of Building" },
+    { key: "address", label: "Address" },
+    { key: "age", label: "Age" },
+    { key: "civilstatus", label: "Civil Status" },
+    { key: "citizenship", label: "Citizenship" },
+    { key: "birthday", label: "Birthday" },
+    { key: "gender", label: "Gender" },
     { key: "contact", label: "Contact" },
+    { key: "educationalattainment", label: "Educational Attainment" },
+    { key: "course", label: "Course" },
+    { key: "beneficiary", label: "Benefficiary of JobStart Program" },
     { key: "status", label: "Status" },
     { key: "requirements", label: "Requirements" },
 ];
 
-export default function ViewOnlineRequest() {
+export default function ViewInBarangayRequest() {
     const requestData = [
         {
-            documentType: "Barangay Permit",
-            purpose: "Construction Permit",
+            documentType: "First Time Jobseeker",
             daterequested: "January 17, 2024",
+            residentsince: "January 14, 2002",
             firstname: "Jennie",
             middlename: "Yap",
             lastname: "Mendoza",
             address: "Calamba, Laguna",
-            constructionactivity: "renovation",
-            projecttitle: "Jennie's Home",
-            projectlocation: "Calamba, Laguna",
-            buildingtype: "Residential",
+            age: "23",
+            civilstatus: "Single",
+            citizenship: "Filipino",
+            birthday: "September 6, 2002",
+            gender: "Female",
             contact: "09171218101",
-            status: "Pending",
+            educationalattainment: "College Graduate",
+            course: "Pharmacy",
+            beneficiary: "Yes",
+            status: "New",
             requirements: "/Images/document.png",
         },
     ];
@@ -52,7 +60,7 @@ export default function ViewOnlineRequest() {
     const residentData = requestData[0] as Record<string, string>;
 
     const handleBack = () => {
-        window.location.href = "/dashboard/ServicesModule/OnlineRequests";
+        window.location.href = "/dashboard/ServicesModule/InBarangayRequests";
     };
 
     return (
@@ -60,10 +68,10 @@ export default function ViewOnlineRequest() {
             <div className="main-content">
                 <div className="section-1">
                   <div className="left-section">
-                    <Link href="/dashboard/ServicesModule/OnlineRequests">
+                    <Link href="/dashboard/ServicesModule/InBarangayRequests">
                         <button type="button" className="back-button" onClick={handleBack}></button>
                     </Link>
-                    <p>Online Request Details</p>
+                    <p>In Barangay Request Details</p>
                   </div>
                   <div className="right-section">
                       <span className={`status-badge ${residentData.status.toLowerCase().replace(" ", "-")}`}>

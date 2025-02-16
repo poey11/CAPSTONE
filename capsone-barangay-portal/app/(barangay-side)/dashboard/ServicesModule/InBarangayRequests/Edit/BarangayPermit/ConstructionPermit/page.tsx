@@ -3,22 +3,22 @@
 import { useRouter } from "next/navigation";
 import type { Metadata } from "next";
 import { useState } from "react";
-import "@/CSS/barangaySide/ServicesModule/BarangayDocs/TemporaryBusinessPermit.css";
+import "@/CSS/barangaySide/ServicesModule/BarangayDocs/ConstructionPermit.css";
 
 
 
 
 const metadata:Metadata = { 
-  title: "Edit Online Temporary Business Permit Request",
-  description: "Edit Online Temporary Business Permit Request",
+  title: "Edit In Barangay Construction Permit Request",
+  description: "Edit In Barangay Construction Permit Request",
 };
 
-export default function EditOnlineRequest() {
+export default function EditInBarangayRequest() {
 
     const router = useRouter();
 
     const handleBack = () => {
-      router.push("/dashboard/ServicesModule/OnlineRequests");
+      router.push("/dashboard/ServicesModule/InBarangayRequests");
     };
 
     const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
@@ -57,11 +57,10 @@ export default function EditOnlineRequest() {
             middlename: "Yap",
             lastname: "Mendoza",
             address: "Calamba, Laguna",
-            businessactivity: "Renewal",
-            businessname: "Jennie's Salon",
-            businesslocation: "Calamba, Laguna",
-            businessnature: "Salon",
-            estimatedcapital: "1000000",
+            constructionactivity: "renovation",
+            projecttitle: "Jennie's Home",
+            projectlocation: "Calamba, Laguna",
+            buildingtype: "Residential",
             contact: "09171218101",
             status: "Pending",
             requirements: "/Images/document.png",
@@ -83,7 +82,7 @@ export default function EditOnlineRequest() {
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/>
                         </button>
 
-                        <h1>Temporary Business Permit</h1>
+                        <h1>Construction Permit</h1>
                     </div>
 
                     <div className="action-btn-section">
@@ -105,16 +104,18 @@ export default function EditOnlineRequest() {
                                         type="date" 
                                         className="input-field" 
                                         placeholder="Select Date From"
-                                        defaultValue={residentData.daterequested} 
-                                    /> 
+                                        defaultValue={residentData.daterequested}
+                                    />
+                                    
                                 </div>
 
                             </div>
 
-                            </div>
+                        </div>
 
                         <div className="section-right">
-                            <div className="fields-section">
+                            <div className="fields-container">
+                                <div className="fields-section">
                                     <p>Status</p>
                                     <select
                                         id="status"
@@ -123,13 +124,12 @@ export default function EditOnlineRequest() {
                                         required
                                         defaultValue={residentData.status}
                                     >
-                                        <option value="Pending">Pending</option>
-                                        <option value="Pickup">Pickup</option>
+                                        <option value="New">New</option>
+                                        <option value="In Progress">In Progress</option>
                                         <option value="Completed">Completed</option>
-                                        <option value="Rejected">Rejected</option>
                                     </select>
                                 </div>
-                            
+                            </div>
                         </div>
                             
                     </div>
@@ -142,7 +142,7 @@ export default function EditOnlineRequest() {
                                     type="text" 
                                     className="headline" 
                                     placeholder="First Name"
-                                    defaultValue={residentData.firstname} 
+                                    defaultValue={residentData.firstname}
                                 />
                             </div>
 
@@ -151,8 +151,8 @@ export default function EditOnlineRequest() {
                                 <input 
                                     type="text" 
                                     className="headline" 
-                                    placeholder="Middle Name" 
-                                    defaultValue={residentData.middlename}
+                                    placeholder="Middle Name"
+                                    defaultValue={residentData.middlename} 
                                 />
                             </div>
 
@@ -161,17 +161,17 @@ export default function EditOnlineRequest() {
                                 <input 
                                     type="text" 
                                     className="headline" 
-                                    placeholder="Last Name" 
-                                    defaultValue={residentData.lastname}
+                                    placeholder="Last Name"
+                                    defaultValue={residentData.lastname} 
                                 />
                             </div>
                             <div className="fields-section">
-                                <p>Home Address</p>
+                                <p>Home / Office Address</p>
                                 <input 
                                     type="text" 
                                     className="headline" 
-                                    placeholder="Home Address" 
-                                    defaultValue={residentData.address}
+                                    placeholder="Home Address"
+                                    defaultValue={residentData.address} 
                                 />
                             </div>
 
@@ -182,32 +182,22 @@ export default function EditOnlineRequest() {
                         <div className="section-left">
                             <div className="fields-container">
                                 <div className="fields-section">
-                                    <p>Business Name</p>
+                                    <p>Project Title</p>
                                     <input 
                                         type="text" 
                                         className="input-field" 
-                                        placeholder="Business Name" 
-                                        defaultValue={residentData.businessname}
+                                        placeholder="Business Name"
+                                        defaultValue={residentData.projecttitle} 
                                     />
                                 </div>
 
                                 <div className="fields-section">
-                                    <p>Business Location</p>
+                                    <p>Project Location</p>
                                     <input 
                                         type="text" 
                                         className="input-field" 
                                         placeholder="Business Location" 
-                                        defaultValue={residentData.businesslocation}
-                                    />
-                                </div>
-
-                                <div className="fields-section">
-                                    <p>Nature of Business</p>
-                                    <input 
-                                        type="text" 
-                                        className="input-field" 
-                                        placeholder="Nature of Business" 
-                                        defaultValue={residentData.businessnature}
+                                        defaultValue={residentData.projectlocation} 
                                     />
                                 </div>
 
@@ -218,27 +208,12 @@ export default function EditOnlineRequest() {
                         <div className="section-right">
                             <div className="fields-container">
                                 <div className="fields-section">
-                                    <p>Type of Business Activity</p>
-                                    <select 
-                                        id="businessActivity" 
-                                        name="businessActivity" 
-                                        className="input-field" 
-                                        required
-                                        defaultValue={residentData.businessactivity}
-                                    >
-                                        <option value="" disabled>Business Activity</option>
-                                        <option value="Male">New</option>
-                                        <option value="Female">Renewal</option>
-                                    </select>
-                                </div>
-                            
-                                <div className="fields-section">
-                                    <p>Estimated Capital</p>
+                                    <p>Type of Building</p>
                                     <input 
-                                        type="number" 
+                                        type="text" 
                                         className="input-field" 
-                                        placeholder="Estimated Capital" 
-                                        defaultValue={residentData.estimatedcapital}
+                                        placeholder="Type of Building"
+                                        defaultValue={residentData.buildingtype}  
                                     />
                                 </div>
 
@@ -254,7 +229,7 @@ export default function EditOnlineRequest() {
                                         maxLength={10}  // Restrict the input to 10 characters as a number
                                         pattern="^[0-9]{10}$"  // Regular expression to enforce a 10-digit number format
                                         title="Please enter a valid 10-digit contact number"  // Tooltip for invalid input
-                                        defaultValue={residentData.contact}
+                                        defaultValue={residentData.contact} 
                                     />
                                 </div>
                             </div>

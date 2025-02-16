@@ -9,11 +9,11 @@ import "@/CSS/barangaySide/ServicesModule/BarangayDocs/LiquorPermit.css";
 
 
 const metadata:Metadata = { 
-  title: "Add Announcements Barangay Side",
-  description: "Add Announcements for Barangay Side",
+  title: "Edit Online Liquor Permit Request",
+  description: "Edit Online Liquor Permit Request",
 };
 
-export default function addAnnouncements() {
+export default function EditOnlineRequest() {
 
     const router = useRouter();
 

@@ -9,11 +9,11 @@ import "@/CSS/barangaySide/ServicesModule/BarangayDocs/COOP.css";
 
 
 const metadata:Metadata = { 
-  title: "Add Announcements Barangay Side",
-  description: "Add Announcements for Barangay Side",
+  title: "Edit Online COOP Request",
+  description: "Edit Online COOP Request",
 };
 
-export default function addAnnouncements() {
+export default function EditOnlineRequest() {
 
     const router = useRouter();
 

@@ -3,22 +3,22 @@
 import { useRouter } from "next/navigation";
 import type { Metadata } from "next";
 import { useState } from "react";
-import "@/CSS/barangaySide/ServicesModule/BarangayDocs/TemporaryBusinessPermit.css";
+import "@/CSS/barangaySide/ServicesModule/BarangayDocs/COOP.css";
 
 
 
 
 const metadata:Metadata = { 
-  title: "Edit Online Temporary Business Permit Request",
-  description: "Edit Online Temporary Business Permit Request",
+  title: "Edit In Barangay COOP Request",
+  description: "Edit In Barangay COOP Request",
 };
 
-export default function EditOnlineRequest() {
+export default function EditInBarangayRequest() {
 
     const router = useRouter();
 
     const handleBack = () => {
-      router.push("/dashboard/ServicesModule/OnlineRequests");
+      router.push("/dashboard/ServicesModule/InBarangayRequests");
     };
 
     const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
@@ -51,7 +51,7 @@ export default function EditOnlineRequest() {
       const requestData = [
         {
             documentType: "Barangay Permit",
-            purpose: "Temporary Business Permit",
+            purpose: "COOP",
             daterequested: "2024-01-17",
             firstname: "Jennie",
             middlename: "Yap",
@@ -63,7 +63,7 @@ export default function EditOnlineRequest() {
             businessnature: "Salon",
             estimatedcapital: "1000000",
             contact: "09171218101",
-            status: "Pending",
+            status: "In Progress",
             requirements: "/Images/document.png",
         },
     ];
@@ -83,7 +83,7 @@ export default function EditOnlineRequest() {
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/>
                         </button>
 
-                        <h1>Temporary Business Permit</h1>
+                        <h1>COOP</h1>
                     </div>
 
                     <div className="action-btn-section">
@@ -104,17 +104,20 @@ export default function EditOnlineRequest() {
                                     <input 
                                         type="date" 
                                         className="input-field" 
-                                        placeholder="Select Date From"
-                                        defaultValue={residentData.daterequested} 
-                                    /> 
+                                        placeholder="Select Date From" 
+                                        defaultValue={residentData.daterequested}    
+                                    />
+                                    
                                 </div>
 
                             </div>
 
                             </div>
 
-                        <div className="section-right">
-                            <div className="fields-section">
+                            <div className="section-right">
+                            <div className="fields-container">
+
+                                <div className="fields-section">
                                     <p>Status</p>
                                     <select
                                         id="status"
@@ -123,13 +126,13 @@ export default function EditOnlineRequest() {
                                         required
                                         defaultValue={residentData.status}
                                     >
-                                        <option value="Pending">Pending</option>
-                                        <option value="Pickup">Pickup</option>
+                                        <option value="New">New</option>
+                                        <option value="In Progress">In Progress</option>
                                         <option value="Completed">Completed</option>
-                                        <option value="Rejected">Rejected</option>
                                     </select>
                                 </div>
-                            
+                                
+                            </div>
                         </div>
                             
                     </div>
@@ -141,8 +144,8 @@ export default function EditOnlineRequest() {
                                 <input 
                                     type="text" 
                                     className="headline" 
-                                    placeholder="First Name"
-                                    defaultValue={residentData.firstname} 
+                                    placeholder="First Name" 
+                                    defaultValue={residentData.firstname}
                                 />
                             </div>
 
@@ -161,8 +164,8 @@ export default function EditOnlineRequest() {
                                 <input 
                                     type="text" 
                                     className="headline" 
-                                    placeholder="Last Name" 
-                                    defaultValue={residentData.lastname}
+                                    placeholder="Last Name"
+                                    defaultValue={residentData.lastname} 
                                 />
                             </div>
                             <div className="fields-section">
@@ -170,8 +173,8 @@ export default function EditOnlineRequest() {
                                 <input 
                                     type="text" 
                                     className="headline" 
-                                    placeholder="Home Address" 
-                                    defaultValue={residentData.address}
+                                    placeholder="Home Address"
+                                    defaultValue={residentData.address} 
                                 />
                             </div>
 
@@ -186,8 +189,8 @@ export default function EditOnlineRequest() {
                                     <input 
                                         type="text" 
                                         className="input-field" 
-                                        placeholder="Business Name" 
-                                        defaultValue={residentData.businessname}
+                                        placeholder="Business Name"
+                                        defaultValue={residentData.businessname} 
                                     />
                                 </div>
 
@@ -224,15 +227,14 @@ export default function EditOnlineRequest() {
                                         name="businessActivity" 
                                         className="input-field" 
                                         required
-                                        defaultValue={residentData.businessactivity}
+                                        defaultValue={residentData.businessactivity}  
                                     >
                                         <option value="" disabled>Business Activity</option>
                                         <option value="Male">New</option>
                                         <option value="Female">Renewal</option>
                                     </select>
                                 </div>
-                            
-                                <div className="fields-section">
+                                 <div className="fields-section">
                                     <p>Estimated Capital</p>
                                     <input 
                                         type="number" 
@@ -320,7 +322,7 @@ export default function EditOnlineRequest() {
                         </div>
 
                     </div>
-                </div>
+                </div>  
             </div>
             
         </main>

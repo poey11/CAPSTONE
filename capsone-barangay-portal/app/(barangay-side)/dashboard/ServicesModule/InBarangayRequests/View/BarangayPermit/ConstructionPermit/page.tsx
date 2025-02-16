@@ -6,8 +6,8 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 
 
 const metadata: Metadata = {
-    title: "View Online Construction Permit Request",
-    description: "View Online Construction Permit Request in Services Module",
+    title: "View In Barangay Construction Permit Request",
+    description: "View In Barangay Construction Permit Request in Services Module",
   };
 
 
@@ -29,7 +29,7 @@ const metadata: Metadata = {
     { key: "requirements", label: "Requirements" },
 ];
 
-export default function ViewOnlineRequest() {
+export default function ViewInBarangayRequest() {
     const requestData = [
         {
             documentType: "Barangay Permit",
@@ -44,7 +44,7 @@ export default function ViewOnlineRequest() {
             projectlocation: "Calamba, Laguna",
             buildingtype: "Residential",
             contact: "09171218101",
-            status: "Pending",
+            status: "Completed",
             requirements: "/Images/document.png",
         },
     ];
@@ -52,7 +52,7 @@ export default function ViewOnlineRequest() {
     const residentData = requestData[0] as Record<string, string>;
 
     const handleBack = () => {
-        window.location.href = "/dashboard/ServicesModule/OnlineRequests";
+        window.location.href = "/dashboard/ServicesModule/InBarangayRequests";
     };
 
     return (
@@ -60,10 +60,10 @@ export default function ViewOnlineRequest() {
             <div className="main-content">
                 <div className="section-1">
                   <div className="left-section">
-                    <Link href="/dashboard/ServicesModule/OnlineRequests">
+                    <Link href="/dashboard/ServicesModule/InBarangayRequests">
                         <button type="button" className="back-button" onClick={handleBack}></button>
                     </Link>
-                    <p>Online Request Details</p>
+                    <p>In Barangay Request Details</p>
                   </div>
                   <div className="right-section">
                       <span className={`status-badge ${residentData.status.toLowerCase().replace(" ", "-")}`}>

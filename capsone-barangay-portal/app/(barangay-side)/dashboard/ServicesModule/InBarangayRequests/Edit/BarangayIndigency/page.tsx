@@ -3,22 +3,22 @@
 import { useRouter } from "next/navigation";
 import type { Metadata } from "next";
 import { useState } from "react";
-import "@/CSS/barangaySide/ServicesModule/BarangayDocs/TemporaryBusinessPermit.css";
+import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayIndigency.css";
 
 
 
 
 const metadata:Metadata = { 
-  title: "Edit Online Temporary Business Permit Request",
-  description: "Edit Online Temporary Business Permit Request",
+  title: "Edit In Barangay Indigency Request",
+  description: "Edit In Barangay Indigency Request",
 };
 
-export default function EditOnlineRequest() {
+export default function EditInBarangayRequest() {
 
     const router = useRouter();
 
     const handleBack = () => {
-      router.push("/dashboard/ServicesModule/OnlineRequests");
+      router.push("/dashboard/ServicesModule/InBarangayRequests");
     };
 
     const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
@@ -50,20 +50,21 @@ export default function EditOnlineRequest() {
 
       const requestData = [
         {
-            documentType: "Barangay Permit",
-            purpose: "Temporary Business Permit",
+            documentType: "Barangay Indigency",
+            purpose: "No Income",
             daterequested: "2024-01-17",
+            residentsince: "2002-01-14",
             firstname: "Jennie",
             middlename: "Yap",
             lastname: "Mendoza",
             address: "Calamba, Laguna",
-            businessactivity: "Renewal",
-            businessname: "Jennie's Salon",
-            businesslocation: "Calamba, Laguna",
-            businessnature: "Salon",
-            estimatedcapital: "1000000",
+            age: "23",
+            civilstatus: "Single",
+            citizenship: "Filipino",
+            birthday: "2002-09-08",
+            gender: "Female",
             contact: "09171218101",
-            status: "Pending",
+            status: "In Progress",
             requirements: "/Images/document.png",
         },
     ];
@@ -73,7 +74,7 @@ export default function EditOnlineRequest() {
     return (
         <main className="addAnnouncement-main-container">
             <div className="section-1">
-                <h1>Barangay Permit Online Request</h1>
+                <h1>Barangay Clearance In Barangay Request</h1>
             </div>
 
             <div className="addAnnouncement-main-section">
@@ -83,7 +84,7 @@ export default function EditOnlineRequest() {
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/>
                         </button>
 
-                        <h1>Temporary Business Permit</h1>
+                        <h1>Barangay Indigency</h1>
                     </div>
 
                     <div className="action-btn-section">
@@ -100,21 +101,43 @@ export default function EditOnlineRequest() {
                         <div className="section-left">
                             <div className="fields-container">
                                 <div className="fields-section">
-                                    <p>Date Requested</p>
-                                    <input 
-                                        type="date" 
+                                    <p>Purpose</p>
+                                    <select 
+                                        id="clearancePurpose" 
+                                        name="clearancePurpose" 
                                         className="input-field" 
-                                        placeholder="Select Date From"
-                                        defaultValue={residentData.daterequested} 
-                                    /> 
+                                        required
+                                        defaultValue={residentData.purpose}
+                                    >
+                                        <option value="" disabled>Purpose</option>
+                                        <option value="Loan">No Income</option>
+                                        <option value="Bank Transaction">Public Attorneys Office</option>
+                                        <option value="Bank Transaction">AKAP</option>
+                                        <option value="Local Employment">Financial Subsidy of Solo Parent</option>
+                                        <option value="Maynilad">Fire Emergency</option>
+                                        <option value="Meralco">Flood Victims</option>
+                                        <option value="Bail Bond">Philhealth Sponsor</option>
+                                        <option value="Character Reputation">Medical Assistance</option>
+                                        <option value="Others">Others</option>
+                                    </select>
+                                </div>
+
+                                <div className="fields-section">
+                                    <p>Other Purpose</p>
+                                    <input 
+                                        type="text" 
+                                        className="input-field" 
+                                        placeholder="Other Purpose" 
+                                    />
                                 </div>
 
                             </div>
 
                             </div>
 
-                        <div className="section-right">
-                            <div className="fields-section">
+                            <div className="section-right">
+                            <div className="fields-container">
+                                <div className="fields-section">
                                     <p>Status</p>
                                     <select
                                         id="status"
@@ -123,13 +146,24 @@ export default function EditOnlineRequest() {
                                         required
                                         defaultValue={residentData.status}
                                     >
-                                        <option value="Pending">Pending</option>
-                                        <option value="Pickup">Pickup</option>
+                                        <option value="New">New</option>
+                                        <option value="In Progress">In Progress</option>
                                         <option value="Completed">Completed</option>
-                                        <option value="Rejected">Rejected</option>
+                                        
                                     </select>
                                 </div>
-                            
+                                <div className="fields-section">
+                                    <p>Date Requested</p>
+                                    <input 
+                                        type="date" 
+                                        className="input-field" 
+                                        placeholder="Select Date From"
+                                        defaultValue={residentData.daterequested} 
+                                    />
+                                    
+                                </div>
+                                
+                            </div>
                         </div>
                             
                     </div>
@@ -137,17 +171,17 @@ export default function EditOnlineRequest() {
                     <div className="main-fields-container-section2">
                         <div className="fields-container">
                             <div className="fields-section">
-                                <p>Applicant's First Name</p>
+                                <p>First Name</p>
                                 <input 
                                     type="text" 
                                     className="headline" 
-                                    placeholder="First Name"
-                                    defaultValue={residentData.firstname} 
+                                    placeholder="First Name" 
+                                    defaultValue={residentData.firstname}
                                 />
                             </div>
 
                             <div className="fields-section">
-                                <p>Applicant's Middle Name</p>
+                                <p>Middle Name</p>
                                 <input 
                                     type="text" 
                                     className="headline" 
@@ -157,7 +191,7 @@ export default function EditOnlineRequest() {
                             </div>
 
                             <div className="fields-section">
-                                <p>Applicant's Last Name</p>
+                                <p>Last Name</p>
                                 <input 
                                     type="text" 
                                     className="headline" 
@@ -166,11 +200,11 @@ export default function EditOnlineRequest() {
                                 />
                             </div>
                             <div className="fields-section">
-                                <p>Home Address</p>
+                                <p>Address</p>
                                 <input 
                                     type="text" 
                                     className="headline" 
-                                    placeholder="Home Address" 
+                                    placeholder="Address" 
                                     defaultValue={residentData.address}
                                 />
                             </div>
@@ -182,32 +216,54 @@ export default function EditOnlineRequest() {
                         <div className="section-left">
                             <div className="fields-container">
                                 <div className="fields-section">
-                                    <p>Business Name</p>
+                                    <p>Resident Since</p>
                                     <input 
-                                        type="text" 
+                                        type="date" 
                                         className="input-field" 
-                                        placeholder="Business Name" 
-                                        defaultValue={residentData.businessname}
+                                        placeholder="Select Date From" 
+                                        defaultValue={residentData.residentsince}
+                                    />
+                                </div>
+                                <div className="fields-section">
+                                    <p>Age</p>
+                                    <input 
+                                        type="number"  // Ensures the input accepts only numbers
+                                        id="age"  
+                                        name="age"  
+                                        className="input-field" 
+                                        required 
+                                        min="1"  // Minimum age (you can adjust this as needed)
+                                        max="150"  // Maximum age (you can adjust this as needed)
+                                        placeholder="Enter Age"  
+                                        step="1"  // Ensures only whole numbers can be entered
+                                        defaultValue={residentData.age}
                                     />
                                 </div>
 
                                 <div className="fields-section">
-                                    <p>Business Location</p>
-                                    <input 
-                                        type="text" 
+                                    <p>Civil Status</p>  
+                                    <select 
+                                        id="civilstatus" 
+                                        name="civilstatus" 
                                         className="input-field" 
-                                        placeholder="Business Location" 
-                                        defaultValue={residentData.businesslocation}
-                                    />
+                                        required
+                                        defaultValue={residentData.civilstatus}  
+                                    >
+                                        <option value="" disabled>Select civil status</option>
+                                        <option value="Single">Single</option>
+                                        <option value="Married">Married</option>
+                                        <option value="Widow">Widow</option>
+                                        <option value="Separated">Separated</option>
+                                    </select>
                                 </div>
 
                                 <div className="fields-section">
-                                    <p>Nature of Business</p>
+                                    <p>Citizenship</p>
                                     <input 
                                         type="text" 
                                         className="input-field" 
-                                        placeholder="Nature of Business" 
-                                        defaultValue={residentData.businessnature}
+                                        placeholder="Address" 
+                                        defaultValue={residentData.citizenship}
                                     />
                                 </div>
 
@@ -218,28 +274,27 @@ export default function EditOnlineRequest() {
                         <div className="section-right">
                             <div className="fields-container">
                                 <div className="fields-section">
-                                    <p>Type of Business Activity</p>
+                                    <p>Birthday</p>
+                                    <input 
+                                        type="date" 
+                                        className="input-field" 
+                                        placeholder="Select Date From" 
+                                        defaultValue={residentData.birthday}
+                                    />    
+                                </div>
+                                <div className="fields-section">
+                                    <p>Gender</p>
                                     <select 
-                                        id="businessActivity" 
-                                        name="businessActivity" 
+                                        id="gender" 
+                                        name="gender" 
                                         className="input-field" 
                                         required
-                                        defaultValue={residentData.businessactivity}
+                                        defaultValue={residentData.gender}  
                                     >
-                                        <option value="" disabled>Business Activity</option>
-                                        <option value="Male">New</option>
-                                        <option value="Female">Renewal</option>
+                                        <option value="" disabled>Select gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
                                     </select>
-                                </div>
-                            
-                                <div className="fields-section">
-                                    <p>Estimated Capital</p>
-                                    <input 
-                                        type="number" 
-                                        className="input-field" 
-                                        placeholder="Estimated Capital" 
-                                        defaultValue={residentData.estimatedcapital}
-                                    />
                                 </div>
 
                                 <div className="fields-section">
@@ -320,7 +375,7 @@ export default function EditOnlineRequest() {
                         </div>
 
                     </div>
-                </div>
+                </div>  
             </div>
             
         </main>

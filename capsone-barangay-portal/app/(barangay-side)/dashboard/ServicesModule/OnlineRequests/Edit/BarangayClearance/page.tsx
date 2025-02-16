@@ -9,8 +9,8 @@ import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayClearance.css";
 
 
 const metadata:Metadata = { 
-  title: "Add Announcements Barangay Side",
-  description: "Add Announcements for Barangay Side",
+  title: "Edit Barangay Clearance Request Barangay Side",
+  description: "Edit Barangay Clearance Request Barangay Side",
 };
 
 export default function EditOnlineRequest() {

@@ -9,11 +9,11 @@ import "@/CSS/barangaySide/ServicesModule/BarangayDocs/FirstTimeJobseeker.css";
 
 
 const metadata:Metadata = { 
-  title: "Add Announcements Barangay Side",
-  description: "Add Announcements for Barangay Side",
+  title: "Edit Online First Time Jobseeker Request",
+  description: "Edit Online First Time Jobseeker Request",
 };
 
-export default function addAnnouncements() {
+export default function EditOnlineRequest() {
 
     const router = useRouter();
 
