@@ -7,6 +7,11 @@
     margin-left: 2rem; 
 }
 
+.main-content{
+    display: flex;
+    flex-direction: column;
+}
+
 .section-1{
     display: flex;
     align-items: center;
@@ -172,16 +177,20 @@
 
 /* Colors for different statuses */
 
-.status-badge.in-progress {
-    background-color: #ffd700;    
+.status-badge.rejected {
+    background-color: #e22929;    
 }
 
 .status-badge.completed {
     background-color: #4caf50;    
 }
 
-.status-badge.new {
-    background-color: #f79233;    
+.status-badge.pick-up {
+    background-color: #be5cb6;    
+}
+
+.status-badge.pending {
+    background-color: #325bd4;    
 }
 
 

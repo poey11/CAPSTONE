@@ -51,7 +51,7 @@ const BMenu: React.FC = () => {
           {openDropdown === "services" && (
             <div className="dropdown-container">
               <Link href="/dashboard/ServicesModule/InBarangayRequests" className="dropdown-item">In Barangay Requests</Link>
-              <Link href="/dashboard/OfficialsModule/SitioHoaOfficers" className="dropdown-item">Online Requests</Link>
+              <Link href="/dashboard/ServicesModule/OnlineRequests" className="dropdown-item">Online Requests</Link>
               <Link href="/dashboard/OfficialsModule/SitioHoaOfficers" className="dropdown-item">Appointments</Link>
             </div>
           )}

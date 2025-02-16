@@ -1,0 +1,171 @@
+.main-container {
+
+    width: 100%;
+    height: 100vh;
+    background-color: #f9f9f9;
+    padding: 30px;
+    margin-left: 2rem; 
+    overflow-y: auto; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main-content {
+display: flex;
+flex-direction: column;
+align-self: center;
+width: 90%;
+border-radius: 1rem;
+border: 2px solid  #ddd;
+height: auto;
+margin:  auto; 
+}
+
+.emergency-details-content{
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    width: 90%;
+    border-radius: 1rem;
+    border: 2px solid  #ddd;
+    height: auto;
+    margin:  auto; 
+    margin-top: 50px;
+}
+
+
+
+
+
+.back-button {
+    background-image: url('/Images/left-arrow.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 30px; 
+    height: 30px;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .back-button:hover {
+    transform: scale(1.1); 
+    transition: transform 0.2s ease;
+  }
+
+  .section-1 {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    width: 100%;
+    padding: 2rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .left-section{
+    display: flex;
+    align-items: center;
+  }
+
+  .section-1 p {
+    font-weight: bold;
+    color: grey;
+    margin-left: 1rem;
+    font-size: 1.25rem;
+    
+  }
+
+  .details-section {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+  }
+
+  .title {
+    width: 15%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .title p {
+    font-weight: bold;
+    color: grey;
+    font-size: 1rem;
+  }
+
+  .description {
+    padding: 2rem;
+    width: 80%;
+  }
+
+  .description p {
+
+    color: grey;
+    font-size: 1rem;
+  }
+
+.requirement-image{
+  width: 200px;
+  height: 200px;
+}
+
+
+
+.Actions-Section{
+  display: flex;
+}
+
+.actions-button{
+    padding: 8px 12px;            
+    border-radius: 5px;          
+    font-size: 13px;              
+    color: white;                
+    display: inline-block;        
+    text-transform: capitalize;   
+    text-align: center;    
+    width: 150px;  
+    background-color: #f78e33;
+    margin-top: 50px;
+}
+
+
+.status-badge {
+    padding: 8px 12px;            
+    border-radius: 5px;          
+    font-size: 13px;              
+    color: white;                
+    display: inline-block;        
+    text-transform: capitalize;   
+    text-align: center;    
+    width: 100px;       
+}
+
+.status-badge.rejected {
+    background-color: #e22929;    
+}
+
+.status-badge.completed {
+    background-color: #4caf50;    
+}
+
+.status-badge.pick-up {
+    background-color: #be5cb6;    
+}
+
+.status-badge.pending {
+    background-color: #325bd4;    
+}
+
+.status-badge.in-progress {
+  background-color: #ffd700;    
+}
+
+.status-badge.completed {
+  background-color: #4caf50;    
+}
+
+.status-badge.new {
+  background-color: #f79233;    
+}
