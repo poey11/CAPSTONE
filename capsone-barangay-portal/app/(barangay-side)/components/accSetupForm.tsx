@@ -22,6 +22,8 @@ interface accountSetupProps {
 
 
 const accSetupForm: React.FC<AccSetupFormProps> = ({userID}) => {
+    /* Not yet implemented confirm password validation */
+
     const router = useRouter();
     const {data: session, update} = useSession();
     const [User, setUser] = useState<accountSetupProps>({
@@ -61,10 +63,11 @@ const accSetupForm: React.FC<AccSetupFormProps> = ({userID}) => {
                 address: User.address,
                 phone: User.phone,
                 sex: User.sex,
+                password: hashedPassword,
                 firstTimelogin: false
             });
 
-            const check = await update();
+            await update();
            
         }
         catch(e: any){
@@ -85,8 +88,8 @@ const accSetupForm: React.FC<AccSetupFormProps> = ({userID}) => {
             <label htmlFor="sex">Sex: </label>
             <select  value={User.sex}  onChange={handleChange} id="sex" name="sex" className="border-2 border-black" required>
               <option value="" disabled>Select a Sex</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
             </select>
 
             <label htmlFor="bday">Birth date: </label>

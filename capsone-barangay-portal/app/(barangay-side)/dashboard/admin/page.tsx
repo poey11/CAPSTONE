@@ -1,8 +1,7 @@
 "use client"
 import React,{useState, useEffect, ChangeEvent} from "react";
 import {db} from "../../../db/firebase";
-import {collection, getDocs, query, where} from "firebase/firestore";
-
+import {collection, getDocs, onSnapshot, query, where} from "firebase/firestore";
 interface ResidentUser {
     id: string;
     first_name: string;
@@ -39,13 +38,14 @@ interface dbBarangayUser{
     birthDate: string;
     sex: string;
 }
+
 const admin = () => {
-    /*Kulang pa search and filter, reload the table button (just re render the table), table func, downloadable/viewable ID pic column */
+    /*Kulang pa search and filter, downloadable/viewable ID pic column, and table actions are not yet working */
     const [users, setUsers] = useState<BarangayUser>({
         userId:"",
         position:"",
         password:"",
-        role:"barangay official"
+        role:"Barangay Official"
     });
     const [barangayUsers, setBarangayUsers] = useState<dbBarangayUser[]>([]);
     const [residentUsers, setResidentUsers] = useState<ResidentUser[]>([]);
@@ -54,25 +54,31 @@ const admin = () => {
             const fetchUsers = async() => {
                 try{
                 const barangayCollection = collection(db, "BarangayUsers");
-                const BarangaySnapshot = await getDocs(barangayCollection);
-                const barangayData: dbBarangayUser[] = BarangaySnapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                })) as dbBarangayUser[];
-    
-                const residentCollection = collection(db, "ResidentUsers");
-                const ResidentSnapshot = await getDocs(residentCollection);
-                const residentData: ResidentUser[] = ResidentSnapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                })) as ResidentUser[];
-    
-                setBarangayUsers(barangayData);
-                setResidentUsers(residentData);
-                BarangaySnapshot.docs.forEach((doc) => {
-                    console.log("Raw Firestore Document:", doc.data());
+                const unsubscribeBarangay = onSnapshot(barangayCollection, (snapshot) => {
+                    const barangayData: dbBarangayUser[] = snapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    })) as dbBarangayUser[];
+                    setBarangayUsers(barangayData);
                 });
+            
+
+
+                const residentCollection = collection(db, "ResidentUsers");
+                const unsubscribeResidents = onSnapshot(residentCollection, (snapshot) => {
+                    const residentData: ResidentUser[] = snapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    })) as ResidentUser[];
+                    setResidentUsers(residentData);
+                });
+           
                 
+                 // Cleanup function to unsubscribe when component unmounts
+                return () => {
+                    unsubscribeBarangay();
+                    unsubscribeResidents();
+                };
                 
             }
             catch(error:String|any){
@@ -146,7 +152,7 @@ const admin = () => {
                     password: users.password,
                     role: users.role,
                     position: users.position,
-                    createdBy: "asst_sec"
+                    createdBy: "Assistant Secretary"
                 })
             });
             const data = await respone.json();
@@ -156,18 +162,19 @@ const admin = () => {
                 return;
             }
             alert(data.message);
+
             setUsers({
                 userId:"",
                 position:"",
                 password:"",
-                role:"barangay official"
+                role:"Barangay Official"
             })
         }
         catch(error: string | any){
             console.log(error.message);
         }
-    
-    }
+        
+   }
 
 
 
@@ -243,7 +250,8 @@ const admin = () => {
                         <td className="border border-gray-300 p-2 text-center">{user.createdBy}</td>
                         <td className="border border-gray-300 p-2 text-center">{user.createdAt}</td>
                         <td className="border flex  border-gray-300 p-2 justify-center">
-                            <button className="bg-red-500 text-white px-4 py-2  rounded">Delete</button>
+                            <button className="bg-green-500 text-white w-20 mr-1 rounded">Modify</button>
+                            <button className="bg-red-500 text-white  w-20 py-3  rounded">Delete</button>
                         </td>
                         </tr>
                     ))}
@@ -257,11 +265,11 @@ const admin = () => {
                 <label htmlFor="roles">Role:</label>
                 <select  value={users.position}  onChange={handleChange} id="roles" name="position" className="border-2 border-black" >
                     <option value="" disabled>Select a Role</option>
-                    <option value="punong_barangay">Punong Barangay</option>
-                    <option value="secretary">Secretary</option>
-                    <option value="asst_sec">Asst Secretary</option>
-                    <option value="admin_staff">Admin Staff</option>
-                    <option value="lf_staff">LF Staff</option>
+                    <option value="Punong Barangay">Punong Barangay</option>
+                    <option value="Secretary">Secretary</option>
+                    <option value="Assistant Secretary">Asst Secretary</option>
+                    <option value="Admin Staff">Admin Staff</option>
+                    <option value="LF Staff">LF Staff</option>
                 </select>
                 <label htmlFor="password">Password: </label>
                 <input value={users.password} onChange={handleChange} id="password" type="password" name="password" className="border-2 border-black" required/>

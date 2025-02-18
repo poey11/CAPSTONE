@@ -1,9 +1,8 @@
 body {
     padding-top: 90px; /* Prevents content from being hidden under the fixed menu */
-  
 }
 
-.main-container{
+.main-containerB{
     width: auto;
     height: 90px;
     background-color: #FFFFFF;
@@ -18,7 +17,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-
+    z-index: 50;
 }
 
 .user-container{
