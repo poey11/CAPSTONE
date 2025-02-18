@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { redirect, usePathname  } from "next/navigation";
 import { useSession } from "next-auth/react";
+
 
 import type { Metadata } from "next";
 
@@ -19,15 +20,25 @@ interface RoleCheckerProps {
 
 const RoleChecker: React.FC<RoleCheckerProps> = ({children }) => {
   const { data: session, status } = useSession();
-  const router = useRouter();
+
+  const pathname = usePathname();
  
   useEffect(() => {
     if (status === "loading") return; // Wait until status is resolved
       if(session){
-        router.push("/dashboard/accountSetup");
+        const user = session.user;
+        if(user.loginStatus === true &&  !pathname.startsWith("/dashboard/accountSetup")){
+          redirect("/dashboard/accountSetup");
+        }
+        if(!pathname.startsWith("/dashboard")){
+          redirect("/dashboard");
+        }
+
       }
 
-  }, [status, router]);
+  }, [status]);
+
+
 
   return( 
     <>

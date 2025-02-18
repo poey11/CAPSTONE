@@ -21,7 +21,7 @@ export default function RootLayout({
             <SessionProvider>
               <TopNav />
               <RoleChecker children={children}/>
-              {/* Conditionally render Footer */}
+              
               {pathname !== '/official/login' && pathname !== '/resident/login' && <Footer />}
             </SessionProvider>
         </AuthProvider>

@@ -3,6 +3,9 @@ import {db} from '@/app/db/firebase'
 import { doc, updateDoc } from "firebase/firestore";
 import { useState } from 'react';
 import {useRouter} from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { hash } from 'bcryptjs'; 
+
 interface AccSetupFormProps {
     userID: string | undefined;
 }
@@ -14,18 +17,21 @@ interface accountSetupProps {
     address: string;
     phone: string;
     sex: string;
+    password: string;
 }
 
 
 const accSetupForm: React.FC<AccSetupFormProps> = ({userID}) => {
     const router = useRouter();
+    const {data: session, update} = useSession();
     const [User, setUser] = useState<accountSetupProps>({
         fName: '',
         lName: '',
         bday: '',
         address: '',
         phone: '',
-        sex: ''
+        sex: '',
+        password: ''
     });
     
 
@@ -40,13 +46,14 @@ const accSetupForm: React.FC<AccSetupFormProps> = ({userID}) => {
 
     const addNewAttribute = async() => {
         if (!userID) {
-            console.log("asdasdasdasd User ID is undefined");
+            console.log("User ID is undefined");
             return;
         }
         
         try{    
         
             const docRef = doc(db, 'BarangayUsers', userID);
+            const hashedPassword = await hash(User.password, 12);
             await updateDoc(docRef, {
                 firstName: User.fName,
                 lastName: User.lName,
@@ -56,12 +63,13 @@ const accSetupForm: React.FC<AccSetupFormProps> = ({userID}) => {
                 sex: User.sex,
                 firstTimelogin: false
             });
-            console.log('New attribute added');
+
+            const check = await update();
+           
         }
         catch(e: any){
             console.log(e.message);
         }
-
         router.push('/dashboard');
     }
     
@@ -89,6 +97,13 @@ const accSetupForm: React.FC<AccSetupFormProps> = ({userID}) => {
 
             <label htmlFor="phone">Cellphone / Telephone #: </label>
             <input onChange={handleChange} value={User.phone} id="phone" type="text" name="phone" className="border-2 border-black" required />
+
+            <label htmlFor="password">New Password: </label>
+            <input onChange={handleChange} value={User.password} id="password" type="password" name="password" className="border-2 border-black" required />
+
+            <label htmlFor="confirmPassword">Confirm Password: </label>
+            <input id="confirmPassword" type="password" name="confirmPassword" className="border-2 border-black" required />
+            
         
             <button   className="bg-blue-500 mt-3 text-white">Submit</button>
         </form>

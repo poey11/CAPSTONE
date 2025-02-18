@@ -40,7 +40,7 @@ interface dbBarangayUser{
     sex: string;
 }
 const admin = () => {
-    /*add search and filter func */
+    /*Kulang pa search and filter, reload the table button (just re render the table), table func, downloadable/viewable ID pic column */
     const [users, setUsers] = useState<BarangayUser>({
         userId:"",
         position:"",
@@ -204,8 +204,8 @@ const admin = () => {
                         <td className="border border-gray-300 p-2 text-center">{user.role}</td>
                         <td className="border border-gray-300 p-2 text-center">{user.email}</td>
                         <td className="border border-gray-300 p-2 text-center">
-                            <button className="bg-green-500 text-white px-4 py-2  rounded">Accept</button>
-                            <button className="bg-red-500 text-white px-4 py-2 ml-1 rounded">Reject</button>
+                            <button className="bg-green-500 text-white w-20 py-2  rounded">Accept</button>
+                            <button className="bg-red-500 text-white  w-20 py-2 mt-1 rounded">Reject</button>
                         </td>
                         </tr>
                     ))}
