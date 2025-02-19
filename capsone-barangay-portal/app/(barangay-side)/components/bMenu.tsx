@@ -2,7 +2,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import "@/CSS/BMenu/header.css";
-import  { signOut } from "next-auth/react";
 
 const BMenu: React.FC = () => {
   const [openDropdown, setOpenDropdown] = useState<"resident" | "officials" | "services" | "incidents"|null>(null);
@@ -73,11 +72,7 @@ const BMenu: React.FC = () => {
 
         <Link href="/dashboard/announcements" className="module">Announcements</Link>
         <Link href="/programs" className="module">Programs and Events</Link>
-        <button
-          onClick={() => signOut({callbackUrl: "/"})}
-          className="module">
-          Log Out
-        </button>
+       
       </div>
     </div>
   );

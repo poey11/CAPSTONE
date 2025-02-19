@@ -8,6 +8,8 @@ declare module "next-auth" {
       name: string;
       role: string;
       position: string;
+      loginStatus: boolean;
+      fullName: string;
     };
   }
 
@@ -16,6 +18,9 @@ declare module "next-auth" {
     name: string;
     role: string;
     position: string;
+    loginStatus: boolean;
+    fullName: string;
+
   }
 }
 
@@ -25,5 +30,7 @@ declare module "next-auth/jwt" {
     name: string;
     role: string;
     position: string;
+    loginStatus: boolean;
+    fullName: string;
   }
 }

@@ -1,7 +1,7 @@
 import NextAuth, { NextAuthOptions, Session } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import {compare } from "bcryptjs";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, getDoc, doc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import { JWT } from "next-auth/jwt";
 
@@ -42,6 +42,8 @@ import { JWT } from "next-auth/jwt";
                 name: userData.userid,
                 role: userData.role,
                 position: userData.position,
+                loginStatus: userData.firstTimelogin,
+                fullName: `${userData.firstName} ${userData.lastName}`  
             };
           
         }
@@ -54,15 +56,28 @@ import { JWT } from "next-auth/jwt";
                 name: token.name,
                 role: token.role,
                 position: token.position,
+                loginStatus: token.loginStatus,
+                fullName: token.fullName
             }
             return session;
         },
         async jwt({token, user}: {token: JWT, user?: any}){
-            if(user){
+            if (user) {
+                // Set initial user data on login
                 token.id = user.id;
                 token.name = user.name;
                 token.role = user.role;
                 token.position = user.position;
+                token.loginStatus = user.loginStatus;
+                token.fullName = user.fullName;
+            } else if (token.id) {
+                // Fetch updated user data from Firestore
+                const userDoc = await getDoc(doc(db, "BarangayUsers", token.id));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    token.loginStatus = userData.firstTimelogin; // Ensure session gets updated
+                    token.fullName = `${userData.firstName} ${userData.lastName}`;
+                }
             }
             return token;
         },

@@ -11,7 +11,7 @@ import ReCAPTCHA from "react-google-recaptcha";
  however form validation is still partially implemented.
  the only validation added are sex, email, and password requirement (confirm password is not yet added ). 
  if register the user is successful,  the form should be cleared.
-have to double check the error handling of register process.
+  have to double check the error handling of register process.
  terms and condition havent been implemented */
 
 interface Resident {
@@ -26,7 +26,7 @@ interface Resident {
   };
   
   type residentUser = Resident & {
-    role: "resident";
+    role: "Resident";
     status: "unverified";
   };
   
@@ -43,7 +43,7 @@ const registerForm:React.FC = () => {
         phone: "",
         address: "",
         password: "",
-        role: "resident",
+        role: "Resident",
         upload: null,
         status: "unverified"
       });
@@ -106,7 +106,7 @@ const registerForm:React.FC = () => {
               address: resident.address,
               sex: resident.sex,
               role: resident.role,
-              createdAt: Date.now().toString(),
+              createdAt: new Date().getTime(),
               status: resident.status,
               validIdDocID: fileName
           });
