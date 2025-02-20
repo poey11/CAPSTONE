@@ -81,7 +81,7 @@ const registerForm:React.FC = () => {
               const timeStamp = Date.now().toString();
               const fileExtention = resident.upload.name.split('.').pop();
               fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtention}`
-              storageRef = ref(storage, `valid_id_image/${fileName}`);
+              storageRef = ref(storage, `ResidentUsers/valid_id_image/${fileName}`);
               await uploadBytes(storageRef,  resident.upload)
             }
               
@@ -117,7 +117,7 @@ const registerForm:React.FC = () => {
 
           alert("Register sucessful! Email verification sent to your email address");
           
-          router.push("/resident");
+          router.push("/");
           
         }
         catch(error: string | any){
