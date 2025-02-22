@@ -2,12 +2,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import "@/CSS/BMenu/header.css";
-import  { signOut } from "next-auth/react";
 
 const BMenu: React.FC = () => {
-  const [openDropdown, setOpenDropdown] = useState<"resident" | "officials" | "services" |null>(null);
+  const [openDropdown, setOpenDropdown] = useState<"resident" | "officials" | "services" | "incidents"|null>(null);
 
-  const toggleDropdown = (menu: "resident" | "officials"| "services") => {
+  const toggleDropdown = (menu: "resident" | "officials"| "services" | "incidents") => {
     setOpenDropdown(openDropdown === menu ? null : menu);
   };
 
@@ -51,20 +50,29 @@ const BMenu: React.FC = () => {
           {openDropdown === "services" && (
             <div className="dropdown-container">
               <Link href="/dashboard/ServicesModule/InBarangayRequests" className="dropdown-item">In Barangay Requests</Link>
-              <Link href="/dashboard/OfficialsModule/SitioHoaOfficers" className="dropdown-item">Online Requests</Link>
+              <Link href="/dashboard/ServicesModule/OnlineRequests" className="dropdown-item">Online Requests</Link>
               <Link href="/dashboard/OfficialsModule/SitioHoaOfficers" className="dropdown-item">Appointments</Link>
             </div>
           )}
         </div>
 
-        <Link href="/incidentManagement" className="module">Incident Management Module</Link>
+          {/* Incident Module */}
+          <div className="dropdown-wrapper">
+          <button onClick={() => toggleDropdown("incidents")} className="dropdown-button">Incident Module</button>
+          {openDropdown === "incidents" && (
+            <div className="dropdown-container">
+              <Link href="/dashboard/IncidentModule/Lupon" className="dropdown-item">Lupon</Link>
+              <Link href="/dashboard/IncidentModule/GAD" className="dropdown-item">GAD</Link>
+              <Link href="/dashboard/IncidentModule/BCPC" className="dropdown-item">BCPC</Link>
+              <Link href="/dashboard/IncidentModule/VAWC" className="dropdown-item">VAWC</Link>
+            </div>
+          )}
+        </div>
+
+
         <Link href="/dashboard/announcements" className="module">Announcements</Link>
         <Link href="/programs" className="module">Programs and Events</Link>
-        <button
-          onClick={() => signOut({callbackUrl: "/"})}
-          className="module">
-          Log Out
-        </button>
+       
       </div>
     </div>
   );

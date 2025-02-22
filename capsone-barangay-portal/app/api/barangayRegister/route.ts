@@ -14,14 +14,14 @@ export async function POST(req: Request) {
     }
 
     // ✅ Ensure only 'asst_sec' can create an account
-    if (createdBy !== "asst_sec") {
+    if (createdBy !== "Assistant Secretary") {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const userCollection = collection(db, "BarangayUsers");
    
     // ✅ Hash the password
-    const passwordHash = await hash(password, 10);
+    const passwordHash = await hash(password, 12);
 
     // ✅ Store user in Firestore
     const docRef = await addDoc(userCollection, {
@@ -30,8 +30,8 @@ export async function POST(req: Request) {
       role,
       position,
       createdBy,
-      createdAt: new Date().toISOString(),
-      firstTimelogin: false,
+      createdAt: new Date().getTime(),
+      firstTimelogin: true,
     });
 
     return NextResponse.json({ message: "Barangay account created successfully", id: docRef.id }, { status: 201 });

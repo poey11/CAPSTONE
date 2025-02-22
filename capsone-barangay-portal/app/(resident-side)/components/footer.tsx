@@ -20,7 +20,9 @@ const Footer = () => {
   const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages
 
   if (noTopNavPages.some((page) => pathname.includes(page))) {
-    return <SideNav />; 
+    return(
+      <></>
+    ); 
   }
 
  

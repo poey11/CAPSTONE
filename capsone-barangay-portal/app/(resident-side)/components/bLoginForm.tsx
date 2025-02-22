@@ -29,7 +29,6 @@ const bLoginForm:React.FC = () => {
 
     const handleLogin = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log(official);
         const result = await signIn("credentials", {
             userid: official.username,
             password: official.password,
@@ -41,7 +40,7 @@ const bLoginForm:React.FC = () => {
             alert("Invalid User ID or Password");
             return;
         }
-        router.push("/dashboard/accountSetup");
+   
      
     }
 

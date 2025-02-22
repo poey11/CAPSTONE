@@ -61,7 +61,7 @@ export default function addAnnouncements() {
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/>
                         </button>
 
-                        <h1>First Time JobSeeker</h1>
+                        <h1>First Time Jobseeker</h1>
                     </div>
 
                     <div className="action-btn-section">

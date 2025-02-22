@@ -1,12 +1,28 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
+import  { signOut } from "next-auth/react";
 import "@/CSS/barangaySide/topMenu.css";
+
+interface User{
+    name: string;
+    role: string;
+}
 
 export default function TopMenu() {
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement | null>(null);
+    const { data: session } = useSession();
+    const currentUser: User = {
+        name: session?.user?.fullName || "User",
+        role: session?.user?.position || session?.user?.role || "User",
+    }
 
+    if( currentUser.name === "undefined undefined"){
+        currentUser.name = "User";
+    }
+    
     const toggleDropdown = () => {
         setDropdownOpen((prev) => !prev);
     };
@@ -31,14 +47,14 @@ export default function TopMenu() {
     }, []);
 
     return (
-        <div className="main-container fixed-top">
+        <div className="main-containerB">
             <div className="user-container">
                 <section className="icon-section">
                     <img src="/images/user.png" alt="User Icon" className="userIcon" />
                 </section>
                 <section className="user-section">
-                    <h1>Justine</h1>
-                    <p>Super Admin</p>
+                    <h1>{currentUser.name}</h1>
+                    <p>{currentUser.role}</p>
                 </section>
                 <section className="menu-section" ref={dropdownRef}>
                     <img
@@ -49,7 +65,12 @@ export default function TopMenu() {
                     />
                     <div className={`dropdown ${isDropdownOpen ? "show" : ""}`}>
                         <ul>
-                            <li onClick={handleLogout}>Logout</li>
+                            <li>Settings</li>
+                            <li
+                                onClick={() => signOut({callbackUrl: "/"})}
+                                className="module">
+                                Log Out
+                            </li>
                         </ul>
                     </div>
                 </section>

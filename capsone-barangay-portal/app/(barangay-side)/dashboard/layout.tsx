@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"; 
 import { redirect } from "next/navigation";
-
-
+import Menu from "@/app/(barangay-side)/components/topMenu"
 export const metadata:Metadata = { 
   title: "Barangay Dashboard",
 };
@@ -18,13 +17,15 @@ export default async function DashboardLayout({
     
     if (!session) {
         redirect("/");
-        return null;
     }
+    
+    const User = session.user;
+    console.log("Dashboard Layout",User);
+
     return (
         <div className="ml-40  flex ">
-            {children}    
+            <Menu/>
+            {children}
         </div>
     )         
-        
-    
 }

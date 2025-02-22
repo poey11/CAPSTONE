@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { useState } from "react";
 
 import Link from 'next/link';
+import { useRouter } from "next/navigation";
 
 
 const metadata: Metadata = {
@@ -61,15 +62,23 @@ export default function AddGADIncident() {
         }
       };
 
+      const router = useRouter();
+
+      const handleAddGAD = () => {
+        router.push("/dashboard/IncidentModule/GAD");
+      };
+  
+
+
   return (
     <main className="main-container">
 
         
         <div className="main-content">
             
-        <Link href="/dashboard/IncidentModule/GAD">    
-        <button type="submit" className="back-button"></button>
-        </Link>
+      
+        <button type="submit" className="back-button" onClick={handleAddGAD}></button>
+      
 
             <div className="section-1">
                 <p className="NewOfficial"> New Incident</p>
@@ -95,18 +104,20 @@ export default function AddGADIncident() {
                     placeholder="Enter Official Name" 
                     />
 
-                    <p>Sex?</p>
-                     <select 
+                   
+                  <p>Sex</p>
+                  <select 
                     id="featuredStatus" 
                     name="featuredStatus" 
                     className="featuredStatus" 
                     required
                     defaultValue=""  
-                   >
+                    >
                     <option value="" disabled>Choose</option>
-                    <option value="active">Yes</option>
-                    <option value="inactive">No</option>
+                    <option value="active">Male</option>
+                    <option value="inactive">Female</option>
                   </select>
+
 
                     <p>Age</p>
 
@@ -140,7 +151,7 @@ export default function AddGADIncident() {
                   placeholder="Enter Official Name" 
                   />
 
-                  <p>Sex?</p>
+                  <p>Sex</p>
                   <select 
                   id="featuredStatus" 
                   name="featuredStatus" 
