@@ -266,8 +266,8 @@ const admin = () => {
                                     <td>{user.createdAt}</td>
                                     <td>
                                         <div className="actions">
-                                            <button className="action-accept">Accept</button>
-                                            <button className="action-reject">Reject</button>
+                                            <button className="action-accept">Modify</button>
+                                            <button className="action-reject">Delete</button>
                                         </div>
                                     </td>
                                     </tr>
