@@ -109,11 +109,12 @@ export default function Dashboard() {
           <div className="metric-card">
 
               <div className="card-left-side">
-                  <p>Barangay Officials:{ barangayUsersCount}</p>
+                  <p className="title">Barangay Officials:</p>
+                  <p className="count">{ barangayUsersCount}</p>
               </div>
 
             <div className="card-right-side">
-              <ResponsiveContainer width={250} height={250} >
+              <ResponsiveContainer width={200} height={250} >
                 <PieChart>
                   <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                     {residentData.map((entry, index) => (
@@ -131,11 +132,12 @@ export default function Dashboard() {
     
              
             <div className="card-left-side">
-                  <p>Registered Resident Users:{ barangayUsersCount}</p>
+                  <p className="title">Registered Resident Users: </p>
+                  <p className="count">{barangayUsersCount}</p>
             </div>
 
             <div className="card-right-side">
-              <ResponsiveContainer width={250} height={250}>
+              <ResponsiveContainer width={200} height={250}>
                 <PieChart>
                   <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                     {residentData.map((entry, index) => (
@@ -155,11 +157,12 @@ export default function Dashboard() {
           <div className="metric-card">
           
             <div className="card-left-side">
-                  <p>New Registered Resident Users:{ newResidentUsersCount}</p>
+                  <p className="title">New Registered Resident Users: </p>
+                  <p className="count">{newResidentUsersCount}</p>
             </div>
 
             <div className="card-right-side">
-              <ResponsiveContainer width={250} height={250}>
+              <ResponsiveContainer width={200} height={250}>
                 <PieChart>
                   <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                     {residentData.map((entry, index) => (
@@ -178,12 +181,13 @@ export default function Dashboard() {
           <div className="metric-card">
            
             <div className="card-left-side">
-                  <p>Total Residents:{ residentsCount}</p>
+                  <p className="title">Total Residents: </p>
+                  <p className="count">{residentsCount}</p>
             </div>
 
           <div className="card-right-side">
              
-          <ResponsiveContainer width={250} height={250}>
+          <ResponsiveContainer width={200} height={250}>
             <PieChart>
               <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                 {verificationData.map((entry, index) => (
@@ -201,12 +205,13 @@ export default function Dashboard() {
          <div className="metric-card">
           
             <div className="card-left-side">
-                  <p>Incidents Reports {incidentReportsCount}</p>
+                  <p className="title">Incidents Reports: </p>
+                  <p className="count">{incidentReportsCount}</p>
             </div>
 
             <div className="card-right-side">
               
-          <ResponsiveContainer width={250} height={250}>
+          <ResponsiveContainer width={200} height={250}>
             <PieChart>
               <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                 {verificationData.map((entry, index) => (
@@ -224,12 +229,13 @@ export default function Dashboard() {
          <div className="metric-card">
           
           <div className="card-left-side">
-                <p>Incidents Reports {incidentReportsCount}</p>
+              <p className="title">Incidents Reports: </p>
+              <p className="count">{incidentReportsCount}</p>
           </div>
 
           <div className="card-right-side">
            
-          <ResponsiveContainer width={250} height={250}>
+          <ResponsiveContainer width={200} height={250}>
             <PieChart>
               <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                 {verificationData.map((entry, index) => (
@@ -245,6 +251,15 @@ export default function Dashboard() {
        </div>
           
       </div> 
+
+
+      <p className="dashboard">Incident Heat Map</p>
+
+          <div className="heatmap-container">
+                  
+        
+
+          </div>
 
      
 

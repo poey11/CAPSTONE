@@ -30,11 +30,14 @@
 
 
 .card-left-side {
-    flex: 1; 
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
+    width: 60%;
+    height: 100%;
+    margin-left: 1rem;
 }
 
 .card-right-side {
@@ -45,17 +48,23 @@
 }
 
 
-.card-left-side p {
+.title {
     font-size: 1.25rem;
     font-weight: bold;
     color: grey;
+}
 
+.count {
+    font-size: 1.75rem;
+    font-weight: bolder;
+    color: grey;
+    margin-top: 10px;
 }
 
 
 .summaries-section {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr)); /* Ensures equal sizing */
+    grid-template-columns: repeat(3, minmax(0, 1fr)); 
     gap: 1rem;
     padding: 2rem;
     width: 100%; 
