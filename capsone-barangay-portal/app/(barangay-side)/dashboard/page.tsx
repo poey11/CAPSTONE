@@ -3,7 +3,15 @@ import "@/CSS/DashboardModule/dashboard.css";
 
 import { useEffect, useState } from "react";
 import { db } from "@/app/db/firebase";
-import { collection, getDocs, Timestamp } from "firebase/firestore";
+import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function Dashboard() {
   const [barangayUsersCount, setBarangayUsersCount] = useState(0);
@@ -11,17 +19,17 @@ export default function Dashboard() {
   const [newResidentUsersCount, setNewResidentUsersCount] = useState(0);
   const [residentsCount, setResidentsCount] = useState(0);
   const [incidentReportsCount, setIncidentReportsCount] = useState(0);
-  const [incidentReports, setIncidentReports] = useState<
-    {
-      reportID: string;
-      firstname: string;
-      lastname: string;
-      address: string;
-      concerns: string;
-      date: string;
-      time: string;
-    }[]
-  >([]);
+  const [verifiedResidentsCount, setVerifiedResidentsCount] = useState(0);
+  const [incidentReports, setIncidentReports] = useState<{ 
+    reportID: string;
+    firstname: string;
+    lastname: string;
+    address: string;
+    concerns: string;
+    date: string;
+    time: string;
+  }[]>([]);
+  
 
   useEffect(() => {
     const fetchCounts = async () => {
@@ -38,31 +46,35 @@ export default function Dashboard() {
         const incidentReportsSnapshot = await getDocs(collection(db, "IncidentReports"));
         setIncidentReportsCount(incidentReportsSnapshot.size);
 
-        // Get current timestamp and calculate last week's date
         const today = new Date();
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(today.getDate() - 7);
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(today.getDate() - 7);
 
-        const reportsData = incidentReportsSnapshot.docs
-          .map((doc) => {
-            const data = doc.data();
-            const incidentDate = data.date?.toDate ? data.date.toDate() : null;
+        const newResidentQuery = query(
+          collection(db, "ResidentUsers"),
+          where("createdAt", ">=", Timestamp.fromDate(sevenDaysAgo))
+        );
+        const newResidentSnapshot = await getDocs(newResidentQuery);
+        setNewResidentUsersCount(newResidentSnapshot.size);
 
-            return {
-              reportID: data.reportID || "N/A",
-              firstname: data.firstname || "N/A",
-              lastname: data.lastname || "N/A",
-              address: data.address || "N/A",
-              concerns: data.concerns || "N/A",
-              date: incidentDate ? incidentDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "N/A",
-              time: data.time || "N/A",
-              timestamp: incidentDate ? incidentDate.getTime() : 0,
-            };
-          })
-          .filter((report) => report.timestamp >= oneWeekAgo.getTime()) // Filter last 7 days
-          .sort((a, b) => b.timestamp - a.timestamp); // Sort by latest
+        const verifiedQuery = query(collection(db, "ResidentUsers"), where("verified", "==", true));
+        const verifiedSnapshot = await getDocs(verifiedQuery);
+        setVerifiedResidentsCount(verifiedSnapshot.size);
 
-        setIncidentReports(reportsData);
+        const incidentReportsData = incidentReportsSnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            reportID: data.reportID,
+            firstname: data.firstname,
+            lastname: data.lastname,
+            address: data.address,
+            concerns: data.concerns,
+            date: data.date,
+            time: data.time,
+          };
+        });
+
+        setIncidentReports(incidentReportsData);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       }
@@ -71,41 +83,77 @@ export default function Dashboard() {
     fetchCounts();
   }, []);
 
+  const residentData = [
+    { name: "Resident Users", value: residentUsersCount },
+    { name: "Non-Users", value: Math.max(residentsCount - residentUsersCount, 0) },
+  ];
+
+  const verificationData = [
+    { name: "Verified Residents", value: verifiedResidentsCount },
+    { name: "Unverified Residents", value: Math.max(residentUsersCount - verifiedResidentsCount, 0) },
+  ];
+
+  const COLORS = ["#4CAF50", "#FF9800"];
+  const VERIFICATION_COLORS = ["#2196F3", "#F44336"];
+
   return (
     <main className="main-container">
       <div className="section-1">
         <h1>Dashboard</h1>
-      </div>
-
-      <div className="main-section">
-        <div className="dashboard-cards">
-          <div className="card">
-            <h2>Total Barangay Users</h2>
+        <div className="dashboard-metrics">
+          <div className="metric-card">
+            <h3>Barangay Officials</h3>
             <p>{barangayUsersCount}</p>
           </div>
-
-          <div className="card">
-            <h2>Total Resident Users</h2>
+          <div className="metric-card">
+            <h3>Registered Resident Users</h3>
             <p>{residentUsersCount}</p>
           </div>
-
-          <div className="card">
-            <h2>New Resident Users (Last 7 Days)</h2>
+          <div className="metric-card">
+            <h3>New Resident Users (Last 7 Days)</h3>
             <p>{newResidentUsersCount}</p>
           </div>
-
-          <div className="card">
-            <h2>Total Residents</h2>
+          <div className="metric-card">
+            <h3>Total Residents</h3>
             <p>{residentsCount}</p>
           </div>
-
-          <div className="card">
-            <h2>Total Incident Reports</h2>
+          <div className="metric-card">
+            <h3>Incident Reports</h3>
             <p>{incidentReportsCount}</p>
           </div>
         </div>
 
-        <h2>Incident Reports (Last 7 Days)</h2>
+        <div className="chart-container">
+          <ResponsiveContainer width={250} height={250}>
+            <PieChart>
+              <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                {residentData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-container">
+          <ResponsiveContainer width={250} height={250}>
+            <PieChart>
+              <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                {verificationData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={VERIFICATION_COLORS[index % VERIFICATION_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="main-section">
+        <h2>Incident Reports</h2>
         <table>
           <thead>
             <tr>
@@ -139,7 +187,7 @@ export default function Dashboard() {
               ))
             ) : (
               <tr>
-                <td colSpan={8} className="no-data">No incident reports in the last 7 days</td>
+                <td colSpan={8} className="no-data">No incident reports</td>
               </tr>
             )}
           </tbody>
