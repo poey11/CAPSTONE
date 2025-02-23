@@ -247,7 +247,11 @@
     color: rgba(0, 0, 0, 0.4);
 }
 
-
+.userID:disabled {
+    background-color: white; /* or match the other input fields */
+    color: rgba(0, 0, 0, 0.4);
+    opacity: 1; /* Override the default lower opacity */
+}
 
 .fields-container{
     display: flex;
