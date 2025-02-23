@@ -80,12 +80,17 @@ export default function MainPageIncident() {
         </select>
       </div>
 
-      <p className="title"> Most Recent Incidents</p>
+    
+      <div className="titlesection">
+             <p className="title"> Most Recent Incidents</p>
+        </div>
      
       <div className="main-section">
         
 
-        <table>
+    
+      <div className="table-section">
+      <table>
           <thead>
             <tr>
               <th>Complainant's Name</th>
@@ -117,10 +122,19 @@ export default function MainPageIncident() {
             ))}
           </tbody>
         </table>
+
+      </div>
+        
       </div>
 
-      <div className="incidentmap-section">
+    
+     
 
+      <div className="incidentmap-section">
+        
+      <div className="titlesection">
+             <p className="title"> Incident HeatMap</p>
+        </div>
 
 
       </div>
