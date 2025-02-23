@@ -2,155 +2,96 @@
 
 import { useRouter } from "next/navigation";
 import type { Metadata } from "next";
-import "@/CSS/barangaySide/ServicesModule/OnlineRequests.css";
+import "@/CSS/barangaySide/ServicesModule/Appointments.css";
 
 
 const metadata: Metadata = {
-    title: "Online Request",
-    description: "Online Request in Services Module",
+    title: "Appointments",
+    description: "Appointments in Services Module",
   };
 
 
-  export default function OnlineRequests() {
+  export default function Appointments() {
     const requestData = [
         {
-            documentType: "Barangay Clearance",
-            purpose: "Loan",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pick Up",
-        },
-        {
-            documentType: "Barangay Indigency",
+            appointmentType: "Barangay Indigency",
             purpose: "No Income",
             name: "Jonnell Quebal",
             contact: "09171218101",
             date: "2024-01-17",
-            status: "Pick Up",
-        },
-        {
-            documentType: "Barangay ID",
-            purpose: "N/A",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
+            time: "09:00 AM - 09:30 AM",
             status: "Completed",
         },
         {
-            documentType: "Barangay Permit",
-            purpose: "Business Permit",
+            appointmentType: "Barangay Certificate",
+            purpose: "Certificate of Residency",
             name: "Jonnell Quebal",
             contact: "09171218101",
             date: "2024-01-17",
+            time: "10:00 AM - 10:30 AM",
             status: "Pending",
         },
         {
-            documentType: "Barangay Permit",
-            purpose: "Temporary Business Permit",
+            appointmentType: "Barangay Certificate",
+            purpose: "Certificate of Residency",
             name: "Jonnell Quebal",
             contact: "09171218101",
             date: "2024-01-17",
+            time: "11:00 AM - 11:30 AM",
             status: "Pending",
         },
-        {
-            documentType: "Barangay Permit",
-            purpose: "Construction Permit",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pending",
-        },
-        {
-            documentType: "Barangay Permit",
-            purpose: "Liquor Permit",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pending",
-        },
-        {
-            documentType: "Barangay Permit",
-            purpose: "COOP",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pending",
-        },
-        {
-            documentType: "Barangay Certificate",
-            purpose: "Death Residency",
-            name: "Rose Yap Fernandez",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Rejected",
-        },
-        {
-            documentType: "First Time Jobseeker",
-            purpose: "N/A",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pick Up",
-        },
-        
-      
     ];
 
     const router = useRouter();
 
-    const handleView = (documentType: string, purpose: string) => {
-        const documentRoutes: { [key: string]: string } = {
-            "Barangay Clearance": "/dashboard/ServicesModule/OnlineRequests/View/BarangayClearance",
-            "Barangay Indigency": "/dashboard/ServicesModule/OnlineRequests/View/BarangayIndigency",
-            "Barangay ID": "/dashboard/ServicesModule/OnlineRequests/View/BarangayID",
-            "Barangay Certificate": "/dashboard/ServicesModule/OnlineRequests/View/BarangayCertificate",
-            "First Time Jobseeker": "/dashboard/ServicesModule/OnlineRequests/View/FirstTimeJobseeker",
-        };
-
-        if (documentType === "Barangay Permit" && purpose) {
-            const formattedPurpose = purpose.replace(/\s+/g, ""); // Remove spaces for URL consistency
-            router.push(`/dashboard/ServicesModule/OnlineRequests/View/BarangayPermit/${formattedPurpose}`);
-        } else {
-            const route = documentRoutes[documentType] || "/dashboard/ServicesModule/OnlineRequests/View";
-            router.push(route);
-        }
+    const handleCalendarView = () => {
+      router.push("/dashboard/ServicesModule/Appointments/CalendarView");
     };
 
-    const handleEdit = (documentType: string, purpose: string) => {
-      const documentRoutes: { [key: string]: string } = {
-          "Barangay Clearance": "/dashboard/ServicesModule/OnlineRequests/Edit/BarangayClearance",
-          "Barangay Indigency": "/dashboard/ServicesModule/OnlineRequests/Edit/BarangayIndigency",
-          "Barangay ID": "/dashboard/ServicesModule/OnlineRequests/Edit/BarangayID",
-          "Barangay Certificate": "/dashboard/ServicesModule/OnlineRequests/Edit/BarangayCertificate",
-          "First Time Jobseeker": "/dashboard/ServicesModule/OnlineRequests/Edit/FirstTimeJobseeker",
+    const handleView = (appointmentType: string, purpose: string) => {
+        const appointmentRoutes: { [key: string]: string } = {
+            "Barangay Indigency": "/dashboard/ServicesModule/Appointments/View/BarangayIndigency",
+            "Barangay Certificate": "/dashboard/ServicesModule/Appointments/View/BarangayCertificate",
+        };
+
+        const route = appointmentRoutes[appointmentType] || "/dashboard/ServicesModule/OnlineRequests/View";
+        router.push(route);
+    };
+
+    const handleEdit = (appointmentType: string, purpose: string) => {
+      const appointmentRoutes: { [key: string]: string } = {
+        "Barangay Indigency": "/dashboard/ServicesModule/Appointments/Edit/BarangayIndigency",
+        "Barangay Certificate": "/dashboard/ServicesModule/Appointments/Edit/BarangayCertificate",
       };
 
-      if (documentType === "Barangay Permit" && purpose) {
-          const formattedPurpose = purpose.replace(/\s+/g, ""); // Remove spaces for URL consistency
-          router.push(`/dashboard/ServicesModule/OnlineRequests/Edit/BarangayPermit/${formattedPurpose}`);
-      } else {
-          const route = documentRoutes[documentType] || "/dashboard/ServicesModule/OnlineRequests/View";
-          router.push(route);
-      }
+      const route = appointmentRoutes[appointmentType] || "/dashboard/ServicesModule/OnlineRequests/Edit";
+        router.push(route);
   };
 
   const handleSMS = () => {
-    window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
+    window.location.href = "/dashboard/ServicesModule/Appointments/SMS";
 };
+
+  
 
     return (
 
         <main className="main-container">
          <div className="section-1">
-          <h1>Online Document Requests</h1>
+          <h1>Scheduled Appointments</h1>
+          <button
+            className="add-announcement-btn"
+            onClick={handleCalendarView}
+          >
+            View Calendar
+          </button>
           
          </div>
          <div className="section-2">
           <input 
               type="text" 
               className="search-bar" 
-              placeholder="Enter Document Type" 
+              placeholder="Enter Appointment Type" 
           />
           <input 
                 type="date" 
@@ -172,8 +113,6 @@ const metadata: Metadata = {
             <option value="" disabled>Select Status</option>
             <option value="pending">Pending</option>
             <option value="completed">Completed</option>
-            <option value="rejected">Rejected</option>
-            <option value="forpickup">For Pick Up</option>
           </select>
           <select 
             id="featuredStatus" 
@@ -192,11 +131,12 @@ const metadata: Metadata = {
           <table>
             <thead>
               <tr>
-                <th>Document Type</th>
+                <th>Appointment Type</th>
                 <th>Purpose</th>
                 <th>Name</th>
                 <th>Contact</th>
                 <th>Date</th>
+                <th>Time</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -204,11 +144,12 @@ const metadata: Metadata = {
             <tbody>
             {requestData.map((request, index) => (
               <tr key={index}>
-                <td>{request.documentType}</td>
+                <td>{request.appointmentType}</td>
                 <td>{request.purpose}</td>
                 <td>{request.name}</td>
                 <td>{request.contact}</td>
                 <td>{request.date}</td>
+                <td>{request.time}</td>
                 <td>
                     <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
                         {request.status}
@@ -218,19 +159,17 @@ const metadata: Metadata = {
                   <div className="actions">
                     <button
                         className="action-view"
-                        onClick={() => handleView(request.documentType, request.purpose)}
+                        onClick={() => handleView(request.appointmentType, request.purpose)}
                     >
                         View
                     </button>
                     <button
                         className="action-edit"
-                        onClick={() => handleEdit(request.documentType, request.purpose)}
+                        onClick={() => handleEdit(request.appointmentType, request.purpose)}
                     >
                         Edit
                     </button>
                     <button className="action-delete">Delete</button>
-
-
                     <button type="button" className="action-view" onClick={handleSMS}>SMS</button>
                   </div>
                 </td>

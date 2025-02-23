@@ -6,61 +6,47 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 
 
 const metadata: Metadata = {
-    title: "View Online Barangay Certificate Request",
-    description: "View Online Barangay Certificate Request in Services Module",
+    title: "View Barangay Indigency Appointment Details",
+    description: "View Barangay Indigency Appointment Details in Services Module",
   };
 
 
   
   const residentFields = [
-    { key: "documentType", label: "Document Type" },
+    { key: "appointmentType", label: "Appointment Type" },
     { key: "purpose", label: "Purpose" },
-    { key: "daterequested", label: "Date Requested" },
-    { key: "residentsince", label: "Resident Since" },
+    { key: "date", label: "Date" },
+    { key: "time", label: "Time" },
     { key: "firstname", label: "First Name" },
     { key: "middlename", label: "Middle Name" },
     { key: "lastname", label: "Last Name" },
-    { key: "address", label: "Address" },
-    { key: "age", label: "Age" },
-    { key: "civilstatus", label: "Civil Status" },
-    { key: "citizenship", label: "Citizenship" },
-    { key: "birthday", label: "Birthday" },
-    { key: "gender", label: "Gender" },
     { key: "contact", label: "Contact" },
     { key: "status", label: "Status" },
-    { key: "requirements", label: "Requirements" },
 ];
 
-export default function ViewOnlineRequest() {
+export default function EditAppointment() {
     const requestData = [
         {
-            documentType: "Barangay Certificate",
-            purpose: "Certificate of Residency",
-            date: "January 17, 2024",
-            residentsince: "January 14, 2002",
-            firstname: "Rose",
+            appointmentType: "Barangay Indigency",
+            purpose: "No Income",
+            firstname: "Jennie",
             middlename: "Yap",
-            lastname: "Fernandez",
-            address: "Calamba, Laguna",
-            age: "23",
-            civilstatus: "Single",
-            citizenship: "Filipino",
-            birthday: "September 6, 2002",
-            gender: "Female",
+            lastname: "Mendoza",
             contact: "09171218101",
-            status: "Pending",
-            requirements: "/Images/document.png",
+            status: "Completed",
+            date: "2024-01-17",
+            time: "09:00 AM",
         },
     ];
 
     const residentData = requestData[0] as Record<string, string>;
 
     const handleBack = () => {
-        window.location.href = "/dashboard/ServicesModule/OnlineRequests";
+        window.location.href = "/dashboard/ServicesModule/Appointments";
     };
 
-    const handleviewappointmentdetails = () => {
-        window.location.href = "/dashboard/ServicesModule/Appointments/View/BarangayCertificate";
+    const handleviewdocumentdetails = () => {
+        window.location.href = "/dashboard/ServicesModule/OnlineRequests/View/BarangayIndigency";
     };
 
     return (
@@ -68,16 +54,15 @@ export default function ViewOnlineRequest() {
             <div className="main-content">
                 <div className="section-1">
                   <div className="left-section">
-                    <Link href="/dashboard/ServicesModule/OnlineRequests">
+                    <Link href="/dashboard/ServicesModule/Appointments">
                         <button type="button" className="back-button" onClick={handleBack}></button>
                     </Link>
-                    <p>Online Request Details</p>
+                    <p>Barangay Indigency Appointment Details</p>
                   </div>
                   <div className="right-section">
                       <span className={`status-badge ${residentData.status.toLowerCase().replace(" ", "-")}`}>
                           {residentData.status ?? "N/A"}
                       </span>
-        
                   </div>
                     
                 </div>
@@ -97,12 +82,10 @@ export default function ViewOnlineRequest() {
                         </div>
                     </div>
                 ))}
-
             </div>
 
             <div className="Actions-Section">
-                <button type="button" className="actions-button">Print</button>
-                <button type="button" className="actions-button" onClick={handleviewappointmentdetails}>View Appointment Details</button>
+                <button type="button" className="actions-button" onClick={handleviewdocumentdetails}>View Document Request Details</button>
             </div>
         </main>
     );

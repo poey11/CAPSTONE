@@ -74,7 +74,7 @@ export default function EditOnlineRequest() {
     return (
         <main className="addAnnouncement-main-container">
             <div className="section-1">
-                <h1>Barangay Clearance Online Request</h1>
+                <h1>Barangay Indigency Online Request</h1>
             </div>
 
             <div className="addAnnouncement-main-section">
