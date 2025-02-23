@@ -2,6 +2,7 @@
 import React,{useState, useEffect, ChangeEvent} from "react";
 import {db} from "../../../db/firebase";
 import {collection, getDocs, onSnapshot, query, where} from "firebase/firestore";
+import "@/CSS/User&Roles/User&Roles.css";
 interface ResidentUser {
     id: string;
     first_name: string;
@@ -179,104 +180,155 @@ const admin = () => {
 
 
     return (  
-        <div>
-            <h1>Admin Module</h1>
-            <h2>Resident Users Table</h2> 
-            <div className="border border-black p-4 h-80 overflow-y-scroll">
-                <table className="w-full border-collapse">
-                    <thead>
-                    <tr>
-                        <th className="border border-gray-300 p-2">ID</th>
-                        <th className="border border-gray-300 p-2">Name</th>
-                        <th className="border border-gray-300 p-2">Address</th>
-                        <th className="border border-gray-300 p-2">Phone</th>
-                        <th className="border border-gray-300 p-2">Sex</th>
-                        <th className="border border-gray-300 p-2">Status</th>
-                        <th className="border border-gray-300 p-2">Valid ID Doc</th>
-                        <th className="border border-gray-300 p-2">Role</th>
-                        <th className="border border-gray-300 p-2">Email</th>
-                        <th className="border border-gray-300 p-2">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {residentUsers.map((user) => (
-                        <tr key={user.id}>
-                        <td className="border border-gray-300 p-2 text-center">{user.id}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.first_name} {user.last_name}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.address}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.phone}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.sex}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.status}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.validIdDoc}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.role}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.email}</td>
-                        <td className="border border-gray-300 p-2 text-center">
-                            <button className="bg-green-500 text-white w-20 py-2  rounded">Accept</button>
-                            <button className="bg-red-500 text-white  w-20 py-2 mt-1 rounded">Reject</button>
-                        </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                  
-                </table>
+        <main className="main-container">
+            <div className="section-1">
+                <h1>Admin Module</h1>
             </div>
-            <h2>Barangay Users Table</h2>
-            <div className="border border-black p-4 h-80 overflow-y-scroll">
-                <table className="w-full border-collapse">
-                    <thead>
-                    <tr>
-                        <th className="border border-gray-300 p-2">User ID</th>
-                        <th className="border border-gray-300 p-2">Official Name</th>
-                        <th className="border border-gray-300 p-2">Sex</th>
-                        <th className="border border-gray-300 p-2">Birth Date</th>
-                        <th className="border border-gray-300 p-2">Address</th>
-                        <th className="border border-gray-300 p-2">Phone</th>
-                        <th className="border border-gray-300 p-2">Position</th>
-                        <th className="border border-gray-300 p-2">Created By</th>
-                        <th className="border border-gray-300 p-2">Created At</th>
-                        <th className="border border-gray-300 p-2 ">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {barangayUsers.map((user) => (
-                        <tr key={user.id}>
-                        <td className="border border-gray-300 p-2 text-center">{user.userid}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.firstName} {user.lastName}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.sex}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.birthDate}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.address}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.phone}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.position}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.createdBy}</td>
-                        <td className="border border-gray-300 p-2 text-center">{user.createdAt}</td>
-                        <td className="border flex  border-gray-300 p-2 justify-center">
-                            <button className="bg-green-500 text-white w-20 mr-1 rounded">Modify</button>
-                            <button className="bg-red-500 text-white  w-20 py-3  rounded">Delete</button>
-                        </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                  
-                </table>
-            </div>       
-            <form onSubmit={handleSubmit} className=" flex flex-col  justify-center">
-                <label htmlFor="username">User ID: </label>
-                <input type="text"  id="username"  className="border-2 border-black" value={users.userId} disabled  required/>
-                <label htmlFor="roles">Role:</label>
-                <select  value={users.position}  onChange={handleChange} id="roles" name="position" className="border-2 border-black" >
-                    <option value="" disabled>Select a Role</option>
-                    <option value="Punong Barangay">Punong Barangay</option>
-                    <option value="Secretary">Secretary</option>
-                    <option value="Assistant Secretary">Asst Secretary</option>
-                    <option value="Admin Staff">Admin Staff</option>
-                    <option value="LF Staff">LF Staff</option>
-                </select>
-                <label htmlFor="password">Password: </label>
-                <input value={users.password} onChange={handleChange} id="password" type="password" name="password" className="border-2 border-black" required/>
-                <button   onClick={GenerateID} className="bg-blue-500 text-white  mb-3 mt-3">Generate User ID</button>
-                <button   className="bg-blue-500 text-white">Create New Barangay User</button>
-            </form>
-        </div>
+
+            <div className="main-section">
+
+                <div className="resident-users">
+                    <h1>Resident Users Table</h1>
+
+                    <div className="resident-users-main-section">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Address</th>
+                                    <th>Phone</th>
+                                    <th>Sex</th>
+                                    <th>Status</th>
+                                    <th>Valid ID Doc</th>
+                                    <th>Role</th>
+                                    <th>Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {residentUsers.map((user) => (
+                                    <tr key={user.id}>
+                                    <td>{user.id}</td>
+                                    <td>{user.first_name} {user.last_name}</td>
+                                    <td>{user.address}</td>
+                                    <td>{user.phone}</td>
+                                    <td>{user.sex}</td>
+                                    <td>{user.status}</td>
+                                    <td>{user.validIdDoc}</td>
+                                    <td>{user.role}</td>
+                                    <td>{user.email}</td>
+                                    <td>
+                                        <div className="actions">
+                                            <button className="action-accept">Accept</button>
+                                            <button className="action-reject">Reject</button>
+                                        </div>
+                                    </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="barangay-users">
+                    <h1>Barangay Users Table</h1>
+
+                    <div className="barangay-users-main-section">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Official Name</th>
+                                    <th>Sex</th>
+                                    <th>Birth Date</th>
+                                    <th>Address</th>
+                                    <th>Phone</th>
+                                    <th>Position</th>
+                                    <th>Created By</th>
+                                    <th>Created At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {barangayUsers.map((user) => (
+                                    <tr key={user.id}>
+                                    <td>{user.userid}</td>
+                                    <td>{user.firstName} {user.lastName}</td>
+                                    <td>{user.sex}</td>
+                                    <td>{user.birthDate}</td>
+                                    <td>{user.address}</td>
+                                    <td>{user.phone}</td>
+                                    <td>{user.position}</td>
+                                    <td>{user.createdBy}</td>
+                                    <td>{user.createdAt}</td>
+                                    <td>
+                                        <div className="actions">
+                                            <button className="action-accept">Modify</button>
+                                            <button className="action-reject">Delete</button>
+                                        </div>
+                                    </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="create-new-barangay-user">
+                    <form onSubmit={handleSubmit}>
+                        <h1>Barangay Users Table</h1>
+                        <div className="fields-container">
+                            <div className="fields-section">
+                                <label htmlFor="username">User ID: </label>
+                                <input 
+                                    type="text" 
+                                    id="username"
+                                    className="userID" 
+                                    value={users.userId} 
+                                    disabled  
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div className="fields-container">
+                            <div className="fields-section">
+                                <label htmlFor="roles">Role:</label>
+                                <select  value={users.position}  onChange={handleChange} id="roles" name="position" className="role" >
+                                    <option value="" disabled>Select a Role</option>
+                                    <option value="Punong Barangay">Punong Barangay</option>
+                                    <option value="Secretary">Secretary</option>
+                                    <option value="Assistant Secretary">Asst Secretary</option>
+                                    <option value="Admin Staff">Admin Staff</option>
+                                    <option value="LF Staff">LF Staff</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="fields-container">
+                            <div className="fields-section">
+                                <label htmlFor="password">Password: </label>
+                                <input 
+                                    value={users.password} 
+                                    onChange={handleChange} 
+                                    id="password" 
+                                    type="password" 
+                                    name="password" 
+                                    className="password" 
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div className="actions-section">
+                            <button onClick={GenerateID} className="generateUserID">Generate User ID</button>
+                            <button className="createNewBarangayUser">Create New Barangay User</button>
+                        </div>
+                        
+                    </form>
+                </div>
+            </div>
+        </main>
 
     );
 }
