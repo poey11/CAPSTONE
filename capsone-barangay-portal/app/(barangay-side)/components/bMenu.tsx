@@ -4,9 +4,9 @@ import Link from "next/link";
 import "@/CSS/BMenu/header.css";
 
 const BMenu: React.FC = () => {
-  const [openDropdown, setOpenDropdown] = useState<"resident" | "officials" | "services" | "incidents"|null>(null);
+  const [openDropdown, setOpenDropdown] = useState<"resident" | "officials" | "services" | "incidents"| "dashboard" |null>(null);
 
-  const toggleDropdown = (menu: "resident" | "officials"| "services" | "incidents") => {
+  const toggleDropdown = (menu: "resident" | "officials"| "services" | "incidents" | "dashboard") => {
     setOpenDropdown(openDropdown === menu ? null : menu);
   };
 
@@ -17,7 +17,18 @@ const BMenu: React.FC = () => {
       </div>
 
       <div className="contents">
-        <Link href="/dashboard" className="module">Dashboard</Link>
+
+         {/* Dashboard and Generate Reports Management */}
+         <div className="dropdown-wrapper">
+          <button onClick={() => toggleDropdown("dashboard")} className="dropdown-button">Dashboard</button>
+          {openDropdown === "dashboard" && (
+            <div className="dropdown-container">
+              <Link href="/reports" className="dropdown-item">Generate Report</Link>
+            </div>
+          )}
+        </div>
+
+
         <Link href="/dashboard/admin" className="module">User and Roles</Link>
 
         {/* Resident Management */}
@@ -42,7 +53,7 @@ const BMenu: React.FC = () => {
           )}
         </div>
 
-        <Link href="/reports" className="module">Reports Module</Link>
+     
 
         {/* Services Module */}
         <div className="dropdown-wrapper">
