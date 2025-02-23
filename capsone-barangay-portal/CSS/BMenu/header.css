@@ -1,3 +1,4 @@
+/* Sidebar header */
 .header {
   display: flex;
   flex-direction: column;
@@ -23,6 +24,7 @@
   width: 100%;
 }
 
+/* Main module button */
 .module {
   padding: 1rem;
   color: grey;
@@ -31,6 +33,8 @@
   text-align: center;
   width: 100%;
   cursor: pointer;
+  position: relative;
+
 }
 
 .module:hover {
@@ -41,50 +45,14 @@
   margin-bottom: 0.50rem;
 }
 
-.logo {
-  padding: 1rem;
-}
-
-/* Dropdown Styles */
+/* Dropdown Wrapper */
 .dropdown-wrapper {
+  position: relative;
   width: 100%;
   text-align: center;
-  position: relative; /* To contain the absolute dropdown */
 }
 
-.dropdown-container {
-    display: flex;
-    flex-direction: column;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 0.375rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    position: absolute;
-    width: 100%;
-    top: 100%;
-    left: 0;
-    z-index: 50;
-    color: grey;
-}
-
-.dropdown-item {
-  padding: 0.75rem 1rem;
-  text-align: center;
-  color: grey;
-  font-size: 0.95rem;
-  font-weight: normal;
-  cursor: pointer;
-  transition: background 0.2s ease-in-out;
-  font-size: 15px;
-  font-weight: bold;
-}
-
-
-.dropdown-item:hover {
-  background-color: #D9D9D9;
-  color: white;
-}
-
+/* Dropdown Button (the module itself) */
 .dropdown-button {
   padding: 1rem;
   color: grey;
@@ -92,8 +60,43 @@
   font-weight: bold;
   text-align: center; 
   width: 100%;
+  cursor: pointer;
 }
 
-.dropdown-button:hover {
+/* Dropdown container */
+.dropdown-container {
+  display: none;
+  flex-direction: column;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  width: 100%;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  color: grey;
+}
+
+/* Show dropdown when hovering over the module */
+.dropdown-wrapper:hover .dropdown-container {
+  display: flex;
+}
+
+/* Dropdown items */
+.dropdown-item {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  color: grey;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+ 
+}
+
+.dropdown-item:hover {
   background-color: #D9D9D9;
+  color: white;
 }
