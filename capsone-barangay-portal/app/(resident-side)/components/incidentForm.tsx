@@ -3,12 +3,13 @@ import "@/CSS/IncidentReport/IncidentReport.css";
 import { ChangeEvent, useState } from "react"; 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/authContext";
-import { deleteObject,ref, uploadBytes } from "firebase/storage";
-import { addDoc, collection, deleteDoc,doc, setDoc } from "firebase/firestore";
-import { auth,db,storage } from "@/app/db/firebase";
+import { ref, uploadBytes } from "firebase/storage";
+import { addDoc, collection} from "firebase/firestore";
+import { db,storage } from "@/app/db/firebase";
 interface reportProps {
     firstname: string;
     lastname: string;
+    contactNos: string;
     concerns: string;
     date: string;
     time: string;
@@ -16,6 +17,7 @@ interface reportProps {
     file: File | null;
     reportID: string;
     department: string;
+    status: string;
 }
 
 
@@ -27,6 +29,7 @@ const incidentForm:React.FC = () => {
   const [incidentReport, setIncidentReport] = useState<reportProps>({
       firstname: "",
       lastname: "",
+      contactNos: "",
       concerns: "",
       date: "",
       time: "",
@@ -34,6 +37,7 @@ const incidentForm:React.FC = () => {
       file: null,
       reportID: "",
       department: "",
+      status: "Pending",
   });
 
     const clearForm = () => {
@@ -45,6 +49,7 @@ const incidentForm:React.FC = () => {
       setIncidentReport({
         firstname: "",
         lastname: "",
+        contactNos: "",
         concerns: "",
         date: "",
         time: "",
@@ -52,6 +57,8 @@ const incidentForm:React.FC = () => {
         file: null,
         reportID: "",
         department: "",
+        status: "Pending",
+
       });
     }
 
@@ -112,12 +119,15 @@ const incidentForm:React.FC = () => {
         await addDoc(docRef, {
           firstname: incidentReport.firstname,
           lastname: incidentReport.lastname,
+          contactNos: incidentReport.contactNos,
           concerns: incidentReport.concerns,
           date: incidentReport.date,
           time: incidentReport.time,
           address: incidentReport.address,
           file: filename,
+          department: "Online",
           reportID: currentUser, 
+          status: incidentReport.status,
         });
         
         alert("Incident Report Submitted!");
@@ -178,6 +188,20 @@ const incidentForm:React.FC = () => {
                 required
                 placeholder="Enter Last Name"
                 value={incidentReport.lastname}
+                onChange={handleFormChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="contactNos" className="form-label">Cellphone Number:</label>
+              <input
+                type="text"
+                id="contactNos"
+                name="contactNos"
+                className="form-input"
+                required
+                placeholder="Enter Your Contact Number"
+                value={incidentReport.contactNos}
                 onChange={handleFormChange}
               />
             </div>

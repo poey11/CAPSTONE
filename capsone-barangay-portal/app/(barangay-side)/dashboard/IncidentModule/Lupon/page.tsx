@@ -1,33 +1,52 @@
 "use client"
 import "@/CSS/IncidentModule/MainDashboardIncident.css";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";
+import {db} from "@/app/db/firebase";
+import {collection, doc, deleteDoc, onSnapshot, query, where} from "firebase/firestore";
 
-const metadata: Metadata = {
-  title: "Incident Management Module",
-  description: "Manage incidents efficiently with status tracking and actions",
-};
+interface ReportProps{
+  id: string;
+  nature: string;
+  address: string;
+  concern: string;
+  date: string;
+  department: string;
+  file: string;
+  firstname: string;
+  lastname: string;
+  reportId: string;
+  time: string;
+  status: string;
+}
 
-const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
+
+const statusOptions = ["Pending","In Progress", "Resolved", "Settled", "Archived"];
 
 export default function LuponDepartment() {
-  const [incidentData, setIncidentData] = useState([
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Resolved" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Pending" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Settled" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived" },
-  ]);
+  const [incidentData, setIncidentData] = useState<ReportProps[]>([])
+
+  useEffect(()=> {
+    const fetchReport = async () => {
+      try{
+        const luponReportCollection = query(collection(db, "IncidentReports"), where("department", "==", "Lupon"));
+        const unsubscribeReport = onSnapshot(luponReportCollection, (snapshot) => {
+          const reportData:ReportProps[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })) as ReportProps[];
+          setIncidentData(reportData);
+        });
+
+        return unsubscribeReport;
+      }
+      catch(error:String|any){
+        console.log(error.message);1
+      }
+    }
+    fetchReport();
+  },[])
+  console.log("Data:",incidentData);
 
   const handleStatusChange = (index: number, newStatus: string) => {
     setIncidentData((prev) =>
@@ -35,19 +54,31 @@ export default function LuponDepartment() {
     );
   };
 
-   const router = useRouter();
+  const router = useRouter();
 
-    const handleViewLupon = () => {
-      router.push("/dashboard/IncidentModule/Lupon/ViewIncident");
-    };
+  const handleViewLupon = (reportId: string) => {
+    router.push(`/dashboard/IncidentModule/Lupon/ViewIncident?id=${reportId}`);
+  };
 
-    const handleEditLupon = () => {
-      router.push("/dashboard/IncidentModule/Lupon/EditIncident");
-    };
+  const handleEditLupon = (reportId: string) => {
+    router.push(`/dashboard/IncidentModule/Lupon/EditIncident?id=${reportId}`);
+  };
 
-    const handleAddLupon = () => {
-      router.push("/dashboard/IncidentModule/Lupon/AddIncident");
-    };
+  const handleDeleteLupon = (reportId: string) => {
+   try{
+    const reportDoc = doc(db, "IncidentReports", reportId);
+    deleteDoc(reportDoc);
+  
+   }
+   catch(error:String|any){
+     console.log(error.message);
+   }
+  }
+
+  const handleAddLupon = () => {
+    router.push("/dashboard/IncidentModule/Lupon/AddIncident");
+  };
+
 
 
   return (
@@ -77,7 +108,7 @@ export default function LuponDepartment() {
           <thead>
             <tr>
               <th>Complainant's Name</th>
-              <th>Date Filed</th>
+              <th>Date & Time of the Incident</th>
               <th>Nature of Complaint</th>
               <th>Status</th>
               <th>Actions</th>
@@ -86,19 +117,19 @@ export default function LuponDepartment() {
           <tbody>
             {incidentData.map((incident, index) => (
               <tr key={index}>
-                <td>{incident.ComplainantName}</td>
-                <td>{incident.DateFiled}</td>
-                <td>{incident.Nature}</td>
+                <td>{incident.firstname} {incident.lastname}</td>
+                <td>{incident.date} {incident.time}</td>
+                <td>{incident.nature}</td>
                 <td>
-                    <span className={`status-badge ${incident.Status.toLowerCase().replace(" ", "-")}`}>
-                        {incident.Status}
+                    <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
+                        {incident.status}
                     </span>
                 </td>   
                 <td>
                   <div className="actions">
-                    <button className="action-view" onClick={handleViewLupon}>View</button>
-                    <button className="action-edit" onClick={handleEditLupon}>Edit</button>
-                    <button className="action-delete">Delete</button>
+                    <button className="action-view" onClick={() => handleViewLupon(incident.id)}>View</button>
+                    <button className="action-edit" onClick={()=>handleEditLupon(incident.id)}>Edit</button>
+                    <button className="action-delete" onClick={()=> handleDeleteLupon(incident.id)}>Delete</button>
                   </div>
                 </td>
               </tr>

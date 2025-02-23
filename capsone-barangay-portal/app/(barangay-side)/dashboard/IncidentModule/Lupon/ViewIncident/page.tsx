@@ -1,28 +1,93 @@
 "use client"
 import "@/CSS/IncidentModule/ViewIncident.css";
-import type { Metadata } from "next";
-import { useState } from "react";
-import Link from 'next/link';
-import { useRouter } from "next/navigation";
+import { useRouter,useSearchParams  } from "next/navigation"; // Use 'next/navigation' in Next.js 13+ (App Router)
+import { useEffect, useState } from "react";
+import { db,storage } from "@/app/db/firebase";
+import {  doc, getDoc } from "firebase/firestore";
+import { getDownloadURL, ref } from "firebase/storage";
 
-const metadata: Metadata = {
-  title: "Announcement Page for Residents",
-  description: "Stay updated with the latest announcements",
-};
 
-export default function ViewLupon() {
-  const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
-  const status = "Pending"; // Example status
+interface reportProps {
+  firstname: string;
+  lastname: string;
+  contactNos: string;
+  concerns: string;
+  date: string;
+  time: string;
+  address: string;
+  file: File | null;
+  reportID: string;
+  department: string;
+  status: string;
+  id: string;
+}
+
+
+
+
+export default  function ViewLupon() {
+  const router = useRouter();
+  const searchParam = useSearchParams();
+  const docId = searchParam.get("id");
+  const [reportData, setReportData] = useState<any>();
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+
+
+  useEffect(() => {
+    const fetchReport = async () => {
+      try {
+        if (!docId) {
+          console.log("No document ID provided.");
+          setReportData(null);
+          return;
+        }
+  
+        // Fetch Firestore document
+        const reportRef = doc(db, "IncidentReports", docId);
+        const reportSnapshot = await getDoc(reportRef);
+  
+        if (!reportSnapshot.exists()) {
+          console.log("No matching document.");
+          setReportData(null);
+          return;
+        }
+  
+        const data = reportSnapshot.data();
+        setReportData(data);
+  
+        // 🔹 Fetch Download URL if file exists
+        if (data?.file) {
+          const filePath = data.file.startsWith("IncidentReports/")
+            ? data.file
+            : `IncidentReports/${data.file}`;
+  
+          const fileRef = ref(storage, filePath);
+          const url = await getDownloadURL(fileRef);
+          setDownloadUrl(url);
+        }
+      } catch (error: any) {
+        console.error("Error fetching report:", error.message);
+      }
+    };
+  
+    fetchReport();
+  }, []);
+
+  const status = reportData?.status; // Example status
+  
+  let accountType = "Guest User";
+  if(reportData?.reportID != "Guest"){
+    accountType = "Resident User";
+  }
 
   const complainantsData = {
-    name: "Jonnell Quebal",
-    sex: "Male",
-    age: 33,
-    civilStatus: "Single",
-    contact: "09171218101",
+    account: accountType,
+    name: reportData?.firstname + " " + reportData?.lastname,
+    contact: reportData?.contactNos,
   };
 
   const respondentsData = {
+    /* which lupon officer who handled this case, will follow up on this after doing edit page*/
     name: "Jonnell Quebal",
     sex: "Male",
     age: 33,
@@ -30,18 +95,19 @@ export default function ViewLupon() {
     contact: "09171218101",
   };
 
+
   const otherinformation = {
-    nature: "Robbery",
-    date: "2025-01-03",
-    location: "Fairview",
+    nature: reportData?.nature,
+    date:  reportData?.date + " " + reportData?.time,
+    location: reportData?.address,
+    concern: reportData?.concerns,
+    image: downloadUrl, 
   };
 
   const complainantsFields = [
+    { label: "Account Type", key: "account" },
     { label: "Name", key: "name" },
-    { label: "Age", key: "age" },
-    { label: "Sex", key: "sex" },
-    { label: "Civil Status", key: "civilStatus" },
-    { label: "Contact", key: "contact" },
+    { label: "Contact No", key: "contact" },
   ];
 
   const respondentsFields = [
@@ -54,8 +120,10 @@ export default function ViewLupon() {
 
   const otherinformationFields = [
     { label: "Nature", key: "nature" },
-    { label: "Date", key: "date" },
+    { label: "Date & Time", key: "date" },
     { label: "Location", key: "location" },
+    { label: "Concern", key: "concern" },
+    { label: "Image", key: "image" },
   ];
 
   const getStatusClass = (status: string) => {
@@ -73,7 +141,6 @@ export default function ViewLupon() {
     }
   };
 
-  const router = useRouter();
 
     const handleViewLupon = () => {
       router.push("/dashboard/IncidentModule/Lupon");
@@ -109,7 +176,7 @@ export default function ViewLupon() {
 
       <div className="main-content">
         <div className="section-1">
-          <p>Respondent's Details</p>
+          <p>LF Staff in Charge</p>
         </div>
 
         {respondentsFields.map((field) => (
@@ -135,11 +202,31 @@ export default function ViewLupon() {
               <p>{field.label}</p>
             </div>
             <div className="description">
-              <p>{otherinformation[field.key as keyof typeof otherinformation]}</p>
+              {field.key === "image" ? (
+                otherinformation.image ? ( // ✅ Check if image exists
+                  <>
+                    <a href={otherinformation.image} target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={otherinformation.image}
+                        alt="Incident Image"
+                        style={{ cursor: "pointer" }}
+                      />
+                    </a>
+                  </>
+                ) : (
+                  // ✅ Show fallback text when no image is available
+                  <p style={{ color: "gray", fontStyle: "italic" }}>No image available</p>
+                )
+              ) : (
+                <p>{otherinformation[field.key as keyof typeof otherinformation]}</p>
+              )}
             </div>
           </div>
-        ))}
+       ))}
       </div>
+
+        
+
     </main>
   );
 }
