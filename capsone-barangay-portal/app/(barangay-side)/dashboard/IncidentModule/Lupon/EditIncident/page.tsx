@@ -390,11 +390,9 @@ export default function EditLuponIncident() {
                 <p className="NewOfficial">First Hearing</p>
             </div>
 
-
     </div>
 
     <div className="hearing-section">
-        
             <div className="title-section">
                 <button type="button" className="plus-button" onClick={handleToggleClick}></button>
                 <p className="NewOfficial">Second Hearing</p>
@@ -402,7 +400,6 @@ export default function EditLuponIncident() {
     </div>
 
     <div className="hearing-section">
-        
         <div className="title-section">
             <button type="button" className="plus-button" onClick={handleToggleClick}></button>
             <p className="NewOfficial">Third Hearing</p>
