@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
+
 import Link from "next/link";
 import "@/CSS/BMenu/header.css";
 
 const BMenu: React.FC = () => {
 
-  const [openDropdown, setOpenDropdown] = useState<"resident" | "officials" | "services" | "incidents"|null>(null);
+  const [hoveredDropdown, setHoveredDropdown] = useState<string | null>(null);
 
   return (
     <div className="header bg-slate-400">
@@ -17,9 +18,18 @@ const BMenu: React.FC = () => {
 
        
           {/* Dashboard Module */}
-      <div className="dropdown-wrapper">
+      <div className="dropdown-wrapper"
+          onMouseEnter={() => setHoveredDropdown("dashboard")}
+          onMouseLeave={() => setHoveredDropdown(null)}
+      >
+
         <div className="dropdown-button">
           <Link href="/dashboard">Dashboard</Link>
+          <img 
+              src={hoveredDropdown === "dashboard" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+              alt="Menu Icon" 
+              className="arrow" 
+            />
         </div>
         <div className="dropdown-container">
           <Link href="/dashboard/ReportsModule" className="dropdown-item">Generate Report</Link>
@@ -30,10 +40,18 @@ const BMenu: React.FC = () => {
         <Link href="/dashboard/admin" className="module">User and Roles</Link>
 
         {/* Resident Management */}
-        <div className="dropdown-wrapper">
+        <div className="dropdown-wrapper"
+          onMouseEnter={() => setHoveredDropdown("resident")}
+          onMouseLeave={() => setHoveredDropdown(null)}
+        >
           
         <div className="dropdown-button">
           <Link href="/dashboard/ResidentModule">Residents Management</Link>
+          <img 
+              src={hoveredDropdown === "resident" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+              alt="Menu Icon" 
+              className="arrow" 
+            />
         </div>
 
 
@@ -44,10 +62,18 @@ const BMenu: React.FC = () => {
         </div>
 
         {/* Officials Module */}
-        <div className="dropdown-wrapper">
+        <div className="dropdown-wrapper"
+          onMouseEnter={() => setHoveredDropdown("officials")}
+          onMouseLeave={() => setHoveredDropdown(null)}
+      >
           
         <div className="dropdown-button">
           <Link  href="/dashboard/OfficialsModule">Officials Module</Link>
+          <img 
+              src={hoveredDropdown === "officials" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+              alt="Menu Icon" 
+              className="arrow" 
+            />
         </div>
           
           <div className="dropdown-container">
@@ -56,13 +82,21 @@ const BMenu: React.FC = () => {
           </div>
         </div>
 
-        <Link href="/reports" className="module">Reports Module</Link>
+
 
         {/* Services Module */}
-        <div className="dropdown-wrapper">
+        <div className="dropdown-wrapper"
+          onMouseEnter={() => setHoveredDropdown("services")}
+          onMouseLeave={() => setHoveredDropdown(null)}
+      >
 
         <div className="dropdown-button">
           <Link href="/dashboard/ServicesModule/InBarangayRequests">Services Management</Link>
+          <img 
+              src={hoveredDropdown === "services" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+              alt="Menu Icon" 
+              className="arrow" 
+            />
         </div>
 
           <div className="dropdown-container">
@@ -73,9 +107,18 @@ const BMenu: React.FC = () => {
         </div>
 
       {/* Incident Module */}
-      <div className="dropdown-wrapper">
+      <div className="dropdown-wrapper"
+          onMouseEnter={() => setHoveredDropdown("incidents")}
+          onMouseLeave={() => setHoveredDropdown(null)}
+      >
+
         <div className="dropdown-button">
           <Link href="/dashboard/IncidentModule">Incident Management</Link>
+          <img 
+              src={hoveredDropdown === "incidents" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+              alt="Menu Icon" 
+              className="arrow" 
+            />
         </div>
         <div className="dropdown-container">
           <Link href="/dashboard/IncidentModule/Lupon" className="dropdown-item">Lupon</Link>
