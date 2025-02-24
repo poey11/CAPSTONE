@@ -9,13 +9,12 @@ const BMenu: React.FC = () => {
   const [hoveredDropdown, setHoveredDropdown] = useState<string | null>(null);
 
   return (
-    <div className="header bg-slate-400">
+    <div className="header">
       <div className="logo">
         <img src="/Images/QClogo.png" alt="Barangay Captain" className="logo-image" />
       </div>
 
       <div className="contents">
-
        
           {/* Dashboard Module */}
       <div className="dropdown-wrapper"
