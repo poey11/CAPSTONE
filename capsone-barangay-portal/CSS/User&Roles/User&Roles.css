@@ -89,10 +89,10 @@
 .resident-users-main-section td{
     padding: 0.5rem; 
     text-align: center; 
-    border-bottom: 2px solid #ddd;
+    border-bottom: 1px solid #aaaaad;
     color: grey;
     font-weight: lighter;
-    border: 1px solid #aaaaad;
+    /*border: 1px solid #aaaaad;*/
 }
 
 .barangay-users{
@@ -158,10 +158,10 @@
 .barangay-users-main-section td{
     padding: 0.5rem; 
     text-align: center; 
-    border-bottom: 2px solid #ddd;
+    border-bottom: 1px solid #aaaaad;
     color: grey;
     font-weight: lighter;
-    border: 1px solid #aaaaad;
+    /*border: 1px solid #aaaaad;*/
 }
 
 
@@ -173,6 +173,8 @@
 
 .action-accept,
 .action-reject,
+.action-modify,
+.action-delete,
 .generateUserID,
 .createNewBarangayUser {   
     border: none;
@@ -190,22 +192,27 @@
     margin-top: 50px;
 }
 
-.action-accept {
+.action-accept,
+.action-modify {
     background-color: #4caf50; /* Green */
     color: white;
 }
 
-.action-accept:hover {
+.action-accept:hover,
+.action-modify:hover {
     background-color: #3e8f41; /* Green */
 }
 
-.action-reject {
+.action-reject,
+.action-delete {
     background-color: #f44336; /* Red */
     color: white;
 }
-.action-reject:hover {
+.action-reject:hover,
+.action-delete:hover {
     background-color: #d73c31; /* Red */
 }
+
 
 .generateUserID,
 .createNewBarangayUser{
