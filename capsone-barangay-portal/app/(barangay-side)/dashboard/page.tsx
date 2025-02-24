@@ -1,6 +1,6 @@
 "use client";
 import "@/CSS/DashboardModule/dashboard.css";
-
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { db } from "@/app/db/firebase";
 import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
@@ -109,7 +109,11 @@ export default function Dashboard() {
           <div className="metric-card">
 
               <div className="card-left-side">
-                  <p className="title">Barangay Officials:</p>
+                <Link href="/dashboard/OfficialsModule">
+                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                    Barangay Officials:
+                  </p>
+                </Link>
                   <p className="count">{ barangayUsersCount}</p>
               </div>
 
@@ -132,14 +136,18 @@ export default function Dashboard() {
     
              
             <div className="card-left-side">
-                  <p className="title">Registered Resident Users: </p>
-                  <p className="count">{barangayUsersCount}</p>
+            <Link href="/dashboard/admin">
+                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                    Total Registered Resident Users:
+                  </p>
+                </Link>
+                  <p className="count">{residentUsersCount}</p>
             </div>
 
             <div className="card-right-side">
               <ResponsiveContainer width={200} height={250}>
                 <PieChart>
-                  <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                  <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                     {residentData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -157,14 +165,18 @@ export default function Dashboard() {
           <div className="metric-card">
           
             <div className="card-left-side">
-                  <p className="title">New Registered Resident Users: </p>
+                <Link href="/dashboard/admin">
+                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                    New Registered Resident Users:
+                  </p>
+                </Link>
                   <p className="count">{newResidentUsersCount}</p>
             </div>
 
             <div className="card-right-side">
               <ResponsiveContainer width={200} height={250}>
                 <PieChart>
-                  <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                  <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                     {residentData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -180,16 +192,20 @@ export default function Dashboard() {
 
           <div className="metric-card">
            
-            <div className="card-left-side">
-                  <p className="title">Total Residents: </p>
-                  <p className="count">{residentsCount}</p>
-            </div>
+              <div className="card-left-side">
+                <Link href="/dashboard/ResidentModule">
+                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                    Total Residents:
+                  </p>
+                </Link>
+                <p className="count">{residentsCount}</p>
+              </div>
 
           <div className="card-right-side">
              
           <ResponsiveContainer width={200} height={250}>
             <PieChart>
-              <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+              <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                 {verificationData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={VERIFICATION_COLORS[index % VERIFICATION_COLORS.length]} />
                 ))}
@@ -203,9 +219,13 @@ export default function Dashboard() {
           </div>
 
          <div className="metric-card">
-          
+          {/* need to change this to the document requests table count */}
             <div className="card-left-side">
-                  <p className="title">Incidents Reports: </p>
+                <Link href="/dashboard/ServicesModule/OnlineRequests">
+                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                    Total Document Requests:
+                  </p>
+                </Link>
                   <p className="count">{incidentReportsCount}</p>
             </div>
 
@@ -229,7 +249,11 @@ export default function Dashboard() {
          <div className="metric-card">
           
           <div className="card-left-side">
-              <p className="title">Incidents Reports: </p>
+                <Link href="/dashboard/IncidentModule/Lupon">
+                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                    Incident Reports:
+                  </p>
+                </Link>
               <p className="count">{incidentReportsCount}</p>
           </div>
 
