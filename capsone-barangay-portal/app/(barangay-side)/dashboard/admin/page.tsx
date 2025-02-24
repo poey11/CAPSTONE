@@ -3,6 +3,7 @@ import React,{useState, useEffect, ChangeEvent} from "react";
 import {db} from "../../../db/firebase";
 import {collection, getDocs, onSnapshot, query, where} from "firebase/firestore";
 import "@/CSS/User&Roles/User&Roles.css";
+import { useRouter } from "next/navigation";
 interface ResidentUser {
     id: string;
     first_name: string;
@@ -177,6 +178,11 @@ const admin = () => {
         
    }
 
+   const router = useRouter();
+   
+   const handleEditBrgyAcc = () => {
+    router.push("/dashboard/admin/modifyBarangayAcc");
+  };
 
 
     return (  
@@ -266,8 +272,8 @@ const admin = () => {
                                     <td>{user.createdAt}</td>
                                     <td>
                                         <div className="actions">
-                                            <button className="action-accept">Accept</button>
-                                            <button className="action-reject">Reject</button>
+                                            <button className="action-modify" onClick={handleEditBrgyAcc}>Modify</button>
+                                            <button className="action-delete">Delete</button>
                                         </div>
                                     </td>
                                     </tr>
