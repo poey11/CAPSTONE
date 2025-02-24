@@ -98,47 +98,96 @@ export default function Dashboard() {
 
   return (
     <main className="main-container">
-      <div className="section-1">
-        <h1>Dashboard</h1>
-        <div className="dashboard-metrics">
-          <div className="metric-card">
-            <h3>Barangay Officials</h3>
-            <p>{barangayUsersCount}</p>
-          </div>
-          <div className="metric-card">
-            <h3>Registered Resident Users</h3>
-            <p>{residentUsersCount}</p>
-          </div>
-          <div className="metric-card">
-            <h3>New Resident Users (Last 7 Days)</h3>
-            <p>{newResidentUsersCount}</p>
-          </div>
-          <div className="metric-card">
-            <h3>Total Residents</h3>
-            <p>{residentsCount}</p>
-          </div>
-          <div className="metric-card">
-            <h3>Incident Reports</h3>
-            <p>{incidentReportsCount}</p>
-          </div>
-        </div>
 
-        <div className="chart-container">
-          <ResponsiveContainer width={250} height={250}>
-            <PieChart>
-              <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                {residentData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+      <p className="dashboard">Summaries</p>
 
-        <div className="chart-container">
-          <ResponsiveContainer width={250} height={250}>
+      
+
+        <div className="summaries-section">
+
+      
+          <div className="metric-card">
+
+              <div className="card-left-side">
+                  <p className="title">Barangay Officials:</p>
+                  <p className="count">{ barangayUsersCount}</p>
+              </div>
+
+            <div className="card-right-side">
+              <ResponsiveContainer width={200} height={250} >
+                <PieChart>
+                  <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                    {residentData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+              </div>
+          </div>
+          
+          <div className="metric-card">
+    
+             
+            <div className="card-left-side">
+                  <p className="title">Registered Resident Users: </p>
+                  <p className="count">{barangayUsersCount}</p>
+            </div>
+
+            <div className="card-right-side">
+              <ResponsiveContainer width={200} height={250}>
+                <PieChart>
+                  <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                    {residentData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+              </div>
+       
+
+
+          </div>
+
+          <div className="metric-card">
+          
+            <div className="card-left-side">
+                  <p className="title">New Registered Resident Users: </p>
+                  <p className="count">{newResidentUsersCount}</p>
+            </div>
+
+            <div className="card-right-side">
+              <ResponsiveContainer width={200} height={250}>
+                <PieChart>
+                  <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                    {residentData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+              </div>
+       
+
+          </div>
+
+          <div className="metric-card">
+           
+            <div className="card-left-side">
+                  <p className="title">Total Residents: </p>
+                  <p className="count">{residentsCount}</p>
+            </div>
+
+          <div className="card-right-side">
+             
+          <ResponsiveContainer width={200} height={250}>
             <PieChart>
               <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                 {verificationData.map((entry, index) => (
@@ -149,50 +198,72 @@ export default function Dashboard() {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
-      </div>
+            </div>
 
-      <div className="main-section">
-        <h2>Incident Reports</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Report ID</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Address</th>
-              <th>Concerns</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {incidentReports.length > 0 ? (
-              incidentReports.map((report) => (
-                <tr key={report.reportID}>
-                  <td>{report.reportID}</td>
-                  <td>{report.firstname}</td>
-                  <td>{report.lastname}</td>
-                  <td>{report.address}</td>
-                  <td>{report.concerns}</td>
-                  <td>{report.date}</td>
-                  <td>{report.time}</td>
-                  <td className="actions">
-                    <button className="action-view">View</button>
-                    <button className="action-edit">Edit</button>
-                    <button className="action-delete">Delete</button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={8} className="no-data">No incident reports</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+
+         <div className="metric-card">
+          
+            <div className="card-left-side">
+                  <p className="title">Incidents Reports: </p>
+                  <p className="count">{incidentReportsCount}</p>
+            </div>
+
+            <div className="card-right-side">
+              
+          <ResponsiveContainer width={200} height={250}>
+            <PieChart>
+              <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                {verificationData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={VERIFICATION_COLORS[index % VERIFICATION_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+            </div>
+
+         </div>
+
+         <div className="metric-card">
+          
+          <div className="card-left-side">
+              <p className="title">Incidents Reports: </p>
+              <p className="count">{incidentReportsCount}</p>
+          </div>
+
+          <div className="card-right-side">
+           
+          <ResponsiveContainer width={200} height={250}>
+            <PieChart>
+              <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                {verificationData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={VERIFICATION_COLORS[index % VERIFICATION_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+          </div>
+
+       </div>
+          
+      </div> 
+
+
+      <p className="dashboard">Incident Heat Map</p>
+
+          <div className="heatmap-container">
+                  
+        
+
+          </div>
+
+     
+
+      
     </main>
   );
 }
