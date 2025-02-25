@@ -3,6 +3,7 @@ import React,{useState, useEffect, ChangeEvent} from "react";
 import {db} from "../../../db/firebase";
 import {collection, getDocs, onSnapshot, query, where} from "firebase/firestore";
 import "@/CSS/User&Roles/User&Roles.css";
+import { useRouter } from "next/navigation";
 interface ResidentUser {
     id: string;
     first_name: string;
@@ -177,6 +178,15 @@ const admin = () => {
         
    }
 
+    const router = useRouter();
+   
+    const handleEditBrgyAcc = () => {
+        router.push("/dashboard/admin/modifyBarangayAcc");
+    };
+
+    const handleRejectResidentUser = () => {
+        router.push("/dashboard/admin/reasonForReject");
+    };
 
 
     return (  
@@ -222,7 +232,7 @@ const admin = () => {
                                     <td>
                                         <div className="actions">
                                             <button className="action-accept">Accept</button>
-                                            <button className="action-reject">Reject</button>
+                                            <button className="action-reject" onClick={handleRejectResidentUser}>Reject</button>
                                         </div>
                                     </td>
                                     </tr>
@@ -266,8 +276,8 @@ const admin = () => {
                                     <td>{user.createdAt}</td>
                                     <td>
                                         <div className="actions">
-                                            <button className="action-accept">Modify</button>
-                                            <button className="action-reject">Delete</button>
+                                            <button className="action-modify" onClick={handleEditBrgyAcc}>Modify</button>
+                                            <button className="action-delete">Delete</button>
                                         </div>
                                     </td>
                                     </tr>
@@ -279,7 +289,7 @@ const admin = () => {
 
                 <div className="create-new-barangay-user">
                     <form onSubmit={handleSubmit}>
-                        <h1>Barangay Users Table</h1>
+                        <h1>Create New Barangay User</h1>
                         <div className="fields-container">
                             <div className="fields-section">
                                 <label htmlFor="username">User ID: </label>
@@ -288,6 +298,7 @@ const admin = () => {
                                     id="username"
                                     className="userID" 
                                     value={users.userId} 
+                                    placeholder="User ID"
                                     disabled  
                                     required
                                 />
@@ -316,6 +327,7 @@ const admin = () => {
                                     type="password" 
                                     name="password" 
                                     className="password" 
+                                    placeholder="Enter Password"
                                     required
                                 />
                             </div>
