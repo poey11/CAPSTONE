@@ -3,24 +3,10 @@ import "@/CSS/IncidentModule/ViewIncident.css";
 import { useRouter,useSearchParams  } from "next/navigation"; // Use 'next/navigation' in Next.js 13+ (App Router)
 import { useEffect, useState } from "react";
 import { db,storage } from "@/app/db/firebase";
-import {  doc, getDoc } from "firebase/firestore";
+import {  collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { getDownloadURL, ref } from "firebase/storage";
 
 
-interface reportProps {
-  firstname: string;
-  lastname: string;
-  contactNos: string;
-  concerns: string;
-  date: string;
-  time: string;
-  address: string;
-  file: File | null;
-  reportID: string;
-  department: string;
-  status: string;
-  id: string;
-}
 
 
 
@@ -30,8 +16,9 @@ export default  function ViewLupon() {
   const searchParam = useSearchParams();
   const docId = searchParam.get("id");
   const [reportData, setReportData] = useState<any>();
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-
+  const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
+  const [LTreportImageUrl, setLTreportImageUrl] = useState<string | null>(null);
+  const [LTreportData, setLTReportData] = useState<any>();
 
   useEffect(() => {
     const fetchReport = async () => {
@@ -45,6 +32,8 @@ export default  function ViewLupon() {
         // Fetch Firestore document
         const reportRef = doc(db, "IncidentReports", docId);
         const reportSnapshot = await getDoc(reportRef);
+
+       
   
         if (!reportSnapshot.exists()) {
           console.log("No matching document.");
@@ -54,6 +43,17 @@ export default  function ViewLupon() {
   
         const data = reportSnapshot.data();
         setReportData(data);
+
+        const LTreportRef = collection(reportRef, "LTAssignedInfo");
+        const LTreportCollectionSnapshot = await getDocs(LTreportRef);
+        
+        if (LTreportCollectionSnapshot.empty) {
+          console.log("No matching document.");
+          setLTReportData(null);
+          return;
+        }
+        const LTdata = LTreportCollectionSnapshot.docs[0].data();
+        setLTReportData(LTdata);
   
         // 🔹 Fetch Download URL if file exists
         if (data?.file) {
@@ -63,8 +63,20 @@ export default  function ViewLupon() {
   
           const fileRef = ref(storage, filePath);
           const url = await getDownloadURL(fileRef);
-          setDownloadUrl(url);
+          setconcernImageUrl(url);
         }
+
+        if (LTdata?.file) {
+          const filePath = LTdata.file.startsWith("IncidentReports/LTAssignedInfo/")
+            ? LTdata.file
+            : `IncidentReports/LTAssignedInfo/${LTdata.file}`;
+  
+          const fileRef = ref(storage, filePath);
+          const url = await getDownloadURL(fileRef);
+          setLTreportImageUrl(url);
+        }
+
+
       } catch (error: any) {
         console.error("Error fetching report:", error.message);
       }
@@ -74,11 +86,14 @@ export default  function ViewLupon() {
   }, []);
 
   const status = reportData?.status; // Example status
-  
+ 
   let accountType = "Guest User";
   if(reportData?.reportID != "Guest"){
     accountType = "Resident User";
   }
+ 
+  console.log("Report Data:", reportData);
+  console.log("LT Report Data:", LTreportData);
 
   const complainantsData = {
     account: accountType,
@@ -88,11 +103,11 @@ export default  function ViewLupon() {
 
   const respondentsData = {
     /* which lupon officer who handled this case, will follow up on this after doing edit page*/
-    name: "Jonnell Quebal",
-    sex: "Male",
-    age: 33,
-    civilStatus: "Single",
-    contact: "09171218101",
+    LTUserId: LTreportData?.LTUserId,
+    name: LTreportData?.Fname + " " + LTreportData?.Lname,
+    contact: LTreportData?.phone,
+    report: LTreportData?.report,
+    image: LTreportImageUrl,
   };
 
 
@@ -101,7 +116,7 @@ export default  function ViewLupon() {
     date:  reportData?.date + " " + reportData?.time,
     location: reportData?.address,
     concern: reportData?.concerns,
-    image: downloadUrl, 
+    image: concernImageUrl, 
   };
 
   const complainantsFields = [
@@ -110,12 +125,12 @@ export default  function ViewLupon() {
     { label: "Contact No", key: "contact" },
   ];
 
-  const respondentsFields = [
+  const LtFields = [
+    { label: "User ID", key: "LTUserId" },
     { label: "Name", key: "name" },
-    { label: "Age", key: "age" },
-    { label: "Sex", key: "sex" },
-    { label: "Civil Status", key: "civilStatus" },
     { label: "Contact", key: "contact" },
+    { label: "Report", key: "report" },
+    { label: "Image", key: "image" },
   ];
 
   const otherinformationFields = [
@@ -176,24 +191,41 @@ export default  function ViewLupon() {
 
       <div className="main-content">
         <div className="section-1">
-          <p>LF Staff in Charge</p>
+          <p>LT Staff in Charge</p>
         </div>
 
-        {respondentsFields.map((field) => (
+        {LtFields.map((field) => (
           <div className="details-section" key={field.key}>
             <div className="title">
               <p>{field.label}</p>
             </div>
             <div className="description">
-              <p>{respondentsData[field.key as keyof typeof respondentsData]}</p>
+              {field.key === "image" ? (
+                respondentsData.image ? ( // ✅ Check if image exists
+                  <>
+                    <a href={respondentsData.image} target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={respondentsData.image}
+                        alt="Incident Image"
+                        style={{ cursor: "pointer" }}
+                      />
+                    </a>
+                  </>
+                ) : (
+                  // ✅ Show fallback text when no image is available
+                  <p style={{ color: "gray", fontStyle: "italic" }}>No image available</p>
+                )
+              ) : (
+                <p>{respondentsData[field.key as keyof typeof respondentsData]}</p>
+              )}
             </div>
           </div>
-        ))}
+       ))}
       </div>
 
       <div className="main-content">
         <div className="section-1">
-          <p>Other's Information</p>
+          <p>Incident Information</p>
         </div>
 
         {otherinformationFields.map((field) => (

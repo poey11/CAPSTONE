@@ -269,7 +269,7 @@ const admin = () => {
                     <option value="Secretary">Secretary</option>
                     <option value="Assistant Secretary">Asst Secretary</option>
                     <option value="Admin Staff">Admin Staff</option>
-                    <option value="LF Staff">LF Staff</option>
+                    <option value="LT Staff">LT Staff</option>
                 </select>
                 <label htmlFor="password">Password: </label>
                 <input value={users.password} onChange={handleChange} id="password" type="password" name="password" className="border-2 border-black" required/>

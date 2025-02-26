@@ -18,6 +18,7 @@ interface accountSetupProps {
     phone: string;
     sex: string;
     password: string;
+    contact: string;
 }
 
 
@@ -33,7 +34,8 @@ const accSetupForm: React.FC<AccSetupFormProps> = ({userID}) => {
         address: '',
         phone: '',
         sex: '',
-        password: ''
+        password: '',
+        contact:''
     });
     
 
@@ -64,7 +66,8 @@ const accSetupForm: React.FC<AccSetupFormProps> = ({userID}) => {
                 phone: User.phone,
                 sex: User.sex,
                 password: hashedPassword,
-                firstTimelogin: false
+                firstTimelogin: false,
+                contact: User.contact
             });
 
             await update();
@@ -91,6 +94,9 @@ const accSetupForm: React.FC<AccSetupFormProps> = ({userID}) => {
               <option value="Male">Male</option>
               <option value="Female">Female</option>
             </select>
+
+            <label htmlFor="contact">Cellphone Nos: </label>
+            <input onChange={handleChange} value={User.contact} id="contact" type="text" name="contact" className="border-2 border-black" required />
 
             <label htmlFor="bday">Birth date: </label>
             <input onChange={handleChange} value={User.bday} id="bday" type="text" name="bday" className="border-2 border-black" required />

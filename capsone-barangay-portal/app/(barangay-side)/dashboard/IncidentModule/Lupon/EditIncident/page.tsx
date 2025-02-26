@@ -1,52 +1,127 @@
 "use client"
 import "@/CSS/IncidentModule/EditIncident.css";
-import type { Metadata } from "next";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { ChangeEvent,useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { db,storage } from "@/app/db/firebase";
+import {  collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 
-import Link from 'next/link';
 
+interface editFormProps {
 
-const metadata: Metadata = {
-  title: "Announcement Page for Residents",
-  description: "Stay updated with the latest announcements",
-};
+}
 
 export default function EditLuponIncident() {
-
-    const [isActive, setIsActive] = useState(false);
-
-    // State for all file containers
-    const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
-        container1: [],
-        container2: [],
-        container3: [],
-        container4: [],
-      });
+    /* do the partial edit/modify of info of the incident. I need the online report category to be able to complete this. */
+    const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const router = useRouter();
+    const searchParam = useSearchParams();
+    const docId = searchParam.get("id");
+    const [reportData, setReportData] = useState<any>();
+    const [LTreportData, setLTReportData] = useState<any>();
+    const [listofLT, setListofLT] = useState<any[]>([]);
   
     // Handle file selection for any container
-    const handleFileChange = (container: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChangeContainer1 = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = event.target.files;
         if (selectedFiles) {
           const fileArray = Array.from(selectedFiles).map((file) => {
             const preview = URL.createObjectURL(file);
             return { name: file.name, preview };
           });
-          setFiles((prevFiles) => ({
-            ...prevFiles,
-            [container]: [...prevFiles[container], ...fileArray], // Append new files to the specified container
-          }));
+          setFilesContainer1((prevFiles) => [...prevFiles, ...fileArray]); // Append new files to the first container
         }
-      };
+    };
   
-      // Handle file deletion for any container
-      const handleFileDelete = (container: string, fileName: string) => {
-        setFiles((prevFiles) => ({
-          ...prevFiles,
-          [container]: prevFiles[container].filter((file) => file.name !== fileName),
-        }));
-      };
-  
+
+    useEffect(() => {
+      const fetchReport = async () => {
+            try {
+              if (!docId) {
+                console.log("No document ID provided.");
+                setReportData(null);
+                return;
+              }
+        
+              // Fetch Firestore document
+              const reportRef = doc(db, "IncidentReports", docId);
+              const reportSnapshot = await getDoc(reportRef);
+      
+             
+        
+              if (!reportSnapshot.exists()) {
+                console.log("No matching document.");
+                setReportData(null);
+                return;
+              }
+        
+              const data = reportSnapshot.data();
+              setReportData(data);
+      
+              const LTreportRef = collection(reportRef, "LTAssignedInfo");
+              const LTreportCollectionSnapshot = await getDocs(LTreportRef);
+              
+              if (LTreportCollectionSnapshot.empty) {
+                console.log("No matching document.");
+                setLTReportData(null);
+                return;
+              }
+              const LTdata = LTreportCollectionSnapshot.docs[0].data();
+              setLTReportData(LTdata);
+            } catch (error: any) {
+              console.error("Error fetching report:", error.message);
+            }
+          };
+        const fetchLT = async () => {
+            try{
+                const LTquery = query(collection(db, "BarangayUsers"), where("position", "==", "LT Staff"));
+                const LTquerySnapshot = await getDocs(LTquery);
+                LTquerySnapshot.forEach((doc) => {
+                    setListofLT((prevList) => [...prevList, doc.data()]);
+                });
+
+            }
+            catch  (error: any) {
+                console.error("Error fetching LT List:", error.message);
+              }
+        }
+        fetchReport();
+        fetchLT();
+    },[]);
+
+    console.log(reportData);
+    console.log(LTreportData);
+    console.log(listofLT);
+
+      // Handle file deletion for container 1
+    const handleFileDeleteContainer1 = (fileName: string) => {
+        setFilesContainer1((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      
+        // Reset file input to ensure re-upload works
+        const fileInput = document.getElementById('file-upload1') as HTMLInputElement;
+        if (fileInput) {
+          fileInput.value = "";
+        }
+    };
+      
+    
+    const handleFormChange = (e:ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const {name, value, type} = e.target;
+          
+        //   if(type === "file" && e.target instanceof HTMLInputElement && e.target.files){
+        //     setIncidentReport({
+        //       ...incidentReport,
+        //       file: e.target.files[0],
+        //     })
+        //   }
+        //   else{
+        //     setIncidentReport({
+        //       ...incidentReport,
+        //       [name]: value,
+        //     })
+    
+        //   }
+        }
+
       // Handle form submission
       const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault(); // Prevent default form submission
@@ -62,7 +137,6 @@ export default function EditLuponIncident() {
         }
       };
 
-    const router = useRouter();
 
     const handleAddLupon = () => {
       router.push("/dashboard/IncidentModule/Lupon");
@@ -76,7 +150,7 @@ export default function EditLuponIncident() {
         router.push("/dashboard/IncidentModule/Lupon/EditIncident/SummonLetter");
       };
 
-      const [status, setStatus] = useState("pending"); //REMOVE PAG IMPLEMENTED NA SA BACKEND
+      const status = reportData?.status//REMOVE PAG IMPLEMENTED NA SA BACKEND
 
       const [showDialogueContent, setShowDialogueContent] = useState(false); // Initially hidden
 
@@ -98,12 +172,12 @@ export default function EditLuponIncident() {
                         id="status"
                         className={`status-dropdown ${status}`}
                         value={status}
-                        onChange={(e) => setStatus(e.target.value)}
+                      
                         >
-                        <option value="pending">Pending</option>
-                        <option value="resolved">Resolved</option>
-                        <option value="settled">Settled</option>
-                        <option value="archived">Archived</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Resolved">Resolved</option>
+                        <option value="Settled">Settled</option>
+                        <option value="Archived">Archived</option>
               </select>
             
 
@@ -132,44 +206,33 @@ export default function EditLuponIncident() {
 
                 <div className="section-2-left-side">
 
+
                     <p >Complainant's Information</p>
+                    <p>Account Type</p>
+                    <input 
+                    type="text" 
+                    className="search-bar" 
+                    placeholder= {reportData?.reportID}
+                    disabled
+                    />
+
                     <p>Name</p>
 
                     <input 
                     type="text" 
                     className="search-bar" 
-                    placeholder="Enter Official Name" 
+                    placeholder={`${reportData?.firstname} ${reportData?.lastname}`}
+                    disabled
                     />
 
-                   
-                <p>Sex</p>
-                  <select 
-                  id="featuredStatus" 
-                  name="featuredStatus" 
-                  className="featuredStatus" 
-                  required
-                  defaultValue=""  
-                  >
-                  <option value="" disabled>Choose</option>
-                  <option value="active">Male</option>
-                  <option value="inactive">Female</option>
-                  </select>
-
-
-                    <p>Age</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder="Enter Age" 
-                    />
 
                     <p>Contact Information</p>
 
                     <input 
                     type="text" 
                     className="search-bar" 
-                    placeholder="Enter Contact Number" 
+                    placeholder={reportData?.contactNos}
+                    disabled
                     />
 
                     
@@ -179,34 +242,21 @@ export default function EditLuponIncident() {
 
                 <div className="section-2-right-side">
 
-                <p>Respondent's Information</p>
+                <p>Assigned LT's Information</p>
+                <p>User ID</p>
+                  <input
+                    type="text"
+                    className="search-bar"
+                    placeholder={LTreportData?.LTUserId}
+                    disabled
+                    />
                   <p>Name</p>
 
                   <input 
                   type="text" 
                   className="search-bar" 
-                  placeholder="Enter Official Name" 
-                  />
-
-                  <p>Sex</p>
-                  <select 
-                  id="featuredStatus" 
-                  name="featuredStatus" 
-                  className="featuredStatus" 
-                  required
-                  defaultValue=""  
-                  >
-                  <option value="" disabled>Choose</option>
-                  <option value="active">Male</option>
-                  <option value="inactive">Female</option>
-                  </select>
-
-                  <p>Age</p>
-
-                  <input 
-                  type="text" 
-                  className="search-bar" 
-                  placeholder="Enter Age" 
+                  placeholder= {`${LTreportData?.Fname} ${LTreportData?.Lname}`}
+                  disabled 
                   />
 
                   <p>Contact Information</p>
@@ -214,9 +264,25 @@ export default function EditLuponIncident() {
                   <input 
                   type="text" 
                   className="search-bar" 
-                  placeholder="Enter Contact Number" 
+                  placeholder= {LTreportData?.phone}
+                    disabled
                   />
-                   
+                
+
+                <p>Change Assigned LT</p>
+                  {/* The first option should be the first assigned LT staff*/}
+                  <select 
+                  id="featuredStatus" 
+                  name="featuredStatus" 
+                  className="featuredStatus" 
+                  >
+                       {listofLT.map((lt, index) => (
+                          <option key={index} value={lt.id}>
+                            {lt.userid} {lt.position}
+                          </option>
+                        ))}
+                  </select>
+                 
 
                 </div>
 
@@ -224,22 +290,27 @@ export default function EditLuponIncident() {
 
 
             <div className="section-3">
-                <p className="title">Other Information</p>
+                <p className="title">Incident Information</p>
                 
                 <div className="bars">
                     <div className="input-group">
                         <p>Nature of Complaint</p>
-                        <input type="text" className="search-bar" placeholder="Enter Nature of Complaint" />
+                        <input type="text" className="search-bar" placeholder={reportData.nature} />
                     </div>
 
                     <div className="input-group">
-                        <p>Date Filed</p>
-                        <input type="date" className="search-bar" placeholder="Enter Date" />
+                        <p>Date of Investigation</p>
+                        <input type="date" className="search-bar" placeholder={LTreportData.dateofinvestigation} />
+                    </div>
+
+                    <div className="input-group">
+                        <p>Date Reported</p>
+                        <input type="text" className="search-bar" placeholder={`${reportData.date} ${reportData.time}`} disabled/>
                     </div>
 
                     <div className="input-group">
                         <p>Location</p>
-                        <input type="text" className="search-bar" placeholder="Enter Location" />
+                        <input type="text" className="search-bar" placeholder={reportData.address} disabled/>
                     </div>
                 </div>
             </div>
@@ -251,10 +322,10 @@ export default function EditLuponIncident() {
                 <div className="section-4-left-side">
 
                   <div className="fields-section">
-                              <p>Description</p>
+                              <p>Investigation Report</p>
                                   <textarea 
                                       className="description" 
-                                      placeholder="Enter Description"
+                                      placeholder={LTreportData.report}
                                       rows={15}
                                ></textarea>
                     </div>
@@ -270,58 +341,54 @@ export default function EditLuponIncident() {
                <div className="file-upload-container">
 
 
-                    <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
+                    <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
                         <input
-                        id="file-upload2"
+                        id="file-upload1"
                         type="file"
                         className="file-upload-input" 
                         multiple
                         accept=".jpg,.jpeg,.png"
                         required
-                        onChange={handleFileChange('container2')} // Handle file selection
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            handleFileChangeContainer1(e);
+                            handleFormChange(e);
+                          }} // Handle file selection
                         />
-
                     <div className="uploadedFiles-container">
-                        {/* Display the file names with image previews */}
-                        {files.container2.length > 0 && (
-                        <div className="file-name-image-display">
+                        {filesContainer1.length > 0 && (
+                          <div className="file-name-image-display">
                             <ul>
-                            {files.container2.map((file, index) => (
+                              {filesContainer1.map((file, index) => (
                                 <div className="file-name-image-display-indiv" key={index}>
-                                <li> 
-                                    {/* Display the image preview */}
+                                  <li>
                                     {file.preview && (
-                                        <div className="filename&image-container">
+                                      <div className="filename-image-container">
                                         <img
-                                            src={file.preview}
-                                            alt={file.name}
-                                            style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                          src={file.preview}
+                                          alt={file.name}
+                                          style={{ width: '50px', height: '50px', marginRight: '5px' }}
                                         />
-                                        </div>
-                                        )}
-                                    {file.name}  
+                                      </div>
+                                    )}
+                                    {file.name}
                                     <div className="delete-container">
-                                    {/* Delete button with image */}
-                                    <button
+                                      <button
                                         type="button"
-                                        onClick={() => handleFileDelete('container2', file.name)}
+                                        onClick={() => handleFileDeleteContainer1(file.name)}
                                         className="delete-button"
-                                        >
+                                      >
                                         <img
-                                            src="/images/trash.png"  
-                                            alt="Delete"
-                                            className="delete-icon"
+                                          src="/images/trash.png"
+                                          alt="Delete"
+                                          className="delete-icon"
                                         />
-                                        </button>
-
+                                      </button>
                                     </div>
-                                                
-                                    
-                                </li>
+                                  </li>
                                 </div>
-                            ))}  
+                              ))}
                             </ul>
-                        </div>
+                          </div>
                         )}
                     </div>
                     </div>
