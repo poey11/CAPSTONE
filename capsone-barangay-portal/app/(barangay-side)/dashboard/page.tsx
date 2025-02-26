@@ -11,6 +11,11 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid
 } from "recharts";
 
 export default function Dashboard() {
@@ -20,6 +25,9 @@ export default function Dashboard() {
   const [residentsCount, setResidentsCount] = useState(0);
   const [incidentReportsCount, setIncidentReportsCount] = useState(0);
   const [verifiedResidentsCount, setVerifiedResidentsCount] = useState(0);
+  const [incidentReportsByMonth, setIncidentReportsByMonth] = useState<{ monthYear: string; count: number }[]>([]);
+  const [otherIncidentReportsCount, setOtherIncidentReportsCount] = useState(0);
+  const [pendingIncidentReportsCount, setPendingIncidentReportsCount] = useState(0);
   const [incidentReports, setIncidentReports] = useState<{ 
     reportID: string;
     firstname: string;
@@ -45,6 +53,15 @@ export default function Dashboard() {
 
         const incidentReportsSnapshot = await getDocs(collection(db, "IncidentReports"));
         setIncidentReportsCount(incidentReportsSnapshot.size);
+
+        const totalReports = incidentReportsSnapshot.size;
+        
+        const pendingReports = incidentReportsSnapshot.docs.filter(
+          (doc) => doc.data().status === "Pending"
+        ).length;
+  
+        setPendingIncidentReportsCount(pendingReports);
+        setOtherIncidentReportsCount(totalReports - pendingReports);
 
         const today = new Date();
         const sevenDaysAgo = new Date();
@@ -75,6 +92,21 @@ export default function Dashboard() {
         });
 
         setIncidentReports(incidentReportsData);
+
+        const monthlyCounts: Record<string, number> = {};
+        incidentReportsSnapshot.docs.forEach((doc) => {
+          const reportDate = new Date(doc.data().date);
+          const monthYear = reportDate.toLocaleString("default", { month: "long", year: "numeric" });
+
+          monthlyCounts[monthYear] = (monthlyCounts[monthYear] || 0) + 1;
+        });
+
+        const formattedData = Object.keys(monthlyCounts).map((monthYear) => ({
+          monthYear,
+          count: monthlyCounts[monthYear],
+        }));
+
+        setIncidentReportsByMonth(formattedData);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       }
@@ -96,6 +128,16 @@ export default function Dashboard() {
   const COLORS = ["#4CAF50", "#FF9800"];
   const VERIFICATION_COLORS = ["#2196F3", "#F44336"];
 
+
+  const incidentReportData = [
+    { name: "Pending Reports", value: pendingIncidentReportsCount },
+    { name: "Other Statuses", value: otherIncidentReportsCount },
+  ];
+  
+  const INCIDENT_COLORS = ["#FF9800", "#4CAF50"];
+  
+  
+
   return (
     <main className="main-container">
 
@@ -107,7 +149,6 @@ export default function Dashboard() {
 
       
           <div className="metric-card">
-
               <div className="card-left-side">
                 <Link href="/dashboard/OfficialsModule">
                   <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
@@ -118,6 +159,9 @@ export default function Dashboard() {
               </div>
 
             <div className="card-right-side">
+
+                            {/* need to change the graph to an image @derick */}
+
               <ResponsiveContainer width={200} height={250} >
                 <PieChart>
                   <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
@@ -129,6 +173,9 @@ export default function Dashboard() {
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
+
+                            {/* gang dito lang need mo idelete */}
+
               </div>
           </div>
           
@@ -202,7 +249,7 @@ export default function Dashboard() {
               </div>
 
           <div className="card-right-side">
-             
+                                         {/* need to change the graph to an image @derick */}
           <ResponsiveContainer width={200} height={250}>
             <PieChart>
               <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
@@ -214,6 +261,9 @@ export default function Dashboard() {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
+
+                                      {/* idk if same ba image na gagamitin mo pero pati dito since total lang naman sila and may different
+                                      graphs na for the users */}
             </div>
 
           </div>
@@ -259,23 +309,39 @@ export default function Dashboard() {
 
           <div className="card-right-side">
            
-          <ResponsiveContainer width={200} height={250}>
-            <PieChart>
-              <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                {verificationData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={VERIFICATION_COLORS[index % VERIFICATION_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+            <ResponsiveContainer width={200} height={250}>
+              <PieChart>
+                <Pie data={incidentReportData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                  {incidentReportData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={INCIDENT_COLORS[index % INCIDENT_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+
+
           </div>
 
        </div>
           
       </div> 
 
+
+      <p className="dashboard">Incident Reports Chart</p>
+      <div className="heatmap-container">
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={incidentReportsByMonth} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="monthYear" textAnchor="end" /> 
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="count" fill="#8884d8" name="Monthly Total" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
       <p className="dashboard">Incident Heat Map</p>
 
