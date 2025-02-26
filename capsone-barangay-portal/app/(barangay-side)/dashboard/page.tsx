@@ -91,21 +91,21 @@ export default function Dashboard() {
           };
         });
 
-        setIncidentReports(incidentReportsData);
+        incidentReportsData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
         const monthlyCounts: Record<string, number> = {};
-        incidentReportsSnapshot.docs.forEach((doc) => {
-          const reportDate = new Date(doc.data().date);
+        incidentReportsData.forEach((report) => {
+          const reportDate = new Date(report.date);
           const monthYear = reportDate.toLocaleString("default", { month: "long", year: "numeric" });
-
+        
           monthlyCounts[monthYear] = (monthlyCounts[monthYear] || 0) + 1;
         });
-
+        
         const formattedData = Object.keys(monthlyCounts).map((monthYear) => ({
           monthYear,
           count: monthlyCounts[monthYear],
         }));
-
+        
         setIncidentReportsByMonth(formattedData);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -249,7 +249,6 @@ export default function Dashboard() {
               </div>
 
           <div className="card-right-side">
-                                         {/* need to change the graph to an image @derick */}
           <ResponsiveContainer width={200} height={250}>
             <PieChart>
               <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
@@ -262,8 +261,6 @@ export default function Dashboard() {
             </PieChart>
           </ResponsiveContainer>
 
-                                      {/* idk if same ba image na gagamitin mo pero pati dito since total lang naman sila and may different
-                                      graphs na for the users */}
             </div>
 
           </div>
