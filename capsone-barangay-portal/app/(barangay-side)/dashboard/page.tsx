@@ -21,7 +21,7 @@ import {
 export default function Dashboard() {
   const [barangayUsersCount, setBarangayUsersCount] = useState(0);
   const [residentUsersCount, setResidentUsersCount] = useState(0);
-  const [newResidentUsersCount, setNewResidentUsersCount] = useState(0);
+  const [newResidentUsersCount, setNewResidentUsersCount] = useState(0); // change to demographics for users
   const [residentsCount, setResidentsCount] = useState(0);
   const [incidentReportsCount, setIncidentReportsCount] = useState(0);
   const [verifiedResidentsCount, setVerifiedResidentsCount] = useState(0);
@@ -125,8 +125,8 @@ export default function Dashboard() {
     { name: "Unverified Residents", value: Math.max(residentUsersCount - verifiedResidentsCount, 0) },
   ];
 
-  const COLORS = ["#4CAF50", "#FF9800"];
-  const VERIFICATION_COLORS = ["#2196F3", "#F44336"];
+  const COLORS = ["#4CAF50", "#F3B50B"];
+  const VERIFICATION_COLORS = ["#2196F3", "#F3B50B"];
 
 
   const incidentReportData = [
@@ -210,7 +210,11 @@ export default function Dashboard() {
           </div>
 
           <div className="metric-card">
-          
+          {/*change this to resident demographics 
+          Residents that Adults >=
+          Below 18(Legal Age)
+          Senior Citizens >= 60
+          */}
             <div className="card-left-side">
                 <Link href="/dashboard/admin">
                   <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
@@ -335,7 +339,7 @@ export default function Dashboard() {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="count" fill="#8884d8" name="Monthly Total" />
+            <Bar dataKey="count" fill="#B3EBF2" name="Monthly Total" />
           </BarChart>
         </ResponsiveContainer>
       </div>
