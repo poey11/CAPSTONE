@@ -192,12 +192,10 @@ export default function EditLuponIncident() {
        
 
             <div className="section-1">
-                <p className="NewOfficial"> Robbery Incident</p>
+                <p className="NewOfficial"> {reportData?.title || "Incident"}</p>
                     <div className="actions">
                         <button className="action-delete">Delete</button>
-                        <button className="action-view">Save</button>
-
-                
+                        <button className="action-view">Save</button>                 
                     </div>
              </div>
 
@@ -295,22 +293,22 @@ export default function EditLuponIncident() {
                 <div className="bars">
                     <div className="input-group">
                         <p>Nature of Complaint</p>
-                        <input type="text" className="search-bar" placeholder={reportData.nature} />
+                        <input type="text" className="search-bar" placeholder={reportData?.nature} />
                     </div>
 
                     <div className="input-group">
                         <p>Date of Investigation</p>
-                        <input type="date" className="search-bar" placeholder={LTreportData.dateofinvestigation} />
+                        <input type="date" className="search-bar" placeholder={LTreportData?.dateofinvestigation} />
                     </div>
 
                     <div className="input-group">
                         <p>Date Reported</p>
-                        <input type="text" className="search-bar" placeholder={`${reportData.date} ${reportData.time}`} disabled/>
+                        <input type="text" className="search-bar" placeholder={`${reportData?.date} ${reportData?.time}`} disabled/>
                     </div>
 
                     <div className="input-group">
                         <p>Location</p>
-                        <input type="text" className="search-bar" placeholder={reportData.address} disabled/>
+                        <input type="text" className="search-bar" placeholder={reportData?.address} disabled/>
                     </div>
                 </div>
             </div>
@@ -325,7 +323,7 @@ export default function EditLuponIncident() {
                               <p>Investigation Report</p>
                                   <textarea 
                                       className="description" 
-                                      placeholder={LTreportData.report}
+                                      placeholder={LTreportData?.report}
                                       rows={15}
                                ></textarea>
                     </div>

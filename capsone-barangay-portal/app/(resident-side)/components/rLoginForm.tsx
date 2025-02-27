@@ -121,23 +121,6 @@ const rLoginForm:React.FC = () => {
             </div>
       </div>
 
-
-
-    // <form  onSubmit={handleLogin} className="flex flex-col  justify-center">
-    //     <label htmlFor="email">Email: </label>
-    //     <input value={resident.email} onChange={handleChange} id="email" type="email" name="email" className="border-2 border-black" required />
-        
-    //     <label htmlFor="password">Password: </label>
-    //     <input value={resident.password} onChange={handleChange} id="password" type="password" name="password" className="border-2 border-black" required />
-        
-    //     <label htmlFor="remember">Remember me: </label>
-    //     <input  checked={resident.remember} onChange={handleChange} id="remember" type="checkbox" name="remember" />
-
-    //     <Link className="text-blue-800" href="/forgot-password">Forgot Password?</Link>
-        
-    //     <button type="submit" className="bg-blue-500 text-white">Login</button>
-    // </form>
-
     );
 }
  
