@@ -2,7 +2,8 @@
 import "@/CSS/ResidentModule/module.css";
 import { useEffect, useState } from "react";
 import { db } from "../../../../db/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { useRouter } from "next/navigation";
+import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
 
 export default function RegisteredVotersModule() {
@@ -13,8 +14,8 @@ export default function RegisteredVotersModule() {
 
   const [searchName, setSearchName] = useState<string>("");
   const [searchAddress, setSearchAddress] = useState<string>("");
-  const [residentType, setResidentType] = useState<string>("");
   const [showCount, setShowCount] = useState<number>(5);
+  const router = useRouter(); 
 
   useEffect(() => {
     const fetchResidents = async () => {
@@ -54,18 +55,28 @@ export default function RegisteredVotersModule() {
       );
     }
 
-    // Filter by resident type
-    if (residentType) {
-      filtered = filtered.filter((resident) => resident.residentType === residentType);
-    }
-
     // Limit number of items to show
     if (showCount) {
       filtered = filtered.slice(0, showCount);
     }
+    
 
     setFilteredResidents(filtered);
-  }, [searchName, searchAddress, residentType, showCount, residents]);
+  }, [searchName, searchAddress, showCount, residents]);
+
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this resident?")) {
+      try {
+        await deleteDoc(doc(db, "Residents", id));
+        setResidents((prev) => prev.filter(resident => resident.id !== id));
+        alert("Resident deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting resident:", error);
+        alert("Failed to delete resident.");
+      }
+    }
+  };
 
   return (
     <main className="main-container">
@@ -77,7 +88,7 @@ export default function RegisteredVotersModule() {
       </div>
 
       <div className="section-2">
-        <input
+      <input
           type="text"
           className="search-bar"
           placeholder="Search by Name"
@@ -91,17 +102,7 @@ export default function RegisteredVotersModule() {
           value={searchAddress}
           onChange={(e) => setSearchAddress(e.target.value)}
         />
-        <select
-          className="featuredStatus"
-          value={residentType}
-          onChange={(e) => setResidentType(e.target.value)}
-        >
-          <option value="" disabled>Resident Type</option>
-          <option value="senior-citizen">Senior Citizen</option>
-          <option value="student">Student</option>
-          <option value="pwd">PWD</option>
-          <option value="single-mom">Single Mom</option>
-        </select>
+
         <select
           className="featuredStatus"
           value={showCount}
@@ -120,39 +121,62 @@ export default function RegisteredVotersModule() {
           <table>
             <thead>
               <tr>
-                <th>Name</th>
+              <th>First Name</th>
+                <th>Last Name</th>
+                <th>Middle Name</th>
                 <th>Address</th>
-                <th>Birthday</th>
+                <th>Date of Birth</th>
                 <th>Place of Birth</th>
                 <th>Age</th>
                 <th>Sex</th>
                 <th>Civil Status</th>
                 <th>Occupation</th>
+                <th>Employer</th>
+                <th>Employer Address</th>
                 <th>Contact</th>
                 <th>Email Address</th>
-                <th>Precinct #</th>
+                <th>Precinct Number</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredResidents.map((resident) => (
                 <tr key={resident.id}>
-                  <td>{resident.name}</td>
+                  <td>{resident.firstName}</td>
+                  <td>{resident.lastName}</td>
+                  <td>{resident.middleName}</td>
                   <td>{resident.address}</td>
-                  <td>{resident.dateofBirth}</td>
-                  <td>{resident.placeofBirth}</td>
+                  <td>{resident.dateOfBirth}</td>
+                  <td>{resident.placeOfBirth}</td>
                   <td>{resident.age}</td>
                   <td>{resident.sex}</td>
                   <td>{resident.civilStatus}</td>
                   <td>{resident.occupation}</td>
+                  <td>{resident.employer}</td>
+                  <td>{resident.employerAddress}</td>
                   <td>{resident.contactNumber}</td>
                   <td>{resident.emailAddress}</td>
                   <td>{resident.precinctNumber}</td>
                   <td>
                     <div className="actions">
-                      <button className="action-view">View</button>
-                      <button className="action-edit">Edit</button>
-                      <button className="action-delete">Delete</button>
+                    <button 
+                        className="action-view" 
+                        onClick={() => router.push(`/dashboard/ResidentModule/ViewResident?id=${resident.id}`)}
+                      >
+                        View
+                      </button>
+                      <button 
+                        className="action-edit" 
+                        onClick={() => router.push(`/dashboard/ResidentModule/EditResident?id=${resident.id}`)}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        className="action-delete" 
+                        onClick={() => handleDelete(resident.id)}
+                      >
+                        Delete
+                      </button>
                     </div>
                   </td>
                 </tr>

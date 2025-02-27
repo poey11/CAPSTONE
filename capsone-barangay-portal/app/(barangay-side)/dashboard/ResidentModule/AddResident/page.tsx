@@ -9,17 +9,21 @@ import Link from "next/link";
 export default function AddResident() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
+    middleName: "",
     address: "",
-    dateofBirth: "",
+    dateOfBirth: "",
     age: "",
     sex: "",
     civilStatus: "",
     occupation: "",
+    employer: "",
+    employerAddress: "",
     contactNumber: "",
     emailAddress: "",
     precinctNumber: "",
-    placeofBirth: "",
+    placeOfBirth: "",
     isVoter: false,
   });
 
@@ -71,24 +75,6 @@ export default function AddResident() {
     }
     setLoading(false);
   };
-
-      const residentData = [
-        {
-          name: "Jonnell Quebal",
-          address: "123 East Fairview",
-          birthday: "1990-02-14",
-          placeOfBirth: "Quezon City",
-          age: 33,
-          sex: "Male",
-          civilStatus: "Single",
-          occupation: "Software Developer",
-          contact: "09171218101",
-          email: "jonnell@example.com",
-          precinct: "101",
-          isVoter: "true",
-        },
-      ];
-
       const handleBack = () => {
         window.location.href = "/dashboard/ResidentModule";
       };
@@ -108,14 +94,34 @@ export default function AddResident() {
           </div>
         </div>
         <form id="addResidentForm" onSubmit={handleSubmit} className="section-2">
+
         <div className="section-2-left-side">
-            <p>Name</p>
+            <p>First Name</p>
             <input type="text" 
             className="search-bar" 
-            placeholder="Enter Name"  
-            name="name" 
-            value={formData.name} 
+            placeholder="Enter First Name"  
+            name="firstName" 
+            value={formData.firstName} 
             onChange={handleChange} required />
+
+
+            <p>Last Name</p>
+            <input type="text" 
+            className="search-bar" 
+            placeholder="Enter Last Name"  
+            name="lastName" 
+            value={formData.lastName} 
+            onChange={handleChange} required />
+
+
+            <p>Middle Name</p>
+            <input type="text" 
+            className="search-bar" 
+            placeholder="Enter Middle Name"  
+            name="middleName" 
+            value={formData.middleName} 
+            onChange={handleChange} required />            
+            
 
             <p>Address</p>
             <input type="text" 
@@ -129,15 +135,15 @@ export default function AddResident() {
             <input type="text" 
             className="search-bar" 
             placeholder="Enter Place of Birth" 
-            name="placeofBirth" 
-            value={formData.placeofBirth} 
+            name="placeOfBirth" 
+            value={formData.placeOfBirth} 
             onChange={handleChange} required />
 
             <p>Date of Birth</p>
             <input type="date" 
             className="search-bar" 
-            name="dateofBirth" 
-            value={formData.dateofBirth} 
+            name="dateOfBirth" 
+            value={formData.dateOfBirth} 
             onChange={handleChange} required />
 
             <p>Age</p>
@@ -176,6 +182,22 @@ export default function AddResident() {
             placeholder="Enter Occupation"  
             name="occupation" 
             value={formData.occupation} 
+            onChange={handleChange} required />
+
+            <p>Employer Name</p>
+            <input type="text" 
+            className="search-bar"           
+            placeholder="Enter Employer"  
+            name="employer" 
+            value={formData.employer} 
+            onChange={handleChange} required />
+
+            <p>Employer Address</p>
+            <input type="text" 
+            className="search-bar"           
+            placeholder="Enter Employer Address"  
+            name="employerAddress" 
+            value={formData.employerAddress} 
             onChange={handleChange} required />
 
             <p>Contact Number</p>
