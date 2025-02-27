@@ -4,9 +4,9 @@ import Link from "next/link";
 import "@/CSS/BMenu/header.css";
 
 const BMenu: React.FC = () => {
-  const [openDropdown, setOpenDropdown] = useState<"resident" | "officials" | "services" | "incidents"|null>(null);
+  const [openDropdown, setOpenDropdown] = useState<"resident" | "officials" | "services" | "incidents"| "dashboard" | "programs" | "events" | null>(null);
 
-  const toggleDropdown = (menu: "resident" | "officials"| "services" | "incidents") => {
+  const toggleDropdown = (menu: "resident" | "officials"| "services" | "incidents" | "dashboard" | "programs" | "events") => {
     setOpenDropdown(openDropdown === menu ? null : menu);
   };
 
@@ -17,7 +17,18 @@ const BMenu: React.FC = () => {
       </div>
 
       <div className="contents">
-        <Link href="/dashboard" className="module">Dashboard</Link>
+
+        {/* Dashboard and Reports */}
+        <div className="dropdown-wrapper">
+          <button onClick={() => toggleDropdown("dashboard")} className="dropdown-button">Dashboard and Reports</button>
+          {openDropdown === "dashboard" && (
+            <div className="dropdown-container">
+              <Link href="/dashboard" className="module">Dashboard</Link>
+              <Link href="/dashboard/ReportsModule" className="module">Reports Module</Link>
+            </div>
+          )}
+        </div>
+
         <Link href="/dashboard/admin" className="module">User and Roles</Link>
 
         {/* Resident Management */}
@@ -41,8 +52,6 @@ const BMenu: React.FC = () => {
             </div>
           )}
         </div>
-
-        <Link href="/reports" className="module">Reports Module</Link>
 
         {/* Services Module */}
         <div className="dropdown-wrapper">
@@ -71,7 +80,28 @@ const BMenu: React.FC = () => {
 
 
         <Link href="/dashboard/announcements" className="module">Announcements</Link>
-        <Link href="/programs" className="module">Programs and Events</Link>
+
+        {/* Programs and Program Responses */}
+        <div className="dropdown-wrapper">
+          <button onClick={() => toggleDropdown("programs")} className="dropdown-button">Programs</button>
+          {openDropdown === "programs" && (
+            <div className="dropdown-container">
+              <Link href="/dashboard/ProgramsModule" className="module">All Programs</Link>
+              <Link href="/dashboard/ProgramsModule/ProgramResponses" className="module">Program Responses</Link>
+            </div>
+          )}
+        </div>
+
+                {/* Programs and Program Responses */}
+                <div className="dropdown-wrapper">
+          <button onClick={() => toggleDropdown("events")} className="dropdown-button">Events</button>
+          {openDropdown === "events" && (
+            <div className="dropdown-container">
+              <Link href="/dashboard/EventsModule" className="module">  All Events</Link>
+              <Link href="/dashboard/EventsModule/EventResponses" className="module">Event Responses</Link>
+            </div>
+          )}
+        </div>
        
       </div>
     </div>
