@@ -1,160 +1,208 @@
 "use client";
-import "@/CSS/ResidentModule/addresident.css"; // Reuses existing CSS
+import "@/CSS/ResidentModule/addresident.css"; 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { db } from "../../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Link from "next/link";
 
-export default function EditResident() {
+interface KasambahayFormData {
+  registrationControlNumber: string;
+  firstName: string;
+  lastName: string;
+  middleName: string;
+  homeAddress: string;
+  dateOfBirth: string;
+  placeOfBirth: string;
+  age: string;
+  sex: string;
+  civilStatus: string;
+  educationalAttainment: string;
+  natureOfWork: string;
+  employmentArrangement: string;
+  salary: string;
+  employerName: string;
+  employerAddress: string;
+  sssMember: boolean;
+  philhealthMember: boolean;
+  pagibigMember: boolean;
+}
+
+export default function EditKasambahay() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const residentId = searchParams.get("id"); 
+  const kasambahayId = searchParams.get("id"); 
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<KasambahayFormData>({
+    registrationControlNumber: "",
     firstName: "",
     lastName: "",
     middleName: "",
-    address: "",
+    homeAddress: "",
     dateOfBirth: "",
+    placeOfBirth: "",
     age: "",
     sex: "",
     civilStatus: "",
-    occupation: "",
-    employer: "",
+    educationalAttainment: "",
+    natureOfWork: "",
+    employmentArrangement: "",
+    salary: "",
+    employerName: "",
     employerAddress: "",
-    contactNumber: "",
-    emailAddress: "",
-    precinctNumber: "",
-    placeofBirth: "",
-    isVoter: false,
+    sssMember: false,
+    philhealthMember: false,
+    pagibigMember: false,
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!residentId) return;
+    if (!kasambahayId) return;
 
-    const fetchResident = async () => {
+    const fetchKasambahay = async () => {
       try {
-        const docRef = doc(db, "Residents", residentId);
+        const docRef = doc(db, "KasambahayList", kasambahayId);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
           const data = docSnap.data();
           setFormData({
-            firstName: data.firstName || "N/A",
-            lastName: data.lastName || "N/A",
-            middleName: data.middleName || "N/A",
-            address: data.address || "N/A",
-            dateOfBirth: data.dateOfBirth || "N/A",
-            age: data.age || "N/A",
-            sex: data.sex || "N/A",
-            civilStatus: data.civilStatus || "N/A",
-            occupation: data.occupation || "N/A",
-            employer: data.employer || "N/A",
-            employerAddress: data.employerAddress || "N/A",
-            contactNumber: data.contactNumber || "N/A",
-            emailAddress: data.emailAddress || "N/A",
-            precinctNumber: data.precinctNumber || "N/A",
-            placeofBirth: data.placeOfBirth || "N/A",
-            isVoter: data.isVoter ?? false,
+            registrationControlNumber: data.registrationControlNumber || "",
+            firstName: data.firstName || "",
+            lastName: data.lastName || "",
+            middleName: data.middleName || "",
+            homeAddress: data.homeAddress || "",
+            dateOfBirth: data.dateOfBirth || "",
+            placeOfBirth: data.placeOfBirth || "",
+            age: data.age || "",
+            sex: data.sex || "",
+            civilStatus: data.civilStatus || "",
+            educationalAttainment: data.educationalAttainment || "",
+            natureOfWork: data.natureOfWork || "",
+            employmentArrangement: data.employmentArrangement || "",
+            salary: data.salary || "",
+            employerName: data.employerName || "",
+            employerAddress: data.employerAddress || "",
+            sssMember: data.sssMember ?? false,
+            philhealthMember: data.philhealthMember ?? false,
+            pagibigMember: data.pagibigMember ?? false,
           });
         } else {
-          setError("Resident not found.");
+          setError("Kasambahay record not found.");
         }
       } catch (error) {
-        console.error("Error fetching resident:", error);
-        setError("Failed to load resident data.");
+        console.error("Error fetching Kasambahay:", error);
+        setError("Failed to load data.");
       }
     };
 
-    fetchResident();
-  }, [residentId]);
+    fetchKasambahay();
+  }, [kasambahayId]);
 
-  //  input changes
+  // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
+    
+    // Convert specific fields to numbers
+    const numericFields = ["educationalAttainment", "natureOfWork", "employmentArrangement", "salary"];
+    
     setFormData({
       ...formData,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+      [name]: numericFields.includes(name) ? Number(value) : type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     });
   };
+  
 
-  // form submission
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!residentId) return;
+    if (!kasambahayId) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const docRef = doc(db, "Residents", residentId);
-      await updateDoc(docRef, formData);
+      const docRef = doc(db, "Kasambahay", kasambahayId);
+      await updateDoc(docRef, {
+        registrationControlNumber: formData.registrationControlNumber,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        middleName: formData.middleName,
+        homeAddress: formData.homeAddress,
+        dateOfBirth: formData.dateOfBirth,
+        placeOfBirth: formData.placeOfBirth,
+        age: formData.age,
+        sex: formData.sex,
+        civilStatus: formData.civilStatus,
+        educationalAttainment: formData.educationalAttainment,
+        natureOfWork: formData.natureOfWork,
+        employmentArrangement: formData.employmentArrangement,
+        salary: formData.salary,
+        employerName: formData.employerName,
+        employerAddress: formData.employerAddress,
+        sssMember: formData.sssMember,
+        philhealthMember: formData.philhealthMember,
+        pagibigMember: formData.pagibigMember,
+      });
+      
 
-      alert("Resident updated successfully!");
-      router.push("/dashboard/ResidentModule");
+      alert("Kasambahay record updated successfully!");
+      router.push("/dashboard/ResidentModule/KasambahayList");
     } catch (err) {
       console.error("Update failed:", err);
-      setError("Failed to update resident.");
+      setError("Failed to update record.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleBack = () => {
-    window.location.href = "/dashboard/ResidentModule";
+    window.location.href = "/dashboard/ResidentModule/kasambahayList";
   };
-  
 
   return (
     <main className="main-container">
       <div className="main-content">
-        <Link href="/dashboard/ResidentModule">
-        <button type="button" className="back-button" onClick={handleBack}></button>;
+        <Link href="/dashboard/ResidentModule/kasambahayList">
+        <button type="button" className="back-button" onClick={handleBack}></button>
         </Link>
         <div className="section-1">
-          <p className="NewResident">Edit Resident</p>
+          <p className="NewResident">Edit Kasambahay</p>
           <div className="actions">
-            <button className="action-view" type="submit" form="editResidentForm" disabled={loading}>
+            <button className="action-view" type="submit" form="editKasambahayForm" disabled={loading}>
               {loading ? "Saving..." : "Save"}
             </button>
           </div>
         </div>
-        <form id="editResidentForm" onSubmit={handleSubmit} className="section-2">
+        <form id="editKasambahayForm" onSubmit={handleSubmit} className="section-2">
           <div className="section-2-left-side">
+            <p>Registration Control Number</p>
+            <input type="text" name="registrationControlNumber" value={formData.registrationControlNumber} onChange={handleChange} disabled className="disabled-input" 
+  />
+
             <p>First Name</p>
-            <input type="text" className="search-bar" name="firstName" value={formData.firstName} onChange={handleChange} required />
+            <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required />
 
             <p>Last Name</p>
-            <input type="text" className="search-bar" name="lastName" value={formData.lastName} onChange={handleChange} required />
-            
+            <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required />
+
             <p>Middle Name</p>
-            <input type="text" className="search-bar" name="middleName" value={formData.middleName} onChange={handleChange} required />
+            <input type="text" name="middleName" value={formData.middleName} onChange={handleChange} required />
 
-            <p>Address</p>
-            <input type="text" className="search-bar" name="address" value={formData.address} onChange={handleChange} required />
-
-            <p>Place of Birth</p>
-            <input type="text" className="search-bar" name="placeofBirth" value={formData.placeofBirth} onChange={handleChange} required />
-
-            <p>Date of Birth</p>
-            <input type="date" className="search-bar" name="dateofBirth" value={formData.dateOfBirth} onChange={handleChange} required />
-
-            <p>Age</p>
-            <input type="number" className="search-bar" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
+            <p>Home Address</p>
+            <input type="text" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
 
             <p>Sex</p>
-            <select name="sex" className="featuredStatus" value={formData.sex} onChange={handleChange} required>
+            <select name="sex" value={formData.sex} onChange={handleChange} required>
               <option value="" disabled>Choose Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
             </select>
 
             <p>Civil Status</p>
-            <select name="civilStatus" className="featuredStatus" value={formData.civilStatus} onChange={handleChange} required>
+            <select name="civilStatus" value={formData.civilStatus} onChange={handleChange} required>
               <option value="" disabled>Choose Civil Status</option>
               <option value="Single">Single</option>
               <option value="Married">Married</option>
@@ -163,31 +211,60 @@ export default function EditResident() {
               <option value="Separated">Separated</option>
             </select>
 
-            <p>Occupation</p>
-            <input type="text" className="search-bar" name="occupation" value={formData.occupation} onChange={handleChange} required />
+            <p>Educational Attainment</p>
+            <select name="educationalAttainment" className="featuredStatus" value={formData.educationalAttainment} onChange={handleChange} required>
+              <option value="" disabled>Choose Educational Attainment</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+            </select>
 
-            <p>Employer</p>
-            <input type="text" className="search-bar" name="employer" value={formData.employer} onChange={handleChange}  />
+            <p>Nature of Work</p>
+            <select name="natureOfWork" className="featuredStatus" value={formData.natureOfWork} onChange={handleChange} required>
+              <option value="" disabled>Choose Nature of Work</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+
+            <p>Employment Arrangement</p>
+            <select name="employmentArrangement" className="featuredStatus" value={formData.employmentArrangement} onChange={handleChange} required>
+              <option value="" disabled>Choose Employment Arrangement</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+
+            <p>Range of Salary</p>
+            <select name="salary" className="featuredStatus" value={formData.salary} onChange={handleChange} required>
+            <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+
+            <p>SSS Member</p>
+            <input type="checkbox" name="sssMember" checked={formData.sssMember} onChange={handleChange} />
+
+            <p>PhilHealth Member</p>
+            <input type="checkbox" name="philhealthMember" checked={formData.philhealthMember} onChange={handleChange} />
+
+            <p>Pag-IBIG Member</p>
+            <input type="checkbox" name="pagibigMember" checked={formData.pagibigMember} onChange={handleChange} />
+
+            <p>Employer Name</p>
+            <input type="text" className="search-bar" placeholder="Enter Employer" name="employerName" value={formData.employerName} onChange={handleChange} required />
 
             <p>Employer Address</p>
-            <input type="text" className="search-bar" name="employerAddress" value={formData.employerAddress} onChange={handleChange}  />
+            <input type="text" className="search-bar" placeholder="Enter Employer Address" name="employerAddress" value={formData.employerAddress} onChange={handleChange} required />
 
-            <p>Contact Number</p>
-            <input type="tel" className="search-bar" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
-
-            <p>Email Address</p>
-            <input type="email" className="search-bar" name="emailAddress" value={formData.emailAddress} onChange={handleChange} required />
-
-            <p>Precinct Number</p>
-            <input type="text" className="search-bar" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required />
-
-            <p>Voter</p>
-            <div className="checkbox-container">
-              <label className="checkbox-label">
-                <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
-                Is this resident a registered voter?
-              </label>
-            </div>
           </div>
         </form>
         {error && <p className="error">{error}</p>}

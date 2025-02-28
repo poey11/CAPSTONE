@@ -1,60 +1,75 @@
 "use client";
 import "@/CSS/ResidentModule/addresident.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "../../../../../db/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
 
-export default function AddResident() {
+export default function AddKasambahay() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    firstName: "",
+    registrationControlNumber: "",
     lastName: "",
+    firstName: "",
     middleName: "",
-    address: "",
+    homeAddress: "",
     dateOfBirth: "",
-    age: "",
-    sex: "",
-    civilStatus: "",
-    occupation: "",
-    employer: "",
-    employerAddress: "",
-    contactNumber: "",
-    emailAddress: "",
-    precinctNumber: "",
     placeOfBirth: "",
-    isVoter: false,
+    sex: "",
+    age: "",
+    civilStatus: "",
+    educationalAttainment: "",
+    natureOfWork: "",
+    employmentArrangement: "",
+    salary: "",
+    sssMember: false,
+    philhealthMember: false,
+    pagibigMember: false,
+    employerName: "",
+    employerAddress: "",
   });
 
-  const [files, setFiles] = useState<{ name: string; preview: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
 
-    const [isActive, setIsActive] = useState(false);
+  useEffect(() => {
+    const fetchLatestNumber = async () => {
+      try {
+        const kasambahayCollection = collection(db, "KasambahayList");
+        const q = query(kasambahayCollection, orderBy("registrationControlNumber", "desc"), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        let newNumber = 1;
+        if (!querySnapshot.empty) {
+          const latestEntry = querySnapshot.docs[0].data();
+          newNumber = latestEntry.registrationControlNumber + 1;
+        }
+
+        setFormData((prevData) => ({
+          ...prevData,
+          registrationControlNumber: newNumber.toString(),
+        }));
+      } catch (error) {
+        console.error("Error fetching latest registration number:", error);
+      }
+    };
+
+    fetchLatestNumber();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
+    
+    // Convert specific fields to numbers
+    const numericFields = ["educationalAttainment", "natureOfWork", "employmentArrangement", "salary"];
+    
     setFormData({
       ...formData,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+      [name]: numericFields.includes(name) ? Number(value) : type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     });
   };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const uploadedFiles = Array.from(e.target.files).map((file) => ({
-        name: file.name,
-        preview: URL.createObjectURL(file),
-      }));
-      setFiles([...files, ...uploadedFiles]);
-    }
-  };
-
-  const handleFileDelete = (fileName: string) => {
-    setFiles(files.filter((file) => file.name !== fileName));
-  };
+  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -62,89 +77,69 @@ export default function AddResident() {
     setError("");
 
     try {
-      await addDoc(collection(db, "Residents"), {
+      // Ensure the latest registration number is assigned
+      const kasambahayCollection = collection(db, "KasambahayList");
+      const q = query(kasambahayCollection, orderBy("registrationControlNumber", "desc"), limit(1));
+      const querySnapshot = await getDocs(q);
+
+      let latestNumber = 1;
+      if (!querySnapshot.empty) {
+        const latestEntry = querySnapshot.docs[0].data();
+        latestNumber = latestEntry.registrationControlNumber + 1;
+      }
+
+      await addDoc(kasambahayCollection, {
         ...formData,
+        registrationControlNumber: latestNumber,
         createdAt: serverTimestamp(),
       });
 
-      alert("Resident added successfully!");
-      router.push("/dashboard/ResidentModule");
+      alert("Kasambahay added successfully!");
+      router.push("/dashboard/ResidentModule/kasambahayList");
     } catch (err) {
-      setError("Failed to add resident");
+      setError("Failed to add kasambahay");
       console.error(err);
     }
     setLoading(false);
   };
-      const handleBack = () => {
-        window.location.href = "/dashboard/ResidentModule";
-      };
+
+  const handleBack = () => {
+    router.push("/dashboard/ResidentModule/kasambahayList");
+  };
 
   return (
     <main className="main-container">
       <div className="main-content">
-        <Link href="/dashboard/ResidentModule">
-        <button type="button" className="back-button" onClick={handleBack}></button>;
+        <Link href="/dashboard/ResidentModule/kasambahayList">
+          <button type="button" className="back-button" onClick={handleBack}></button>
         </Link>
         <div className="section-1">
-          <p className="NewResident">New Resident</p>
+          <p className="NewResident">New Kasambahay</p>
           <div className="actions">
-            <button className="action-view" type="submit" form="addResidentForm" disabled={loading}>
+            <button className="action-view" type="submit" form="addKasambahayForm" disabled={loading}>
               {loading ? "Saving..." : "Save"}
             </button>
           </div>
         </div>
-        <form id="addResidentForm" onSubmit={handleSubmit} className="section-2">
-
-        <div className="section-2-left-side">
-            <p>First Name</p>
-            <input type="text" 
-            className="search-bar" 
-            placeholder="Enter First Name"  
-            name="firstName" 
-            value={formData.firstName} 
-            onChange={handleChange} required />
-
-
+        <form id="addKasambahayForm" onSubmit={handleSubmit} className="section-2">
+          <div className="section-2-left-side">
             <p>Last Name</p>
-            <input type="text" 
-            className="search-bar" 
-            placeholder="Enter Last Name"  
-            name="lastName" 
-            value={formData.lastName} 
-            onChange={handleChange} required />
+            <input type="text" className="search-bar" placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
 
+            <p>First Name</p>
+            <input type="text" className="search-bar" placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
 
             <p>Middle Name</p>
-            <input type="text" 
-            className="search-bar" 
-            placeholder="Enter Middle Name"  
-            name="middleName" 
-            value={formData.middleName} 
-            onChange={handleChange} required />            
-            
+            <input type="text" className="search-bar" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} required />
 
-            <p>Address</p>
-            <input type="text" 
-            className="search-bar" 
-            placeholder="Enter Address" 
-            name="address" 
-            value={formData.address} 
-            onChange={handleChange} required />
+            <p>Home Address</p>
+            <input type="text" className="search-bar" placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
 
             <p>Place of Birth</p>
-            <input type="text" 
-            className="search-bar" 
-            placeholder="Enter Place of Birth" 
-            name="placeOfBirth" 
-            value={formData.placeOfBirth} 
-            onChange={handleChange} required />
+            <input type="text" className="search-bar" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} required />
 
             <p>Date of Birth</p>
-            <input type="date" 
-            className="search-bar" 
-            name="dateOfBirth" 
-            value={formData.dateOfBirth} 
-            onChange={handleChange} required />
+            <input type="date" className="search-bar" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
 
             <p>Age</p>
             <input
@@ -176,118 +171,77 @@ export default function AddResident() {
               <option value="Separated">Separated</option>
             </select>
 
-            <p>Occupation</p>
-            <input type="text" 
-            className="search-bar"           
-            placeholder="Enter Occupation"  
-            name="occupation" 
-            value={formData.occupation} 
-            onChange={handleChange} required />
 
-            <p>Employer Name</p>
-            <input type="text" 
-            className="search-bar"           
-            placeholder="Enter Employer"  
-            name="employer" 
-            value={formData.employer} 
-            onChange={handleChange} required />
+            <p>Educational Attainment</p>
+            <select name="educationalAttainment" className="featuredStatus" value={formData.educationalAttainment} onChange={handleChange} required>
+              <option value="" disabled>Choose Educational Attainment</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+            </select>
 
-            <p>Employer Address</p>
-            <input type="text" 
-            className="search-bar"           
-            placeholder="Enter Employer Address"  
-            name="employerAddress" 
-            value={formData.employerAddress} 
-            onChange={handleChange} required />
+            <p>Nature of Work</p>
+            <select name="natureOfWork" className="featuredStatus" value={formData.natureOfWork} onChange={handleChange} required>
+              <option value="" disabled>Choose Nature of Work</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
 
-            <p>Contact Number</p>
-            <input
-              type="tel"
-              className="search-bar"                       
-              name="contactNumber"
-              value={formData.contactNumber}
-              onChange={handleChange}
-              required
-              pattern="[0-9]{11}"
-              placeholder="Enter 11-digit phone number"
-            />
+            <p>Employment Arrangement</p>
+            <select name="employmentArrangement" className="featuredStatus" value={formData.employmentArrangement} onChange={handleChange} required>
+              <option value="" disabled>Choose Employment Arrangement</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
 
-            <p>Email Address</p>
-            <input type="email" 
-            className="search-bar"           
-            placeholder="Enter Email Address"              
-            name="emailAddress" 
-            value={formData.emailAddress} 
-            onChange={handleChange} required />
+            <p>Range of Salary</p>
+            <select name="salary" className="featuredStatus" value={formData.salary} onChange={handleChange} required>
+            <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
 
-            <p>Precinct Number</p>
-            <input type="text" 
-            className="search-bar"           
-            placeholder="Enter Precinct Number"              
-            name="precinctNumber" 
-            value={formData.precinctNumber} 
-            onChange={handleChange} required />
 
-            <p>Voter</p>
+            <p>SSS Membership</p>
             <div className="checkbox-container">
               <label className="checkbox-label">
-                <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
-                Is this resident a registered voter?
+                <input type="checkbox" name="sssMember" checked={formData.sssMember} onChange={handleChange} />
+                Is this resident an SSS Member?
               </label>
             </div>
-            </div>
-            <div className="section-2-right-side">
-  <div className="file-upload-container">
-    <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
-    <input
-      id="file-upload"
-      type="file"
-      className="file-upload-input"
-      multiple
-      accept=".jpg,.jpeg,.png"
-      // required 
-      onChange={handleFileChange}
-    />
-    <div className="uploadedFiles-container">
-      {files.length > 0 && (
-        <div className="file-name-image-display">
-          <ul>
-            {files.map((file, index) => (
-              <div className="file-name-image-display-indiv" key={index}>
-                <li>
-                  {file.preview && (
-                    <div className="filename&image-container">
-                      <img
-                        src={file.preview}
-                        alt={file.name}
-                        style={{ width: "50px", height: "50px", marginRight: "5px" }}
-                      />
-                    </div>
-                  )}
-                  {file.name}
-                  <div className="delete-container">
-                    <button
-                      type="button"
-                      onClick={() => handleFileDelete(file.name)}
-                      className="delete-button"
-                    >
-                      <img
-                        src="/images/trash.png"
-                        alt="Delete"
-                        className="delete-icon"
-                      />
-                    </button>
-                  </div>
-                </li>
-              </div>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  </div>
-</div>
 
+            <p>Pag-Ibig Membership</p>
+            <div className="checkbox-container">
+              <label className="checkbox-label">
+                <input type="checkbox" name="pagibigMember" checked={formData.pagibigMember} onChange={handleChange} />
+                Is this resident a Pag-Ibig Member?
+              </label>
+            </div>
+
+            <p>PhilHealth Membership</p>
+            <div className="checkbox-container">
+              <label className="checkbox-label">
+                <input type="checkbox" name="philhealthMember" checked={formData.philhealthMember} onChange={handleChange} />
+                Is this resident a PhilHealth Member?
+              </label>
+            </div>
+
+            <p>Employer Name</p>
+            <input type="text" className="search-bar" placeholder="Enter Employer" name="employerName" value={formData.employerName} onChange={handleChange} required />
+
+            <p>Employer Address</p>
+            <input type="text" className="search-bar" placeholder="Enter Employer Address" name="employerAddress" value={formData.employerAddress} onChange={handleChange} required />
+          </div>
         </form>
         {error && <p className="error">{error}</p>}
       </div>
