@@ -12,13 +12,17 @@ export default function EditResident() {
   const residentId = searchParams.get("id"); 
 
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
+    middleName: "",
     address: "",
-    dateofBirth: "",
+    dateOfBirth: "",
     age: "",
     sex: "",
     civilStatus: "",
     occupation: "",
+    employer: "",
+    employerAddress: "",
     contactNumber: "",
     emailAddress: "",
     precinctNumber: "",
@@ -40,17 +44,21 @@ export default function EditResident() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setFormData({
-            name: data.name || "",
-            address: data.address || "",
-            dateofBirth: data.dateofBirth || "",
-            age: data.age || "",
-            sex: data.sex || "",
-            civilStatus: data.civilStatus || "",
-            occupation: data.occupation || "",
-            contactNumber: data.contactNumber || "",
-            emailAddress: data.emailAddress || "",
-            precinctNumber: data.precinctNumber || "",
-            placeofBirth: data.placeofBirth || "",
+            firstName: data.firstName || "N/A",
+            lastName: data.lastName || "N/A",
+            middleName: data.middleName || "N/A",
+            address: data.address || "N/A",
+            dateOfBirth: data.dateOfBirth || "N/A",
+            age: data.age || "N/A",
+            sex: data.sex || "N/A",
+            civilStatus: data.civilStatus || "N/A",
+            occupation: data.occupation || "N/A",
+            employer: data.employer || "N/A",
+            employerAddress: data.employerAddress || "N/A",
+            contactNumber: data.contactNumber || "N/A",
+            emailAddress: data.emailAddress || "N/A",
+            precinctNumber: data.precinctNumber || "N/A",
+            placeofBirth: data.placeOfBirth || "N/A",
             isVoter: data.isVoter ?? false,
           });
         } else {
@@ -117,8 +125,14 @@ export default function EditResident() {
         </div>
         <form id="editResidentForm" onSubmit={handleSubmit} className="section-2">
           <div className="section-2-left-side">
-            <p>Name</p>
-            <input type="text" className="search-bar" name="name" value={formData.name} onChange={handleChange} required />
+            <p>First Name</p>
+            <input type="text" className="search-bar" name="firstName" value={formData.firstName} onChange={handleChange} required />
+
+            <p>Last Name</p>
+            <input type="text" className="search-bar" name="lastName" value={formData.lastName} onChange={handleChange} required />
+            
+            <p>Middle Name</p>
+            <input type="text" className="search-bar" name="middleName" value={formData.middleName} onChange={handleChange} required />
 
             <p>Address</p>
             <input type="text" className="search-bar" name="address" value={formData.address} onChange={handleChange} required />
@@ -127,7 +141,7 @@ export default function EditResident() {
             <input type="text" className="search-bar" name="placeofBirth" value={formData.placeofBirth} onChange={handleChange} required />
 
             <p>Date of Birth</p>
-            <input type="date" className="search-bar" name="dateofBirth" value={formData.dateofBirth} onChange={handleChange} required />
+            <input type="date" className="search-bar" name="dateofBirth" value={formData.dateOfBirth} onChange={handleChange} required />
 
             <p>Age</p>
             <input type="number" className="search-bar" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
@@ -151,6 +165,12 @@ export default function EditResident() {
 
             <p>Occupation</p>
             <input type="text" className="search-bar" name="occupation" value={formData.occupation} onChange={handleChange} required />
+
+            <p>Employer</p>
+            <input type="text" className="search-bar" name="employer" value={formData.employer} onChange={handleChange}  />
+
+            <p>Employer Address</p>
+            <input type="text" className="search-bar" name="employerAddress" value={formData.employerAddress} onChange={handleChange}  />
 
             <p>Contact Number</p>
             <input type="tel" className="search-bar" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />

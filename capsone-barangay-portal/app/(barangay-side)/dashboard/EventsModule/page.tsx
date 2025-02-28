@@ -14,8 +14,6 @@ export default function ResidentModule() {
 
   const [searchName, setSearchName] = useState<string>("");
   const [searchAddress, setSearchAddress] = useState<string>("");
-  const [searchOccupation, setSearchOccupation] = useState<string>("");
-
   const [residentType, setResidentType] = useState<string>("");
   const [showCount, setShowCount] = useState<number>(5);
 
@@ -42,17 +40,9 @@ export default function ResidentModule() {
     let filtered = [...residents];
 
     if (searchName) {
-      filtered = filtered.filter((resident) => {
-        const firstName = resident.firstName?.toLowerCase() || "";
-        const middleName = resident.middleName?.toLowerCase() || "";
-        const lastName = resident.lastName?.toLowerCase() || "";
-    
-        return (
-          firstName.includes(searchName.toLowerCase()) ||
-          middleName.includes(searchName.toLowerCase()) ||
-          lastName.includes(searchName.toLowerCase())
-        );
-      });
+      filtered = filtered.filter((resident) =>
+        resident.name.toLowerCase().includes(searchName.toLowerCase())
+      );
     }
 
     if (searchAddress) {
@@ -60,13 +50,6 @@ export default function ResidentModule() {
         resident.address.toLowerCase().includes(searchAddress.toLowerCase())
       );
     }
-
-    if (searchOccupation) {
-      filtered = filtered.filter((resident) =>
-        resident.occupation.toLowerCase().includes(searchOccupation.toLowerCase())
-      );
-    }
-
 
     if (residentType) {
       filtered = filtered.filter((resident) => resident.residentType === residentType);
@@ -77,7 +60,7 @@ export default function ResidentModule() {
     }
 
     setFilteredResidents(filtered);
-  }, [searchName, searchAddress, searchOccupation, residentType, showCount, residents]);
+  }, [searchName, searchAddress, residentType, showCount, residents]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this resident?")) {
@@ -117,15 +100,6 @@ export default function ResidentModule() {
           onChange={(e) => setSearchAddress(e.target.value)}
         />
 
-        <input
-          type="text"
-          className="search-bar"
-          placeholder="Search by Occupation"
-          value={searchOccupation}
-          onChange={(e) => setSearchOccupation(e.target.value)}
-        />
-
-
         <select
           className="featuredStatus"
           value={residentType}
@@ -155,9 +129,7 @@ export default function ResidentModule() {
           <table>
             <thead>
               <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Middle Name</th>
+                <th>Name</th>
                 <th>Address</th>
                 <th>Date of Birth</th>
                 <th>Place of Birth</th>
@@ -165,8 +137,6 @@ export default function ResidentModule() {
                 <th>Sex</th>
                 <th>Civil Status</th>
                 <th>Occupation</th>
-                <th>Employer</th>
-                <th>Employer Address</th>
                 <th>Contact</th>
                 <th>Email Address</th>
                 <th>Precinct Number</th>
@@ -176,18 +146,14 @@ export default function ResidentModule() {
             <tbody>
               {filteredResidents.map((resident) => (
                 <tr key={resident.id}>
-                  <td>{resident.firstName}</td>
-                  <td>{resident.lastName}</td>
-                  <td>{resident.middleName}</td>
+                  <td>{resident.name}</td>
                   <td>{resident.address}</td>
-                  <td>{resident.dateOfBirth}</td>
-                  <td>{resident.placeOfBirth}</td>
+                  <td>{resident.dateofBirth}</td>
+                  <td>{resident.placeofBirth}</td>
                   <td>{resident.age}</td>
                   <td>{resident.sex}</td>
                   <td>{resident.civilStatus}</td>
                   <td>{resident.occupation}</td>
-                  <td>{resident.employer}</td>
-                  <td>{resident.employerAddress}</td>
                   <td>{resident.contactNumber}</td>
                   <td>{resident.emailAddress}</td>
                   <td>{resident.precinctNumber}</td>

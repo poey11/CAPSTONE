@@ -28,7 +28,15 @@ export default function Dashboard() {
   const [incidentReportsByMonth, setIncidentReportsByMonth] = useState<{ monthYear: string; count: number }[]>([]);
   const [otherIncidentReportsCount, setOtherIncidentReportsCount] = useState(0);
   const [pendingIncidentReportsCount, setPendingIncidentReportsCount] = useState(0);
-[]>([]);
+  const [incidentReports, setIncidentReports] = useState<{ 
+    reportID: string;
+    firstname: string;
+    lastname: string;
+    address: string;
+    concerns: string;
+    date: string;
+    time: string;
+  }[]>([]);
   
 
   useEffect(() => {

@@ -2,11 +2,11 @@
 import "@/CSS/ResidentModule/module.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "../../../db/firebase";
+import { db } from "../../../../db/firebase";
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
 
-export default function ResidentModule() {
+export default function KasambahayListModule() {
   const [residents, setResidents] = useState<any[]>([]);
   const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -14,9 +14,6 @@ export default function ResidentModule() {
 
   const [searchName, setSearchName] = useState<string>("");
   const [searchAddress, setSearchAddress] = useState<string>("");
-  const [searchOccupation, setSearchOccupation] = useState<string>("");
-
-  const [residentType, setResidentType] = useState<string>("");
   const [showCount, setShowCount] = useState<number>(5);
 
   const router = useRouter(); 
@@ -24,7 +21,7 @@ export default function ResidentModule() {
   useEffect(() => {
     const fetchResidents = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "Residents"));
+        const querySnapshot = await getDocs(collection(db, "KasambahayList"));
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setResidents(data);
       } catch (err) {
@@ -57,19 +54,8 @@ export default function ResidentModule() {
 
     if (searchAddress) {
       filtered = filtered.filter((resident) =>
-        resident.address.toLowerCase().includes(searchAddress.toLowerCase())
+        resident.homeAddress.toLowerCase().includes(searchAddress.toLowerCase())
       );
-    }
-
-    if (searchOccupation) {
-      filtered = filtered.filter((resident) =>
-        resident.occupation.toLowerCase().includes(searchOccupation.toLowerCase())
-      );
-    }
-
-
-    if (residentType) {
-      filtered = filtered.filter((resident) => resident.residentType === residentType);
     }
 
     if (showCount) {
@@ -77,7 +63,7 @@ export default function ResidentModule() {
     }
 
     setFilteredResidents(filtered);
-  }, [searchName, searchAddress, searchOccupation, residentType, showCount, residents]);
+  }, [searchName, searchAddress, showCount, residents]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this resident?")) {
@@ -95,9 +81,9 @@ export default function ResidentModule() {
   return (
     <main className="main-container">
       <div className="section-1">
-        <h1>Residents List</h1>
-        <Link href="/dashboard/ResidentModule/AddResident">
-          <button className="add-announcement-btn">Add New Resident</button>
+        <h1>Kasambay Masterlist</h1>
+        <Link href="/dashboard/ResidentModule/kasambahayList/AddKasambahay">
+          <button className="add-announcement-btn">Add New Kasambahay</button>
         </Link>
       </div>
 
@@ -117,26 +103,6 @@ export default function ResidentModule() {
           onChange={(e) => setSearchAddress(e.target.value)}
         />
 
-        <input
-          type="text"
-          className="search-bar"
-          placeholder="Search by Occupation"
-          value={searchOccupation}
-          onChange={(e) => setSearchOccupation(e.target.value)}
-        />
-
-
-        <select
-          className="featuredStatus"
-          value={residentType}
-          onChange={(e) => setResidentType(e.target.value)}
-        >
-          <option value="">Resident Type</option>
-          <option value="senior-citizen">Senior Citizen</option>
-          <option value="student">Student</option>
-          <option value="pwd">PWD</option>
-          <option value="single-mom">Single Mom</option>
-        </select>
         <select
           className="featuredStatus"
           value={showCount}
@@ -155,53 +121,62 @@ export default function ResidentModule() {
           <table>
             <thead>
               <tr>
+                <th>Registration Control Number</th>                
+                <th>Last Name</th>                
                 <th>First Name</th>
-                <th>Last Name</th>
                 <th>Middle Name</th>
-                <th>Address</th>
+                <th>Home Address</th>
                 <th>Date of Birth</th>
                 <th>Place of Birth</th>
-                <th>Age</th>
                 <th>Sex</th>
+                <th>Age</th>
                 <th>Civil Status</th>
-                <th>Occupation</th>
-                <th>Employer</th>
+                <th>Educational Attainment</th>
+                <th>Nature of Work</th>
+                <th>Employment Arrangement</th>
+                <th>Salary</th>
+                <th>SSS Member</th>
+                <th>PAG-IBIG Member</th>
+                <th>PhilHealth Member</th>
+                <th>Employer Name</th>
                 <th>Employer Address</th>
-                <th>Contact</th>
-                <th>Email Address</th>
-                <th>Precinct Number</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredResidents.map((resident) => (
                 <tr key={resident.id}>
-                  <td>{resident.firstName}</td>
+                  <td>{resident.registrationControlNumber}</td>
                   <td>{resident.lastName}</td>
+                  <td>{resident.firstName}</td>
                   <td>{resident.middleName}</td>
-                  <td>{resident.address}</td>
+                  <td>{resident.homeAddress}</td>
                   <td>{resident.dateOfBirth}</td>
                   <td>{resident.placeOfBirth}</td>
-                  <td>{resident.age}</td>
                   <td>{resident.sex}</td>
+                  <td>{resident.age}</td>
                   <td>{resident.civilStatus}</td>
-                  <td>{resident.occupation}</td>
-                  <td>{resident.employer}</td>
+                  <td>{resident.educationalAttainment}</td>
+                  <td>{resident.natureOfWork}</td>
+                  <td>{resident.employmentArrangement}</td>
+                  <td>{resident.salary}</td>
+                  <td>{resident.sssMember ? "Yes" : "No"}</td>
+                  <td>{resident.pagibigMember ? "Yes" : "No"}</td>
+                  <td>{resident.philhealthMember ? "Yes" : "No"}</td>
+                  <td>{resident.employerName}</td>
                   <td>{resident.employerAddress}</td>
-                  <td>{resident.contactNumber}</td>
-                  <td>{resident.emailAddress}</td>
-                  <td>{resident.precinctNumber}</td>
+
                   <td>
                     <div className="actions">
                       <button 
                         className="action-view" 
-                        onClick={() => router.push(`/dashboard/ResidentModule/ViewResident?id=${resident.id}`)}
+                        onClick={() => router.push(`/dashboard/ResidentModule/kasambahayList/ViewKasambahay?id=${resident.id}`)}
                       >
                         View
                       </button>
                       <button 
                         className="action-edit" 
-                        onClick={() => router.push(`/dashboard/ResidentModule/EditResident?id=${resident.id}`)}
+                        onClick={() => router.push(`/dashboard/ResidentModule/kasambahayList/EditKasambahay?id=${resident.id}`)}
                       >
                         Edit
                       </button>
