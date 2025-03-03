@@ -25,6 +25,8 @@ export default function AddResident() {
     precinctNumber: "",
     placeOfBirth: "",
     generalLocation:"",
+    PWD:false,
+    soloParent:false,
     isVoter: false,
   });
 
@@ -237,6 +239,22 @@ export default function AddResident() {
             value={formData.precinctNumber} 
             onChange={handleChange} required />
 
+            <p>PWD</p>
+            <div className="checkbox-container">
+              <label className="checkbox-label">
+                <input type="checkbox" name="isVoter" checked={formData.PWD} onChange={handleChange} />
+                Is this resident a person with disability?
+              </label>
+            </div>
+
+            <p>Solo Parent</p>
+            <div className="checkbox-container">
+              <label className="checkbox-label">
+                <input type="checkbox" name="isVoter" checked={formData.soloParent} onChange={handleChange} />
+                Is this resident a solo parent?
+              </label>
+            </div>
+
             <p>Voter</p>
             <div className="checkbox-container">
               <label className="checkbox-label">
@@ -244,6 +262,7 @@ export default function AddResident() {
                 Is this resident a registered voter?
               </label>
             </div>
+
             </div>
             <div className="section-2-right-side">
   <div className="file-upload-container">

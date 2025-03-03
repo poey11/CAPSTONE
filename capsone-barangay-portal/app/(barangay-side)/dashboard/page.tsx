@@ -24,11 +24,17 @@ export default function Dashboard() {
   const [eastResidentsCount, seteastResidentsCount] = useState(0);
   const [westResidentsCount, setwestResidentsCount] = useState(0);
   const [southResidentsCount, setsouthResidentsCount] = useState(0);
-  const [incidentReportsCount, setIncidentReportsCount] = useState(0);
   const [verifiedResidentsCount, setVerifiedResidentsCount] = useState(0);
+  const [incidentReportsCount, setIncidentReportsCount] = useState(0);
   const [incidentReportsByWeek, setIncidentReportsByWeek] = useState<{ monthWeek: string; count: number }[]>([]);
-  const [otherIncidentReportsCount, setOtherIncidentReportsCount] = useState(0);
   const [pendingIncidentReportsCount, setPendingIncidentReportsCount] = useState(0);
+  const [settledIncidentReportsCount, setSettledIncidentReportsCount] = useState(0);
+  const [archivedIncidentReportsCount, setArchivedIncidentReportsCount] = useState(0);
+  const [pwdCount, setPwdCount] = useState(0);
+  const [soloParentCount, setSoloParentCount] = useState(0);
+  const [seniorCitizensCount, setSeniorCitizensCount] = useState(0);
+  const [minorsCount, setMinorsCount] = useState(0);
+  const [adultsCount, setAdultsCount] = useState(0);
 []>([]);
   
 
@@ -59,18 +65,47 @@ export default function Dashboard() {
         const incidentReportsSnapshot = await getDocs(collection(db, "IncidentReports"));
         setIncidentReportsCount(incidentReportsSnapshot.size);
 
-        const totalReports = incidentReportsSnapshot.size;
-        
-        const pendingReports = incidentReportsSnapshot.docs.filter(
-          (doc) => doc.data().status === "Pending"
-        ).length;
+        let pending = 0,
+          settled = 0,
+          archived = 0;
+
+        incidentReportsSnapshot.docs.forEach((doc) => {
+          const status = doc.data().status;
+          if (status === "Pending") pending++;
+          else if (status === "Settled") settled++;
+          else if (status === "Archived") archived++;
+        });
   
-        setPendingIncidentReportsCount(pendingReports);
-        setOtherIncidentReportsCount(totalReports - pendingReports);
+        setPendingIncidentReportsCount(pending);
+        setSettledIncidentReportsCount(settled);
+        setArchivedIncidentReportsCount(archived);
 
         const today = new Date();
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(today.getDate() - 7);
+
+        const residents = residentsSnapshot.docs.map((doc) => doc.data());
+
+        let seniors = 0,
+          pwds = 0,
+          soloParents = 0,
+          minors = 0,
+          adults = 0;
+
+        residents.forEach((resident) => {
+          if (resident.age >= 60) seniors++;
+          else if (resident.age < 18) minors++;
+          else adults++;
+
+          if (resident.PWD === true) pwds++;
+          if (resident.soloParent === true) soloParents++;
+        });
+
+        setSeniorCitizensCount(seniors);
+        setPwdCount(pwds);
+        setSoloParentCount(soloParents);
+        setMinorsCount(minors);
+        setAdultsCount(adults);
 
         const newResidentQuery = query(
           collection(db, "ResidentUsers"),
@@ -145,17 +180,25 @@ export default function Dashboard() {
     { name: "Unverified Residents", value: Math.max(residentUsersCount - verifiedResidentsCount, 0) },
   ];
 
-  const COLORS = ["#4CAF50", "#F3B50B"];
-  const VERIFICATION_COLORS = ["#2196F3", "#F3B50B"];
-  const LOCATION_COLORS = ["#4CAF50", "#2196F3", "#FF9800"];  
-
-
   const incidentReportData = [
-    { name: "Pending Reports", value: pendingIncidentReportsCount },
-    { name: "Other Statuses", value: otherIncidentReportsCount },
+    { name: "Pending", value: pendingIncidentReportsCount },
+    { name: "Settled", value: settledIncidentReportsCount },
+    { name: "Archived", value: archivedIncidentReportsCount },
   ];
+
   
-  const INCIDENT_COLORS = ["#FF9800", "#4CAF50"];
+  const barangayDemographics = [
+    { name: "Senior Citizens", value: seniorCitizensCount },
+    { name: "PWD", value: pwdCount },
+    { name: "Solo Parents", value: soloParentCount },
+    { name: "Minors", value: minorsCount },
+    { name: "Adults", value: adultsCount },
+  ];
+
+  const DEMOGRAPHICS_COLORS = ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"];
+  const VERIFICATION_COLORS = ["#2196F3", "#F3B50B"];
+  const LOCATION_COLORS = ["#4CAF50", "#2196F3", "#FF9800"]; 
+  const INCIDENT_COLORS = ["#FF9800", "#4CAF50", "#9E9E9E"];
   
   
 
@@ -234,36 +277,44 @@ export default function Dashboard() {
           </div>
 
           <div className="metric-card">
-          {/*change this to resident demographics 
-          Residents that Adults >=
-          Below 18(Legal Age)
-          Senior Citizens >= 60
-          */}
-            <div className="card-left-side">
-                <Link href="/dashboard/admin">
-                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                   3. Barangay Demographics:
-                  </p>
-                </Link>
-                  <p className="count">{}</p>
-            </div>
-
-            <div className="card-right-side">
-              <ResponsiveContainer width={200} height={250}>
-                <PieChart>
-                  <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                    {residentData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-              </div>
-       
-
+          <div className="card-left-side">
+            <Link href="/dashboard/admin">
+              <p
+                className="title"
+                style={{ cursor: "pointer", textDecoration: "underline" }}
+              >
+                3. Barangay Demographics:
+              </p>
+            </Link>
+            <p className="count">
+              {residentsCount}
+            </p>
           </div>
+
+          <div className="card-right-side">
+            <ResponsiveContainer width={250} height={300}>
+              <PieChart>
+                <Pie
+                  data={barangayDemographics}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label={({ name, percent }) =>
+                    `${name} (${(percent * 100).toFixed(1)}%)`
+                  }
+                >
+                  {barangayDemographics.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={DEMOGRAPHICS_COLORS[index % DEMOGRAPHICS_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
           <div className="metric-card">
            
@@ -322,18 +373,15 @@ export default function Dashboard() {
          </div>
 
          <div className="metric-card">
-          
           <div className="card-left-side">
-                <Link href="/dashboard/IncidentModule/Lupon">
-                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                  6. Incident Reports:
-                  </p>
-                </Link>
-              <p className="count">{incidentReportsCount}</p>
+            <Link href="/dashboard/IncidentModule/Lupon">
+              <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                Incident Reports:
+              </p>
+            </Link>
+            <p className="count">{incidentReportsCount}</p>
           </div>
-
           <div className="card-right-side">
-           
             <ResponsiveContainer width={200} height={250}>
               <PieChart>
                 <Pie data={incidentReportData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
@@ -345,11 +393,8 @@ export default function Dashboard() {
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
-
-
           </div>
-
-       </div>
+        </div>
           
       </div> 
 
