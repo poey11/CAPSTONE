@@ -126,80 +126,66 @@ const Menu = () => {
 
 
             {!loading && user ? (
-              <div  className="relative" ref={loginMenuRef}>
-                  <p
-                  id="profile-link"
-                  className="hover:text-[white] cursor-pointer"
-                  onClick={toggleLoginOptions}
-                >
-                  <img src="/images/user.png" alt="User Icon" className="header-usericon" />
-                </p>
-                {showLoginOptions && (
-                  <div className="absolute w-40 bg-slate-300 rounded-md py-1 px-3">
-                    <div className="flex flex-col">
-                      <Link
-                        href={"/"}
-                        onClick={toggleLoginOptions}
-                        className="hover:text-[white] cursor-pointer"
-                      >
-                        Profile
-                      </Link>
-                      <Link
-                        href={"/"}
-                        onClick={handleLogout}
-                        className="hover:text-[white] cursor-pointer"
-                      >
-                        Logout
-                      </Link>
-                    </div>
+              <div className="dropdown-Container">
+                <div className="dropdown-item" ref={loginMenuRef}>
+                    <p
+                    id="profile-link"
+                    onClick={toggleLoginOptions}
+                  >
+                    <img src="/images/user.png" alt="User Icon" className="header-usericon" />
+                  </p>
+                  
+                  <div className="Dropdown">
+                    <Link
+                      href={"/"}
+                    >
+                      <p className="dropdown-item">Profile</p>
+                    </Link>
+
+                    <Link
+                      href={"/"}
+                      onClick={handleLogout}
+                    >
+                      <p className="dropdown-item">Logout</p>
+                    </Link>
+
                   </div>
-                )}
+                </div>
               </div>
           ):(
-              <div className="relative" ref={loginMenuRef}>
+
+            <div className="dropdown-Container">
+              <div className="dropdown-item" ref={loginMenuRef}>
                 <p
                   id="login-link"
-                  className="hover:text-[white] cursor-pointer"
-                  onClick={toggleLoginOptions}
+                  className="dropdown-item"
                 >
                   Login
                 </p>
 
-                {showLoginOptions && (
-                  <div className="dropdown-containerr">
-                    <div className="dropdown-content">
+                  <div className="Dropdown">
                       <Link
                         //href="/official"
                         href="/official/login"
-
-                        onClick={toggleLoginOptions}
-                        className="dropdown-item"
                       >
-                        Login For Official
+                        <p className="dropdown-item">Login For Officials</p>
                       </Link>
                       <Link
                         //href="/resident"
                         href="/resident/login"
-                        onClick={toggleLoginOptions}
-                        className="dropdown-item"
                       >
-                        Login For Resident
+                        <p className="dropdown-item">Login For Residents</p>
                       </Link>
                       <Link
                         href="/register"
-                        onClick={toggleLoginOptions}
-                        className="dropdown-item"
                       >
-                        Register
-                      </Link>
-                    </div>
+                        <p className="dropdown-item">Register</p>
+                      </Link> 
                   </div>
-                )}
               </div>
+            </div>
             )}
           </div>
-
-
         </div>
       </div>
     </>

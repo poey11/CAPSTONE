@@ -14,28 +14,27 @@ export default function Services() {
       <div className="headerpic">
         <p>SERVICES</p>
       </div>
-
-
-
-    <div className="services-main-container">
-      <div className="documents-container">
-        <div className="documents-container-row">
+      
+      <div className="services-main-container">
+        <div className="documents-container">
+          <div className="documents-container-column">
             <div className="documents-card dropdown-container">
               <img
-                src="/images/document.png"
-                alt="Document Icon"
-                className="document-icon"
-              />
-              <h1>Barangay Certificate</h1>
-              <div className="dropdown">
-                <Link href="/services/barangaycertificate/residency">
-                  <p>Residency</p>
-                </Link>
-                <Link href="/services/barangaycertificate/others">
-                    <p>Others</p>
-                </Link>
-              </div>
+                  src="/images/document.png"
+                  alt="Document Icon"
+                  className="document-icon"
+                />
+                <h1>Barangay Certificate</h1>
+                <div className="dropdown">
+                  <Link href="/services/barangaycertificate/residency">
+                    <p>Residency</p>
+                  </Link>
+                  <Link href="/services/barangaycertificate/others">
+                      <p>Others</p>
+                  </Link>
+                </div>
             </div>
+
             <Link href="/services/barangayindigency">
               <div className="documents-card">
                 <img
@@ -57,11 +56,12 @@ export default function Services() {
                 <h1>Barangay ID</h1>
               </div>
             </Link>
-            
+    
           </div>
-        
-          <div className="documents-container-row">
-            <div className="documents-card dropdown-container">
+
+
+          <div className="documents-container-column">
+          <div className="documents-card dropdown-container">
               <img
                 src="/images/document.png"
                 alt="Document Icon"
@@ -152,18 +152,11 @@ export default function Services() {
                 <h1>First Time Jobseeker</h1>
               </div>
             </Link>
+
           </div>
 
-
-
-
-
+        </div>
       </div>
-
-    </div>
-
-
-
     </main>
   );
 }
