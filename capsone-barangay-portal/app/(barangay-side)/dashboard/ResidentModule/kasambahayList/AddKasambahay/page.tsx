@@ -17,7 +17,7 @@ export default function AddKasambahay() {
     dateOfBirth: "",
     placeOfBirth: "",
     sex: "",
-    age: "",
+    age: 0,
     civilStatus: "",
     educationalAttainment: "",
     natureOfWork: "",
