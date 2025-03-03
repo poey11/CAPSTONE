@@ -3,11 +3,14 @@
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import  { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import "@/CSS/barangaySide/topMenu.css";
+
 
 interface User{
     name: string;
     role: string;
+    
 }
 
 export default function TopMenu() {
@@ -46,6 +49,11 @@ export default function TopMenu() {
         };
     }, []);
 
+    const router = useRouter();
+    const handleSettings = () => {
+        router.push("/dashboard/settingsPage");
+    };
+
     return (
         <div className="main-containerB">
             <div className="user-container">
@@ -65,7 +73,9 @@ export default function TopMenu() {
                     />
                     <div className={`dropdown ${isDropdownOpen ? "show" : ""}`}>
                         <ul>
-                            <li>Settings</li>
+                        <li className="module" onClick={handleSettings}>
+                            Settings
+                        </li>
                             <li
                                 onClick={() => signOut({callbackUrl: "/"})}
                                 className="module">
@@ -78,3 +88,4 @@ export default function TopMenu() {
         </div>
     );
 }
+
