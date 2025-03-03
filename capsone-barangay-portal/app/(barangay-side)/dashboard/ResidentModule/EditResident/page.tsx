@@ -28,6 +28,8 @@ export default function EditResident() {
     precinctNumber: "",
     placeofBirth: "",
     isVoter: false,
+    PWD: false,
+    soloParent: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -59,6 +61,8 @@ export default function EditResident() {
             emailAddress: data.emailAddress || "N/A",
             precinctNumber: data.precinctNumber || "N/A",
             placeofBirth: data.placeOfBirth || "N/A",
+            PWD: data.PWD ?? false,
+            soloParent: data.soloParent ?? false,
             isVoter: data.isVoter ?? false,
           });
         } else {
@@ -180,6 +184,22 @@ export default function EditResident() {
 
             <p>Precinct Number</p>
             <input type="text" className="search-bar" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required />
+
+            <p>PWD</p>
+            <div className="checkbox-container">
+              <label className="checkbox-label">
+                <input type="checkbox" name="isVoter" checked={formData.PWD} onChange={handleChange} />
+                Is this resident a person with disability?
+              </label>
+            </div>
+
+            <p>Solo Parent</p>
+            <div className="checkbox-container">
+              <label className="checkbox-label">
+                <input type="checkbox" name="isVoter" checked={formData.soloParent} onChange={handleChange} />
+                Is this resident a solo parent?
+              </label>
+            </div>
 
             <p>Voter</p>
             <div className="checkbox-container">

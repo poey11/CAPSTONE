@@ -45,6 +45,7 @@ export default function ViewResident() {
     { label: "Middle Name", key: "middleName" },
     { label: "Address", key: "address" },
     { label: "Date of Birth", key: "dateOfBirth" },
+    { label: "General Location", key: "generalLocation" },
     { label: "Place of Birth", key: "placeOfBirth" },
     { label: "Age", key: "age" },
     { label: "Sex", key: "sex" },
@@ -55,7 +56,9 @@ export default function ViewResident() {
     { label: "Contact Number", key: "contactNumber" },
     { label: "Email Address", key: "emailAddress" },
     { label: "Precinct Number", key: "precinctNumber" },
-    { label: "Voter", key: "isVoter" }
+    { label: "Voter", key: "isVoter" },
+    { label: "PWD", key: "PWD" },
+    { label: "soloParent", key: "soloParent" }
   ];
 
   const handleBack = () => {
@@ -78,7 +81,11 @@ export default function ViewResident() {
               <p>{field.label}</p>
             </div>
             <div className="description">
-              <p>{residentData[field.key] ?? "N/A"}</p>
+              <p>       
+                {typeof residentData[field.key] === "boolean"
+                  ? residentData[field.key] ? "Yes" : "No"
+                  : residentData[field.key] ?? "N/A"}
+              </p>
             </div>
           </div>
         ))}

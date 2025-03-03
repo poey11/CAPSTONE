@@ -28,6 +28,9 @@ const ReportsPage = () => {
       const querySnapshot = await getDocs(q);
       
       const newMembers = querySnapshot.docs.map(doc => doc.data());
+
+      newMembers.sort((a, b) => a.registrationControlNumber - b.registrationControlNumber);
+
       
       if (newMembers.length === 0) {
         alert("No new members found for the current month.");
@@ -104,7 +107,7 @@ const ReportsPage = () => {
         worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 3 })] = { v: member.middleName };
         worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 4 })] = { v: member.homeAddress };
         worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 5 })] = { v: member.placeOfBirth };
-        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 6 })] = { v: member.dateOfBirth };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 6 })] = { v: member.datewOfBirth };
         worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 7 })] = { v: member.sex };
         worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 8 })] = { v: member.age };
         worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 9 })] = { v: member.civilStatus };

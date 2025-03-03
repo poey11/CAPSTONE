@@ -24,6 +24,9 @@ export default function AddResident() {
     emailAddress: "",
     precinctNumber: "",
     placeOfBirth: "",
+    generalLocation:"",
+    PWD:false,
+    soloParent:false,
     isVoter: false,
   });
 
@@ -130,6 +133,14 @@ export default function AddResident() {
             name="address" 
             value={formData.address} 
             onChange={handleChange} required />
+            
+            <p>Location</p>
+            <select name="generalLocation" className="featuredStatus" value={formData.generalLocation} onChange={handleChange} required>
+              <option value="" disabled>Choose Part of Fairview</option>
+              <option value="East Fairview">East Fairview</option>
+              <option value="West Fairview">West Fairview</option>
+              <option value="South Fairview">South Fairview</option>
+            </select>
 
             <p>Place of Birth</p>
             <input type="text" 
@@ -228,6 +239,22 @@ export default function AddResident() {
             value={formData.precinctNumber} 
             onChange={handleChange} required />
 
+            <p>PWD</p>
+            <div className="checkbox-container">
+              <label className="checkbox-label">
+                <input type="checkbox" name="isVoter" checked={formData.PWD} onChange={handleChange} />
+                Is this resident a person with disability?
+              </label>
+            </div>
+
+            <p>Solo Parent</p>
+            <div className="checkbox-container">
+              <label className="checkbox-label">
+                <input type="checkbox" name="isVoter" checked={formData.soloParent} onChange={handleChange} />
+                Is this resident a solo parent?
+              </label>
+            </div>
+
             <p>Voter</p>
             <div className="checkbox-container">
               <label className="checkbox-label">
@@ -235,6 +262,7 @@ export default function AddResident() {
                 Is this resident a registered voter?
               </label>
             </div>
+
             </div>
             <div className="section-2-right-side">
   <div className="file-upload-container">
