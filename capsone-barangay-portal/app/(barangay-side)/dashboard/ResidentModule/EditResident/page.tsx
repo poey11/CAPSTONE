@@ -188,7 +188,7 @@ export default function EditResident() {
             <p>PWD</p>
             <div className="checkbox-container">
               <label className="checkbox-label">
-                <input type="checkbox" name="isVoter" checked={formData.PWD} onChange={handleChange} />
+                <input type="checkbox" name="PWD" checked={formData.PWD} onChange={handleChange} />
                 Is this resident a person with disability?
               </label>
             </div>
@@ -196,7 +196,7 @@ export default function EditResident() {
             <p>Solo Parent</p>
             <div className="checkbox-container">
               <label className="checkbox-label">
-                <input type="checkbox" name="isVoter" checked={formData.soloParent} onChange={handleChange} />
+                <input type="checkbox" name="soloParent" checked={formData.soloParent} onChange={handleChange} />
                 Is this resident a solo parent?
               </label>
             </div>
