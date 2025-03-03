@@ -82,21 +82,26 @@ const incidentForm:React.FC = () => {
 
     // Handle file selection for container 1
     const handleFileChangeContainer1 = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const selectedFiles = event.target.files;
-      if (selectedFiles) {
-        const fileArray = Array.from(selectedFiles).map((file) => {
-          const preview = URL.createObjectURL(file);
-          return { name: file.name, preview };
-        });
-        setFilesContainer1((prevFiles) => [...prevFiles, ...fileArray]); // Append new files to the first container
+      const selectedFile = event.target.files?.[0];
+      if (selectedFile) {
+        const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+        
+        if (!validImageTypes.includes(selectedFile.type)) {
+          alert("Only JPG, JPEG, and PNG files are allowed.");
+          return;
+        }
+    
+        // Replace existing file instead of adding multiple
+        const preview = URL.createObjectURL(selectedFile);
+        setFilesContainer1([{ name: selectedFile.name, preview }]);
       }
     };
 
     // Handle file deletion for container 1
     const handleFileDeleteContainer1 = (fileName: string) => {
-      setFilesContainer1((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
-    
-      // Reset file input to ensure re-upload works
+      setFilesContainer1([]);
+  
+      // Reset file input
       const fileInput = document.getElementById('file-upload1') as HTMLInputElement;
       if (fileInput) {
         fileInput.value = "";
@@ -272,7 +277,6 @@ const incidentForm:React.FC = () => {
                   id="file-upload1"
                   type="file"
                   className="file-upload-input"
-                  multiple
                   accept=".jpg,.jpeg,.png"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleFileChangeContainer1(e);

@@ -55,60 +55,76 @@ export default  function ViewLupon() {
         const LTdata = LTreportCollectionSnapshot.docs[0].data();
         setLTReportData(LTdata);
   
-        // 🔹 Fetch Download URL if file exists
-        if (data?.file) {
-          const filePath = data.file.startsWith("IncidentReports/")
-            ? data.file
-            : `IncidentReports/${data.file}`;
-  
-          const fileRef = ref(storage, filePath);
-          const url = await getDownloadURL(fileRef);
-          setconcernImageUrl(url);
-        }
-
-        if (LTdata?.file) {
-          const filePath = LTdata.file.startsWith("IncidentReports/LTAssignedInfo/")
-            ? LTdata.file
-            : `IncidentReports/LTAssignedInfo/${LTdata.file}`;
-  
-          const fileRef = ref(storage, filePath);
-          const url = await getDownloadURL(fileRef);
-          setLTreportImageUrl(url);
-        }
-
+       
 
       } catch (error: any) {
         console.error("Error fetching report:", error.message);
       }
     };
-  
     fetchReport();
-  }, []);
+  }, [docId]);
+
+  useEffect(() => {
+    const fetchImage = async () => {
+      try{
+         // 🔹 Fetch Download URL if file exists
+         if (reportData?.file) {
+          const filePath = reportData.file.startsWith("IncidentReports/")
+            ? reportData.file
+            : `IncidentReports/${reportData.file}`;
+  
+          const fileRef = ref(storage, filePath);
+          const url = await getDownloadURL(fileRef);
+          setconcernImageUrl(url);
+        }
+  
+        if (LTreportData?.file) {
+          const filePath = LTreportData.file.startsWith("IncidentReports/LTAssignedInfo/")
+            ? LTreportData.file
+            : `IncidentReports/LTAssignedInfo/${LTreportData.file}`;
+  
+          const fileRef = ref(storage, filePath);
+          const url = await getDownloadURL(fileRef);
+          setLTreportImageUrl(url);
+        }
+  
+      }
+      catch (error: any) {
+        console.error("Error fetching image:", error.message);
+      }
+    }
+    fetchImage();
+  }, [reportData, LTreportData]);
+
 
   const status = reportData?.status; // Example status
- 
-  let accountType = "Guest User";
-  if(reportData?.reportID != "Guest"){
-    accountType = "Resident User";
-  }
- 
-  console.log("Report Data:", reportData);
-  console.log("LT Report Data:", LTreportData);
+  
 
-  const complainantsData = {
-    account: accountType,
+
+  const complainantsData = reportData?.reportID != "Guest" ? {
+    account: "Resident User",
+    name: reportData?.firstname + " " + reportData?.lastname,
+    contact: reportData?.contactNos,
+  }:{
+    account: "Guest User",
     name: reportData?.firstname + " " + reportData?.lastname,
     contact: reportData?.contactNos,
   };
-
-  const respondentsData = {
-    /* which lupon officer who handled this case, will follow up on this after doing edit page*/
+  const respondentsData = LTreportData == null ? {
+    LTUserId: "No LT Staff Assigned",
+    name: "No LT Staff Assigned",
+    contact: "No LT Staff Assigned",
+    report: "No LT Staff Assigned",
+    image: "",
+  } : {
     LTUserId: LTreportData?.LTUserId,
     name: LTreportData?.Fname + " " + LTreportData?.Lname,
     contact: LTreportData?.phone,
     report: LTreportData?.report,
     image: LTreportImageUrl,
   };
+
+ 
 
 
   const otherinformation = {
@@ -158,7 +174,7 @@ export default  function ViewLupon() {
 
 
     const handleViewLupon = () => {
-      router.push("/dashboard/IncidentModule/Lupon");
+      router.back();
     };
 
   return (

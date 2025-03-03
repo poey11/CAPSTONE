@@ -4,6 +4,7 @@ import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {db} from "@/app/db/firebase";
 import {collection, doc, deleteDoc, onSnapshot, query, where} from "firebase/firestore";
+import { getReportData } from "@/app/(barangay-side)/components/server";
 
 interface ReportProps{
   id: string;
@@ -107,6 +108,7 @@ export default function LuponDepartment() {
         <table>
           <thead>
             <tr>
+              <th>Case #</th>
               <th>Complainant's Name</th>
               <th>Date & Time of the Incident</th>
               <th>Nature of Complaint</th>
@@ -117,6 +119,7 @@ export default function LuponDepartment() {
           <tbody>
             {incidentData.map((incident, index) => (
               <tr key={index}>
+                <td></td>
                 <td>{incident.firstname} {incident.lastname}</td>
                 <td>{incident.date} {incident.time}</td>
                 <td>{incident.nature}</td>
