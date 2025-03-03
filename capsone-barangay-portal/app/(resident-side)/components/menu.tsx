@@ -60,28 +60,31 @@ const Menu = () => {
           <img src="/images/brgylogo.png" alt="Barangay Logo" className="header-brgylogo" />
     
           <div className="navbar-links">
-            <div className="navbar-indiv-container">
-              <Link
-                href="/"
-                className="hover:text-[white] cursor-pointer"
-                onClick={toggleLoginOptionsOff}
-              >
-                Home
-              </Link>
-            </div>
-            <div className="navbar-indiv-container">
-              <Link
-                href="/aboutus"
-                className="hover:text-[white] cursor-pointer"
-                onClick={toggleLoginOptionsOff}
-              >
-                About Us
-              </Link>
-            </div>
             
-            <div className="navbar-indiv-container dropdown-Container">
+          <div className="navbar-indiv-container">
+              <div className="dropdown-Container">
+              <Link href="/">
+                <p className="dropdown-item" onClick={toggleLoginOptionsOff}>Home</p>
+              </Link>
+                
+              </div>
+            </div>
+
+          
+
+            <div className="navbar-indiv-container">
+              <div className="dropdown-Container">
+              <Link href="/aboutus">
+                <p className="dropdown-item" onClick={toggleLoginOptionsOff}>About Us</p>
+              </Link>
+                
+              </div>
+            </div>
+
+ 
+            <div className="dropdown-Container">
               
-                <p className="hover:text-[white] cursor-pointer">Services</p>
+                <p className="dropdown-item">Services</p>
                 <div className="Dropdown">
                   <Link href="/services">
                     <p>Request Documents</p>
@@ -96,29 +99,31 @@ const Menu = () => {
               
             </div>
             
-            <Link
-                href="/Announcements"
-                className="hover:text-[white] cursor-pointer"
-                onClick={toggleLoginOptionsOff}
-              >
-                News
-              </Link>
 
-            <div className="navbar-indiv-container dropdown-Container">
-              
-                <p className="hover:text-[white] cursor-pointer">Officials</p>
-                <div className="Dropdown">
-                  <Link href="/OfficialsPage">
-                    <p>Barangay Officials</p>
-                  </Link>
-                  <Link href="/OfficialsPage/HOAOfficersPage">
-                    <p>HOA Officers</p>
-                  </Link>
-                  <Link href="/OfficialsPage/SitioOfficersPage">
-                    <p>Sitio Officers</p>
-                  </Link>
-                </div>
+              <div className="navbar-indiv-container">
+              <div className="dropdown-Container">
+              <Link href="/Announcements">
+                <p className="dropdown-item" onClick={toggleLoginOptionsOff}>News</p>
+              </Link>
+                
+              </div>
             </div>
+
+              <div className="dropdown-Container">
+              <p className="dropdown-item">Officials</p>
+              <div className="Dropdown">
+                <Link href="/OfficialsPage">
+                  <p className="dropdown-item">Barangay Officials</p>
+                </Link>
+                <Link href="/OfficialsPage/HOAOfficersPage">
+                  <p className="dropdown-item">HOA Officers</p>
+                </Link>
+                <Link href="/OfficialsPage/SitioOfficersPage">
+                  <p className="dropdown-item">Sitio Officers</p>
+                </Link>
+              </div>
+            </div>
+
 
             {!loading && user ? (
               <div  className="relative" ref={loginMenuRef}>
