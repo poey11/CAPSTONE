@@ -45,6 +45,7 @@ export default function ViewResident() {
     { label: "Middle Name", key: "middleName" },
     { label: "Address", key: "address" },
     { label: "Date of Birth", key: "dateOfBirth" },
+    { label: "General Location", key: "generalLocation" },
     { label: "Place of Birth", key: "placeOfBirth" },
     { label: "Age", key: "age" },
     { label: "Sex", key: "sex" },

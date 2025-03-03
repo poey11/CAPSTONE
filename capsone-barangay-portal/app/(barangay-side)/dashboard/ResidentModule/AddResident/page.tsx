@@ -24,6 +24,7 @@ export default function AddResident() {
     emailAddress: "",
     precinctNumber: "",
     placeOfBirth: "",
+    generalLocation:"",
     isVoter: false,
   });
 
@@ -130,6 +131,14 @@ export default function AddResident() {
             name="address" 
             value={formData.address} 
             onChange={handleChange} required />
+            
+            <p>Location</p>
+            <select name="generalLocation" className="featuredStatus" value={formData.generalLocation} onChange={handleChange} required>
+              <option value="" disabled>Choose Part of Fairview</option>
+              <option value="East Fairview">East Fairview</option>
+              <option value="West Fairview">West Fairview</option>
+              <option value="South Fairview">South Fairview</option>
+            </select>
 
             <p>Place of Birth</p>
             <input type="text" 
