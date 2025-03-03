@@ -66,7 +66,7 @@
   font-size: 20px;
 }
 
-.documents-container-row {
+.documents-container-column {
   margin-top: 20px;
   display: block;
   flex-wrap: wrap;
@@ -76,14 +76,16 @@
   flex: 1 1 calc(50% - 20px);
   background-color: rgba(237, 112, 20, 0.3);
   padding: 20px;
+  padding-left: 30px;
   border: 1px solid #ddd;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
   height: 70px;
   margin-bottom: 20px;
+  margin-left: 50px;
   transition: all 0.3s ease;
   display: flex;
-  gap: 40px;
+  gap: 55px;
   align-items: center;
   z-index: 10;
   width: 350px; /* Adjusted for better fit */
@@ -110,6 +112,12 @@
 
 .dropdown-container {
     position: relative;
+    display: flex;
+    align-items: center; /* Ensures elements stay aligned */
+    justify-content: center; /* Keeps spacing balanced */
+    flex-wrap: wrap; /* Allows elements to wrap instead of breaking layout */
+    gap: 0;
+    padding-left: 0;
 }
 
 .dropdown {
@@ -123,7 +131,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 10px;
     z-index: 100; /* Ensure dropdown is above other elements */
-    width: 310px; /* Optional: Set a minimum width for the dropdown */
+    width: 350px; /* Optional: Set a minimum width for the dropdown */
 }
 
 .dropdown p {
@@ -132,10 +140,12 @@
     color: #333;
     font-size: 14px;
     cursor: pointer;
+    transition: color 0.2s ease-in-out;
 }
 
 .dropdown p:hover {
     background-color: rgba(237, 112, 20, 0.3); /* Highlight option on hover */
+    color: white;
 }
 
 
