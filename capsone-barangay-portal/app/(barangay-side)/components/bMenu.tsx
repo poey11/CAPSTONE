@@ -124,6 +124,7 @@ const BMenu: React.FC = () => {
           <Link href="/dashboard/IncidentModule/GAD" className="dropdown-item">GAD</Link>
           <Link href="/dashboard/IncidentModule/BCPC" className="dropdown-item">BCPC</Link>
           <Link href="/dashboard/IncidentModule/VAWC" className="dropdown-item">VAWC</Link>
+          <Link href="/dashboard/IncidentModule/OnlineReports" className="dropdown-item">Online Requests</Link>
         </div>
       </div>
 
