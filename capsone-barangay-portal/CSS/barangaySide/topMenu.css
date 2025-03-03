@@ -49,8 +49,8 @@ body {
 }
 
 .menuIcon{
-    width: 25px;
-    height: 25px;
+    width: 15px;
+    height: 15px;
     cursor: pointer;
     filter: grayscale(100%);
 }
@@ -89,3 +89,21 @@ body {
 .dropdown li:hover {
     background-color: #ddd;
 }
+
+.module {
+    padding: 1rem;
+    color: grey;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    cursor: pointer;
+  }
+  
+  .module:hover {
+    background-color: #D9D9D9;
+  }
+  
+  .module:not(:last-child) {
+    margin-bottom: 0.50rem;
+  }
