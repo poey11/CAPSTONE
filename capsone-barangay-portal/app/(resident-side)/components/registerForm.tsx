@@ -6,6 +6,8 @@ import { createUserWithEmailAndPassword, sendEmailVerification,signOut } from "f
 import { useState, ChangeEvent } from "react";
 import { useRouter } from 'next/navigation';
 import ReCAPTCHA from "react-google-recaptcha";
+import "@/CSS/Components/registerform.css";
+
 
 /*Fixed the register func logic where any failure in the process will delete any partial passed through the db
  however form validation is still partially implemented.
@@ -162,57 +164,208 @@ const registerForm:React.FC = () => {
         }
       }
 
+      const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
+
+  // Handle file selection for container 1
+  const handleFileChangeContainer1 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files;
+    if (selectedFiles) {
+      const fileArray = Array.from(selectedFiles).map((file) => {
+        const preview = URL.createObjectURL(file);
+        return { name: file.name, preview };
+      });
+      setFilesContainer1((prevFiles) => [...prevFiles, ...fileArray]); // Append new files to the first container
+    }
+  };
+
+  // Handle file deletion for container 1
+  const handleFileDeleteContainer1 = (fileName: string) => {
+    setFilesContainer1((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+  };
+
+  
+
+ 
+
      
     return ( 
-        <div>
-        <form onSubmit={handleSubmit} className="flex flex-col  justify-center">
-        <label htmlFor="sex">Sex:</label>
-            <select  value={resident.sex}  onChange={handleChange} id="sex" name="sex" className="border-2 border-black" required>
+      <main className="main-container">
+    
+
+      <div className="register-section">
+        <h1>Register</h1>
+        <form className="register-form" onSubmit={handleSubmit}> {/* Use onSubmit to trigger the redirect */}
+          <div className="form-group">
+            <label htmlFor="sex" className="form-label">Sex:</label>
+            <select  value={resident.sex}  onChange={handleChange} id="sex" name="sex"  className="form-input" required>
               <option value="" disabled>Select a Sex</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>
+           
+          </div>
 
-            <label htmlFor="first_name">First Name: </label>
-            <input value={resident.first_name} onChange={handleChange} id="first_name" type="text" name="first_name" className="border-2 border-black" required />
+          <div className="form-group">
+          <label htmlFor="first_name" className="form-label">First Name: </label>
+          <input value={resident.first_name} onChange={handleChange} id="first_name" 
+          type="text" name="first_name" 
+          className="form-input"
+          placeholder= "Enter Name"
+           required />
 
-            <label htmlFor="last_name">Last Name: </label>  
-            <input value={resident.last_name} onChange={handleChange} id="last_name" type="text" name="last_name" className="border-2 border-black" required/>
+          </div>
 
-            <label htmlFor="email">Email: </label>
-            <input  value={resident.email} onChange={handleChange} id="email" type="email" name="email" className="border-2 border-black" required />
+          <div className="form-group">
+          <label htmlFor="last_name" className="form-label" >Last Name: </label>  
+           
 
-            <label htmlFor="phone">Phone: </label>
-            <input  value={resident.phone} onChange={handleChange} id="phone" type="tel" name="phone" className="border-2 border-black" required />
+            <input value={resident.last_name} onChange={handleChange} id="last_name" 
+            type="text" name="last_name" 
+            className="form-input" 
+            placeholder="Enter Last Name"
+            required/>
 
-            <label htmlFor="address">Address: </label>
-            <input value={resident.address} onChange={handleChange} id="address" type="text" name="address" className="border-2 border-black" required />
-            
-            <label htmlFor="password">Password: </label>
-            <input value={resident.password} onChange={handleChange} id="password" type="password" name="password" className="border-2 border-black" required/>
+          </div>
 
-            <label htmlFor="confirm_password">Confirm Password: </label>
-            <input id="confirm_password" type="password" name="confirm_password" className="border-2 border-black" />
+          <div className="form-group">
+          <label htmlFor="email" className="form-label" >Email: </label>
+          <input  value={resident.email} onChange={handleChange} id="email" 
+          type="email" name="email" 
+          className="form-input" 
+          placeholder="Enter Email"
+          required />
+          </div>
 
-            <label htmlFor="terms">I agree to the terms and conditions</label>
-            <input id="terms" onChange={handleCheckBox}  type="checkbox" name="terms" className="" />
-            
-            <label htmlFor="upload">Upload Valid ID with address: </label>
-            <input onChange={handleChange} id="upload" type="file" name="upload" className="" accept="image/*"  />
-            <ReCAPTCHA sitekey= {captchaSiteKey} onChange={handleToken}  />
-            <button
-                type="submit"
-                className={`bg-slate-200 mt-2 ${
-                    isTermChecked ? "opacity-100" : "opacity-50 cursor-not-allowed"
-                }`}
-                disabled={!isTermChecked} // Disable the button if checkbox is not checked
-                >
-                Register
-                </button>
+          <div className="form-group">
+          <label htmlFor="phone" className="form-label" >Phone: </label>
+          <input  value={resident.phone} onChange={handleChange} id="phone" 
+          type="tel" name="phone"
+           className="form-input" 
+           placeholder="Enter Phone Number"
+           required />
+          </div>
 
+
+          <div className="form-group">
+          <label htmlFor="address" className="form-label">Address: </label>
+          <input value={resident.address} onChange={handleChange} id="address" 
+          type="text" name="address" 
+          className="form-input" 
+          placeholder="Enter Address"
+          required />
+          </div>
+
+
+          <div className="form-group">
+          <label htmlFor="password" className="form-label">Password: </label>
+          <input value={resident.password} onChange={handleChange} id="password"
+           type="password" name="password" 
+           className="form-input"
+           placeholder="Enter Password"
+           required/>
+          </div>
+
+          <div className="form-group">
+          <label htmlFor="confirm_password" className="form-label">Confirm Password: </label>
+          <input id="confirm_password" type="password"
+           name="confirm_password"
+           className="form-input"
+           placeholder="Confirm Password"
+           />
+          </div>
+
+
+          <div className="signature/printedname-container">
+            <label className="form-label">Upload Valid ID with address: </label>
+
+            <div className="file-upload-container">
+              <label htmlFor="upload" className="upload-link">Click to Upload File</label>
+              <input
+                id="file-upload1"
+                type="file"
+                className="file-upload-input"
+                multiple
+                accept=".jpg,.jpeg,.png"
+                onChange={handleFileChangeContainer1} // Handle file selection
+              />
+
+          <input onChange={handleChange} id="upload" type="file" name="upload" className="file-upload-input" accept="image/*"  />
+         
+              <div className="uploadedFiles-container">
+
+
+                
+                {filesContainer1.length > 0 && (
+                  <div className="file-name-image-display">
+                    <ul>
+                      {filesContainer1.map((file, index) => (
+                        <div className="file-name-image-display-indiv" key={index}>
+                          <li>
+                            {file.preview && (
+                              <div className="filename-image-container">
+                                <img
+                                  src={file.preview}
+                                  alt={file.name}
+                                  style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                />
+                              </div>
+                            )}
+                            {file.name}
+                            <div className="delete-container">
+                              <button
+                                type="button"
+                                onClick={() => handleFileDeleteContainer1(file.name)}
+                                className="delete-button"
+                              >
+                                <img
+                                  src="/images/trash.png"
+                                  alt="Delete"
+                                  className="delete-icon"
+                                />
+                              </button>
+                            </div>
+                          </li>
+                        </div>
+                      ))}
+                    </ul>
+
+                    
+                  </div>
+
+                  
+
+                  
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="form-checkbox-section">
+          <label htmlFor="terms" className="form-label">I agree to the terms and conditions</label>
+          <input id="terms" onChange={handleCheckBox}  type="checkbox" name="terms" className="form-checkbox" />
+          </div>
+
+          <div className="form-captcha">
+          <ReCAPTCHA sitekey= {captchaSiteKey} onChange={handleToken}  />
+          </div>
+
+
+          {/* Submit button */}
+          <button
+            type="submit"
+            className= "submit-button"
+            disabled={!isTermChecked}
+          >
+            Register
+          </button>
         </form>
-        
-        </div>
+
+
+      </div>
+
+
+     
+    </main>
      );
 }
  
