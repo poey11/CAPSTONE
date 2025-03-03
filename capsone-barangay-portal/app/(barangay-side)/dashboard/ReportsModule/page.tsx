@@ -1,360 +1,150 @@
 "use client";
-import "@/CSS/DashboardModule/dashboard.css";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { db } from "@/app/db/firebase";
-import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid
-} from "recharts";
 
-export default function Dashboard() {
-  const [barangayUsersCount, setBarangayUsersCount] = useState(0);
-  const [residentUsersCount, setResidentUsersCount] = useState(0);
-  const [newResidentUsersCount, setNewResidentUsersCount] = useState(0); // change to demographics for users
-  const [residentsCount, setResidentsCount] = useState(0);
-  const [incidentReportsCount, setIncidentReportsCount] = useState(0);
-  const [verifiedResidentsCount, setVerifiedResidentsCount] = useState(0);
-  const [incidentReportsByMonth, setIncidentReportsByMonth] = useState<{ monthYear: string; count: number }[]>([]);
-  const [otherIncidentReportsCount, setOtherIncidentReportsCount] = useState(0);
-  const [pendingIncidentReportsCount, setPendingIncidentReportsCount] = useState(0);
-  const [incidentReports, setIncidentReports] = useState<{ 
-    reportID: string;
-    firstname: string;
-    lastname: string;
-    address: string;
-    concerns: string;
-    date: string;
-    time: string;
-  }[]>([]);
-  
+import { useState } from "react";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
-  useEffect(() => {
-    const fetchCounts = async () => {
-      try {
-        const barangayUsersSnapshot = await getDocs(collection(db, "BarangayUsers"));
-        setBarangayUsersCount(barangayUsersSnapshot.size);
+const ReportsPage = () => {
+  const [loading, setLoading] = useState(false);
 
-        const residentUsersSnapshot = await getDocs(collection(db, "ResidentUsers"));
-        setResidentUsersCount(residentUsersSnapshot.size);
+  const generateKasambahayReport = async () => {
+    setLoading(true);
 
-        const residentsSnapshot = await getDocs(collection(db, "Residents"));
-        setResidentsCount(residentsSnapshot.size);
+    try {
+      const storage = getStorage();
+      const db = getFirestore();
 
-        const incidentReportsSnapshot = await getDocs(collection(db, "IncidentReports"));
-        setIncidentReportsCount(incidentReportsSnapshot.size);
+      // Get the current month and year
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const currentMonthYear = currentDate.toLocaleString("en-US", { month: "long", year: "numeric" }).toUpperCase();
 
-        const totalReports = incidentReportsSnapshot.size;
-        
-        const pendingReports = incidentReportsSnapshot.docs.filter(
-          (doc) => doc.data().status === "Pending"
-        ).length;
-  
-        setPendingIncidentReportsCount(pendingReports);
-        setOtherIncidentReportsCount(totalReports - pendingReports);
-
-        const today = new Date();
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(today.getDate() - 7);
-
-        const newResidentQuery = query(
-          collection(db, "ResidentUsers"),
-          where("createdAt", ">=", Timestamp.fromDate(sevenDaysAgo))
-        );
-        const newResidentSnapshot = await getDocs(newResidentQuery);
-        setNewResidentUsersCount(newResidentSnapshot.size);
-
-        const verifiedQuery = query(collection(db, "ResidentUsers"), where("verified", "==", true));
-        const verifiedSnapshot = await getDocs(verifiedQuery);
-        setVerifiedResidentsCount(verifiedSnapshot.size);
-
-        const incidentReportsData = incidentReportsSnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            reportID: data.reportID,
-            firstname: data.firstname,
-            lastname: data.lastname,
-            address: data.address,
-            concerns: data.concerns,
-            date: data.date,
-            time: data.time,
-          };
-        });
-
-        incidentReportsData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-        const monthlyCounts: Record<string, number> = {};
-        incidentReportsData.forEach((report) => {
-          const reportDate = new Date(report.date);
-          const monthYear = reportDate.toLocaleString("default", { month: "long", year: "numeric" });
-        
-          monthlyCounts[monthYear] = (monthlyCounts[monthYear] || 0) + 1;
-        });
-        
-        const formattedData = Object.keys(monthlyCounts).map((monthYear) => ({
-          monthYear,
-          count: monthlyCounts[monthYear],
-        }));
-        
-        setIncidentReportsByMonth(formattedData);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+      // Fetch new members from Firestore (registered this month)
+      const kasambahayRef = collection(db, "KasambahayList");
+      const q = query(kasambahayRef, where("createdAt", ">=", `${year}-${month}-01`), where("createdAt", "<=", `${year}-${month}-31`));
+      const querySnapshot = await getDocs(q);
+      
+      const newMembers = querySnapshot.docs.map(doc => doc.data());
+      
+      if (newMembers.length === 0) {
+        alert("No new members found for the current month.");
+        setLoading(false);
+        return;
       }
-    };
 
-    fetchCounts();
-  }, []);
+      // Get template file from Firebase Storage
+      const templateRef = ref(storage, "ReportsModule/Kasambahay Masterlist Report Template.xlsx");
+      let url;
+      try {
+        url = await getDownloadURL(templateRef);
+      } catch (error) {
+        console.error("Error fetching template file:", error);
+        alert("Failed to fetch report template. Check Firebase Storage.");
+        setLoading(false);
+        return;
+      }
+      
+      let response;
+      try {
+        response = await fetch(url);
+      } catch (error) {
+        console.error("Error downloading template file:", error);
+        alert("Failed to download report template.");
+        setLoading(false);
+        return;
+      }
+      
+      let arrayBuffer;
+      try {
+        arrayBuffer = await response.arrayBuffer();
+      } catch (error) {
+        console.error("Error reading template file:", error);
+        alert("Failed to process template file.");
+        setLoading(false);
+        return;
+      }
+      
+      let workbook;
+      try {
+        workbook = XLSX.read(arrayBuffer, { type: "array" });
+      } catch (error) {
+        console.error("Error parsing Excel file:", error);
+        alert("Invalid Excel file format.");
+        setLoading(false);
+        return;
+      }
+      
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
 
-  const residentData = [
-    { name: "Resident Users", value: residentUsersCount },
-    { name: "Non-Users", value: Math.max(residentsCount - residentUsersCount, 0) },
-  ];
+      // Find the last row dynamically (before the signature section)
+      let lastRow = 0;
+      const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1");
+      for (let row = range.s.r; row <= range.e.r; row++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: row, c: 0 });
+        if (worksheet[cellAddress] && worksheet[cellAddress].v) {
+          lastRow = row;
+        }
+      }
 
-  const verificationData = [
-    { name: "Verified Residents", value: verifiedResidentsCount },
-    { name: "Unverified Residents", value: Math.max(residentUsersCount - verifiedResidentsCount, 0) },
-  ];
+      // Insert "NEW MEMBERS (CURRENT MONTH YEAR)" header
+      const headerRow = lastRow + 2;
+      const headerCell = XLSX.utils.encode_cell({ r: headerRow, c: 0 });
+      worksheet[headerCell] = { v: `NEW MEMBERS (${currentMonthYear})`, s: { font: { bold: true, italic: true, color: { rgb: "FF0000" } } } };
 
-  const COLORS = ["#4CAF50", "#F3B50B"];
-  const VERIFICATION_COLORS = ["#2196F3", "#F3B50B"];
+      // Insert new members' data
+      let rowIndex = headerRow + 1;
+      newMembers.forEach(member => {
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })] = { v: member.registrationControlNumber };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 1 })] = { v: member.lastName };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 2 })] = { v: member.firstName };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 3 })] = { v: member.middleName };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 4 })] = { v: member.homeAddress };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 5 })] = { v: member.placeOfBirth };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 6 })] = { v: member.dateOfBirth };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 7 })] = { v: member.sex };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 8 })] = { v: member.age };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 9 })] = { v: member.civilStatus };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 10 })] = { v: member.educationalAttainment };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 11 })] = { v: member.natureOfWork };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 12 })] = { v: member.employmentArrangement };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 13 })] = { v: member.salary };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 14 })] = { v: member.sssMember ? "Yes" : "No" };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 15 })] = { v: member.pagibigMember ? "Yes" : "No" };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 16 })] = { v: member.philhealthMember ? "Yes" : "No" };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 17 })] = { v: member.employerName };
+        worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 18 })] = { v: member.employerAddress };
+        rowIndex++;
+      });
 
+      const updatedWorkbook = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([updatedWorkbook], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      saveAs(blob, `Kasambahay_Masterlist_${currentMonthYear}.xlsx`);
 
-  const incidentReportData = [
-    { name: "Pending Reports", value: pendingIncidentReportsCount },
-    { name: "Other Statuses", value: otherIncidentReportsCount },
-  ];
-  
-  const INCIDENT_COLORS = ["#FF9800", "#4CAF50"];
-  
-  
+      alert("Report generated successfully!");
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      alert("Failed to generate report.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <main className="main-container">
-
-      <p className="dashboard">Summaries</p>
-
-      
-
-        <div className="summaries-section">
-
-      
-          <div className="metric-card">
-              <div className="card-left-side">
-                <Link href="/dashboard/OfficialsModule">
-                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                    Barangay Officials:
-                  </p>
-                </Link>
-                  <p className="count">{ barangayUsersCount}</p>
-              </div>
-
-            <div className="card-right-side">
-
-                            {/* need to change the graph to an image @derick */}
-
-              <ResponsiveContainer width={200} height={250} >
-                <PieChart>
-                  <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                    {residentData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-
-                            {/* gang dito lang need mo idelete */}
-
-              </div>
-          </div>
-          
-          <div className="metric-card">
-    
-             
-            <div className="card-left-side">
-            <Link href="/dashboard/admin">
-                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                    Total Registered Resident Users:
-                  </p>
-                </Link>
-                  <p className="count">{residentUsersCount}</p>
-            </div>
-
-            <div className="card-right-side">
-              <ResponsiveContainer width={200} height={250}>
-                <PieChart>
-                  <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                    {residentData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-              </div>
-       
-
-
-          </div>
-
-          <div className="metric-card">
-          {/*change this to resident demographics 
-          Residents that Adults >=
-          Below 18(Legal Age)
-          Senior Citizens >= 60
-          */}
-            <div className="card-left-side">
-                <Link href="/dashboard/admin">
-                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                    New Registered Resident Users:
-                  </p>
-                </Link>
-                  <p className="count">{newResidentUsersCount}</p>
-            </div>
-
-            <div className="card-right-side">
-              <ResponsiveContainer width={200} height={250}>
-                <PieChart>
-                  <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                    {residentData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-              </div>
-       
-
-          </div>
-
-          <div className="metric-card">
-           
-              <div className="card-left-side">
-                <Link href="/dashboard/ResidentModule">
-                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                    Total Residents:
-                  </p>
-                </Link>
-                <p className="count">{residentsCount}</p>
-              </div>
-
-          <div className="card-right-side">
-          <ResponsiveContainer width={200} height={250}>
-            <PieChart>
-              <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                {verificationData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={VERIFICATION_COLORS[index % VERIFICATION_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-
-            </div>
-
-          </div>
-
-         <div className="metric-card">
-          {/* need to change this to the document requests table count */}
-            <div className="card-left-side">
-                <Link href="/dashboard/ServicesModule/OnlineRequests">
-                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                    Total Document Requests:
-                  </p>
-                </Link>
-                  <p className="count">{incidentReportsCount}</p>
-            </div>
-
-            <div className="card-right-side">
-              
-          <ResponsiveContainer width={200} height={250}>
-            <PieChart>
-              <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                {verificationData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={VERIFICATION_COLORS[index % VERIFICATION_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-            </div>
-
-         </div>
-
-         <div className="metric-card">
-          
-          <div className="card-left-side">
-                <Link href="/dashboard/IncidentModule/Lupon">
-                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                    Incident Reports:
-                  </p>
-                </Link>
-              <p className="count">{incidentReportsCount}</p>
-          </div>
-
-          <div className="card-right-side">
-           
-            <ResponsiveContainer width={200} height={250}>
-              <PieChart>
-                <Pie data={incidentReportData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                  {incidentReportData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={INCIDENT_COLORS[index % INCIDENT_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-
-
-          </div>
-
-       </div>
-          
-      </div> 
-
-
-      <p className="dashboard">Incident Reports Chart</p>
-      <div className="heatmap-container">
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={incidentReportsByMonth} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="monthYear" textAnchor="end" /> 
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="count" fill="#B3EBF2" name="Monthly Total" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      <p className="dashboard">Incident Heat Map</p>
-
-          <div className="heatmap-container">
-                  
-        
-
-          </div>
-
-     
-
-      
-    </main>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+      <h1 className="text-2xl font-bold mb-6">Generate Reports</h1>
+      <button
+        onClick={generateKasambahayReport}
+        disabled={loading}
+        className={`px-6 py-3 text-white rounded-lg transition ${loading ? "bg-gray-500 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"}`}
+      >
+        {loading ? "Generating..." : "Generate Kasambahay Masterlist"}
+      </button>
+    </div>
   );
-}
+};
+
+export default ReportsPage;
