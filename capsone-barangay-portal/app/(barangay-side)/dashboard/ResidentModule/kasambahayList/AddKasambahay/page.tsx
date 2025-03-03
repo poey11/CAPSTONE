@@ -194,7 +194,7 @@ export default function AddKasambahay() {
               <option value="" disabled>Choose Nature of Work</option>
               <option value="1">Gen. House Help (All Around)</option>
               <option value="2">YAYA</option>
-              <option value="3">CODK</option>
+              <option value="3">COOK</option>
               <option value="4">Gardener</option>
               <option value="5">Laundry Person</option>
               <option value="6">Others</option>

@@ -15,6 +15,7 @@ export default function KasambahayListModule() {
   const [searchName, setSearchName] = useState<string>("");
   const [searchAddress, setSearchAddress] = useState<string>("");
   const [showCount, setShowCount] = useState<number>(5);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const router = useRouter(); 
 
@@ -58,12 +59,19 @@ export default function KasambahayListModule() {
       );
     }
 
+    // Sorting by Registration Control Number
+    filtered.sort((a, b) => {
+      const numA = parseInt(a.registrationControlNumber, 10) || 0;
+      const numB = parseInt(b.registrationControlNumber, 10) || 0;
+      return sortOrder === "asc" ? numA - numB : numB - numA;
+    });
+
     if (showCount) {
       filtered = filtered.slice(0, showCount);
     }
 
     setFilteredResidents(filtered);
-  }, [searchName, searchAddress, showCount, residents]);
+  }, [searchName, searchAddress, showCount, residents, sortOrder]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this resident?")) {
@@ -121,7 +129,15 @@ export default function KasambahayListModule() {
           <table>
             <thead>
               <tr>
-                <th>Registration Control Number</th>                
+                <th>
+                  Registration Control Number
+                  <button
+                    onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                    className="sort-button"
+                  >
+                    {sortOrder === "asc" ? "▲" : "▼"}
+                  </button>
+                </th>                
                 <th>Last Name</th>                
                 <th>First Name</th>
                 <th>Middle Name</th>
