@@ -6,19 +6,8 @@ import { useAuth } from "@/app/context/authContext";
 import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
-interface reportProps {
-    firstname: string;
-    lastname: string;
-    contactNos: string;
-    concerns: string;
-    date: string;
-    time: string;
-    address: string;
-    file: File | null;
-    reportID: string;
-    department: string;
-    status: string;
-}
+import { reportFormProps } from "@/app/helpers/interfaceHelper";
+
 
 
 const incidentForm:React.FC = () => {
@@ -26,7 +15,7 @@ const incidentForm:React.FC = () => {
   const {user} = useAuth();
   const currentUser = user?.uid || "Guest";
   const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
-  const [incidentReport, setIncidentReport] = useState<reportProps>({
+  const [incidentReport, setIncidentReport] = useState<reportFormProps>({
       firstname: "",
       lastname: "",
       contactNos: "",
@@ -109,7 +98,7 @@ const incidentForm:React.FC = () => {
     };
     
 
-    const handleReportUpload = async (incidentReport: reportProps) => {
+    const handleReportUpload = async (incidentReport: reportFormProps) => {
       try{
         let filename = "";
         if(incidentReport.file){

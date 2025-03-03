@@ -1,10 +1,8 @@
 "use client"
 import "@/CSS/IncidentModule/ViewIncident.css";
 import { useRouter,useSearchParams  } from "next/navigation"; // Use 'next/navigation' in Next.js 13+ (App Router)
-import { useEffect, useState } from "react";
-import { db,storage } from "@/app/db/firebase";
-import {  collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { getDownloadURL, ref } from "firebase/storage";
+import {  useEffect, useState } from "react";
+import { getSpecificIncidentReport, generateDownloadLink } from "@/app/helpers/firestorehelper";
 
 
 
@@ -19,82 +17,31 @@ export default  function ViewLupon() {
   const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
   const [LTreportImageUrl, setLTreportImageUrl] = useState<string | null>(null);
   const [LTreportData, setLTReportData] = useState<any>();
+  
 
   useEffect(() => {
-    const fetchReport = async () => {
-      try {
-        if (!docId) {
-          console.log("No document ID provided.");
-          setReportData(null);
-          return;
-        }
-  
-        // Fetch Firestore document
-        const reportRef = doc(db, "IncidentReports", docId);
-        const reportSnapshot = await getDoc(reportRef);
-
-       
-  
-        if (!reportSnapshot.exists()) {
-          console.log("No matching document.");
-          setReportData(null);
-          return;
-        }
-  
-        const data = reportSnapshot.data();
-        setReportData(data);
-
-        const LTreportRef = collection(reportRef, "LTAssignedInfo");
-        const LTreportCollectionSnapshot = await getDocs(LTreportRef);
-        
-        if (LTreportCollectionSnapshot.empty) {
-          console.log("No matching document.");
-          setLTReportData(null);
-          return;
-        }
-        const LTdata = LTreportCollectionSnapshot.docs[0].data();
-        setLTReportData(LTdata);
-  
-       
-
-      } catch (error: any) {
-        console.error("Error fetching report:", error.message);
-      }
-    };
-    fetchReport();
-  }, [docId]);
-
-  useEffect(() => {
-    const fetchImage = async () => {
-      try{
-         // 🔹 Fetch Download URL if file exists
-         if (reportData?.file) {
-          const filePath = reportData.file.startsWith("IncidentReports/")
-            ? reportData.file
-            : `IncidentReports/${reportData.file}`;
-  
-          const fileRef = ref(storage, filePath);
-          const url = await getDownloadURL(fileRef);
-          setconcernImageUrl(url);
-        }
-  
-        if (LTreportData?.file) {
-          const filePath = LTreportData.file.startsWith("IncidentReports/LTAssignedInfo/")
-            ? LTreportData.file
-            : `IncidentReports/LTAssignedInfo/${LTreportData.file}`;
-  
-          const fileRef = ref(storage, filePath);
-          const url = await getDownloadURL(fileRef);
-          setLTreportImageUrl(url);
-        }
-  
-      }
-      catch (error: any) {
-        console.error("Error fetching image:", error.message);
-      }
+    if(docId){
+      getSpecificIncidentReport(docId, setReportData, setLTReportData);
     }
-    fetchImage();
-  }, [reportData, LTreportData]);
+    else{
+      console.log("No document ID provided.");
+      setReportData(null);
+      setLTReportData(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    if(reportData?.file){
+      generateDownloadLink(reportData?.file, "IncidentReports").then(url => {
+        if (url) setconcernImageUrl(url);
+      });
+    }
+    if(LTreportData?.file){
+      generateDownloadLink(LTreportData?.file, "IncidentReports/LTAssignedInfo").then(url => {
+        if (url) setLTreportImageUrl(url);
+      }); 
+    }
+  },[reportData, LTreportData]);
 
 
   const status = reportData?.status; // Example status

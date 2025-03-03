@@ -2,24 +2,9 @@
 import "@/CSS/IncidentModule/MainDashboardIncident.css";
 import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {db} from "@/app/db/firebase";
-import {collection, doc, deleteDoc, onSnapshot, query, where} from "firebase/firestore";
-import { getReportData } from "@/app/(barangay-side)/components/server";
+import { getIncidentDataByDepartment,deleteDocument } from "@/app/helpers/firestorehelper";
+import { ReportProps } from "@/app/helpers/interfaceHelper";
 
-interface ReportProps{
-  id: string;
-  nature: string;
-  address: string;
-  concern: string;
-  date: string;
-  department: string;
-  file: string;
-  firstname: string;
-  lastname: string;
-  reportId: string;
-  time: string;
-  status: string;
-}
 
 
 const statusOptions = ["Pending","In Progress", "Resolved", "Settled", "Archived"];
@@ -28,24 +13,13 @@ export default function LuponDepartment() {
   const [incidentData, setIncidentData] = useState<ReportProps[]>([])
 
   useEffect(()=> {
-    const fetchReport = async () => {
-      try{
-        const luponReportCollection = query(collection(db, "IncidentReports"), where("department", "==", "Lupon"));
-        const unsubscribeReport = onSnapshot(luponReportCollection, (snapshot) => {
-          const reportData:ReportProps[] = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })) as ReportProps[];
-          setIncidentData(reportData);
-        });
+    const unsubscribe = getIncidentDataByDepartment("Lupon", setIncidentData);
 
-        return unsubscribeReport;
+    return () => {
+      if (unsubscribe) {
+        unsubscribe(); // ✅ Now this works correctly
       }
-      catch(error:String|any){
-        console.log(error.message);1
-      }
-    }
-    fetchReport();
+    };
   },[])
   console.log("Data:",incidentData);
 
@@ -66,14 +40,7 @@ export default function LuponDepartment() {
   };
 
   const handleDeleteLupon = (reportId: string) => {
-   try{
-    const reportDoc = doc(db, "IncidentReports", reportId);
-    deleteDoc(reportDoc);
-  
-   }
-   catch(error:String|any){
-     console.log(error.message);
-   }
+    deleteDocument("IncidentReports", reportId);
   }
 
   const handleAddLupon = () => {
