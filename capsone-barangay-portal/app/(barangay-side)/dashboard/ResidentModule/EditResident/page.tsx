@@ -17,7 +17,7 @@ export default function EditResident() {
     middleName: "",
     address: "",
     dateOfBirth: "",
-    age: "",
+    age: 0,
     sex: "",
     civilStatus: "",
     occupation: "",

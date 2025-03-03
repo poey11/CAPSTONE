@@ -14,7 +14,7 @@ export default function AddResident() {
     middleName: "",
     address: "",
     dateOfBirth: "",
-    age: "",
+    age: 0,
     sex: "",
     civilStatus: "",
     occupation: "",
