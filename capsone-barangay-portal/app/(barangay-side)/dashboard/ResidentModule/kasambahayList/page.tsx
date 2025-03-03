@@ -68,7 +68,7 @@ export default function KasambahayListModule() {
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this resident?")) {
       try {
-        await deleteDoc(doc(db, "Residents", id));
+        await deleteDoc(doc(db, "KasambahayList", id));
         setResidents((prev) => prev.filter(resident => resident.id !== id));
         alert("Resident deleted successfully!");
       } catch (error) {
@@ -140,6 +140,7 @@ export default function KasambahayListModule() {
                 <th>PhilHealth Member</th>
                 <th>Employer Name</th>
                 <th>Employer Address</th>
+                <th>Created At</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -165,27 +166,12 @@ export default function KasambahayListModule() {
                   <td>{resident.philhealthMember ? "Yes" : "No"}</td>
                   <td>{resident.employerName}</td>
                   <td>{resident.employerAddress}</td>
-
+                  <td>{resident.createdAt}</td>
                   <td>
                     <div className="actions">
-                      <button 
-                        className="action-view" 
-                        onClick={() => router.push(`/dashboard/ResidentModule/kasambahayList/ViewKasambahay?id=${resident.id}`)}
-                      >
-                        View
-                      </button>
-                      <button 
-                        className="action-edit" 
-                        onClick={() => router.push(`/dashboard/ResidentModule/kasambahayList/EditKasambahay?id=${resident.id}`)}
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        className="action-delete" 
-                        onClick={() => handleDelete(resident.id)}
-                      >
-                        Delete
-                      </button>
+                      <button className="action-view" onClick={() => router.push(`/dashboard/ResidentModule/kasambahayList/ViewKasambahay?id=${resident.id}`)}>View</button>
+                      <button className="action-edit" onClick={() => router.push(`/dashboard/ResidentModule/kasambahayList/EditKasambahay?id=${resident.id}`)}>Edit</button>
+                      <button className="action-delete" onClick={() => handleDelete(resident.id)}>Delete</button>
                     </div>
                   </td>
                 </tr>

@@ -28,6 +28,7 @@ export default function AddKasambahay() {
     pagibigMember: false,
     employerName: "",
     employerAddress: "",
+    createdAt:"",
   });
 
   const [loading, setLoading] = useState(false);
@@ -88,10 +89,13 @@ export default function AddKasambahay() {
         latestNumber = latestEntry.registrationControlNumber + 1;
       }
 
+      const currentDate = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
+
+
       await addDoc(kasambahayCollection, {
         ...formData,
         registrationControlNumber: latestNumber,
-        createdAt: serverTimestamp(),
+        createdAt: currentDate,
       });
 
       alert("Kasambahay added successfully!");
