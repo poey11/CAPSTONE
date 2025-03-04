@@ -14,7 +14,7 @@ interface KasambahayFormData {
   homeAddress: string;
   dateOfBirth: string;
   placeOfBirth: string;
-  age: string;
+  age: number;
   sex: string;
   civilStatus: string;
   educationalAttainment: string;
@@ -41,7 +41,7 @@ export default function EditKasambahay() {
     homeAddress: "",
     dateOfBirth: "",
     placeOfBirth: "",
-    age: "",
+    age: 0,
     sex: "",
     civilStatus: "",
     educationalAttainment: "",

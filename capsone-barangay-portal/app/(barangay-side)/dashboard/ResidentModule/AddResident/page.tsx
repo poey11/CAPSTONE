@@ -14,7 +14,7 @@ export default function AddResident() {
     middleName: "",
     address: "",
     dateOfBirth: "",
-    age: "",
+    age: 0,
     sex: "",
     civilStatus: "",
     occupation: "",
@@ -34,8 +34,6 @@ export default function AddResident() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
-
-    const [isActive, setIsActive] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -242,7 +240,7 @@ export default function AddResident() {
             <p>PWD</p>
             <div className="checkbox-container">
               <label className="checkbox-label">
-                <input type="checkbox" name="isVoter" checked={formData.PWD} onChange={handleChange} />
+                <input type="checkbox" name="PWD" checked={formData.PWD} onChange={handleChange} />
                 Is this resident a person with disability?
               </label>
             </div>
@@ -250,7 +248,7 @@ export default function AddResident() {
             <p>Solo Parent</p>
             <div className="checkbox-container">
               <label className="checkbox-label">
-                <input type="checkbox" name="isVoter" checked={formData.soloParent} onChange={handleChange} />
+                <input type="checkbox" name="soloParent" checked={formData.soloParent} onChange={handleChange} />
                 Is this resident a solo parent?
               </label>
             </div>
