@@ -1,0 +1,142 @@
+    .main-container {
+        background-color: #f7e5d5; 
+        display: flex; 
+        height: auto; 
+        width: 100%;
+        gap: 2rem; 
+        padding: 3rem; 
+    }
+
+    .account-profile-section {
+        width: 30%;
+        display: flex;
+        flex-direction: column;
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 3rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 50%;
+       
+    }
+
+    .icon-container {
+        display: flex;
+        flex-direction: column;
+        margin-top: 2rem;
+    }
+
+    .user-icon {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        object-fit: cover; 
+        border: 4px solid #f49028;
+        margin-bottom: 1rem;
+    }
+
+    .upload-btn {
+        background-color: #f49028;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.3s ease;
+    }
+
+    .upload-btn:hover {
+        background-color: #e07c21;
+    }
+
+    .account-details-section {
+        width: 70%;
+        display: flex;
+        flex-direction: column;
+        padding: 3rem;
+        background-color: rgba(255, 255, 255, 0.7);
+        border-radius: 16px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        gap: 2rem;
+    }
+
+    .edit-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        width: 100%;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.3s ease;
+        background: #f7f7f7;
+        color: #333;
+    }
+
+    .form-input:focus {
+        border-color: #f49028;
+        box-shadow: 0 0 10px rgba(244, 144, 40, 0.3);
+    }
+
+    .submit-btn {
+        background-color: #f49028;
+        color: white;
+        padding: 12px 0;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        background-color: #e07c21;
+    }
+
+    .Details {
+        color: #333;
+        font-size: 1.5rem;
+        font-weight: bold;
+        align-self: center;
+    }
+
+    .name-section {
+        display: flex;
+        gap: 10px;
+        margin-top: 1rem;
+        padding: 1rem;
+    }
+
+
+   .name {
+    display: flex;
+    color: #f49028;
+    font-size: 1.5rem;
+    font-weight: bold;
+    align-self: center;
+   }
+    

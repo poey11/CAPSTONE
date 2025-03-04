@@ -137,7 +137,7 @@ const Menu = () => {
                   
                   <div className="Dropdown">
                     <Link
-                      href={"/"}
+                      href={"/ResidentAccount/Profile"}
                     >
                       <p className="dropdown-item">Profile</p>
                     </Link>
