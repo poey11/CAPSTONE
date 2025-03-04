@@ -90,7 +90,7 @@
 .header-inboxicon{
   max-width: 100%; 
   height: auto;
-  width: 25px;
+  width: 23px;
   margin-top: 5px;
   margin-right: 50px;
 }
@@ -142,7 +142,7 @@
 
 .notification-section {
   position: absolute;
-  top: 90px; 
+  top: 89px; 
   right: -290px;
   width: 380px;
   height: 600px;

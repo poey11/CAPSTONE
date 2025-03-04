@@ -56,15 +56,15 @@ const Menu = () => {
 
   const messages = [
     { id: 1, text: "Online Incident Report is being reviewed. Wait for an update from the barangay official.", status: "unread" },
-    { id: 2, text: "Barangay Clearance request is being processed.", status: "read" },
-    { id: 3, text: "Barangay ID request is being processed.", status: "unread" },
-    { id: 4, text: "Barangay ID request is being processed.", status: "unread" },
-    { id: 5, text: "Barangay ID request is being processed.", status: "read" },
-    { id: 6, text: "Barangay ID request is being processed.", status: "unread" },
-    { id: 7, text: "Barangay ID request is being processed.", status: "unread" },
-    { id: 8, text: "Barangay ID request is being processed.", status: "read" },
-    { id: 9, text: "Barangay ID request is being processed.", status: "unread" },
-    { id: 10, text: "Barangay ID request is being processed.", status: "unread" },
+    { id: 2, text: "Barangay Clearance request is being processed. SMS sent.", status: "read" },
+    { id: 3, text: "Barangay ID request is being processed. SMS sent.", status: "unread" },
+    { id: 4, text: "Barangay Certificate request is being processed. SMS sent.", status: "unread" },
+    { id: 5, text: "Barangay Permit request is being processed. SMS sent.", status: "read" },
+    { id: 6, text: "Barangay Indigency request is being processed. SMS sent.", status: "unread" },
+    { id: 7, text: "Barangay Certificate request is being processed. SMS sent.", status: "unread" },
+    { id: 8, text: "First Time Jobseeker request is being processed. SMS sent.", status: "read" },
+    { id: 9, text: "Barangay ID request is being processed. SMS sent.", status: "unread" },
+    { id: 10, text: "Barangay Clearance request is being processed. SMS sent.", status: "unread" },
   ];
 
   const unreadCount = messages.filter((msg) => msg.status === "unread").length;
