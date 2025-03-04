@@ -38,6 +38,38 @@ const Menu = () => {
     };
   }, []);
 
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [filter, setFilter] = useState("all");
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const toggleNotificationSection = () => setIsOpen((prev) => !prev);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const messages = [
+    { id: 1, text: "blablablabalabalababalalabkjdxbakdadnandlakndfewkfjwejfbwkebfowbe;fkjbweljfbwelifbliwehbfliwebhflwekbfwebf;wijbe", status: "unread" },
+    { id: 2, text: "Message 2", status: "read" },
+    { id: 3, text: "Message 3", status: "unread" },
+    { id: 4, text: "Message 4", status: "unread" },
+    { id: 5, text: "Message 5", status: "read" },
+    { id: 6, text: "Message 6", status: "unread" },
+    { id: 7, text: "Message 7", status: "unread" },
+    { id: 8, text: "Message 8", status: "read" },
+    { id: 9, text: "Message 9", status: "unread" },
+    { id: 10, text: "Message 10", status: "unread" },
+  ];
+
+  const unreadCount = messages.filter((msg) => msg.status === "unread").length;
+  const filteredMessages = filter === "all" ? messages : messages.filter((msg) => msg.status === "unread");
+
   const pathname = usePathname();
   const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages
 
@@ -126,9 +158,58 @@ const Menu = () => {
 
 
             {!loading && user ? (
+            <div className="logged-in-container">  
+              <div className="dropdown-Container">
+                <div className="dropdown-item">
+                  <p
+                    id="inbox-link"
+                    onClick={toggleNotificationSection}
+                    className="inbox-container"
+                  >
+                    <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
+                    {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+                  </p>
+                </div>
+                {isOpen && (
+                  <div className="notification-section" ref={dropdownRef}>
+                    <div className="top-section">
+                      <p className="notification-title">Notification Inbox</p>
+                      <div className="filter-container">
+                        <button className={`filter-option ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
+                        <button className={`filter-option ${filter === "unread" ? "active" : ""}`} onClick={() => setFilter("unread")}>Unread</button>
+                      </div>
+                    </div>
+                    <div className="bottom-section">
+                      <div className="notification-content">
+                        {filteredMessages.length > 0 ? (
+                          filteredMessages.map((message) => (
+                            <div className="notification-item" key={message.id}>
+                              <div className="message-section">
+                                <p>{message.text}</p>
+                              </div>
+                              <div className="unread-icon-section">
+                              
+                                {message.status === "unread" && (
+                                  <img
+                                    src="/images/unread-icon.png"
+                                    alt="Unread Icon"
+                                    className="unread-icon"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p>No messages found</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="dropdown-Container">
                 <div className="dropdown-item" ref={loginMenuRef}>
-                    <p
+                  <p
                     id="profile-link"
                     onClick={toggleLoginOptions}
                   >
@@ -152,6 +233,7 @@ const Menu = () => {
                   </div>
                 </div>
               </div>
+            </div>
           ):(
 
             <div className="dropdown-Container">
