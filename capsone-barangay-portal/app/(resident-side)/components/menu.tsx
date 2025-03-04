@@ -55,16 +55,16 @@ const Menu = () => {
   }, []);
 
   const messages = [
-    { id: 1, text: "blablablabalabalababalalabkjdxbakdadnandlakndfewkfjwejfbwkebfowbe;fkjbweljfbwelifbliwehbfliwebhflwekbfwebf;wijbe", status: "unread" },
-    { id: 2, text: "Message 2", status: "read" },
-    { id: 3, text: "Message 3", status: "unread" },
-    { id: 4, text: "Message 4", status: "unread" },
-    { id: 5, text: "Message 5", status: "read" },
-    { id: 6, text: "Message 6", status: "unread" },
-    { id: 7, text: "Message 7", status: "unread" },
-    { id: 8, text: "Message 8", status: "read" },
-    { id: 9, text: "Message 9", status: "unread" },
-    { id: 10, text: "Message 10", status: "unread" },
+    { id: 1, text: "Online Incident Report is being reviewed. Wait for an update from the barangay official.", status: "unread" },
+    { id: 2, text: "Barangay Clearance request is being processed.", status: "read" },
+    { id: 3, text: "Barangay ID request is being processed.", status: "unread" },
+    { id: 4, text: "Barangay ID request is being processed.", status: "unread" },
+    { id: 5, text: "Barangay ID request is being processed.", status: "read" },
+    { id: 6, text: "Barangay ID request is being processed.", status: "unread" },
+    { id: 7, text: "Barangay ID request is being processed.", status: "unread" },
+    { id: 8, text: "Barangay ID request is being processed.", status: "read" },
+    { id: 9, text: "Barangay ID request is being processed.", status: "unread" },
+    { id: 10, text: "Barangay ID request is being processed.", status: "unread" },
   ];
 
   const unreadCount = messages.filter((msg) => msg.status === "unread").length;
