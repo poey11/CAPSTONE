@@ -19,6 +19,7 @@
   text-decoration: none;
   transition: color 0.2s ease-in-out;
   font-weight: normal;
+  font-size: 16px;
 }
 
 .dropdown-item:hover {
@@ -46,7 +47,7 @@
   margin: 0;
   padding: 5px 10px;
   color: black;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   font-weight: normal;
 }
@@ -257,4 +258,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.menu-section-container{
+  display: flex; 
+}
+
+.dropdown-icon{
+  width: 13px;
+  height: 13px;
+  margin-top: 18px;
 }

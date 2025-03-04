@@ -73,9 +73,9 @@ export default function TopMenu() {
                     />
                     <div className={`dropdown ${isDropdownOpen ? "show" : ""}`}>
                         <ul>
-                        <li className="module" onClick={handleSettings}>
-                            Settings
-                        </li>
+                            <li className="module" onClick={handleSettings}>
+                                Settings
+                            </li>
                             <li
                                 onClick={() => signOut({callbackUrl: "/"})}
                                 className="module">

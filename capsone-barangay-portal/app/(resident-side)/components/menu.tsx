@@ -116,7 +116,11 @@ const Menu = () => {
  
             <div className="dropdown-Container">
               
-                <p className="dropdown-item">Services</p>
+                <div className="menu-section-container">
+                  <p className="dropdown-item">Services</p>
+                  <img src="/images/down-arrow.png" className="dropdown-icon"/>
+                </div>
+    
                 <div className="Dropdown">
                   <Link href="/services">
                     <p>Request Documents</p>
@@ -142,7 +146,10 @@ const Menu = () => {
             </div>
 
               <div className="dropdown-Container">
-              <p className="dropdown-item">Officials</p>
+                <div className="menu-section-container">
+                  <p className="dropdown-item">Officials</p>
+                  <img src="/images/down-arrow.png" className="dropdown-icon"/>
+                </div>
               <div className="Dropdown">
                 <Link href="/OfficialsPage">
                   <p className="dropdown-item">Barangay Officials</p>
