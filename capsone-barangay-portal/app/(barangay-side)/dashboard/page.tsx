@@ -321,7 +321,7 @@ export default function Dashboard() {
               <div className="card-left-side">
                 <Link href="/dashboard/ResidentModule">
                   <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                    Most Requested Documents(Weekly):
+                    4. Most Requested Documents(Weekly):
                   </p>
                 </Link>
                 <p className="count">{residentsCount}</p>
@@ -349,7 +349,7 @@ export default function Dashboard() {
             <div className="card-left-side">
                 <Link href="/dashboard/ServicesModule/OnlineRequests">
                   <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                    4. Total Document Requests:
+                    5. Total Document Requests:
                   </p>
                 </Link>
                   <p className="count">{incidentReportsCount}</p>
@@ -376,7 +376,7 @@ export default function Dashboard() {
           <div className="card-left-side">
             <Link href="/dashboard/IncidentModule/Lupon">
               <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                Incident Reports:
+                6. Incident Reports:
               </p>
             </Link>
             <p className="count">{incidentReportsCount}</p>

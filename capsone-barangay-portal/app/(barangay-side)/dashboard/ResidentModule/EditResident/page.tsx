@@ -108,9 +108,9 @@ export default function EditResident() {
     }
   };
 
-  const handleBack = () => {
-    window.location.href = "/dashboard/ResidentModule";
-  };
+    const handleBack = () => {
+      window.location.href = "/dashboard/ResidentModule";
+    };
   
 
   return (
