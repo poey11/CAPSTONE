@@ -7,13 +7,6 @@ import { useState, ChangeEvent } from "react";
 import { useRouter } from 'next/navigation';
 import ReCAPTCHA from "react-google-recaptcha";
 
-/*Fixed the register func logic where any failure in the process will delete any partial passed through the db
- however form validation is still partially implemented.
- the only validation added are sex, email, and password requirement (confirm password is not yet added ). 
- if register the user is successful,  the form should be cleared.
-  have to double check the error handling of register process.
- terms and condition havent been implemented */
-
 interface Resident {
     sex: string;
     first_name: string;
@@ -106,7 +99,7 @@ const registerForm:React.FC = () => {
               address: resident.address,
               sex: resident.sex,
               role: resident.role,
-              createdAt: new Date().getTime(),
+              createdAt: new Date().toISOString(),
               status: resident.status,
               validIdDocID: fileName
           });

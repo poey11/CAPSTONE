@@ -1,17 +1,17 @@
 "use client"
 import "@/CSS/IncidentModule/OnlineReporting.css";
 import { useState, useEffect } from "react";
-import { getIncidentDataByDepartment, deleteDocument } from "@/app/helpers/firestorehelper";
+import { getAllSpecificDocument, deleteDocument } from "@/app/helpers/firestorehelper";
 import { useRouter } from "next/navigation";
-import { ReportProps } from "@/app/helpers/interfaceHelper";
+
 
 const statusOptions = ["Acknowledged", "Pending"];
 
 export default function OnlineReports() {
-  const [incidentData, setIncidentData] = useState<ReportProps[]>([]);
+  const [incidentData, setIncidentData] = useState<any[]>([]);
 
   useEffect(() => {
-    const unsubscribe = getIncidentDataByDepartment("Online", setIncidentData);
+    const unsubscribe = getAllSpecificDocument("IncidentReports","department","Online", setIncidentData);
 
     return () => {
       if (unsubscribe) {

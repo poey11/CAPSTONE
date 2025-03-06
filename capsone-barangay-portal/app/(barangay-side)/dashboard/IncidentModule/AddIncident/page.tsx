@@ -168,6 +168,8 @@ export default function AddIncident() {
     if (form.checkValidity()) {
       // Redirect to the Notification page after form submission if validation is successful
       handleUpload();
+      deleteForm();
+      router.push(`/dashboard/IncidentModule/Department?id=${departmentId}`);
     } else {
       // If the form is invalid, trigger the validation
       form.reportValidity(); // This will show validation messages for invalid fields
@@ -278,6 +280,7 @@ export default function AddIncident() {
                     name="caseNumber"
                     id="caseNumber"
                     disabled
+                    
                     />
 
              <div className="section-2">
@@ -295,6 +298,7 @@ export default function AddIncident() {
                     name="fname"
                     id="complainant"
                     onChange={handleFormChange}
+                    required
                     />
                   <p>Last Name</p>
 
@@ -306,6 +310,7 @@ export default function AddIncident() {
                     name="lname"
                     id="complainant"
                     onChange={handleFormChange}
+                    required
                     />
 
                   <p>Sex</p>
@@ -333,6 +338,7 @@ export default function AddIncident() {
                     name="age"
                     id="complainant"
                     onChange={handleFormChange}
+                    required
                     />
 
                     <p>Civil Status</p>
@@ -343,6 +349,7 @@ export default function AddIncident() {
                     value={complainant.civilStatus}
                     name="civilStatus"
                     id="complainant"
+                    required
                     onChange={handleFormChange}
                     />
 
@@ -355,6 +362,7 @@ export default function AddIncident() {
                     value={complainant.address}
                     name="address"
                     id="complainant"
+                    required
                     onChange={handleFormChange}
                     />
 
@@ -367,6 +375,7 @@ export default function AddIncident() {
                     value={complainant.contact}
                     name="contact"
                     id="complainant"
+                    required
                     onChange={handleFormChange}
                     />
 
@@ -384,6 +393,7 @@ export default function AddIncident() {
                     value={respondent.fname}
                     name="fname"
                     id="respondent"  
+                    required
                     onChange={handleFormChange}
                     />
                   <p>Last Name</p>
@@ -395,6 +405,7 @@ export default function AddIncident() {
                     value={respondent.lname}
                     name="lname"
                     id="respondent"
+                    required
                     onChange={handleFormChange}
                     />
 
@@ -422,6 +433,7 @@ export default function AddIncident() {
                     placeholder="Enter Age" 
                     value={respondent.age}
                     name="age"
+                    required
                     onChange={handleFormChange}
                     />
 
@@ -433,6 +445,7 @@ export default function AddIncident() {
                     placeholder="Enter Civil Status" 
                     value={respondent.civilStatus}
                     name="civilStatus"
+                    required
                     onChange={handleFormChange}
                     />
 
@@ -445,6 +458,7 @@ export default function AddIncident() {
                     placeholder="Enter Address" 
                     value={respondent.address}
                     name="address"
+                    required
                     onChange={handleFormChange}
                     />
 
@@ -457,6 +471,7 @@ export default function AddIncident() {
                     placeholder="Enter Contact Number" 
                     value={respondent.contact}
                     name="contact"
+                    required
                     onChange={handleFormChange}
                     />
                 
@@ -472,22 +487,26 @@ export default function AddIncident() {
                 <div className="bars">
                     <div className="input-group">
                         <p>Nature of Complaint</p>
-                        <input type="text" className="search-bar" placeholder="Enter Nature of Complaint"  id="nature" name="nature" value = {reportInfo.nature} onChange={handleFormChange} />
+                        <input type="text" className="search-bar" placeholder="Enter Nature of Complaint"  id="nature" name="nature" 
+                        value = {reportInfo.nature} onChange={handleFormChange} required/>
                     </div>
 
                     <div className="input-group">
                         <p>Date Filed</p>
-                        <input type="date" className="search-bar" placeholder="Enter Date" id="dateFiled" name="dateFiled" value = {reportInfo.dateFiled} onChange={handleFormChange} />
+                        <input type="date" className="search-bar" placeholder="Enter Date" id="dateFiled" name="dateFiled" 
+                        value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
                     </div>
 
                     <div className="input-group">
                         <p>Time Filed</p>
-                        <input type="time" className="search-bar" placeholder="Enter Time" id="timeFiled" name="timeFiled" value = {reportInfo.timeFiled} onChange={handleFormChange} />
+                        <input type="time" className="search-bar" placeholder="Enter Time" id="timeFiled" name="timeFiled" 
+                        value = {reportInfo.timeFiled} onChange={handleFormChange} required />
                     </div>
 
                     <div className="input-group">
                         <p>Location</p>
-                        <input type="text" className="search-bar" placeholder="Enter Location" id="location" name="location" value = {reportInfo.location} onChange={handleFormChange} />
+                        <input type="text" className="search-bar" placeholder="Enter Location" id="location" name="location" 
+                        value = {reportInfo.location} onChange={handleFormChange} required />
                     </div>
                 </div>
                 
@@ -503,6 +522,7 @@ export default function AddIncident() {
                     className="search-bar" 
                     placeholder="Enter Desk Officer First Name" 
                     id="staff"
+                    required
                     name="fname"
                     value = {deskStaff.fname} onChange={handleFormChange}
                     />
@@ -518,6 +538,7 @@ export default function AddIncident() {
                     className="search-bar" 
                     placeholder="Enter Desk Officer Last Name" 
                     id="staff"
+                    required
                     name="lname"
                     value = {deskStaff.lname} onChange={handleFormChange}
                     />
@@ -532,6 +553,7 @@ export default function AddIncident() {
                     className="search-bar" 
                     id="dateRecieved"
                     name="dateRecieved"
+                    required
                     value = {reportInfo.dateRecieved} onChange={handleFormChange}
                     /> 
                   </div>
@@ -542,6 +564,7 @@ export default function AddIncident() {
                     <input 
                     type="time" 
                     className="search-bar" 
+                    required
                     id="timeRecieved"
                     name="timeRecieved"
                     value = {reportInfo.timeRecieved} onChange={handleFormChange}
@@ -562,6 +585,7 @@ export default function AddIncident() {
                               <p>Nature of Facts</p>
                                   <textarea 
                                       className="description" 
+                                      required
                                       placeholder="Enter Nature of Facts of the Complaint"
                                       value={reportInfo.concern}
                                       id="concern"

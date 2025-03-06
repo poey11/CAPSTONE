@@ -10,9 +10,7 @@ export default function Register() {
  
   
     return (
-      /*will add captcha later */
       <div className="flex flex-col items-center">
-        REGISTER
         <RegisterForm />
       </div>
     );

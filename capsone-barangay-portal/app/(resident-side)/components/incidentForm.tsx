@@ -6,7 +6,7 @@ import { useAuth } from "@/app/context/authContext";
 import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
-import { reportFormProps } from "@/app/helpers/interfaceHelper";
+
 
 
 
@@ -15,7 +15,7 @@ const incidentForm:React.FC = () => {
   const {user} = useAuth();
   const currentUser = user?.uid || "Guest";
   const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
-  const [incidentReport, setIncidentReport] = useState<reportFormProps>({
+  const [incidentReport, setIncidentReport] = useState<any>({
       firstname: "",
       lastname: "",
       contactNos: "",
@@ -98,7 +98,7 @@ const incidentForm:React.FC = () => {
     };
     
 
-    const handleReportUpload = async (incidentReport: reportFormProps) => {
+    const handleReportUpload = async () => {
       try{
         let filename = "";
         if(incidentReport.file){
@@ -138,7 +138,7 @@ const incidentForm:React.FC = () => {
       event.preventDefault(); 
       const form = event.target as HTMLFormElement;
       if (form.checkValidity()) {
-        handleReportUpload(incidentReport);
+        handleReportUpload();
         clearForm(); // Clear the form after submission
         router.push('/IncidentReport/Notification'); 
       } else {

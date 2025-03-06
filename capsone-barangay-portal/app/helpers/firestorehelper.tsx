@@ -1,19 +1,18 @@
 "use client"
 import {db, storage} from "@/app/db/firebase";
 import {collection, doc, deleteDoc, onSnapshot, query, where, getDoc, getDocs} from "firebase/firestore";
-import { ReportProps } from "@/app/helpers/interfaceHelper";
 import { deleteObject, getDownloadURL, ref } from "firebase/storage";
 
-const getAllIncidentReports =  (setIncidentData:(data: ReportProps[])=>  void) => {
+const getAllDocument =  (collect:string,data:(data: any[])=>  void) => {
     try{
-        const luponReportCollection = collection(db, "IncidentReports");
-        const unsubscribe = onSnapshot(luponReportCollection, (snapshot) => {
-        const reports: ReportProps[] = snapshot.docs.map((doc) => ({
+        const Collection = collection(db, collect);
+        const unsubscribe = onSnapshot(Collection, (snapshot) => {
+        const reports: any[] = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
-          })) as ReportProps[];
+          }));
         
-        setIncidentData(reports);
+          data(reports);
         });
 
         return unsubscribe;
@@ -24,16 +23,50 @@ const getAllIncidentReports =  (setIncidentData:(data: ReportProps[])=>  void) =
     }
 }
 
-const  getIncidentDataByDepartment =  (department: string,  setIncidentData:(data: ReportProps[])=>  void) => {
+
+const getAllStaffList = async (setStaffList:(data: any)=> void) => {
+    try {
+        const staffquery = collection(db, "BarangayUsers");
+        const querySnapshot = await getDocs(staffquery);
+        
+        const newStaffList: any[] = [];
+        querySnapshot.forEach((doc) => {
+            newStaffList.push(doc.data());
+        });
+  
+        return setStaffList(newStaffList);
+      } catch (error: any) {
+        console.error("Error fetching LT List:", error.message);
+      }
+}
+
+
+const getStaffList = async (position:string,setStaffList:(data: any)=> void) => {
+    try {
+        const staffquery = query(collection(db, "BarangayUsers"), where("position", "==",position));
+        const querySnapshot = await getDocs(staffquery);
+        
+        const newStaffList: any[] = [];
+        querySnapshot.forEach((doc) => {
+            newStaffList.push(doc.data());
+        });
+  
+        return setStaffList(newStaffList);
+      } catch (error: any) {
+        console.error("Error fetching LT List:", error.message);
+      }
+}
+
+const  getAllSpecificDocument =  (collect: string,  attribute: string, value: string,   setData:(data: any[])=>  void) => {
     try{
-        const luponReportCollection = query(collection(db, "IncidentReports"), where("department", "==", department));
-        const unsubscribe = onSnapshot(luponReportCollection, (snapshot) => {
-        const reports:ReportProps[] = snapshot.docs.map((doc) => ({
+        const reportCollection = query(collection(db, collect), where(attribute, "==", value));
+        const unsubscribe = onSnapshot(reportCollection, (snapshot) => {
+        const reports:any[] = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
-        })) as ReportProps[];
+        }));
         
-        setIncidentData(reports);
+        setData(reports);
         });
         return unsubscribe;
     }
@@ -42,29 +75,66 @@ const  getIncidentDataByDepartment =  (department: string,  setIncidentData:(dat
     }
 }
 
-const getSpecificIncidentReport = async (id: string, setReportData:(data: any)=> void, setLTReportData:(data:any)=> void) => {
+const getSpecificDocument = async (mainCollection: string, id: string, setData:(data: any)=> void) => {
     try{
-        const docRef = doc(db, "IncidentReports", id);
+        const docRef = doc(db, mainCollection, id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-            setReportData(docSnap.data());
+            return setData(docSnap.data());
         } else {
             console.log("No such document!");
         }
-        const LTreportRef = collection(docRef, "LTAssignedInfo");
-        const LTreportCollectionSnapshot = await getDocs(LTreportRef);
-        if (LTreportCollectionSnapshot.empty) {
-            console.log("No matching document.");
-            return;
-          }
-          const LTdata = LTreportCollectionSnapshot.docs[0].data();
-         return setLTReportData(LTdata);
+     
 
     }
     catch(error:String|any){
         console.log(error.message);
     }
 }
+
+const getAllSpecificSubDocument = async (mainCollection: string, id: string, subCollection:string, nos:number, setData:(data: any[])=> void) => {
+    try{
+        const docRef = doc(db, mainCollection, id);
+        const subDocRef = collection(docRef, subCollection);
+        const subDocSnap = await getDocs(subDocRef);
+        if (subDocSnap.empty) {  
+            console.log("No matching document."); 
+            return;
+        }
+        const unsubscribe = onSnapshot(subDocRef, (snapshot) => {
+        const reports:any[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+        
+        setData(reports);
+        });
+        return unsubscribe;
+
+    }
+    catch(error:String|any){
+        console.log(error.message);
+    }
+}
+const getSpecificSubDocument = async (mainCollection: string, id: string, subCollection:string, nos:number, setData:(data: any)=> void) => {
+    try{
+        const docRef = doc(db, mainCollection, id);
+        const subDocRef = collection(docRef, subCollection);
+        const subDocSnap = await getDocs(subDocRef);
+        if (!subDocSnap.empty) {  
+            const subData = subDocSnap.docs[nos].data();
+            return setData(subData);
+        }
+        else{
+            console.log("No matching document");
+        }
+
+    }
+    catch(error:String|any){
+        console.log(error.message);
+    }
+}
+
 const generateDownloadLink = async (file: string, location: string) => {
     try{
         const fileRef = ref(storage, `${location}/${file}`);
@@ -104,7 +174,9 @@ const deleteDocument = async (collection: string,id: string) => {
        }
 }
 
-export {getIncidentDataByDepartment, 
-    getAllIncidentReports, getSpecificIncidentReport
-    , generateDownloadLink, deleteDocument
+
+export {getAllSpecificDocument, getSpecificDocument,
+    getAllDocument
+    , generateDownloadLink, deleteDocument,
+    getStaffList,getAllStaffList,getSpecificSubDocument,getAllSpecificSubDocument
 };
