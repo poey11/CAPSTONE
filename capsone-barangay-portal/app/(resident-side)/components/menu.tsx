@@ -38,6 +38,38 @@ const Menu = () => {
     };
   }, []);
 
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [filter, setFilter] = useState("all");
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const toggleNotificationSection = () => setIsOpen((prev) => !prev);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const messages = [
+    { id: 1, text: "Online Incident Report is being reviewed. Wait for an update from the barangay official.", status: "unread" },
+    { id: 2, text: "Barangay Clearance request is being processed. SMS sent.", status: "read" },
+    { id: 3, text: "Barangay ID request is being processed. SMS sent.", status: "unread" },
+    { id: 4, text: "Barangay Certificate request is being processed. SMS sent.", status: "unread" },
+    { id: 5, text: "Barangay Permit request is being processed. SMS sent.", status: "read" },
+    { id: 6, text: "Barangay Indigency request is being processed. SMS sent.", status: "unread" },
+    { id: 7, text: "Barangay Certificate request is being processed. SMS sent.", status: "unread" },
+    { id: 8, text: "First Time Jobseeker request is being processed. SMS sent.", status: "read" },
+    { id: 9, text: "Barangay ID request is being processed. SMS sent.", status: "unread" },
+    { id: 10, text: "Barangay Clearance request is being processed. SMS sent.", status: "unread" },
+  ];
+
+  const unreadCount = messages.filter((msg) => msg.status === "unread").length;
+  const filteredMessages = filter === "all" ? messages : messages.filter((msg) => msg.status === "unread");
+
   const pathname = usePathname();
   const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages
 
@@ -84,7 +116,11 @@ const Menu = () => {
  
             <div className="dropdown-Container">
               
-                <p className="dropdown-item">Services</p>
+                <div className="menu-section-container">
+                  <p className="dropdown-item">Services</p>
+                  <img src="/images/down-arrow.png" className="dropdown-icon"/>
+                </div>
+    
                 <div className="Dropdown">
                   <Link href="/services">
                     <p>Request Documents</p>
@@ -110,7 +146,10 @@ const Menu = () => {
             </div>
 
               <div className="dropdown-Container">
-              <p className="dropdown-item">Officials</p>
+                <div className="menu-section-container">
+                  <p className="dropdown-item">Officials</p>
+                  <img src="/images/down-arrow.png" className="dropdown-icon"/>
+                </div>
               <div className="Dropdown">
                 <Link href="/OfficialsPage">
                   <p className="dropdown-item">Barangay Officials</p>
@@ -126,9 +165,58 @@ const Menu = () => {
 
 
             {!loading && user ? (
+            <div className="logged-in-container">  
+              <div className="dropdown-Container">
+                <div className="dropdown-item">
+                  <p
+                    id="inbox-link"
+                    onClick={toggleNotificationSection}
+                    className="inbox-container"
+                  >
+                    <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
+                    {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+                  </p>
+                </div>
+                {isOpen && (
+                  <div className="notification-section" ref={dropdownRef}>
+                    <div className="top-section">
+                      <p className="notification-title">Notification Inbox</p>
+                      <div className="filter-container">
+                        <button className={`filter-option ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
+                        <button className={`filter-option ${filter === "unread" ? "active" : ""}`} onClick={() => setFilter("unread")}>Unread</button>
+                      </div>
+                    </div>
+                    <div className="bottom-section">
+                      <div className="notification-content">
+                        {filteredMessages.length > 0 ? (
+                          filteredMessages.map((message) => (
+                            <div className="notification-item" key={message.id}>
+                              <div className="message-section">
+                                <p>{message.text}</p>
+                              </div>
+                              <div className="unread-icon-section">
+                              
+                                {message.status === "unread" && (
+                                  <img
+                                    src="/images/unread-icon.png"
+                                    alt="Unread Icon"
+                                    className="unread-icon"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p>No messages found</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="dropdown-Container">
                 <div className="dropdown-item" ref={loginMenuRef}>
-                    <p
+                  <p
                     id="profile-link"
                     onClick={toggleLoginOptions}
                   >
@@ -152,6 +240,7 @@ const Menu = () => {
                   </div>
                 </div>
               </div>
+            </div>
           ):(
 
             <div className="dropdown-Container">
