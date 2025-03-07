@@ -5,12 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function IncidentTransactionsDetails() {
-  const searchParams = useSearchParams();
-  const Date = searchParams.get("Date");
-  const ReferenceId = searchParams.get("ReferenceId");
-  const Type = searchParams.get("Type");
-  const Details = searchParams.get("Details");
-  const Status = searchParams.get("Status");
+ 
 
   const [transactionData] = useState([
     {

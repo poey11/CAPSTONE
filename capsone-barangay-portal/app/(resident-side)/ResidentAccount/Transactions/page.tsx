@@ -86,7 +86,6 @@ export default function Transactions() {
                                 <th onClick={() => handleSort("Date")}>Date</th>
                                 <th onClick={() => handleSort("ReferenceId")}>Reference ID</th>
                                 <th onClick={() => handleSort("Type")}>Type</th>
-                                <th onClick={() => handleSort("Details")}>Details</th>
                                 <th onClick={() => handleSort("Status")}>Status</th>
                             </tr>
                         </thead>
@@ -96,7 +95,6 @@ export default function Transactions() {
                                     <td> {transaction.Date}</td>
                                     <td>{transaction.ReferenceId}</td>
                                     <td>{transaction.Type}</td>
-                                    <td>{transaction.Details}</td>
                                     <td>
                                         <span className={`status-badge ${transaction.Status.toLowerCase().replace(" ", "-")}`}>
                                             {transaction.Status}
