@@ -18,6 +18,7 @@ const ReportsPage = () => {
   const formFiles = [
     "Fairview ECA Form.docx",
     "KASAMBAHAY PROGRAM COMPONENTS FORM.docx",
+    "Barangay Kontra Gutom(Hapag sa Barangay).docx",
   ];
 
   useEffect(() => {
