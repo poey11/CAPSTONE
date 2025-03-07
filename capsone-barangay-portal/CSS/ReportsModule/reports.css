@@ -1,11 +1,15 @@
 /* Main Container */
-.main-container {
+.report-main-container {
     width: 100%;
     height: 100vh;
     background-color: #f9f9f9;
     padding: 30px;
     margin-left: 2rem;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Page Title */
@@ -19,10 +23,13 @@
 /* Reports Sections */
 .reports-section {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
     gap: 1.5rem;
     margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
 /* Card Style */
@@ -38,6 +45,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    width: 70%;
 }
 
 /* Section Titles */
@@ -55,7 +63,7 @@
     font-size: 1rem;
     font-weight: bold;
     color: white;
-    background-color: #3b82f6;
+    background-color: #e56723;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -64,7 +72,7 @@
 }
 
 .report-button:hover {
-    background-color: #2563eb;
+    background-color: #e56723;
 }
 
 .report-button:disabled {
@@ -85,17 +93,19 @@
     justify-content: space-between;
     align-items: center;
     background: #fff;
-    padding: 12px 15px;
+    padding: 15px 18px;
     margin-bottom: 10px;
     border-radius: 8px;
     border: 1px solid #ddd;
     font-size: 1rem;
     color: #333;
+    margin-top: 2rem;
 }
+
 
 /* Download Button */
 .download-button {
-    background-color: #3b82f6;
+    background-color: #e56723;
     color: white;
     padding: 6px 12px;
     border-radius: 6px;
@@ -108,6 +118,36 @@
 .download-button:hover {
     background-color: #2563eb;
 }
+
+.featuredStatus{
+    padding: 8px;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.download-text {
+    font-size: 1rem;
+    font-weight: bold; 
+    color: #e56723; 
+    margin-bottom: 10px; 
+    text-transform: capitalize;
+    text-align: center; 
+    padding: 1rem;
+}
+
+
+
+
+
+
+
+
+
+
 
 /* Responsive Adjustments */
 @media (max-width: 1024px) {

@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
@@ -7,9 +6,15 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
 
+interface FileData {
+  name: string;
+  url: string;
+}
+
 const ReportsPage = () => {
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<{ name: string; url: string }[]>([]);
+  const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
 
   const storage = getStorage();
   const db = getFirestore();
@@ -55,8 +60,16 @@ const ReportsPage = () => {
     }
   };
 
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedName = e.target.value;
+    const file = files.find((f) => f.name.replace(".docx", "") === selectedName) || null;
+    setSelectedFile(file);
+  };
+
+
   return (
-    <div className="main-container">
+    <div className="report-main-container">
+
       <h1 className="reports-title">Reports Module</h1>
 
       <div className="reports-section">
@@ -75,22 +88,44 @@ const ReportsPage = () => {
           <button className="report-button">Generate West Fairview Resident List</button>
         </div>
 
+
+
         {/* Downloadable Forms Section */}
-        <div className="report-card">
-          <h2 className="report-title">Downloadable Forms</h2>
-          <ul className="download-list">
-            {files.length > 0 ? (
-              files.map((file, index) => (
-                <li key={index} className="download-item">
-                  <span className="download-text">{file.name.replace(".docx", "")}</span>
-                  <a href={file.url} download className="download-button">Download</a>
-                </li>
-              ))
-            ) : (
-              <li>Loading files...</li>
-            )}
-          </ul>
-        </div>
+        <div className="reports-section">
+            <div className="report-card">
+              <h2 className="report-title">Downloadable Forms</h2>
+              <div className="Option-container">
+                <select
+                  id="featuredStatus"
+                  name="featuredStatus"
+                  className="featuredStatus"
+                  onChange={handleSelectChange}
+                  required
+                >
+                  <option value="">Select a form...</option>
+                  {files.length > 0 ? (
+                    files.map((file, index) => (
+                      <option key={index} value={file.name.replace(".docx", "")}> 
+                        {file.name.replace(".docx", "")}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Loading files...</option>
+                  )}
+                </select>
+              </div>
+
+              {selectedFile && (
+                <div className="download-item">
+                  <span className="download-text">{selectedFile.name.replace(".docx", "")}</span>
+                  <a href={selectedFile.url} download className="download-button">
+                    Download
+                  </a>
+                </div>
+              )}
+            </div>
+  </div>
+
       </div>
     </div>
   );
