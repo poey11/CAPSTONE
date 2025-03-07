@@ -107,10 +107,6 @@ export default function Dashboard() {
         setMinorsCount(minors);
         setAdultsCount(adults);
 
-        const newResidentQuery = query(
-          collection(db, "ResidentUsers"),
-          where("createdAt", ">=", Timestamp.fromDate(sevenDaysAgo))
-        );
 
         const verifiedQuery = query(collection(db, "ResidentUsers"), where("verified", "==", true));
         const verifiedSnapshot = await getDocs(verifiedQuery);
@@ -120,21 +116,27 @@ export default function Dashboard() {
           const data = doc.data();
           return {
             reportID: data.reportID,
-            firstname: data.firstname,
-            lastname: data.lastname,
-            address: data.address,
-            concerns: data.concerns,
-            date: data.date, 
-            time: data.time,
+            caseNumber: data.caseNumber,
+            concern: data.concern,
+            dateFiled: data.dateFiled,
+            dateReceived: data.dateReceived,
+            department: data.department,
+            file: data.file,
+            location: data.location,
+            nature: data.nature,
+            receivedBy: data.receivedBy,
+            status: data.status,
+            timeFiled:  data.timeFiled,
+            timeReceived: data.timeReceived,
           };
         });
 
-        incidentReportsData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        incidentReportsData.sort((a, b) => new Date(a.dateFiled).getTime() - new Date(b.dateFiled).getTime());
 
         const weeklyCounts: Record<string, number> = {};
 
         incidentReportsData.forEach((report) => {
-          const reportDate = new Date(report.date);
+          const reportDate = new Date(report.dateFiled);
 
           const startOfWeek = new Date(reportDate);
           startOfWeek.setDate(reportDate.getDate() - ((reportDate.getDay() + 6) % 7)); // Adjust to Monday start
