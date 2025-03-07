@@ -143,6 +143,13 @@ const Menu = () => {
                     </Link>
 
                     <Link
+                      href={"/ResidentAccount/Transactions"}
+                    >
+                      <p className="dropdown-item">Transactions</p>
+                    </Link>
+
+
+                    <Link
                       href={"/"}
                       onClick={handleLogout}
                     >

@@ -37,6 +37,8 @@ export default function SettingsPageResident() {
     return (
         <main className="main-container">
 
+         <div className="first-section">
+
             <div className="account-profile-section">
 
             <p className="Details"> Profile </p>
@@ -150,10 +152,6 @@ export default function SettingsPageResident() {
                         />
                     </div>
 
-                
-
-
-
 
                     <button 
                                 className="upload-btn" 
@@ -165,6 +163,9 @@ export default function SettingsPageResident() {
                   </div>
          
             </div>
+
+        </div>
+
 
 
         </main>
