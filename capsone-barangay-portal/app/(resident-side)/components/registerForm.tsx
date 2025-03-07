@@ -37,6 +37,8 @@ const registerForm:React.FC = () => {
     const captchaSiteKey = process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY || "";
     const [captchaToken, setCaptchaToken] = useState<string>("");
     const [isTermChecked, setIsTermChecked] = useState<boolean>(false);
+    const [showPopup, setShowPopup] = useState(false);
+    const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
     const [resident, setResident] = useState<residentUser>({
         sex: "",
         first_name: "",
@@ -117,13 +119,15 @@ const registerForm:React.FC = () => {
 
 
 
-          alert("Register sucessful! Email verification sent to your email address");
-          
-          router.push("/resident");
+          setShowPopup(true);
+            setTimeout(() => {
+                setShowPopup(false);
+                router.push("/resident/login");
+            }, 3000);
           
         }
-        catch(error: string | any){
-            alert("Register failed! " + error.message);
+        catch (error: any) {
+          setErrorPopup({ show: true, message: "Register failed! " + error.message });
             if(docRef){
               try{
                 await deleteDoc(docRef);
@@ -190,178 +194,193 @@ const registerForm:React.FC = () => {
      
     return ( 
       <main className="main-container">
-    
+        {showPopup && (
+                <div className="popup-overlay">
+                    <div className="popup">
+                        <p>Registration Successful!</p>
+                        <p>Redirecting to Login Page...</p>
+                    </div>
+                </div>
+            )}
+        {errorPopup.show && (
+                <div className="popup-overlay error">
+                    <div className="popup">
+                        <p>{errorPopup.message}</p>
+                        <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+                    </div>
+                </div>
+            )}
 
-      <div className="register-section">
-        <h1>Register</h1>
-        <form className="register-form" onSubmit={handleSubmit}> {/* Use onSubmit to trigger the redirect */}
-          <div className="form-group">
-            <label htmlFor="sex" className="form-label">Sex:</label>
-            <select  value={resident.sex}  onChange={handleChange} id="sex" name="sex"  className="form-input" required>
-              <option value="" disabled>Select a Sex</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
-           
-          </div>
+        <div className="register-section">
+          <h1>Register</h1>
+          <form className="register-form" onSubmit={handleSubmit}> {/* Use onSubmit to trigger the redirect */}
+            <div className="form-group">
+              <label htmlFor="sex" className="form-label">Sex:</label>
+              <select  value={resident.sex}  onChange={handleChange} id="sex" name="sex"  className="form-input" required>
+                <option value="" disabled>Select a Sex</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            
+            </div>
 
-          <div className="form-group">
-          <label htmlFor="first_name" className="form-label">First Name: </label>
-          <input value={resident.first_name} onChange={handleChange} id="first_name" 
-          type="text" name="first_name" 
-          className="form-input"
-          placeholder= "Enter Name"
-           required />
+            <div className="form-group">
+            <label htmlFor="first_name" className="form-label">First Name: </label>
+            <input value={resident.first_name} onChange={handleChange} id="first_name" 
+            type="text" name="first_name" 
+            className="form-input"
+            placeholder= "Enter Name"
+            required />
 
-          </div>
+            </div>
 
-          <div className="form-group">
-          <label htmlFor="last_name" className="form-label" >Last Name: </label>  
-           
+            <div className="form-group">
+            <label htmlFor="last_name" className="form-label" >Last Name: </label>  
+            
 
-            <input value={resident.last_name} onChange={handleChange} id="last_name" 
-            type="text" name="last_name" 
+              <input value={resident.last_name} onChange={handleChange} id="last_name" 
+              type="text" name="last_name" 
+              className="form-input" 
+              placeholder="Enter Last Name"
+              required/>
+
+            </div>
+
+            <div className="form-group">
+            <label htmlFor="email" className="form-label" >Email: </label>
+            <input  value={resident.email} onChange={handleChange} id="email" 
+            type="email" name="email" 
             className="form-input" 
-            placeholder="Enter Last Name"
+            placeholder="Enter Email"
+            required />
+            </div>
+
+            <div className="form-group">
+            <label htmlFor="phone" className="form-label" >Phone: </label>
+            <input  value={resident.phone} onChange={handleChange} id="phone" 
+            type="tel" name="phone"
+            className="form-input" 
+            placeholder="Enter Phone Number"
+            required />
+            </div>
+
+
+            <div className="form-group">
+            <label htmlFor="address" className="form-label">Address: </label>
+            <input value={resident.address} onChange={handleChange} id="address" 
+            type="text" name="address" 
+            className="form-input" 
+            placeholder="Enter Address"
+            required />
+            </div>
+
+
+            <div className="form-group">
+            <label htmlFor="password" className="form-label">Password: </label>
+            <input value={resident.password} onChange={handleChange} id="password"
+            type="password" name="password" 
+            className="form-input"
+            placeholder="Enter Password"
             required/>
+            </div>
 
-          </div>
-
-          <div className="form-group">
-          <label htmlFor="email" className="form-label" >Email: </label>
-          <input  value={resident.email} onChange={handleChange} id="email" 
-          type="email" name="email" 
-          className="form-input" 
-          placeholder="Enter Email"
-          required />
-          </div>
-
-          <div className="form-group">
-          <label htmlFor="phone" className="form-label" >Phone: </label>
-          <input  value={resident.phone} onChange={handleChange} id="phone" 
-          type="tel" name="phone"
-           className="form-input" 
-           placeholder="Enter Phone Number"
-           required />
-          </div>
+            <div className="form-group">
+            <label htmlFor="confirm_password" className="form-label">Confirm Password: </label>
+            <input id="confirm_password" type="password"
+            name="confirm_password"
+            className="form-input"
+            placeholder="Confirm Password"
+            />
+            </div>
 
 
-          <div className="form-group">
-          <label htmlFor="address" className="form-label">Address: </label>
-          <input value={resident.address} onChange={handleChange} id="address" 
-          type="text" name="address" 
-          className="form-input" 
-          placeholder="Enter Address"
-          required />
-          </div>
+            <div className="signature/printedname-container">
+              <label className="form-label">Upload Valid ID with address: </label>
+
+              <div className="file-upload-container">
+                <label htmlFor="upload" className="upload-link">Click to Upload File</label>
+                <input
+                  id="file-upload1"
+                  type="file"
+                  className="file-upload-input"
+                  multiple
+                  accept=".jpg,.jpeg,.png"
+                  onChange={handleFileChangeContainer1} // Handle file selection
+                />
+
+            <input onChange={handleChange} id="upload" type="file" name="upload" className="file-upload-input" accept="image/*"  />
+          
+                <div className="uploadedFiles-container">
 
 
-          <div className="form-group">
-          <label htmlFor="password" className="form-label">Password: </label>
-          <input value={resident.password} onChange={handleChange} id="password"
-           type="password" name="password" 
-           className="form-input"
-           placeholder="Enter Password"
-           required/>
-          </div>
-
-          <div className="form-group">
-          <label htmlFor="confirm_password" className="form-label">Confirm Password: </label>
-          <input id="confirm_password" type="password"
-           name="confirm_password"
-           className="form-input"
-           placeholder="Confirm Password"
-           />
-          </div>
-
-
-          <div className="signature/printedname-container">
-            <label className="form-label">Upload Valid ID with address: </label>
-
-            <div className="file-upload-container">
-              <label htmlFor="upload" className="upload-link">Click to Upload File</label>
-              <input
-                id="file-upload1"
-                type="file"
-                className="file-upload-input"
-                multiple
-                accept=".jpg,.jpeg,.png"
-                onChange={handleFileChangeContainer1} // Handle file selection
-              />
-
-          <input onChange={handleChange} id="upload" type="file" name="upload" className="file-upload-input" accept="image/*"  />
-         
-              <div className="uploadedFiles-container">
-
-
-                
-                {filesContainer1.length > 0 && (
-                  <div className="file-name-image-display">
-                    <ul>
-                      {filesContainer1.map((file, index) => (
-                        <div className="file-name-image-display-indiv" key={index}>
-                          <li>
-                            {file.preview && (
-                              <div className="filename-image-container">
-                                <img
-                                  src={file.preview}
-                                  alt={file.name}
-                                  style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                />
+                  
+                  {filesContainer1.length > 0 && (
+                    <div className="file-name-image-display">
+                      <ul>
+                        {filesContainer1.map((file, index) => (
+                          <div className="file-name-image-display-indiv" key={index}>
+                            <li>
+                              {file.preview && (
+                                <div className="filename-image-container">
+                                  <img
+                                    src={file.preview}
+                                    alt={file.name}
+                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                  />
+                                </div>
+                              )}
+                              {file.name}
+                              <div className="delete-container">
+                                <button
+                                  type="button"
+                                  onClick={() => handleFileDeleteContainer1(file.name)}
+                                  className="delete-button"
+                                >
+                                  <img
+                                    src="/images/trash.png"
+                                    alt="Delete"
+                                    className="delete-icon"
+                                  />
+                                </button>
                               </div>
-                            )}
-                            {file.name}
-                            <div className="delete-container">
-                              <button
-                                type="button"
-                                onClick={() => handleFileDeleteContainer1(file.name)}
-                                className="delete-button"
-                              >
-                                <img
-                                  src="/images/trash.png"
-                                  alt="Delete"
-                                  className="delete-icon"
-                                />
-                              </button>
-                            </div>
-                          </li>
-                        </div>
-                      ))}
-                    </ul>
+                            </li>
+                          </div>
+                        ))}
+                      </ul>
+
+                      
+                    </div>
 
                     
-                  </div>
 
-                  
-
-                  
-                )}
+                    
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="form-checkbox-section">
-          <label htmlFor="terms" className="form-label">I agree to the terms and conditions</label>
-          <input id="terms" onChange={handleCheckBox}  type="checkbox" name="terms" className="form-checkbox" />
-          </div>
+            <div className="form-checkbox-section">
+            <label htmlFor="terms" className="form-label">I agree to the terms and conditions</label>
+            <input id="terms" onChange={handleCheckBox}  type="checkbox" name="terms" className="form-checkbox" />
+            </div>
 
-          <div className="form-captcha">
-          <ReCAPTCHA sitekey= {captchaSiteKey} onChange={handleToken}  />
-          </div>
-
-
-          {/* Submit button */}
-          <button
-            type="submit"
-            className= "submit-button"
-            disabled={!isTermChecked}
-          >
-            Register
-          </button>
-        </form>
+            <div className="form-captcha">
+            <ReCAPTCHA sitekey= {captchaSiteKey} onChange={handleToken}  />
+            </div>
 
 
-      </div>
+            {/* Submit button */}
+            <button
+              type="submit"
+              className= "submit-button"
+              disabled={!isTermChecked}
+            >
+              Register
+            </button>
+          </form>
+
+
+        </div>
 
 
      

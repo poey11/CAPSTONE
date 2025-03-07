@@ -12,10 +12,22 @@ interface Resident {
 
 const rLoginForm:React.FC = () => {
     const router = useRouter(); 
+
+    const handleRegister = () => {
+      router.push("/register");
+    };
+
     const [resident, setResident] = useState<Resident>({
         email: "",
         password: "",
     });
+
+    const [showPopup, setShowPopup] = useState(false);
+    const [showVerifyPopup, setShowVerifyPopup] = useState(false);
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [userEmail, setUserEmail] = useState("");
+
      // Handle form submission
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -39,17 +51,16 @@ const rLoginForm:React.FC = () => {
         try{
             const userCredentials = await signInWithEmailAndPassword(auth, resident.email, resident.password);
             const user = userCredentials.user;
-            if(user.emailVerified){
-                setResident({
-                    email: "",
-                    password: "",
-                });
-                alert("Login Successful");
-                router.push("/");
-            }
-            else{
+            if (user.emailVerified) {
+                setUserEmail(resident.email);
+                setShowPopup(true);
+                setTimeout(() => {
+                    setShowPopup(false);
+                    router.push("/");
+                }, 3000);
+            } else {
                 await signOut(auth);
-                alert("Please verify your email first");
+                setShowVerifyPopup(true);
             }
             
             /* ok di ko to gets HAHAHAH */
@@ -63,9 +74,9 @@ const rLoginForm:React.FC = () => {
             //     form.reportValidity(); // This will show validation messages for invalid fields
             // }
             
-        }
-        catch(error: string|any){
-          alert(error.message);
+        } catch (error: string | any) {
+            setErrorMessage(error.message);
+            setShowErrorPopup(true);
         }
      
 
@@ -77,6 +88,30 @@ const rLoginForm:React.FC = () => {
     return (   
 
         <div className="login-container">
+            {showPopup && (
+                <div className="popup-overlay">
+                    <div className="popup">
+                        <p>Welcome, {userEmail}!</p>
+                        <p>Redirecting to the Home Page...</p>
+                    </div>
+                </div>
+            )}
+            {showVerifyPopup && (
+                <div className="popup-overlay">
+                    <div className="popup">
+                        <p>Please verify your email first.</p>
+                        <button onClick={() => setShowVerifyPopup(false)} className="continue-button">Continue</button>
+                    </div>
+                </div>
+            )}
+            {showErrorPopup && (
+                <div className="popup-overlay">
+                    <div className="popup">
+                        <p>Error: {errorMessage}</p>
+                        <button onClick={() => setShowErrorPopup(false)} className="continue-button">Continue</button>
+                    </div>
+                </div>
+            )}
             <div className="login-contents">
                 <div className="login-card">
                     <form onSubmit={handleLogin}>
@@ -109,8 +144,8 @@ const rLoginForm:React.FC = () => {
                         </div>
 
                         <div className="section2">
-                            <p className="section2options">Forgot Password</p>
-                            <p className="section2options">Create an Account</p>
+                            <button className="section2options">Forgot Password</button>
+                            <button className="section2options" onClick={handleRegister}>Create an Account</button>
                         </div>
 
                         <div className="section3">
@@ -119,7 +154,7 @@ const rLoginForm:React.FC = () => {
                     </form>
                 </div>
             </div>
-      </div>
+        </div>
 
 
 
