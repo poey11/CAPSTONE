@@ -81,7 +81,7 @@ export default function AddResident() {
     <main className="main-container">
       <div className="main-content">
         <Link href="/dashboard/ResidentModule">
-        <button type="button" className="back-button" onClick={handleBack}></button>;
+        <button type="button" className="back-button" onClick={handleBack}></button>
         </Link>
         <div className="section-1">
           <p className="NewResident">New Resident</p>
@@ -200,7 +200,17 @@ export default function AddResident() {
             value={formData.precinctNumber} 
             onChange={handleChange} />
 
-            <p>PWD</p>
+           
+
+            </div>
+           
+           
+   <div className="section-2-right-side">
+
+
+      <div className="checkboxes-container">
+
+      <p>PWD</p>
             <div className="checkbox-container">
               <label className="checkbox-label">
                 <input type="checkbox" name="PWD" checked={formData.PWD} onChange={handleChange} />
@@ -224,57 +234,65 @@ export default function AddResident() {
               </label>
             </div>
 
-            </div>
-            <div className="section-2-right-side">
-  <div className="file-upload-container">
-    <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
-    <input
-      id="file-upload"
-      type="file"
-      className="file-upload-input"
-      multiple
-      accept=".jpg,.jpeg,.png"
-      // required 
-      onChange={handleFileChange}
-    />
-    <div className="uploadedFiles-container">
-      {files.length > 0 && (
-        <div className="file-name-image-display">
-          <ul>
-            {files.map((file, index) => (
-              <div className="file-name-image-display-indiv" key={index}>
-                <li>
-                  {file.preview && (
-                    <div className="filename&image-container">
-                      <img
-                        src={file.preview}
-                        alt={file.name}
-                        style={{ width: "50px", height: "50px", marginRight: "5px" }}
-                      />
+
+      </div>
+
+    
+
+     <div className="file-upload-container">
+
+          <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
+          <input
+            id="file-upload"
+            type="file"
+            className="file-upload-input"
+            multiple
+            accept=".jpg,.jpeg,.png"
+            // required 
+            onChange={handleFileChange}
+          />
+          <div className="uploadedFiles-container">
+            {files.length > 0 && (
+              <div className="file-name-image-display">
+                <ul>
+                  {files.map((file, index) => (
+                    <div className="file-name-image-display-indiv" key={index}>
+                      <li>
+                        {file.preview && (
+                          <div className="filename&image-container">
+                            <img
+                              src={file.preview}
+                              alt={file.name}
+                              style={{ width: "50px", height: "50px", marginRight: "5px" }}
+                            />
+                          </div>
+                        )}
+                        {file.name}
+                        <div className="delete-container">
+                          <button
+                            type="button"
+                            onClick={() => handleFileDelete(file.name)}
+                            className="delete-button"
+                          >
+                            <img
+                              src="/images/trash.png"
+                              alt="Delete"
+                              className="delete-icon"
+                            />
+                          </button>
+                        </div>
+                      </li>
                     </div>
-                  )}
-                  {file.name}
-                  <div className="delete-container">
-                    <button
-                      type="button"
-                      onClick={() => handleFileDelete(file.name)}
-                      className="delete-button"
-                    >
-                      <img
-                        src="/images/trash.png"
-                        alt="Delete"
-                        className="delete-icon"
-                      />
-                    </button>
-                  </div>
-                </li>
+                  ))}
+                </ul>
               </div>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  </div>
+            )}
+          </div>
+          </div>
+
+   
+
+          
 </div>
 
         </form>

@@ -17,7 +17,8 @@ export default function ResidentModule() {
   const [searchOccupation, setSearchOccupation] = useState<string>("");
 
   const [residentType, setResidentType] = useState<string>("");
-  const [showCount, setShowCount] = useState<number>(5);
+  const [showCount, setShowCount] = useState<number>(0);
+  
 
   const router = useRouter(); 
 
@@ -134,11 +135,14 @@ export default function ResidentModule() {
           <option value="pwd">PWD</option>
           <option value="single-mom">Single Mom</option>
         </select>
+
+
         <select
           className="featuredStatus"
           value={showCount}
           onChange={(e) => setShowCount(Number(e.target.value))}
         >
+          <option value="0">Show All</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
         </select>
