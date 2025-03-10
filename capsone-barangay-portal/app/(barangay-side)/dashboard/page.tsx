@@ -224,7 +224,7 @@ export default function Dashboard() {
               </div>
 
             <div className="card-right-side">
-                <ResponsiveContainer width={200} height={250}>
+                <ResponsiveContainer width={300} height={300}>
                 <PieChart>
                     <Pie
                     data={generalLocationData}
@@ -233,7 +233,7 @@ export default function Dashboard() {
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
-                    label
+  
                     >
                     {generalLocationData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={LOCATION_COLORS[index % LOCATION_COLORS.length]} />
@@ -260,7 +260,7 @@ export default function Dashboard() {
             </div>
 
             <div className="card-right-side">
-          <ResponsiveContainer width={200} height={250}>
+          <ResponsiveContainer width={300} height={300}>
             <PieChart>
               <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                 {verificationData.map((entry, index) => (
@@ -294,7 +294,7 @@ export default function Dashboard() {
           </div>
 
           <div className="card-right-side">
-            <ResponsiveContainer width={250} height={300}>
+            <ResponsiveContainer width={300} height={300}>
               <PieChart>
                 <Pie
                   data={barangayDemographics}
@@ -303,9 +303,7 @@ export default function Dashboard() {
                   cx="50%"
                   cy="50%"
                   outerRadius={100}
-                  label={({ name, percent }) =>
-                    `${name} (${(percent * 100).toFixed(1)}%)`
-                  }
+                  
                 >
                   {barangayDemographics.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={DEMOGRAPHICS_COLORS[index % DEMOGRAPHICS_COLORS.length]} />
@@ -330,7 +328,7 @@ export default function Dashboard() {
               </div>
 
           <div className="card-right-side">
-          <ResponsiveContainer width={200} height={250}>
+          <ResponsiveContainer width={300} height={300}>
             <PieChart>
               <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                 {verificationData.map((entry, index) => (
@@ -359,7 +357,7 @@ export default function Dashboard() {
 
             <div className="card-right-side">
               
-          <ResponsiveContainer width={200} height={250}>
+          <ResponsiveContainer width={300} height={300}>
             <PieChart>
               <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                 {verificationData.map((entry, index) => (
@@ -384,7 +382,7 @@ export default function Dashboard() {
             <p className="count">{incidentReportsCount}</p>
           </div>
           <div className="card-right-side">
-            <ResponsiveContainer width={200} height={250}>
+            <ResponsiveContainer width={300} height={300}>
               <PieChart>
                 <Pie data={incidentReportData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                   {incidentReportData.map((entry, index) => (
