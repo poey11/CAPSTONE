@@ -14,7 +14,7 @@ export default function RegisteredVotersModule() {
 
   const [searchName, setSearchName] = useState<string>("");
   const [searchAddress, setSearchAddress] = useState<string>("");
-  const [showCount, setShowCount] = useState<number>(5);
+  const [showCount, setShowCount] = useState<number>(0);
   const router = useRouter(); 
 
   useEffect(() => {
@@ -78,9 +78,22 @@ export default function RegisteredVotersModule() {
     }
   };
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const residentsPerPage = 5; //pwede paltan 
+
+  const indexOfLastResident = currentPage * residentsPerPage;
+  const indexOfFirstResident = indexOfLastResident - residentsPerPage;
+  const currentResidents = filteredResidents.slice(indexOfFirstResident, indexOfLastResident);
+
+  const totalPages = Math.ceil(filteredResidents.length / residentsPerPage);
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+  const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+
   return (
     <main className="main-container">
-      <div className="section-1">
+      <div className="section-1">vi
         <h1>Registered Voters List</h1>
         <Link href="/dashboard/ResidentModule/AddResident">
           <button className="add-announcement-btn">Add New Resident</button>
@@ -108,6 +121,7 @@ export default function RegisteredVotersModule() {
           value={showCount}
           onChange={(e) => setShowCount(Number(e.target.value))}
         >
+          <option value="0">Show All</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
         </select>
@@ -137,7 +151,7 @@ export default function RegisteredVotersModule() {
               </tr>
             </thead>
             <tbody>
-              {filteredResidents.map((resident) => (
+              {currentResidents.map((resident) => (
                 <tr key={resident.id}>
                   <td>{resident.name}</td>
                   <td>{resident.address}</td>
@@ -179,6 +193,17 @@ export default function RegisteredVotersModule() {
           </table>
         )}
       </div>
+
+      <div className="redirection-section">
+        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+        {[...Array(totalPages)].map((_, index) => (
+          <button key={index} onClick={() => paginate(index + 1)} className={currentPage === index + 1 ? "active" : ""}>
+            {index + 1}
+          </button>
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+      </div>
+
     </main>
   );
 }
