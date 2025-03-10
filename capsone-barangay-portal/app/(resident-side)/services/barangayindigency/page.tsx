@@ -77,7 +77,7 @@ export default function BarangayIndigency() {
         
         <form className="doc-req-form" onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="purpose" className="form-label">Barangay Clearance Purpose</label>
+              <label htmlFor="purpose" className="form-label">Barangay Indigency Purpose</label>
               <select 
                 id="purpose" 
                 name="purpose" 

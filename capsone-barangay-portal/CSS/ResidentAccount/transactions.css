@@ -30,8 +30,14 @@
     width: 100%;
     max-height: 100%;
     border: 2px solid  #ddd;
-    
-  
+}
+
+.table-section thead{
+  position: sticky;
+  top: 0;
+  background-color: rgb(232, 228, 228);
+  z-index: 10; 
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); 
 }
 
 .table-section table {
@@ -163,6 +169,16 @@
     color: white;
   }
 
+  .pick-up{
+    background-color: #66a8c4;
+    color: white;
+  }
+
+  .completed{
+    background-color: #d8b471;
+    color: white;
+  }
+
   .status-badge {
     padding: 8px 12px;            
     border-radius: 5px;          
@@ -183,7 +199,8 @@
     min-height: 100vh; 
   }
   
-  .incident-content {
+  .incident-content,
+  .emergency-content{
     display: flex;
     flex-direction: column;
     align-self: center;
@@ -197,11 +214,13 @@
     transition: transform 0.3s ease;
   }
   
-  .incident-content:hover {
+  .incident-content:hover,
+  .emergency-content:hover {
     transform: translateY(-5px); 
   }
   
-  .incident-content-section-1 {
+  .incident-content-section-1,
+  .emergency-content-section-1{
     display: flex;
     align-items: center;
     padding: 2rem;
@@ -216,13 +235,16 @@
   .incident-content-section-1 p {
     margin-left: 1rem;
   }
+  .emergency-content-section-1 p {
+    margin-left: 1rem;
+  }
   
   .back-button {
     background-image: url('/Images/left-arrow.png');
     background-size: contain;
     background-repeat: no-repeat;
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     border: none;
     cursor: pointer;
     background-color: transparent; 
@@ -255,6 +277,7 @@
     color: #e07c21;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    text-align: center;
   }
   
   .description {
@@ -267,6 +290,12 @@
     color: #555;
     font-size: 1.10rem;
     line-height: 1.6;
+  }
+
+  .proofOfIncident-image,
+  .Requirements{
+    width: 200px;
+    height: 200px;
   }
   
   @media (max-width: 768px) {

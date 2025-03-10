@@ -4,32 +4,53 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function DocumentRequestTransactionsDetails() {
+export default function IncidentTransactionsDetails() {
+
+    const searchParams = useSearchParams();
+    const detailsFromQuery = searchParams.get("details") || ""; 
+    const purposeFromQuery = searchParams.get("purpose") || ""; 
+  
  
 
   const [transactionData] = useState([
     {
       Date: "05-10-2024",
       ReferenceId: "2001",
-      Type: "Online Incident",
-      Details: "Broken Lamp Post",
-      AddressOfIncident: "Pipestone Street South Fairview",
+      Type: "Document Request",
       Status: "Resolved",
-      FirstName: "Malcolm",
-      LastName: "Payao",
-      ProofOfIncident: "/Images/document.png"
+      Details: detailsFromQuery,
+      Purpose: purposeFromQuery,
+      FirstName: "Jennie",
+      MiddleName: "Ruby",
+      LastName: "Kim",
+      BusinessName: "Jennie's Bakeshop",
+      HomeAddress: "Sampaguita St.",
+      BusinessActivity: "New",
+      BusinessLocation: "Timesquare",
+      NatureOfBusiness: "Bakery",
+      EstimatedCapital: "500000",
+      ContactNumber: "09171231234",
+      Requirements: "/Images/document.png"
     },
   ]);
 
   const incidentFields = [
-    { label: "Date of Incident", key: "Date" },
+    { label: "Date of Request", key: "Date" },
     { label: "ID", key: "ReferenceId" },
-    { label: "First Name", key: "FirstName" },
-    { label: "Last Name", key: "LastName" },
     { label: "Type", key: "Type" },
-    { label: "Concern", key: "Details" },
-    { label: "Location", key: "AddressOfIncident" },
     { label: "Status", key: "Status" },
+    { label: "Details", key: "Details" },
+    { label: "Purpose", key: "Purpose" },
+    { label: "First Name", key: "FirstName" },
+    { label: "Middle Name", key: "MiddleName" },
+    { label: "Last Name", key: "LastName" },
+    { label: "Business Name", key: "BusinessName" },
+    { label: "Home Address", key: "HomeAddress" },
+    { label: "Business Activity", key: "BusinessActivity" },
+    { label: "Business Location", key: "BusinessLocation" },
+    { label: "Nature of Business", key: "NatureOfBusiness" },
+    { label: "Estimated Capital", key: "EstimatedCapital" },
+    { label: "Contact Number", key: "ContactNumber" },
   ];
 
   const router = useRouter();
@@ -65,13 +86,13 @@ export default function DocumentRequestTransactionsDetails() {
           
           <div className="details-section">
             <div className="title">
-              <p>Proof of Incident</p>
+              <p>Requirements</p>
             </div>
             <div className="description">
               <img
-                src={transactionData[0].ProofOfIncident}
-                alt="Proof of Incident"
-                className="proofOfIncident-image"
+                src={transactionData[0].Requirements}
+                alt="Requirements"
+                className="Requirements"
               />
             </div>
           </div>
@@ -82,3 +103,4 @@ export default function DocumentRequestTransactionsDetails() {
     </main>
   );
 }
+
