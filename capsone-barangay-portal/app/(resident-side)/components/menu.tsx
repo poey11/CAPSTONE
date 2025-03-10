@@ -225,10 +225,17 @@ const Menu = () => {
                   
                   <div className="Dropdown">
                     <Link
-                      href={"/"}
+                      href={"/ResidentAccount/Profile"}
                     >
                       <p className="dropdown-item">Profile</p>
                     </Link>
+
+                    <Link
+                      href={"/ResidentAccount/Transactions"}
+                    >
+                      <p className="dropdown-item">Transactions</p>
+                    </Link>
+
 
                     <Link
                       href={"/"}

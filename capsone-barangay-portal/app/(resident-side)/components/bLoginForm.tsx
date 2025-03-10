@@ -15,8 +15,8 @@ const bLoginForm:React.FC = () => {
         password: "",
     });
     
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
 
-  
 
     const handleChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -36,8 +36,8 @@ const bLoginForm:React.FC = () => {
         });
 
       
-        if(result?.error){
-            alert("Invalid User ID or Password");
+        if (result?.error) {
+            setShowErrorPopup(true);
             return;
         }
    
@@ -46,6 +46,15 @@ const bLoginForm:React.FC = () => {
 
     return (  
         <main className="main-container">
+
+            {showErrorPopup && (
+                <div className="popup-overlay">
+                    <div className="popup">
+                        <p>Invalid User ID or Password</p>
+                        <button onClick={() => setShowErrorPopup(false)} className="continue-button">OK</button>
+                    </div>
+                </div>
+            )}
             <div className="login-section">
                 <div className="first-section">
                     <img 

@@ -1,0 +1,287 @@
+.main-container {
+    background-color: #f7e5d5;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.transactions-history {
+    width: 90%;
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    overflow-x: auto;
+    height: 70%;
+    align-self: center;
+    margin-bottom: 3rem;
+    
+   
+}
+
+.table-section {
+    flex: 1; 
+    display: flex; 
+    flex-direction: column;
+    padding: 0;
+    margin: 0; 
+    overflow: auto; 
+    width: 100%;
+    max-height: 100%;
+    border: 2px solid  #ddd;
+    
+  
+}
+
+.table-section table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid  #ddd;
+    height: 100%;
+    table-layout: fixed;
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+
+
+.table-section th {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 2px solid #ddd;
+    color:#e07c21 ;
+    cursor: pointer;
+    white-space: nowrap;
+    background-color: #f7e5d5;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+
+.table-section td {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 2px solid #ddd;
+    color: grey;
+    white-space: nowrap;
+    background-color: rgba(255, 255, 255, 0.7);
+    font-size: 18px;
+}
+
+.table-section tr:hover {
+    background-color: #e0e0e0; 
+    cursor: pointer; 
+    transition: background-color 0.2s ease; 
+}
+
+
+@media (max-width: 768px) {
+    .table-section table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .transactions-history {
+        padding: 1.5rem;
+    }
+} 
+
+.title-section {
+    display: flex;
+
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: grey;
+    margin-bottom: 2rem;
+}
+
+.Page {
+    height: 200px; 
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    color: white; 
+    font-size: 40px; 
+    font-weight: bold; 
+    position: relative;
+    margin-bottom: 50px;
+  }
+
+  .Page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/Images/Background.jpeg');
+    background-size: cover; 
+    background-position: 50% 50%;
+    background-repeat: no-repeat; 
+    z-index: 1; 
+    filter: blur(2px); 
+  }
+
+  .Page > * {
+    position: relative;
+    z-index: 2; 
+  }
+
+  .status-dropdown {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+  }
+  
+  .pending {
+    background-color: #d4d64f;
+    color: white;
+    font-size: 15px;
+    
+  }
+  
+  .resolved {
+    background-color: #66c47a;
+    color: white;
+    
+  }
+
+  .rejected {
+    background-color: red;
+    color: white;
+  }
+
+  .approved {
+    background-color: #66c47a;
+    color: white;
+  }
+
+  .status-badge {
+    padding: 8px 12px;            
+    border-radius: 5px;          
+    font-size: 13px;              
+    color: white;                
+    display: inline-block;        
+    text-transform: capitalize;   
+    text-align: center;    
+    width: 100px;       
+}
+
+
+
+.incident-transaction-container {
+    background: linear-gradient(to bottom, #f7e5d5, #f3d3b0); 
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; 
+  }
+  
+  .incident-content {
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    width: 60%;
+    border-radius: 1rem;
+    border: 1px solid #ddd;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); 
+    background: rgba(255, 255, 255, 0.9);
+    overflow: hidden; 
+    margin-bottom: 3rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .incident-content:hover {
+    transform: translateY(-5px); 
+  }
+  
+  .incident-content-section-1 {
+    display: flex;
+    align-items: center;
+    padding: 2rem;
+    background: #e07c21; 
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .incident-content-section-1 p {
+    margin-left: 1rem;
+  }
+  
+  .back-button {
+    background-image: url('/Images/left-arrow.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 40px;
+    height: 40px;
+    border: none;
+    cursor: pointer;
+    background-color: transparent; 
+    transition: transform 0.3s ease;
+  }
+  
+ 
+  
+  .details-section {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    padding: 1.5rem;
+    transition: background 0.3s ease;
+  }
+  
+  .details-section:hover {
+    background: rgba(224, 124, 33, 0.1); 
+  }
+  
+  .title {
+    width: 25%; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .title p {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #e07c21;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .description {
+    width: 75%;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .description p {
+    color: #555;
+    font-size: 1.10rem;
+    line-height: 1.6;
+  }
+  
+  @media (max-width: 768px) {
+    .incident-content {
+      width: 90%;
+    }
+  
+    .title, .description {
+      width: 100%;
+      text-align: left;
+      padding: 1rem;
+    }
+  
+    .details-section {
+      flex-direction: column;
+    }
+  }
+  
