@@ -58,6 +58,7 @@ const BMenu: React.FC = () => {
             <Link href="/dashboard/ResidentModule" className="dropdown-item">Main Residents</Link>
             <Link href="/dashboard/ResidentModule/registeredVoters" className="dropdown-item">Registered Voters</Link>
             <Link href="/dashboard/ResidentModule/kasambahayList" className="dropdown-item">Kasambahay Master List</Link>
+            <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker" className="dropdown-item">First-Time Job Seekers List</Link>
 
           </div>
         </div>
