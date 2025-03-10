@@ -129,6 +129,85 @@ const ReportsPage = () => {
   }
 };
 
+const generateFirstTimeJobSeekerReport = async () => {
+  setLoading(true);
+  try {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+    const currentMonthYear = currentDate.toLocaleString("en-US", { month: "long", year: "numeric" }).toUpperCase();
+
+    const jobSeekerRef = collection(db, "JobSeekerList");
+    const q = query(
+      jobSeekerRef,
+      where("dateApplied", ">=", `${year}-${month}-01`),
+      where("dateApplied", "<=", `${year}-${month}-31`)
+    );
+
+    const querySnapshot = await getDocs(q);
+    let jobSeekers = querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => doc.data());
+
+    if (jobSeekers.length === 0) {
+      alert("No first-time job seekers found for the current month.");
+      setLoading(false);
+      return;
+    }
+
+    jobSeekers.sort((a, b) => new Date(a.dateApplied).getTime() - new Date(b.dateApplied).getTime());
+
+    const templateRef = ref(storage, "ReportsModule/First Time Job Seeker Record.xlsx");
+    const url = await getDownloadURL(templateRef);
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
+    const sheetName = "JANUARY";
+    let worksheet = workbook.Sheets[sheetName];
+
+    if (!worksheet) {
+      worksheet = XLSX.utils.aoa_to_sheet([["First Time Job Seekers", "", ""], ["", "", ""]]);
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    }
+
+    let lastRow = 2;
+    while (worksheet[XLSX.utils.encode_cell({ r: lastRow, c: 0 })]) {
+      lastRow++;
+    }
+
+    jobSeekers.forEach((seeker) => {
+
+
+      worksheet[XLSX.utils.encode_cell({ r: lastRow, c: 0 })] = { v: new Date(seeker.dateApplied).toLocaleDateString("en-US") };
+      worksheet[XLSX.utils.encode_cell({ r: lastRow, c: 1 })] = { v: seeker.lastName };
+      worksheet[XLSX.utils.encode_cell({ r: lastRow, c: 2 })] = { v: seeker.firstName };
+      worksheet[XLSX.utils.encode_cell({ r: lastRow, c: 3 })] = { v: seeker.middleName };
+      worksheet[XLSX.utils.encode_cell({ r: lastRow, c: 4 })] = { v: seeker.age };
+      worksheet[XLSX.utils.encode_cell({ r: lastRow, c: 5 })] = { v: seeker.monthOfBirth };
+      worksheet[XLSX.utils.encode_cell({ r: lastRow, c: 6 })] = { v: seeker.dayOfBirth };
+      worksheet[XLSX.utils.encode_cell({ r: lastRow, c: 7 })] = { v: seeker.yearOfBirth };
+      if (seeker.sex === "M") {
+        worksheet[XLSX.utils.encode_cell({ r: lastRow, c: 8 })] = { v: "*" };
+      } else if (seeker.sex === "F") {
+        worksheet[XLSX.utils.encode_cell({ r: lastRow, c: 9 })] = { v: "*" }; 
+      }
+      worksheet[XLSX.utils.encode_cell({ r: lastRow, c: 10 })] = { v: seeker.remarks };
+
+
+      lastRow++;
+    });
+
+    const updatedWorkbook = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([updatedWorkbook], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    saveAs(blob, `FirstTimeJobSeekers_${currentMonthYear}.xlsx`);
+
+    alert("First-Time Job Seeker Report generated successfully!");
+  } catch (error) {
+    console.error("Error generating report:", error);
+    alert("Failed to generate First-Time Job Seeker Report.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedName = e.target.value;
@@ -172,8 +251,9 @@ const ReportsPage = () => {
               <button onClick={generateKasambahayReport} disabled={loading} className="report-button">
                 {loading ? "Generating..." : "Generate Kasambahay Masterlist"}
               </button>
-              <button className="report-button">First Time Job Seeker</button>
-            </>
+              <button onClick={generateFirstTimeJobSeekerReport} disabled={loading} className="report-button">
+                {loading ? "Generating..." : "Generate First-Time Job Seeker List"}
+              </button>            </>
           )}
 
           {selectedModule === "Incident Module" && (
