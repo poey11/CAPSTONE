@@ -12,24 +12,21 @@ export default function EditResident() {
   const residentId = searchParams.get("id"); 
 
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    middleName: "",
+    name: "",
     address: "",
     dateOfBirth: "",
+    placeOfBirth: "",
     age: 0,
     sex: "",
     civilStatus: "",
     occupation: "",
-    employer: "",
-    employerAddress: "",
     contactNumber: "",
     emailAddress: "",
     precinctNumber: "",
-    placeofBirth: "",
-    isVoter: false,
+    generalLocation:"",
     PWD: false,
     soloParent: false,
+    isVoter: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -46,21 +43,18 @@ export default function EditResident() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setFormData({
-            firstName: data.firstName || "N/A",
-            lastName: data.lastName || "N/A",
-            middleName: data.middleName || "N/A",
+            name: data.name || "N/A",
             address: data.address || "N/A",
+            generalLocation: data.generalLocation || "N/A",
             dateOfBirth: data.dateOfBirth || "N/A",
             age: data.age || "N/A",
             sex: data.sex || "N/A",
             civilStatus: data.civilStatus || "N/A",
             occupation: data.occupation || "N/A",
-            employer: data.employer || "N/A",
-            employerAddress: data.employerAddress || "N/A",
             contactNumber: data.contactNumber || "N/A",
             emailAddress: data.emailAddress || "N/A",
             precinctNumber: data.precinctNumber || "N/A",
-            placeofBirth: data.placeOfBirth || "N/A",
+            placeOfBirth: data.placeOfBirth || "N/A",
             PWD: data.PWD ?? false,
             soloParent: data.soloParent ?? false,
             isVoter: data.isVoter ?? false,
@@ -129,20 +123,21 @@ export default function EditResident() {
         </div>
         <form id="editResidentForm" onSubmit={handleSubmit} className="section-2">
           <div className="section-2-left-side">
-            <p>First Name</p>
-            <input type="text" className="search-bar" name="firstName" value={formData.firstName} onChange={handleChange} required />
-
-            <p>Last Name</p>
-            <input type="text" className="search-bar" name="lastName" value={formData.lastName} onChange={handleChange} required />
-            
-            <p>Middle Name</p>
-            <input type="text" className="search-bar" name="middleName" value={formData.middleName} onChange={handleChange} required />
-
+            <p>Full Name</p>
+            <input type="text" className="search-bar" name="name" value={formData.name} onChange={handleChange} required />
             <p>Address</p>
             <input type="text" className="search-bar" name="address" value={formData.address} onChange={handleChange} required />
 
+            <p>Location</p>
+            <select name="generalLocation" className="featuredStatus" value={formData.generalLocation} onChange={handleChange} required>
+              <option value="" disabled>Choose Part of Fairview</option>
+              <option value="East Fairview">East Fairview</option>
+              <option value="West Fairview">West Fairview</option>
+              <option value="South Fairview">South Fairview</option>
+            </select>
+
             <p>Place of Birth</p>
-            <input type="text" className="search-bar" name="placeofBirth" value={formData.placeofBirth} onChange={handleChange} required />
+            <input type="text" className="search-bar" name="placeofBirth" value={formData.placeOfBirth} onChange={handleChange} required />
 
             <p>Date of Birth</p>
             <input type="date" className="search-bar" name="dateofBirth" value={formData.dateOfBirth} onChange={handleChange} required />
@@ -168,22 +163,15 @@ export default function EditResident() {
             </select>
 
             <p>Occupation</p>
-            <input type="text" className="search-bar" name="occupation" value={formData.occupation} onChange={handleChange} required />
-
-            <p>Employer</p>
-            <input type="text" className="search-bar" name="employer" value={formData.employer} onChange={handleChange}  />
-
-            <p>Employer Address</p>
-            <input type="text" className="search-bar" name="employerAddress" value={formData.employerAddress} onChange={handleChange}  />
-
+            <input type="text" className="search-bar" name="occupation" value={formData.occupation} onChange={handleChange} />
             <p>Contact Number</p>
             <input type="tel" className="search-bar" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
 
             <p>Email Address</p>
-            <input type="email" className="search-bar" name="emailAddress" value={formData.emailAddress} onChange={handleChange} required />
+            <input type="email" className="search-bar" name="emailAddress" value={formData.emailAddress} onChange={handleChange} />
 
             <p>Precinct Number</p>
-            <input type="text" className="search-bar" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required />
+            <input type="text" className="search-bar" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
 
             <p>PWD</p>
             <div className="checkbox-container">
@@ -215,3 +203,4 @@ export default function EditResident() {
     </main>
   );
 }
+

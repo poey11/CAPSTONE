@@ -9,21 +9,18 @@ import Link from "next/link";
 export default function AddResident() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    middleName: "",
+    
+    name: "",
     address: "",
     dateOfBirth: "",
+    placeOfBirth: "",
     age: 0,
     sex: "",
     civilStatus: "",
     occupation: "",
-    employer: "",
-    employerAddress: "",
     contactNumber: "",
     emailAddress: "",
     precinctNumber: "",
-    placeOfBirth: "",
     generalLocation:"",
     PWD:false,
     soloParent:false,
@@ -97,32 +94,13 @@ export default function AddResident() {
         <form id="addResidentForm" onSubmit={handleSubmit} className="section-2">
 
         <div className="section-2-left-side">
-            <p>First Name</p>
+            <p>Full Name</p>
             <input type="text" 
             className="search-bar" 
-            placeholder="Enter First Name"  
-            name="firstName" 
-            value={formData.firstName} 
+            placeholder="Enter Full Name"  
+            name="name" 
+            value={formData.name} 
             onChange={handleChange} required />
-
-
-            <p>Last Name</p>
-            <input type="text" 
-            className="search-bar" 
-            placeholder="Enter Last Name"  
-            name="lastName" 
-            value={formData.lastName} 
-            onChange={handleChange} required />
-
-
-            <p>Middle Name</p>
-            <input type="text" 
-            className="search-bar" 
-            placeholder="Enter Middle Name"  
-            name="middleName" 
-            value={formData.middleName} 
-            onChange={handleChange} required />            
-            
 
             <p>Address</p>
             <input type="text" 
@@ -191,23 +169,8 @@ export default function AddResident() {
             placeholder="Enter Occupation"  
             name="occupation" 
             value={formData.occupation} 
-            onChange={handleChange} required />
+            onChange={handleChange} />
 
-            <p>Employer Name</p>
-            <input type="text" 
-            className="search-bar"           
-            placeholder="Enter Employer"  
-            name="employer" 
-            value={formData.employer} 
-            onChange={handleChange} required />
-
-            <p>Employer Address</p>
-            <input type="text" 
-            className="search-bar"           
-            placeholder="Enter Employer Address"  
-            name="employerAddress" 
-            value={formData.employerAddress} 
-            onChange={handleChange} required />
 
             <p>Contact Number</p>
             <input
@@ -227,7 +190,7 @@ export default function AddResident() {
             placeholder="Enter Email Address"              
             name="emailAddress" 
             value={formData.emailAddress} 
-            onChange={handleChange} required />
+            onChange={handleChange} />
 
             <p>Precinct Number</p>
             <input type="text" 
@@ -235,7 +198,7 @@ export default function AddResident() {
             placeholder="Enter Precinct Number"              
             name="precinctNumber" 
             value={formData.precinctNumber} 
-            onChange={handleChange} required />
+            onChange={handleChange} />
 
             <p>PWD</p>
             <div className="checkbox-container">
@@ -320,3 +283,4 @@ export default function AddResident() {
     </main>
   );
 }
+

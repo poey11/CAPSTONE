@@ -40,9 +40,7 @@ export default function ViewResident() {
   if (!residentData) return <p>Resident not found</p>;
 
   const residentFields = [
-    { label: "First Name", key: "firstName" },
-    { label: "Last Name", key: "lastName" },
-    { label: "Middle Name", key: "middleName" },
+    { label: "Full Name", key: "name" },
     { label: "Address", key: "address" },
     { label: "Date of Birth", key: "dateOfBirth" },
     { label: "General Location", key: "generalLocation" },
@@ -51,8 +49,6 @@ export default function ViewResident() {
     { label: "Sex", key: "sex" },
     { label: "Civil Status", key: "civilStatus" },
     { label: "Occupation", key: "occupation" },
-    { label: "Employer", key: "employer" },
-    { label: "Employer Address", key: "employerAddress" },
     { label: "Contact Number", key: "contactNumber" },
     { label: "Email Address", key: "emailAddress" },
     { label: "Precinct Number", key: "precinctNumber" },
