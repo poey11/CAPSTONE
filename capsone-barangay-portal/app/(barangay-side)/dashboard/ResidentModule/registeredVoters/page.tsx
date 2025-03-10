@@ -121,19 +121,16 @@ export default function RegisteredVotersModule() {
           <table>
             <thead>
               <tr>
-              <th>First Name</th>
-                <th>Last Name</th>
-                <th>Middle Name</th>
+                <th>Full Name</th>
                 <th>Address</th>
+                <th>General Location</th>
                 <th>Date of Birth</th>
                 <th>Place of Birth</th>
                 <th>Age</th>
                 <th>Sex</th>
                 <th>Civil Status</th>
                 <th>Occupation</th>
-                <th>Employer</th>
-                <th>Employer Address</th>
-                <th>Contact</th>
+                <th>Contact Number</th>
                 <th>Email Address</th>
                 <th>Precinct Number</th>
                 <th>Actions</th>
@@ -142,18 +139,15 @@ export default function RegisteredVotersModule() {
             <tbody>
               {filteredResidents.map((resident) => (
                 <tr key={resident.id}>
-                  <td>{resident.firstName}</td>
-                  <td>{resident.lastName}</td>
-                  <td>{resident.middleName}</td>
+                  <td>{resident.name}</td>
                   <td>{resident.address}</td>
+                  <td>{resident.generalLocation}</td>
                   <td>{resident.dateOfBirth}</td>
                   <td>{resident.placeOfBirth}</td>
                   <td>{resident.age}</td>
                   <td>{resident.sex}</td>
                   <td>{resident.civilStatus}</td>
                   <td>{resident.occupation}</td>
-                  <td>{resident.employer}</td>
-                  <td>{resident.employerAddress}</td>
                   <td>{resident.contactNumber}</td>
                   <td>{resident.emailAddress}</td>
                   <td>{resident.precinctNumber}</td>
