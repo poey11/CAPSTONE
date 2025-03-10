@@ -59,6 +59,10 @@ export default function ViewOnlineRequest() {
         window.location.href = "/dashboard/ServicesModule/OnlineRequests";
     };
 
+    const handleviewappointmentdetails = () => {
+        window.location.href = "/dashboard/ServicesModule/Appointments/View/BarangayIndigency";
+    };
+
     return (
         <main className="main-container">
             <div className="main-content">
@@ -95,7 +99,8 @@ export default function ViewOnlineRequest() {
             </div>
 
             <div className="Actions-Section">
-                    <button type="button" className="actions-button">Print</button>
+                <button type="button" className="actions-button">Print</button>
+                <button type="button" className="actions-button" onClick={handleviewappointmentdetails}>View Appointment Details</button>
             </div>
         </main>
     );

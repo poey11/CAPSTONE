@@ -1,14 +1,13 @@
 "use client"
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import type { Metadata } from "next";
 import "@/CSS/barangaySide/ServicesModule/SMSOnlineRequest.css";
 
 
 const metadata: Metadata = {
-    title: "SMS Online Request",
-    description: "Online Document Request in Services Module",
+    title: "SMS Appointment",
+    description: "Appointment in Services Module",
 };
 
 
@@ -16,27 +15,20 @@ export default function OnlineRequests() {
     const router = useRouter();
 
     const handleBackToOnlineRequests = () => {
-        router.push("/dashboard/ServicesModule/OnlineRequests");
+        router.push("/dashboard/ServicesModule/Appointments");
     };
 
     const requestData = [
         {
-            documentType: "Barangay Certificate",
+            appointmentType: "Barangay Certificate",
             purpose: "Certificate of Residency",
-            daterequested: "2024-01-17",
-            residentsince: "2002-01-14",
-            firstname: "Rose",
+            firstname: "Jennie",
             middlename: "Yap",
-            lastname: "Fernandez",
-            address: "Calamba, Laguna",
-            age: "23",
-            civilstatus: "Single",
-            citizenship: "Filipino",
-            birthday: "2002-09-06",
-            gender: "Female",
+            lastname: "Mendoza",
             contact: "09171218101",
-            status: "Pick Up",
-            requirements: "/Images/document.png",
+            status: "Pending",
+            date: "2024-01-17",
+            time: "10:00 AM",
         },
     ];
 
@@ -45,11 +37,24 @@ export default function OnlineRequests() {
     // Combine first, middle, and last names into one field
     const fullName = `${residentData.firstname} ${residentData.middlename} ${residentData.lastname}`.trim();
 
+    const convertTo24HourFormat = (time: string | undefined): string => {
+        if (!time) return "";
+        const [timePart, modifier] = time.split(" ");
+        let [hours, minutes] = timePart.split(":");
+    
+        if (modifier === "PM" && hours !== "12") {
+            hours = String(parseInt(hours, 10) + 12);
+        } else if (modifier === "AM" && hours === "12") {
+            hours = "00";
+        }
+    
+        return `${hours.padStart(2, "0")}:${minutes}`;
+    };
     
     return (
         <main className="addAnnouncement-main-container">
             <div className="section-1">
-                <h1>Online Document Requests</h1>
+                <h1>Appointment Schedule</h1>
             </div>
 
             <div className="addAnnouncement-main-section">
@@ -74,10 +79,21 @@ export default function OnlineRequests() {
                                     <input
                                         type="text"
                                         className="input-field"
-                                        defaultValue={residentData.documentType}
+                                        defaultValue={residentData.appointmentType}
                                         readOnly
                                     />
                             </div>
+                            <div className="fields-section">
+                                    <p>Date of Appointment</p>
+                                    <input 
+                                        type="date" 
+                                        className="input-field" 
+                                        placeholder="Select Date From"
+                                        defaultValue={residentData.date} 
+                                        readOnly
+                                    />
+                                    
+                                </div>
                         </div>
 
                         <div className="fields-container">
@@ -106,6 +122,16 @@ export default function OnlineRequests() {
                                     />
                             </div>
                         </div>
+                            <div className="fields-section">
+                                    <p>Time of Appointment</p>
+                                    <input 
+                                        type="time" 
+                                        className="input-field" 
+                                        placeholder="Select Time"
+                                        defaultValue={convertTo24HourFormat(residentData.time)} 
+                                        readOnly
+                                    />
+                                </div>
 
                         <div className="fields-container">
                             <div className="fields-section">
@@ -122,22 +148,11 @@ export default function OnlineRequests() {
 
                     </div>
 
-                    
-
-                    
-
-
                 </div>
 
-                <div className="status-container">   
-                        <p>Status</p>
-                        <span className={`status-badge ${residentData.status.toLowerCase().replace(" ", "-")}`}>
-                          {residentData.status ?? "N/A"}
-                        </span>   
-                </div>
 
                 <div className="Actions-Section">
-                    <button type="button" className="actions-button">Send SMS</button>
+                    <button type="button" className="actions-button">Send Appointment Confirmation</button>
                 </div>
                 
             </div>
