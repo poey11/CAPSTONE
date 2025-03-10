@@ -13,8 +13,8 @@ interface FileData {
 }
 
 const ReportsPage = () => {
-  const [loading, setLoading] = useState(false);
-  const [files, setFiles] = useState<FileData[]>([]);
+  const [loadingKasambahay, setLoadingKasambahay] = useState(false); 
+  const [loadingJobSeeker, setLoadingJobSeeker] = useState(false);    const [files, setFiles] = useState<FileData[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
   const [selectedModule, setSelectedModule] = useState<string>("");
 
@@ -47,7 +47,7 @@ const ReportsPage = () => {
   }, []);
 
   const generateKasambahayReport = async () => {
-    setLoading(true);
+    setLoadingKasambahay(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -67,13 +67,12 @@ const ReportsPage = () => {
   
       if (newMembers.length === 0) {
         alert("No new members found for the current month.");
-        setLoading(false);
+        setLoadingKasambahay(false);
         return;
       }
   
       newMembers.sort((a, b) => Number(a.registrationControlNumber) - Number(b.registrationControlNumber));
   
-      // Fetch template from Firebase Storage
       const storage = getStorage();
       const templateRef = ref(storage, "ReportsModule/Kasambahay Masterlist Report Template.xlsx");
       const url = await getDownloadURL(templateRef);
@@ -84,23 +83,22 @@ const ReportsPage = () => {
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
   
-      // Identify last filled row before the footer
-      let lastDataRow = worksheet.lastRow?.number || 1;
-      const footerStartRow = 187; // Update this if your footer starts at a different row
+      const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow === 0);
+      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 186);
   
-      if (lastDataRow >= footerStartRow) {
-        lastDataRow = footerStartRow - 1; // Ensure we don't overwrite the footer
-      }
+      const footerStartRow = 187; 
   
-      // Insert new rows before the footer
       worksheet.spliceRows(footerStartRow, 0, ...new Array(newMembers.length + 2).fill([]));
   
-      // Insert header for new members
-      const headerRow = worksheet.getRow(footerStartRow);
-      headerRow.getCell(1).value = `NEW MEMBERS (${currentMonthYear})`;
-      headerRow.font = { name: "Calibri", size: 20, bold: true, italic: true, color: { argb: "FFFF0000" } };
-  
-      // Insert new members starting from the row after the header
+      headerDrawings.forEach((drawing) => {
+        if (drawing.range?.tl) drawing.range.tl.nativeRow = 0;
+      
+        if (drawing.range?.br) {
+          drawing.range.br.nativeRow = 0;
+        }
+      });
+      
+            
       let insertionRow = footerStartRow + 1;
   
       newMembers.forEach((member) => {
@@ -118,7 +116,6 @@ const ReportsPage = () => {
           member.employerName, member.employerAddress
         ];
   
-        // Apply font settings to each cell
         cells.forEach((value, index) => {
           const cell = row.getCell(index + 1);
           cell.value = value;
@@ -129,7 +126,16 @@ const ReportsPage = () => {
         insertionRow++;
       });
   
-      // Generate and download the updated report
+footerDrawings.forEach((drawing) => {
+  const newRow = (drawing.range?.tl?.nativeRow || 186) + newMembers.length + 2;
+
+  if (drawing.range?.tl) drawing.range.tl.nativeRow = newRow;
+
+  if (drawing.range?.br) {
+    drawing.range.br.nativeRow = newRow + 1;
+  }
+});
+   
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -141,11 +147,103 @@ const ReportsPage = () => {
       console.error("Unexpected error:", error);
       alert("Failed to generate Kasambahay Masterlist Report.");
     } finally {
-      setLoading(false);
+      setLoadingKasambahay(false);
+    }
+  };
+
+  
+  const generateFirstTimeJobSeekerReport = async () => {
+    setLoadingJobSeeker(true);
+    try {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const currentMonthYear = currentDate.toLocaleString("en-US", { month: "long", year: "numeric" }).toUpperCase();
+  
+      const jobSeekerRef = collection(db, "JobSeekerList");
+      const q = query(jobSeekerRef);
+      const querySnapshot = await getDocs(q);
+  
+      let jobSeekers = querySnapshot.docs.map((doc) => doc.data());
+  
+      if (jobSeekers.length === 0) {
+        alert("No first-time job seekers found.");
+        setLoadingJobSeeker(false);
+        return;
+      }
+  
+      jobSeekers.sort((a, b) => new Date(a.dateApplied).getTime() - new Date(b.dateApplied).getTime());
+  
+      const templateRef = ref(storage, "ReportsModule/First Time Job Seeker Record.xlsx");
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0]; 
+  
+      const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+  
+      const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow === 0);
+      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 186);
+  
+      const dataStartRow = 8; 
+      const footerStartRow = 13; 
+  
+      worksheet.spliceRows(dataStartRow + jobSeekers.length, 0, ...new Array(footerDrawings.length).fill([])); 
+  
+      let insertionRow = dataStartRow;
+  
+      jobSeekers.forEach((seeker) => {
+        const row = worksheet.getRow(insertionRow);
+  
+        const cells = [
+          seeker.dateApplied ? new Date(seeker.dateApplied).toLocaleDateString("en-US") : "",
+          seeker.lastName || "",
+          seeker.firstName || "",
+          seeker.middleName || "",
+          seeker.age || "",
+          seeker.monthOfBirth ? monthNames[parseInt(seeker.monthOfBirth, 10) - 1] : "",
+          seeker.dayOfBirth || "",
+          seeker.yearOfBirth || "",
+          seeker.sex === "M" ? "*" : "",
+          seeker.sex === "F" ? "*" : "",
+          seeker.remarks || ""
+        ];
+  
+        cells.forEach((value, index) => {
+          const cell = row.getCell(index + 1);
+          cell.value = value;
+          cell.font = { name: "Calibri", size: 20 };
+        });
+  
+        row.commit();
+        insertionRow++;
+      });
+  
+      footerDrawings.forEach((drawing) => {
+        const newRow = (drawing.range?.tl?.nativeRow || 186) + jobSeekers.length + 1;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow = newRow;
+        if (drawing.range?.br) drawing.range.br.nativeRow = newRow + 1;
+      });
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      saveAs(blob, `FirstTimeJobSeekers_${currentMonthYear}.xlsx`);
+  
+      alert("First-Time Job Seeker Report generated successfully!");
+    } catch (error) {
+      console.error("Error generating report:", error);
+      alert("Failed to generate First-Time Job Seeker Report.");
+    } finally {
+      setLoadingJobSeeker(false);
     }
   };
   
-
 
   
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -187,12 +285,12 @@ const ReportsPage = () => {
               <button className="report-button">Generate East Fairview Resident List</button>
               <button className="report-button">Generate South Fairview Resident List</button>
               <button className="report-button">Generate West Fairview Resident List</button>
-              <button onClick={generateKasambahayReport} disabled={loading} className="report-button">
-                {loading ? "Generating..." : "Generate Kasambahay Masterlist"}
+              <button onClick={generateKasambahayReport} disabled={loadingKasambahay} className="report-button">
+                {loadingKasambahay ? "Generating..." : "Generate Kasambahay Masterlist"}
               </button>
-              {/* <button onClick={generateFirstTimeJobSeekerReport} disabled={loading} className="report-button">
-                {loading ? "Generating..." : "Generate First-Time Job Seeker List"}
-              </button>             */}
+              <button onClick={generateFirstTimeJobSeekerReport} disabled={loadingJobSeeker} className="report-button">
+                {loadingJobSeeker ? "Generating..." : "Generate First-Time Job Seeker List"}
+              </button>       
               </>
           )}
 
