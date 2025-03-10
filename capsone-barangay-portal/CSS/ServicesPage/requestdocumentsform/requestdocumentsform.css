@@ -109,6 +109,13 @@
   border-radius: 4px;
   margin-top: 2px;
   color: grey;
+  accent-color: #f49028; 
+}
+
+.form-input:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
   
   .form-requirements-title{
