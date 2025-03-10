@@ -11,8 +11,8 @@
 
 
  .main-section {
-    flex: 1; /* Makes it take up remaining space */
-    display: flex; /* Ensures proper alignment */
+    flex: 1; 
+    display: flex; 
     flex-direction: column;
     padding: 0;
     margin: 0; /* Remove default margin */

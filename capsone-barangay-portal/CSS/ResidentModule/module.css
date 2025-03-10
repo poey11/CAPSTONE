@@ -10,17 +10,22 @@
 }
 
 
- .main-section {
-    flex: 1; /* Makes it take up remaining space */
-    display: flex; /* Ensures proper alignment */
+
+.main-section {
+    flex: 1; 
+    display: flex; 
     flex-direction: column;
     padding: 0;
     margin: 0; /* Remove default margin */
     overflow: auto; /* Allow scrolling if content overflows */
     width: 100%;
-    height: 100%; /* Full height */
+    height: 100%; 
+    max-height: 70%;
     margin-top: 2rem;
+    border: 2px solid  #ddd;
 }
+
+
 
 .main-section table {
     width: 100%; /* Ensures the table spans the full width */
@@ -158,6 +163,12 @@
     border-radius: 5px;
     color: rgba(0, 0, 0, 0.4);
     text-align: center;
+  }
+
+  .search-bar:focus ,.featuredStatus:focus {
+    border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
 
   .featuredStatus option {
