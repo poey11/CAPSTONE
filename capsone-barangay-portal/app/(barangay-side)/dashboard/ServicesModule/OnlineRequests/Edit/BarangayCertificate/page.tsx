@@ -48,7 +48,7 @@ export default function EditOnlineRequest() {
     const requestData = [
         {
             documentType: "Barangay Certificate",
-            purpose: "Death Residency",
+            purpose: "Certificate of Residency",
             daterequested: "2024-01-17",
             residentsince: "2002-01-14",
             firstname: "Rose",
@@ -61,7 +61,7 @@ export default function EditOnlineRequest() {
             birthday: "2002-09-06",
             gender: "Female",
             contact: "09171218101",
-            status: "Rejected",
+            status: "Pending",
             requirements: "/Images/document.png",
         },
     ];
@@ -117,7 +117,7 @@ export default function EditOnlineRequest() {
                                         <option value="Good Moral and Probation">Good Moral and Probation</option>
                                         <option value="Garage/PUV">Garage/PUV</option>
                                         <option value="Garage/TRU">Garage/TRU</option>
-                                        <option value="Residencye">Residency</option>
+                                        <option value="Certificate of Residency">Certificate of Residency</option>
                                         <option value="Others">Others</option>
                                     </select>
                                 </div>

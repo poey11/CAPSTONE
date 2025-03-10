@@ -99,7 +99,7 @@ const metadata: Metadata = {
 
     const router = useRouter();
 
-    const handleAddAnnouncement = () => {
+    const handleGenerateDocument = () => {
       router.push("/dashboard/ServicesModule/GenerateDocument");
     };
 
@@ -147,7 +147,7 @@ const metadata: Metadata = {
           <h1>In Barangay Document Requests</h1>
           <button
             className="add-announcement-btn"
-            onClick={handleAddAnnouncement}
+            onClick={handleGenerateDocument}
           >
             Generate Document
           </button>

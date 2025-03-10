@@ -98,7 +98,7 @@ export default function BarangayConstructionPermit() {
                         </label>
                         <label className="form-radio">
                         <input type="radio" id="renovation" name="renovation" value="renovation" required />
-                            renovation
+                            Renovation
                         </label>
                     </div>
 

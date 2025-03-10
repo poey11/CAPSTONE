@@ -115,6 +115,7 @@ margin:  auto;
 
 .Actions-Section{
   display: flex;
+  gap: 50px;
 }
 
 .actions-button{
@@ -168,4 +169,31 @@ margin:  auto;
 
 .status-badge.new {
   background-color: #f79233;    
+}
+
+
+.verification-box {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.verify-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  color: white;
+  text-transform: uppercase;
+  width: 120px;
+}
+
+.verify-button.accept {
+  background-color: #28a745;
+}
+
+.verify-button.reject {
+  background-color: #dc3545;
 }

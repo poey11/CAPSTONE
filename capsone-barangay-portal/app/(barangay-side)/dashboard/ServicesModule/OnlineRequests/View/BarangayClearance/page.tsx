@@ -94,8 +94,13 @@ export default function ViewOnlineRequest() {
                 ))}
             </div>
 
+            <div className="verification-box">
+                <button type="button" className="verify-button accept">Accept</button>
+                <button type="button" className="verify-button reject">Reject</button>
+            </div>
+
             <div className="Actions-Section">
-                    <button type="button" className="actions-button">Print</button>
+                <button type="button" className="actions-button">Print</button>
             </div>
         </main>
     );
