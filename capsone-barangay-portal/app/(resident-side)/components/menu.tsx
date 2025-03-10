@@ -6,10 +6,12 @@ import {useAuth} from "../../context/authContext";
 import { signOut } from "firebase/auth";
 import SideNav from '../../(barangay-side)/components/bMenu';
 import Link from 'next/link';
+import { useRouter } from "next/navigation";
 import "@/CSS/Components/menu.css";
 
 const Menu = () => {
   const {user, loading} = useAuth();
+  const router = useRouter();
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const loginMenuRef = useRef<HTMLDivElement | null>(null);
   
@@ -54,18 +56,48 @@ const Menu = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const documentRoutes: Record<string, string> = {
+    "Barangay Clearance": "/ResidentAccount/Transactions/DocumentRequestTransactions/Documents/BarangayCertificateIndigencyClearance",
+    "Barangay Indigency": "/ResidentAccount/Transactions/DocumentRequestTransactions/Documents/BarangayCertificateIndigencyClearance",
+    "Barangay ID": "/ResidentAccount/Transactions/DocumentRequestTransactions/Documents/BarangayID",
+    "First Time Jobseeker": "/ResidentAccount/Transactions/DocumentRequestTransactions/Documents/FirstTimeJobseeker",
+    "Barangay Certificate": "/ResidentAccount/Transactions/DocumentRequestTransactions/Documents/BarangayCertificateIndigencyClearance",
+    "Barangay Permit": "/ResidentAccount/Transactions/DocumentRequest/Permit",
+};
+
+const barangayPermitRoutes: Record<string, string> = {
+    "Business Permit": "/ResidentAccount/Transactions/DocumentRequestTransactions/Permits/Temporary-BusinessPermit(new&renewal)",
+    "Temporary Business Permit": "/ResidentAccount/Transactions/DocumentRequestTransactions/Permits/Temporary-BusinessPermit(new&renewal)",
+    "Construction Permit": "/ResidentAccount/Transactions/DocumentRequestTransactions/Permits/ConstructionPermit",
+    "Liquor Permit": "/ResidentAccount/Transactions/DocumentRequestTransactions/Permits/LiquorPermit",
+    "COOP": "/ResidentAccount/Transactions/DocumentRequestTransactions/Permits/COOP",
+};
+
   const messages = [
-    { id: 1, text: "Online Incident Report is being reviewed. Wait for an update from the barangay official.", status: "unread" },
-    { id: 2, text: "Barangay Clearance request is being processed. SMS sent.", status: "read" },
-    { id: 3, text: "Barangay ID request is being processed. SMS sent.", status: "unread" },
-    { id: 4, text: "Barangay Certificate request is being processed. SMS sent.", status: "unread" },
-    { id: 5, text: "Barangay Permit request is being processed. SMS sent.", status: "read" },
-    { id: 6, text: "Barangay Indigency request is being processed. SMS sent.", status: "unread" },
-    { id: 7, text: "Barangay Certificate request is being processed. SMS sent.", status: "unread" },
-    { id: 8, text: "First Time Jobseeker request is being processed. SMS sent.", status: "read" },
-    { id: 9, text: "Barangay ID request is being processed. SMS sent.", status: "unread" },
-    { id: 10, text: "Barangay Clearance request is being processed. SMS sent.", status: "unread" },
+    { id: 1, text: "Online Incident Report is being reviewed. Wait for an update from the barangay official.", status: "unread", type: "Online Incident", Details: "Robbery Incident", Purpose: "N/A"},
+    { id: 2, text: "Barangay Clearance document request is being processed. SMS sent.", status: "read", type: "Document Request", Details: "Barangay Clearance", Purpose: "Loan"},
+    { id: 3, text: "Barangay Indigency document request is being processed. SMS sent.", status: "unread", type: "Document Request", Details: "Barangay Indigency", Purpose: "No Income"},
+    { id: 4, text: "Barangay ID document request is being processed. SMS sent.", status: "unread", type: "Document Request", Details: "Barangay ID", Purpose: "N/A"},
+    { id: 5, text: "Barangay Permit document request is being processed. SMS sent.", status: "read" , type: "Document Request", Details: "Barangay Permit", Purpose: "Business Permit"},
+    { id: 6, text: "Barangay Certificate request is being processed. SMS sent.", status: "unread" , type: "Document Request", Details: "Barangay Certificate", Purpose: "Death Residency"},
+    { id: 7, text: "First Time Jobseeker request is being processed. SMS sent.", status: "read" , type: "Document Request", Details: "First Time Jobseeker", Purpose: "N/A"},
   ];
+
+  const handleNotificationClick = (transaction: { Type: string; Details: string; Purpose: string }) => {
+    if (transaction.Type === "Online Incident") {
+      router.push("/ResidentAccount/Transactions/IncidentTransactions");
+  } else if (transaction.Type === "Document Request") {
+      const encodedDetails = encodeURIComponent(transaction.Details);
+      const encodedPurpose = encodeURIComponent(transaction.Purpose);
+
+      if (transaction.Details === "Barangay Permit") {
+          const permitRoute = barangayPermitRoutes[transaction.Purpose] || "/ResidentAccount/Transactions/DocumentRequestTransactions/Permit/General";
+          router.push(`${permitRoute}?details=${encodedDetails}&purpose=${encodedPurpose}`);
+      } else {
+          router.push(`${documentRoutes[transaction.Details] || "/ResidentAccount/Transactions/DocumentRequestTransactions"}?details=${encodedDetails}&purpose=${encodedPurpose}`);
+      }
+  }
+};
 
   const unreadCount = messages.filter((msg) => msg.status === "unread").length;
   const filteredMessages = filter === "all" ? messages : messages.filter((msg) => msg.status === "unread");
@@ -190,7 +222,17 @@ const Menu = () => {
                       <div className="notification-content">
                         {filteredMessages.length > 0 ? (
                           filteredMessages.map((message) => (
-                            <div className="notification-item" key={message.id}>
+                            <div
+                              className="notification-item"
+                              key={message.id}
+                              onClick={() =>
+                                handleNotificationClick({
+                                  Type: message.type,
+                                  Details: message.Details,
+                                  Purpose: message.Purpose,
+                                })
+                              }
+                            >
                               <div className="message-section">
                                 <p>{message.text}</p>
                               </div>
