@@ -24,13 +24,31 @@ export default function EditResident() {
     emailAddress: "",
     precinctNumber: "",
     generalLocation:"",
-    PWD: false,
-    soloParent: false,
+    isStudent:false,
+    isPWD:false,
+    isSeniorCitizen: false,
+    isSoloParent:false,
     isVoter: false,
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [files, setFiles] = useState<{ name: string; preview: string }[]>([]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const uploadedFiles = Array.from(e.target.files).map((file) => ({
+        name: file.name,
+        preview: URL.createObjectURL(file),
+      }));
+      setFiles([...files, ...uploadedFiles]);
+    }
+  };
+
+  const handleFileDelete = (fileName: string) => {
+    setFiles(files.filter((file) => file.name !== fileName));
+  };
 
   useEffect(() => {
     if (!residentId) return;
@@ -55,8 +73,10 @@ export default function EditResident() {
             emailAddress: data.emailAddress || "N/A",
             precinctNumber: data.precinctNumber || "N/A",
             placeOfBirth: data.placeOfBirth || "N/A",
-            PWD: data.PWD ?? false,
-            soloParent: data.soloParent ?? false,
+            isStudent: data.isStudent || "N/A",
+            isSeniorCitizen: data.isSeniorCitizen || "N/A",
+            isPWD: data.isPWD ?? false,
+            isSoloParent: data.soloParent ?? false,
             isVoter: data.isVoter ?? false,
           });
         } else {
@@ -173,34 +193,111 @@ export default function EditResident() {
             <p>Precinct Number</p>
             <input type="text" className="search-bar" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
 
-            <p>PWD</p>
-            <div className="checkbox-container">
-              <label className="checkbox-label">
-                <input type="checkbox" name="PWD" checked={formData.PWD} onChange={handleChange} />
-                Is this resident a person with disability?
-              </label>
             </div>
-
-            <p>Solo Parent</p>
-            <div className="checkbox-container">
-              <label className="checkbox-label">
-                <input type="checkbox" name="soloParent" checked={formData.soloParent} onChange={handleChange} />
-                Is this resident a solo parent?
-              </label>
-            </div>
-
-            <p>Voter</p>
-            <div className="checkbox-container">
-              <label className="checkbox-label">
-                <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
-                Is this resident a registered voter?
-              </label>
-            </div>
-          </div>
-        </form>
-        {error && <p className="error">{error}</p>}
-      </div>
-    </main>
-  );
-}
-
+           
+           
+           <div className="section-2-right-side">
+        
+        
+              <div className="checkboxes-container">
+        
+                    <p>Student</p>
+                    <div className="checkbox-container">
+                      <label className="checkbox-label">
+                        <input type="checkbox" name="isStudent" checked={formData.isStudent} onChange={handleChange} />
+                        Is this resident a student?
+                      </label>
+                    </div>
+        
+                    <p>PWD</p>
+                    <div className="checkbox-container">
+                      <label className="checkbox-label">
+                        <input type="checkbox" name="isPWD" checked={formData.isPWD} onChange={handleChange} />
+                        Is this resident a person with disability?
+                      </label>
+                    </div>
+        
+                    <p>Solo Parent</p>
+                    <div className="checkbox-container">
+                      <label className="checkbox-label">
+                        <input type="checkbox" name="isSoloParent" checked={formData.isSoloParent} onChange={handleChange} />
+                        Is this resident a solo parent?
+                      </label>
+                    </div>
+        
+                    <p>Voter</p>
+                    <div className="checkbox-container">
+                      <label className="checkbox-label">
+                        <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
+                        Is this resident a registered voter?
+                      </label>
+                    </div>
+        
+        
+              </div>
+        
+            
+        
+             <div className="file-upload-container">
+        
+                  <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    className="file-upload-input"
+                    multiple
+                    accept=".jpg,.jpeg,.png"
+                    // required 
+                    onChange={handleFileChange}
+                  />
+                  <div className="uploadedFiles-container">
+                    {files.length > 0 && (
+                      <div className="file-name-image-display">
+                        <ul>
+                          {files.map((file, index) => (
+                            <div className="file-name-image-display-indiv" key={index}>
+                              <li>
+                                {file.preview && (
+                                  <div className="filename&image-container">
+                                    <img
+                                      src={file.preview}
+                                      alt={file.name}
+                                      style={{ width: "50px", height: "50px", marginRight: "5px" }}
+                                    />
+                                  </div>
+                                )}
+                                {file.name}
+                                <div className="delete-container">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleFileDelete(file.name)}
+                                    className="delete-button"
+                                  >
+                                    <img
+                                      src="/images/trash.png"
+                                      alt="Delete"
+                                      className="delete-icon"
+                                    />
+                                  </button>
+                                </div>
+                              </li>
+                            </div>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  </div>
+        
+           
+        
+                  
+        </div>
+        
+                </form>
+                {error && <p className="error">{error}</p>}
+              </div>
+            </main>
+          );
+        }
+        

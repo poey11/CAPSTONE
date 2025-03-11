@@ -15,16 +15,18 @@ export default function ResidentModule() {
   const [searchName, setSearchName] = useState<string>("");
   const [searchAddress, setSearchAddress] = useState<string>("");
   const [searchOccupation, setSearchOccupation] = useState<string>("");
-
-  const [residentType, setResidentType] = useState<string>("");
- 
  
   const [showCount, setShowCount] = useState<number>(0);
   const router = useRouter(); 
 
   const [currentPage, setCurrentPage] = useState(1);
-  const residentsPerPage = 10; //pwede paltan 
-  
+  const residentsPerPage = 10; // Can be changed 
+
+  const [residentType, setResidentType] = useState<string>("");
+
+  const handleResidentTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setResidentType(e.target.value);
+  };
 
   useEffect(() => {
     const fetchResidents = async () => {
@@ -47,31 +49,31 @@ export default function ResidentModule() {
     let filtered = [...residents];
 
     if (searchName) {
-      filtered = filtered.filter((resident) => {
-        const name = resident.name?.toLowerCase() || "";
-
-    
-        return (
-          name.includes(searchName.toLowerCase()) 
-        );
-      });
+      filtered = filtered.filter((resident) =>
+        resident.name?.toLowerCase().includes(searchName.toLowerCase())
+      );
     }
 
     if (searchAddress) {
       filtered = filtered.filter((resident) =>
-        resident.address.toLowerCase().includes(searchAddress.toLowerCase())
+        resident.address?.toLowerCase().includes(searchAddress.toLowerCase())
       );
     }
 
     if (searchOccupation) {
       filtered = filtered.filter((resident) =>
-        resident.occupation.toLowerCase().includes(searchOccupation.toLowerCase())
+        resident.occupation?.toLowerCase().includes(searchOccupation.toLowerCase())
       );
     }
 
-
     if (residentType) {
-      filtered = filtered.filter((resident) => resident.residentType === residentType);
+      filtered = filtered.filter((resident) => {
+        if (residentType === "senior-citizen") return resident.isSeniorCitizen;
+        if (residentType === "student") return resident.isStudent;
+        if (residentType === "pwd") return resident.isPWD;
+        if (residentType === "solo-parent") return resident.isSoloParent;
+        return false;
+      });
     }
 
     if (showCount) {
@@ -100,28 +102,9 @@ export default function ResidentModule() {
 
   const totalPages = Math.ceil(filteredResidents.length / residentsPerPage);
 
-
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
   const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
   const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
-
-  const getPageNumbers = () => {
-    const totalPagesArray = [];
-    const pageNumbersToShow = [];
-
-    for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-        pageNumbersToShow.push(i);
-      } else if (
-        (i === currentPage - 2 || i === currentPage + 2) &&
-        pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
-      ) {
-        pageNumbersToShow.push("...");
-      }
-    }
-
-    return pageNumbersToShow;
-  };
 
   return (
     <main className="main-container">
@@ -156,19 +139,13 @@ export default function ResidentModule() {
           onChange={(e) => setSearchOccupation(e.target.value)}
         />
 
-
-        <select
-          className="featuredStatus"
-          value={residentType}
-          onChange={(e) => setResidentType(e.target.value)}
-        >
+        <select className="featuredStatus" value={residentType} onChange={handleResidentTypeChange}>
           <option value="">Resident Type</option>
           <option value="senior-citizen">Senior Citizen</option>
           <option value="student">Student</option>
           <option value="pwd">PWD</option>
-          <option value="single-mom">Single Mom</option>
+          <option value="solo-parent">Solo Parent</option>
         </select>
-
 
         <select
           className="featuredStatus"
@@ -239,24 +216,6 @@ export default function ResidentModule() {
           </table>
         )}
       </div>
-
-
-      <div className="redirection-section">
-        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {getPageNumbers().map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === 'number' && paginate(number)}
-            className={currentPage === number ? "active" : ""}
-          >
-            {number}
-          </button>
-        ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-      </div>
-
-
     </main>
   );
 }
-
