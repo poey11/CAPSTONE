@@ -14,10 +14,12 @@ export default function KasambahayListModule() {
 
   const [searchName, setSearchName] = useState<string>("");
   const [searchAddress, setSearchAddress] = useState<string>("");
-  const [showCount, setShowCount] = useState<number>(5);
+  const [showCount, setShowCount] = useState<number>(0);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const router = useRouter(); 
+
+
 
   useEffect(() => {
     const fetchResidents = async () => {
@@ -86,6 +88,38 @@ export default function KasambahayListModule() {
     }
   };
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const residentsPerPage = 10; //pwede paltan 
+
+  const indexOfLastResident = currentPage * residentsPerPage;
+  const indexOfFirstResident = indexOfLastResident - residentsPerPage;
+  const currentResidents = filteredResidents.slice(indexOfFirstResident, indexOfLastResident);
+
+  const totalPages = Math.ceil(filteredResidents.length / residentsPerPage);
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+  const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+
+
+  const getPageNumbers = () => {
+    const totalPagesArray = [];
+    const pageNumbersToShow = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pageNumbersToShow.push(i);
+      } else if (
+        (i === currentPage - 2 || i === currentPage + 2) &&
+        pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
+      ) {
+        pageNumbersToShow.push("...");
+      }
+    }
+
+    return pageNumbersToShow;
+  };
+
   return (
     <main className="main-container">
       <div className="section-1">
@@ -110,12 +144,12 @@ export default function KasambahayListModule() {
           value={searchAddress}
           onChange={(e) => setSearchAddress(e.target.value)}
         />
-
-        <select
+      <select
           className="featuredStatus"
           value={showCount}
           onChange={(e) => setShowCount(Number(e.target.value))}
         >
+          <option value="0">Show All</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
         </select>
@@ -146,22 +180,12 @@ export default function KasambahayListModule() {
                 <th>Place of Birth</th>
                 <th>Sex</th>
                 <th>Age</th>
-                <th>Civil Status</th>
-                <th>Educational Attainment</th>
-                <th>Nature of Work</th>
-                <th>Employment Arrangement</th>
-                <th>Salary</th>
-                <th>SSS Member</th>
-                <th>PAG-IBIG Member</th>
-                <th>PhilHealth Member</th>
-                <th>Employer Name</th>
-                <th>Employer Address</th>
                 <th>Created At</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredResidents.map((resident) => (
+              {currentResidents.map((resident) => (
                 <tr key={resident.id}>
                   <td>{resident.registrationControlNumber}</td>
                   <td>{resident.lastName}</td>
@@ -172,16 +196,6 @@ export default function KasambahayListModule() {
                   <td>{resident.placeOfBirth}</td>
                   <td>{resident.sex}</td>
                   <td>{resident.age}</td>
-                  <td>{resident.civilStatus}</td>
-                  <td>{resident.educationalAttainment}</td>
-                  <td>{resident.natureOfWork}</td>
-                  <td>{resident.employmentArrangement}</td>
-                  <td>{resident.salary}</td>
-                  <td>{resident.sssMember ? "Yes" : "No"}</td>
-                  <td>{resident.pagibigMember ? "Yes" : "No"}</td>
-                  <td>{resident.philhealthMember ? "Yes" : "No"}</td>
-                  <td>{resident.employerName}</td>
-                  <td>{resident.employerAddress}</td>
                   <td>{resident.createdAt}</td>
                   <td>
                     <div className="actions">
@@ -196,6 +210,22 @@ export default function KasambahayListModule() {
           </table>
         )}
       </div>
+
+    
+      <div className="redirection-section">
+        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+        {getPageNumbers().map((number, index) => (
+          <button
+            key={index}
+            onClick={() => typeof number === 'number' && paginate(number)}
+            className={currentPage === number ? "active" : ""}
+          >
+            {number}
+          </button>
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+      </div>
+
     </main>
   );
 }

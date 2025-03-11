@@ -10,21 +10,32 @@
 }
 
 
- .main-section {
-    flex: 1; /* Makes it take up remaining space */
-    display: flex; /* Ensures proper alignment */
+
+.main-section {
+    flex: 1; 
+    display: flex; 
     flex-direction: column;
     padding: 0;
     margin: 0; /* Remove default margin */
     overflow: auto; /* Allow scrolling if content overflows */
     width: 100%;
-    height: 100%; /* Full height */
+    height: 100%; 
+    max-height: 70%;
     margin-top: 2rem;
+    border: 2px solid  #ddd;
 }
+
+
 
 .main-section table {
     width: 100%; /* Ensures the table spans the full width */
     border-collapse: collapse; /* Removes unnecessary spacing between table cells */
+}
+
+.main-section tr:hover {
+  background-color: #e0e0e0; 
+  cursor: pointer; 
+  transition: background-color 0.2s ease; 
 }
 
 .main-section td {
@@ -160,10 +171,51 @@
     text-align: center;
   }
 
+  .search-bar:focus ,.featuredStatus:focus {
+    border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+
   .featuredStatus option {
     color: rgba(0, 0, 0, 0.4); 
   }
 
-
-
+  /* Centering the Pagination */
+.redirection-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem auto;
+    width: fit-content;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    background: #f8f8f8;
+    gap: 5px;
+  }
+  
+  .redirection-section button {
+    padding: 4px 8px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.3s;
+  }
+  
+  .redirection-section button:hover {
+    background-color: #0056b3;
+  }
+  
+  .redirection-section button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .redirection-section .active {
+    background-color: #0056b3;
+    font-weight: bold;
+  }
   
