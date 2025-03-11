@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject } from "firebase/storage";
 import { getFirestore, collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
-import * as XLSX from "xlsx";
+import { v4 as uuidv4 } from "uuid";
 import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
@@ -14,9 +14,13 @@ interface FileData {
 
 const ReportsPage = () => {
   const [loadingKasambahay, setLoadingKasambahay] = useState(false); 
-  const [loadingJobSeeker, setLoadingJobSeeker] = useState(false);    const [files, setFiles] = useState<FileData[]>([]);
+  const [loadingJobSeeker, setLoadingJobSeeker] = useState(false);    
+  const [files, setFiles] = useState<FileData[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
   const [selectedModule, setSelectedModule] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
 
   const storage = getStorage();
   const db = getFirestore();
@@ -30,6 +34,12 @@ const ReportsPage = () => {
   useEffect(() => {
     const fetchDownloadLinks = async () => {
       try {
+        const formFiles = [
+          "Fairview ECA Form.docx",
+          "KASAMBAHAY PROGRAM COMPONENTS FORM.docx",
+          "Barangay Kontra Gutom(Hapag sa Barangay).docx",
+        ];
+
         const urls = await Promise.all(
           formFiles.map(async (file) => {
             const fileRef = ref(storage, `ReportsModule/${file}`);
@@ -45,6 +55,41 @@ const ReportsPage = () => {
 
     fetchDownloadLinks();
   }, []);
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const fileName = `${uuidv4()}_${file.name}`;
+      const fileRef = ref(storage, `ReportsModule/${fileName}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      setFiles([...files, { name: fileName, url }]);
+      alert("File uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert("Failed to upload file.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileDelete = async (fileName: string) => {
+    setDeleting(true);
+    try {
+      const fileRef = ref(storage, `ReportsModule/${fileName}`);
+      await deleteObject(fileRef);
+      setFiles(files.filter((file) => file.name !== fileName));
+      alert("File deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      alert("Failed to delete file.");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const generateKasambahayReport = async () => {
     setLoadingKasambahay(true);
