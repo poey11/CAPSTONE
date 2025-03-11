@@ -134,13 +134,13 @@ export default function AddKasambahay() {
             <input type="text" className="search-bar" placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
 
             <p>Middle Name</p>
-            <input type="text" className="search-bar" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} required />
+            <input type="text" className="search-bar" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} />
 
             <p>Home Address</p>
             <input type="text" className="search-bar" placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
 
             <p>Place of Birth</p>
-            <input type="text" className="search-bar" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} required />
+            <input type="text" className="search-bar" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} />
 
             <p>Date of Birth</p>
             <input type="date" className="search-bar" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />

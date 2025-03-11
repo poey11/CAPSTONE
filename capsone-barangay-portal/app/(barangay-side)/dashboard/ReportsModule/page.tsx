@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject } from "firebase/storage";
 import { getFirestore, collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
-import * as XLSX from "xlsx";
+import { v4 as uuidv4 } from "uuid";
 import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
@@ -14,37 +14,75 @@ interface FileData {
 
 const ReportsPage = () => {
   const [loadingKasambahay, setLoadingKasambahay] = useState(false); 
-  const [loadingJobSeeker, setLoadingJobSeeker] = useState(false);    const [files, setFiles] = useState<FileData[]>([]);
+  const [loadingJobSeeker, setLoadingJobSeeker] = useState(false);    
+  const [files, setFiles] = useState<FileData[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
   const [selectedModule, setSelectedModule] = useState<string>("");
+  const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(null);
+
 
   const storage = getStorage();
   const db = getFirestore();
 
-  const formFiles = [
-    "Fairview ECA Form.docx",
-    "KASAMBAHAY PROGRAM COMPONENTS FORM.docx",
-    "Barangay Kontra Gutom(Hapag sa Barangay).docx",
-  ];
+  const fetchDownloadLinks = async () => {
+    try {
+      const formFiles = [
+        "Fairview ECA Form.docx",
+        "KASAMBAHAY PROGRAM COMPONENTS FORM.docx",
+        "Barangay Kontra Gutom(Hapag sa Barangay).docx",
+      ];
+  
+      const urls = await Promise.all(
+        formFiles.map(async (file) => {
+          const fileRef = ref(storage, `ReportsModule/${file}`);
+          const url = await getDownloadURL(fileRef);
+          return { name: file, url };
+        })
+      );
+      setFiles(urls);
+    } catch (error) {
+      console.error("Error fetching file URLs:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchDownloadLinks = async () => {
-      try {
-        const urls = await Promise.all(
-          formFiles.map(async (file) => {
-            const fileRef = ref(storage, `ReportsModule/${file}`);
-            const url = await getDownloadURL(fileRef);
-            return { name: file, url };
-          })
-        );
-        setFiles(urls);
-      } catch (error) {
-        console.error("Error fetching file URLs:", error);
-      }
-    };
-
     fetchDownloadLinks();
   }, []);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setSelectedUploadFile(event.target.files[0]);
+    }
+  };
+
+  const uploadFile = async () => {
+    if (!selectedUploadFile) return;
+    const fileRef = ref(storage, `ReportsModule/${selectedUploadFile.name}`);
+    try {
+      await uploadBytes(fileRef, selectedUploadFile);
+      alert("File uploaded successfully!");
+      setSelectedUploadFile(null);
+      fetchDownloadLinks(); 
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
+
+    window.location.reload();
+
+  };
+
+  const deleteFile = async (fileName: string) => {
+    const fileRef = ref(storage, `ReportsModule/${fileName}`);
+    try {
+      await deleteObject(fileRef);
+      alert("File deleted successfully!");
+      setFiles(files.filter(file => file.name !== fileName));
+    } catch (error) {
+      console.error("Delete failed:", error);
+    }
+    window.location.reload();
+
+  };
 
   const generateKasambahayReport = async () => {
     setLoadingKasambahay(true);
@@ -317,6 +355,22 @@ footerDrawings.forEach((drawing) => {
 
         <div className="report-card">
           <h2 className="report-title">Downloadable Forms</h2>
+            {/* File Upload Section */}
+          <div className="upload-container">
+            <input 
+              type="file" 
+              onChange={handleFileUpload} 
+              className="upload-input"
+            />
+            <button 
+              onClick={uploadFile} 
+              disabled={!selectedUploadFile} 
+              className="upload-button"
+            >
+              Upload
+            </button>
+          </div>
+
           <div className="Option-container">
             <select
               className="featuredStatus"
@@ -341,7 +395,13 @@ footerDrawings.forEach((drawing) => {
               <span className="download-text">{selectedFile.name.replace(".docx", "")}</span>
               <a href={selectedFile.url} download className="download-button">
                 Download
-              </a>
+                </a>
+              <button 
+                onClick={() => deleteFile(selectedFile.name)} 
+                className="delete-button"
+              >
+                Delete
+              </button>
             </div>
           )}
         </div>

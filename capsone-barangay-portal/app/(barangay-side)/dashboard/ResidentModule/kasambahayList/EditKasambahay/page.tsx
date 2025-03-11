@@ -189,10 +189,16 @@ export default function EditKasambahay() {
             <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required />
 
             <p>Middle Name</p>
-            <input type="text" name="middleName" value={formData.middleName} onChange={handleChange} required />
+            <input type="text" name="middleName" value={formData.middleName} onChange={handleChange} />
 
             <p>Home Address</p>
             <input type="text" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+
+            <p>Place of Birth</p>
+            <input type="text" className="search-bar" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} />
+
+            <p>Date of Birth</p>
+            <input type="date" className="search-bar" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
 
             <p>Sex</p>
             <select name="sex" value={formData.sex} onChange={handleChange} required>
