@@ -53,8 +53,10 @@ export default function ViewResident() {
     { label: "Email Address", key: "emailAddress" },
     { label: "Precinct Number", key: "precinctNumber" },
     { label: "Voter", key: "isVoter" },
-    { label: "PWD", key: "PWD" },
-    { label: "soloParent", key: "soloParent" }
+    { label: "PWD", key: "isPWD" },
+    { label: "Single Parent", key: "isSoloParent" },
+    { label: "Student", key: "isStudent" },
+    { label: "Senior Citizen", key: "isSeniorCitizen" },
   ];
 
   const handleBack = () => {

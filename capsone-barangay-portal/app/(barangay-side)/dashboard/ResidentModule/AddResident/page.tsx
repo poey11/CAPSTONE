@@ -22,8 +22,10 @@ export default function AddResident() {
     emailAddress: "",
     precinctNumber: "",
     generalLocation:"",
-    PWD:false,
-    soloParent:false,
+    isStudent:false,
+    isPWD:false,
+    isSeniorCitizen: false,
+    isSoloParent:false,
     isVoter: false,
   });
 
@@ -34,11 +36,23 @@ export default function AddResident() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
-    });
+    let newValue: any = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+  
+    if (name === "age") {
+      const ageValue = parseInt(value, 10) || 0;
+      setFormData((prevData) => ({
+        ...prevData,
+        age: ageValue,
+        isSeniorCitizen: ageValue >= 60,
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: newValue,
+      }));
+    }
   };
+  
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -210,10 +224,18 @@ export default function AddResident() {
 
       <div className="checkboxes-container">
 
-      <p>PWD</p>
+            <p>Student</p>
             <div className="checkbox-container">
               <label className="checkbox-label">
-                <input type="checkbox" name="PWD" checked={formData.PWD} onChange={handleChange} />
+                <input type="checkbox" name="isStudent" checked={formData.isStudent} onChange={handleChange} />
+                Is this resident a student?
+              </label>
+            </div>
+
+            <p>PWD</p>
+            <div className="checkbox-container">
+              <label className="checkbox-label">
+                <input type="checkbox" name="isPWD" checked={formData.isPWD} onChange={handleChange} />
                 Is this resident a person with disability?
               </label>
             </div>
@@ -221,7 +243,7 @@ export default function AddResident() {
             <p>Solo Parent</p>
             <div className="checkbox-container">
               <label className="checkbox-label">
-                <input type="checkbox" name="soloParent" checked={formData.soloParent} onChange={handleChange} />
+                <input type="checkbox" name="isSoloParent" checked={formData.isSoloParent} onChange={handleChange} />
                 Is this resident a solo parent?
               </label>
             </div>
