@@ -32,6 +32,12 @@
     border-collapse: collapse; /* Removes unnecessary spacing between table cells */
 }
 
+.main-section tr:hover {
+  background-color: #e0e0e0; 
+  cursor: pointer; 
+  transition: background-color 0.2s ease; 
+}
+
 .main-section td {
     padding: 1rem; 
     text-align: center; 

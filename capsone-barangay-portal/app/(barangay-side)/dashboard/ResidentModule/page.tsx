@@ -17,13 +17,13 @@ export default function ResidentModule() {
   const [searchOccupation, setSearchOccupation] = useState<string>("");
 
   const [residentType, setResidentType] = useState<string>("");
+ 
+ 
   const [showCount, setShowCount] = useState<number>(0);
-  
-
   const router = useRouter(); 
 
   const [currentPage, setCurrentPage] = useState(1);
-  const residentsPerPage = 5; //pwede paltan 
+  const residentsPerPage = 10; //pwede paltan 
   
 
   useEffect(() => {
@@ -197,10 +197,6 @@ export default function ResidentModule() {
                 <th>Age</th>
                 <th>Sex</th>
                 <th>Civil Status</th>
-                <th>Occupation</th>
-                <th>Contact Numbert</th>
-                <th>Email Address</th>
-                <th>Precinct Number</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -215,10 +211,6 @@ export default function ResidentModule() {
                   <td>{resident.age}</td>
                   <td>{resident.sex}</td>
                   <td>{resident.civilStatus}</td>
-                  <td>{resident.occupation}</td>
-                  <td>{resident.contactNumber}</td>
-                  <td>{resident.emailAddress}</td>
-                  <td>{resident.precinctNumber}</td>
                   <td>
                     <div className="actions">
                       <button 

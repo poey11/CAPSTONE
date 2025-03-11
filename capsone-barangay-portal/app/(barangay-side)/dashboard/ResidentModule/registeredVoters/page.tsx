@@ -79,7 +79,7 @@ export default function RegisteredVotersModule() {
   };
 
   const [currentPage, setCurrentPage] = useState(1);
-  const residentsPerPage = 5; //pwede paltan 
+  const residentsPerPage = 10; //pwede paltan 
 
   const indexOfLastResident = currentPage * residentsPerPage;
   const indexOfFirstResident = indexOfLastResident - residentsPerPage;
@@ -91,9 +91,28 @@ export default function RegisteredVotersModule() {
   const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
   const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
 
+  const getPageNumbers = () => {
+    const totalPagesArray = [];
+    const pageNumbersToShow = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pageNumbersToShow.push(i);
+      } else if (
+        (i === currentPage - 2 || i === currentPage + 2) &&
+        pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
+      ) {
+        pageNumbersToShow.push("...");
+      }
+    }
+
+    return pageNumbersToShow;
+  };
+
+
   return (
     <main className="main-container">
-      <div className="section-1">vi
+      <div className="section-1">
         <h1>Registered Voters List</h1>
         <Link href="/dashboard/ResidentModule/AddResident">
           <button className="add-announcement-btn">Add New Resident</button>
@@ -145,8 +164,6 @@ export default function RegisteredVotersModule() {
                 <th>Civil Status</th>
                 <th>Occupation</th>
                 <th>Contact Number</th>
-                <th>Email Address</th>
-                <th>Precinct Number</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -163,8 +180,6 @@ export default function RegisteredVotersModule() {
                   <td>{resident.civilStatus}</td>
                   <td>{resident.occupation}</td>
                   <td>{resident.contactNumber}</td>
-                  <td>{resident.emailAddress}</td>
-                  <td>{resident.precinctNumber}</td>
                   <td>
                     <div className="actions">
                     <button 
@@ -196,13 +211,18 @@ export default function RegisteredVotersModule() {
 
       <div className="redirection-section">
         <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {[...Array(totalPages)].map((_, index) => (
-          <button key={index} onClick={() => paginate(index + 1)} className={currentPage === index + 1 ? "active" : ""}>
-            {index + 1}
+        {getPageNumbers().map((number, index) => (
+          <button
+            key={index}
+            onClick={() => typeof number === 'number' && paginate(number)}
+            className={currentPage === number ? "active" : ""}
+          >
+            {number}
           </button>
         ))}
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
+
 
     </main>
   );

@@ -19,6 +19,8 @@ export default function KasambahayListModule() {
 
   const router = useRouter(); 
 
+
+
   useEffect(() => {
     const fetchResidents = async () => {
       try {
@@ -87,7 +89,7 @@ export default function KasambahayListModule() {
   };
 
   const [currentPage, setCurrentPage] = useState(1);
-  const residentsPerPage = 5; //pwede paltan 
+  const residentsPerPage = 10; //pwede paltan 
 
   const indexOfLastResident = currentPage * residentsPerPage;
   const indexOfFirstResident = indexOfLastResident - residentsPerPage;
@@ -98,6 +100,25 @@ export default function KasambahayListModule() {
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
   const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
   const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+
+
+  const getPageNumbers = () => {
+    const totalPagesArray = [];
+    const pageNumbersToShow = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pageNumbersToShow.push(i);
+      } else if (
+        (i === currentPage - 2 || i === currentPage + 2) &&
+        pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
+      ) {
+        pageNumbersToShow.push("...");
+      }
+    }
+
+    return pageNumbersToShow;
+  };
 
   return (
     <main className="main-container">
@@ -159,16 +180,6 @@ export default function KasambahayListModule() {
                 <th>Place of Birth</th>
                 <th>Sex</th>
                 <th>Age</th>
-                <th>Civil Status</th>
-                <th>Educational Attainment</th>
-                <th>Nature of Work</th>
-                <th>Employment Arrangement</th>
-                <th>Salary</th>
-                <th>SSS Member</th>
-                <th>PAG-IBIG Member</th>
-                <th>PhilHealth Member</th>
-                <th>Employer Name</th>
-                <th>Employer Address</th>
                 <th>Created At</th>
                 <th>Actions</th>
               </tr>
@@ -185,16 +196,6 @@ export default function KasambahayListModule() {
                   <td>{resident.placeOfBirth}</td>
                   <td>{resident.sex}</td>
                   <td>{resident.age}</td>
-                  <td>{resident.civilStatus}</td>
-                  <td>{resident.educationalAttainment}</td>
-                  <td>{resident.natureOfWork}</td>
-                  <td>{resident.employmentArrangement}</td>
-                  <td>{resident.salary}</td>
-                  <td>{resident.sssMember ? "Yes" : "No"}</td>
-                  <td>{resident.pagibigMember ? "Yes" : "No"}</td>
-                  <td>{resident.philhealthMember ? "Yes" : "No"}</td>
-                  <td>{resident.employerName}</td>
-                  <td>{resident.employerAddress}</td>
                   <td>{resident.createdAt}</td>
                   <td>
                     <div className="actions">
@@ -210,11 +211,16 @@ export default function KasambahayListModule() {
         )}
       </div>
 
+    
       <div className="redirection-section">
         <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {[...Array(totalPages)].map((_, index) => (
-          <button key={index} onClick={() => paginate(index + 1)} className={currentPage === index + 1 ? "active" : ""}>
-            {index + 1}
+        {getPageNumbers().map((number, index) => (
+          <button
+            key={index}
+            onClick={() => typeof number === 'number' && paginate(number)}
+            className={currentPage === number ? "active" : ""}
+          >
+            {number}
           </button>
         ))}
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
