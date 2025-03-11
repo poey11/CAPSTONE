@@ -37,7 +37,7 @@ const ReportsPage = () => {
         })
       );
   
-      setFiles(urls); // Save all fetched files to state
+      setFiles(urls);
     } catch (error) {
       console.error("Error fetching file URLs:", error);
     }
