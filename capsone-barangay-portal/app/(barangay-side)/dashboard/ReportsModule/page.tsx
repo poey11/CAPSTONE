@@ -355,21 +355,9 @@ footerDrawings.forEach((drawing) => {
 
         <div className="report-card">
           <h2 className="report-title">Downloadable Forms</h2>
-            {/* File Upload Section */}
-          <div className="upload-container">
-            <input 
-              type="file" 
-              onChange={handleFileUpload} 
-              className="upload-input"
-            />
-            <button 
-              onClick={uploadFile} 
-              disabled={!selectedUploadFile} 
-              className="upload-button"
-            >
-              Upload
-            </button>
-          </div>
+       
+
+
 
           <div className="Option-container">
             <select
@@ -404,7 +392,34 @@ footerDrawings.forEach((drawing) => {
               </button>
             </div>
           )}
+
+           
+         {/* File Upload Section */}
+         <div className="upload-container">
+              
+              <input 
+                type="file" 
+                onChange={handleFileUpload} 
+                className="upload-input" 
+                id="file-upload"
+              />
+              <label 
+                htmlFor="file-upload" 
+                className="upload-button"
+              >
+                Choose File
+              </label>
+              <button 
+                onClick={uploadFile} 
+                disabled={!selectedUploadFile} 
+                className="upload-button"
+              >
+                Upload
+              </button>
         </div>
+
+        </div>
+
         
       </div>
     </div>
