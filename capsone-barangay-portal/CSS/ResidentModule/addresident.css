@@ -21,12 +21,6 @@
     padding: 3rem;
     margin:  auto; 
 }
-    
-   /* max-width: 1200px; 
-   /* margin: 2rem auto; 
-   /* max-height: 90vh; 
-    /*overflow-y: auto; */
-    
 
 
 .section-1 {
@@ -45,8 +39,7 @@
 }
 
 .actions {
-    display: flex;
-    gap: 0.5rem; /* Space between action buttons */
+    display: block
 }
 
 
@@ -192,19 +185,32 @@
   .section-2-right-side {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    align-items: center; 
+    justify-content: center; 
     width: 40%;
-    padding: 1rem;
-    margin-left: 2rem;
-    margin-top: 1rem;
+    padding: 3rem;
+    flex-wrap: wrap;
+    overflow: hidden;
+    box-sizing: border-box;
+    
+  }
+  .checkboxes-container {
+    display: flex;
+    flex-direction: column;
+    padding: 3rem;
+    margin-bottom: 2rem;
+    border-radius: 1rem;
+    border: 2px solid  #ddd;
+
+    
   }
 
-
-
-
-
-
+  .checkboxes-container p {
+   color: grey;
+   font-weight: bold;
+   font-size: 1rem;
+   padding: 1rem;
+  }
 
 
   .file-upload-container {
@@ -217,10 +223,11 @@
     align-items: center; 
     justify-content: center; 
     text-align: center;
-    height: 60%; /* Set a fixed height for better UI experience */
+    height: 40%; 
     width: 80%;
-    
   }
+
+  
 
   .file-upload-container:hover {
     background-color: rgba(245, 143, 88, 0.2);
@@ -339,7 +346,7 @@
   }
   
 
-  /* for isVoter checkbox */
+
 .checkbox-label {
   font-size: 1rem; 
   color: grey;
@@ -364,4 +371,10 @@
   color: #555; 
   cursor: not-allowed; 
   opacity: 0.8; 
+}
+
+.search-bar:focus ,.featuredStatus:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
