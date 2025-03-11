@@ -356,7 +356,7 @@ footerDrawings.forEach((drawing) => {
         <div className="report-card">
           <h2 className="report-title">Downloadable Forms</h2>
        
-
+      <div className="forms-section">
 
 
           <div className="Option-container">
@@ -392,32 +392,40 @@ footerDrawings.forEach((drawing) => {
               </button>
             </div>
           )}
+    </div>
 
-           
-         {/* File Upload Section */}
-         <div className="upload-container">
-              
-              <input 
-                type="file" 
-                onChange={handleFileUpload} 
-                className="upload-input" 
-                id="file-upload"
-              />
-              <label 
-                htmlFor="file-upload" 
-                className="upload-button"
-              >
-                Choose File
-              </label>
-              <button 
-                onClick={uploadFile} 
-                disabled={!selectedUploadFile} 
-                className="upload-button"
-              >
-                Upload
-              </button>
-        </div>
+<h2 className="report-title">Upload A File</h2>  
+        <div className="upload-section">
 
+            <div className="upload-container">
+                  <input 
+                    type="file" 
+                    onChange={handleFileUpload} 
+                    id="file-upload"
+                    style={{ display: 'none' }} 
+                  />
+                  <label 
+                    htmlFor="file-upload" 
+                    className="upload-button"
+                  >
+                    Choose File
+                  </label>
+                  {selectedUploadFile && (
+                    <p className="file-name">{selectedUploadFile.name}</p>
+                  )}
+                  <button 
+                    onClick={uploadFile} 
+                    disabled={!selectedUploadFile} 
+                    className="upload-button"
+                  >
+                    Upload
+                  </button>
+                </div>
+
+      </div>
+
+                          
+          
         </div>
 
         

@@ -11,14 +11,7 @@
     overflow-y: auto;
 }
 
-/* Title */
-.reports-title {
-    color: grey;
-    font-size: 2rem;
-    margin-bottom: 2rem;
-    font-weight: 700;
-   
-}
+
 
 /* Report Section */
 .reports-section {
@@ -42,14 +35,23 @@
     transform: translateY(-5px);
 }
 
+
 .report-title {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
     color: grey;
     display: flex;
     justify-content: flex-start;
+    margin-top: 2rem;
 }
 
+/* Title */
+.reports-title {
+    color: grey;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    font-weight: 700;
+}
 .featuredStatus {
     padding: 10px;
     width: 100%;
@@ -114,26 +116,45 @@
     gap: 1rem;
 }
 
+.upload-section {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
 .upload-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; 
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     padding: 24px;
     border: 2px dashed #e0e0e0;
     border-radius: 12px;
     background-color: #f9f9f9;
     transition: background-color 0.3s;
-    margin-top: 3rem;
+    width: 60%;
+    max-width: 500px; 
+    text-align: center;
   }
+  
+  .file-name {
+    word-wrap: break-word; 
+    word-break: break-all; 
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    width: 100%; 
+    text-align: center;
+  }
+  
   
   .upload-container:hover {
     background-color: #f0f8ff;
   }
   
-  .upload-input {
-    display: none;
-  }
   
   .upload-button {
     padding: 10px 24px;
