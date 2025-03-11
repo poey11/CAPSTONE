@@ -18,77 +18,70 @@ const ReportsPage = () => {
   const [files, setFiles] = useState<FileData[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
   const [selectedModule, setSelectedModule] = useState<string>("");
-  const [uploading, setUploading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(null);
 
 
   const storage = getStorage();
   const db = getFirestore();
 
-  const formFiles = [
-    "Fairview ECA Form.docx",
-    "KASAMBAHAY PROGRAM COMPONENTS FORM.docx",
-    "Barangay Kontra Gutom(Hapag sa Barangay).docx",
-  ];
-
-  useEffect(() => {
-    const fetchDownloadLinks = async () => {
-      try {
-        const formFiles = [
-          "Fairview ECA Form.docx",
-          "KASAMBAHAY PROGRAM COMPONENTS FORM.docx",
-          "Barangay Kontra Gutom(Hapag sa Barangay).docx",
-        ];
-
-        const urls = await Promise.all(
-          formFiles.map(async (file) => {
-            const fileRef = ref(storage, `ReportsModule/${file}`);
-            const url = await getDownloadURL(fileRef);
-            return { name: file, url };
-          })
-        );
-        setFiles(urls);
-      } catch (error) {
-        console.error("Error fetching file URLs:", error);
-      }
-    };
-
-    fetchDownloadLinks();
-  }, []);
-
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
+  const fetchDownloadLinks = async () => {
     try {
-      const fileName = `${uuidv4()}_${file.name}`;
-      const fileRef = ref(storage, `ReportsModule/${fileName}`);
-      await uploadBytes(fileRef, file);
-      const url = await getDownloadURL(fileRef);
-      setFiles([...files, { name: fileName, url }]);
-      alert("File uploaded successfully!");
+      const formFiles = [
+        "Fairview ECA Form.docx",
+        "KASAMBAHAY PROGRAM COMPONENTS FORM.docx",
+        "Barangay Kontra Gutom(Hapag sa Barangay).docx",
+      ];
+  
+      const urls = await Promise.all(
+        formFiles.map(async (file) => {
+          const fileRef = ref(storage, `ReportsModule/${file}`);
+          const url = await getDownloadURL(fileRef);
+          return { name: file, url };
+        })
+      );
+      setFiles(urls);
     } catch (error) {
-      console.error("Error uploading file:", error);
-      alert("Failed to upload file.");
-    } finally {
-      setUploading(false);
+      console.error("Error fetching file URLs:", error);
     }
   };
 
-  const handleFileDelete = async (fileName: string) => {
-    setDeleting(true);
-    try {
-      const fileRef = ref(storage, `ReportsModule/${fileName}`);
-      await deleteObject(fileRef);
-      setFiles(files.filter((file) => file.name !== fileName));
-      alert("File deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting file:", error);
-      alert("Failed to delete file.");
-    } finally {
-      setDeleting(false);
+  useEffect(() => {
+    fetchDownloadLinks();
+  }, []);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setSelectedUploadFile(event.target.files[0]);
     }
+  };
+
+  const uploadFile = async () => {
+    if (!selectedUploadFile) return;
+    const fileRef = ref(storage, `ReportsModule/${selectedUploadFile.name}`);
+    try {
+      await uploadBytes(fileRef, selectedUploadFile);
+      alert("File uploaded successfully!");
+      setSelectedUploadFile(null);
+      fetchDownloadLinks(); 
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
+
+    window.location.reload();
+
+  };
+
+  const deleteFile = async (fileName: string) => {
+    const fileRef = ref(storage, `ReportsModule/${fileName}`);
+    try {
+      await deleteObject(fileRef);
+      alert("File deleted successfully!");
+      setFiles(files.filter(file => file.name !== fileName));
+    } catch (error) {
+      console.error("Delete failed:", error);
+    }
+    window.location.reload();
+
   };
 
   const generateKasambahayReport = async () => {
@@ -362,6 +355,22 @@ footerDrawings.forEach((drawing) => {
 
         <div className="report-card">
           <h2 className="report-title">Downloadable Forms</h2>
+            {/* File Upload Section */}
+          <div className="upload-container">
+            <input 
+              type="file" 
+              onChange={handleFileUpload} 
+              className="upload-input"
+            />
+            <button 
+              onClick={uploadFile} 
+              disabled={!selectedUploadFile} 
+              className="upload-button"
+            >
+              Upload
+            </button>
+          </div>
+
           <div className="Option-container">
             <select
               className="featuredStatus"
@@ -386,7 +395,13 @@ footerDrawings.forEach((drawing) => {
               <span className="download-text">{selectedFile.name.replace(".docx", "")}</span>
               <a href={selectedFile.url} download className="download-button">
                 Download
-              </a>
+                </a>
+              <button 
+                onClick={() => deleteFile(selectedFile.name)} 
+                className="delete-button"
+              >
+                Delete
+              </button>
             </div>
           )}
         </div>
