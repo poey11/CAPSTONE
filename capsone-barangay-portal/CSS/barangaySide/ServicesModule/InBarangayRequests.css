@@ -79,6 +79,8 @@
     width: 100%;
     height: 100%; /* Full height */
     margin-top: 2rem;
+    border: 2px solid  #ddd;
+    max-height: 70%;
 }
 
 .main-section table {
@@ -183,6 +185,52 @@
 .status-badge.new {
     background-color: #f79233;    
 }
+
+
+.redirection-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem auto;
+    width: fit-content;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    background: #f8f8f8;
+    gap: 5px;
+  }
+  
+  .redirection-section button {
+    padding: 4px 8px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.3s;
+  }
+  
+  .redirection-section button:hover {
+    background-color: #0056b3;
+  }
+  
+  .redirection-section button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .redirection-section .active {
+    background-color: #0056b3;
+    font-weight: bold;
+  }
+  
+
+  .main-section tr:hover {
+    background-color: #e0e0e0; 
+    cursor: pointer; 
+    transition: background-color 0.2s ease; 
+  }
+  
 
 
 

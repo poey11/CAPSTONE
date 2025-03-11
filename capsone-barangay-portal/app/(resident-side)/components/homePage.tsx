@@ -12,28 +12,28 @@ const homePage:React.FC = () => {
         },
         {
         image: "/Images/feeding2.jpg",
-        facility: "Health Center",
-        location: "Dahlia Avenue",
+        facility: "Senior Citizen Building",
+        location: "Complex, Dahlia Avenue",
         },
         {
         image: "/Images/feeding2.jpg",
-        facility: "Multi-purpose Hall",
-        location: "Dahlia Avenue",
+        facility: "Multi-purpose Center",
+        location: "Sitio Ruby",
         },
         {
         image: "/Images/feeding2.jpg",
-        facility: "Community Center",
+        facility: "Sapamanai Covered Court",
         location: "Rose Street",
         },
         {
         image: "/Images/feeding2.jpg",
-        facility: "Public Library",
+        facility: "Fairview Elementary School",
         location: "Tulip Lane",
         },
         {
         image: "/Images/feeding2.jpg",
-        facility: "Sports Complex",
-        location: "Lily Road",
+        facility: " Sitio Kislap Covered Court",
+        location: "Pearl Street",
         },
     ];
 
@@ -101,13 +101,13 @@ const homePage:React.FC = () => {
                   </div>
 
                   <div className="card">
-                        <p className="quantity"> 81k</p>
-                        <p className="name">Population </p>
+                        <p className="quantity"> 22k</p>
+                        <p className="name">Households </p>
                   </div>
 
                   <div className="card">
-                        <p className="quantity"> 81k</p>
-                        <p className="name">Population </p>
+                        <p className="quantity"> 312</p>
+                        <p className="name">Hectares</p>
                   </div>
 
                   <div className="card">
