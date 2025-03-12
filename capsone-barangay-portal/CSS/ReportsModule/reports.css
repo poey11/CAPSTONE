@@ -81,27 +81,58 @@
 .report-button:hover {
     background: #cf5315;
 }
-
 .download-item {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     background: #f8f8f8;
     padding: 1rem;
     border-radius: 8px;
     margin-top: 10px;
 }
 
-.download-button {
+.download-text {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;
+}
+
+.download-button,
+.delete-button {
     padding: 10px 15px;
-    background: #e56723;
+    border-radius: 8px;
     color: white;
     text-decoration: none;
-    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.download-button {
+    background: #e56723;
+    margin-right: 10px;
 }
 
 .download-button:hover {
     background: #cf5315;
 }
+
+.delete-button {
+    background: #e04f4f;
+}
+
+.delete-button:hover {
+    background: #c63b3b;
+}
+
+/* Align the buttons to the right */
+.download-item div {
+    display: flex;
+    gap: 10px;
+}
+
 
 @media (max-width: 768px) {
     .report-card {

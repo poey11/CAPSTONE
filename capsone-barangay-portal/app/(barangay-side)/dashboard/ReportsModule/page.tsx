@@ -1,11 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
-import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject } from "firebase/storage";
+import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject, listAll } from "firebase/storage";
 import { getFirestore, collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
+
 
 interface FileData {
   name: string;
@@ -26,19 +27,16 @@ const ReportsPage = () => {
 
   const fetchDownloadLinks = async () => {
     try {
-      const formFiles = [
-        "Fairview ECA Form.docx",
-        "KASAMBAHAY PROGRAM COMPONENTS FORM.docx",
-        "Barangay Kontra Gutom(Hapag sa Barangay).docx",
-      ];
+      const folderRef = ref(storage, "ReportsModule/");
+      const fileList = await listAll(folderRef);
   
       const urls = await Promise.all(
-        formFiles.map(async (file) => {
-          const fileRef = ref(storage, `ReportsModule/${file}`);
-          const url = await getDownloadURL(fileRef);
-          return { name: file, url };
+        fileList.items.map(async (item) => {
+          const url = await getDownloadURL(item);
+          return { name: item.name, url };
         })
       );
+  
       setFiles(urls);
     } catch (error) {
       console.error("Error fetching file URLs:", error);
@@ -379,19 +377,23 @@ footerDrawings.forEach((drawing) => {
           </div>
 
           {selectedFile && (
-            <div className="download-item">
-              <span className="download-text">{selectedFile.name.replace(".docx", "")}</span>
-              <a href={selectedFile.url} download className="download-button">
-                Download
-                </a>
-              <button 
-                onClick={() => deleteFile(selectedFile.name)} 
-                className="delete-button"
-              >
-                Delete
-              </button>
-            </div>
-          )}
+              <div className="download-item">
+                <span className="download-text">{selectedFile.name.replace(".docx", "")}</span>
+                <button 
+                  onClick={() => window.location.href = selectedFile.url} 
+                  className="download-button"
+                >
+                  Download
+                </button>
+                <button 
+                  onClick={() => deleteFile(selectedFile.name)} 
+                  className="delete-button"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+
     </div>
 
 <h2 className="report-title">Upload A File</h2>  

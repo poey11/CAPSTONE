@@ -96,6 +96,8 @@ export default function ResidentModule() {
     }
   };
 
+ 
+
   const indexOfLastResident = currentPage * residentsPerPage;
   const indexOfFirstResident = indexOfLastResident - residentsPerPage;
   const currentResidents = filteredResidents.slice(indexOfFirstResident, indexOfLastResident);
@@ -105,6 +107,25 @@ export default function ResidentModule() {
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
   const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
   const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+
+  const getPageNumbers = () => {
+    const totalPagesArray = [];
+    const pageNumbersToShow = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pageNumbersToShow.push(i);
+      } else if (
+        (i === currentPage - 2 || i === currentPage + 2) &&
+        pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
+      ) {
+        pageNumbersToShow.push("...");
+      }
+    }
+
+    return pageNumbersToShow;
+  };
+
 
   return (
     <main className="main-container">
@@ -216,6 +237,21 @@ export default function ResidentModule() {
           </table>
         )}
       </div>
+
+      <div className="redirection-section">
+        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+        {getPageNumbers().map((number, index) => (
+          <button
+            key={index}
+            onClick={() => typeof number === 'number' && paginate(number)}
+            className={currentPage === number ? "active" : ""}
+          >
+            {number}
+          </button>
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+      </div>
+      
     </main>
   );
 }
