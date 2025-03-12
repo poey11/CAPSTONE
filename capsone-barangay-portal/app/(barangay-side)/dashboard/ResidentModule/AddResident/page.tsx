@@ -34,10 +34,13 @@ export default function AddResident() {
   const [error, setError] = useState("");
   
 
+    // Handles input changes for text, select, and checkbox fields
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     let newValue: any = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
   
+        // Automatically mark as Senior Citizen if age is 60 or above
     if (name === "age") {
       const ageValue = parseInt(value, 10) || 0;
       setFormData((prevData) => ({
@@ -53,7 +56,7 @@ export default function AddResident() {
     }
   };
   
-
+  // Handles file selection and creates a preview
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const uploadedFiles = Array.from(e.target.files).map((file) => ({
@@ -64,10 +67,12 @@ export default function AddResident() {
     }
   };
 
+    // Handles file deletion from the uploaded files list
   const handleFileDelete = (fileName: string) => {
     setFiles(files.filter((file) => file.name !== fileName));
   };
 
+    // Handles form submission and saves the resident's data to Firestore
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -80,13 +85,15 @@ export default function AddResident() {
       });
 
       alert("Resident added successfully!");
-      router.push("/dashboard/ResidentModule");
+      router.push("/dashboard/ResidentModule"); // Redirect to Residents module after saving
     } catch (err) {
       setError("Failed to add resident");
       console.error(err);
     }
     setLoading(false);
   };
+
+    // Redirects the user back to the Residents module
       const handleBack = () => {
         window.location.href = "/dashboard/ResidentModule";
       };
@@ -106,7 +113,7 @@ export default function AddResident() {
           </div>
         </div>
         <form id="addResidentForm" onSubmit={handleSubmit} className="section-2">
-
+        {/* Resident Form */}
         <div className="section-2-left-side">
             <p>Full Name</p>
             <input type="text" 
@@ -223,7 +230,7 @@ export default function AddResident() {
 
 
       <div className="checkboxes-container">
-
+            {/* Checkboxes for Resident Type */}
             <p>Student</p>
             <div className="checkbox-container">
               <label className="checkbox-label">
@@ -262,7 +269,7 @@ export default function AddResident() {
     
 
      <div className="file-upload-container">
-
+            {/* File Upload */}
           <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
           <input
             id="file-upload"
