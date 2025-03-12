@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
+import { motion } from "framer-motion";
 
 
 interface FileData {
@@ -21,6 +22,11 @@ const ReportsPage = () => {
   const [selectedModule, setSelectedModule] = useState<string>("");
   const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(null);
 
+
+  
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
 
   const storage = getStorage();
   const db = getFirestore();
@@ -299,10 +305,17 @@ footerDrawings.forEach((drawing) => {
     setSelectedModule(e.target.value);
   };
 
+
+  const handleDownload = (file: FileData) => {
+    setPopupMessage(`${file.name.replace(".docx", "")} downloaded!`);
+    setShowSuccessPopup(true);
+    setTimeout(() => {
+      setShowSuccessPopup(false);
+    }, 3000);
+  };
+
   return (
     <div className="report-main-container">
-
-      
       <h1 className="reports-title">Reports Module</h1>
 
       <div className="reports-section">
@@ -463,6 +476,24 @@ footerDrawings.forEach((drawing) => {
 
         
       </div>
+
+      {/* Success Pop-up */}
+      {showSuccessPopup && (
+        <div className={`popup-overlay show`}>
+          <div className="popup">
+              <p>{popupMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error Pop-up */}
+      {showErrorPopup && (
+        <div className={`popup-overlay show`}>
+          <div className="popup">
+              <p>{popupMessage}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
