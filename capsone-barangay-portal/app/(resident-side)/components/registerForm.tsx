@@ -20,7 +20,7 @@ interface Resident {
   
   type residentUser = Resident & {
     role: "Resident";
-    status: "unverified";
+    status: "Unverified";
   };
   
 const registerForm:React.FC = () => {
@@ -38,7 +38,7 @@ const registerForm:React.FC = () => {
         password: "",
         role: "Resident",
         upload: null,
-        status: "unverified"
+        status: "Unverified"
       });
 
       const handleChange = (

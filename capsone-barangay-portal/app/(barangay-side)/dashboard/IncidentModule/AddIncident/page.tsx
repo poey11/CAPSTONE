@@ -1,10 +1,11 @@
 "use client"
 import "@/CSS/IncidentModule/AddNewIncident.css";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
+import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
 
  interface userProps{
   fname: string;
@@ -42,10 +43,31 @@ export default function AddIncident() {
     address: "",
   });
 
-  const caseNumber = `${departmentId}-2025-0001`;
+  // ✅ Fetch and set the case number when the component mounts
+  useEffect(() => {
+    const fetchCaseNumber = async () => {
+      const caseNum = await getCaseNumber();
+      setReportInfo((prev: any) => ({ ...prev, caseNumber: caseNum }));
+    };
 
+    fetchCaseNumber();
+  }, [departmentId]); // Runs when `departmentId` changes
+
+  const year = new Date().getFullYear().toString();
+  const getCaseNumber = async () => {
+    if (departmentId) {
+      let number = await getSpecificCountofCollection("IncidentReports", "department", departmentId);
+      const formattedNumber = number !== undefined ? String(number + 1).padStart(4, "0") : "0000";
+
+      const caseValue =`${departmentId}-${year}-${formattedNumber}` ;
+      console.log("Generated Case Number:", caseValue); // ✅ Logs the correct value
+      return caseValue; // ✅ Ensure the function returns the computed value
+    }
+  };
+
+  
   const [reportInfo, setReportInfo] = useState<any>({
-    caseNumber: caseNumber,
+    caseNumber: "",
     dateFiled: "",
     timeFiled: "",
     location: "",
@@ -53,8 +75,8 @@ export default function AddIncident() {
     concern: "",
     status: "Pending",
     receivedBy: "",
-    dateRecieved: "",
-    timeRecieved: "",
+    dateReceived: "",
+    timeReceived: "",
     file: null,
   });
 
@@ -85,7 +107,6 @@ export default function AddIncident() {
   }
   };
 
-     // Handle file deletion for container 1
   const handleFileDeleteContainer1 = (fileName: string) => {
     setFilesContainer1([]);
 
@@ -108,7 +129,7 @@ export default function AddIncident() {
         }
 
         // Add document to IncidentReports collection
-        const docRef = await addDoc(collection(db, "IncidentReports"), {
+        await addDoc(collection(db, "IncidentReports"), {
             caseNumber: reportInfo.caseNumber,
             dateFiled: reportInfo.dateFiled,
             timeFiled: reportInfo.timeFiled,
@@ -117,35 +138,29 @@ export default function AddIncident() {
             concern: reportInfo.concern,
             status: "Pending",
             receivedBy: `${deskStaff.fname} ${deskStaff.lname}`,
-            dateRecieved: reportInfo.dateRecieved,
-            timeRecieved: reportInfo.timeRecieved,
+            dateReceived: reportInfo.dateReceived,
+            timeReceived: reportInfo.timeReceived,
             file: filename,
             department:departmentId,
-        });
-
-        // Add subcollection "Complainant"
-        await addDoc(collection(docRef, "Complainant"), {
-            // Add fields related to the complainant
-            fname: complainant.fname,
-            lname: complainant.lname,
-            sex: complainant.sex,
-            age: complainant.age,
-            contact: complainant.contact,
-            civilStatus: complainant.civilStatus,
-            address: complainant.address,
-            
-        });
-
-        // Add subcollection "Respondent"
-        await addDoc(collection(docRef, "Respondent"), {
-            // Add fields related to the respondent
-            fname: respondent.fname,
-            lname: respondent.lname,
-            sex: respondent.sex,
-            age: respondent.age,
-            contact: respondent.contact,
-            civilStatus: respondent.civilStatus,
-            address: respondent.address,
+            complainant:{
+              fname: complainant.fname,
+              lname: complainant.lname,
+              sex: complainant.sex,
+              age: complainant.age,
+              contact: complainant.contact,
+              civilStatus: complainant.civilStatus,
+              address: complainant.address,
+             
+            },
+            respondent:{
+              fname: respondent.fname,
+              lname: respondent.lname,
+              sex: respondent.sex,
+              age: respondent.age,
+              contact: respondent.contact,
+              civilStatus: respondent.civilStatus,
+              address: respondent.address,
+            }
         });
 
         alert("Incident Report Submitted!");
@@ -156,23 +171,18 @@ export default function AddIncident() {
 
 
 
-      // Handle form submission
   const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault(); // Prevent default form submission
-    console.log("complainant", complainant);
-    console.log("respondent", respondent);
-    console.log("reportInfo", reportInfo);
-    console.log("deskStaff", deskStaff);
-    // Manually trigger form validation
+    event.preventDefault(); 
     const form = event.target as HTMLFormElement;
     if (form.checkValidity()) {
-      // Redirect to the Notification page after form submission if validation is successful
-      handleUpload();
-      deleteForm();
-      router.push(`/dashboard/IncidentModule/Department?id=${departmentId}`);
+      
+      handleUpload().then(() => {
+        deleteForm();
+        router.back();
+      })
     } else {
-      // If the form is invalid, trigger the validation
-      form.reportValidity(); // This will show validation messages for invalid fields
+     
+      form.reportValidity();
     }
   };
 
@@ -196,7 +206,7 @@ export default function AddIncident() {
       } else if (id === "respondent") {
         setRespondent({
           ...respondent,
-          [name]: value||"",
+          [name]: value,
         });
       } else if (id === "staff") {
         setdeskStaff({
@@ -223,8 +233,8 @@ export default function AddIncident() {
         concern: "",
         status: "",
         receivedBy: "",
-        dateRecieved: "",
-        timeRecieved: "",
+        dateReceived: "",
+        timeReceived: "",
         file: null,
       });
       setComplainant({
@@ -250,7 +260,7 @@ export default function AddIncident() {
         address: "",
       });
 
-    }
+  }
 
   const handleBack = () => {
     router.back();
@@ -261,7 +271,7 @@ export default function AddIncident() {
     <main className="main-container">
         <div className="main-content">
 
-        <button type="submit" className="back-button" onClick={handleBack}></button>
+        <button type="button" className="back-button" onClick={handleBack}></button>
 
         <form onSubmit={handleSubmit}>
             <div className="section-1">
@@ -546,30 +556,17 @@ export default function AddIncident() {
                   </div> 
                             
                   <div className="input-group">
-                    <p>Date Signed</p>
+                        <p>Date Received</p>
+                        <input type="date" className="search-bar" placeholder="Enter Date" id="dateReceived" name="dateReceived" 
+                        value = {reportInfo.dateReceived} onChange={handleFormChange} required/>
+                    </div>
 
-                    <input 
-                    type="Date" 
-                    className="search-bar" 
-                    id="dateRecieved"
-                    name="dateRecieved"
-                    required
-                    value = {reportInfo.dateRecieved} onChange={handleFormChange}
-                    /> 
-                  </div>
+                    <div className="input-group">
+                        <p>Time Received</p>
+                        <input type="time" className="search-bar" placeholder="Enter Time" id="timeReceived" name="timeReceived" 
+                        value = {reportInfo.timeReceived} onChange={handleFormChange} required />
+                    </div>
 
-                  <div className="input-group">
-                    <p>Time Signed</p>
-
-                    <input 
-                    type="time" 
-                    className="search-bar" 
-                    required
-                    id="timeRecieved"
-                    name="timeRecieved"
-                    value = {reportInfo.timeRecieved} onChange={handleFormChange}
-                    /> 
-                  </div>
 
                 </div>
                    
@@ -598,64 +595,63 @@ export default function AddIncident() {
                  </div>
 
             <div className="section-4-right-side">
-
-              <div className="title">
-                    <p> Photo (If Applicable)</p>
-              </div> 
-            
-              <div className="file-upload-container">
-              <label htmlFor="file-upload1" className="upload-link">Click to Upload File</label>
+              
+              
+            <div className="title">
+                     <p> Photo of the Incident (if Applicable)</p>
+               </div> 
+ 
+               <div className="file-upload-container">
+                 <label htmlFor="file-upload1" className="upload-link">Click to Upload File</label>
                  <input
                    id="file-upload1"
                    type="file"
                    className="file-upload-input"
                    accept=".jpg,.jpeg,.png"
-                   value={reportInfo.file?.name || ""}
                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                      handleFileChangeContainer1(e);
-                      handleFormChange(e);
+                     handleFormChange(e);
                    }} // Handle file selection
                  />
                  <div className="uploadedFiles-container">
-                   {filesContainer1.length > 0 && (
-                     <div className="file-name-image-display">
-                       <ul>
-                         {filesContainer1.map((file, index) => (
-                           <div className="file-name-image-display-indiv" key={index}>
-                             <li>
-                               {file.preview && (
-                                 <div className="filename-image-container">
-                                   <img
-                                     src={file.preview}
-                                     alt={file.name}
-                                     style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                   />
-                                 </div>
-                               )}
-                               {file.name}
-                               <div className="delete-container">
-                                 <button
-                                   type="button"
-                                   onClick={() => handleFileDeleteContainer1(file.name)}
-                                   className="delete-button"
-                                 >
-                                   <img
-                                     src="/images/trash.png"
-                                     alt="Delete"
-                                     className="delete-icon"
-                                   />
-                                 </button>
-                               </div>
-                             </li>
-                           </div>
-                         ))}
-                       </ul>
-                     </div>
-                   )}
+                    {filesContainer1.length > 0 && (
+                      <div className="file-name-image-display">
+                        <ul>
+                          {filesContainer1.map((file, index) => (
+                            <div className="file-name-image-display-indiv" key={index}>
+                              <li>
+                                {file.preview && (
+                                  <div className="filename-image-container">
+                                    <img
+                                      src={file.preview}
+                                      alt={file.name}
+                                      style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                    />
+                                  </div>
+                                )}
+                                {file.name}
+                                <div className="delete-container">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleFileDeleteContainer1(file.name)}
+                                    className="delete-button"
+                                  >
+                                    <img
+                                      src="/images/trash.png"
+                                      alt="Delete"
+                                      className="delete-icon"
+                                    />
+                                  </button>
+                                </div>
+                              </li>
+                            </div>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                  </div>
-
-
-              </div>
+               </div>
+               
 
             </div>
                 

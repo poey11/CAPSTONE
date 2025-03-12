@@ -3,12 +3,12 @@ import "@/CSS/IncidentModule/MainDashboardIncident.css";
 import { useState,useEffect } from "react";
 import { useRouter,useSearchParams} from "next/navigation";
 import { getAllSpecificDocument,deleteDocument } from "@/app/helpers/firestorehelper";
-import { ReportProps } from "@/app/helpers/interfaceHelper";
+
 
 const statusOptions = ["Pending","In Progress", "Resolved", "Settled", "Archived"];
 
 export default function Department() {
-  const [incidentData, setIncidentData] = useState<ReportProps[]>([])
+  const [incidentData, setIncidentData] = useState<any[]>([])
   const router = useRouter();
   const searchParam = useSearchParams();
   const departmentId = searchParam.get("id");
@@ -16,10 +16,10 @@ export default function Department() {
   useEffect(()=> {
 
     if(departmentId){
-      const unsubscribe = getAllSpecificDocument("IncidentReports","department",departmentId, setIncidentData);
-      return () => {
+      const unsubscribe = getAllSpecificDocument("IncidentReports", "department", departmentId, setIncidentData);
+        return () => {
         if (unsubscribe) {
-          unsubscribe(); // ✅ Now this works correctly
+          unsubscribe(); 
         }
       };
     }
@@ -28,6 +28,7 @@ export default function Department() {
   },[departmentId])
   console.log("Data:",incidentData);
 
+  /*filtering and search is not yet working */
   const handleStatusChange = (index: number, newStatus: string) => {
     setIncidentData((prev) =>
       prev.map((incident, i) => (i === index ? { ...incident, Status: newStatus } : incident))
@@ -46,6 +47,7 @@ export default function Department() {
 
   const handleDeleteLupon = (reportId: string) => {
     deleteDocument("IncidentReports", reportId);
+    deleteDocument("IncidentReports/Investigator", reportId);
   }
 
   const handleAddLupon = () => {
@@ -57,7 +59,7 @@ export default function Department() {
   return (
     <main className="main-container">
       <div className="section-1">
-        <h1>Lupon Tagapamayapa {departmentId} Table</h1>
+        <h1>Lupon Tagapamayapa: {departmentId} Table</h1>
           <button className="add-announcement-btn" onClick={handleAddLupon}>Add New Incident</button>
       </div>
 
@@ -81,7 +83,6 @@ export default function Department() {
           <thead>
             <tr>
               <th>Case #</th>
-              <th>Complainant's Name</th>
               <th>Date & Time of the Incident</th>
               <th>Nature of Complaint</th>
               <th>Status</th>
@@ -91,9 +92,8 @@ export default function Department() {
           <tbody>
             {incidentData.map((incident, index) => (
               <tr key={index}>
-                <td></td>
-                <td>{incident.firstname} {incident.lastname}</td>
-                <td>{incident.date} {incident.time}</td>
+                <td>{incident.caseNumber}</td>
+                <td>{incident.dateFiled} {incident.timeFiled}</td>
                 <td>{incident.nature}</td>
                 <td>
                     <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
@@ -103,7 +103,7 @@ export default function Department() {
                 <td>
                   <div className="actions">
                     <button className="action-view" onClick={() => handleViewLupon(incident.id)}>View</button>
-                    <button className="action-edit" onClick={()=>handleEditLupon(incident.id)}>Edit</button>
+                    <button className="action-edit" onClick={()=>handleEditLupon(incident.id) }>Edit</button>
                     <button className="action-delete" onClick={()=> handleDeleteLupon(incident.id)}>Delete</button>
                   </div>
                 </td>

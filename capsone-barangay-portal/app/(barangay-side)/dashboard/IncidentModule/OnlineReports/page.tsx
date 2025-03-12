@@ -1,7 +1,7 @@
 "use client"
 import "@/CSS/IncidentModule/OnlineReporting.css";
 import { useState, useEffect } from "react";
-import { getAllSpecificDocument, deleteDocument } from "@/app/helpers/firestorehelper";
+import { getAllSpecificDocument } from "@/app/helpers/firestorehelper";
 import { useRouter } from "next/navigation";
 
 

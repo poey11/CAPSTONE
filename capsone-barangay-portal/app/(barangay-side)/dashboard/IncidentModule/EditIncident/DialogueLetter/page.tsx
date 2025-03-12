@@ -18,7 +18,7 @@ export default function GenerateDialougeLetter() {
     const router = useRouter();
 
     const handleAddLupon = () => {
-      router.push("/dashboard/IncidentModule/Lupon/EditIncident");
+      router.back();
     };
 
 

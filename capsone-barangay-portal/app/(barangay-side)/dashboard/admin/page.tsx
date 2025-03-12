@@ -142,6 +142,7 @@ const admin = () => {
         console.log(users);
         
         try{
+            /*remove this and direct submit nalng noneed to create an api to create the baragangay users */
             const respone = await fetch('/api/barangayRegister', {
                 method: 'POST',
                 headers: {

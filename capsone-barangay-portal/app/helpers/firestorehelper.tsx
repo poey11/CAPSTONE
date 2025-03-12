@@ -1,6 +1,6 @@
 "use client"
 import {db, storage} from "@/app/db/firebase";
-import {collection, doc, deleteDoc, onSnapshot, query, where, getDoc, getDocs} from "firebase/firestore";
+import {collection, doc, deleteDoc, onSnapshot, query, where, getDoc, getDocs, getCountFromServer , count  } from "firebase/firestore";
 import { deleteObject, getDownloadURL, ref } from "firebase/storage";
 
 const getAllDocument =  (collect:string,data:(data: any[])=>  void) => {
@@ -116,24 +116,6 @@ const getAllSpecificSubDocument = async (mainCollection: string, id: string, sub
         console.log(error.message);
     }
 }
-const getSpecificSubDocument = async (mainCollection: string, id: string, subCollection:string, nos:number, setData:(data: any)=> void) => {
-    try{
-        const docRef = doc(db, mainCollection, id);
-        const subDocRef = collection(docRef, subCollection);
-        const subDocSnap = await getDocs(subDocRef);
-        if (!subDocSnap.empty) {  
-            const subData = subDocSnap.docs[nos].data();
-            return setData(subData);
-        }
-        else{
-            console.log("No matching document");
-        }
-
-    }
-    catch(error:String|any){
-        console.log(error.message);
-    }
-}
 
 const generateDownloadLink = async (file: string, location: string) => {
     try{
@@ -147,7 +129,7 @@ const generateDownloadLink = async (file: string, location: string) => {
 }
 
 const deleteDocument = async (collection: string,id: string) => {
-    /*incomplete should also delete the LTAssignedInfo subcollection picture */
+    /*incomplete should also delete the  subcollection and pictures related to it in the firebase storage */
     try{
         const docRef = doc(db, collection, id);
         const docSnapshot = await getDoc(docRef);
@@ -174,9 +156,32 @@ const deleteDocument = async (collection: string,id: string) => {
        }
 }
 
+const getCountofCollection = async (collectionString: string) => {
+    try{
+        const collectionRef = collection(db, collectionString);
+        const collectionCount =  await getCountFromServer(collectionRef);
+        return collectionCount;
+
+    }   
+    catch(error:String|any){
+        console.log(error.message);
+    }
+}
+
+const getSpecificCountofCollection = async (collectionRef: string, attribute: string, value: string) => {
+    try{
+        const reportCollection = query(collection(db, collectionRef), where(attribute, "==", value));
+        const collectionCount =  await getCountFromServer(reportCollection);
+        console.log(collectionCount.data().count);
+        return collectionCount.data().count;
+    }
+    catch(error:String|any){
+        console.log(error.message);
+    }
+}
 
 export {getAllSpecificDocument, getSpecificDocument,
     getAllDocument
     , generateDownloadLink, deleteDocument,
-    getStaffList,getAllStaffList,getSpecificSubDocument,getAllSpecificSubDocument
+    getStaffList,getAllStaffList,getAllSpecificSubDocument,getCountofCollection,getSpecificCountofCollection
 };
