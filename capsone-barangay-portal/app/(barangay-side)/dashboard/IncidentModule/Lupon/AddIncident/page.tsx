@@ -67,6 +67,48 @@ export default function AddLuponIncident() {
       const handleAddLupon = () => {
         router.push("/dashboard/IncidentModule/Lupon");
       };
+
+
+      const [showDiscardPopup, setShowDiscardPopup] = useState(false);
+    const [showCreatePopup, setShowCreatePopup] = useState(false); 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+
+    const handleDiscardClick = async () => {
+        setShowDiscardPopup(true);
+    }
+
+    const confirmDiscard = async () => {
+        setShowDiscardPopup(false);
+
+        setPopupMessage("New Incident discarded successfully!");
+                setShowPopup(true);
+
+                // Hide the popup after 3 seconds
+                setTimeout(() => {
+                    setShowPopup(false);
+                    router.push("/dashboard/IncidentModule/Lupon");
+                }, 3000);
+    };
+
+    const handleCreateClick = async () => {
+        setShowCreatePopup(true);
+    }
+
+    const confirmCreate = async () => {
+        setShowCreatePopup(false);
+
+        router.push("/dashboard/IncidentModule/Lupon/ViewIncident");
+                setShowPopup(true);
+
+                // Hide the popup after 3 seconds
+                setTimeout(() => {
+                    setShowPopup(false);
+                    router.push("/dashboard/ServicesModule/InBarangayRequests/View/BarangayCertificate");
+                }, 3000);
+
+                
+    };
   
 
   return (
@@ -83,9 +125,41 @@ export default function AddLuponIncident() {
                 <p className="NewOfficial"> New Incident</p>
 
                     <div className="actions">
-                        <button className="action-delete">Delete</button>
-                        <button className="action-view">Save</button>
+                        <button className="action-delete" onClick={handleDiscardClick}>Discard</button>
+                        <button className="action-view" onClick={handleCreateClick}>Create</button>
                     </div>
+
+                    {showDiscardPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to discard new incident?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+                    )}
+
+                    {showCreatePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to create new incident?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowCreatePopup(false)} className="no-button">No</button> 
+                                    <button onClick={confirmCreate} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+                    )}
+
+                    {showPopup && (
+                        <div className={`popup-overlay show`}>
+                            <div className="popup">
+                                <p>{popupMessage}</p>
+                            </div>
+                        </div>
+                    )}
                 
              </div>
 

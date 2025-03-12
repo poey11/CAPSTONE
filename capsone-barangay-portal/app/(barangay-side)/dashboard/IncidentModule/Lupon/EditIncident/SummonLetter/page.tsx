@@ -21,6 +21,29 @@ export default function GenerateSummonLetter() {
       router.push("/dashboard/IncidentModule/Lupon/EditIncident");
     };
 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+    
+    const handlePrintClick = async () => {
+        setPopupMessage(`Summon Letter printed successfully!`);
+        setShowPopup(true);
+        
+        // Hide the popup after 3 seconds
+        setTimeout(() => {
+            setShowPopup(false);
+        }, 3000);
+    };
+
+    const handleSendSMSClick = async () => {
+        setPopupMessage(`SMS sent successfully!`);
+
+        setShowPopup(true);
+        
+        // Hide the popup after 3 seconds
+        setTimeout(() => {
+            setShowPopup(false);
+        }, 3000);
+    }
 
 
   return (
@@ -119,19 +142,20 @@ export default function GenerateSummonLetter() {
 
             <div className="section-4">
 
-                <button className="letter-announcement-btn" >Print</button>
-                <button className="letter-announcement-btn" >Send SMS</button>
+            <button className="letter-announcement-btn" onClick={handlePrintClick}>Print</button>
+            <button className="letter-announcement-btn" onClick={handleSendSMSClick}>Send SMS</button>
                 
             </div>
-
-
-
-           
-
         </div> 
 
     
-
+        {showPopup && (
+            <div className={`popup-overlay show`}>
+                <div className="popup">
+                    <p>{popupMessage}</p>
+                </div>
+            </div>
+        )}
     
     </main>
   );

@@ -22,6 +22,30 @@ export default function GenerateDialougeLetter() {
     };
 
 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+    
+    const handlePrintClick = async () => {
+        setPopupMessage(`Dialogue Letter printed successfully!`);
+        setShowPopup(true);
+        
+        // Hide the popup after 3 seconds
+        setTimeout(() => {
+            setShowPopup(false);
+        }, 3000);
+    };
+
+    const handleSendSMSClick = async () => {
+        setPopupMessage(`SMS sent successfully!`);
+
+        setShowPopup(true);
+        
+        // Hide the popup after 3 seconds
+        setTimeout(() => {
+            setShowPopup(false);
+        }, 3000);
+    }
+
 
   return (
     <main className="main-container">
@@ -120,8 +144,8 @@ export default function GenerateDialougeLetter() {
 
             <div className="section-4">
 
-            <button className="letter-announcement-btn" >Print</button>
-            <button className="letter-announcement-btn" >Send SMS</button>
+            <button className="letter-announcement-btn" onClick={handlePrintClick}>Print</button>
+            <button className="letter-announcement-btn" onClick={handleSendSMSClick}>Send SMS</button>
                 
 
             </div>

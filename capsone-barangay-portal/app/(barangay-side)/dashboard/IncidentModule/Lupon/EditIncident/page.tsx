@@ -118,8 +118,7 @@ export default function EditLuponIncident() {
 
                 // Hide the popup after 3 seconds
                 setTimeout(() => {
-                    setShowPopup(false);
-                    
+                    setShowPopup(false);   
                 }, 3000);
     };
 

@@ -50,6 +50,26 @@ export default function LuponDepartment() {
     };
 
 
+    const [showDeletePopup, setShowDeletePopup] = useState(false);
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+
+    const handleDeleteClick = () => {
+      setShowDeletePopup(true);
+  };
+
+  const confirmDelete = () => {
+    setShowDeletePopup(false);
+
+    setPopupMessage(`Incident deleted successfully!`);
+    setShowPopup(true);
+
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+    }, 3000);
+  };
+
   return (
     <main className="main-container">
       <div className="section-1">
@@ -98,7 +118,7 @@ export default function LuponDepartment() {
                   <div className="actions">
                     <button className="action-view" onClick={handleViewLupon}>View</button>
                     <button className="action-edit" onClick={handleEditLupon}>Edit</button>
-                    <button className="action-delete">Delete</button>
+                    <button className="action-delete" onClick={handleDeleteClick}>Delete</button>
                   </div>
                 </td>
               </tr>
@@ -106,6 +126,27 @@ export default function LuponDepartment() {
           </tbody>
         </table>
       </div>
+
+
+      {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+        )}
+
+        {showDeletePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to delete this incident?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
+                                </div> 
+                            </div>
+                        </div>
+          )}
     </main>
   );
 }
