@@ -53,6 +53,11 @@ const ReportsPage = () => {
     }
   };
 
+   // Function to remove the selected file
+   const onDeleteFile = () => {
+    setSelectedUploadFile(null);
+};
+
   const uploadFile = async () => {
     if (!selectedUploadFile) return;
     const fileRef = ref(storage, `ReportsModule/${selectedUploadFile.name}`);
@@ -387,7 +392,7 @@ footerDrawings.forEach((drawing) => {
                 </button>
                 <button 
                   onClick={() => deleteFile(selectedFile.name)} 
-                  className="delete-button"
+                  className="deleted-button"
                 >
                   Delete
                 </button>
@@ -425,7 +430,7 @@ footerDrawings.forEach((drawing) => {
                                   {/* Delete button with image */}
                                   <button
                                       type="button"
-                                      onClick={() => (selectedUploadFile.name)}
+                                      onClick={onDeleteFile} // Call the delete function
                                       className="delete-button"
                                   >
                                       <img
