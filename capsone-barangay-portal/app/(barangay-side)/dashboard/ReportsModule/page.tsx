@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject } from "firebase/storage";
+import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject, listAll } from "firebase/storage";
 import { getFirestore, collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import ExcelJS from 'exceljs';
@@ -24,26 +24,25 @@ const ReportsPage = () => {
   const storage = getStorage();
   const db = getFirestore();
 
+
   const fetchDownloadLinks = async () => {
     try {
-      const formFiles = [
-        "Fairview ECA Form.docx",
-        "KASAMBAHAY PROGRAM COMPONENTS FORM.docx",
-        "Barangay Kontra Gutom(Hapag sa Barangay).docx",
-      ];
+      const folderRef = ref(storage, "ReportsModule/");
+      const fileList = await listAll(folderRef);
   
       const urls = await Promise.all(
-        formFiles.map(async (file) => {
-          const fileRef = ref(storage, `ReportsModule/${file}`);
-          const url = await getDownloadURL(fileRef);
-          return { name: file, url };
+        fileList.items.map(async (item) => {
+          const url = await getDownloadURL(item);
+          return { name: item.name, url };
         })
       );
+  
       setFiles(urls);
     } catch (error) {
       console.error("Error fetching file URLs:", error);
     }
   };
+  
 
   useEffect(() => {
     fetchDownloadLinks();
