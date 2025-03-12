@@ -158,7 +158,7 @@
     flex-direction: column; 
     align-items: center;
     gap: 12px;
-    padding: 24px;
+    padding: 70px;
     border: 2px dashed #e0e0e0;
     border-radius: 12px;
     background-color: #f9f9f9;
@@ -166,6 +166,7 @@
     width: 60%;
     max-width: 500px; 
     text-align: center;
+    align-self: center;
   }
   
   .file-name {
@@ -207,4 +208,94 @@
     color: #9e9e9e;
     cursor: not-allowed;
   }
+
+
+    
+  .file-name-image-display {
+    margin-top: 10px;
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.6);
+    text-align: center;
+    }
+    
+    .file-name-image-display-indiv {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+        background-color: #f8f8f8;
+        border-radius: 5px;
+        gap: 10px;
+    }
+    
+    .file-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    .file-preview {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+        flex-shrink: 0; /* Prevents the image from shrinking */
+    }
+    
+    .file-upload-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.6);
+    text-align: center;
+    
+    }
+    
+    .upload-link {
+    color: rgb(245, 143, 88);
+    text-decoration: underline;
+    cursor: pointer;
+    }
+    
+    .file-name {
+        max-width: 150px; /* Adjust this value based on your layout */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 14px;
+        flex-grow: 1; /* Takes up remaining space */
+    }
+    
+    .delete-container {
+        flex-shrink: 0; /* Prevents the delete button from shrinking */
+    }
+    
+    .delete-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+    }
+    
+    .delete-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+
+    .input-field{
+        padding: 8px;
+        width: 100%;
+        max-width: 600px;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        color: rgba(0, 0, 0, 0.4);
+        height: 40px;
+    }
+
+    .input-field option {
+        color: rgba(0, 0, 0, 0.4); 
+    }
   

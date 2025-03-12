@@ -397,36 +397,60 @@ footerDrawings.forEach((drawing) => {
     </div>
 
 <h2 className="report-title">Upload A File</h2>  
-        <div className="upload-section">
 
-            <div className="upload-container">
-                  <input 
-                    type="file" 
-                    onChange={handleFileUpload} 
-                    id="file-upload"
-                    style={{ display: 'none' }} 
-                  />
-                  <label 
-                    htmlFor="file-upload" 
-                    className="upload-button"
-                  >
-                    Choose File
-                  </label>
-                  {selectedUploadFile && (
-                    <p className="file-name">{selectedUploadFile.name}</p>
-                  )}
-                  <button 
-                    onClick={uploadFile} 
-                    disabled={!selectedUploadFile} 
-                    className="upload-button"
-                  >
-                    Upload
-                  </button>
-                </div>
+<div className="upload-section">
+      <div className="upload-container">
+          <input 
+              type="file" 
+              onChange={handleFileUpload} 
+              id="file-upload"
+              style={{ display: 'none' }} 
+          />
+          <label 
+              htmlFor="file-upload" 
+              className="upload-link"
+          >
+              Choose File
+          </label>
 
+          {selectedUploadFile && (
+              <div className="file-name-image-display">
+                  <ul>
+                      <div className="file-name-image-display-indiv">
+                          <li className="file-item"> 
+                              
+                            
+                              <span>{selectedUploadFile.name}</span>  
+                              <div className="delete-container">
+                                  {/* Delete button with image */}
+                                  <button
+                                      type="button"
+                                      onClick={() => (selectedUploadFile.name)}
+                                      className="delete-button"
+                                  >
+                                      <img
+                                          src="/images/trash.png"  
+                                          alt="Delete"
+                                          className="delete-icon"
+                                      />
+                                  </button>
+                              </div>
+                          </li>
+                      </div>
+                  </ul>
+              </div>
+          )}
+
+          <button 
+              onClick={uploadFile} 
+              disabled={!selectedUploadFile} 
+              className="upload-button"
+          >
+              Upload
+          </button>
       </div>
 
-                          
+</div>             
           
         </div>
 
