@@ -96,6 +96,8 @@ export default function ResidentModule() {
     }
   };
 
+ 
+
   const indexOfLastResident = currentPage * residentsPerPage;
   const indexOfFirstResident = indexOfLastResident - residentsPerPage;
   const currentResidents = filteredResidents.slice(indexOfFirstResident, indexOfLastResident);
@@ -250,6 +252,7 @@ export default function ResidentModule() {
         ))}
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
+      
     </main>
   );
 }

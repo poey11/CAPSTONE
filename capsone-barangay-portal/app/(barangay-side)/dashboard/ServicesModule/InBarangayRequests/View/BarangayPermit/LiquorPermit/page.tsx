@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { Metadata } from "next";
+import React,{useState} from "react";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 
 
@@ -57,6 +58,19 @@ export default function ViewInBarangayRequest() {
         window.location.href = "/dashboard/ServicesModule/InBarangayRequests";
     };
 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+    
+    const handlePrintClick = async () => {
+        const documentType = residentData.documentType || "Document";
+        setPopupMessage(`${documentType} printed successfully!`);
+        setShowPopup(true);
+        
+        // Hide the popup after 3 seconds
+        setTimeout(() => {
+            setShowPopup(false);
+        }, 3000);
+    };
     return (
         <main className="main-container">
             <div className="main-content">
@@ -93,8 +107,16 @@ export default function ViewInBarangayRequest() {
             </div>
 
             <div className="Actions-Section">
-                    <button type="button" className="actions-button">Print</button>
+                    <button type="button" className="actions-button" onClick={handlePrintClick}>Print</button>
             </div>
+
+            {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
