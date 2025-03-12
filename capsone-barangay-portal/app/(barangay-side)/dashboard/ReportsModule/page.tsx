@@ -7,6 +7,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
 
+
 interface FileData {
   name: string;
   url: string;
@@ -53,6 +54,11 @@ const ReportsPage = () => {
       setSelectedUploadFile(event.target.files[0]);
     }
   };
+
+   // Function to remove the selected file
+   const onDeleteFile = () => {
+    setSelectedUploadFile(null);
+};
 
   const uploadFile = async () => {
     if (!selectedUploadFile) return;
@@ -354,21 +360,9 @@ footerDrawings.forEach((drawing) => {
 
         <div className="report-card">
           <h2 className="report-title">Downloadable Forms</h2>
-            {/* File Upload Section */}
-          <div className="upload-container">
-            <input 
-              type="file" 
-              onChange={handleFileUpload} 
-              className="upload-input"
-            />
-            <button 
-              onClick={uploadFile} 
-              disabled={!selectedUploadFile} 
-              className="upload-button"
-            >
-              Upload
-            </button>
-          </div>
+       
+      <div className="forms-section">
+
 
           <div className="Option-container">
             <select
@@ -390,20 +384,83 @@ footerDrawings.forEach((drawing) => {
           </div>
 
           {selectedFile && (
-            <div className="download-item">
-              <span className="download-text">{selectedFile.name.replace(".docx", "")}</span>
-              <a href={selectedFile.url} download className="download-button">
-                Download
-                </a>
-              <button 
-                onClick={() => deleteFile(selectedFile.name)} 
-                className="delete-button"
-              >
-                Delete
-              </button>
-            </div>
+              <div className="download-item">
+                <span className="download-text">{selectedFile.name.replace(".docx", "")}</span>
+                <button 
+                  onClick={() => window.location.href = selectedFile.url} 
+                  className="download-button"
+                >
+                  Download
+                </button>
+                <button 
+                  onClick={() => deleteFile(selectedFile.name)} 
+                  className="deleted-button"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+
+    </div>
+
+<h2 className="report-title">Upload A File</h2>  
+
+<div className="upload-section">
+      <div className="upload-container">
+          <input 
+              type="file" 
+              onChange={handleFileUpload} 
+              id="file-upload"
+              style={{ display: 'none' }} 
+          />
+          <label 
+              htmlFor="file-upload" 
+              className="upload-link"
+          >
+              Choose File
+          </label>
+
+          {selectedUploadFile && (
+              <div className="file-name-image-display">
+                  <ul>
+                      <div className="file-name-image-display-indiv">
+                          <li className="file-item"> 
+                              
+                            
+                              <span>{selectedUploadFile.name}</span>  
+                              <div className="delete-container">
+                                  {/* Delete button with image */}
+                                  <button
+                                      type="button"
+                                      onClick={onDeleteFile} // Call the delete function
+                                      className="delete-button"
+                                  >
+                                      <img
+                                          src="/images/trash.png"  
+                                          alt="Delete"
+                                          className="delete-icon"
+                                      />
+                                  </button>
+                              </div>
+                          </li>
+                      </div>
+                  </ul>
+              </div>
           )}
+
+          <button 
+              onClick={uploadFile} 
+              disabled={!selectedUploadFile} 
+              className="upload-button"
+          >
+              Upload
+          </button>
+      </div>
+
+</div>             
+          
         </div>
+
         
       </div>
     </div>
