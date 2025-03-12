@@ -6,6 +6,8 @@ import { v4 as uuidv4 } from "uuid";
 import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
+import { motion } from "framer-motion";
+
 
 interface FileData {
   name: string;
@@ -20,6 +22,11 @@ const ReportsPage = () => {
   const [selectedModule, setSelectedModule] = useState<string>("");
   const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(null);
 
+
+  
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
 
   const storage = getStorage();
   const db = getFirestore();
@@ -53,6 +60,11 @@ const ReportsPage = () => {
       setSelectedUploadFile(event.target.files[0]);
     }
   };
+
+   // Function to remove the selected file
+   const onDeleteFile = () => {
+    setSelectedUploadFile(null);
+};
 
   const uploadFile = async () => {
     if (!selectedUploadFile) return;
@@ -293,10 +305,17 @@ footerDrawings.forEach((drawing) => {
     setSelectedModule(e.target.value);
   };
 
+
+  const handleDownload = (file: FileData) => {
+    setPopupMessage(`${file.name.replace(".docx", "")} downloaded!`);
+    setShowSuccessPopup(true);
+    setTimeout(() => {
+      setShowSuccessPopup(false);
+    }, 3000);
+  };
+
   return (
     <div className="report-main-container">
-
-      
       <h1 className="reports-title">Reports Module</h1>
 
       <div className="reports-section">
@@ -354,21 +373,9 @@ footerDrawings.forEach((drawing) => {
 
         <div className="report-card">
           <h2 className="report-title">Downloadable Forms</h2>
-            {/* File Upload Section */}
-          <div className="upload-container">
-            <input 
-              type="file" 
-              onChange={handleFileUpload} 
-              className="upload-input"
-            />
-            <button 
-              onClick={uploadFile} 
-              disabled={!selectedUploadFile} 
-              className="upload-button"
-            >
-              Upload
-            </button>
-          </div>
+       
+      <div className="forms-section">
+
 
           <div className="Option-container">
             <select
@@ -390,22 +397,103 @@ footerDrawings.forEach((drawing) => {
           </div>
 
           {selectedFile && (
-            <div className="download-item">
-              <span className="download-text">{selectedFile.name.replace(".docx", "")}</span>
-              <a href={selectedFile.url} download className="download-button">
-                Download
-                </a>
-              <button 
-                onClick={() => deleteFile(selectedFile.name)} 
-                className="delete-button"
-              >
-                Delete
-              </button>
-            </div>
+              <div className="download-item">
+                <span className="download-text">{selectedFile.name.replace(".docx", "")}</span>
+                <button 
+                  onClick={() => window.location.href = selectedFile.url} 
+                  className="download-button"
+                >
+                  Download
+                </button>
+                <button 
+                  onClick={() => deleteFile(selectedFile.name)} 
+                  className="deleted-button"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+
+    </div>
+
+<h2 className="report-title">Upload A File</h2>  
+
+<div className="upload-section">
+      <div className="upload-container">
+          <input 
+              type="file" 
+              onChange={handleFileUpload} 
+              id="file-upload"
+              style={{ display: 'none' }} 
+          />
+          <label 
+              htmlFor="file-upload" 
+              className="upload-link"
+          >
+              Choose File
+          </label>
+
+          {selectedUploadFile && (
+              <div className="file-name-image-display">
+                  <ul>
+                      <div className="file-name-image-display-indiv">
+                          <li className="file-item"> 
+                              
+                            
+                              <span>{selectedUploadFile.name}</span>  
+                              <div className="delete-container">
+                                  {/* Delete button with image */}
+                                  <button
+                                      type="button"
+                                      onClick={onDeleteFile} // Call the delete function
+                                      className="delete-button"
+                                  >
+                                      <img
+                                          src="/images/trash.png"  
+                                          alt="Delete"
+                                          className="delete-icon"
+                                      />
+                                  </button>
+                              </div>
+                          </li>
+                      </div>
+                  </ul>
+              </div>
           )}
+
+          <button 
+              onClick={uploadFile} 
+              disabled={!selectedUploadFile} 
+              className="upload-button"
+          >
+              Upload
+          </button>
+      </div>
+
+</div>             
+          
         </div>
+
         
       </div>
+
+      {/* Success Pop-up */}
+      {showSuccessPopup && (
+        <div className={`popup-overlay show`}>
+          <div className="popup">
+              <p>{popupMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error Pop-up */}
+      {showErrorPopup && (
+        <div className={`popup-overlay show`}>
+          <div className="popup">
+              <p>{popupMessage}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

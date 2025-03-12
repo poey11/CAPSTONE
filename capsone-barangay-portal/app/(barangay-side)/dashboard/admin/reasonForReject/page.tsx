@@ -19,6 +19,29 @@ export default function reasonForRejection() {
     const handleBack = () => {
         router.push("/dashboard/admin");
     };
+
+
+    const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+
+
+    const handleSubmitClick = async () => {
+        setShowSubmitPopup(true);
+    }
+
+    const confirmSubmit = async () => {
+        setShowSubmitPopup(false);
+
+        setPopupMessage("Reason for Rejection submitted successfully!");
+                setShowPopup(true);
+
+                // Hide the popup after 3 seconds
+                setTimeout(() => {
+                    setShowPopup(false);
+                    router.push("/dashboard/admin");
+                }, 3000);
+    };
     
     return (
     <main className="reasonforrejection-main-container">
@@ -36,7 +59,7 @@ export default function reasonForRejection() {
                     <h1>Reason For Rejection</h1>
                 </div>
                 <div className="action-btn-section">
-                    <button className="submit-btn">Submit</button>
+                    <button className="submit-btn" onClick={handleSubmitClick}>Submit</button>
                 </div>
             </div>
 
@@ -57,6 +80,27 @@ export default function reasonForRejection() {
             </div>
             
         </div>
+
+
+        {showSubmitPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to submit?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmSubmit} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+        )}
+
+        {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+        )}
 
     </main>
 );

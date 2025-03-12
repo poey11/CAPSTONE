@@ -85,6 +85,43 @@ export default function EditLuponIncident() {
       };
 
 
+    const [showDiscardPopup, setShowDiscardPopup] = useState(false);
+    const [showSavePopup, setShowSavePopup] = useState(false); 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+
+    const handleDiscardClick = async () => {
+        setShowDiscardPopup(true);
+    }
+
+    const confirmDiscard = async () => {
+        setShowDiscardPopup(false);
+
+        setPopupMessage("Changes discarded successfully!");
+                setShowPopup(true);
+
+                // Hide the popup after 3 seconds
+                setTimeout(() => {
+                    setShowPopup(false);
+                }, 3000);
+    };
+
+    const handleSaveClick = async () => {
+        setShowSavePopup(true);
+    }
+
+    const confirmSave = async () => {
+        setShowSavePopup(false);
+
+                setPopupMessage("Changes saved successfully!");
+                setShowPopup(true);
+
+                // Hide the popup after 3 seconds
+                setTimeout(() => {
+                    setShowPopup(false);
+                    
+                }, 3000);
+    };
 
 
   return (
@@ -120,11 +157,41 @@ export default function EditLuponIncident() {
             <div className="section-1">
                 <p className="NewOfficial"> Robbery Incident</p>
                     <div className="actions">
-                        <button className="action-delete">Delete</button>
-                        <button className="action-view">Save</button>
-
-                
+                        <button className="action-delete" onClick={handleDiscardClick}>Discard</button>
+                        <button className="action-view" onClick={handleSaveClick}>Save</button>
                     </div>
+
+                    {showDiscardPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to discard the changes?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> {/* need to change yung on click. mawawala yung new input and babalik sa original data.*/}
+                                </div> 
+                            </div>
+                        </div>
+                    )}
+
+                    {showSavePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to save the changes?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowSavePopup(false)} className="no-button">No</button> {/* need to change yung on click. mawawala yung new input and babalik sa original data.*/}
+                                    <button onClick={confirmSave} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+                    )}
+
+                    {showPopup && (
+                        <div className={`popup-overlay show`}>
+                            <div className="popup">
+                                <p>{popupMessage}</p>
+                            </div>
+                        </div>
+                    )}
              </div>
 
 
