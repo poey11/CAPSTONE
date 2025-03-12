@@ -5,6 +5,7 @@ import { getFirestore } from "firebase/firestore";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
+import { motion } from "framer-motion";
 
 interface FileData {
   name: string;
@@ -16,6 +17,11 @@ const ReportsPage = () => {
   const [files, setFiles] = useState<FileData[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
   const [selectedModule, setSelectedModule] = useState<string>("");
+
+  
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
 
   const storage = getStorage();
 
@@ -48,12 +54,19 @@ const ReportsPage = () => {
     setLoading(true);
     try {
       setTimeout(() => {
-        alert("Kasambahay Masterlist Generated!");
+        setPopupMessage("Kasambahay Masterlist Generated!");
+        setShowSuccessPopup(true);
         setLoading(false);
+
+         // Hide the popup after 3 seconds
+         setTimeout(() => {
+          setShowSuccessPopup(false);
+        }, 3000);
       }, 2000);
     } catch (error) {
       console.error("Unexpected error:", error);
-      alert("Failed to generate report.");
+      setPopupMessage("Failed to generate report.");
+      setShowErrorPopup(true);
       setLoading(false);
     }
   };
@@ -68,10 +81,17 @@ const ReportsPage = () => {
     setSelectedModule(e.target.value);
   };
 
+
+  const handleDownload = (file: FileData) => {
+    setPopupMessage(`${file.name.replace(".docx", "")} downloaded!`);
+    setShowSuccessPopup(true);
+    setTimeout(() => {
+      setShowSuccessPopup(false);
+    }, 3000);
+  };
+
   return (
     <div className="report-main-container">
-
-      
       <h1 className="reports-title">Reports Module</h1>
 
       <div className="reports-section">
@@ -148,7 +168,7 @@ const ReportsPage = () => {
           {selectedFile && (
             <div className="download-item">
               <span className="download-text">{selectedFile.name.replace(".docx", "")}</span>
-              <a href={selectedFile.url} download className="download-button">
+              <a href={selectedFile.url} download className="download-button" onClick={() => handleDownload(selectedFile)}>
                 Download
               </a>
             </div>
@@ -156,6 +176,24 @@ const ReportsPage = () => {
         </div>
         
       </div>
+
+      {/* Success Pop-up */}
+      {showSuccessPopup && (
+        <div className={`popup-overlay show`}>
+          <div className="popup">
+              <p>{popupMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error Pop-up */}
+      {showErrorPopup && (
+        <div className={`popup-overlay show`}>
+          <div className="popup">
+              <p>{popupMessage}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

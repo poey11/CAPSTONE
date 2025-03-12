@@ -48,6 +48,47 @@ export default function addAnnouncements() {
         }));
       };
 
+    const [showDiscardPopup, setShowDiscardPopup] = useState(false);
+    const [showCreatePopup, setShowCreatePopup] = useState(false); 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+
+    const handleDiscardClick = async () => {
+        setShowDiscardPopup(true);
+    }
+
+    const confirmDiscard = async () => {
+        setShowDiscardPopup(false);
+
+        setPopupMessage("Document discarded successfully!");
+                setShowPopup(true);
+
+                // Hide the popup after 3 seconds
+                setTimeout(() => {
+                    setShowPopup(false);
+                    router.push("/dashboard/ServicesModule/InBarangayRequests");
+                }, 3000);
+    };
+
+    const handleCreateClick = async () => {
+        setShowCreatePopup(true);
+    }
+
+    const confirmCreate = async () => {
+        setShowCreatePopup(false);
+
+                setPopupMessage("Barangay Clearance created successfully!");
+                setShowPopup(true);
+
+                // Hide the popup after 3 seconds
+                setTimeout(() => {
+                    setShowPopup(false);
+                    router.push("/dashboard/ServicesModule/InBarangayRequests/View/BarangayClearance");
+                }, 3000);
+
+                
+    };
+
     return (
         <main className="addAnnouncement-main-container">
             <div className="section-1">
@@ -65,9 +106,41 @@ export default function addAnnouncements() {
                     </div>
 
                     <div className="action-btn-section">
-                        <button className="discard-btn">Discard</button>
-                        <button className="save-btn">Save</button>
+                        <button className="discard-btn" onClick={handleDiscardClick}>Discard</button>
+                        <button className="save-btn" onClick={handleCreateClick}>Create</button>
                     </div>
+
+                    {showDiscardPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to discard the document?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+                    )}
+
+                    {showCreatePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to create the document?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowCreatePopup(false)} className="no-button">No</button> 
+                                    <button onClick={confirmCreate} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+                    )}
+
+                    {showPopup && (
+                        <div className={`popup-overlay show`}>
+                            <div className="popup">
+                                <p>{popupMessage}</p>
+                            </div>
+                        </div>
+                    )}
 
                 </div>
                 

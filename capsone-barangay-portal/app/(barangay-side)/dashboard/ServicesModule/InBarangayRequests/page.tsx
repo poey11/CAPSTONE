@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { Metadata } from "next";
+import { useState } from "react";
 import "@/CSS/barangaySide/ServicesModule/InBarangayRequests.css";
 
 
@@ -139,6 +140,29 @@ const metadata: Metadata = {
     }
 };
 
+  const [selectedDocumentType, setSelectedDocumentType] = useState<string | null>(null);
+
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+
+  const handleDeleteClick = (documentType: string) => {
+    setSelectedDocumentType(documentType); 
+    setShowDeletePopup(true);
+};
+
+const confirmDelete = () => {
+  setShowDeletePopup(false);
+
+  const documentType = selectedDocumentType || "Document";
+  setPopupMessage(`${documentType} deleted successfully!`);
+  setShowPopup(true);
+
+  // Hide the popup after 3 seconds
+  setTimeout(() => {
+    setShowPopup(false);
+  }, 3000);
+};
 
     return (
 
@@ -233,7 +257,7 @@ const metadata: Metadata = {
                     >
                         Edit
                     </button>
-                    <button className="action-delete">Delete</button>
+                    <button className="action-delete" onClick={() => handleDeleteClick(request.documentType)}>Delete</button>
                   </div>
                 </td>
               </tr>
@@ -241,6 +265,28 @@ const metadata: Metadata = {
             </tbody>
           </table>
         </div>
+
+
+        {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+        )}
+
+        {showDeletePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to delete this request?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
+                                </div> 
+                            </div>
+                        </div>
+          )}
+                
 
       </main>
         
