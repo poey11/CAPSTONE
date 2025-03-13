@@ -2,8 +2,9 @@
 import "@/CSS/ResidentModule/addresident.css";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "../../../../db/firebase";
+import { db, storage } from "../../../../db/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL, uploadBytes } from "firebase/storage"; // Firebase storage functions
 import Link from "next/link";
 
 export default function AddResident() {
@@ -29,7 +30,7 @@ export default function AddResident() {
     isVoter: false,
   });
 
-  const [files, setFiles] = useState<{ name: string; preview: string }[]>([]);
+  const [files, setFiles] = useState<{ file: File; preview: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
@@ -60,38 +61,81 @@ export default function AddResident() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const uploadedFiles = Array.from(e.target.files).map((file) => ({
+        file,
         name: file.name,
-        preview: URL.createObjectURL(file),
+        preview: URL.createObjectURL(file), // Local preview before upload
       }));
       setFiles([...files, ...uploadedFiles]);
     }
   };
+  
 
-    // Handles file deletion from the uploaded files list
+  // Handles file deletion
   const handleFileDelete = (fileName: string) => {
-    setFiles(files.filter((file) => file.name !== fileName));
+    setFiles(files.filter((file) => file.file.name !== fileName));
   };
 
-    // Handles form submission and saves the resident's data to Firestore
+
+
+  // Handles file upload to Firebase Storage
+  const handleUploadFiles = async () => {
+    const uploadedUrls: string[] = [];
+    for (const fileObj of files) {
+      const storageRef = ref(storage, `ResidentsFiles/${fileObj.file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, fileObj.file);
+
+      // Wait for upload completion
+      await new Promise<void>((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+          null,
+          (error) => reject(error),
+          async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            uploadedUrls.push(downloadURL);
+            resolve();
+          }
+        );
+      });
+    }
+    return uploadedUrls;
+  };  
+
+  // Handles form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+  
     try {
+      // Upload each file and get download URLs
+      const fileUploadPromises = files.map(async ({ file }) => {
+        const storageRef = ref(storage, `ResidentsFiles/${file.name}`);
+        await uploadBytes(storageRef, file);
+        return getDownloadURL(storageRef);
+      });
+  
+      const fileURLs = await Promise.all(fileUploadPromises);
+  
+      // Add resident data along with file URLs to Firestore
       await addDoc(collection(db, "Residents"), {
         ...formData,
         createdAt: serverTimestamp(),
+        fileURLs, // Store the uploaded file URLs in Firestore
       });
-
+  
       alert("Resident added successfully!");
-      router.push("/dashboard/ResidentModule"); // Redirect to Residents module after saving
+      router.push("/dashboard/ResidentModule");
     } catch (err) {
       setError("Failed to add resident");
       console.error(err);
     }
+  
     setLoading(false);
   };
+  
+
+  
 
     // Redirects the user back to the Residents module
       const handleBack = () => {
@@ -268,66 +312,58 @@ export default function AddResident() {
 
     
 
-     <div className="file-upload-container">
-            {/* File Upload */}
-          <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
-          <input
-            id="file-upload"
-            type="file"
-            className="file-upload-input"
-            multiple
-            accept=".jpg,.jpeg,.png"
-            // required 
-            onChange={handleFileChange}
-          />
-          <div className="uploadedFiles-container">
-            {files.length > 0 && (
-              <div className="file-name-image-display">
-                <ul>
-                  {files.map((file, index) => (
-                    <div className="file-name-image-display-indiv" key={index}>
-                      <li>
-                        {file.preview && (
-                          <div className="filename&image-container">
-                            <img
-                              src={file.preview}
-                              alt={file.name}
-                              style={{ width: "50px", height: "50px", marginRight: "5px" }}
-                            />
-                          </div>
-                        )}
-                        {file.name}
-                        <div className="delete-container">
-                          <button
-                            type="button"
-                            onClick={() => handleFileDelete(file.name)}
-                            className="delete-button"
-                          >
-                            <img
-                              src="/images/trash.png"
-                              alt="Delete"
-                              className="delete-icon"
-                            />
-                          </button>
+      <div className="file-upload-container">
+              {/* File Upload */}
+              <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
+              <input
+                id="file-upload"
+                type="file"
+                className="file-upload-input"
+                multiple
+                accept=".jpg,.jpeg,.png"
+                onChange={handleFileChange}
+              />
+
+              <div className="uploadedFiles-container">
+                {files.length > 0 && (
+                  <div className="file-name-image-display">
+                    <ul>
+                      {files.map((file, index) => (
+                        <div className="file-name-image-display-indiv" key={index}>
+                          <li>
+                            <div className="filename&image-container">
+                              <img
+                                src={file.preview}
+                                alt={file.file.name}
+                                style={{ width: "50px", height: "50px", marginRight: "5px" }}
+                              />
+                            </div>
+                            {file.file.name}
+                            <div className="delete-container">
+                              <button
+                                type="button"
+                                onClick={() => handleFileDelete(file.file.name)}
+                                className="delete-button"
+                              >
+                                <img
+                                  src="/images/trash.png"
+                                  alt="Delete"
+                                  className="delete-icon"
+                                />
+                              </button>
+                            </div>
+                          </li>
                         </div>
-                      </li>
-                    </div>
-                  ))}
-                </ul>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
-          </div>
-
-   
-
-          
-</div>
-
         </form>
         {error && <p className="error">{error}</p>}
       </div>
     </main>
   );
 }
-

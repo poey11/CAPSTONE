@@ -1,9 +1,10 @@
 "use client";
-import "@/CSS/ResidentModule/addresident.css"; // Reuses existing CSS
-import { useState, useEffect } from "react";
+import "@/CSS/ResidentModule/addresident.css";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { db } from "../../../../db/firebase";
+import { db, storage } from "../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
 import Link from "next/link";
 
 export default function EditResident() {
@@ -23,22 +24,24 @@ export default function EditResident() {
     contactNumber: "",
     emailAddress: "",
     precinctNumber: "",
-    generalLocation:"",
+    generalLocation: "",
     isStudent: false,
     isPWD: false,
     isSeniorCitizen: false,
     isSoloParent: false,
     isVoter: false,
+    fileURLs: [],
   });
+  
 
+  const [files, setFiles] = useState<{ file?: File; name: string; preview: string; url?: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const [files, setFiles] = useState<{ name: string; preview: string }[]>([]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const uploadedFiles = Array.from(e.target.files).map((file) => ({
+        file,
         name: file.name,
         preview: URL.createObjectURL(file),
       }));
@@ -46,10 +49,58 @@ export default function EditResident() {
     }
   };
 
-  const handleFileDelete = (fileName: string) => {
-    setFiles(files.filter((file) => file.name !== fileName));
-  };
+  const [deletedFileURLs, setDeletedFileURLs] = useState<string[]>([]);
 
+  const handleFileDelete = async (fileName: string, fileUrl?: string) => {
+    try {
+      if (fileUrl) {
+        // Extract Firebase storage path from URL
+        const decodedUrl = decodeURIComponent(fileUrl);
+        const match = decodedUrl.match(/\/o\/(.*?)\?alt=media/);
+        const storagePath = match ? match[1] : null;
+  
+        if (storagePath) {
+          console.log("Deleting file from Firebase Storage:", storagePath); // Debugging
+  
+          // Track deleted file in state
+          setDeletedFileURLs((prev) => [...prev, fileUrl]);
+  
+          // Delete file from Firebase Storage
+          const storageRef = ref(storage, storagePath);
+          await deleteObject(storageRef);
+        }
+      }
+  
+      // Remove file from UI state immediately
+      setFiles((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
+  };
+  
+  
+  
+  
+  const handleUploadFiles = async () => {
+    const uploadedUrls: string[] = [];
+  
+    // Retain existing URLs for files that were not deleted
+    uploadedUrls.push(...formData.fileURLs.filter(url => !deletedFileURLs.includes(url)));
+  
+    // Upload new files
+    for (const fileObj of files) {
+      if (fileObj.file) {
+        const storageRef = ref(storage, `ResidentsFiles/${fileObj.file.name}`);
+        await uploadBytesResumable(storageRef, fileObj.file);
+        const downloadURL = await getDownloadURL(storageRef);
+        uploadedUrls.push(downloadURL);
+      }
+    }
+  
+    return uploadedUrls;
+  };
+  
+  
   useEffect(() => {
     if (!residentId) return;
 
@@ -61,24 +112,35 @@ export default function EditResident() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setFormData({
-            name: data.name || "N/A",
-            address: data.address || "N/A",
-            generalLocation: data.generalLocation || "N/A",
-            dateOfBirth: data.dateOfBirth || "N/A",
-            age: data.age || "N/A",
-            sex: data.sex || "N/A",
-            civilStatus: data.civilStatus || "N/A",
-            occupation: data.occupation || "N/A",
-            contactNumber: data.contactNumber || "N/A",
-            emailAddress: data.emailAddress || "N/A",
-            precinctNumber: data.precinctNumber || "N/A",
-            placeOfBirth: data.placeOfBirth || "N/A",
+            name: data.name || "",
+            address: data.address || "",
+            generalLocation: data.generalLocation || "",
+            dateOfBirth: data.dateOfBirth || "",
+            age: data.age ?? 0, // Ensure age is a number
+            sex: data.sex || "",
+            civilStatus: data.civilStatus || "",
+            occupation: data.occupation || "",
+            contactNumber: data.contactNumber || "",
+            emailAddress: data.emailAddress || "",
+            precinctNumber: data.precinctNumber || "",
+            placeOfBirth: data.placeOfBirth || "",
             isStudent: data.isStudent ?? false,
             isSeniorCitizen: data.isSeniorCitizen ?? false,
             isPWD: data.isPWD ?? false,
-            isSoloParent: data.soloParent ?? false,
+            isSoloParent: data.isSoloParent ?? false,
             isVoter: data.isVoter ?? false,
+            fileURLs: data.fileURLs ?? [],
           });
+          
+
+          const loadedFiles = (data.fileURLs ?? []).map((url: string) => ({
+            file: null,
+            name: (url.split("%2F").pop() ?? "").split("?")[0], // Safe fallback
+            preview: url,
+          }));
+
+          setFiles(loadedFiles);
+
         } else {
           setError("Resident not found.");
         }
@@ -96,22 +158,41 @@ export default function EditResident() {
     const { name, value, type } = e.target;
     setFormData({
       ...formData,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked 
+            : type === "number" ? Number(value) || 0  // Convert to number safely
+            : value,
     });
   };
+
+  useEffect(() => {
+    // Ensure `setFiles` only includes valid, non-deleted files
+    setFiles(formData.fileURLs.filter(url => !deletedFileURLs.includes(url)));
+  }, [deletedFileURLs, formData.fileURLs]);
+  
 
   // form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!residentId) return;
-
+  
     setLoading(true);
     setError("");
-
+  
     try {
-      const docRef = doc(db, "Residents", residentId);
-      await updateDoc(docRef, formData);
-
+      const uploadedFileURLs: string[] = await handleUploadFiles(); // Ensure correct type
+  
+      // Remove deleted files and add newly uploaded ones
+      const updatedFileURLs: string[] = [
+        ...formData.fileURLs.filter(url => !deletedFileURLs.includes(url)),
+        ...uploadedFileURLs, // Spread the array instead of concat
+      ];
+  
+      // Update Firestore
+      await updateDoc(doc(db, "Residents", residentId), {
+        ...formData,
+        fileURLs: updatedFileURLs, // Save updated list
+      });
+  
       alert("Resident updated successfully!");
       router.push("/dashboard/ResidentModule");
     } catch (err) {
@@ -121,7 +202,7 @@ export default function EditResident() {
       setLoading(false);
     }
   };
-
+  
     const handleBack = () => {
       window.location.href = "/dashboard/ResidentModule";
     };
@@ -232,72 +313,61 @@ export default function EditResident() {
                         Is this resident a registered voter?
                       </label>
                     </div>
-        
-        
               </div>
-        
-            
-        
-             <div className="file-upload-container">
-        
-                  <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
-                  <input
-                    id="file-upload"
-                    type="file"
-                    className="file-upload-input"
-                    multiple
-                    accept=".jpg,.jpeg,.png"
-                    // required 
-                    onChange={handleFileChange}
-                  />
-                  <div className="uploadedFiles-container">
-                    {files.length > 0 && (
-                      <div className="file-name-image-display">
-                        <ul>
-                          {files.map((file, index) => (
-                            <div className="file-name-image-display-indiv" key={index}>
-                              <li>
-                                {file.preview && (
-                                  <div className="filename&image-container">
-                                    <img
-                                      src={file.preview}
-                                      alt={file.name}
-                                      style={{ width: "50px", height: "50px", marginRight: "5px" }}
-                                    />
-                                  </div>
-                                )}
-                                {file.name}
-                                <div className="delete-container">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleFileDelete(file.name)}
-                                    className="delete-button"
-                                  >
-                                    <img
-                                      src="/images/trash.png"
-                                      alt="Delete"
-                                      className="delete-icon"
-                                    />
-                                  </button>
-                                </div>
-                              </li>
+
+
+              <div className="file-upload-container">
+              {/* File Upload */}
+              <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
+              <input
+                id="file-upload"
+                type="file"
+                className="file-upload-input"
+                multiple
+                accept=".jpg,.jpeg,.png"
+                onChange={handleFileChange}
+              />
+
+              <div className="uploadedFiles-container">
+                {files.length > 0 && (
+                  <div className="file-name-image-display">
+                    <ul>
+                      {files.map((file, index) => (
+                        <div className="file-name-image-display-indiv" key={index}>
+                          <li>
+                            <div className="filename&image-container">
+                              <img
+                                src={file.preview}
+                                alt={file.name}
+                                style={{ width: "50px", height: "50px", marginRight: "5px" }}
+                              />
                             </div>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                            {file.name}
+                            <div className="delete-container">
+                              <button
+                                type="button"
+                                onClick={() => handleFileDelete(file.name)}
+                                className="delete-button"
+                              >
+                                <img
+                                  src="/images/trash.png"
+                                  alt="Delete"
+                                  className="delete-icon"
+                                />
+                              </button>
+                            </div>
+                          </li>
+                        </div>
+                      ))}
+                    </ul>
                   </div>
-                  </div>
-        
-           
-        
-                  
-        </div>
-        
-                </form>
-                {error && <p className="error">{error}</p>}
+                )}
               </div>
-            </main>
-          );
-        }
-        
+            </div>
+          </div>
+        </form>
+        {error && <p className="error">{error}</p>}
+      </div>
+    </main>
+  );
+}
