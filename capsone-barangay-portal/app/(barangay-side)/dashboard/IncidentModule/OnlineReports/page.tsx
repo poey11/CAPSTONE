@@ -11,7 +11,7 @@ export default function OnlineReports() {
   const [incidentData, setIncidentData] = useState<any[]>([]);
 
   useEffect(() => {
-    const unsubscribe = getAllSpecificDocument("IncidentReports","department","Online", setIncidentData);
+    const unsubscribe = getAllSpecificDocument("IncidentReports","department","==","Online", setIncidentData);
 
     return () => {
       if (unsubscribe) {

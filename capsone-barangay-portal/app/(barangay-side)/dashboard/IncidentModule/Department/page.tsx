@@ -16,7 +16,7 @@ export default function Department() {
   useEffect(()=> {
 
     if(departmentId){
-      const unsubscribe = getAllSpecificDocument("IncidentReports", "department", departmentId, setIncidentData);
+      const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==",departmentId, setIncidentData);
         return () => {
         if (unsubscribe) {
           unsubscribe(); 
@@ -26,7 +26,6 @@ export default function Department() {
 
    
   },[departmentId])
-  console.log("Data:",incidentData);
 
   /*filtering and search is not yet working */
   const handleStatusChange = (index: number, newStatus: string) => {
@@ -37,20 +36,20 @@ export default function Department() {
 
  
 
-  const handleViewLupon = (reportId: string) => {
+  const handleView = (reportId: string) => {
     router.push(`/dashboard/IncidentModule/ViewIncident?id=${reportId}`);
   };
 
-  const handleEditLupon = (reportId: string) => {
+  const handleEdit = (reportId: string) => {
     router.push(`/dashboard/IncidentModule/EditIncident?id=${reportId}`);
   };
 
-  const handleDeleteLupon = (reportId: string) => {
+  const handleDelete = (reportId: string) => {
     deleteDocument("IncidentReports", reportId);
     deleteDocument("IncidentReports/Investigator", reportId);
   }
 
-  const handleAddLupon = () => {
+  const handleAdd = () => {
     router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`);
   };
 
@@ -60,7 +59,7 @@ export default function Department() {
     <main className="main-container">
       <div className="section-1">
         <h1>Lupon Tagapamayapa: {departmentId} Table</h1>
-          <button className="add-announcement-btn" onClick={handleAddLupon}>Add New Incident</button>
+          <button className="add-announcement-btn" onClick={handleAdd}>Add New Incident</button>
       </div>
 
       <div className="section-2">
@@ -102,9 +101,9 @@ export default function Department() {
                 </td>   
                 <td>
                   <div className="actions">
-                    <button className="action-view" onClick={() => handleViewLupon(incident.id)}>View</button>
-                    <button className="action-edit" onClick={()=>handleEditLupon(incident.id) }>Edit</button>
-                    <button className="action-delete" onClick={()=> handleDeleteLupon(incident.id)}>Delete</button>
+                    <button className="action-view" onClick={() => handleView(incident.id)}>View</button>
+                    <button className="action-edit" onClick={()=>handleEdit(incident.id) }>Edit</button>
+                    <button className="action-delete" onClick={()=> handleDelete(incident.id)}>Delete</button>
                   </div>
                 </td>
               </tr>

@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import Link from "next/link";
 import "@/CSS/BMenu/header.css";
+import React from "react";
 
 
 const BMenu: React.FC = () => {

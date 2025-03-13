@@ -1,5 +1,5 @@
 "use client"
-import {db, storage} from "@/app/db/firebase";
+import {db, storage} from "../db/firebase";
 import {collection, doc, deleteDoc, onSnapshot, query, where, getDoc, getDocs, getCountFromServer , count  } from "firebase/firestore";
 import { deleteObject, getDownloadURL, ref } from "firebase/storage";
 
@@ -57,9 +57,9 @@ const getStaffList = async (position:string,setStaffList:(data: any)=> void) => 
       }
 }
 
-const  getAllSpecificDocument =  (collect: string,  attribute: string, value: string,   setData:(data: any[])=>  void) => {
+const  getAllSpecificDocument =  (collect: string,  attribute: string, sign:any, value: string    ,setData:(data: any[])=>  void) => {
     try{
-        const reportCollection = query(collection(db, collect), where(attribute, "==", value));
+        const reportCollection = query(collection(db, collect), where(attribute, sign, value));
         const unsubscribe = onSnapshot(reportCollection, (snapshot) => {
         const reports:any[] = snapshot.docs.map((doc) => ({
             id: doc.id,

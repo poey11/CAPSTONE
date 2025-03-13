@@ -1,49 +1,42 @@
 "use client"
 import "@/CSS/IncidentModule/AllDepartments.css";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 
-const metadata: Metadata = {
-  title: "Incident Management Module",
-  description: "Manage incidents efficiently with status tracking and actions",
-};
+import { useState,useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { deleteDocument, getAllSpecificDocument } from "@/app/helpers/firestorehelper";
+
+
 
 const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
 const departmentOptions = ["GAD", "BCPC", "VAWC", "Lupon"]
 
 export default function MainPageIncident() {
-  const [incidentData, setIncidentData] = useState([
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Resolved", Deparment: "BCPC" },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Pending", Deparment: "BCPC"  },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Settled", Deparment: "BCPC"  },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived", Deparment: "BCPC"  },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived", Deparment: "BCPC"  },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived", Deparment: "BCPC"  },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived", Deparment: "BCPC"  },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived", Deparment: "BCPC"  },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived", Deparment: "BCPC"  },
-    { ComplainantName: "Malcolm Payao Quebal", DateFiled: "2024-02-01", Nature: "Robbery", Status: "Archived", Deparment: "BCPC"  },
-   
-
-  ]);
+  const [incidentData, setIncidentData] = useState<any[]>([])
+  useEffect(() => {
+      const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "!=", "Online", setIncidentData);
+        return () => {
+        if (unsubscribe) {
+          unsubscribe(); 
+        }
+    }  }, []);
 
 
 
   const router = useRouter();
 
-    const handleViewBCPC = () => {
-      router.push("/dashboard/IncidentModule/BCPC/ViewIncident");
-    };
+  const handleView = (reportId: string) => {
+    router.push(`/dashboard/IncidentModule/ViewIncident?id=${reportId}`);
+  };
 
-    const handleEditBCPC = () => {
-      router.push("/dashboard/IncidentModule/BCPC/EditIncident");
-    };
+  const handleEdit = (reportId: string) => {
+    router.push(`/dashboard/IncidentModule/EditIncident?id=${reportId}`);
+  };
 
-    const handleAddBCPC = () => {
-      router.push("/dashboard/IncidentModule/BCPC/AddIncident");
-    };
+  const handleDelete = (reportId: string) => {
+    deleteDocument("IncidentReports", reportId);
+    deleteDocument("IncidentReports/Investigator", reportId);
+  }
+
 
    
   
@@ -88,14 +81,13 @@ export default function MainPageIncident() {
       <div className="main-section">
         
 
-    
       <div className="table-section">
-      <table>
+        <table>
           <thead>
             <tr>
-              <th>Complainant's Name</th>
-              <th> Department</th>
-              <th>Date Filed</th>
+              <th>Case #</th>
+              <th>Department</th>
+              <th>Date & Time of the Incident</th>
               <th>Nature of Complaint</th>
               <th>Status</th>
               <th>Actions</th>
@@ -104,25 +96,26 @@ export default function MainPageIncident() {
           <tbody>
             {incidentData.map((incident, index) => (
               <tr key={index}>
-                <td>{incident.ComplainantName}</td>
-                <td>{incident.Deparment}</td>
-                <td>{incident.DateFiled}</td>
-                <td>{incident.Nature}</td>
+                <td>{incident.caseNumber}</td>
+                <td>{incident.department}</td>
+                <td>{incident.dateFiled} {incident.timeFiled}</td>
+                <td>{incident.nature}</td>
                 <td>
-                    <span className={`status-badge ${incident.Status.toLowerCase().replace(" ", "-")}`}>
-                        {incident.Status}
+                    <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
+                        {incident.status}
                     </span>
-                </td>
+                </td>   
                 <td>
                   <div className="actions">
-                  <button className="action-view" onClick={handleViewBCPC}>View</button>
+                    <button className="action-view" onClick={() => handleView(incident.id)}>View</button>
+                    <button className="action-edit" onClick={()=>handleEdit(incident.id) }>Edit</button>
+                    <button className="action-delete" onClick={()=> handleDelete(incident.id)}>Delete</button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-
       </div>
         
       </div>

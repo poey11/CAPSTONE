@@ -2,9 +2,10 @@
 import "@/CSS/IncidentModule/EditIncident.css";
 import { ChangeEvent,useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getSpecificDocument, generateDownloadLink } from "@/app/helpers/firestorehelper";
+import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/firestorehelper";
 import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/app/db/firebase";
+import { db } from "../../../../db/firebase";
+import React from "react";
 
 
 
