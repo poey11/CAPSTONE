@@ -4,7 +4,7 @@ import "@/CSS/IncidentModule/AllDepartments.css";
 import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { deleteDocument, getAllSpecificDocument } from "@/app/helpers/firestorehelper";
-
+import Heatmap from "@/app/(barangay-side)/components/heatmap"
 
 
 const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
@@ -128,8 +128,8 @@ export default function MainPageIncident() {
       <div className="titlesection">
              <p className="title"> Incident HeatMap</p>
         </div>
-
-
+        <Heatmap/>
+      
       </div>
 
     </main>
