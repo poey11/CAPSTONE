@@ -1,16 +1,16 @@
 "use client";
 import "@/CSS/ResidentModule/addresident.css";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { db, storage } from "../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Link from "next/link";
 
 export default function EditResident() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const residentId = searchParams.get("id"); 
+  const residentId = searchParams.get("id");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -30,177 +30,108 @@ export default function EditResident() {
     isSeniorCitizen: false,
     isSoloParent: false,
     isVoter: false,
-    fileURLs: [],
+    fileURL: "",
   });
-  
 
-  const [files, setFiles] = useState<{ file?: File; name: string; preview: string; url?: string }[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const uploadedFiles = Array.from(e.target.files).map((file) => ({
-        file,
-        name: file.name,
-        preview: URL.createObjectURL(file),
-      }));
-      setFiles([...files, ...uploadedFiles]);
-    }
-  };
-
-  const [deletedFileURLs, setDeletedFileURLs] = useState<string[]>([]);
-
-  const handleFileDelete = async (fileName: string, fileUrl?: string) => {
-    try {
-      if (fileUrl) {
-        // Extract Firebase storage path from URL
-        const decodedUrl = decodeURIComponent(fileUrl);
-        const match = decodedUrl.match(/\/o\/(.*?)\?alt=media/);
-        const storagePath = match ? match[1] : null;
-  
-        if (storagePath) {
-          console.log("Deleting file from Firebase Storage:", storagePath); // Debugging
-  
-          // Track deleted file in state
-          setDeletedFileURLs((prev) => [...prev, fileUrl]);
-  
-          // Delete file from Firebase Storage
-          const storageRef = ref(storage, storagePath);
-          await deleteObject(storageRef);
-        }
-      }
-  
-      // Remove file from UI state immediately
-      setFiles((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
-    } catch (error) {
-      console.error("Error deleting file:", error);
-    }
-  };
-  
-  
-  
-  
-  const handleUploadFiles = async () => {
-    const uploadedUrls: string[] = [];
-  
-    // Retain existing URLs for files that were not deleted
-    uploadedUrls.push(...formData.fileURLs.filter(url => !deletedFileURLs.includes(url)));
-  
-    // Upload new files
-    for (const fileObj of files) {
-      if (fileObj.file) {
-        const storageRef = ref(storage, `ResidentsFiles/${fileObj.file.name}`);
-        await uploadBytesResumable(storageRef, fileObj.file);
-        const downloadURL = await getDownloadURL(storageRef);
-        uploadedUrls.push(downloadURL);
-      }
-    }
-  
-    return uploadedUrls;
-  };
-  
-  
   useEffect(() => {
-    if (!residentId) return;
-
-    const fetchResident = async () => {
-      try {
+    if (residentId) {
+      const fetchResidentData = async () => {
         const docRef = doc(db, "Residents", residentId);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          const data = docSnap.data();
           setFormData({
-            name: data.name || "",
-            address: data.address || "",
-            generalLocation: data.generalLocation || "",
-            dateOfBirth: data.dateOfBirth || "",
-            age: data.age ?? 0, // Ensure age is a number
-            sex: data.sex || "",
-            civilStatus: data.civilStatus || "",
-            occupation: data.occupation || "",
-            contactNumber: data.contactNumber || "",
-            emailAddress: data.emailAddress || "",
-            precinctNumber: data.precinctNumber || "",
-            placeOfBirth: data.placeOfBirth || "",
-            isStudent: data.isStudent ?? false,
-            isSeniorCitizen: data.isSeniorCitizen ?? false,
-            isPWD: data.isPWD ?? false,
-            isSoloParent: data.isSoloParent ?? false,
-            isVoter: data.isVoter ?? false,
-            fileURLs: data.fileURLs ?? [],
+            name: docSnap.data().name || "",
+            address: docSnap.data().address || "",
+            dateOfBirth: docSnap.data().dateOfBirth || "",
+            placeOfBirth: docSnap.data().placeOfBirth || "",
+            age: docSnap.data().age || 0,
+            sex: docSnap.data().sex || "",
+            civilStatus: docSnap.data().civilStatus || "",
+            occupation: docSnap.data().occupation || "",
+            contactNumber: docSnap.data().contactNumber || "",
+            emailAddress: docSnap.data().emailAddress || "",
+            precinctNumber: docSnap.data().precinctNumber || "",
+            generalLocation: docSnap.data().generalLocation || "",
+            isStudent: docSnap.data().isStudent || false,
+            isPWD: docSnap.data().isPWD || false,
+            isSeniorCitizen: docSnap.data().isSeniorCitizen || false,
+            isSoloParent: docSnap.data().isSoloParent || false,
+            isVoter: docSnap.data().isVoter || false,
+            fileURL: docSnap.data().fileURL || "",
           });
-          
-
-          const loadedFiles = (data.fileURLs ?? []).map((url: string) => ({
-            file: null,
-            name: (url.split("%2F").pop() ?? "").split("?")[0], // Safe fallback
-            preview: url,
-          }));
-
-          setFiles(loadedFiles);
-
-        } else {
-          setError("Resident not found.");
+                    setPreview(docSnap.data().fileURL || null);
         }
-      } catch (error) {
-        console.error("Error fetching resident:", error);
-        setError("Failed to load resident data.");
-      }
-    };
-
-    fetchResident();
+      };
+      fetchResidentData();
+    }
   }, [residentId]);
 
-  //  input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked 
-            : type === "number" ? Number(value) || 0  // Convert to number safely
-            : value,
-    });
+    let newValue: any = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+
+    if (name === "age") {
+      const ageValue = parseInt(value, 10) || 0;
+      setFormData((prevData) => ({
+        ...prevData,
+        age: ageValue,
+        isSeniorCitizen: ageValue >= 60,
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: newValue,
+      }));
+    }
   };
 
-  useEffect(() => {
-    // Ensure `setFiles` only includes valid, non-deleted files
-    setFiles(formData.fileURLs.filter(url => !deletedFileURLs.includes(url)));
-  }, [deletedFileURLs, formData.fileURLs]);
-  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
+      e.target.value = "";
+    }
+  };
 
-  // form submission
+  const handleFileDelete = () => {
+    setFile(null);
+    setPreview(null); // ✅ Ensure it's undefined
+    setFormData((prev) => ({ ...prev, fileURL: "" }));  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!residentId) return;
-  
     setLoading(true);
     setError("");
-  
+
     try {
-      const uploadedFileURLs: string[] = await handleUploadFiles(); // Ensure correct type
-  
-      // Remove deleted files and add newly uploaded ones
-      const updatedFileURLs: string[] = [
-        ...formData.fileURLs.filter(url => !deletedFileURLs.includes(url)),
-        ...uploadedFileURLs, // Spread the array instead of concat
-      ];
-  
-      // Update Firestore
-      await updateDoc(doc(db, "Residents", residentId), {
+      let fileURL = formData.fileURL;
+      if (file) {
+        const storageRef = ref(storage, `ResidentsFiles/${file.name}`);
+        await uploadBytes(storageRef, file);
+        fileURL = await getDownloadURL(storageRef);
+      }
+
+      const docRef = doc(db, "Residents", residentId!);
+      await updateDoc(docRef, {
         ...formData,
-        fileURLs: updatedFileURLs, // Save updated list
+        fileURL,
       });
-  
+
       alert("Resident updated successfully!");
       router.push("/dashboard/ResidentModule");
     } catch (err) {
-      console.error("Update failed:", err);
-      setError("Failed to update resident.");
-    } finally {
-      setLoading(false);
+      setError("Failed to update resident");
+      console.error(err);
     }
+
+    setLoading(false);
   };
   
     const handleBack = () => {
@@ -208,166 +139,162 @@ export default function EditResident() {
     };
   
 
-  return (
-    <main className="main-container">
-      <div className="main-content">
-        <Link href="/dashboard/ResidentModule">
-        <button type="button" className="back-button" onClick={handleBack}></button>;
-        </Link>
-        <div className="section-1">
-          <p className="NewResident">Edit Resident</p>
-          <div className="actions">
-            <button className="action-view" type="submit" form="editResidentForm" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
-            </button>
-          </div>
-        </div>
-        <form id="editResidentForm" onSubmit={handleSubmit} className="section-2">
-          <div className="section-2-left-side">
-            <p>Full Name</p>
-            <input type="text" className="search-bar" name="name" value={formData.name} onChange={handleChange} required />
-            <p>Address</p>
-            <input type="text" className="search-bar" name="address" value={formData.address} onChange={handleChange} required />
-
-            <p>Location</p>
-            <select name="generalLocation" className="featuredStatus" value={formData.generalLocation} onChange={handleChange} required>
-              <option value="" disabled>Choose Part of Fairview</option>
-              <option value="East Fairview">East Fairview</option>
-              <option value="West Fairview">West Fairview</option>
-              <option value="South Fairview">South Fairview</option>
-            </select>
-
-            <p>Place of Birth</p>
-            <input type="text" className="search-bar" name="placeofBirth" value={formData.placeOfBirth} onChange={handleChange} required />
-
-            <p>Date of Birth</p>
-            <input type="date" className="search-bar" name="dateofBirth" value={formData.dateOfBirth} onChange={handleChange} required />
-
-            <p>Age</p>
-            <input type="number" className="search-bar" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
-
-            <p>Sex</p>
-            <select name="sex" className="featuredStatus" value={formData.sex} onChange={handleChange} required>
-              <option value="" disabled>Choose Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-
-            <p>Civil Status</p>
-            <select name="civilStatus" className="featuredStatus" value={formData.civilStatus} onChange={handleChange} required>
-              <option value="" disabled>Choose Civil Status</option>
-              <option value="Single">Single</option>
-              <option value="Married">Married</option>
-              <option value="Widowed">Widowed</option>
-              <option value="Divorced">Divorced</option>
-              <option value="Separated">Separated</option>
-            </select>
-
-            <p>Occupation</p>
-            <input type="text" className="search-bar" name="occupation" value={formData.occupation} onChange={handleChange} />
-            <p>Contact Number</p>
-            <input type="tel" className="search-bar" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
-
-            <p>Email Address</p>
-            <input type="email" className="search-bar" name="emailAddress" value={formData.emailAddress} onChange={handleChange} />
-
-            <p>Precinct Number</p>
-            <input type="text" className="search-bar" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
-
-            </div>
-           
-           
-           <div className="section-2-right-side">
-        
-        
-              <div className="checkboxes-container">
-        
-                    <p>Student</p>
-                    <div className="checkbox-container">
-                      <label className="checkbox-label">
-                        <input type="checkbox" name="isStudent" checked={formData.isStudent} onChange={handleChange} />
-                        Is this resident a student?
-                      </label>
-                    </div>
-        
-                    <p>PWD</p>
-                    <div className="checkbox-container">
-                      <label className="checkbox-label">
-                        <input type="checkbox" name="isPWD" checked={formData.isPWD} onChange={handleChange} />
-                        Is this resident a person with disability?
-                      </label>
-                    </div>
-        
-                    <p>Solo Parent</p>
-                    <div className="checkbox-container">
-                      <label className="checkbox-label">
-                        <input type="checkbox" name="isSoloParent" checked={formData.isSoloParent} onChange={handleChange} />
-                        Is this resident a solo parent?
-                      </label>
-                    </div>
-        
-                    <p>Voter</p>
-                    <div className="checkbox-container">
-                      <label className="checkbox-label">
-                        <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
-                        Is this resident a registered voter?
-                      </label>
-                    </div>
+    return (
+        <main className="main-container">
+          <div className="main-content">
+            <Link href="/dashboard/ResidentModule">
+              <button type="button" className="back-button" onClick={handleBack}></button>
+            </Link>
+  
+            <div className="section-1">
+              <p className="NewResident">Edit Resident</p>
+              <div className="actions">
+                <button className="action-view" type="submit" form="editResidentForm" disabled={loading}>
+                  {loading ? "Saving..." : "Save"}
+                </button>
               </div>
-
-
-              <div className="file-upload-container">
-              {/* File Upload */}
-              <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
-              <input
-                id="file-upload"
-                type="file"
-                className="file-upload-input"
-                multiple
-                accept=".jpg,.jpeg,.png"
-                onChange={handleFileChange}
-              />
-
-              <div className="uploadedFiles-container">
-                {files.length > 0 && (
-                  <div className="file-name-image-display">
-                    <ul>
-                      {files.map((file, index) => (
-                        <div className="file-name-image-display-indiv" key={index}>
-                          <li>
-                            <div className="filename&image-container">
-                              <img
-                                src={file.preview}
-                                alt={file.name}
-                                style={{ width: "50px", height: "50px", marginRight: "5px" }}
-                              />
-                            </div>
-                            {file.name}
-                            <div className="delete-container">
-                              <button
-                                type="button"
-                                onClick={() => handleFileDelete(file.name)}
-                                className="delete-button"
-                              >
-                                <img
-                                  src="/images/trash.png"
-                                  alt="Delete"
-                                  className="delete-icon"
-                                />
-                              </button>
-                            </div>
-                          </li>
-                        </div>
-                      ))}
-                    </ul>
+            </div>
+  
+            <form id="editResidentForm" onSubmit={handleSubmit} className="section-2">
+              {/* Left Side - Resident Form */}
+              <div className="section-2-left-side">
+                <p>Full Name</p>
+                <input type="text" className="search-bar" placeholder="Enter Full Name" name="name" value={formData.name} onChange={handleChange} required />
+  
+                <p>Address</p>
+                <input type="text" className="search-bar" placeholder="Enter Address" name="address" value={formData.address} onChange={handleChange} required />
+  
+                <p>Location</p>
+                <select name="generalLocation" className="featuredStatus" value={formData.generalLocation} onChange={handleChange} required>
+                  <option value="" disabled>Choose Part of Fairview</option>
+                  <option value="East Fairview">East Fairview</option>
+                  <option value="West Fairview">West Fairview</option>
+                  <option value="South Fairview">South Fairview</option>
+                </select>
+  
+                <p>Place of Birth</p>
+                <input type="text" className="search-bar" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} required />
+  
+                <p>Date of Birth</p>
+                <input type="date" className="search-bar" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
+  
+                <p>Age</p>
+                <input type="number" className="search-bar" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
+  
+                <p>Sex</p>
+                <select name="sex" className="featuredStatus" value={formData.sex} onChange={handleChange} required>
+                  <option value="" disabled>Choose Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+  
+                <p>Civil Status</p>
+                <select name="civilStatus" className="featuredStatus" value={formData.civilStatus} onChange={handleChange} required>
+                  <option value="" disabled>Choose Civil Status</option>
+                  <option value="Single">Single</option>
+                  <option value="Married">Married</option>
+                  <option value="Widowed">Widowed</option>
+                  <option value="Divorced">Divorced</option>
+                  <option value="Separated">Separated</option>
+                </select>
+  
+                <p>Occupation</p>
+                <input type="text" className="search-bar" placeholder="Enter Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
+  
+                <p>Contact Number</p>
+                <input type="tel" className="search-bar" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
+  
+                <p>Email Address</p>
+                <input type="email" className="search-bar" placeholder="Enter Email Address" name="emailAddress" value={formData.emailAddress} onChange={handleChange} />
+  
+                <p>Precinct Number</p>
+                <input type="text" className="search-bar" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
+              </div>
+  
+              {/* Right Side - Checkboxes & File Upload */}
+              <div className="section-2-right-side">
+                <div className="checkboxes-container">
+                  <p>Student</p>
+                  <div className="checkbox-container">
+                    <label className="checkbox-label">
+                      <input type="checkbox" name="isStudent" checked={formData.isStudent} onChange={handleChange} />
+                      Is this resident a student?
+                    </label>
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </form>
-        {error && <p className="error">{error}</p>}
+  
+                  <p>PWD</p>
+                  <div className="checkbox-container">
+                    <label className="checkbox-label">
+                      <input type="checkbox" name="isPWD" checked={formData.isPWD} onChange={handleChange} />
+                      Is this resident a person with disability?
+                    </label>
+                  </div>
+  
+                  <p>Solo Parent</p>
+                  <div className="checkbox-container">
+                    <label className="checkbox-label">
+                      <input type="checkbox" name="isSoloParent" checked={formData.isSoloParent} onChange={handleChange} />
+                      Is this resident a solo parent?
+                    </label>
+                  </div>
+  
+                  <p>Voter</p>
+                  <div className="checkbox-container">
+                    <label className="checkbox-label">
+                      <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
+                      Is this resident a registered voter?
+                    </label>
+                  </div>
+                </div>
+  
+                {/* File Upload Section Paayos na lang dito mapapasok yung new image*/}
+                <div className="file-upload-container">  
+  <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
+  <input 
+    id="file-upload" 
+    type="file" 
+    className="file-upload-input" 
+    accept=".jpg,.jpeg,.png" 
+    onChange={handleFileChange} 
+  />
+
+  {/* Current Image Section */}
+  {formData.fileURL && (
+    <div className="file-name-image-display">
+      <span className="section-title">Current Image</span>
+      <div className="file-name-image-display-indiv">
+        <img src={formData.fileURL} alt="Current Resident Image" style={{ width: "100px", height: "100px" }} />
+        <div className="delete-container">
+          <button type="button" onClick={handleFileDelete} className="delete-button">
+            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+          </button>
+        </div>
       </div>
-    </main>
-  );
-}
+    </div>
+  )}
+
+  {/* New Image Section (Only if a file is uploaded) */}
+  {file && (
+    <div className="file-name-image-display">
+      <span className="section-title">New Image</span>
+      <div className="file-name-image-display-indiv">
+        <img src={preview || ""} alt="New Resident Image" style={{ width: "100px", height: "100px" }} />
+        <span>{file.name}</span>
+        <div className="delete-container">
+          <button type="button" onClick={handleFileDelete} className="delete-button">
+            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
+
+              </div>
+            </form>
+  
+            {error && <p className="error">{error}</p>}
+          </div>
+        </main>
+    );
+  }
