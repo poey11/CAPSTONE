@@ -3,10 +3,8 @@ import "@/CSS/IncidentModule/EditIncident.css";
 import { ChangeEvent,useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSpecificDocument, generateDownloadLink } from "@/app/helpers/firestorehelper";
-import { report } from "process";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
-import { update } from "firebase/database";
 
 
 
@@ -21,6 +19,8 @@ export default function EditLuponIncident() {
     const [reportData, setReportData] = useState<any>();
     const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
     const [showDialogueContent, setShowDialogueContent] = useState(false); // Initially hidden
+  
+ 
     const [toUpdate, setToUpdate] = useState<any|null>({
       complainant: {
         fname: "",
@@ -47,12 +47,13 @@ export default function EditLuponIncident() {
       status: reportData?.status,
       investigator: {
         fullname: "",
-        dateInvestigated: "",
+        dateInvestigated:"",
         timeInvestigated: "",
         investigationReport: "",
         investigateImage: "",
       }
     });
+    let status = toUpdate.status//REMOVE PAG IMPLEMENTED NA SA BACKEND
 
 
     useEffect(() => {
@@ -73,9 +74,8 @@ export default function EditLuponIncident() {
       }
     },[reportData]);
 
- 
 
-    const status = toUpdate.status//REMOVE PAG IMPLEMENTED NA SA BACKEND
+  
 
     
     const handleFileChangeContainer1 = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,11 +236,11 @@ export default function EditLuponIncident() {
     };
     
     const handleGenerateDialouge = () => {
-        router.push(`/dashboard/IncidentModule/EditIncident/DialogueLetter?id=+${docId}`);
+        router.push(`/dashboard/IncidentModule/EditIncident/DialogueLetter?id=${docId}`);
       };
 
       const handleGenerateSummonLetter = () => {
-        router.push(`/dashboard/IncidentModule/EditIncident/SummonLetter?id=+${docId}`);
+        router.push(`/dashboard/IncidentModule/EditIncident/SummonLetter?id=${docId}`);
       };
 
       const handleDeleteForm=()=>{
@@ -297,7 +297,7 @@ export default function EditLuponIncident() {
                            id="status"
                            className={`status-dropdown ${status}`}  
                            name="status"
-                            value={status}     
+                            value={toUpdate.status ?? reportData.status ?? "Pending"} // Show db value or user-updated value
                            onChange={handleFormChange}               
                            >
                            <option value="Pending">Pending</option>
@@ -595,8 +595,8 @@ export default function EditLuponIncident() {
                         <div className="input-group">
                             <p>Investigator Full Name (FN SN)</p>
                             <input type="text" className="search-bar" 
-                            placeholder="Enter Full Name"
-                            value={toUpdate.investigator.fullname || ""}
+                            placeholder={reportData?.investigator?.fullname ?? "Enter Full Name"}
+                            value={toUpdate?.investigator.fullname}
                             name="investigator.fullname"
                             id="investigator.fullname"
                             onChange={handleFormChange}
@@ -606,25 +606,34 @@ export default function EditLuponIncident() {
                         <div className="input-group">
                             <p>Date Investigated</p>
                             <input type="date" className="search-bar" 
-                              value={toUpdate.investigator.dateInvestigated}
+                              value={toUpdate?.investigator?.dateInvestigated || reportData?.investigator?.dateInvestigated || ""}
                               name="investigator.dateInvestigated"
                               id="investigator.dateInvestigated"
-                              onChange={handleFormChange} />
+                              onChange={handleFormChange} 
+                  
+                              />
                         </div>
                         <div className="input-group">
                             <p>Time Investigated</p>
                             <input type="time" className="search-bar" 
-                            value={toUpdate.investigator.timeInvestigated} 
+                            value={toUpdate?.investigator?.timeInvestigated || reportData?.investigator?.timeInvestigated  || ""} 
                             name="investigator.timeInvestigated"
                             id="investigator.timeInvestigated"
-                            onChange={handleFormChange}  />
+                            onChange={handleFormChange}  
+                            />
+                           
                         </div>
                     </div>
 
                     <p  className="title">Image of Incident</p>
                     <div className="description">
                       {concernImageUrl ? (
-                          <img src={concernImageUrl} alt="Incident" className="incident-image"  style={{ width: '30%', height: '100%', marginRight: '5px', cursor: "pointer" }} />
+                        <>
+                          <a href={concernImageUrl} target="_blank" rel="noopener noreferrer">
+
+                            <img src={concernImageUrl} alt="Incident" className="incident-image"  style={{ width: '30%', height: '100%', marginRight: '5px', cursor: "pointer" }} />
+                          </a>
+                        </>
 
                        ) : ( 
                          <div className="input-group">

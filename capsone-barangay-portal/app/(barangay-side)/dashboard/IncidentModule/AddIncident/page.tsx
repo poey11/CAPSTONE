@@ -53,13 +53,13 @@ export default function AddIncident() {
     fetchCaseNumber();
   }, [departmentId]); // Runs when `departmentId` changes
 
-  const year = new Date().getFullYear().toString();
+  const currentDate = new Date().toISOString().split("T")[0].replace(/-/g, "");
   const getCaseNumber = async () => {
     if (departmentId) {
       let number = await getSpecificCountofCollection("IncidentReports", "department", departmentId);
       const formattedNumber = number !== undefined ? String(number + 1).padStart(4, "0") : "0000";
 
-      const caseValue =`${departmentId}-${year}-${formattedNumber}` ;
+      const caseValue =`${departmentId} - ${currentDate} - ${formattedNumber}` ;
       console.log("Generated Case Number:", caseValue); // ✅ Logs the correct value
       return caseValue; // ✅ Ensure the function returns the computed value
     }
@@ -225,7 +225,7 @@ export default function AddIncident() {
   const deleteForm = () => {
     
     setReportInfo({
-        caseNumber: caseNumber,
+        caseNumber: "",
         dateFiled: "",
         timeFiled: "",
         location: "",
