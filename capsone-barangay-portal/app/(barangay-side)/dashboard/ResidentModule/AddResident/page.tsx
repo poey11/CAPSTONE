@@ -4,13 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { db, storage } from "../../../../db/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL, uploadBytes } from "firebase/storage"; // Firebase storage functions
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Link from "next/link";
 
 export default function AddResident() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    
     name: "",
     address: "",
     dateOfBirth: "",
@@ -22,26 +21,23 @@ export default function AddResident() {
     contactNumber: "",
     emailAddress: "",
     precinctNumber: "",
-    generalLocation:"",
-    isStudent:false,
-    isPWD:false,
+    generalLocation: "",
+    isStudent: false,
+    isPWD: false,
     isSeniorCitizen: false,
-    isSoloParent:false,
+    isSoloParent: false,
     isVoter: false,
   });
 
-  const [files, setFiles] = useState<{ file: File; preview: string }[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
-
-    // Handles input changes for text, select, and checkbox fields
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     let newValue: any = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
-  
-        // Automatically mark as Senior Citizen if age is 60 or above
+
     if (name === "age") {
       const ageValue = parseInt(value, 10) || 0;
       setFormData((prevData) => ({
@@ -56,314 +52,191 @@ export default function AddResident() {
       }));
     }
   };
-  
-  // Handles file selection and creates a preview
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const uploadedFiles = Array.from(e.target.files).map((file) => ({
-        file,
-        name: file.name,
-        preview: URL.createObjectURL(file), // Local preview before upload
-      }));
-      setFiles([...files, ...uploadedFiles]);
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFile = e.target.files[0];
+  
+      // Ensure only one file is processed
+      setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
+  
+      // Reset the file input to prevent multiple selections
+      e.target.value = "";
     }
   };
   
-
-  // Handles file deletion
-  const handleFileDelete = (fileName: string) => {
-    setFiles(files.filter((file) => file.file.name !== fileName));
+  const handleFileDelete = () => {
+    setFile(null);
+    setPreview(null);
   };
+  
 
-
-
-  // Handles file upload to Firebase Storage
-  const handleUploadFiles = async () => {
-    const uploadedUrls: string[] = [];
-    for (const fileObj of files) {
-      const storageRef = ref(storage, `ResidentsFiles/${fileObj.file.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, fileObj.file);
-
-      // Wait for upload completion
-      await new Promise<void>((resolve, reject) => {
-        uploadTask.on(
-          "state_changed",
-          null,
-          (error) => reject(error),
-          async () => {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            uploadedUrls.push(downloadURL);
-            resolve();
-          }
-        );
-      });
-    }
-    return uploadedUrls;
-  };  
-
-  // Handles form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-  
+
     try {
-      // Upload each file and get download URLs
-      const fileUploadPromises = files.map(async ({ file }) => {
+      let fileURL = "";
+      if (file) {
         const storageRef = ref(storage, `ResidentsFiles/${file.name}`);
         await uploadBytes(storageRef, file);
-        return getDownloadURL(storageRef);
-      });
-  
-      const fileURLs = await Promise.all(fileUploadPromises);
-  
-      // Add resident data along with file URLs to Firestore
+        fileURL = await getDownloadURL(storageRef);
+      }
+
       await addDoc(collection(db, "Residents"), {
         ...formData,
         createdAt: serverTimestamp(),
-        fileURLs, // Store the uploaded file URLs in Firestore
+        fileURL,
       });
-  
+
       alert("Resident added successfully!");
       router.push("/dashboard/ResidentModule");
     } catch (err) {
       setError("Failed to add resident");
       console.error(err);
     }
-  
+
     setLoading(false);
   };
-  
 
-  
-
-    // Redirects the user back to the Residents module
-      const handleBack = () => {
-        window.location.href = "/dashboard/ResidentModule";
-      };
+  const handleBack = () => {
+    window.location.href = "/dashboard/ResidentModule";
+  };
 
   return (
-    <main className="main-container">
-      <div className="main-content">
-        <Link href="/dashboard/ResidentModule">
-        <button type="button" className="back-button" onClick={handleBack}></button>
-        </Link>
-        <div className="section-1">
-          <p className="NewResident">New Resident</p>
-          <div className="actions">
-            <button className="action-view" type="submit" form="addResidentForm" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
-            </button>
+      <main className="main-container">
+        <div className="main-content">
+          <Link href="/dashboard/ResidentModule">
+            <button type="button" className="back-button" onClick={handleBack}></button>
+          </Link>
+
+          <div className="section-1">
+            <p className="NewResident">New Resident</p>
+            <div className="actions">
+              <button className="action-view" type="submit" form="addResidentForm" disabled={loading}>
+                {loading ? "Saving..." : "Save"}
+              </button>
+            </div>
           </div>
-        </div>
-        <form id="addResidentForm" onSubmit={handleSubmit} className="section-2">
-        {/* Resident Form */}
-        <div className="section-2-left-side">
-            <p>Full Name</p>
-            <input type="text" 
-            className="search-bar" 
-            placeholder="Enter Full Name"  
-            name="name" 
-            value={formData.name} 
-            onChange={handleChange} required />
 
-            <p>Address</p>
-            <input type="text" 
-            className="search-bar" 
-            placeholder="Enter Address" 
-            name="address" 
-            value={formData.address} 
-            onChange={handleChange} required />
-            
-            <p>Location</p>
-            <select name="generalLocation" className="featuredStatus" value={formData.generalLocation} onChange={handleChange} required>
-              <option value="" disabled>Choose Part of Fairview</option>
-              <option value="East Fairview">East Fairview</option>
-              <option value="West Fairview">West Fairview</option>
-              <option value="South Fairview">South Fairview</option>
-            </select>
+          <form id="addResidentForm" onSubmit={handleSubmit} className="section-2">
+            {/* Left Side - Resident Form */}
+            <div className="section-2-left-side">
+              <p>Full Name</p>
+              <input type="text" className="search-bar" placeholder="Enter Full Name" name="name" value={formData.name} onChange={handleChange} required />
 
-            <p>Place of Birth</p>
-            <input type="text" 
-            className="search-bar" 
-            placeholder="Enter Place of Birth" 
-            name="placeOfBirth" 
-            value={formData.placeOfBirth} 
-            onChange={handleChange} required />
+              <p>Address</p>
+              <input type="text" className="search-bar" placeholder="Enter Address" name="address" value={formData.address} onChange={handleChange} required />
 
-            <p>Date of Birth</p>
-            <input type="date" 
-            className="search-bar" 
-            name="dateOfBirth" 
-            value={formData.dateOfBirth} 
-            onChange={handleChange} required />
+              <p>Location</p>
+              <select name="generalLocation" className="featuredStatus" value={formData.generalLocation} onChange={handleChange} required>
+                <option value="" disabled>Choose Part of Fairview</option>
+                <option value="East Fairview">East Fairview</option>
+                <option value="West Fairview">West Fairview</option>
+                <option value="South Fairview">South Fairview</option>
+              </select>
 
-            <p>Age</p>
-            <input
-              type="number"
-              className="search-bar" 
-              placeholder="Enter Age" 
-              name="age"
-              value={formData.age}
-              onChange={handleChange}
-              required
-              min="1"
-              max="120"
-            />
+              <p>Place of Birth</p>
+              <input type="text" className="search-bar" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} required />
 
-            <p>Sex</p>
-            <select name="sex" className="featuredStatus" value={formData.sex} onChange={handleChange} required>
-              <option value="" disabled>Choose Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
+              <p>Date of Birth</p>
+              <input type="date" className="search-bar" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
 
-            <p>Civil Status</p>
-            <select name="civilStatus" className="featuredStatus" value={formData.civilStatus} onChange={handleChange} required>
-              <option value="" disabled>Choose Civil Status</option>
-              <option value="Single">Single</option>
-              <option value="Married">Married</option>
-              <option value="Widowed">Widowed</option>
-              <option value="Divorced">Divorced</option>
-              <option value="Separated">Separated</option>
-            </select>
+              <p>Age</p>
+              <input type="number" className="search-bar" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
 
-            <p>Occupation</p>
-            <input type="text" 
-            className="search-bar"           
-            placeholder="Enter Occupation"  
-            name="occupation" 
-            value={formData.occupation} 
-            onChange={handleChange} />
+              <p>Sex</p>
+              <select name="sex" className="featuredStatus" value={formData.sex} onChange={handleChange} required>
+                <option value="" disabled>Choose Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
 
+              <p>Civil Status</p>
+              <select name="civilStatus" className="featuredStatus" value={formData.civilStatus} onChange={handleChange} required>
+                <option value="" disabled>Choose Civil Status</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+                <option value="Widowed">Widowed</option>
+                <option value="Divorced">Divorced</option>
+                <option value="Separated">Separated</option>
+              </select>
 
-            <p>Contact Number</p>
-            <input
-              type="tel"
-              className="search-bar"                       
-              name="contactNumber"
-              value={formData.contactNumber}
-              onChange={handleChange}
-              required
-              pattern="[0-9]{11}"
-              placeholder="Enter 11-digit phone number"
-            />
+              <p>Occupation</p>
+              <input type="text" className="search-bar" placeholder="Enter Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
 
-            <p>Email Address</p>
-            <input type="email" 
-            className="search-bar"           
-            placeholder="Enter Email Address"              
-            name="emailAddress" 
-            value={formData.emailAddress} 
-            onChange={handleChange} />
+              <p>Contact Number</p>
+              <input type="tel" className="search-bar" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
 
-            <p>Precinct Number</p>
-            <input type="text" 
-            className="search-bar"           
-            placeholder="Enter Precinct Number"              
-            name="precinctNumber" 
-            value={formData.precinctNumber} 
-            onChange={handleChange} />
+              <p>Email Address</p>
+              <input type="email" className="search-bar" placeholder="Enter Email Address" name="emailAddress" value={formData.emailAddress} onChange={handleChange} />
 
-           
-
-            </div>
-           
-           
-   <div className="section-2-right-side">
-
-
-      <div className="checkboxes-container">
-            {/* Checkboxes for Resident Type */}
-            <p>Student</p>
-            <div className="checkbox-container">
-              <label className="checkbox-label">
-                <input type="checkbox" name="isStudent" checked={formData.isStudent} onChange={handleChange} />
-                Is this resident a student?
-              </label>
+              <p>Precinct Number</p>
+              <input type="text" className="search-bar" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
             </div>
 
-            <p>PWD</p>
-            <div className="checkbox-container">
-              <label className="checkbox-label">
-                <input type="checkbox" name="isPWD" checked={formData.isPWD} onChange={handleChange} />
-                Is this resident a person with disability?
-              </label>
-            </div>
+            {/* Right Side - Checkboxes & File Upload */}
+            <div className="section-2-right-side">
+              <div className="checkboxes-container">
+                <p>Student</p>
+                <div className="checkbox-container">
+                  <label className="checkbox-label">
+                    <input type="checkbox" name="isStudent" checked={formData.isStudent} onChange={handleChange} />
+                    Is this resident a student?
+                  </label>
+                </div>
 
-            <p>Solo Parent</p>
-            <div className="checkbox-container">
-              <label className="checkbox-label">
-                <input type="checkbox" name="isSoloParent" checked={formData.isSoloParent} onChange={handleChange} />
-                Is this resident a solo parent?
-              </label>
-            </div>
+                <p>PWD</p>
+                <div className="checkbox-container">
+                  <label className="checkbox-label">
+                    <input type="checkbox" name="isPWD" checked={formData.isPWD} onChange={handleChange} />
+                    Is this resident a person with disability?
+                  </label>
+                </div>
 
-            <p>Voter</p>
-            <div className="checkbox-container">
-              <label className="checkbox-label">
-                <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
-                Is this resident a registered voter?
-              </label>
-            </div>
+                <p>Solo Parent</p>
+                <div className="checkbox-container">
+                  <label className="checkbox-label">
+                    <input type="checkbox" name="isSoloParent" checked={formData.isSoloParent} onChange={handleChange} />
+                    Is this resident a solo parent?
+                  </label>
+                </div>
 
+                <p>Voter</p>
+                <div className="checkbox-container">
+                  <label className="checkbox-label">
+                    <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
+                    Is this resident a registered voter?
+                  </label>
+                </div>
+              </div>
 
-      </div>
+              {/* File Upload Section */}
+              <div className="file-upload-container">
+                <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
+                <input id="file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleFileChange} />
 
-    
-
-      <div className="file-upload-container">
-              {/* File Upload */}
-              <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
-              <input
-                id="file-upload"
-                type="file"
-                className="file-upload-input"
-                multiple
-                accept=".jpg,.jpeg,.png"
-                onChange={handleFileChange}
-              />
-
-              <div className="uploadedFiles-container">
-                {files.length > 0 && (
+                {file && (
                   <div className="file-name-image-display">
-                    <ul>
-                      {files.map((file, index) => (
-                        <div className="file-name-image-display-indiv" key={index}>
-                          <li>
-                            <div className="filename&image-container">
-                              <img
-                                src={file.preview}
-                                alt={file.file.name}
-                                style={{ width: "50px", height: "50px", marginRight: "5px" }}
-                              />
-                            </div>
-                            {file.file.name}
-                            <div className="delete-container">
-                              <button
-                                type="button"
-                                onClick={() => handleFileDelete(file.file.name)}
-                                className="delete-button"
-                              >
-                                <img
-                                  src="/images/trash.png"
-                                  alt="Delete"
-                                  className="delete-icon"
-                                />
-                              </button>
-                            </div>
-                          </li>
-                        </div>
-                      ))}
-                    </ul>
+                    <div className="file-name-image-display-indiv">
+                      {preview && <img src={preview} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />}
+                      <span>{file.name}</span>
+                      <div className="delete-container">
+                        <button type="button" onClick={handleFileDelete} className="delete-button">
+                          <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
-          </div>
-        </form>
-        {error && <p className="error">{error}</p>}
-      </div>
-    </main>
+          </form>
+
+          {error && <p className="error">{error}</p>}
+        </div>
+      </main>
   );
 }
