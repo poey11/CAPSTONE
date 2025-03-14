@@ -55,7 +55,7 @@ export default function ViewVoter() {
       <div className="main-content">
         <div className="section-1">
           <Link href="/dashboard/ResidentModule/registeredVoters">
-            <button type="button" className="back-button" onClick={handleBack}></button>;
+            <button type="button" className="back-button" onClick={handleBack}></button>
           </Link>
           <p>Voter Details</p>
         </div>
