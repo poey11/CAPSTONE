@@ -124,7 +124,7 @@ export default function EditKasambahay() {
     setError("");
 
     try {
-      const docRef = doc(db, "Kasambahay", kasambahayId);
+      const docRef = doc(db, "KasambahayList", kasambahayId);
       await updateDoc(docRef, {
         registrationControlNumber: formData.registrationControlNumber,
         firstName: formData.firstName,
