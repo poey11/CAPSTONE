@@ -26,7 +26,6 @@ export default function AddResident() {
     isPWD: false,
     isSeniorCitizen: false,
     isSoloParent: false,
-    isVoter: false,
   });
 
   const [file, setFile] = useState<File | null>(null);
@@ -201,14 +200,6 @@ export default function AddResident() {
                   <label className="checkbox-label">
                     <input type="checkbox" name="isSoloParent" checked={formData.isSoloParent} onChange={handleChange} />
                     Is this resident a solo parent?
-                  </label>
-                </div>
-
-                <p>Voter</p>
-                <div className="checkbox-container">
-                  <label className="checkbox-label">
-                    <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
-                    Is this resident a registered voter?
                   </label>
                 </div>
               </div>

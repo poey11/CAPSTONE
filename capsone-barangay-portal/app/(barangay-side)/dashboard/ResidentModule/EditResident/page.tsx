@@ -29,7 +29,6 @@ export default function EditResident() {
     isPWD: false,
     isSeniorCitizen: false,
     isSoloParent: false,
-    isVoter: false,
     fileURL: "",
   });
 
@@ -62,7 +61,6 @@ export default function EditResident() {
             isPWD: docSnap.data().isPWD || false,
             isSeniorCitizen: docSnap.data().isSeniorCitizen || false,
             isSoloParent: docSnap.data().isSoloParent || false,
-            isVoter: docSnap.data().isVoter || false,
             fileURL: docSnap.data().fileURL || "",
           });
                     setPreview(docSnap.data().fileURL || null);
@@ -237,14 +235,7 @@ export default function EditResident() {
                       Is this resident a solo parent?
                     </label>
                   </div>
-  
-                  <p>Voter</p>
-                  <div className="checkbox-container">
-                    <label className="checkbox-label">
-                      <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
-                      Is this resident a registered voter?
-                    </label>
-                  </div>
+
                 </div>
   
                 {/* File Upload Section Paayos na lang dito mapapasok yung new image*/}
