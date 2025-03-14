@@ -13,6 +13,7 @@ export default function EditResident() {
   const residentId = searchParams.get("id");
 
   const [formData, setFormData] = useState({
+    residentNumber: 0,
     name: "",
     address: "",
     dateOfBirth: "",
@@ -29,7 +30,6 @@ export default function EditResident() {
     isPWD: false,
     isSeniorCitizen: false,
     isSoloParent: false,
-    isVoter: false,
     fileURL: "",
   });
 
@@ -46,6 +46,7 @@ export default function EditResident() {
 
         if (docSnap.exists()) {
           setFormData({
+            residentNumber: docSnap.data().residentNumber || 0,
             name: docSnap.data().name || "",
             address: docSnap.data().address || "",
             dateOfBirth: docSnap.data().dateOfBirth || "",
@@ -62,7 +63,6 @@ export default function EditResident() {
             isPWD: docSnap.data().isPWD || false,
             isSeniorCitizen: docSnap.data().isSeniorCitizen || false,
             isSoloParent: docSnap.data().isSoloParent || false,
-            isVoter: docSnap.data().isVoter || false,
             fileURL: docSnap.data().fileURL || "",
           });
                     setPreview(docSnap.data().fileURL || null);
@@ -158,9 +158,12 @@ export default function EditResident() {
             <form id="editResidentForm" onSubmit={handleSubmit} className="section-2">
               {/* Left Side - Resident Form */}
               <div className="section-2-left-side">
+                <p>Resident Number</p>
+                <input type="text" className="disabled-field" name="residentNumber" value={formData.residentNumber} onChange={handleChange} disabled />
+  
                 <p>Full Name</p>
                 <input type="text" className="search-bar" placeholder="Enter Full Name" name="name" value={formData.name} onChange={handleChange} required />
-  
+    
                 <p>Address</p>
                 <input type="text" className="search-bar" placeholder="Enter Address" name="address" value={formData.address} onChange={handleChange} required />
   
@@ -237,14 +240,7 @@ export default function EditResident() {
                       Is this resident a solo parent?
                     </label>
                   </div>
-  
-                  <p>Voter</p>
-                  <div className="checkbox-container">
-                    <label className="checkbox-label">
-                      <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
-                      Is this resident a registered voter?
-                    </label>
-                  </div>
+
                 </div>
   
                 {/* File Upload Section Paayos na lang dito mapapasok yung new image*/}

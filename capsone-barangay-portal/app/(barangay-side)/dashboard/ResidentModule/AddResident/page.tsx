@@ -3,7 +3,7 @@ import "@/CSS/ResidentModule/addresident.css";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { db, storage } from "../../../../db/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Link from "next/link";
 
@@ -26,7 +26,6 @@ export default function AddResident() {
     isPWD: false,
     isSeniorCitizen: false,
     isSoloParent: false,
-    isVoter: false,
   });
 
   const [file, setFile] = useState<File | null>(null);
@@ -76,7 +75,7 @@ export default function AddResident() {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+  
     try {
       let fileURL = "";
       if (file) {
@@ -84,23 +83,36 @@ export default function AddResident() {
         await uploadBytes(storageRef, file);
         fileURL = await getDownloadURL(storageRef);
       }
-
-      await addDoc(collection(db, "Residents"), {
+  
+      // Fetch the highest residentNumber
+      const residentsRef = collection(db, "Residents");
+      const q = query(residentsRef, orderBy("residentNumber", "desc"), limit(1));
+      const querySnapshot = await getDocs(q);
+  
+      let newResidentNumber = 1; // Default to 1 if no residents exist
+  
+      if (!querySnapshot.empty) {
+        const lastResident = querySnapshot.docs[0].data();
+        newResidentNumber = lastResident.residentNumber + 1;
+      }
+  
+      // Add the new resident with an incremented residentNumber
+      await addDoc(residentsRef, {
         ...formData,
+        residentNumber: newResidentNumber,
         createdAt: serverTimestamp(),
         fileURL,
       });
-
+  
       alert("Resident added successfully!");
       router.push("/dashboard/ResidentModule");
     } catch (err) {
       setError("Failed to add resident");
       console.error(err);
     }
-
+  
     setLoading(false);
   };
-
   const handleBack = () => {
     window.location.href = "/dashboard/ResidentModule";
   };
@@ -201,14 +213,6 @@ export default function AddResident() {
                   <label className="checkbox-label">
                     <input type="checkbox" name="isSoloParent" checked={formData.isSoloParent} onChange={handleChange} />
                     Is this resident a solo parent?
-                  </label>
-                </div>
-
-                <p>Voter</p>
-                <div className="checkbox-container">
-                  <label className="checkbox-label">
-                    <input type="checkbox" name="isVoter" checked={formData.isVoter} onChange={handleChange} />
-                    Is this resident a registered voter?
                   </label>
                 </div>
               </div>
