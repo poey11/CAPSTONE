@@ -119,7 +119,7 @@ export default function registeredVotersModule() {
   return (
     <main className="main-container">
       <div className="section-1">
-        <h1>Kasambay Masterlist</h1>
+        <h1>Voter Masterlist</h1>
         <Link href="/dashboard/ResidentModule/registeredVoters/AddVoter">
           <button className="add-announcement-btn">Add New Voter</button>
         </Link>
@@ -186,8 +186,8 @@ export default function registeredVotersModule() {
                   <td>{resident.createdAt}</td>
                   <td>
                     <div className="actions">
-                      <button className="action-view" onClick={() => router.push(`/dashboard/ResidentModule/VotersList/ViewVoter?id=${resident.id}`)}>View</button>
-                      <button className="action-edit" onClick={() => router.push(`/dashboard/ResidentModule/VotersList/EditVoter?id=${resident.id}`)}>Edit</button>
+                      <button className="action-view" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}>View</button>
+                      <button className="action-edit" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/EditVoter?id=${resident.id}`)}>Edit</button>
                       <button className="action-delete" onClick={() => handleDelete(resident.id)}>Delete</button>
                     </div>
                   </td>

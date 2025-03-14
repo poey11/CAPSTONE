@@ -15,7 +15,7 @@ export default function ViewResident() {
 
   useEffect(() => {
     if (!residentId) return;
-    
+
     const fetchResident = async () => {
       try {
         const docRef = doc(db, "Residents", residentId);
@@ -40,10 +40,9 @@ export default function ViewResident() {
   if (!residentData) return <p>Resident not found</p>;
 
   const residentFields = [
-    { label: "Full Name", key: "name" },
-    { label: "Address", key: "address" },
+    { label: "First Name", key: "name" },
+    { label: "Home Address", key: "address" },
     { label: "Date of Birth", key: "dateOfBirth" },
-    { label: "General Location", key: "generalLocation" },
     { label: "Place of Birth", key: "placeOfBirth" },
     { label: "Age", key: "age" },
     { label: "Sex", key: "sex" },
@@ -52,11 +51,11 @@ export default function ViewResident() {
     { label: "Contact Number", key: "contactNumber" },
     { label: "Email Address", key: "emailAddress" },
     { label: "Precinct Number", key: "precinctNumber" },
-    { label: "Voter", key: "isVoter" },
-    { label: "PWD", key: "isPWD" },
-    { label: "Single Parent", key: "isSoloParent" },
-    { label: "Student", key: "isStudent" },
-    { label: "Senior Citizen", key: "isSeniorCitizen" },
+    { label: "General Location", key: "generalLocation" },
+    { label: "Student", key: "isStudent", isBoolean: true },
+    { label: "PWD", key: "isPWD", isBoolean: true },
+    { label: "Senior Citizen", key: "isSeniorCitizen", isBoolean: true },
+    { label: "Solo Parent", key: "isSoloParent", isBoolean: true },
   ];
 
   const handleBack = () => {
@@ -68,7 +67,7 @@ export default function ViewResident() {
       <div className="main-content">
         <div className="section-1">
           <Link href="/dashboard/ResidentModule">
-          <button type="button" className="back-button" onClick={handleBack}></button>;
+            <button type="button" className="back-button" onClick={handleBack}></button>;
           </Link>
           <p>Resident Details</p>
         </div>
@@ -79,8 +78,8 @@ export default function ViewResident() {
               <p>{field.label}</p>
             </div>
             <div className="description">
-              <p>       
-                {typeof residentData[field.key] === "boolean"
+              <p>
+                {field.isBoolean !== undefined
                   ? residentData[field.key] ? "Yes" : "No"
                   : residentData[field.key] ?? "N/A"}
               </p>

@@ -120,14 +120,14 @@ export default function EditVoter() {
         <form id="editVoterForm" onSubmit={handleSubmit} className="section-2">
           <div className="section-2-left-side">
             <p>Voter Number</p>
-            <input type="text" name="voterNumber" value={formData.voterNumber} onChange={handleChange} disabled className="disabled-input" 
+            <input type="text" name="voterNumber" value={formData.voterNumber} onChange={handleChange} disabled className="search-bar" 
   />
 
             <p>Full Name</p>
-            <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
+            <input type="text" className="search-bar" name="fullName" value={formData.fullName} onChange={handleChange} required />
 
             <p>Home Address</p>
-            <input type="text" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+            <input type="text" className="search-bar" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
 
             <p>Precinct Number</p>
             <input type="text" className="search-bar" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
