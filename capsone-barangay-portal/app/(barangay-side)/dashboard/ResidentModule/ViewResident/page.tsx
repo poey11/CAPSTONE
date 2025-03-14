@@ -40,7 +40,8 @@ export default function ViewResident() {
   if (!residentData) return <p>Resident not found</p>;
 
   const residentFields = [
-    { label: "First Name", key: "name" },
+    { label: "Resident Number", key: "residentNumber" },
+    { label: "Full Name", key: "name" },
     { label: "Home Address", key: "address" },
     { label: "Date of Birth", key: "dateOfBirth" },
     { label: "Place of Birth", key: "placeOfBirth" },
@@ -77,7 +78,7 @@ export default function ViewResident() {
             <div className="title">
               <p>{field.label}</p>
             </div>
-            <div className="description">
+            <div className={`description ${field.key === "residentNumber" ? "disabled-field" : ""}`}>
               <p>
                 {field.isBoolean !== undefined
                   ? residentData[field.key] ? "Yes" : "No"

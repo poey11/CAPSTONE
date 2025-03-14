@@ -188,6 +188,7 @@ export default function ResidentModule() {
           <table>
             <thead>
               <tr>
+                <th>Resident Number</th>
                 <th>Full Name</th>
                 <th>Address</th>
                 <th>General Location</th>
@@ -202,6 +203,7 @@ export default function ResidentModule() {
             <tbody>
               {currentResidents.map((resident) => (
                 <tr key={resident.id}>
+                  <td>{resident.residentNumber}</td>
                   <td>{resident.name}</td>
                   <td>{resident.address}</td>
                   <td>{resident.generalLocation}</td>
