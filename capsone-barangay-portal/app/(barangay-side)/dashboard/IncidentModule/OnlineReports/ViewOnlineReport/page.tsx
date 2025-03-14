@@ -19,9 +19,7 @@ export default function ViewOnlineReports() {
     { label: "Date Of Incident", key: "2024-02-01" },
     { label: "Concern", key: "Broken Lamp Post at Payao Street" },
     { label: "Status", key: "Acknowledged" },
-    { label: "Investigated By", key: "Jerico Ibanez" },
-    { label: "Investigation Report", key: "The barangay promptly dispatched maintenance personnel to assess the broken lamp post after receiving the report, ensuring repairs were completed to restore proper lighting in the area." },
-    { label: "Investigation Photo", key: "/Images/kap.jpg" },
+    { label: "Proof Photo", key: "/Images/kap.jpg" },
   ];
 
   const router = useRouter();
@@ -52,8 +50,8 @@ export default function ViewOnlineReports() {
             </div>
             <div className="description-section">
 
-                    {field.label === "Investigation Photo" ? (
-                        <img src={field.key} alt="Investigation Photo" className="detail-section-image" />
+                    {field.label === "Proof Photo" ? (
+                        <img src={field.key} alt="Proof Photo" className="detail-section-image" />
                         ) : (
                         <p>{field.key}</p>
                         )}
@@ -61,7 +59,60 @@ export default function ViewOnlineReports() {
           </div>
         ))}
       </div>
+    
 
+    <div className="main-content-response-section">
+
+        <div className="section-1-response">
+
+        <h1 className="title-response-section">Respondent's Information</h1>
+
+            <div className="official-section-online-report">
+
+
+            <p>Respondent Officer</p>
+                  <select 
+                  id="" 
+                  name="" 
+                  className="online-report-input-field" 
+                  required
+                  defaultValue=""  
+                  >
+                  <option value="" disabled>Choose</option>
+                  <option value="">Malcolm </option>
+                  <option value="">Luen</option>
+                  <option value="">Payao</option>
+                  </select>
+
+                    
+                </div>
+
+
+            <div className="fields-section-online-report">
+                    <p>Investigation Report</p>
+                <textarea 
+                    className="description" 
+                    placeholder="Enter Description"
+                    rows={15}
+                ></textarea>
+             </div>
+      
+        </div>
+
+
+        <div className="">
+
+        </div>
+
+
+
+        <div className="submit-response-section">
+                 <button className="save-btn-online-report-response-section">Save</button>
+        </div>
+
+       
+
+    </div>
 
     
     </main>

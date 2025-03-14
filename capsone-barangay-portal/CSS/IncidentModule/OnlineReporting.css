@@ -285,12 +285,109 @@ FOR ONLINE INCIDENT REPORTING CSS
     width: 100px;
     background-color: #4caf50;
     color: white;
-    
 }
 .save-btn-online-report:hover {
     background-color: #3e8f41; 
 }
   
+
+
+
+
+
+.main-content-response-section {
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    width: 50%;
+    border-radius: 1rem;
+    border: 2px solid  #ddd;
+    height: auto;
+    margin:  auto; 
+    margin-top: 2rem;
+
+}
+
+.section-1-response {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.official-section-online-report {
+    width: 90%;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+}
+
+.official-section-online-report {
+    color: grey;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 1rem;
+}
+
+.fields-section-online-report {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+    width: 100%;
+}
+
+.fields-section-online-report p{
+    color: grey;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 1rem;
+}
+
+ .online-report-input-field{
+    padding: 8px;
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: rgba(0, 0, 0, 0.4);
+    text-align: center;
+  }
+
+  .online-report-input-field option {
+    color: rgba(0, 0, 0, 0.4); 
+  }
+
+  .title-response-section {
+    font-weight: bold;
+    padding: 2rem;
+    font-size: 20px;
+    color: grey;
+  }
+
+  .submit-response-section {
+    padding: 1.5rem;
+    align-self: center;
+  }
+
+
+
+  .save-btn-online-report-response-section {   
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+    width: 250px;
+    background-color: #4caf50;
+    color: white;
+}
+.save-btn-online-repor-response-sectiont:hover {
+    background-color: #3e8f41; 
+}
+
 
 
 
