@@ -32,7 +32,7 @@
     border-collapse: collapse; /* Removes unnecessary spacing between table cells */
 }
 
-.main-section tr:hover {
+.main-section tbody tr:hover {
   background-color: #e0e0e0; 
   cursor: pointer; 
   transition: background-color 0.2s ease; 
@@ -54,6 +54,16 @@
     text-align: center;
     
 }
+
+.main-section thead {
+  position: sticky;
+  top: 0;
+  background-color: rgb(232, 228, 228); /* Ensures it's visible when scrolled */
+  z-index: 10; /* Ensures it stays above other content */
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
+  height: 80px;
+}
+
 
 .main-section .official-info {
     display: flex;
