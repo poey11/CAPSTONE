@@ -1,12 +1,12 @@
 "use client";
 import "@/CSS/ResidentModule/module.css";
 import { useEffect, useState } from "react";
-import { db } from "../../../../db/firebase";
 import { useRouter } from "next/navigation";
+import { db } from "../../../../db/firebase";
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
 
-export default function RegisteredVotersModule() {
+export default function registeredVotersModule() {
   const [residents, setResidents] = useState<any[]>([]);
   const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,20 +15,20 @@ export default function RegisteredVotersModule() {
   const [searchName, setSearchName] = useState<string>("");
   const [searchAddress, setSearchAddress] = useState<string>("");
   const [showCount, setShowCount] = useState<number>(0);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
   const router = useRouter(); 
+
+
 
   useEffect(() => {
     const fetchResidents = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "Residents"));
+        const querySnapshot = await getDocs(collection(db, "VotersList"));
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        // Filter to only include voters
-        const filteredVoters = data.filter((resident: any) => resident.isVoter === true);
-        setResidents(filteredVoters);
-        setFilteredResidents(filteredVoters); // Initialize with filtered voters
+        setResidents(data);
       } catch (err) {
-        setError("Failed to load residents");
+        setError("Failed to load voters");
         console.error(err);
       } finally {
         setLoading(false);
@@ -41,34 +41,40 @@ export default function RegisteredVotersModule() {
   useEffect(() => {
     let filtered = [...residents];
 
-    // Filter by search term for name
     if (searchName) {
-      filtered = filtered.filter((resident) =>
-        resident.name.toLowerCase().includes(searchName.toLowerCase())
-      );
+      filtered = filtered.filter((resident) => {
+        const fullName = resident.fullName?.toLowerCase() || "";
+
+    
+        return (
+          fullName.includes(searchName.toLowerCase()));
+      });
     }
 
-    // Filter by search term for address
     if (searchAddress) {
       filtered = filtered.filter((resident) =>
-        resident.address.toLowerCase().includes(searchAddress.toLowerCase())
+        resident.homeAddress.toLowerCase().includes(searchAddress.toLowerCase())
       );
     }
 
-    // Limit number of items to show
+    // Sorting by Voter Number
+    filtered.sort((a, b) => {
+      const numA = parseInt(a.voterNumber, 10) || 0;
+      const numB = parseInt(b.voterNumber, 10) || 0;
+      return sortOrder === "asc" ? numA - numB : numB - numA;
+    });
+
     if (showCount) {
       filtered = filtered.slice(0, showCount);
     }
-    
 
     setFilteredResidents(filtered);
-  }, [searchName, searchAddress, showCount, residents]);
-
+  }, [searchName, searchAddress, showCount, residents, sortOrder]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this resident?")) {
       try {
-        await deleteDoc(doc(db, "Residents", id));
+        await deleteDoc(doc(db, "VotersList", id));
         setResidents((prev) => prev.filter(resident => resident.id !== id));
         alert("Resident deleted successfully!");
       } catch (error) {
@@ -91,6 +97,7 @@ export default function RegisteredVotersModule() {
   const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
   const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
 
+
   const getPageNumbers = () => {
     const totalPagesArray = [];
     const pageNumbersToShow = [];
@@ -109,18 +116,17 @@ export default function RegisteredVotersModule() {
     return pageNumbersToShow;
   };
 
-
   return (
     <main className="main-container">
       <div className="section-1">
-        <h1>Registered Voters List</h1>
-        <Link href="/dashboard/ResidentModule/AddResident">
-          <button className="add-announcement-btn">Add New Resident</button>
+        <h1>Kasambay Masterlist</h1>
+        <Link href="/dashboard/ResidentModule/registeredVoters/AddVoter">
+          <button className="add-announcement-btn">Add New Voter</button>
         </Link>
       </div>
 
       <div className="section-2">
-      <input
+        <input
           type="text"
           className="search-bar"
           placeholder="Search by Name"
@@ -134,8 +140,7 @@ export default function RegisteredVotersModule() {
           value={searchAddress}
           onChange={(e) => setSearchAddress(e.target.value)}
         />
-
-        <select
+      <select
           className="featuredStatus"
           value={showCount}
           onChange={(e) => setShowCount(Number(e.target.value))}
@@ -147,59 +152,43 @@ export default function RegisteredVotersModule() {
       </div>
 
       <div className="main-section">
-        {loading && <p>Loading residents...</p>}
+        {loading && <p>Loading voters...</p>}
         {error && <p className="error">{error}</p>}
 
         {!loading && !error && (
           <table>
             <thead>
               <tr>
-                <th>Full Name</th>
-                <th>Address</th>
-                <th>General Location</th>
+                <th>
+                  Voter  Number
+                  <button
+                    onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                    className="sort-button"
+                  >
+                    {sortOrder === "asc" ? "▲" : "▼"}
+                  </button>
+                </th>                
+                <th>Full Name</th>                
+                <th>Home Address</th>
+                <th>Precinct Number</th>
                 <th>Date of Birth</th>
-                <th>Place of Birth</th>
-                <th>Age</th>
-                <th>Sex</th>
-                <th>Civil Status</th>
-                <th>Occupation</th>
-                <th>Contact Number</th>
+
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {currentResidents.map((resident) => (
                 <tr key={resident.id}>
-                  <td>{resident.name}</td>
-                  <td>{resident.address}</td>
-                  <td>{resident.generalLocation}</td>
-                  <td>{resident.dateOfBirth}</td>
-                  <td>{resident.placeOfBirth}</td>
-                  <td>{resident.age}</td>
-                  <td>{resident.sex}</td>
-                  <td>{resident.civilStatus}</td>
-                  <td>{resident.occupation}</td>
-                  <td>{resident.contactNumber}</td>
+                  <td>{resident.voterNumber}</td>
+                  <td>{resident.fullName}</td>
+                  <td>{resident.homeAddress}</td>
+                  <td>{resident.precinctNumber}</td>
+                  <td>{resident.createdAt}</td>
                   <td>
                     <div className="actions">
-                    <button 
-                        className="action-view" 
-                        onClick={() => router.push(`/dashboard/ResidentModule/ViewResident?id=${resident.id}`)}
-                      >
-                        View
-                      </button>
-                      <button 
-                        className="action-edit" 
-                        onClick={() => router.push(`/dashboard/ResidentModule/EditResident?id=${resident.id}`)}
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        className="action-delete" 
-                        onClick={() => handleDelete(resident.id)}
-                      >
-                        Delete
-                      </button>
+                      <button className="action-view" onClick={() => router.push(`/dashboard/ResidentModule/VotersList/ViewVoter?id=${resident.id}`)}>View</button>
+                      <button className="action-edit" onClick={() => router.push(`/dashboard/ResidentModule/VotersList/EditVoter?id=${resident.id}`)}>Edit</button>
+                      <button className="action-delete" onClick={() => handleDelete(resident.id)}>Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -209,6 +198,7 @@ export default function RegisteredVotersModule() {
         )}
       </div>
 
+    
       <div className="redirection-section">
         <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
         {getPageNumbers().map((number, index) => (
@@ -222,7 +212,6 @@ export default function RegisteredVotersModule() {
         ))}
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
-
 
     </main>
   );
