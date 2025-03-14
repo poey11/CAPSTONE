@@ -20,6 +20,8 @@
     width: 100%;
     height: 100%; /* Full height */
     margin-top: 2rem;
+    max-height: 70%;
+    border: 2px solid  #ddd;
 }
 
 .main-section table {
@@ -171,6 +173,126 @@ width: 100px;
 .status-badge.pending {
     background-color: #325bd4;  
 }
+
+
+
+/*
+
+FOR ONLINE INCIDENT REPORTING CSS
+
+*/
+.main-content-view-online-report {
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    width: 90%;
+    border-radius: 1rem;
+    border: 2px solid  #ddd;
+    height: auto;
+    margin:  auto; 
+}
+.section-1-online-report {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    width: 100%;
+    padding: 2rem;
+    justify-content: space-between;
+}
+
+
+.section-1-online-report p {
+    font-weight: bold;
+    color: grey;
+    margin-left: 1rem;
+    font-size: 1.25rem;
+}
+
+.section-1-online-report-left-side {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.section-1-online-report-left-side h1 {
+    font-size: 17px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.5);
+    
+}
+
+.action-btn-section-online-report {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.back-button {
+    background-image: url('/Images/left-arrow.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 30px; 
+    height: 30px;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .back-button:hover {
+    transform: scale(1.1); 
+    transition: transform 0.2s ease;
+  }
+
+  .online-report-details-section{
+    display: flex;
+    border-bottom: 2px solid #ddd;
+  }
+
+  .title-section {
+    width: 15%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .title-section p {
+    font-weight: bold;
+    color: grey;
+    font-size: 1rem;
+  }
+
+  .description-section {
+    padding: 2rem;
+    width: 80%;
+  }
+
+  .description-section p {
+    color: grey;
+    font-size: 1rem;
+  }
+
+  .detail-section-image {
+    width: 200px;
+  }
+
+
+  .save-btn-online-report {   
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+    width: 100px;
+    background-color: #4caf50;
+    color: white;
+    
+}
+.save-btn-online-report:hover {
+    background-color: #3e8f41; 
+}
+  
+
+
 
 
 
