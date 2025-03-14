@@ -323,6 +323,7 @@ footerDrawings.forEach((drawing) => {
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0]; 
   
+      // Update title
       worksheet.getCell("A1").value = reportTitle;
   
       const dataStartRow = 4;
@@ -347,17 +348,22 @@ footerDrawings.forEach((drawing) => {
   
         cells.forEach((value, index) => {
           row.getCell(index + 1).value = value;
-          row.getCell(index + 1).font = { name: "Calibri", size: 20 };
+          row.getCell(index + 1).font = { name: "Calibri", size: 20, bold: false }; // Ensure uniform font & remove bold
         });
+  
         row.commit();
         insertionRow++;
       });
   
+      // Add "TOTAL" row after last entry
+      const totalRow = worksheet.getRow(insertionRow);
       worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
-      worksheet.getCell(`A${insertionRow}`).value = `TOTAL: ${residents.length}`;
-      worksheet.getCell(`A${insertionRow}`).alignment = { horizontal: "center", vertical: "middle" };
-      worksheet.getCell(`A${insertionRow}`).font = { bold: true, size: 20 };
-
+      totalRow.getCell(1).value = `TOTAL: ${residents.length}`;
+      totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
+      totalRow.getCell(1).font = { name: "Calibri", size: 20, bold: true };
+  
+      totalRow.commit();
+  
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       saveAs(blob, `Inhabitant Record_${year}.xlsx`);
@@ -370,6 +376,7 @@ footerDrawings.forEach((drawing) => {
       setLoadingResident(false);
     }
   };
+  
   
   
 
