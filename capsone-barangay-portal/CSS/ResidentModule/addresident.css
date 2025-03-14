@@ -373,6 +373,17 @@
   opacity: 0.8; 
 }
 
+.disabled-field {
+  padding: 8px;
+  width: 100%;
+  margin-top: 10px;
+  border: darkgray;
+  border-radius: 5px;
+  color: darkgray;
+  text-align: center;
+}
+
+
 .search-bar:focus ,.featuredStatus:focus {
   border-color: #f49028;
   outline: none;

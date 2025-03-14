@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject, listAll } from "firebase/storage";
 import { getFirestore, collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
-import { v4 as uuidv4 } from "uuid";
 import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
@@ -17,6 +16,7 @@ interface FileData {
 const ReportsPage = () => {
   const [loadingKasambahay, setLoadingKasambahay] = useState(false); 
   const [loadingJobSeeker, setLoadingJobSeeker] = useState(false);    
+  const [loadingResident, setLoadingResident] = useState(false);    
   const [files, setFiles] = useState<FileData[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
   const [selectedModule, setSelectedModule] = useState<string>("");
@@ -292,6 +292,92 @@ footerDrawings.forEach((drawing) => {
       setLoadingJobSeeker(false);
     }
   };
+
+  const generateResidentListReport = async () => {
+    setLoadingResident(true);
+    try {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const reportTitle = `RECORD OF BARANGAY INHABITANTS ${year}`;
+  
+      const residentRef = collection(db, "Residents");
+      const q = query(residentRef);
+      const querySnapshot = await getDocs(q);
+  
+      let residents = querySnapshot.docs.map((doc) => doc.data());
+  
+      if (residents.length === 0) {
+        alert("No resident found.");
+        setLoadingResident(false);
+        return;
+      }
+  
+      residents.sort((a, b) => (Number(a.residentNumber) || 0) - (Number(b.residentNumber) || 0));
+  
+      const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0]; 
+  
+      // Update title
+      worksheet.getCell("A1").value = reportTitle;
+  
+      const dataStartRow = 4;
+      let insertionRow = dataStartRow;
+  
+      residents.forEach((resident) => {
+        const row = worksheet.getRow(insertionRow);
+        const cells = [
+          resident.residentNumber || "",
+          resident.name || "",
+          resident.address || "",
+          resident.dateOfBirth || "",
+          resident.placeOfBirth || "",
+          resident.age || "",
+          resident.sex || "",
+          resident.civilStatus || "",
+          resident.occupation || "",
+          resident.contactNumber || "",
+          resident.emailAddress || "",
+          resident.precinctNumber || "",
+        ];
+  
+        cells.forEach((value, index) => {
+          row.getCell(index + 1).value = value;
+          row.getCell(index + 1).font = { name: "Calibri", size: 20, bold: false }; // Ensure uniform font & remove bold
+        });
+  
+        row.commit();
+        insertionRow++;
+      });
+  
+      // Add "TOTAL" row after last entry
+      const totalRow = worksheet.getRow(insertionRow);
+      worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
+      totalRow.getCell(1).value = `TOTAL: ${residents.length}`;
+      totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
+      totalRow.getCell(1).font = { name: "Calibri", size: 20, bold: true };
+  
+      totalRow.commit();
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      saveAs(blob, `Inhabitant Record_${year}.xlsx`);
+  
+      alert("Resident Masterlist generated successfully!");
+    } catch (error) {
+      console.error("Error generating report:", error);
+      alert("Failed to generate Resident Masterlist Report.");
+    } finally {
+      setLoadingResident(false);
+    }
+  };
+  
+  
   
 
   
@@ -337,8 +423,9 @@ footerDrawings.forEach((drawing) => {
 
           {selectedModule === "Resident Module" && (
             <>
-              <button className="report-button">Generate Barangay Fairview Resident Masterlist</button>
-              <button className="report-button">Generate East Fairview Resident List</button>
+              <button onClick={generateResidentListReport} disabled={loadingResident} className="report-button">
+                {loadingJobSeeker ? "Generating..." : "Generate Resident Masterlist"}
+              </button>                    <button className="report-button">Generate East Fairview Resident List</button>
               <button className="report-button">Generate South Fairview Resident List</button>
               <button className="report-button">Generate West Fairview Resident List</button>
               <button onClick={generateKasambahayReport} disabled={loadingKasambahay} className="report-button">
