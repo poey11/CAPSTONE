@@ -29,6 +29,35 @@ export default function EditVoter() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+
+  const [originalData, setOriginalData] = useState({ ...formData });
+
+  const [showDiscardPopup, setShowDiscardPopup] = useState(false);
+  const [showSavePopup, setShowSavePopup] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+
+
+  const handleDiscardClick = async () => {
+    setShowDiscardPopup(true);
+  }
+
+  const confirmDiscard = async () => {
+      setShowDiscardPopup(false);
+
+      setFormData(originalData); // Reset to original data
+
+      setPopupMessage("Changes discarded successfully!");
+      setShowPopup(true);
+      
+
+      // Hide the popup after 3 seconds
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 3000);
+
+  };
+
   useEffect(() => {
     if (!voterId) return;
 
@@ -38,13 +67,15 @@ export default function EditVoter() {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          const data = docSnap.data();
-          setFormData({
-            voterNumber: data.voterNumber || "",
-            fullName: data.fullName || "",
-            homeAddress: data.homeAddress || "",
-            precinctNumber: data.precinctNumber || "",
-          });
+          const data = {
+            voterNumber: docSnap.data().voterNumber || "",
+            fullName: docSnap.data().fullName || "",
+            homeAddress: docSnap.data().homeAddress || "",
+            precinctNumber: docSnap.data().precinctNumber || "",
+          };
+
+          setFormData(data);
+          setOriginalData(data); // Store original data
         } else {
           setError("Voter record not found.");
         }
@@ -70,6 +101,27 @@ export default function EditVoter() {
     });
   };
   
+  const handleSaveClick = async () => {
+    setShowSavePopup(true);
+  } 
+
+  const confirmSave = async () => {
+    setShowSavePopup(false);
+
+    setPopupMessage("Changes saved successfully!");
+    setShowPopup(true);
+
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+
+      router.push("/dashboard/ResidentModule/registeredVoters");
+    }, 3000);
+
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+  };
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -88,9 +140,6 @@ export default function EditVoter() {
         precinctNumber: formData.precinctNumber,
       });
       
-
-      alert("Voter record updated successfully!");
-      router.push("/dashboard/ResidentModule/registeredVoters");
     } catch (err) {
       console.error("Update failed:", err);
       setError("Failed to update record.");
@@ -104,37 +153,95 @@ export default function EditVoter() {
   };
 
   return (
-    <main className="main-container">
-      <div className="main-content">
-        <Link href="/dashboard/ResidentModule/registeredVoters">
-        <button type="button" className="back-button" onClick={handleBack}></button>
-        </Link>
-        <div className="section-1">
-          <p className="NewResident">Edit Voter</p>
-          <div className="actions">
-            <button className="action-view" type="submit" form="editVoterForm" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
-            </button>
-          </div>
-        </div>
-        <form id="editVoterForm" onSubmit={handleSubmit} className="section-2">
-          <div className="section-2-left-side">
-            <p>Voter Number</p>
-            <input type="text" name="voterNumber" value={formData.voterNumber} onChange={handleChange} disabled className="search-bar" 
-  />
+    <main className="add-resident-main-container">
 
-            <p>Full Name</p>
-            <input type="text" className="search-bar" name="fullName" value={formData.fullName} onChange={handleChange} required />
+      <div className="addresident-page-title-section-1">
+        <h1>Edit Voter Details</h1>
+      </div>
 
-            <p>Home Address</p>
-            <input type="text" className="search-bar" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+      <div className="add-resident-main-content">
+        <div className="add-resident-main-section1">
+              <div className="add-resident-main-section1-left">
+                <button onClick={handleBack}>
+                  <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                </button>
 
-            <p>Precinct Number</p>
-            <input type="text" className="search-bar" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
+                <h1> Edit Resident </h1>
+              </div>
+
+              <div className="action-btn-section">
+                <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
+                <button className="action-view" onClick={handleSaveClick} disabled={loading}>
+              
+                  {loading ? "Saving..." : "Save"}
+                </button>
+              </div>
+              
+            </div>
+
+          <hr/>
+        <form id="editVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
+          <div className="add-resident-section-2-left-side">
+
+            <div className="fields-container">
+              <div className="fields-section">
+                <p>Voter Number</p>
+                <input type="text" name="voterNumber" value={formData.voterNumber} onChange={handleChange} disabled className="add-resident-input-field-disabled" />
+              </div>
+
+              <div className="fields-section">
+                <p>Full Name</p>
+                <input type="text" className="add-resident-input-field" name="fullName" value={formData.fullName} onChange={handleChange} required />
+              </div>
+              
+              <div className="fields-section">
+                <p>Home Address</p>
+                <input type="text" className="add-resident-input-field" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+              </div>
+
+              <div className="fields-section">
+                <p>Precinct Number</p>
+                <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
+              </div>
+            </div>
           </div>
         </form>
         {error && <p className="error">{error}</p>}
       </div>
+
+
+      {showDiscardPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to discard the changes?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+                    )}
+
+          {showSavePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to save the changes?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowSavePopup(false)} className="no-button">No</button> 
+                                    <button onClick={confirmSave} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+            )}
+                    
+
+          {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
     </main>
   );
 }

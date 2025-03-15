@@ -78,7 +78,7 @@ export default function AddResident() {
 
   const handleSubmitClick = async () => {
     setShowSubmitPopup(true);
-}
+  }
 
 const confirmSubmit = async () => {
   setShowSubmitPopup(false);
@@ -162,7 +162,6 @@ const confirmSubmit = async () => {
             <div className="action-btn-section">
               {/*<button className="action-view" type="submit" form="addResidentForm" disabled={loading}>*/}
               <button className="action-view"  onClick={handleSubmitClick} disabled={loading}>
-              
                 {loading ? "Saving..." : "Save"}
               </button>
             </div>

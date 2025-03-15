@@ -19,6 +19,10 @@ export default function addVoter() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+
   useEffect(() => {
     const fetchLatestNumber = async () => {
       try {
@@ -57,6 +61,27 @@ export default function addVoter() {
   };
   
 
+  const handleSubmitClick = async () => {
+    setShowSubmitPopup(true);
+  }
+
+  const confirmSubmit = async () => {
+    setShowSubmitPopup(false);
+  
+    setPopupMessage("Resident added successfully!");
+    setShowPopup(true);
+  
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+      router.push("/dashboard/ResidentModule/registeredVoters");
+    }, 3000);
+  
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -83,8 +108,7 @@ export default function addVoter() {
         createdAt: currentDate,
       });
 
-      alert("Voter added successfully!");
-      router.push("/dashboard/ResidentModule/registeredVoters");
+     
     } catch (err) {
       setError("Failed to add voter");
       console.error(err);
@@ -113,7 +137,7 @@ export default function addVoter() {
             </div>
 
             <div className="action-btn-section">
-              <button className="action-view" type="submit" form="addVoterForm" disabled={loading}>
+              <button className="action-view"  onClick={handleSubmitClick} disabled={loading}>
                 {loading ? "Saving..." : "Save"}
               </button>
             </div>
@@ -128,12 +152,12 @@ export default function addVoter() {
 
             <div className="fields-container">
               <div className="fields-section">
-                <p>Full Name</p>
+                <p>Full Name <span className="required">*</span></p>
                 <input type="text" className="add-resident-input-field" placeholder="Enter Full Name" name="fullName" value={formData.fullName} onChange={handleChange} required />
               </div>
 
               <div className="fields-section">
-                <p>Home Address</p>
+                <p>Home Address <span className="required">*</span></p>
                 <input type="text" className="add-resident-input-field" placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
               </div>
               
@@ -146,6 +170,26 @@ export default function addVoter() {
         </form>
         {error && <p className="error">{error}</p>}
       </div>
+
+      {showSubmitPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to submit?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmSubmit} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+        )}
+
+        {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
     </main>
   );
 }

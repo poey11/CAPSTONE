@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { db, storage } from "../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { deleteObject } from "firebase/storage";
 
 export default function EditResident() {
   const router = useRouter();
@@ -200,25 +199,24 @@ export default function EditResident() {
             <h1>Edit Resident Details</h1>
           </div>
           <div className="add-resident-main-content">
-          <div className="add-resident-main-section1">
-            <div className="add-resident-main-section1-left">
-              <button onClick={handleBack}>
-                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
-              </button>
+            <div className="add-resident-main-section1">
+              <div className="add-resident-main-section1-left">
+                <button onClick={handleBack}>
+                  <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                </button>
 
-              <h1> Edit Resident </h1>
-            </div>
+                <h1> Edit Resident </h1>
+              </div>
 
-            <div className="action-btn-section">
-              <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
-              {/*<button className="action-view" type="submit" form="editResidentForm" disabled={loading}>*/}
-              <button className="action-view" onClick={handleSaveClick} disabled={loading}>
-             
-                {loading ? "Saving..." : "Save"}
-              </button>
+              <div className="action-btn-section">
+                <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
+                <button className="action-view" onClick={handleSaveClick} disabled={loading}>
+              
+                  {loading ? "Saving..." : "Save"}
+                </button>
+              </div>
+              
             </div>
-            
-          </div>
 
           <hr/>
 
