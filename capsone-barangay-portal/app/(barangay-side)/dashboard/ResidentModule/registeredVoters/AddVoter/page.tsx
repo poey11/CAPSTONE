@@ -22,6 +22,8 @@ export default function addVoter() {
   const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
   useEffect(() => {
     const fetchLatestNumber = async () => {
@@ -62,8 +64,24 @@ export default function addVoter() {
   
 
   const handleSubmitClick = async () => {
+    const { fullName, homeAddress} = formData;
+  
+    if (!fullName || !homeAddress) {
+
+      setPopupErrorMessage("Please fill up all required fields.");
+      setShowErrorPopup(true);
+  
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowErrorPopup(false);
+      
+    }, 3000);
+    
+      return;
+    }
+  
     setShowSubmitPopup(true);
-  }
+  };
 
   const confirmSubmit = async () => {
     setShowSubmitPopup(false);
@@ -188,6 +206,14 @@ export default function addVoter() {
                 <div className={`popup-overlay show`}>
                     <div className="popup">
                         <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+        {showErrorPopup && (
+                <div className={`error-popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupErrorMessage}</p>
                     </div>
                 </div>
                 )}

@@ -37,6 +37,8 @@ export default function AddKasambahay() {
   const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
   useEffect(() => {
     const fetchLatestNumber = async () => {
@@ -77,8 +79,24 @@ export default function AddKasambahay() {
   
 
   const handleSubmitClick = async () => {
+    const { lastName, firstName, homeAddress, placeOfBirth, dateOfBirth, age, sex, civilStatus, educationalAttainment, natureOfWork, employmentArrangement, salary, employerName, employerAddress} = formData;
+  
+    if (!lastName || !firstName ||!homeAddress || !placeOfBirth ||!dateOfBirth || !age || !sex || !civilStatus || !educationalAttainment || !natureOfWork || !employmentArrangement || !salary || !employerName || !employerAddress) {
+
+      setPopupErrorMessage("Please fill up all required fields.");
+      setShowErrorPopup(true);
+  
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowErrorPopup(false);
+      
+    }, 3000);
+    
+      return;
+    }
+  
     setShowSubmitPopup(true);
-  }
+  };
 
 
   const confirmSubmit = async () => {
@@ -339,6 +357,14 @@ export default function AddKasambahay() {
                 <div className={`popup-overlay show`}>
                     <div className="popup">
                         <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+        {showErrorPopup && (
+                <div className={`error-popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupErrorMessage}</p>
                     </div>
                 </div>
                 )}

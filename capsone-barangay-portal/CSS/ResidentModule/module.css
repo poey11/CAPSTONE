@@ -247,11 +247,11 @@
     }
   }
 
-.popup-overlay {
+.popup-overlay,
+.error-popup-overlay{
     position: fixed;
     top: 13%;
     right: -3px;
-    background: #777575;
     color: white;
     width: 350px;
     height: 50px;
@@ -265,6 +265,14 @@
     align-items: center;
     justify-content: center;
     border-left: 10px solid #403f3e;
+  }
+
+  .popup-overlay{
+    background: #777575;
+  }
+
+  .error-popup-overlay{
+    background: #991e1e;
   }
 
   .popup{

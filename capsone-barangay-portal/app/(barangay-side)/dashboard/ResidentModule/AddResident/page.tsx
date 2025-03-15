@@ -36,6 +36,8 @@ export default function AddResident() {
   const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -77,8 +79,27 @@ export default function AddResident() {
   
 
   const handleSubmitClick = async () => {
+    const { 
+      name, address, generalLocation, placeOfBirth, dateOfBirth, 
+      age, sex, civilStatus, contactNumber 
+  } = formData;
+  
+    if (!name || !address || !generalLocation || !placeOfBirth || !dateOfBirth || !age || !sex || !civilStatus || !contactNumber) {
+
+      setPopupErrorMessage("Please fill up all required fields.");
+      setShowErrorPopup(true);
+  
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowErrorPopup(false);
+      
+    }, 3000);
+    
+      return;
+    }
+  
     setShowSubmitPopup(true);
-  }
+  };
 
 const confirmSubmit = async () => {
   setShowSubmitPopup(false);
@@ -329,6 +350,14 @@ const confirmSubmit = async () => {
                 <div className={`popup-overlay show`}>
                     <div className="popup">
                         <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+        {showErrorPopup && (
+                <div className={`error-popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupErrorMessage}</p>
                     </div>
                 </div>
                 )}
