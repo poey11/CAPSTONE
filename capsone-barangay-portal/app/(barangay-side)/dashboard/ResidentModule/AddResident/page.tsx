@@ -33,6 +33,10 @@ export default function AddResident() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     let newValue: any = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
@@ -51,6 +55,7 @@ export default function AddResident() {
       }));
     }
   };
+  
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -70,6 +75,27 @@ export default function AddResident() {
     setPreview(null);
   };
   
+
+  const handleSubmitClick = async () => {
+    setShowSubmitPopup(true);
+}
+
+const confirmSubmit = async () => {
+  setShowSubmitPopup(false);
+
+  setPopupMessage("Resident added successfully!");
+  setShowPopup(true);
+
+  // Hide the popup after 3 seconds
+  setTimeout(() => {
+    setShowPopup(false);
+    router.push("/dashboard/ResidentModule");
+  }, 3000);
+
+  // Create a fake event and call handleSubmit
+  const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+  await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+};
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -104,8 +130,7 @@ export default function AddResident() {
         fileURL,
       });
   
-      alert("Resident added successfully!");
-      router.push("/dashboard/ResidentModule");
+    
     } catch (err) {
       setError("Failed to add resident");
       console.error(err);
@@ -135,7 +160,9 @@ export default function AddResident() {
             </div>
 
             <div className="action-btn-section">
-              <button className="action-view" type="submit" form="addResidentForm" disabled={loading}>
+              {/*<button className="action-view" type="submit" form="addResidentForm" disabled={loading}>*/}
+              <button className="action-view"  onClick={handleSubmitClick} disabled={loading}>
+              
                 {loading ? "Saving..." : "Save"}
               </button>
             </div>
@@ -285,6 +312,27 @@ export default function AddResident() {
 
           {error && <p className="error">{error}</p>}
         </div>
+
+
+        {showSubmitPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to submit?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmSubmit} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+        )}
+
+        {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
       </main>
   );
 }

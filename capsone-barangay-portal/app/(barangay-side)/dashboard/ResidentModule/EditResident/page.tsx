@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { db, storage } from "../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import Link from "next/link";
+import { deleteObject } from "firebase/storage";
 
 export default function EditResident() {
   const router = useRouter();
@@ -38,6 +38,37 @@ export default function EditResident() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [originalData, setOriginalData] = useState({ ...formData });
+
+  const [showDiscardPopup, setShowDiscardPopup] = useState(false);
+  const [showSavePopup, setShowSavePopup] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+
+  const handleDiscardClick = async () => {
+    setShowDiscardPopup(true);
+  }
+
+  const confirmDiscard = async () => {
+      setShowDiscardPopup(false);
+
+      setFormData(originalData); // Reset to original data
+      setPreview(originalData.fileURL || null);
+      setFile(null); // Reset file selection
+
+      setPopupMessage("Changes discarded successfully!");
+      setShowPopup(true);
+      
+
+      // Hide the popup after 3 seconds
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 3000);
+
+  };
+
+
+
   useEffect(() => {
     if (residentId) {
       const fetchResidentData = async () => {
@@ -45,7 +76,7 @@ export default function EditResident() {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          setFormData({
+          const data = {
             residentNumber: docSnap.data().residentNumber || 0,
             name: docSnap.data().name || "",
             address: docSnap.data().address || "",
@@ -64,8 +95,11 @@ export default function EditResident() {
             isSeniorCitizen: docSnap.data().isSeniorCitizen || false,
             isSoloParent: docSnap.data().isSoloParent || false,
             fileURL: docSnap.data().fileURL || "",
-          });
-                    setPreview(docSnap.data().fileURL || null);
+          };
+
+          setFormData(data);
+          setOriginalData(data); // Store original data
+          setPreview(docSnap.data().fileURL || null);
         }
       };
       fetchResidentData();
@@ -105,6 +139,29 @@ export default function EditResident() {
     setPreview(null); // ✅ Ensure it's undefined
     setFormData((prev) => ({ ...prev, fileURL: "" }));  };
 
+
+  const handleSaveClick = async () => {
+    setShowSavePopup(true);
+  } 
+
+  const confirmSave = async () => {
+    setShowSavePopup(false);
+
+    setPopupMessage("Changes saved successfully!");
+    setShowPopup(true);
+
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+
+      router.push("/dashboard/ResidentModule");
+    }, 3000);
+
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -124,8 +181,6 @@ export default function EditResident() {
         fileURL,
       });
 
-      alert("Resident updated successfully!");
-      router.push("/dashboard/ResidentModule");
     } catch (err) {
       setError("Failed to update resident");
       console.error(err);
@@ -155,7 +210,10 @@ export default function EditResident() {
             </div>
 
             <div className="action-btn-section">
-              <button className="action-view" type="submit" form="editResidentForm" disabled={loading}>
+              <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
+              {/*<button className="action-view" type="submit" form="editResidentForm" disabled={loading}>*/}
+              <button className="action-view" onClick={handleSaveClick} disabled={loading}>
+             
                 {loading ? "Saving..." : "Save"}
               </button>
             </div>
@@ -335,6 +393,39 @@ export default function EditResident() {
   
             {error && <p className="error">{error}</p>}
           </div>
+
+          {showDiscardPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to discard the changes?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+                    )}
+
+          {showSavePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to save the changes?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowSavePopup(false)} className="no-button">No</button> 
+                                    <button onClick={confirmSave} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+            )}
+                    
+
+          {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
         </main>
     );
   }
