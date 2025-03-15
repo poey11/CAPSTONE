@@ -23,7 +23,6 @@
     flex-direction: column;
     align-self: center;
     width: 95%;
-    /*height: 180vh;*/
     border-radius: 1rem;
     border: 2px solid  #ddd;
     padding-left: 30px;
@@ -250,7 +249,10 @@
   }
 
 
-
+  p .required {
+    color: red;
+    margin-left: 5px;
+  }
   
 
   .add-resident-section-2-right-side {
@@ -263,7 +265,6 @@
     flex-wrap: wrap;
     overflow: hidden;
     box-sizing: border-box;
-    
   }
   .checkboxes-container {
     display: flex;

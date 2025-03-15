@@ -150,17 +150,17 @@ export default function AddResident() {
             <div className="add-resident-section-2-left-side">
               <div className="fields-container">
                 <div className="fields-section">
-                  <p>Full Name</p>
+                  <p>Full Name <span className="required">*</span></p>
                   <input type="text" className="add-resident-input-field" placeholder="Enter Full Name" name="name" value={formData.name} onChange={handleChange} required />
                 </div>
 
                 <div className="fields-section">
-                  <p>Address</p>
+                  <p>Address <span className="required">*</span></p>
                   <input type="text" className="add-resident-input-field" placeholder="Enter Address" name="address" value={formData.address} onChange={handleChange} required />
                 </div>
 
                 <div className="fields-section">
-                  <p>Location</p>
+                  <p>Location <span className="required">*</span></p>
                   <select name="generalLocation" className="add-resident-input-field" value={formData.generalLocation} onChange={handleChange} required>
                     <option value="" disabled>Choose Part of Fairview</option>
                     <option value="East Fairview">East Fairview</option>
@@ -171,22 +171,22 @@ export default function AddResident() {
 
 
                 <div className="fields-section">
-                  <p>Place of Birth</p>
+                  <p>Place of Birth <span className="required">*</span></p>
                   <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} required />
                 </div>
                 
                 <div className="fields-section">
-                  <p>Date of Birth</p>
+                  <p>Date of Birth <span className="required">*</span></p>
                   <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
                 </div>
 
                 <div className="fields-section">
-                  <p>Age</p>
+                  <p>Age <span className="required">*</span></p>
                   <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
                 </div>
                 
                 <div className="fields-section">
-                  <p>Sex</p>
+                  <p>Sex <span className="required">*</span></p>
                   <select name="sex" className="add-resident-input-field" value={formData.sex} onChange={handleChange} required>
                     <option value="" disabled>Choose Gender</option>
                     <option value="Male">Male</option>
@@ -196,7 +196,7 @@ export default function AddResident() {
                 
 
                 <div className="fields-section">
-                  <p>Civil Status</p>
+                  <p>Civil Status <span className="required">*</span></p>
                   <select name="civilStatus" className="add-resident-input-field" value={formData.civilStatus} onChange={handleChange} required>
                     <option value="" disabled>Choose Civil Status</option>
                     <option value="Single">Single</option>
@@ -213,7 +213,7 @@ export default function AddResident() {
                 </div>
                 
                 <div className="fields-section">
-                  <p>Contact Number</p>
+                  <p>Contact Number <span className="required">*</span></p>
                   <input type="tel" className="add-resident-input-field" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
                 </div>
 

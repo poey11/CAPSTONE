@@ -41,7 +41,7 @@
 .resident-module-main-section td {
     padding: 1rem; 
     text-align: center; 
-    border-bottom: 2px solid #ddd;
+    border-top: 2px solid #ddd;
     color: grey;
     font-weight: lighter;
 }
@@ -108,6 +108,10 @@
 
 .residentmodule-action-delete {
     background-color: #f44336; /* Red */
+    color: white;
+}
+.action-view {
+    background-color: #4caf50; /* Green */
     color: white;
 }
 
@@ -218,10 +222,5 @@
   .redirection-section .active {
     background-color: #0056b3;
     font-weight: bold;
-  }
-
-  .highlight {
-    background-color: yellow !important;
-    transition: background-color 0.5s ease-in-out;
   }
   

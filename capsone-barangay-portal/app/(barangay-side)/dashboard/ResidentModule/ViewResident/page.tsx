@@ -89,9 +89,37 @@ export default function ViewResident() {
                   ? residentData[field.key] ? "Yes" : "No"
                   : residentData[field.key] ?? "N/A"}
               </p>
-            </div>
+            </div>    
           </div>
         ))}
+
+        {/* Display Valid ID */}
+        <div className="viewresident-details-section">
+          <div className="viewresident-title">
+            <p>Valid ID</p>
+          </div>
+          <div className="viewresident-description">
+            {residentData.fileURL ? (
+              <div className="resident-id-container">
+                <img
+                  src={residentData.fileURL}
+                  alt="Resident's Valid ID"
+                  className="resident-id-image"
+                />
+                <a
+                  href={residentData.fileURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="view-image-link"
+                >
+                  View Image
+                </a>
+              </div>
+            ) : (
+              <p>No ID uploaded</p>
+            )}
+          </div>
+        </div>
       </div>
     </main>
   );

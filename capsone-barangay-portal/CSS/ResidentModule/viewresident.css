@@ -33,6 +33,24 @@ margin-top: 20px;
   color: rgba(0, 0, 0, 0.5);
 }
 
+.resident-id-image{
+  width: 100%;
+}
+
+.resident-id-container{
+  width: 50%;
+  text-align: center;
+}
+
+.view-image-link{
+  margin-top: 10px;
+  display: inline-block;
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+  
+}
+
 
 .back-button {
     background-image: url('/Images/left-arrow.png');
