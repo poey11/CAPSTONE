@@ -72,32 +72,32 @@ export default function SettingsPageResident() {
 
                         <div className="form-group">
                             <label htmlFor="first_name" className="form-label">First Name: </label>
-                            <input id="first_name" value={resident.email || ""} readOnly className="form-input" />
+                            <input id="first_name" value={resident.first_name || ""} className="form-input" />
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="last_name" className="form-label">Last Name: </label>
-                            <input id="last_name" value={resident.email || ""} readOnly className="form-input" />
+                            <input id="last_name" value={resident.last_name || ""} className="form-input" />
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="sex" className="form-label">Sex:</label>
-                            <input id="sex" value={resident.sex || ""} readOnly className="form-input" />
+                            <input id="sex" value={resident.sex || ""}  className="form-input" />
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="email" className="form-label">Email:</label>
-                            <input id="email" value={resident.email || ""} readOnly className="form-input" />
+                            <input id="email" value={resident.email || ""} className="form-input" />
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="phone" className="form-label">Phone:</label>
-                            <input id="phone" value={resident.phone|| ""} readOnly className="form-input" />
+                            <input id="phone" value={resident.phone|| ""} className="form-input" />
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="status" className="form-label">Status:</label>
-                            <input id="status" value={resident.status|| ""} readOnly className="form-input" />
+                            <input id="status" value={resident.status|| ""}  className="form-input" />
                         </div>
 
                         <button className="upload-btn">Update Profile</button>
