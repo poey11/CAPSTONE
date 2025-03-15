@@ -39,7 +39,7 @@ export default  function ViewLupon() {
 
 
   const status = reportData?.status; // Example status
- 
+  const departId = reportData?.department;
   const complainantsData  ={
     name: reportData?.complainant.fname + " " + reportData?.complainant.lname,
     contact: reportData?.complainant.contact,
@@ -237,8 +237,29 @@ export default  function ViewLupon() {
                 <p>{otherinformation[field.key as keyof typeof otherinformation]}</p>
               )}
             </div>
+            {departId === "GAD" && field.key === "location" && (
+              <>
+               
+                <div className="title">
+                  <p>Nos of Male Children Victim/s</p>
+                </div>
+                <div className="description">
+                    <p>{reportData?.nosofMaleChildren}</p>
+                </div>
+                <div className="title">
+                  <p>Nos of Female Children Victim/s</p>
+                </div>
+                <div className="description">
+                    <p>{reportData?.nosofFemaleChildren}</p>
+                </div>
+              </>
+            )} 
           </div>
+          
+        
        ))}
+         
+       
       </div>
 
       <div className="main-content">

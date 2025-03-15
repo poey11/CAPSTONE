@@ -42,6 +42,28 @@ export default function AddIncident() {
     civilStatus: "",
     address: "",
   });
+  const [reportInfo, setReportInfo] = useState<any>({
+    caseNumber: "",
+    dateFiled: "",
+    timeFiled: "",
+    location: "",
+    nature: "",
+    concern: "",
+    status: "Pending",
+    receivedBy: "",
+    dateReceived: "",
+    timeReceived: "",
+    nosofMaleChildren: "",
+    nosofFemaleChildren: "",
+    file: null,
+  });
+
+  const [deskStaff, setdeskStaff] = useState<any>({
+    fname: "",
+    lname: "",
+  })
+
+  
 
   // ✅ Fetch and set the case number when the component mounts
   useEffect(() => {
@@ -65,27 +87,7 @@ export default function AddIncident() {
     }
   };
 
-  
-  const [reportInfo, setReportInfo] = useState<any>({
-    caseNumber: "",
-    dateFiled: "",
-    timeFiled: "",
-    location: "",
-    nature: "",
-    concern: "",
-    status: "Pending",
-    receivedBy: "",
-    dateReceived: "",
-    timeReceived: "",
-    file: null,
-  });
 
-  const [deskStaff, setdeskStaff] = useState<any>({
-    fname: "",
-    lname: "",
-  })
-
-  
   
   const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
  
@@ -128,8 +130,8 @@ export default function AddIncident() {
             await uploadBytes(storageRef, reportInfo.file);
         }
 
-        // Add document to IncidentReports collection
-        await addDoc(collection(db, "IncidentReports"), {
+        // Prepare the incident report data
+        const reportData: Record<string, any> = {
             caseNumber: reportInfo.caseNumber,
             dateFiled: reportInfo.dateFiled,
             timeFiled: reportInfo.timeFiled,
@@ -141,35 +143,59 @@ export default function AddIncident() {
             dateReceived: reportInfo.dateReceived,
             timeReceived: reportInfo.timeReceived,
             file: filename,
-            department:departmentId,
-            complainant:{
-              fname: complainant.fname,
-              lname: complainant.lname,
-              sex: complainant.sex,
-              age: complainant.age,
-              contact: complainant.contact,
-              civilStatus: complainant.civilStatus,
-              address: complainant.address,
-             
+            department: departmentId,
+            nosofMaleChildren: reportInfo.nosofMaleChildren,
+            nosofFemaleChildren: reportInfo.nosofFemaleChildren,
+            complainant: {
+                fname: complainant.fname,
+                lname: complainant.lname,
+                sex: complainant.sex,
+                age: complainant.age,
+                contact: complainant.contact,
+                civilStatus: complainant.civilStatus,
+                address: complainant.address,
             },
-            respondent:{
-              fname: respondent.fname,
-              lname: respondent.lname,
-              sex: respondent.sex,
-              age: respondent.age,
-              contact: respondent.contact,
-              civilStatus: respondent.civilStatus,
-              address: respondent.address,
+            respondent: {
+                fname: respondent.fname,
+                lname: respondent.lname,
+                sex: respondent.sex,
+                age: respondent.age,
+                contact: respondent.contact,
+                civilStatus: respondent.civilStatus,
+                address: respondent.address,
             }
-        });
+        };
+
+        // 🔥 Remove fields with empty values ("" or null)
+        const filteredData = Object.fromEntries(
+            Object.entries(reportData).filter(([_, value]) => 
+                value !== "" && value !== null
+            )
+        );
+
+        // 🔥 Recursively filter empty fields from nested objects
+        const deepFilter = (obj: any): any => {
+            return Object.fromEntries(
+                Object.entries(obj).filter(([_, value]) => 
+                    value !== "" && value !== null
+                ).map(([key, value]) => 
+                    [key, typeof value === 'object' && !Array.isArray(value) ? deepFilter(value) : value]
+                )
+            );
+        };
+
+        // 🔥 Apply deep filtering for nested objects (complainant & respondent)
+        filteredData.complainant = deepFilter(filteredData.complainant);
+        filteredData.respondent = deepFilter(filteredData.respondent);
+
+        // Save filtered data to Firestore
+        await addDoc(collection(db, "IncidentReports"), filteredData);
 
         alert("Incident Report Submitted!");
     } catch (e: any) {
         console.log(e);
     }
 };
-
-
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault(); 
@@ -187,40 +213,48 @@ export default function AddIncident() {
   };
 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-  
+    const { name, value, type, id } = e.target;
+
+    // Handle file input separately
     if (type === "file" && e.target instanceof HTMLInputElement && e.target.files) {
-      setReportInfo({
-        ...reportInfo,
-        file: e.target.files[0],
-      });
-    } else {
-      // Check which state to update based on input field "id"
-      const { id } = e.target;
-  
-      if (id === "complainant") {
-        setComplainant({
-          ...complainant,
-          [name]: value,
-        });
-      } else if (id === "respondent") {
-        setRespondent({
-          ...respondent,
-          [name]: value,
-        });
-      } else if (id === "staff") {
-        setdeskStaff({
-          ...deskStaff,
-          [name]: value,
-        });
-      } else {
-        setReportInfo({
-          ...reportInfo,
-          [name]: value,
-        });
-      }
+        setReportInfo((prev:any) => ({
+            ...prev,
+            file: (e.target as HTMLInputElement).files?.[0] || null,
+        }));
+        return;
     }
-  };
+
+    // Prevent negative numbers for numeric inputs
+    let updatedValue: string | number = value;
+    if (type === "number") {
+        updatedValue = Number(value);
+        if (updatedValue < 0) updatedValue = 0;
+    }
+
+    // Update respective state based on the "id" of the field
+    if (id === "complainant") {
+        setComplainant((prev) => ({
+            ...prev,
+            [name]: updatedValue,
+        }));
+    } else if (id === "respondent") {
+        setRespondent((prev) => ({
+            ...prev,
+            [name]: updatedValue,
+        }));
+    } else if (id === "staff") {
+        setdeskStaff((prev:any) => ({
+            ...prev,
+            [name]: updatedValue,
+        }));
+    } else {
+        setReportInfo((prev:any) => ({
+            ...prev,
+            [name]: updatedValue,
+        }));
+    }
+};
+
   
   const deleteForm = () => {
     
@@ -495,11 +529,35 @@ export default function AddIncident() {
                 <p className="title">Other Information</p>
                 
                 <div className="bars">
-                    <div className="input-group">
-                        <p>Nature of Complaint</p>
-                        <input type="text" className="search-bar" placeholder="Enter Nature of Complaint"  id="nature" name="nature" 
-                        value = {reportInfo.nature} onChange={handleFormChange} required/>
-                    </div>
+                {departmentId === "GAD" ? 
+                (
+                  <div className="input-group">
+                    <p>Nature of Complaint</p>
+                    <select 
+                    className="featuredStatus" 
+                    required
+                    id="nature" name="nature" 
+                    value={reportInfo.nature}
+                    onChange={handleFormChange}
+                    >
+                    <option value="" disabled>Choose A Nature of Incident</option>
+                    <option value="Physical Abuse">Physical Abuse</option>
+                    <option value="Sexual Abuse">Sexual Abuse</option>
+                    <option value="Psychological, Enviromental, Verbal Abuse">Psychological, Enviromental, Verbal Abuse</option>
+                    <option value="Economic, Financial Abuse">Economic, Financial Abuse</option>
+                    <option value="Public Space Sexual Harassment">Public Space Sexual Harassment</option>
+                    <option value="Others">Others: (Trafficking, Prostitution, Violaiton of RA9208)</option>
+
+                  </select>
+                  </div>
+                ):(
+                  <div className="input-group">
+                    <p>Nature of Complaint</p>
+                    <input type="text" className="search-bar" placeholder="Enter Nature of Complaint"  id="nature" name="nature" 
+                    value = {reportInfo.nature} onChange={handleFormChange} required/>
+                  </div>
+                )}
+                   
 
                     <div className="input-group">
                         <p>Date Filed</p>
@@ -518,6 +576,33 @@ export default function AddIncident() {
                         <input type="text" className="search-bar" placeholder="Enter Location" id="location" name="location" 
                         value = {reportInfo.location} onChange={handleFormChange} required />
                     </div>
+
+                    {departmentId === "GAD" && (
+                      <div>
+                        <div className="input-group">
+                          <p>Nos of Male Children Victim/s</p>
+                          <input type="number" 
+                          className="search-bar"
+                          min="0"
+                          value={reportInfo.nosofMaleChildren}
+                          name="nosofMaleChildren"
+                          onChange={handleFormChange}
+                          required />    
+                        </div>
+
+                        <div className="input-group">
+                          <p>Nos of Female Children Victim/s</p>
+                          <input type="number"
+                            className="search-bar"
+                            min="0"
+                            value={reportInfo.nosofFemaleChildren}
+                            name="nosofFemaleChildren"
+                            onChange={handleFormChange}
+                            required />    
+                        </div>
+
+                      </div>
+                    )}
                 </div>
                 
                 <p className="title">Complainant/s Recieved By</p>

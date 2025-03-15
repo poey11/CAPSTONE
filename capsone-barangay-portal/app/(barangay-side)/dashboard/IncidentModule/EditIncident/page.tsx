@@ -6,6 +6,7 @@ import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/f
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../db/firebase";
 import React from "react";
+import { report } from "process";
 
 
 
@@ -46,6 +47,8 @@ export default function EditLuponIncident() {
       nature: "",
       location: "",
       status: reportData?.status,
+      nosofMaleChildren: "",
+      nosofFemaleChildren: "",
       investigator: {
         fullname: "",
         dateInvestigated:"",
@@ -55,7 +58,7 @@ export default function EditLuponIncident() {
       }
     });
     let status = toUpdate.status//REMOVE PAG IMPLEMENTED NA SA BACKEND
-
+   
 
     useEffect(() => {
       if(docId){
@@ -76,7 +79,7 @@ export default function EditLuponIncident() {
     },[reportData]);
 
 
-  
+    const department =  reportData?.department;
 
     
     const handleFileChangeContainer1 = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,52 +111,62 @@ export default function EditLuponIncident() {
 
     
     
-    const handleFormChange = (e:ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const {name, value, type} = e.target;
-        setToUpdate((prevState:any) => {
-
-          if (type === "file") {
-            const fileInput = e.target as HTMLInputElement;
-            if (fileInput.files && fileInput.files.length > 0) {
-              const file = fileInput.files[0];
-      
-              // Handle nested properties (e.g., "investigator.investigateImage")
-              const keys = name.split(".");
-              if (keys.length === 2) {
-                return {
-                  ...prevState,
-                  [keys[0]]: {
-                    ...prevState[keys[0]],
-                    [keys[1]]: file, // Store the file object
-                  },
-                };
-              }
-      
+    const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const { name, value, type } = e.target;
+    
+      setToUpdate((prevState: any) => {
+        if (type === "file") {
+          const fileInput = e.target as HTMLInputElement;
+          if (fileInput.files && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+    
+            // Handle nested properties (e.g., "investigator.investigateImage")
+            const keys = name.split(".");
+            if (keys.length === 2) {
               return {
                 ...prevState,
-                [name]: file,
+                [keys[0]]: {
+                  ...prevState[keys[0]],
+                  [keys[1]]: file, // Store the file object
+                },
               };
             }
-          }
-      
-          // Handle nested fields (text/select inputs)
-          const keys = name.split(".");
-          if (keys.length === 2) {
+    
             return {
               ...prevState,
-              [keys[0]]: {
-                ...prevState[keys[0]],
-                [keys[1]]: value,
-              },
+              [name]: file,
             };
           }
-      
+        }
+    
+        let newValue: any = value;
+    
+        // ✅ Prevent negative numbers
+        if (type === "number") {
+          const numericValue = Number(value);
+          if (numericValue < 0) return prevState; // Do not update if negative
+          newValue = numericValue;
+        }
+    
+        // Handle nested fields (text/select inputs)
+        const keys = name.split(".");
+        if (keys.length === 2) {
           return {
             ...prevState,
-            [name]: value,
+            [keys[0]]: {
+              ...prevState[keys[0]],
+              [keys[1]]: newValue,
+            },
           };
-        });
+        }
+    
+        return {
+          ...prevState,
+          [name]: newValue,
+        };
+      });
     };
+    
       
     const removeUndefined = (obj: any): any => {
       if (typeof obj !== "object" || obj === null) return obj;
@@ -209,6 +222,8 @@ export default function EditLuponIncident() {
           nature: mergeData(reportData.nature, toUpdate.nature),
           location: mergeData(reportData.location, toUpdate.location),
           status: mergeData(reportData.status, toUpdate.status),
+          nosofFemaleChildren: mergeData(reportData.nosofFemaleChildren, toUpdate.nosofFemaleChildren),
+          nosofMaleChildren: mergeData(reportData.nosofMaleChildren, toUpdate.nosofMaleChildren),
         });
     
         await updateDoc(docRef, cleanedData);
@@ -269,6 +284,8 @@ export default function EditLuponIncident() {
           nature: "",
           location: "",
           status:"",
+          nosofFemaleChildren: "",
+          nosofMaleChildren: "",
           investigator: {
             fullname: "",
             dateInvestigated: "",
@@ -541,6 +558,32 @@ export default function EditLuponIncident() {
                            <p>Date & Time Filed</p>
                            <input type="text" className="search-bar" placeholder={`${reportData.dateFiled} ${reportData.timeFiled}`} disabled/>
                        </div>
+
+                       {department === "GAD" && (
+                      <div>
+                        <div className="input-group">
+                          <p>Nos of Male Children Victim/s</p>
+                          <input type="number" 
+                          className="search-bar"
+                          value={toUpdate.nosofMaleChildren || reportData.nosofMaleChildren}
+                          onChange={handleFormChange}
+                          name="nosofMaleChildren"
+                          required />    
+                        </div>
+
+                        <div className="input-group">
+                          <p>Nos of Female Children Victim/s</p>
+                          <input type="number"
+                            className="search-bar"
+                            
+                            value={toUpdate.nosofFemaleChildren||reportData.nosofFemaleChildren}
+                            name="nosofFemaleChildren"
+                            onChange={handleFormChange}
+                            required />    
+                        </div>
+
+                      </div>
+                    )}
                    </div>
 
 
