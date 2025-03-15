@@ -39,6 +39,30 @@ export default function GenerateDialougeLetter() {
 
     }
 
+    const sendSMS = async () => {
+      try{
+        const response = await fetch("/api/twilioAPI", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                to: userInfo.complainant.contactNumber,
+                message: `Hello ${userInfo.complainant.fname} ${userInfo.complainant.lname} , your being summoned to attend a meeting on ${otherInfo.DateOfMeeting} at ${otherInfo.LuponStaff} office
+                for the dialouge letter. Thank you!`
+            })
+        });
+        if (!response.ok) throw new Error("Failed to send SMS");
+
+        const data = await response.json();
+        console.log(data);
+      }
+      catch(err) {
+        console.log(err);
+    }
+        
+    }
+
     const onSubmit = (e: any) => {
         e.preventDefault();
         const action = e.nativeEvent.submitter.name;
@@ -47,7 +71,8 @@ export default function GenerateDialougeLetter() {
             if (action === "print") {
                 alert("Printing the document...");
             } else if (action === "sendSMS") {
-                alert("Sending SMS notification...");
+                sendSMS()
+               
             }
         });
         console.log(otherInfo)
