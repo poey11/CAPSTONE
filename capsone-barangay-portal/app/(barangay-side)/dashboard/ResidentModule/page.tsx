@@ -129,15 +129,15 @@ export default function ResidentModule() {
 
 
   return (
-    <main className="main-container">
-      <div className="section-1">
+    <main className="resident-module-main-container">
+      <div className="resident-module-section-1">
         <h1>Residents List</h1>
         <Link href="/dashboard/ResidentModule/AddResident">
           <button className="add-announcement-btn">Add New Resident</button>
         </Link>
       </div>
 
-      <div className="section-2">
+      <div className="resident-module-section-2">
         <input
           type="text"
           className="search-bar"
@@ -180,7 +180,7 @@ export default function ResidentModule() {
         </select>
       </div>
 
-      <div className="main-section">
+      <div className="resident-module-main-section">
         {loading && <p>Loading residents...</p>}
         {error && <p className="error">{error}</p>}
 
@@ -213,21 +213,21 @@ export default function ResidentModule() {
                   <td>{resident.sex}</td>
                   <td>{resident.civilStatus}</td>
                   <td>
-                    <div className="actions">
+                    <div className="residentmodule-actions">
                       <button 
-                        className="action-view" 
+                        className="residentmodule-action-view" 
                         onClick={() => router.push(`/dashboard/ResidentModule/ViewResident?id=${resident.id}`)}
                       >
                         View
                       </button>
                       <button 
-                        className="action-edit" 
+                        className="residentmodule-action-edit" 
                         onClick={() => router.push(`/dashboard/ResidentModule/EditResident?id=${resident.id}`)}
                       >
                         Edit
                       </button>
                       <button 
-                        className="action-delete" 
+                        className="residentmodule-action-delete" 
                         onClick={() => handleDelete(resident.id)}
                       >
                         Delete

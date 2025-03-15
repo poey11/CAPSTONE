@@ -1,6 +1,6 @@
 
 
-.main-container{
+.resident-module-main-container{
     width: 100%;
     height: 100vh;
     background-color: #f9f9f9;
@@ -11,7 +11,7 @@
 
 
 
-.main-section {
+.resident-module-main-section {
     flex: 1; 
     display: flex; 
     flex-direction: column;
@@ -27,18 +27,18 @@
 
 
 
-.main-section table {
+.resident-module-main-section table {
     width: 100%; /* Ensures the table spans the full width */
     border-collapse: collapse; /* Removes unnecessary spacing between table cells */
 }
 
-.main-section tbody tr:hover {
+.resident-module-main-section tbody tr:hover {
   background-color: #e0e0e0; 
   cursor: pointer; 
   transition: background-color 0.2s ease; 
 }
 
-.main-section td {
+.resident-module-main-section td {
     padding: 1rem; 
     text-align: center; 
     border-bottom: 2px solid #ddd;
@@ -46,7 +46,7 @@
     font-weight: lighter;
 }
 
-.main-section th {
+.resident-module-main-section th {
     padding: 1rem; 
     text-align: left; 
     border-bottom: 2px solid #ddd;
@@ -55,7 +55,7 @@
     
 }
 
-.main-section thead {
+.resident-module-main-section thead {
   position: sticky;
   top: 0;
   background-color: rgb(232, 228, 228); /* Ensures it's visible when scrolled */
@@ -65,27 +65,27 @@
 }
 
 
-.main-section .official-info {
+.resident-module-main-section .official-info {
     display: flex;
     align-items: center; /* Center align the image and text */
     gap: 1rem; /* Add space between the image and text */
 }
 
-.main-section .official-image {
+.resident-module-main-section .official-image {
     width: 50px;
     height: 50px;
     border-radius: 50%; /* Make the image circular */
     object-fit: cover; /* Ensure the image is properly scaled */
 }
 
-.actions {
+.residentmodule-actions {
     display: flex;
     gap: 0.5rem; /* Space between action buttons */
 }
 
-.action-view,
-.action-edit,
-.action-delete {
+.residentmodule-action-view,
+.residentmodule-action-edit,
+.residentmodule-action-delete {
     border: none;
     cursor: pointer;
     padding: 8px 12px;
@@ -95,46 +95,36 @@
 
 }
 
-.action-view {
+.residentmodule-action-view {
     background-color: #4caf50; /* Green */
     color: white;
 }
 
-.action-edit {
+.residentmodule-action-edit {
     background-color: #ff9800; /* Orange */
     color: white;
 }
 
-.action-delete {
+.residentmodule-action-delete {
     background-color: #f44336; /* Red */
     color: white;
 }
-.action-view {
-    background-color: #4caf50; /* Green */
-    color: white;
-}
 
-.action-view:hover {
+
+.residentmodule-action-view:hover {
     background-color: #3e8f41; /* Green */
 }
 
-.action-edit {
-    background-color: #ff9800; /* Orange */
-    color: white;
-}
-.action-edit:hover {
+.residentmodule-action-edit:hover {
     background-color: #d58102; /* Orange */
 }
 
-.action-delete {
-    background-color: #f44336; /* Red */
-    color: white;
-}
-.action-delete:hover {
+
+.residentmodule-action-delete:hover {
     background-color: #d73c31; /* Red */
 }
 
-.section-1{
+.resident-module-section-1{
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -142,7 +132,7 @@
 
 }
 
-.section-1 h1{
+.resident-module-section-1 h1{
     font-size: 20px;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
@@ -163,7 +153,7 @@
     background-color:#cc591b;
   }
 
-  .section-2{
+  .resident-module-section-2{
     display: flex;
     gap: 20px;
     padding: 0;
@@ -227,5 +217,10 @@
   .redirection-section .active {
     background-color: #0056b3;
     font-weight: bold;
+  }
+
+  .highlight {
+    background-color: yellow;
+    transition: background-color 3s ease-out;
   }
   
