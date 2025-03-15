@@ -93,19 +93,6 @@ export default function ResidentModule() {
     setFilteredResidents(filtered);
   }, [searchName, searchAddress, searchOccupation, residentType, showCount, residents]);
 
-  /*
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this resident?")) {
-      try {
-        await deleteDoc(doc(db, "Residents", id));
-        setResidents((prev) => prev.filter(resident => resident.id !== id));
-        alert("Resident deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting resident:", error);
-        alert("Failed to delete resident.");
-      }
-    }
-  };*/
 
   const handleDeleteClick = async (id: string, residentNumber: string) => {
     setDeleteUserId(id);
@@ -123,7 +110,7 @@ export default function ResidentModule() {
         setShowDeletePopup(false);
         setDeleteUserId(null);
 
-        setPopupMessage("Resident deleted successfully!");
+        setPopupMessage("Resident Record deleted successfully!");
         setShowPopup(true);
 
         setTimeout(() => {
@@ -306,7 +293,7 @@ export default function ResidentModule() {
       {showDeletePopup && (
                         <div className="confirmation-popup-overlay">
                             <div className="confirmation-popup">
-                            <p>Are you sure you want to delete this resident?</p>
+                            <p>Are you sure you want to delete this Resident Record?</p>
                             <h2>Resident Number: {selectedResidentNumber}</h2>
                                 <div className="yesno-container">
                                     <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>

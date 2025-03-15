@@ -68,7 +68,7 @@ export default function addVoter() {
   const confirmSubmit = async () => {
     setShowSubmitPopup(false);
   
-    setPopupMessage("Resident added successfully!");
+    setPopupMessage("Voter Record added successfully!");
     setShowPopup(true);
   
     // Hide the popup after 3 seconds
@@ -124,7 +124,7 @@ export default function addVoter() {
     <main className="add-resident-main-container">
 
         <div className="addresident-page-title-section-1">
-          <h1>Add New Voter</h1>
+          <h1>Add New Voter Record</h1>
         </div>
       <div className="add-resident-main-content">
         <div className="add-resident-main-section1">

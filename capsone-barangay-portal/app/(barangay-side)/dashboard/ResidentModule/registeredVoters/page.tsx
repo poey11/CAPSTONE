@@ -78,19 +78,6 @@ export default function registeredVotersModule() {
     setFilteredResidents(filtered);
   }, [searchName, searchAddress, showCount, residents, sortOrder]);
 
-  /*
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this resident?")) {
-      try {
-        await deleteDoc(doc(db, "VotersList", id));
-        setResidents((prev) => prev.filter(resident => resident.id !== id));
-        alert("Resident deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting resident:", error);
-        alert("Failed to delete resident.");
-      }
-    }
-  };*/
 
   const handleDeleteClick = async (id: string, voterNumber: string) => {
     setDeleteUserId(id);
@@ -107,7 +94,7 @@ export default function registeredVotersModule() {
         setShowDeletePopup(false);
         setDeleteUserId(null);
 
-        setPopupMessage("Voter deleted successfully!");
+        setPopupMessage("Voter Record deleted successfully!");
         setShowPopup(true);
 
         setTimeout(() => {
@@ -257,7 +244,7 @@ export default function registeredVotersModule() {
       {showDeletePopup && (
                         <div className="confirmation-popup-overlay">
                             <div className="confirmation-popup">
-                            <p>Are you sure you want to delete this voter?</p>
+                            <p>Are you sure you want to delete this Voter Record?</p>
                             <h2>Voter Number: {selectedVoterNumber}</h2>
                                 <div className="yesno-container">
                                     <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>

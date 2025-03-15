@@ -177,7 +177,7 @@ export default function EditVoter() {
                 </button>
               </div>
               
-            </div>
+          </div>
 
           <hr/>
         <form id="editVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">

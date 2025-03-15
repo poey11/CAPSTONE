@@ -60,8 +60,8 @@ export default function ViewVoter() {
       <div className="viewresident-main-content">
         <div className="viewresident-section-1">
           <button onClick={handleBack}>
-                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
-              </button>
+            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+          </button>
           <p>Voter Details</p>
         </div>
 

@@ -83,7 +83,7 @@ export default function AddResident() {
 const confirmSubmit = async () => {
   setShowSubmitPopup(false);
 
-  setPopupMessage("Resident added successfully!");
+  setPopupMessage("Resident Record added successfully!");
   setShowPopup(true);
 
   // Hide the popup after 3 seconds

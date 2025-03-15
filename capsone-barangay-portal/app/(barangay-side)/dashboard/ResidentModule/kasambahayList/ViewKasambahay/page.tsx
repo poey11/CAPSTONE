@@ -66,21 +66,25 @@ export default function ViewKasambahay() {
   };
 
   return (
-    <main className="main-container">
-      <div className="main-content">
-        <div className="section-1">
-          <Link href="/dashboard/ResidentModule/kasambahayList">
-            <button type="button" className="back-button" onClick={handleBack}></button>;
-          </Link>
+    <main className="viewresident-main-container">
+      <div className="viewresident-page-title-section-1">
+        <h1>View Kasambahay Details</h1>
+      </div>
+
+      <div className="viewresident-main-content">
+        <div className="viewresident-section-1">
+          <button onClick={handleBack}>
+            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+          </button>
           <p>Kasambahay Details</p>
         </div>
 
         {kasambahayFields.map((field) => (
-          <div className="details-section" key={field.key}>
-            <div className="title">
+          <div className="viewresident-details-section" key={field.key}>
+            <div className="viewresident-title">
               <p>{field.label}</p>
             </div>
-            <div className="description">
+            <div className="viewresident-description">
               <p>
                 {field.isBoolean !== undefined
                   ? kasambahayData[field.key] ? "Yes" : "No"
