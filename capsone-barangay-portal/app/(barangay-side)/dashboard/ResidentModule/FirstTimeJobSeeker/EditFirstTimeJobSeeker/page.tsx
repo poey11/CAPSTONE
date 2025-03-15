@@ -101,8 +101,8 @@ export default function EditFirstTimeJobSeeker() {
               <p>Middle Name</p>
               <input type="text" className="search-bar" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} required />
 
-              <p>Date Applied</p>
-              <input type="date" className="search-bar" name="dateApplied" value={formData.dateApplied} onChange={handleChange} required />
+              <p>Date Applied(Cannot be changed)</p>
+              <input type="date" className="search-bar" name="dateApplied" value={formData.dateApplied} onChange={handleChange} disabled  />
 
               <p>Date of Birth</p>
               <input type="date" className="search-bar" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />

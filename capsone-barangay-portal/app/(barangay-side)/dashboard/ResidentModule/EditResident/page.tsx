@@ -158,8 +158,8 @@ export default function EditResident() {
             <form id="editResidentForm" onSubmit={handleSubmit} className="section-2">
               {/* Left Side - Resident Form */}
               <div className="section-2-left-side">
-                <p>Resident Number</p>
-                <input type="text" className="disabled-field" name="residentNumber" value={formData.residentNumber} onChange={handleChange} disabled />
+                <p>Resident Number(Cannot be changed)</p>
+                <input type="text" className="search-bar" name="residentNumber" value={formData.residentNumber} onChange={handleChange} disabled />
   
                 <p>Full Name</p>
                 <input type="text" className="search-bar" placeholder="Enter Full Name" name="name" value={formData.name} onChange={handleChange} required />
