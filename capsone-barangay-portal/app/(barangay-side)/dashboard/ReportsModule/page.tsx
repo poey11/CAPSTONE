@@ -534,7 +534,7 @@ footerDrawings.forEach((drawing) => {
                                   <button
                                       type="button"
                                       onClick={onDeleteFile} // Call the delete function
-                                      className="delete-button"
+                                      className="deleted-button"
                                   >
                                       <img
                                           src="/images/trash.png"  
