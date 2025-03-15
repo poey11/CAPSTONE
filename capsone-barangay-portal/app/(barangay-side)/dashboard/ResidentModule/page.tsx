@@ -11,6 +11,8 @@ export default function ResidentModule() {
   const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
 
   const [searchName, setSearchName] = useState<string>("");
   const [searchAddress, setSearchAddress] = useState<string>("");
@@ -76,12 +78,22 @@ export default function ResidentModule() {
       });
     }
 
+    filtered.sort((a, b) => {
+      const numA = parseInt(a.residentNumber, 10) || 0;
+      const numB = parseInt(b.residentNumber, 10) || 0;
+      return sortOrder === "asc" ? numA - numB : numB - numA;
+    });
+
+    if (showCount) {
+      filtered = filtered.slice(0, showCount);
+    }
+
     if (showCount) {
       filtered = filtered.slice(0, showCount);
     }
 
     setFilteredResidents(filtered);
-  }, [searchName, searchAddress, searchOccupation, residentType, showCount, residents]);
+  }, [searchName, searchAddress, searchOccupation, residentType, showCount, residents, sortOrder]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this resident?")) {
@@ -188,7 +200,15 @@ export default function ResidentModule() {
           <table>
             <thead>
               <tr>
-                <th>Resident Number</th>
+                <th>
+                  Resident Number
+                  <button
+                    onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                    className="sort-button"
+                  >
+                    {sortOrder === "asc" ? "▲" : "▼"}
+                  </button>
+                </th>
                 <th>Full Name</th>
                 <th>Address</th>
                 <th>General Location</th>
