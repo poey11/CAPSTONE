@@ -69,6 +69,17 @@ export default function SettingsPageResident() {
                     <p className="Details">Account Details</p>
 
                     <div className="edit-section">
+
+                        <div className="form-group">
+                            <label htmlFor="first_name" className="form-label">First Name: </label>
+                            <input id="first_name" value={resident.email || ""} readOnly className="form-input" />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="last_name" className="form-label">Last Name: </label>
+                            <input id="last_name" value={resident.email || ""} readOnly className="form-input" />
+                        </div>
+
                         <div className="form-group">
                             <label htmlFor="sex" className="form-label">Sex:</label>
                             <input id="sex" value={resident.sex || ""} readOnly className="form-input" />
