@@ -4,15 +4,15 @@
     height: 100vh;
     background-color: #f9f9f9;
     padding: 30px;
-    margin-left: 2rem; 
+    margin-left: 3rem; 
     overflow-y: auto; 
 }
 
-.section-1{
+.addresident-page-title-section-1{
   width: 100%;
 }
 
-.section-1 h1{
+.addresident-page-title-section-1 h1{
   font-size: 20px;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.5);
@@ -23,7 +23,7 @@
     flex-direction: column;
     align-self: center;
     width: 95%;
-    height: 170vh;
+    height: 180vh;
     border-radius: 1rem;
     border: 2px solid  #ddd;
     padding-left: 3rem;
@@ -228,6 +228,18 @@
     border: 1px solid #ccc;
     border-radius: 5px;
     color: rgba(0, 0, 0, 0.4);
+    text-align: left;
+  }
+
+  .add-resident-input-field-disabled{
+    background-color: white; 
+    color: rgba(0, 0, 0, 0.4);
+    opacity: 1;
+    padding: 8px;
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
     text-align: left;
   }
 

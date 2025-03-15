@@ -5,7 +5,7 @@
     height: 100vh;
     background-color: #f9f9f9;
     padding:30px;
-    margin-left: 2rem; 
+    margin-left: 3rem;
     overflow-y: auto; 
 }
 
@@ -160,7 +160,7 @@
     margin-top: 25px;
   }
 
-  .search-bar, .featuredStatus{
+  .resident-module-filter{
     padding: 8px;
     width: 100%;
     max-width: 400px;
@@ -171,13 +171,13 @@
     text-align: center;
   }
 
-  .search-bar:focus ,.featuredStatus:focus {
+  .resident-module-filter:focus {
     border-color: #f49028;
     outline: none;
     box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
 
-  .featuredStatus option {
+  .resident-module-filter option {
     color: rgba(0, 0, 0, 0.4); 
   }
 
@@ -220,7 +220,7 @@
   }
 
   .highlight {
-    background-color: yellow;
-    transition: background-color 3s ease-out;
+    background-color: yellow !important;
+    transition: background-color 0.5s ease-in-out;
   }
   

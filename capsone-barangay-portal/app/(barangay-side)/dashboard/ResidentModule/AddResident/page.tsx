@@ -52,31 +52,22 @@ export default function AddResident() {
     }
   };
 
-  const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
-    container1: [],
-});
-
-// Handle file selection for any container
-const handleFileChange = (container: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = event.target.files;
-    if (selectedFiles) {
-      const fileArray = Array.from(selectedFiles).map((file) => {
-        const preview = URL.createObjectURL(file);
-        return { name: file.name, preview };
-      });
-      setFiles((prevFiles) => ({
-        ...prevFiles,
-        [container]: [...prevFiles[container], ...fileArray], // Append new files to the specified container
-      }));
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFile = e.target.files[0];
+  
+      // Ensure only one file is processed
+      setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
+  
+      // Reset the file input to prevent multiple selections
+      e.target.value = "";
     }
   };
-
-  // Handle file deletion for any container
-  const handleFileDelete = (container: string, fileName: string) => {
-    setFiles((prevFiles) => ({
-      ...prevFiles,
-      [container]: prevFiles[container].filter((file) => file.name !== fileName),
-    }));
+  
+  const handleFileDelete = () => {
+    setFile(null);
+    setPreview(null);
   };
   
 
@@ -129,7 +120,7 @@ const handleFileChange = (container: string) => (event: React.ChangeEvent<HTMLIn
   return (
       <main className="add-resident-main-container">
 
-        <div className="section-1">
+        <div className="addresident-page-title-section-1">
           <h1>Add New Resident</h1>
         </div>
         
@@ -266,52 +257,28 @@ const handleFileChange = (container: string) => (event: React.ChangeEvent<HTMLIn
                 </div>
               </div>
 
+
+
               {/* File Upload Section */}
               <div className="file-upload-container">
                 <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
-                <input id="file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleFileChange('container1')} />
+                <input id="file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleFileChange} />
 
+                {file && (
+                  <div className="file-name-image-display">
+                    <div className="file-name-image-display-indiv">
+                      {preview && <img src={preview} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />}
+                      <span>{file.name}</span>
+                      <div className="delete-container">
+                        <button type="button" onClick={handleFileDelete} className="delete-button">
+                          <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-              <div className="uploadedFiles-container">
-                                {/* Display the file names with image previews */}
-                                {files.container1.length > 0 && (
-                                    <div className="file-name-image-display">
-                                        <ul>
-                                            {files.container1.map((file, index) => (
-                                                <div className="file-name-image-display-indiv" key={index}>
-                                                    <li className="file-item"> 
-                                                        {/* Display the image preview */}
-                                                        {file.preview && (
-                                                            <div className="filename-image-container">
-                                                                <img
-                                                                    src={file.preview}
-                                                                    alt={file.name}
-                                                                    className="file-preview"
-                                                                />
-                                                            </div>
-                                                        )}
-                                                        <span className="file-name">{file.name}</span>  
-                                                        <div className="delete-container">
-                                                            {/* Delete button with image */}
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => handleFileDelete('container1', file.name)}
-                                                                className="delete-button"
-                                                            >
-                                                                <img
-                                                                    src="/images/trash.png"  
-                                                                    alt="Delete"
-                                                                    className="delete-icon"
-                                                                />
-                                                            </button>
-                                                        </div>
-                                                    </li>
-                                                </div>
-                                            ))}  
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
+              
               </div>
             </div>
           </form>

@@ -6,6 +6,7 @@ import { db } from "../../../db/firebase";
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
 
+
 export default function ResidentModule() {
   const [residents, setResidents] = useState<any[]>([]);
   const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
@@ -27,6 +28,7 @@ export default function ResidentModule() {
   const handleResidentTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setResidentType(e.target.value);
   };
+
 
   useEffect(() => {
     const fetchResidents = async () => {
@@ -140,14 +142,14 @@ export default function ResidentModule() {
       <div className="resident-module-section-2">
         <input
           type="text"
-          className="search-bar"
+          className="resident-module-filter"
           placeholder="Search by Name"
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
         <input
           type="text"
-          className="search-bar"
+          className="resident-module-filter"
           placeholder="Search by Address"
           value={searchAddress}
           onChange={(e) => setSearchAddress(e.target.value)}
@@ -155,13 +157,13 @@ export default function ResidentModule() {
 
         <input
           type="text"
-          className="search-bar"
+          className="resident-module-filter"
           placeholder="Search by Occupation"
           value={searchOccupation}
           onChange={(e) => setSearchOccupation(e.target.value)}
         />
 
-        <select className="featuredStatus" value={residentType} onChange={handleResidentTypeChange}>
+        <select className="resident-module-filter" value={residentType} onChange={handleResidentTypeChange}>
           <option value="">Resident Type</option>
           <option value="senior-citizen">Senior Citizen</option>
           <option value="student">Student</option>
@@ -170,7 +172,7 @@ export default function ResidentModule() {
         </select>
 
         <select
-          className="featuredStatus"
+          className="resident-module-filter"
           value={showCount}
           onChange={(e) => setShowCount(Number(e.target.value))}
         >

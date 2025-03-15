@@ -140,82 +140,126 @@ export default function EditResident() {
   
 
     return (
-        <main className="main-container">
-          <div className="main-content">
-            <Link href="/dashboard/ResidentModule">
-              <button type="button" className="back-button" onClick={handleBack}></button>
-            </Link>
-  
-            <div className="section-1">
-              <p className="NewResident">Edit Resident</p>
-              <div className="actions">
-                <button className="action-view" type="submit" form="editResidentForm" disabled={loading}>
-                  {loading ? "Saving..." : "Save"}
-                </button>
-              </div>
+        <main className="add-resident-main-container">
+          <div className="addresident-page-title-section-1">
+            <h1>Edit Resident Details</h1>
+          </div>
+          <div className="add-resident-main-content">
+          <div className="add-resident-main-section1">
+            <div className="add-resident-main-section1-left">
+              <button onClick={handleBack}>
+                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+              </button>
+
+              <h1> Edit Resident </h1>
             </div>
+
+            <div className="action-btn-section">
+              <button className="action-view" type="submit" form="editResidentForm" disabled={loading}>
+                {loading ? "Saving..." : "Save"}
+              </button>
+            </div>
+            
+          </div>
+
+          <hr/>
+
   
-            <form id="editResidentForm" onSubmit={handleSubmit} className="section-2">
+            <form id="editResidentForm" onSubmit={handleSubmit} className="add-resident-section-2">
               {/* Left Side - Resident Form */}
-              <div className="section-2-left-side">
-                <p>Resident Number</p>
-                <input type="text" className="disabled-field" name="residentNumber" value={formData.residentNumber} onChange={handleChange} disabled />
-  
-                <p>Full Name</p>
-                <input type="text" className="search-bar" placeholder="Enter Full Name" name="name" value={formData.name} onChange={handleChange} required />
+              <div className="add-resident-section-2-left-side">
+
+                <div className="fields-container">
+                  <div className="fields-section">
+                    <p>Resident Number</p>
+                    <input type="text" className="add-resident-input-field-disabled" name="residentNumber" value={formData.residentNumber} onChange={handleChange} disabled />
+                  </div>
+
+                  <div className="fields-section">
+                    <p>Full Name</p>
+                    <input type="text" className="add-resident-input-field" placeholder="Enter Full Name" name="name" value={formData.name} onChange={handleChange} required />
+                  </div>
+                  
+                  <div className="fields-section">
+                    <p>Address</p>
+                    <input type="text" className="add-resident-input-field" placeholder="Enter Address" name="address" value={formData.address} onChange={handleChange} required />
+                  </div>
+                  
+                  <div className="fields-section">
+                    <p>Location</p>
+                    <select name="generalLocation" className="add-resident-input-field" value={formData.generalLocation} onChange={handleChange} required>
+                      <option value="" disabled>Choose Part of Fairview</option>
+                      <option value="East Fairview">East Fairview</option>
+                      <option value="West Fairview">West Fairview</option>
+                      <option value="South Fairview">South Fairview</option>
+                    </select>
+                  </div>
+                  
     
-                <p>Address</p>
-                <input type="text" className="search-bar" placeholder="Enter Address" name="address" value={formData.address} onChange={handleChange} required />
-  
-                <p>Location</p>
-                <select name="generalLocation" className="featuredStatus" value={formData.generalLocation} onChange={handleChange} required>
-                  <option value="" disabled>Choose Part of Fairview</option>
-                  <option value="East Fairview">East Fairview</option>
-                  <option value="West Fairview">West Fairview</option>
-                  <option value="South Fairview">South Fairview</option>
-                </select>
-  
-                <p>Place of Birth</p>
-                <input type="text" className="search-bar" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} required />
-  
-                <p>Date of Birth</p>
-                <input type="date" className="search-bar" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
-  
-                <p>Age</p>
-                <input type="number" className="search-bar" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
-  
-                <p>Sex</p>
-                <select name="sex" className="featuredStatus" value={formData.sex} onChange={handleChange} required>
-                  <option value="" disabled>Choose Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                </select>
-  
-                <p>Civil Status</p>
-                <select name="civilStatus" className="featuredStatus" value={formData.civilStatus} onChange={handleChange} required>
-                  <option value="" disabled>Choose Civil Status</option>
-                  <option value="Single">Single</option>
-                  <option value="Married">Married</option>
-                  <option value="Widowed">Widowed</option>
-                  <option value="Divorced">Divorced</option>
-                  <option value="Separated">Separated</option>
-                </select>
-  
-                <p>Occupation</p>
-                <input type="text" className="search-bar" placeholder="Enter Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
-  
-                <p>Contact Number</p>
-                <input type="tel" className="search-bar" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
-  
-                <p>Email Address</p>
-                <input type="email" className="search-bar" placeholder="Enter Email Address" name="emailAddress" value={formData.emailAddress} onChange={handleChange} />
-  
-                <p>Precinct Number</p>
-                <input type="text" className="search-bar" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
+                  <div className="fields-section">
+                    <p>Place of Birth</p>
+                    <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} required />
+                  </div>
+                  
+                  <div className="fields-section">
+                    <p>Date of Birth</p>
+                    <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
+                  </div>
+
+                  <div className="fields-section">
+                    <p>Age</p>
+                    <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
+                  </div>
+                
+    
+                  <div className="fields-section">
+                    <p>Sex</p>
+                    <select name="sex" className="add-resident-input-field" value={formData.sex} onChange={handleChange} required>
+                      <option value="" disabled>Choose Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                  </div>
+                  
+                  <div className="fields-section">
+                    <p>Civil Status</p>
+                    <select name="civilStatus" className="add-resident-input-field" value={formData.civilStatus} onChange={handleChange} required>
+                      <option value="" disabled>Choose Civil Status</option>
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Widowed">Widowed</option>
+                      <option value="Divorced">Divorced</option>
+                      <option value="Separated">Separated</option>
+                    </select>
+                  </div>
+
+
+                  <div className="fields-section">
+                    <p>Occupation</p>
+                    <input type="text" className="add-resident-input-field" placeholder="Enter Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
+                  </div>
+                  
+    
+                  <div className="fields-section">
+                    <p>Contact Number</p>
+                    <input type="tel" className="add-resident-input-field" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
+                  </div>
+                  
+                  <div className="fields-section">
+                    <p>Email Address</p>
+                    <input type="email" className="add-resident-input-field" placeholder="Enter Email Address" name="emailAddress" value={formData.emailAddress} onChange={handleChange} />
+                  </div>
+
+
+                  <div className="fields-section">
+                    <p>Precinct Number</p>
+                    <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
+                  </div>
+                </div>
               </div>
   
               {/* Right Side - Checkboxes & File Upload */}
-              <div className="section-2-right-side">
+              <div className="add-resident-section-2-right-side">
                 <div className="checkboxes-container">
                   <p>Student</p>
                   <div className="checkbox-container">
@@ -245,46 +289,46 @@ export default function EditResident() {
   
                 {/* File Upload Section Paayos na lang dito mapapasok yung new image*/}
                 <div className="file-upload-container">  
-  <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
-  <input 
-    id="file-upload" 
-    type="file" 
-    className="file-upload-input" 
-    accept=".jpg,.jpeg,.png" 
-    onChange={handleFileChange} 
-  />
+                  <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
+                  <input 
+                    id="file-upload" 
+                    type="file" 
+                    className="file-upload-input" 
+                    accept=".jpg,.jpeg,.png" 
+                    onChange={handleFileChange} 
+                  />
 
-  {/* Current Image Section */}
-  {formData.fileURL && (
-    <div className="file-name-image-display">
-      <span className="section-title">Current Image</span>
-      <div className="file-name-image-display-indiv">
-        <img src={formData.fileURL} alt="Current Resident Image" style={{ width: "100px", height: "100px" }} />
-        <div className="delete-container">
-          <button type="button" onClick={handleFileDelete} className="delete-button">
-            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-          </button>
-        </div>
-      </div>
-    </div>
-  )}
+                  {/* Current Image Section */}
+                  {formData.fileURL && (
+                    <div className="file-name-image-display">
+                      <span className="section-title">Current Image</span>
+                      <div className="file-name-image-display-indiv">
+                        <img src={formData.fileURL} alt="Current Resident Image" style={{ width: "100px", height: "100px" }} />
+                        <div className="delete-container">
+                          <button type="button" onClick={handleFileDelete} className="delete-button">
+                            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-  {/* New Image Section (Only if a file is uploaded) */}
-  {file && (
-    <div className="file-name-image-display">
-      <span className="section-title">New Image</span>
-      <div className="file-name-image-display-indiv">
-        <img src={preview || ""} alt="New Resident Image" style={{ width: "100px", height: "100px" }} />
-        <span>{file.name}</span>
-        <div className="delete-container">
-          <button type="button" onClick={handleFileDelete} className="delete-button">
-            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-          </button>
-        </div>
-      </div>
-    </div>
-  )}
-</div>
+                  {/* New Image Section (Only if a file is uploaded) */}
+                  {file && (
+                    <div className="file-name-image-display">
+                      <span className="section-title">New Image</span>
+                      <div className="file-name-image-display-indiv">
+                        <img src={preview || ""} alt="New Resident Image" style={{ width: "100px", height: "100px" }} />
+                        <span>{file.name}</span>
+                        <div className="delete-container">
+                          <button type="button" onClick={handleFileDelete} className="delete-button">
+                            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
               </div>
             </form>
