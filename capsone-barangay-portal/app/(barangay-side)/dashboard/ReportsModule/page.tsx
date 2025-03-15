@@ -326,7 +326,7 @@ footerDrawings.forEach((drawing) => {
       // Update title
       worksheet.getCell("A1").value = reportTitle;
   
-      const dataStartRow = 4;
+      const dataStartRow = 3;
       let insertionRow = dataStartRow;
   
       residents.forEach((resident) => {
@@ -348,7 +348,10 @@ footerDrawings.forEach((drawing) => {
   
         cells.forEach((value, index) => {
           row.getCell(index + 1).value = value;
-          row.getCell(index + 1).font = { name: "Calibri", size: 20, bold: false }; // Ensure uniform font & remove bold
+          row.getCell(index + 1).font = { name: "Times New Roman", size: 10, bold: false }; // Ensure uniform font & remove bold
+          row.getCell(index +1).alignment = {
+            horizontal: 'center'
+          };
         });
   
         row.commit();
@@ -358,9 +361,7 @@ footerDrawings.forEach((drawing) => {
       // Add "TOTAL" row after last entry
       const totalRow = worksheet.getRow(insertionRow);
       worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
-      totalRow.getCell(1).value = `TOTAL: ${residents.length}`;
-      totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
-      totalRow.getCell(1).font = { name: "Calibri", size: 20, bold: true };
+      Object.assign(totalRow.getCell(1), { value: `TOTAL: ${residents.length}`, alignment: { horizontal: "center", vertical: "middle" }, font: { name: "Times New Roman", size: 10, bold: false } });
   
       totalRow.commit();
   
