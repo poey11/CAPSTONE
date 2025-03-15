@@ -47,11 +47,15 @@ export default function AddFirstTimeJobSeeker() {
   };
 
   const handleSubmitClick = async () => {
+  
+    
     setShowSubmitPopup(true);
+
   }
 
   const confirmSubmit = async () => {
     setShowSubmitPopup(false);
+
   
     setPopupMessage("First-Time Jobseeker Record added successfully!");
     setShowPopup(true);
@@ -119,7 +123,7 @@ export default function AddFirstTimeJobSeeker() {
             </div>
 
             <div className="action-btn-section">
-              <button className="action-view"  onClick={handleSubmitClick} disabled={loading}>
+              <button className="action-view" onClick={handleSubmitClick} disabled={loading}>
                 {loading ? "Saving..." : "Save"}
               </button>
             </div>
