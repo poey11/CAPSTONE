@@ -126,8 +126,9 @@ export default function addVoter() {
         <div className="addresident-page-title-section-1">
           <h1>Add New Voter Record</h1>
         </div>
-      <div className="add-resident-main-content">
-        <div className="add-resident-main-section1">
+        
+        <div className="add-resident-main-content">
+          <div className="add-resident-main-section1">
             <div className="add-resident-main-section1-left">
               <button onClick={handleBack}>
                 <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
