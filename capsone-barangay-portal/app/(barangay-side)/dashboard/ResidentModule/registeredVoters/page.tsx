@@ -117,31 +117,31 @@ export default function registeredVotersModule() {
   };
 
   return (
-    <main className="main-container">
-      <div className="section-1">
+    <main className="resident-module-main-container">
+      <div className="resident-module-section-1">
         <h1>Voter Masterlist</h1>
         <Link href="/dashboard/ResidentModule/registeredVoters/AddVoter">
           <button className="add-announcement-btn">Add New Voter</button>
         </Link>
       </div>
 
-      <div className="section-2">
+      <div className="resident-module-section-2">
         <input
           type="text"
-          className="search-bar"
+          className="resident-module-filter"
           placeholder="Search by Name"
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
         <input
           type="text"
-          className="search-bar"
+          className="resident-module-filter"
           placeholder="Search by Address"
           value={searchAddress}
           onChange={(e) => setSearchAddress(e.target.value)}
         />
       <select
-          className="featuredStatus"
+          className="resident-module-filter"
           value={showCount}
           onChange={(e) => setShowCount(Number(e.target.value))}
         >
@@ -151,7 +151,7 @@ export default function registeredVotersModule() {
         </select>
       </div>
 
-      <div className="main-section">
+      <div className="resident-module-main-section">
         {loading && <p>Loading voters...</p>}
         {error && <p className="error">{error}</p>}
 
@@ -185,10 +185,10 @@ export default function registeredVotersModule() {
                   <td>{resident.precinctNumber}</td>
                   <td>{resident.createdAt}</td>
                   <td>
-                    <div className="actions">
-                      <button className="action-view" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}>View</button>
-                      <button className="action-edit" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/EditVoter?id=${resident.id}`)}>Edit</button>
-                      <button className="action-delete" onClick={() => handleDelete(resident.id)}>Delete</button>
+                    <div className="residentmodule-actions">
+                      <button className="residentmodule-action-view" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}>View</button>
+                      <button className="residentmodule-action-edit" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/EditVoter?id=${resident.id}`)}>Edit</button>
+                      <button className="residentmodule-action-delete" onClick={() => handleDelete(resident.id)}>Delete</button>
                     </div>
                   </td>
                 </tr>

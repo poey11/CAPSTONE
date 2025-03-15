@@ -23,15 +23,17 @@
     flex-direction: column;
     align-self: center;
     width: 95%;
-    height: 180vh;
+    /*height: 180vh;*/
     border-radius: 1rem;
     border: 2px solid  #ddd;
-    padding-left: 3rem;
-    padding-right: 3rem;
-    padding: 30px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 30px;
+    padding-bottom: 50px;
     margin:  auto; 
     background-color: #f4f2f2;
     margin-top: 20px;
+    
 }
 
 

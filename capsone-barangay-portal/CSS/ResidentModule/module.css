@@ -81,6 +81,7 @@
 .residentmodule-actions {
     display: flex;
     gap: 0.5rem; /* Space between action buttons */
+    justify-content: center;
 }
 
 .residentmodule-action-view,
