@@ -295,17 +295,25 @@ FOR ONLINE INCIDENT REPORTING CSS
 
 
 
+
 .main-content-response-section {
     display: flex;
     flex-direction: column;
     align-self: center;
-    width: 50%;
+    width: 75%;
     border-radius: 1rem;
     border: 2px solid  #ddd;
     height: auto;
     margin:  auto; 
     margin-top: 2rem;
+}
 
+
+
+.main-section-response-section {
+    display: flex;
+    width: 100%;
+    padding: 1rem;
 }
 
 .section-1-response {
@@ -313,21 +321,22 @@ FOR ONLINE INCIDENT REPORTING CSS
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    width: 60%;
 }
 
 .official-section-online-report {
-    width: 90%;
+    width: 100%;
     padding: 2rem;
     display: flex;
     flex-direction: column;
     margin-top: 30px;
 }
 
-.official-section-online-report {
+.official-section-online-report p {
     color: grey;
     font-weight: bold;
     font-size: 1rem;
-    padding: 1rem;
+    margin-bottom: 1rem;
 }
 
 .fields-section-online-report {
@@ -342,7 +351,7 @@ FOR ONLINE INCIDENT REPORTING CSS
     color: grey;
     font-weight: bold;
     font-size: 1rem;
-    padding: 1rem;
+    margin-bottom: 1rem;
 }
 
  .online-report-input-field{
@@ -359,16 +368,25 @@ FOR ONLINE INCIDENT REPORTING CSS
     color: rgba(0, 0, 0, 0.4); 
   }
 
+  .title-section-response-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+}
+
   .title-response-section {
     font-weight: bold;
-    padding: 2rem;
-    font-size: 20px;
+    padding: 1.5rem;
+    font-size: 25px;
     color: grey;
   }
 
   .submit-response-section {
     padding: 1.5rem;
-    align-self: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
 
@@ -388,6 +406,123 @@ FOR ONLINE INCIDENT REPORTING CSS
     background-color: #3e8f41; 
 }
 
+
+
+/*
+FILE UPLOAD SECTION DAMI KASI TANGINA!
+*/
+
+.section-2-response {
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 40%;
+    padding: 2rem;
+}
+
+.section-2-response p {
+  color: grey;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+
+.file-upload-container {
+    border: 2px dashed rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: background-color 0.3s ease;
+    display: block;
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    height: 75%; /* Set a fixed height for better UI experience */
+    width: 100%;
+    align-self: center;
+    
+  }
+
+  .file-upload-container:hover {
+    background-color: rgba(245, 143, 88, 0.2);
+  }
+
+  .uploadedFiles-container{
+    display: block;
+  }
+
+  .file-upload-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.6);
+    text-align: center;
+    
+  }
+
+  .upload-link {
+    color: rgb(245, 143, 88);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .file-upload-input {
+    display: none;
+  }
+
+  .file-name-image-display {
+    margin-top: 10px;
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.6);
+    text-align: center;
+  }
+
+  .file-name-image-display-indiv {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .filename-image-container {
+    display: flex;
+    align-items: center;
+    flex-grow: 1; 
+    overflow: hidden; 
+    margin-top:10px;
+  }
+
+  .file-name-image-display-indiv li {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden; 
+    white-space: nowrap; 
+    text-overflow: ellipsis; 
+  }
+
+  .delete-container {
+    margin-left: auto; 
+  }
+
+  .delete-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+  }
+
+  .delete-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: center; 
+    margin-top: 50px; 
+  }
 
 
 

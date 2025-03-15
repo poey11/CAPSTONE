@@ -28,6 +28,38 @@ export default function ViewOnlineReports() {
     router.push("/dashboard/IncidentModule/BCPC/ViewIncident");
   };
 
+   // State for all file containers
+   const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
+    container1: [],
+    container2: [],
+    container3: [],
+    container4: [],
+  });
+
+// Handle file selection for any container
+const handleFileChange = (container: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files;
+    if (selectedFiles) {
+      const fileArray = Array.from(selectedFiles).map((file) => {
+        const preview = URL.createObjectURL(file);
+        return { name: file.name, preview };
+      });
+      setFiles((prevFiles) => ({
+        ...prevFiles,
+        [container]: [...prevFiles[container], ...fileArray], // Append new files to the specified container
+      }));
+    }
+  };
+
+  // Handle file deletion for any container
+  const handleFileDelete = (container: string, fileName: string) => {
+    setFiles((prevFiles) => ({
+      ...prevFiles,
+      [container]: prevFiles[container].filter((file) => file.name !== fileName),
+    }));
+  };
+
+
   return (
     <main className="main-container">
       <div className="main-content-view-online-report">
@@ -37,10 +69,6 @@ export default function ViewOnlineReports() {
                 <button type="button" className="back-button" onClick={() => router.back()}></button>
                 <p>Online Report Details</p>
             </div>
-
-                <div className="action-btn-section-online-report">
-                     <button className="save-btn-online-report">Save</button>
-                </div>
         </div>
 
         {incidentData.map((field, index) => (
@@ -63,9 +91,17 @@ export default function ViewOnlineReports() {
 
     <div className="main-content-response-section">
 
+    <div className="title-section-response-section">
+            <h1 className="title-response-section">Respondent's Information</h1>
+    </div>
+
+    <div className="main-section-response-section">
+
+   
+    
         <div className="section-1-response">
 
-        <h1 className="title-response-section">Respondent's Information</h1>
+      
 
             <div className="official-section-online-report">
 
@@ -96,20 +132,92 @@ export default function ViewOnlineReports() {
                     rows={15}
                 ></textarea>
              </div>
+
+    
+
       
         </div>
 
+        
 
-        <div className="">
+        <div className="section-2-response">
+
+           <p> Investigation Photo</p>
+
+
+            <div className="file-upload-container">
+
+
+
+                <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
+                    <input
+                    id="file-upload2"
+                    type="file"
+                    className="file-upload-input" 
+                    multiple
+                    accept=".jpg,.jpeg,.png"
+                    required
+                    onChange={handleFileChange('container2')} // Handle file selection
+                    />
+
+                <div className="uploadedFiles-container">
+                    {/* Display the file names with image previews */}
+                    {files.container2.length > 0 && (
+                    <div className="file-name-image-display">
+                        <ul>
+                        {files.container2.map((file, index) => (
+                            <div className="file-name-image-display-indiv" key={index}>
+                            <li> 
+                                {/* Display the image preview */}
+                                {file.preview && (
+                                    <div className="filename&image-container">
+                                    <img
+                                        src={file.preview}
+                                        alt={file.name}
+                                        style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                    />
+                                    </div>
+                                    )}
+                                {file.name}  
+                                <div className="delete-container">
+                                {/* Delete button with image */}
+                                <button
+                                    type="button"
+                                    onClick={() => handleFileDelete('container2', file.name)}
+                                    className="delete-button"
+                                    >
+                                    <img
+                                        src="/images/trash.png"  
+                                        alt="Delete"
+                                        className="delete-icon"
+                                    />
+                                    </button>
+
+                                </div>
+                                            
+                                
+                            </li>
+                            </div>
+                        ))}  
+                        </ul>
+                    </div>
+                    )}
+                </div>
+
+                </div>
+
+            
 
         </div>
 
+
+
+        </div>
 
 
         <div className="submit-response-section">
                  <button className="save-btn-online-report-response-section">Save</button>
         </div>
-
        
 
     </div>

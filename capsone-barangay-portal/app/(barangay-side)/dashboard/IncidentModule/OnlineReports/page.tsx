@@ -89,8 +89,7 @@ export default function OnlineReports() {
                 </td>
                 <td>
                   <div className="actions">
-                    <button className="action-notify" onClick={handleViewOnlineReport}>Notify</button>
-                    <button className="action-edit" >Edit</button>
+                    <button className="action-notify" onClick={handleViewOnlineReport}>View</button>
                   </div>
                 </td>
               </tr>
