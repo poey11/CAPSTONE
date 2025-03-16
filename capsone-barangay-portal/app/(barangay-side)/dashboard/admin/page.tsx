@@ -4,7 +4,7 @@ import {db} from "../../../db/firebase";
 import {collection, getDocs, onSnapshot, query, where} from "firebase/firestore";
 import "@/CSS/User&Roles/User&Roles.css";
 import { useRouter } from "next/navigation";
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import Link from "next/link";
 
 interface ResidentUser {
@@ -55,6 +55,8 @@ const admin = () => {
     const [barangayUsers, setBarangayUsers] = useState<dbBarangayUser[]>([]);
     const [residentUsers, setResidentUsers] = useState<ResidentUser[]>([]);
     const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+    const [selectedBarangayUserId, setSelectedBarangayUserId] = useState<string | null>(null);
 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
@@ -102,25 +104,38 @@ const admin = () => {
         fetchUsers();           
     },[])
 
-    const handleAcceptClick = async () => {
+    const handleAcceptClick = (userId: string) => {
         setShowAcceptPopup(true);
-    }
+        setSelectedUserId(userId);
+    };
 
     const confirmAccept = async () => {
-        setShowAcceptPopup(false);
-
-                setPopupMessage("User accepted successfully!");
-                setShowPopup(true);
-
-                // Hide the popup after 3 seconds
-                setTimeout(() => {
-                    setShowPopup(false);
-                }, 3000);
+        if (!selectedUserId) return;
+    
+        try {
+            await updateDoc(doc(db, "ResidentUsers", selectedUserId), {
+                status: "Verified",
+            });
+    
+            setPopupMessage("User accepted successfully!");
+            setShowPopup(true);
+    
+            // Hide the popup after 3 seconds
+            setTimeout(() => {
+                setShowPopup(false);
+            }, 3000);
+        } catch (error) {
+            console.error("Error updating user status:", error);
+        } finally {
+            setShowAcceptPopup(false);
+            setSelectedUserId(null);
+        }
     };
 
 
-    const handleDeleteClick = (userId: string) => {
+    const handleDeleteClick = (userId: string, userid: string) => {
         setDeleteUserId(userId);
+        setSelectedBarangayUserId(userid);
         setShowDeletePopup(true); 
     };
     
@@ -132,7 +147,7 @@ const admin = () => {
                 setShowDeletePopup(false);
                 setDeleteUserId(null);
 
-                setPopupMessage("Barangay user deleted successfully!");
+                setPopupMessage("Barangay User deleted successfully!");
                 setShowPopup(true);
 
                 // Hide the popup after 3 seconds
@@ -243,13 +258,6 @@ const admin = () => {
 
     const router = useRouter();
    
-    const handleEditBrgyAcc = () => {
-        router.push("/dashboard/admin/modifyBarangayAcc");
-    };
-
-    const handleRejectResidentUser = () => {
-        router.push("/dashboard/admin/reasonForReject");
-    };
 
 
     const [showResidentTableContent, setShowResidentTableContent] = useState(false); 
@@ -322,8 +330,8 @@ const admin = () => {
                                             <td>{user.email}</td>
                                             <td>
                                                 <div className="admin-actions">
-                                                    <button className="admin-action-accept" onClick={handleAcceptClick}>Accept</button>
-                                                    <button className="admin-action-reject" onClick={handleRejectResidentUser}>Reject</button>
+                                                    <button className="admin-action-accept" onClick={() => handleAcceptClick(user.id)}>Accept</button>
+                                                    <button className="admin-action-reject" onClick={() => router.push(`/dashboard/admin/reasonForReject?id=${user.id}`)}>Reject</button>
                                                 </div>
                                             </td>
                                             </tr>
@@ -338,6 +346,7 @@ const admin = () => {
                         <div className="confirmation-popup-overlay">
                             <div className="confirmation-popup">
                                 <p>Are you sure you want to accept this user?</p>
+                                <h2>Resident ID: {selectedUserId}</h2>
                                 <div className="yesno-container">
                                     <button onClick={() => setShowAcceptPopup(false)} className="no-button">No</button>
                                     <button onClick={confirmAccept} className="yes-button">Yes</button>
@@ -400,7 +409,7 @@ const admin = () => {
                                                     </button>
                                                     <button 
                                                         className="admin-action-delete" 
-                                                        onClick={() => handleDeleteClick(user.id)}>
+                                                        onClick={() => handleDeleteClick(user.id, user.userid)}>
                                                             Delete
                                                     </button>
                                                 </div>
@@ -415,7 +424,8 @@ const admin = () => {
                     {showDeletePopup && (
                         <div className="confirmation-popup-overlay">
                             <div className="confirmation-popup">
-                                <p>Are you sure you want to delete this user?</p>
+                                <p>Are you sure you want to delete this Barangay User?</p>
+                                <h2>User ID: {selectedBarangayUserId}</h2>
                                 <div className="yesno-container">
                                     <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
                                     <button onClick={confirmDelete} className="yes-button">Yes</button>

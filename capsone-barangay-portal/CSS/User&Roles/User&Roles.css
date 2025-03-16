@@ -364,6 +364,12 @@
   .confirmation-popup p{
     color: rgb(97, 97, 97);
   }
+
+  .confirmation-popup h2{
+    margin-top: 10px;
+    color: #f44336;
+    font-size: 15px;
+  }
   
   .yesno-container{
     display: flex;
