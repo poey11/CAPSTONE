@@ -44,6 +44,13 @@
         margin-bottom: 1rem;
     }
 
+    .submit-section-resident-account {
+        padding: 2rem;
+      display: flex;
+       justify-content: center;
+       align-items: center;
+    }
+
     .upload-btn {
         background-color: #f49028;
         color: white;
@@ -53,8 +60,8 @@
         cursor: pointer;
         font-size: 14px;
         transition: background 0.3s ease;
-      
-        margin-top: 2rem;
+        width: 100%;
+
     }
 
     .upload-btn:hover {

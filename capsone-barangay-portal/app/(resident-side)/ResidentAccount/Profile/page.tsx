@@ -67,25 +67,37 @@ export default function SettingsPageResident() {
         setError("");
     
         try {
-  
-         
+            const docRef = doc(db, "ResidentUsers", residentId!);
+            const docSnap = await getDoc(docRef);
     
-          const docRef = doc(db, "ResidentUsers", residentId!);
-          await updateDoc(docRef, {
-            ...resident,
-
-          });
+            if (docSnap.exists()) {
+                const currentData = docSnap.data();
     
-          alert("Profile updated successfully!");
-          router.push("/ResidentAccount/Profile");
+                // Check if there are any changes
+                const isDataChanged = Object.keys(resident).some(
+                    (key) => resident[key as keyof typeof resident] !== currentData[key]
+                );
+    
+                if (!isDataChanged) {
+                    alert("No changes detected.");
+                    setLoading(false);
+                    return;
+                }
+            }
+    
+            // Proceed with update if data has changed
+            await updateDoc(docRef, { ...resident });
+    
+            alert("Profile updated successfully!");
+            router.push("/ResidentAccount/Profile");
         } catch (err) {
-          setError("Failed to update resident");
-          console.error(err);
+            setError("Failed to update resident");
+            console.error(err);
         }
     
         setLoading(false);
-      };
-
+    };
+    
     return (
         <main className="main-container">
             <div className="first-section">
@@ -171,12 +183,20 @@ export default function SettingsPageResident() {
                                 onChange={handleChange} 
                                 className="form-input" 
                                 required 
+                                disabled 
                             />
                         </div>
 
-                        <button type="submit" className="upload-btn" disabled={loading}>
-                            {loading ? "Updating..." : "Update Profile"}
-                        </button>
+                        
+                        <div className="submit-section-resident-account">
+
+                            <button type="submit" className="upload-btn" disabled={loading}>
+                                {loading ? "Updating..." : "Update Profile"}
+                            </button>
+
+                        </div>
+
+                       
 
                         </form>
                     </div>
