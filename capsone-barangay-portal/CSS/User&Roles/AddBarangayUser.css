@@ -352,4 +352,9 @@
   .no-button:hover {
     background-color:  #c2352b; 
   } 
+
+  p .required {
+    color: red;
+    margin-left: 5px;
+  }
   

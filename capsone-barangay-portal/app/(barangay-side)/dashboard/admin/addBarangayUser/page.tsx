@@ -186,9 +186,9 @@ export default function AddBarangayUser() {
                     <form id="addBarangayUserForm" onSubmit={handleSubmit}>
                         <div className="fields-container">
                             <div className="fields-section">
-                                <label htmlFor="roles">Role:</label>
+                                <p>Position</p>
                                 <select  value={users.position}  onChange={handleChange} id="roles" name="position" className="role" >
-                                    <option value="" disabled>Select a Role</option>
+                                    <option value="" disabled>Select a Position</option>
                                     <option value="Punong Barangay">Punong Barangay</option>
                                     <option value="Secretary">Secretary</option>
                                     <option value="Assistant Secretary">Asst Secretary</option>
@@ -198,7 +198,7 @@ export default function AddBarangayUser() {
                             </div>
                     
                             <div className="fields-section">
-                                <label htmlFor="password">Password: </label>
+                                <p>Password <span className="required">*</span></p>
                                 <input 
                                     value={users.password} 
                                     onChange={handleChange} 
@@ -212,7 +212,7 @@ export default function AddBarangayUser() {
                             </div>
 
                             <div className="fields-section">
-                                <label htmlFor="username">User ID: </label>
+                                <p>User ID <span className="required">*</span> </p>
                                 <input 
                                     type="text" 
                                     id="username"

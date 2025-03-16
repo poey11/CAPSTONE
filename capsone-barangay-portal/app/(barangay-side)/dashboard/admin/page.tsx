@@ -282,7 +282,7 @@ const admin = () => {
 
                     <div className="resident-users-topsection">
                         <button type="button" 
-                                className={showResidentTableContent ? "minus-button" : "plus-button"} 
+                                className={showResidentTableContent ? "user-role-minus-button" : "user-role-plus-button"} 
                                 onClick={handleToggleClickResidentTable}>
                         </button>
                         <h1>Resident Users Table</h1>
@@ -321,9 +321,9 @@ const admin = () => {
                                             <td>{user.role}</td>
                                             <td>{user.email}</td>
                                             <td>
-                                                <div className="actions">
-                                                    <button className="action-accept" onClick={handleAcceptClick}>Accept</button>
-                                                    <button className="action-reject" onClick={handleRejectResidentUser}>Reject</button>
+                                                <div className="admin-actions">
+                                                    <button className="admin-action-accept" onClick={handleAcceptClick}>Accept</button>
+                                                    <button className="admin-action-reject" onClick={handleRejectResidentUser}>Reject</button>
                                                 </div>
                                             </td>
                                             </tr>
@@ -352,7 +352,7 @@ const admin = () => {
                     <div className="resident-users-topsection">
 
                         <button type="button" 
-                                className={showBarangayTableContent ? "minus-button" : "plus-button"} 
+                                className={showBarangayTableContent ? "user-role-minus-button" : "user-role-plus-button"} 
                                 onClick={handleToggleClickBarangayTable}>
                         </button>
                         <h1>Barangay Users Table</h1>
@@ -391,9 +391,18 @@ const admin = () => {
                                             <td>{user.createdBy}</td>
                                             <td>{user.createdAt}</td>
                                             <td>
-                                                <div className="actions">
-                                                    <button className="action-modify" onClick={handleEditBrgyAcc}>Modify</button>
-                                                    <button className="action-delete" onClick={() => handleDeleteClick(user.id)}>Delete</button>
+                                                <div className="admin-actions">
+                                                    <button 
+                                                        className="admin-action-edit" 
+                                                        onClick={() => router.push(`/dashboard/admin/modifyBarangayAcc?id=${user.id}`)}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button 
+                                                        className="admin-action-delete" 
+                                                        onClick={() => handleDeleteClick(user.id)}>
+                                                            Delete
+                                                    </button>
                                                 </div>
                                             </td>
                                             </tr>

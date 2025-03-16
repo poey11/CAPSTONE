@@ -170,17 +170,17 @@
 }
 
 
-.actions {
+.admin-actions {
     display: flex;
     justify-content: center;
     gap: 0.5rem; /* Space between action buttons */
 }
 
-.action-accept,
-.action-reject,
-.action-modify,
-.action-delete,
-.generateUserID,
+.admin-action-accept,
+.admin-action-reject,
+.admin-action-edit,
+.admin-action-delete,
+.admin-generateUserID,
 .createNewBarangayUser {   
     border: none;
     cursor: pointer;
@@ -190,31 +190,33 @@
     transition: background-color 0.2s ease;
 }
 
-.actions-section {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem; /* Space between action buttons */
-    margin-top: 50px;
-}
 
-.action-accept,
-.action-modify {
+.admin-action-accept {
     background-color: #4caf50; /* Green */
     color: white;
 }
 
-.action-accept:hover,
-.action-modify:hover {
+.admin-action-edit{
+  background-color: #ff9800; /* Orange */
+  color: white;
+}
+
+
+.admin-action-accept:hover {
     background-color: #3e8f41; /* Green */
 }
 
-.action-reject,
-.action-delete {
+.admin-action-edit:hover{
+    background-color: #d58102; /* Orange */
+}
+
+.admin-action-reject,
+.admin-action-delete {
     background-color: #f44336; /* Red */
     color: white;
 }
-.action-reject:hover,
-.action-delete:hover {
+.admin-action-reject:hover,
+.admin-action-delete:hover {
     background-color: #d73c31; /* Red */
 }
 
@@ -227,24 +229,6 @@
 .generateUserID:hover,
 .createNewBarangayUser:hover{
     background-color:#cc591b; /* Orange */
-}
-
-.create-new-barangay-user{
-    width: 99%;
-    border-radius: 10px;
-    border: 2px solid rgba(0, 0, 0, 0.10);
-    background-color: #f4f2f2;
-    display: flex;
-    flex-direction:column;
-    margin-top: 20px;
-    padding: 30px;
-    height: 28rem;
-}
-
-.create-new-barangay-user h1{
-    font-size: 17px;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.5);
 }
 
 
@@ -416,7 +400,7 @@
   } 
 
 
-  .plus-button {
+  .user-role-plus-button {
     background-image: url('/Images/plus.png');
     background-size: contain;
     background-repeat: no-repeat;
@@ -429,12 +413,12 @@
     filter: grayscale(100%) brightness(0%) invert(50%);
   }
   
-  .plus-button:hover {
+  .user-role-plus-button:hover {
     transform: scale(1.1); 
     transition: transform 0.2s ease;
   }
 
-  .minus-button {
+  .user-role-minus-button {
     background-image: url('/Images/minus-sign.png');
     background-size: contain;
     background-repeat: no-repeat;
@@ -447,7 +431,7 @@
     filter: grayscale(100%) brightness(0%) invert(50%);
   }
 
-  .minus-button:hover {
+  .user-role-minus-button:hover {
     transform: scale(1.1); 
     transition: transform 0.2s ease;
   }

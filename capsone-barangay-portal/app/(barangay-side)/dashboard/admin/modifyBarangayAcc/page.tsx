@@ -1,28 +1,71 @@
 "use client"
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams} from "next/navigation";
 import type { Metadata } from "next";
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { Eye, EyeOff } from "lucide-react";
-import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayCertificate.css";
+import { db, storage } from "../../../../db/firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import "@/CSS/User&Roles/ModifyBarangayAcc.css";
+import { form } from "framer-motion/m";
 
 const metadata:Metadata = { 
     title: "Modify Barangay Accounts",
     description: "Modify Barangay Accounts Barangay Side",
 };
 
+interface BarangayUser {
+    userid: number;
+    role: string;
+    position: string;
+    password: string;
+    createdBy: string;
+    createdAt: string;
+    address: string;
+    birthDate: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    sex: string;
+  }
+
 export default function EditBarangayAccount() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const userId = searchParams.get("id");
+
+
+    const [formData, setFormData] = useState({
+        userid: 0,
+        role: "",
+        position: "",
+        password: "",
+        createdBy: "",
+        createdAt: "",
+        address: "",
+        birthDate: "",
+        firstName: "",
+        lastName: "",
+        phone: "",
+        sex: "",
+      });
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+
     const handleBack = () => {
         router.push("/dashboard/admin");
     };
+
+    const [originalData, setOriginalData] = useState({ ...formData });
 
     const [showPassword, setShowPassword] = useState(false);
     const [showDiscardPopup, setShowDiscardPopup] = useState(false);
     const [showSavePopup, setShowSavePopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+
 
     const handleDiscardClick = async () => {
         setShowDiscardPopup(true);
@@ -31,13 +74,16 @@ export default function EditBarangayAccount() {
     const confirmDiscard = async () => {
         setShowDiscardPopup(false);
 
-        setPopupMessage("Changes discarded successfully!");
-                setShowPopup(true);
+    
+        setFormData(originalData); // Reset to original data
 
-                // Hide the popup after 3 seconds
-                setTimeout(() => {
-                    setShowPopup(false);
-                }, 3000);
+        setPopupMessage("Changes discarded successfully!");
+        setShowPopup(true);
+
+        // Hide the popup after 3 seconds
+        setTimeout(() => {
+            setShowPopup(false);
+        }, 3000);
     };
 
     const handleSaveClick = async () => {
@@ -47,25 +93,100 @@ export default function EditBarangayAccount() {
     const confirmSave = async () => {
         setShowSavePopup(false);
 
-                setPopupMessage("Changes saved successfully!");
-                setShowPopup(true);
+        setPopupMessage("Changes saved successfully!");
+        setShowPopup(true);
 
-                // Hide the popup after 3 seconds
-                setTimeout(() => {
-                    setShowPopup(false);
-                }, 3000);
+        // Hide the popup after 3 seconds
+        setTimeout(() => {
+            setShowPopup(false);
+            router.push("/dashboard/admin");
+        }, 3000);
+
+         // Create a fake event and call handleSubmit
+        const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+        await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+    };
+
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!userId || !formData) return;
+    
+        setLoading(true);
+        try {
+          const docRef = doc(db, "BarangayUsers", userId);
+          await updateDoc(docRef, { ...formData } as Partial<BarangayUser>);
+        } catch (err) {
+          console.error(err);
+          setError("Failed to update job seeker");
+        }
+        setLoading(false);
+      };
+
+    const [showRecordDetails, setShowRecordDetails] = useState(false); 
+    const [showPasswordDetails, setShowPasswordDetails] = useState(false);
+    
+    const handleToggleClickRecordDetails = () => {
+        setShowRecordDetails(prevState => !prevState);
+    };
+    
+    const handleToggleClickPasswordDetails = () => {
+        setShowPasswordDetails(prevState => !prevState);
+    };
+
+
+    useEffect(() => {
+
+        console.log("User ID from search params:", userId);
+        if (userId) {
+            const fetchUserData = async () => {
+                const docRef = doc(db, "BarangayUsers", userId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = {
+                        userid: docSnap.data().userid || 0,
+                        role: docSnap.data().role || "",
+                        position: docSnap.data().position || "",
+                        password: docSnap.data().password || "",
+                        createdBy: docSnap.data().createdBy || "",
+                        createdAt: docSnap.data().createdAt || "",
+                        address: docSnap.data().address || "",
+                        birthDate: docSnap.data().birthDate || "",
+                        firstName: docSnap.data().firstName || "",
+                        lastName: docSnap.data().lastName || "",
+                        phone: docSnap.data().phone || "",
+                        sex: docSnap.data().sex || "",
+                    };
+
+                    setFormData(data);
+                    setOriginalData(data); // Store original data
+                }
+            };
+
+            fetchUserData();
+        }
+        
+    }, [userId]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
     };
 
     return (
 
         <main className="editbrgyacc-main-container">
-            <div className="section-1">
+            <div className="editbrgyacc-page-title-section-1">
                 <h1>Admin Module</h1>
             </div>
 
-            <div className="editbrgyacc-main-section">
+            <div className="editbrgyacc-main-content">
                 <div className="editbrgyacc-main-section1">
-                    <div className="addAnnouncement-main-section1-left">
+                    <div className="editbrgyacc-main-section1-left">
                         <button onClick={handleBack}>
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
                         </button>
@@ -77,137 +198,139 @@ export default function EditBarangayAccount() {
                         <button className="discard-btn" onClick={handleDiscardClick}>Discard</button>
                         <button className="save-btn" onClick={handleSaveClick}>Save</button>
                     </div>
-
-                    {showDiscardPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
-                                <p>Are you sure you want to discard the changes?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> {/* need to change yung on click. mawawala yung new input and babalik sa original data.*/}
-                                </div> 
-                            </div>
-                        </div>
-                    )}
-
-                    {showSavePopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
-                                <p>Are you sure you want to save the changes?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowSavePopup(false)} className="no-button">No</button> {/* need to change yung on click. mawawala yung new input and babalik sa original data.*/}
-                                    <button onClick={confirmSave} className="yes-button">Yes</button> 
-                                </div> 
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 <hr/>
 
-                <div className="main-fields-container">
+                <div className="editbrgyacc-main-fields-container">
 
                     <div className="account-details-section">
 
                         <h1>Account Details</h1>
                         <hr/>
-                        <div className="main-fields-container-section1">
-                            <div className="section-left">
-                                <div className="fields-container">
-                                    <div className="fields-section">
+
+                        <div className="editbrgyacc-main-fields-container-section1">
+                            <div className="editbrgyacc-section-left">
+                                <div className="editbrgyacc-fields-container">
+                                    <div className="editbrgyacc-fields-section">
                                         <p>User ID</p>
                                         <input
                                             type="number"
-                                            className="input-field"
+                                            className="editbrgyacc-input-field"
                                             placeholder="User ID"
-                                            defaultValue="2025483"
+                                            value={formData.userid}
                                             disabled
+                                            name="userID"
+                                            onChange={handleChange}
                                         />
                                     </div>
-                                </div>  
-                            </div>
-                            <div className="section-right">
 
-                            </div>
-                            
-                        </div>
-
-                        <div className="main-fields-container-section1">
-                            <div className="section-left">
-                                <div className="fields-container">
-                                    <div className="fields-section">
-                                        <p>Position</p>
+                                    <div className="editbrgyacc-fields-section">
+                                        <p>Official First Name</p>
                                         <input
                                             type="text"
-                                            className="input-field"
-                                            placeholder="Position"
-                                            defaultValue="Secretary"
+                                            className="editbrgyacc-input-field"
+                                            placeholder="Official First Name"
+                                            name="firstName"
+                                            value={formData.firstName}
+                                            onChange={handleChange}
                                         />
                                     </div>
-                                    <div className="fields-section">
+
+                                    <div className="editbrgyacc-fields-section">
+                                        <p>Official Last Name</p>
+                                        <input
+                                            type="text"
+                                            className="editbrgyacc-input-field"
+                                            placeholder="Official Last Name"
+                                            name="lastName"
+                                            value={formData.lastName}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+
+                                    <div className="editbrgyacc-fields-section">
                                         <p>Contact Number</p>
                                         <input
                                             type="tel"
-                                            id="contactnumber"
-                                            name="contactnumber"
-                                            className="input-field"
-                                            required
+                                            id="phone"
+                                            name="phone"
+                                            className="editbrgyacc-input-field"
                                             placeholder="Enter Contact Number"
                                             maxLength={10}
                                             pattern="^[0-9]{10}$"
                                             title="Please enter a valid 10-digit contact number"
-                                            defaultValue="09088952877"
+                                            value={formData.phone}
+                                            onChange={handleChange}
                                         />
-                                    </div>
-                                    
+                                    </div>  
                                 </div>
                             </div>
-                            <div className="section-right">
-                                <div className="fields-container">
-                                    <div className="fields-section">
+                            <div className="editbrgyacc-section-right">
+                                <div className="editbrgyacc-fields-container">
+
+                                    <div className="editbrgyacc-fields-section">
+                                        <p>Position</p>
+
+                                        <select
+                                            name="position"
+                                            className="editbrgyacc-input-field"
+                                            required
+                                            value={formData.position}
+                                            onChange={handleChange}
+                                        >
+                                            
+                                            <option value="" disabled>Select a Position</option>
+                                            <option value="Punong Barangay">Punong Barangay</option>
+                                            <option value="Secretary">Secretary</option>
+                                            <option value="Assistant Secretary">Asst Secretary</option>
+                                            <option value="Admin Staff">Admin Staff</option>
+                                            <option value="LF Staff">LF Staff</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div className="editbrgyacc-fields-section">
                                         <p>Birthday</p>
                                         <input
                                             type="date"
-                                            className="input-field"
+                                            className="editbrgyacc-input-field"
                                             placeholder="Birthday"
-                                            defaultValue="2002-09-15"
+                                            name="birthDate"
+                                            value={formData.birthDate}
+                                            onChange={handleChange}
                                         />
                                     </div>
-                                    <div className="fields-section">
+
+                                    <div className="editbrgyacc-fields-section">
                                         <p>Sex</p>
                                         <select
                                             name="gender"
-                                            className="input-field"
+                                            className="editbrgyacc-input-field"
                                             required
-                                            defaultValue="Male"
+                                            value={formData.sex}
+                                            onChange={handleChange}
                                         >
                                             <option value="" disabled>Select gender</option>
                                             <option value="Male">Male</option>
                                             <option value="Female">Female</option>
                                         </select>
-                                    </div>  
+                                    </div> 
+                            
                                 </div>
                             </div>
                         </div>
 
-                        <div className="main-fields-container-section2">
-                            <div className="fields-container">
-                                <div className="fields-section">
-                                    <p>Official Name</p>
-                                    <input
-                                        type="text"
-                                        className="input-field"
-                                        placeholder="Official Name"
-                                        defaultValue="Malcolm Payao"
-                                    />
-                                </div>
-                                <div className="fields-section">
+                        <div className="editbrgyacc-main-fields-container-section2">
+                            <div className="editbrgyacc-fields-container">
+                                <div className="editbrgyacc-fields-section">
                                     <p>Address</p>
                                     <input
                                         type="text"
-                                        className="input-field"
+                                        className="editbrgyacc-input-field"
                                         placeholder="Address"
-                                        defaultValue="1724 Taft Avenue Pasay City"
+                                        name="address"
+                                        value={formData.address}
+                                        onChange={handleChange}
                                     />
                                 </div>
 
@@ -219,65 +342,106 @@ export default function EditBarangayAccount() {
 
 
                     <div className="record-details-section">
-                        <h1>Record Details</h1>
-                        <hr/>
 
-                        <div className="main-fields-container-section1">
-                            <div className="section-left">
-                                <div className="fields-container">
-                                    <div className="fields-section">
-                                        <p>Created By</p>
-                                        <input
-                                            type="text"
-                                            className="input-field"
-                                            placeholder="Created By"
-                                            defaultValue="Assistant Secretary"
-                                            disabled
-                                        />
+                        <div className="record-details">
+                            <div className="record-details-topsection">
+                                <button type="button" 
+                                        className={showRecordDetails ? "record-details-minus-button" : "record-details-plus-button"} 
+                                        onClick={handleToggleClickRecordDetails}>
+                                </button>
+                                <h1>Record Details</h1>
+                            </div>
+
+                            <hr/>
+
+                            {showRecordDetails && (
+                            <>
+                                <div className="editbrgyacc-main-fields-container-section1">
+                                    <div className="editbrgyacc-section-left">
+                                        <div className="editbrgyacc-fields-container">
+                                            <div className="editbrgyacc-fields-section">
+                                                <p>Created By</p>
+                                                <input
+                                                    type="text"
+                                                    className="editbrgyacc-input-field"
+                                                    placeholder="Created By"
+                                                    value={formData.createdBy}
+                                                    disabled
+                                                    name="createdBy"
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="editbrgyacc-section-right">
+                                        <div className="editbrgyacc-fields-container">
+                                            <div className="editbrgyacc-fields-section">
+                                                <p>Created At</p>
+                                                <input
+                                                    type="number"
+                                                    className="editbrgyacc-input-field"
+                                                    placeholder="Created At"
+                                                    value={formData.createdAt}
+                                                    disabled
+                                                    name="createdAt"
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="section-right">
-                                <div className="fields-container">
-                                    <div className="fields-section">
-                                        <p>Created At</p>
-                                        <input
-                                            type="number"
-                                            className="input-field"
-                                            placeholder="Created At"
-                                            defaultValue="2025483"
-                                            disabled
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+                            </>
+
+                            )}
                         </div>
                     </div>
 
                     <div className="password-details-section">
-                        <h1>Password Details</h1>
-                        <hr/>
 
-                        <div className="section-left">
-                                <div className="fields-container">
-                                    <div className="fields-section">
-                                        <p>Current Password</p>
-                                        <div className="relative">
-                                            <input
-                                                type={showPassword ? "text" : "password"}
-                                                className="input-field"
-                                                defaultValue="password"
-                                            />
-                                            <button
-                                                type="button"
-                                                className="toggle-password-btn"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                            >
-                                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                            </button>
-                                        </div>
+                        <div className="password-details">
+
+                            <div className="password-details-topsection">
+                                <button type="button" 
+                                        className={showPasswordDetails ? "record-details-minus-button" : "record-details-plus-button"} 
+                                        onClick={handleToggleClickPasswordDetails} 
+                                        >
+                                        
+                                </button>
+
+                                <h1>Password Details</h1>
+                            </div>
+
+                            <hr/>
+
+                            {showPasswordDetails && (
+                                <>
+                                    <div className="editbrgyacc-main-fields-container-section2">
+                                            <div className="editbrgyacc-fields-container">
+                                                <div className="editbrgyacc-fields-section">
+                                                    <p>Current Password</p>
+                                                    <div className="relative">
+                                                        <input
+                                                            type={showPassword ? "text" : "password"}
+                                                            className="editbrgyacc-input-field"
+                                                            value={formData.password}
+                                                            onChange={handleChange}
+                                                            name="password"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="toggle-password-btn"
+                                                            onClick={() => setShowPassword(!showPassword)}
+                                                        >
+                                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                     </div>
-                                </div>
+
+                                </>
+
+                            )}
                         </div>
                     </div>
                 </div>
@@ -285,7 +449,32 @@ export default function EditBarangayAccount() {
             </div>
 
 
-            {showPopup && (
+            {showDiscardPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to discard the changes?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+                    )}
+
+          {showSavePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to save the changes?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowSavePopup(false)} className="no-button">No</button> 
+                                    <button onClick={confirmSave} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+            )}
+                    
+
+          {showPopup && (
                 <div className={`popup-overlay show`}>
                     <div className="popup">
                         <p>{popupMessage}</p>
