@@ -104,7 +104,7 @@ export default function SettingsPageResident() {
                 <div className="account-profile-section">
                     <p className="Details">Profile</p>
                     <div className="name-section">
-                        <p className="name">{resident.first_name}</p>
+                        <p className="name">{resident.first_name || "N/A"}</p>
                         <p className="name">{resident.last_name || "N/A"}</p>
                     </div>
                 </div>
@@ -119,7 +119,7 @@ export default function SettingsPageResident() {
                             <input 
                                 id="first_name" 
                                 name="first_name"
-                                value={resident.first_name || ""} 
+                                value={resident.first_name ||  "N/A"} 
                                 onChange={handleChange} 
                                 className="form-input" 
                                 required 
@@ -131,7 +131,7 @@ export default function SettingsPageResident() {
                             <input 
                                 id="last_name" 
                                 name="last_name"
-                                value={resident.last_name || ""} 
+                                value={resident.last_name ||  "N/A"} 
                                 onChange={handleChange} 
                                 className="form-input" 
                                 required 
@@ -143,7 +143,7 @@ export default function SettingsPageResident() {
                             <input 
                                 id="sex" 
                                 name="sex"
-                                value={resident.sex || ""}  
+                                value={resident.sex ||  "N/A"}  
                                 onChange={handleChange} 
                                 className="form-input" 
                                 required 
@@ -155,7 +155,7 @@ export default function SettingsPageResident() {
                             <input 
                                 id="email" 
                                 name="email"
-                                value={resident.email || ""} 
+                                value={resident.email ||  "N/A"} 
                                 onChange={handleChange} 
                                 className="form-input" 
                                 required 
@@ -167,7 +167,7 @@ export default function SettingsPageResident() {
                             <input 
                                 id="phone" 
                                 name="phone"
-                                value={resident.phone || ""} 
+                                value={resident.phone ||  "N/A"} 
                                 onChange={handleChange} 
                                 className="form-input" 
                                 required 
@@ -179,7 +179,7 @@ export default function SettingsPageResident() {
                             <input 
                                 id="status" 
                                 name="status"
-                                value={resident.status || ""}  
+                                value={resident.status ||  "N/A"}  
                                 onChange={handleChange} 
                                 className="form-input" 
                                 required 
@@ -201,6 +201,7 @@ export default function SettingsPageResident() {
                         </form>
                     </div>
                 </div>
+
             </div>
         </main>
     );
