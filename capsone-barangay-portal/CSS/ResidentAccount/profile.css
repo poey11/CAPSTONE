@@ -53,6 +53,8 @@
         cursor: pointer;
         font-size: 14px;
         transition: background 0.3s ease;
+      
+        margin-top: 2rem;
     }
 
     .upload-btn:hover {

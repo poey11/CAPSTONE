@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase"; 
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "@/CSS/ResidentAccount/profile.css";
 
 export default function SettingsPageResident() {
@@ -19,17 +20,17 @@ export default function SettingsPageResident() {
         status: "",
     });
 
-
     const [preview, setPreview] = useState<string | null>(null);
-   
-
-    useEffect(() => {
-
-            if (residentId){
-                const fetchResidentData = async () => {
-                    const docRef = doc(db, "ResidentUsers", residentId);
-                    const docSnap = await getDoc(docRef);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [file, setFile] = useState<File | null>(null); // State for file upload
+  
     
+    useEffect(() => {
+        if (residentId) {
+            const fetchResidentData = async () => {
+                const docRef = doc(db, "ResidentUsers", residentId);
+                const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     setResident({
@@ -39,21 +40,52 @@ export default function SettingsPageResident() {
                         email: docSnap.data().email || "",
                         sex: docSnap.data().sex || "",
                         status: docSnap.data().status || "",
-
                     });
 
                     setPreview(docSnap.data().fileURL || null);
-            } 
+                }
             };
             fetchResidentData();
         }
-
     }, [residentId]);
 
     const handleBack = () => {
         window.location.href = "/dashboard";
     };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setResident((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
     
+        try {
+  
+         
+    
+          const docRef = doc(db, "ResidentUsers", residentId!);
+          await updateDoc(docRef, {
+            ...resident,
+
+          });
+    
+          alert("Profile updated successfully!");
+          router.push("/ResidentAccount/Profile");
+        } catch (err) {
+          setError("Failed to update resident");
+          console.error(err);
+        }
+    
+        setLoading(false);
+      };
+
     return (
         <main className="main-container">
             <div className="first-section">
@@ -69,38 +101,84 @@ export default function SettingsPageResident() {
                     <p className="Details">Account Details</p>
 
                     <div className="edit-section">
-
+                      <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label htmlFor="first_name" className="form-label">First Name: </label>
-                            <input id="first_name" value={resident.first_name || ""} className="form-input" />
+                            <input 
+                                id="first_name" 
+                                name="first_name"
+                                value={resident.first_name || ""} 
+                                onChange={handleChange} 
+                                className="form-input" 
+                                required 
+                            />
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="last_name" className="form-label">Last Name: </label>
-                            <input id="last_name" value={resident.last_name || ""} className="form-input" />
+                            <input 
+                                id="last_name" 
+                                name="last_name"
+                                value={resident.last_name || ""} 
+                                onChange={handleChange} 
+                                className="form-input" 
+                                required 
+                            />
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="sex" className="form-label">Sex:</label>
-                            <input id="sex" value={resident.sex || ""}  className="form-input" />
+                            <input 
+                                id="sex" 
+                                name="sex"
+                                value={resident.sex || ""}  
+                                onChange={handleChange} 
+                                className="form-input" 
+                                required 
+                            />
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="email" className="form-label">Email:</label>
-                            <input id="email" value={resident.email || ""} className="form-input" />
+                            <input 
+                                id="email" 
+                                name="email"
+                                value={resident.email || ""} 
+                                onChange={handleChange} 
+                                className="form-input" 
+                                required 
+                            />
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="phone" className="form-label">Phone:</label>
-                            <input id="phone" value={resident.phone|| ""} className="form-input" />
+                            <input 
+                                id="phone" 
+                                name="phone"
+                                value={resident.phone || ""} 
+                                onChange={handleChange} 
+                                className="form-input" 
+                                required 
+                            />
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="status" className="form-label">Status:</label>
-                            <input id="status" value={resident.status|| ""}  className="form-input" />
+                            <input 
+                                id="status" 
+                                name="status"
+                                value={resident.status || ""}  
+                                onChange={handleChange} 
+                                className="form-input" 
+                                required 
+                            />
                         </div>
 
-                        <button className="upload-btn">Update Profile</button>
+                        <button type="submit" className="upload-btn" disabled={loading}>
+                            {loading ? "Updating..." : "Update Profile"}
+                        </button>
+
+                        </form>
                     </div>
                 </div>
             </div>
