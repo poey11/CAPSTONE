@@ -20,6 +20,9 @@ export default function SettingsPageResident() {
         status: "",
     });
 
+    const [showPopup, setShowPopup] = useState(false);
+    const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+
     const [preview, setPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
