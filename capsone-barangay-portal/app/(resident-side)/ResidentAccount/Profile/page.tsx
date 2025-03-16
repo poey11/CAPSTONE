@@ -109,14 +109,14 @@ export default function SettingsPageResident() {
     };
     
     return (
-        <main className="main-container">
-            <div className="first-section">
+        <main className="main-container-resident-profile">
+            <div className="first-section-resident-profile">
                 <div className="account-profile-section">
                     <p className="Details">Profile</p>
 
-                    <div className="icon-container">
+                    <div className="icon-container-profile-section">
 
-                        <img src={selectedImage || "/images/user.png"} alt="User Icon" className="user-icon" />
+                        <img src={selectedImage || "/images/user.png"} alt="User Icon" className="user-icon-profile-section" />
                                 
                                 <input
                                     type="file"
@@ -126,7 +126,7 @@ export default function SettingsPageResident() {
                                     onChange={handleImageChange}
                                 />
                                 <button 
-                                    className="upload-btn" 
+                                    className="upload-btn-profile-section" 
                                     onClick={() => document.getElementById("fileUpload")?.click()}
                                 >
                                     Update Profile Image
@@ -150,76 +150,76 @@ export default function SettingsPageResident() {
                 <div className="account-details-section">
                     <p className="Details">Account Details</p>
 
-                    <div className="edit-section">
+                    <div className="edit-section-profile">
                       <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label htmlFor="first_name" className="form-label">First Name: </label>
+                        <div className="form-group-profile-section">
+                            <label htmlFor="first_name" className="form-label-profile-section">First Name: </label>
                             <input 
                                 id="first_name" 
                                 name="first_name"
                                 value={resident.first_name ||  "N/A"} 
                                 onChange={handleChange} 
-                                className="form-input" 
+                                className="form-input-profile-section" 
                                 required 
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="last_name" className="form-label">Last Name: </label>
+                        <div className="form-group-profile-section">
+                            <label htmlFor="last_name" className="form-label-profile-section">Last Name: </label>
                             <input 
                                 id="last_name" 
                                 name="last_name"
                                 value={resident.last_name ||  "N/A"} 
                                 onChange={handleChange} 
-                                className="form-input" 
+                                className="form-input-profile-section" 
                                 required 
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="sex" className="form-label">Sex:</label>
+                        <div className="form-group-profile-section">
+                            <label htmlFor="sex" className="form-label-profile-section">Sex:</label>
                             <input 
                                 id="sex" 
                                 name="sex"
                                 value={resident.sex ||  "N/A"}  
                                 onChange={handleChange} 
-                                className="form-input" 
+                                className="form-input-profile-section" 
                                 required 
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="email" className="form-label">Email:</label>
+                        <div className="form-group-profile-section">
+                            <label htmlFor="email" className="form-label-profile-section">Email:</label>
                             <input 
                                 id="email" 
                                 name="email"
                                 value={resident.email ||  "N/A"} 
                                 onChange={handleChange} 
-                                className="form-input" 
+                                className="form-input-profile-section" 
                                 required 
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="phone" className="form-label">Phone:</label>
+                        <div className="form-group-profile-section">
+                            <label htmlFor="phone" className="form-label-profile-section">Phone:</label>
                             <input 
                                 id="phone" 
                                 name="phone"
                                 value={resident.phone ||  "N/A"} 
                                 onChange={handleChange} 
-                                className="form-input" 
+                                className="form-input-profile-section" 
                                 required 
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="status" className="form-label">Status:</label>
+                        <div className="form-group-profile-section">
+                            <label htmlFor="status" className="form-label-profile-section">Status:</label>
                             <input 
                                 id="status" 
                                 name="status"
                                 value={resident.status ||  "N/A"}  
                                 onChange={handleChange} 
-                                className="form-input" 
+                                className="form-input-profile-section" 
                                 required 
                                 disabled 
                             />
@@ -228,35 +228,35 @@ export default function SettingsPageResident() {
                             {/* MALCOLM HERE */}
 
 
-                       <div className="form-group">
-                            <label htmlFor="current-password" className="form-label">Current Password:</label>
+                       <div className="form-group-profile-section">
+                            <label htmlFor="current-password" className="form-label-profile-section">Current Password:</label>
                             <input 
                                 id="current-password" 
                                 name="current-password"
-                                className="form-input" 
+                                className="form-input-profile-section" 
                                 required 
                                 disabled 
                             />
                         </div>
 
 
-                        <div className="form-group">
-                            <label htmlFor="new-password" className="form-label">New Password:</label>
+                        <div className="form-group-profile-section">
+                            <label htmlFor="new-password" className="form-label-profile-section">New Password:</label>
                             <input 
                                 id="new-password" 
                                 name="new-password"
-                                className="form-input" 
+                                className="form-input-profile-section" 
                                 required 
                                 disabled 
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="confirm-password" className="form-label">Confirm Password:</label>
+                        <div className="form-group-profile-section">
+                            <label htmlFor="confirm-password" className="form-label-profile-section">Confirm Password:</label>
                             <input 
                                 id="confirm-password" 
                                 name="confirm-password"
-                                className="form-input" 
+                                className="form-input-profile-section" 
                                 required 
                                 disabled 
                             />
@@ -266,7 +266,7 @@ export default function SettingsPageResident() {
                         
                         <div className="submit-section-resident-account">
 
-                            <button type="submit" className="upload-btn" disabled={loading}>
+                            <button type="submit" className="submit-btn-profile-section" disabled={loading}>
                                 {loading ? "Updating..." : "Update Profile"}
                             </button>
 
