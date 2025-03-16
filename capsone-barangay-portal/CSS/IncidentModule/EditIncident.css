@@ -371,8 +371,8 @@
     transition: transform 0.2s ease;
   }
 
-  .plus-button {
-    background-image: url('/Images/plus.png');
+  .plus-button
+  .minus-button {
     background-size: contain;
     background-repeat: no-repeat;
     width: 25px; 
@@ -382,6 +382,10 @@
     padding: 0;
     margin-right: 1rem;
   }
+
+
+
+  
   
   .plus-button:hover {
     transform: scale(1.1); 

@@ -155,7 +155,7 @@ const confirmSubmit = async () => {
     } catch (err) {
       setError("Failed to add resident");
       console.error(err);
-    }
+    } 
   
     setLoading(false);
   };

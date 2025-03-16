@@ -5,6 +5,8 @@ import {collection, getDocs, onSnapshot, query, where} from "firebase/firestore"
 import "@/CSS/User&Roles/User&Roles.css";
 import { useRouter } from "next/navigation";
 import { deleteDoc, doc } from "firebase/firestore";
+import Link from "next/link";
+
 interface ResidentUser {
     id: string;
     first_name: string;
@@ -250,62 +252,87 @@ const admin = () => {
     };
 
 
+    const [showResidentTableContent, setShowResidentTableContent] = useState(false); 
+    const [showBarangayTableContent, setShowBarangayTableContent] = useState(true);
+
+    const handleToggleClickResidentTable = () => {
+        setShowResidentTableContent(prevState => !prevState);
+    };
+
+    const handleToggleClickBarangayTable = () => {
+        setShowBarangayTableContent(prevState => !prevState);
+    };
     
 
 
 
 
     return (  
-        <main className="main-container">
-            <div className="section-1">
+        <main className="user-roles-module-main-container">
+            <div className="user-roles-module-section-1">
                 <h1>Admin Module</h1>
+                <Link href="/dashboard/admin/addBarangayUser">
+                    <button className="add-announcement-btn">Add New Barangay User</button>
+                </Link>
             </div>
 
-            <div className="main-section">
+            <div className="user-roles-main-section">
 
                 <div className="resident-users">
-                    <h1>Resident Users Table</h1>
 
-                    <div className="resident-users-main-section">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Address</th>
-                                    <th>Phone</th>
-                                    <th>Sex</th>
-                                    <th>Status</th>
-                                    <th>Valid ID Doc</th>
-                                    <th>Role</th>
-                                    <th>Email</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {residentUsers.map((user) => (
-                                    <tr key={user.id}>
-                                    <td>{user.id}</td>
-                                    <td>{user.first_name} {user.last_name}</td>
-                                    <td>{user.address}</td>
-                                    <td>{user.phone}</td>
-                                    <td>{user.sex}</td>
-                                    <td>{user.status}</td>
-                                    <td>{user.validIdDoc}</td>
-                                    <td>{user.role}</td>
-                                    <td>{user.email}</td>
-                                    <td>
-                                        <div className="actions">
-                                            <button className="action-accept" onClick={handleAcceptClick}>Accept</button>
-                                            <button className="action-reject" onClick={handleRejectResidentUser}>Reject</button>
-                                        </div>
-                                    </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <div className="resident-users-topsection">
+                        <button type="button" 
+                                className={showResidentTableContent ? "minus-button" : "plus-button"} 
+                                onClick={handleToggleClickResidentTable}>
+                        </button>
+                        <h1>Resident Users Table</h1>
                     </div>
+
+                    {showResidentTableContent && (
+                        <>
+
+                            <div className="resident-users-main-section">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Address</th>
+                                            <th>Phone</th>
+                                            <th>Sex</th>
+                                            <th>Status</th>
+                                            <th>Valid ID Doc</th>
+                                            <th>Role</th>
+                                            <th>Email</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {residentUsers.map((user) => (
+                                            <tr key={user.id}>
+                                            <td>{user.id}</td>
+                                            <td>{user.first_name} {user.last_name}</td>
+                                            <td>{user.address}</td>
+                                            <td>{user.phone}</td>
+                                            <td>{user.sex}</td>
+                                            <td>{user.status}</td>
+                                            <td>{user.validIdDoc}</td>
+                                            <td>{user.role}</td>
+                                            <td>{user.email}</td>
+                                            <td>
+                                                <div className="actions">
+                                                    <button className="action-accept" onClick={handleAcceptClick}>Accept</button>
+                                                    <button className="action-reject" onClick={handleRejectResidentUser}>Reject</button>
+                                                </div>
+                                            </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
 
                     {showAcceptPopup && (
                         <div className="confirmation-popup-overlay">
@@ -321,49 +348,61 @@ const admin = () => {
                 </div>
 
                 <div className="barangay-users">
-                    <h1>Barangay Users Table</h1>
 
-                    <div className="barangay-users-main-section">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>User ID</th>
-                                    <th>Official Name</th>
-                                    <th>Sex</th>
-                                    <th>Birth Date</th>
-                                    <th>Address</th>
-                                    <th>Phone</th>
-                                    <th>Position</th>
-                                    <th>Created By</th>
-                                    <th>Created At</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
+                    <div className="resident-users-topsection">
 
-                            <tbody>
-                                {barangayUsers.map((user) => (
-                                    <tr key={user.id}>
-                                    <td>{user.userid}</td>
-                                    <td>{user.firstName} {user.lastName}</td>
-                                    <td>{user.sex}</td>
-                                    <td>{user.birthDate}</td>
-                                    <td>{user.address}</td>
-                                    <td>{user.phone}</td>
-                                    <td>{user.position}</td>
-                                    <td>{user.createdBy}</td>
-                                    <td>{user.createdAt}</td>
-                                    <td>
-                                        <div className="actions">
-                                            <button className="action-modify" onClick={handleEditBrgyAcc}>Modify</button>
-                                            <button className="action-delete" onClick={() => handleDeleteClick(user.id)}>Delete</button>
-                                        </div>
-                                    </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                        <button type="button" 
+                                className={showBarangayTableContent ? "minus-button" : "plus-button"} 
+                                onClick={handleToggleClickBarangayTable}>
+                        </button>
+                        <h1>Barangay Users Table</h1>
                     </div>
 
+
+                    {showBarangayTableContent && (
+                        <>
+                            <div className="barangay-users-main-section">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>User ID</th>
+                                            <th>Official Name</th>
+                                            <th>Sex</th>
+                                            <th>Birth Date</th>
+                                            <th>Address</th>
+                                            <th>Phone</th>
+                                            <th>Position</th>
+                                            <th>Created By</th>
+                                            <th>Created At</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {barangayUsers.map((user) => (
+                                            <tr key={user.id}>
+                                            <td>{user.userid}</td>
+                                            <td>{user.firstName} {user.lastName}</td>
+                                            <td>{user.sex}</td>
+                                            <td>{user.birthDate}</td>
+                                            <td>{user.address}</td>
+                                            <td>{user.phone}</td>
+                                            <td>{user.position}</td>
+                                            <td>{user.createdBy}</td>
+                                            <td>{user.createdAt}</td>
+                                            <td>
+                                                <div className="actions">
+                                                    <button className="action-modify" onClick={handleEditBrgyAcc}>Modify</button>
+                                                    <button className="action-delete" onClick={() => handleDeleteClick(user.id)}>Delete</button>
+                                                </div>
+                                            </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
                     {showDeletePopup && (
                         <div className="confirmation-popup-overlay">
                             <div className="confirmation-popup">
@@ -375,59 +414,6 @@ const admin = () => {
                             </div>
                         </div>
                     )}
-                </div>
-
-                <div className="create-new-barangay-user">
-                    <form onSubmit={handleSubmit}>
-                        <h1>Create New Barangay User</h1>
-                        <div className="fields-container">
-                            <div className="fields-section">
-                                <label htmlFor="username">User ID: </label>
-                                <input 
-                                    type="text" 
-                                    id="username"
-                                    className="userID" 
-                                    value={users.userId} 
-                                    placeholder="User ID"
-                                    disabled  
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <div className="fields-container">
-                            <div className="fields-section">
-                                <label htmlFor="roles">Role:</label>
-                                <select  value={users.position}  onChange={handleChange} id="roles" name="position" className="role" >
-                                    <option value="" disabled>Select a Role</option>
-                                    <option value="Punong Barangay">Punong Barangay</option>
-                                    <option value="Secretary">Secretary</option>
-                                    <option value="Assistant Secretary">Asst Secretary</option>
-                                    <option value="Admin Staff">Admin Staff</option>
-                                    <option value="LF Staff">LF Staff</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="fields-container">
-                            <div className="fields-section">
-                                <label htmlFor="password">Password: </label>
-                                <input 
-                                    value={users.password} 
-                                    onChange={handleChange} 
-                                    id="password" 
-                                    type="password" 
-                                    name="password" 
-                                    className="password" 
-                                    placeholder="Enter Password"
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <div className="actions-section">
-                            <button onClick={GenerateID} className="generateUserID">Generate User ID</button>
-                            <button className="createNewBarangayUser">Create New Barangay User</button>
-                        </div>
-                        
-                    </form>
                 </div>
 
                 {showPopup && (
