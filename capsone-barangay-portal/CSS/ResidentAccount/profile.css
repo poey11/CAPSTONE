@@ -89,7 +89,7 @@
     .form-group {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 1rem;
     }
 
     .form-label {
@@ -98,6 +98,7 @@
         color: #555;
         text-transform: uppercase;
         letter-spacing: 0.8px;
+        margin-top: 1rem;
     }
 
     .form-input {
@@ -150,7 +151,7 @@
 
    .name {
     display: flex;
-    color: #f49028;
+      color: #333;;
     font-size: 1.5rem;
     font-weight: bold;
     align-self: center;
@@ -169,3 +170,23 @@
         margin-top: 1rem;
     
    }
+
+
+   .transactions-link {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.transactions-text {
+    color: blue;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s ease-in-out;
+}
+
+.transactions-text:hover {
+    color: #6773cd;
+    text-decoration: underline;
+}
+

@@ -97,16 +97,54 @@ export default function SettingsPageResident() {
     
         setLoading(false);
     };
+
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const imageUrl = URL.createObjectURL(file);
+            setSelectedImage(imageUrl);
+        }
+    };
     
     return (
         <main className="main-container">
             <div className="first-section">
                 <div className="account-profile-section">
                     <p className="Details">Profile</p>
+
+                    <div className="icon-container">
+
+                        <img src={selectedImage || "/images/user.png"} alt="User Icon" className="user-icon" />
+                                
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    id="fileUpload"
+                                    style={{ display: "none" }}
+                                    onChange={handleImageChange}
+                                />
+                                <button 
+                                    className="upload-btn" 
+                                    onClick={() => document.getElementById("fileUpload")?.click()}
+                                >
+                                    Update Profile Image
+                                </button>
+                    </div>
+
                     <div className="name-section">
                         <p className="name">{resident.first_name || "N/A"}</p>
                         <p className="name">{resident.last_name || "N/A"}</p>
                     </div>
+
+                    {/* Transactions Link */}
+                    <div className="transactions-link">
+                        <a href="/ResidentAccount/Transactions" className="transactions-text">
+                            View Transactions
+                        </a>
+                    </div>
+
                 </div>
 
                 <div className="account-details-section">
@@ -186,6 +224,44 @@ export default function SettingsPageResident() {
                                 disabled 
                             />
                         </div>
+
+                            {/* MALCOLM HERE */}
+
+
+                       <div className="form-group">
+                            <label htmlFor="current-password" className="form-label">Current Password:</label>
+                            <input 
+                                id="current-password" 
+                                name="current-password"
+                                className="form-input" 
+                                required 
+                                disabled 
+                            />
+                        </div>
+
+
+                        <div className="form-group">
+                            <label htmlFor="new-password" className="form-label">New Password:</label>
+                            <input 
+                                id="new-password" 
+                                name="new-password"
+                                className="form-input" 
+                                required 
+                                disabled 
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="confirm-password" className="form-label">Confirm Password:</label>
+                            <input 
+                                id="confirm-password" 
+                                name="confirm-password"
+                                className="form-input" 
+                                required 
+                                disabled 
+                            />
+                        </div>
+
 
                         
                         <div className="submit-section-resident-account">
