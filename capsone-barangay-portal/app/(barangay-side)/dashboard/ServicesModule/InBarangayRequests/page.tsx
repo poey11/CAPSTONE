@@ -207,8 +207,8 @@ const confirmDelete = () => {
 
     return (
 
-        <main className="main-container">
-         <div className="section-1">
+        <main className="inbarangayreq-main-container">
+         <div className="inbarangayreq-section-1">
           <h1>In Barangay Document Requests</h1>
           <button
             className="add-announcement-btn"
@@ -217,7 +217,7 @@ const confirmDelete = () => {
             Generate Document
           </button>
          </div>
-         <div className="section-2">
+         <div className="inbarangayreq-section-2">
           <input 
               type="text" 
               className="search-bar" 
@@ -258,7 +258,7 @@ const confirmDelete = () => {
           </select>
          </div>
 
-         <div className="main-section">
+         <div className="inbarangayreq-main-section">
           <table>
             <thead>
               <tr>

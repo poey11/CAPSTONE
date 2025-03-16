@@ -177,12 +177,12 @@ const metadata: Metadata = {
 
     return (
 
-        <main className="main-container">
-         <div className="section-1">
+        <main className="onlinereq-main-container">
+         <div className="onlinereq-section-1">
           <h1>Online Document Requests</h1>
           
          </div>
-         <div className="section-2">
+         <div className="onlinereq-section-2">
           <input 
               type="text" 
               className="search-bar" 
@@ -224,7 +224,7 @@ const metadata: Metadata = {
           </select>
          </div>
 
-         <div className="main-section">
+         <div className="onlinereq-main-section">
           <table>
             <thead>
               <tr>

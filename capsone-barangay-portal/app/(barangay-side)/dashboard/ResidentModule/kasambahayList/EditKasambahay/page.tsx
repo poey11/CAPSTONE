@@ -58,6 +58,33 @@ export default function EditKasambahay() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [originalData, setOriginalData] = useState({ ...formData });
+
+  const [showDiscardPopup, setShowDiscardPopup] = useState(false);
+  const [showSavePopup, setShowSavePopup] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+
+  const handleDiscardClick = async () => {
+    setShowDiscardPopup(true);
+  }
+
+  const confirmDiscard = async () => {
+    setShowDiscardPopup(false);
+
+    setFormData(originalData); // Reset to original data
+
+    setPopupMessage("Changes discarded successfully!");
+    setShowPopup(true);
+    
+
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+    }, 3000);
+
+};
+
   useEffect(() => {
     if (!kasambahayId) return;
 
@@ -67,28 +94,31 @@ export default function EditKasambahay() {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          const data = docSnap.data();
-          setFormData({
-            registrationControlNumber: data.registrationControlNumber || "",
-            firstName: data.firstName || "",
-            lastName: data.lastName || "",
-            middleName: data.middleName || "",
-            homeAddress: data.homeAddress || "",
-            dateOfBirth: data.dateOfBirth || "",
-            placeOfBirth: data.placeOfBirth || "",
-            age: data.age || "",
-            sex: data.sex || "",
-            civilStatus: data.civilStatus || "",
-            educationalAttainment: data.educationalAttainment || "",
-            natureOfWork: data.natureOfWork || "",
-            employmentArrangement: data.employmentArrangement || "",
-            salary: data.salary || "",
-            employerName: data.employerName || "",
-            employerAddress: data.employerAddress || "",
-            sssMember: data.sssMember ?? false,
-            philhealthMember: data.philhealthMember ?? false,
-            pagibigMember: data.pagibigMember ?? false,
-          });
+          const data = {
+            registrationControlNumber: docSnap.data().registrationControlNumber || "",
+            firstName: docSnap.data().firstName || "",
+            lastName: docSnap.data().lastName || "",
+            middleName: docSnap.data().middleName || "",
+            homeAddress: docSnap.data().homeAddress || "",
+            dateOfBirth: docSnap.data().dateOfBirth || "",
+            placeOfBirth: docSnap.data().placeOfBirth || "",
+            age: docSnap.data().age || "",
+            sex: docSnap.data().sex || "",
+            civilStatus: docSnap.data().civilStatus || "",
+            educationalAttainment: docSnap.data().educationalAttainment || "",
+            natureOfWork: docSnap.data().natureOfWork || "",
+            employmentArrangement: docSnap.data().employmentArrangement || "",
+            salary: docSnap.data().salary || "",
+            employerName: docSnap.data().employerName || "",
+            employerAddress: docSnap.data().employerAddress || "",
+            sssMember: docSnap.data().sssMember ?? false,
+            philhealthMember: docSnap.data().philhealthMember ?? false,
+            pagibigMember: docSnap.data().pagibigMember ?? false,
+          };
+
+          setFormData(data);
+          setOriginalData(data); // Store original data
+
         } else {
           setError("Kasambahay record not found.");
         }
@@ -114,6 +144,27 @@ export default function EditKasambahay() {
     });
   };
   
+  const handleSaveClick = async () => {
+    setShowSavePopup(true);
+  } 
+
+  const confirmSave = async () => {
+    setShowSavePopup(false);
+
+    setPopupMessage("Changes saved successfully!");
+    setShowPopup(true);
+
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+
+      router.push("/dashboard/ResidentModule/kasambahayList");
+    }, 3000);
+
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+  };
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -147,9 +198,6 @@ export default function EditKasambahay() {
         pagibigMember: formData.pagibigMember,
       });
       
-
-      alert("Kasambahay record updated successfully!");
-      router.push("/dashboard/ResidentModule/KasambahayList");
     } catch (err) {
       console.error("Update failed:", err);
       setError("Failed to update record.");
@@ -163,118 +211,216 @@ export default function EditKasambahay() {
   };
 
   return (
-    <main className="main-container">
-      <div className="main-content">
-        <Link href="/dashboard/ResidentModule/kasambahayList">
-        <button type="button" className="back-button" onClick={handleBack}></button>
-        </Link>
-        <div className="section-1">
-          <p className="NewResident">Edit Kasambahay</p>
-          <div className="actions">
-            <button className="action-view" type="submit" form="editKasambahayForm" disabled={loading}>
+    <main className="add-resident-main-container">
+
+      <div className="addresident-page-title-section-1">
+        <h1>Edit Kasambahay Details</h1>
+      </div>
+
+      <div className="add-resident-main-content">
+        <div className="add-resident-main-section1">
+          <div className="add-resident-main-section1-left">
+            <button onClick={handleBack}>
+              <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+            </button>
+
+            <h1> Edit Kasambahay </h1>
+          </div>
+
+          <div className="action-btn-section">
+            <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
+            <button className="action-view" onClick={handleSaveClick} disabled={loading}>
+              
               {loading ? "Saving..." : "Save"}
             </button>
           </div>
         </div>
-        <form id="editKasambahayForm" onSubmit={handleSubmit} className="section-2">
-          <div className="section-2-left-side">
-            <p>Registration Control Number</p>
-            <input type="text" name="registrationControlNumber" value={formData.registrationControlNumber} onChange={handleChange} disabled className="disabled-input" 
-  />
 
-            <p>First Name</p>
-            <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required />
+        <hr/>
+      
+        <form id="editKasambahayForm" onSubmit={handleSubmit} className="add-resident-section-2">
+          <div className="add-resident-section-2-left-side">
 
-            <p>Last Name</p>
-            <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required />
+            <div className="fields-container">
+              <div className="fields-section">
+                <p>Registration Control Number</p>
+                <input type="text" name="registrationControlNumber" value={formData.registrationControlNumber} onChange={handleChange} disabled className="add-resident-input-field-disabled" />
+              </div>
 
-            <p>Middle Name</p>
-            <input type="text" name="middleName" value={formData.middleName} onChange={handleChange} />
+              <div className="fields-section">
+                <p>First Name</p>
+                <input type="text" name="firstName" className="add-resident-input-field" value={formData.firstName} onChange={handleChange} required />
+              </div>
 
-            <p>Home Address</p>
-            <input type="text" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+              <div className="fields-section">
+                <p>Last Name</p>
+                <input type="text" name="lastName" className="add-resident-input-field" value={formData.lastName} onChange={handleChange} required />
+              </div>
 
-            <p>Place of Birth</p>
-            <input type="text" className="search-bar" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} />
+              <div className="fields-section">
+                <p>Middle Name</p>
+                <input type="text" name="middleName" className="add-resident-input-field" value={formData.middleName} onChange={handleChange} />
+              </div>
 
-            <p>Date of Birth</p>
-            <input type="date" className="search-bar" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
+              <div className="fields-section">
+                <p>Home Address</p>
+                <input type="text" name="homeAddress" className="add-resident-input-field" value={formData.homeAddress} onChange={handleChange} required />
+              </div>
+           
+              <div className="fields-section">
+                <p>Place of Birth</p>
+                <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} required/>
+              </div>
 
-            <p>Sex</p>
-            <select name="sex" value={formData.sex} onChange={handleChange} required>
-              <option value="" disabled>Choose Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
+              <div className="fields-section">
+                <p>Date of Birth</p>
+                <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
+              </div>
+            
+              <div className="fields-section">
+                <p>Sex</p>
+                <select name="sex" className="add-resident-input-field" value={formData.sex} onChange={handleChange} required>
+                  <option value="" disabled>Choose Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
 
-            <p>Civil Status</p>
-            <select name="civilStatus" value={formData.civilStatus} onChange={handleChange} required>
-              <option value="" disabled>Choose Civil Status</option>
-              <option value="Single">Single</option>
-              <option value="Married">Married</option>
-              <option value="Widowed">Widowed</option>
-              <option value="Divorced">Divorced</option>
-              <option value="Separated">Separated</option>
-            </select>
+              <div className="fields-section">
+                <p>Civil Status</p>
+                <select name="civilStatus" className="add-resident-input-field" value={formData.civilStatus} onChange={handleChange} required>
+                  <option value="" disabled>Choose Civil Status</option>
+                  <option value="Single">Single</option>
+                  <option value="Married">Married</option>
+                  <option value="Widowed">Widowed</option>
+                  <option value="Divorced">Divorced</option>
+                  <option value="Separated">Separated</option>
+                </select>
+              </div>
 
-            <p>Educational Attainment</p>
-            <select name="educationalAttainment" className="featuredStatus" value={formData.educationalAttainment} onChange={handleChange} required>
-              <option value="" disabled>Choose Educational Attainment</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-            </select>
+              <div className="fields-section">
+                <p>Educational Attainment</p>
+                <select name="educationalAttainment" className="add-resident-input-field" value={formData.educationalAttainment} onChange={handleChange} required>
+                  <option value="" disabled>Choose Educational Attainment</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                </select>
+              </div>
 
-            <p>Nature of Work</p>
-            <select name="natureOfWork" className="featuredStatus" value={formData.natureOfWork} onChange={handleChange} required>
-              <option value="" disabled>Choose Nature of Work</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-            </select>
+              <div className="fields-section">
+                <p>Nature of Work</p>
+                <select name="natureOfWork" className="add-resident-input-field" value={formData.natureOfWork} onChange={handleChange} required>
+                  <option value="" disabled>Choose Nature of Work</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                </select>
+              </div>
 
-            <p>Employment Arrangement</p>
-            <select name="employmentArrangement" className="featuredStatus" value={formData.employmentArrangement} onChange={handleChange} required>
-              <option value="" disabled>Choose Employment Arrangement</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-            </select>
+              <div className="fields-section">
+                <p>Employment Arrangement</p>
+                <select name="employmentArrangement" className="add-resident-input-field" value={formData.employmentArrangement} onChange={handleChange} required>
+                  <option value="" disabled>Choose Employment Arrangement</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                </select>
+              </div>
+            
+              <div className="fields-section">
+                <p>Range of Salary</p>
+                <select name="salary" className="add-resident-input-field" value={formData.salary} onChange={handleChange} required>
+                <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </div>
 
-            <p>Range of Salary</p>
-            <select name="salary" className="featuredStatus" value={formData.salary} onChange={handleChange} required>
-            <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-            </select>
+              <div className="fields-section">
+                <p>Employer Name</p>
+                <input type="text" className="add-resident-input-field" placeholder="Enter Employer" name="employerName" value={formData.employerName} onChange={handleChange} required />
+              </div>
 
-            <p>SSS Member</p>
-            <input type="checkbox" name="sssMember" checked={formData.sssMember} onChange={handleChange} />
+              <div className="fields-section">
+                <p>Employer Address</p>
+                <input type="text" className="add-resident-input-field" placeholder="Enter Employer Address" name="employerAddress" value={formData.employerAddress} onChange={handleChange} required />
+              </div>
+            </div>
+          </div>
 
-            <p>PhilHealth Member</p>
-            <input type="checkbox" name="philhealthMember" checked={formData.philhealthMember} onChange={handleChange} />
+          <div className="add-resident-section-2-right-side">
+            <div className="checkboxes-container">
+              <p>SSS Member</p>
+              <div className="checkbox-container">
+                <label className="checkbox-label">
+                  <input type="checkbox" name="sssMember" checked={formData.sssMember} onChange={handleChange} />
+                  Is this resident an SSS member?
+                </label>
+              </div>
 
-            <p>Pag-IBIG Member</p>
-            <input type="checkbox" name="pagibigMember" checked={formData.pagibigMember} onChange={handleChange} />
+              <p>PhilHealth Member</p>
+              <div className="checkbox-container">
+                <label className="checkbox-label">
+                  <input type="checkbox" name="philhealthMember" checked={formData.philhealthMember} onChange={handleChange} />
+                  Is this resident a PhilHealth member?
+                </label>
+              </div>
 
-            <p>Employer Name</p>
-            <input type="text" className="search-bar" placeholder="Enter Employer" name="employerName" value={formData.employerName} onChange={handleChange} required />
+              <p>Pag-IBIG Member</p>
+              <div className="checkbox-container">
+                <label className="checkbox-label">
+                  <input type="checkbox" name="pagibigMember" checked={formData.pagibigMember} onChange={handleChange} />
+                  Is this resident a Pag-IBIG member?
+                </label>
+              </div>
 
-            <p>Employer Address</p>
-            <input type="text" className="search-bar" placeholder="Enter Employer Address" name="employerAddress" value={formData.employerAddress} onChange={handleChange} required />
-
+            </div>
           </div>
         </form>
         {error && <p className="error">{error}</p>}
       </div>
+
+      {showDiscardPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to discard the changes?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+                    )}
+
+      {showSavePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to save the changes?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowSavePopup(false)} className="no-button">No</button> 
+                                    <button onClick={confirmSave} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+            )}
+                    
+
+          {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
     </main>
   );
 }

@@ -64,29 +64,62 @@ export default function ViewResident() {
   };
 
   return (
-    <main className="main-container">
-      <div className="main-content">
-        <div className="section-1">
-          <Link href="/dashboard/ResidentModule">
-            <button type="button" className="back-button" onClick={handleBack}></button>;
-          </Link>
+    <main className="viewresident-main-container">
+
+        <div className="viewresident-page-title-section-1">
+          <h1>View Resident Details</h1>
+        </div>
+
+      <div className="viewresident-main-content">
+        <div className="viewresident-section-1">
+          <button onClick={handleBack}>
+                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+              </button>
           <p>Resident Details</p>
         </div>
 
         {residentFields.map((field) => (
-          <div className="details-section" key={field.key}>
-            <div className="title">
+          <div className="viewresident-details-section" key={field.key}>
+            <div className="viewresident-title">
               <p>{field.label}</p>
             </div>
-            <div className={`description ${field.key === "residentNumber" ? "disabled-field" : ""}`}>
+            <div className={`viewresident-description ${field.key === "residentNumber" ? "disabled-field" : ""}`}>
               <p>
                 {field.isBoolean !== undefined
                   ? residentData[field.key] ? "Yes" : "No"
                   : residentData[field.key] ?? "N/A"}
               </p>
-            </div>
+            </div>    
           </div>
         ))}
+
+        {/* Display Valid ID */}
+        <div className="viewresident-details-section">
+          <div className="viewresident-title">
+            <p>Valid ID</p>
+          </div>
+          <div className="viewresident-description">
+            {residentData.fileURL ? (
+              <div className="resident-id-container">
+                <img
+                  src={residentData.fileURL}
+                  alt="Resident's Valid ID"
+                  className="resident-id-image"
+                />
+                <a
+                  href={residentData.fileURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="view-image-link"
+                >
+                  View Image
+                </a>
+              </div>
+            ) : (
+              <p>No ID uploaded</p>
+            )}
+          </div>
+        </div>
       </div>
     </main>
   );

@@ -113,8 +113,8 @@ const getPageNumbers = () => {
 
     return (
 
-        <main className="main-container">
-         <div className="section-1">
+        <main className="appointments-main-container">
+         <div className="appointments-section-1">
           <h1>Scheduled Appointments</h1>
           <button
             className="add-announcement-btn"
@@ -124,7 +124,7 @@ const getPageNumbers = () => {
           </button>
           
          </div>
-         <div className="section-2">
+         <div className="appointments-section-2">
           <input 
               type="text" 
               className="search-bar" 
@@ -164,7 +164,7 @@ const getPageNumbers = () => {
           </select>
          </div>
 
-         <div className="main-section">
+         <div className="appointments-main-section">
           <table>
             <thead>
               <tr>
