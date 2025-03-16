@@ -31,9 +31,8 @@ export default async function AccountSetupPage({searchParams}: AccountSetupPageP
     return null;
   }
   return (
-    <div>
-      <h1>Account Setup</h1>
+  
       <Form userID={userId} />
-    </div>
+  
   );
 }
