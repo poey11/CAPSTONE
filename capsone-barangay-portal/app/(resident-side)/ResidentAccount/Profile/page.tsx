@@ -1,27 +1,104 @@
 "use client";
-
-import { useRouter } from "next/navigation";
-import type { Metadata } from "next";
-import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "@/app/db/firebase"; 
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "@/CSS/ResidentAccount/profile.css";
-
-const metadata: Metadata = { 
-    title: "Settings Page for Resident Side",
-    description: "Settings Page for Barangay Side",
-};
 
 export default function SettingsPageResident() {
     const router = useRouter();
-    const { data: session } = useSession();
+    const searchParams = useSearchParams();
+    const residentId = searchParams.get("id");
 
-    // name lang yung nareretrieve and display. not sure pano yung sa ibang fields
-    const currentUser = {
-        name: session?.user?.fullName || "User",
-    };
+    const [resident, setResident] = useState({
+        first_name: "",
+        last_name: "",
+        phone: "",
+        email: "",
+        sex: "",
+        status: "",
+    });
+
+    const [showPopup, setShowPopup] = useState(false);
+    const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+
+    const [preview, setPreview] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [file, setFile] = useState<File | null>(null); // State for file upload
+  
+    
+    useEffect(() => {
+        if (residentId) {
+            const fetchResidentData = async () => {
+                const docRef = doc(db, "ResidentUsers", residentId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    setResident({
+                        first_name: docSnap.data().first_name || "",
+                        last_name: docSnap.data().last_name || "",
+                        phone: docSnap.data().phone || "",
+                        email: docSnap.data().email || "",
+                        sex: docSnap.data().sex || "",
+                        status: docSnap.data().status || "",
+                    });
+
+                    setPreview(docSnap.data().fileURL || null);
+                }
+            };
+            fetchResidentData();
+        }
+    }, [residentId]);
 
     const handleBack = () => {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setResident((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
+    
+        try {
+            const docRef = doc(db, "ResidentUsers", residentId!);
+            const docSnap = await getDoc(docRef);
+    
+            if (docSnap.exists()) {
+                const currentData = docSnap.data();
+    
+                // Check if there are any changes
+                const isDataChanged = Object.keys(resident).some(
+                    (key) => resident[key as keyof typeof resident] !== currentData[key]
+                );
+    
+                if (!isDataChanged) {
+                    alert("No changes detected.");
+                    setLoading(false);
+                    return;
+                }
+            }
+    
+            // Proceed with update if data has changed
+            await updateDoc(docRef, { ...resident });
+    
+            alert("Profile updated successfully!");
+            router.push("/ResidentAccount/Profile");
+        } catch (err) {
+            setError("Failed to update resident");
+            console.error(err);
+        }
+    
+        setLoading(false);
     };
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -33,141 +110,178 @@ export default function SettingsPageResident() {
             setSelectedImage(imageUrl);
         }
     };
-
+    
     return (
-        <main className="main-container">
+        <main className="main-container-resident-profile">
+            <div className="first-section-resident-profile">
+                <div className="account-profile-section">
+                    <p className="Details">Profile</p>
 
-         <div className="first-section">
+                    <div className="icon-container-profile-section">
 
-            <div className="account-profile-section">
-
-            <p className="Details"> Profile </p>
-
-                    <div className="icon-container">
-
-                    <img src={selectedImage || "/images/user.png"} alt="User Icon" className="user-icon" />
-                            
-                            <input
-                                type="file"
-                                accept="image/*"
-                                id="fileUpload"
-                                style={{ display: "none" }}
-                                onChange={handleImageChange}
-                            />
-                            <button 
-                                className="upload-btn" 
-                                onClick={() => document.getElementById("fileUpload")?.click()}
-                            >
-                                Update Profile Image
-                            </button>
+                        <img src={selectedImage || "/images/user.png"} alt="User Icon" className="user-icon-profile-section" />
+                                
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    id="fileUpload"
+                                    style={{ display: "none" }}
+                                    onChange={handleImageChange}
+                                />
+                                <button 
+                                    className="upload-btn-profile-section" 
+                                    onClick={() => document.getElementById("fileUpload")?.click()}
+                                >
+                                    Update Profile Image
+                                </button>
                     </div>
 
                     <div className="name-section">
-                        <p className="name"> Malcolm </p>
-                        <p className="name"> Payao </p>
+                        <p className="name">{resident.first_name || "N/A"}</p>
+                        <p className="name">{resident.last_name || "N/A"}</p>
                     </div>
 
+                    {/* Transactions Link */}
+                    <div className="transactions-link">
+                        <a href="/ResidentAccount/Transactions" className="transactions-text">
+                            View Transactions
+                        </a>
+                    </div>
 
-            </div>
+                </div>
 
-            <div className="account-details-section">
+                <div className="account-details-section">
+                    <p className="Details">Account Details</p>
 
-                <p className="Details"> Account Details</p>
+                    <div className="edit-section-profile">
+                      <form onSubmit={handleSubmit}>
+                        <div className="form-group-profile-section">
+                            <label htmlFor="first_name" className="form-label-profile-section">First Name: </label>
+                            <input 
+                                id="first_name" 
+                                name="first_name"
+                                value={resident.first_name ||  "N/A"} 
+                                onChange={handleChange} 
+                                className="form-input-profile-section" 
+                                required 
+                            />
+                        </div>
 
-                  <div className= "edit-section">
-                    
-                    <div className="form-group">
-                        <label htmlFor="sex" className="form-label">Sex:</label>
-                        <select  id="sex" name="sex"  className="form-input" required>
-                        <option value="" disabled>Select a Sex</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        </select>
-                     </div>
+                        <div className="form-group-profile-section">
+                            <label htmlFor="last_name" className="form-label-profile-section">Last Name: </label>
+                            <input 
+                                id="last_name" 
+                                name="last_name"
+                                value={resident.last_name ||  "N/A"} 
+                                onChange={handleChange} 
+                                className="form-input-profile-section" 
+                                required 
+                            />
+                        </div>
 
-                     <div className="form-group">
-                        <label htmlFor="first_name" className="form-label">First Name: </label>
-                        <input  id="first_name" 
-                        type="text" name="first_name" 
-                        className="form-input"
-                        placeholder= "Enter Name"
-                        required />
+                        <div className="form-group-profile-section">
+                            <label htmlFor="sex" className="form-label-profile-section">Sex:</label>
+                            <input 
+                                id="sex" 
+                                name="sex"
+                                value={resident.sex ||  "N/A"}  
+                                onChange={handleChange} 
+                                className="form-input-profile-section" 
+                                required 
+                            />
+                        </div>
+
+                        <div className="form-group-profile-section">
+                            <label htmlFor="email" className="form-label-profile-section">Email:</label>
+                            <input 
+                                id="email" 
+                                name="email"
+                                value={resident.email ||  "N/A"} 
+                                onChange={handleChange} 
+                                className="form-input-profile-section" 
+                                required 
+                            />
+                        </div>
+
+                        <div className="form-group-profile-section">
+                            <label htmlFor="phone" className="form-label-profile-section">Phone:</label>
+                            <input 
+                                id="phone" 
+                                name="phone"
+                                value={resident.phone ||  "N/A"} 
+                                onChange={handleChange} 
+                                className="form-input-profile-section" 
+                                required 
+                            />
+                        </div>
+
+                        <div className="form-group-profile-section">
+                            <label htmlFor="status" className="form-label-profile-section">Status:</label>
+                            <input 
+                                id="status" 
+                                name="status"
+                                value={resident.status ||  "N/A"}  
+                                onChange={handleChange} 
+                                className="form-input-profile-section" 
+                                required 
+                                disabled 
+                            />
+                        </div>
+
+                            {/* MALCOLM HERE */}
+
+
+                       <div className="form-group-profile-section">
+                            <label htmlFor="current-password" className="form-label-profile-section">Current Password:</label>
+                            <input 
+                                id="current-password" 
+                                name="current-password"
+                                className="form-input-profile-section" 
+                                required 
+                                disabled 
+                            />
+                        </div>
+
+
+                        <div className="form-group-profile-section">
+                            <label htmlFor="new-password" className="form-label-profile-section">New Password:</label>
+                            <input 
+                                id="new-password" 
+                                name="new-password"
+                                className="form-input-profile-section" 
+                                required 
+                                disabled 
+                            />
+                        </div>
+
+                        <div className="form-group-profile-section">
+                            <label htmlFor="confirm-password" className="form-label-profile-section">Confirm Password:</label>
+                            <input 
+                                id="confirm-password" 
+                                name="confirm-password"
+                                className="form-input-profile-section" 
+                                required 
+                                disabled 
+                            />
+                        </div>
+
+
+                        
+                        <div className="submit-section-resident-account">
+
+                            <button type="submit" className="submit-btn-profile-section" disabled={loading}>
+                                {loading ? "Updating..." : "Update Profile"}
+                            </button>
 
                         </div>
 
-                        <div className="form-group">
-                    <label htmlFor="last_name" className="form-label" >Last Name: </label>  
-                    
+                       
 
-                        <input  id="last_name" 
-                        type="text" name="last_name" 
-                        className="form-input" 
-                        placeholder="Enter Last Name"
-                        required/>
-
+                        </form>
                     </div>
+                </div>
 
-                    <div className="form-group">
-                        <label htmlFor="email" className="form-label" >Email: </label>
-                        <input  id="email" 
-                        type="email" name="email" 
-                        className="form-input" 
-                        placeholder="Enter Email"
-                        required />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="phone" className="form-label" >Phone: </label>
-                        <input   id="phone" 
-                        type="tel" name="phone"
-                        className="form-input" 
-                        placeholder="Enter Phone Number"
-                        required />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="address" className="form-label">Address: </label>
-                        <input  id="address" 
-                        type="text" name="address" 
-                        className="form-input" 
-                        placeholder="Enter Address"
-                        required />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="password" className="form-label">Password: </label>
-                        <input  id="password"
-                        type="password" name="password" 
-                        className="form-input"
-                        placeholder="Enter Password"
-                        required/>
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="confirm_password" className="form-label">Confirm Password: </label>
-                        <input id="confirm_password" type="password"
-                        name="confirm_password"
-                        className="form-input"
-                        placeholder="Confirm Password"
-                        />
-                    </div>
-
-
-                    <button 
-                                className="upload-btn" 
-                            >
-                                Update Profile
-                    </button>
-
-
-                  </div>
-         
             </div>
-
-        </div>
-
-
-
         </main>
     );
 }

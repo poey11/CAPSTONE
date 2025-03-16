@@ -1,4 +1,4 @@
-    .main-container {
+    .main-container-resident-profile {
         background-color: #f7e5d5; 
         display: flex; 
         flex-direction: column;
@@ -6,7 +6,7 @@
         width: 100%;
     }
 
-    .first-section {
+    .first-section-resident-profile {
      display: flex;
      height: auto; 
      width: 100%;
@@ -29,13 +29,13 @@
        
     }
 
-    .icon-container {
+    .icon-container-profile-section {
         display: flex;
         flex-direction: column;
         margin-top: 2rem;
     }
 
-    .user-icon {
+    .user-icon-profile-section {
         width: 180px;
         height: 180px;
         border-radius: 50%;
@@ -44,7 +44,14 @@
         margin-bottom: 1rem;
     }
 
-    .upload-btn {
+    .submit-section-resident-account {
+        padding: 2rem;
+      display: flex;
+       justify-content: center;
+       align-items: center;
+    }
+
+    .upload-btn-profile-section {
         background-color: #f49028;
         color: white;
         border: none;
@@ -53,9 +60,11 @@
         cursor: pointer;
         font-size: 14px;
         transition: background 0.3s ease;
+        width: 100%;
+
     }
 
-    .upload-btn:hover {
+    .upload-btn-profile-section:hover {
         background-color: #e07c21;
     }
 
@@ -70,28 +79,29 @@
         gap: 2rem;
     }
 
-    .edit-section {
+    .edit-section-profile {
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
         width: 100%;
     }
 
-    .form-group {
+    .form-group-profile-section {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 1rem;
     }
 
-    .form-label {
+    .form-label-profile-section {
         font-size: 14px;
         font-weight: 600;
         color: #555;
         text-transform: uppercase;
         letter-spacing: 0.8px;
+        margin-top: 1rem;
     }
 
-    .form-input {
+    .form-input-profile-section {
         width: 100%;
         padding: 12px;
         font-size: 16px;
@@ -103,12 +113,12 @@
         color: #333;
     }
 
-    .form-input:focus {
+    .form-input-profile-section:focus {
         border-color: #f49028;
         box-shadow: 0 0 10px rgba(244, 144, 40, 0.3);
     }
 
-    .submit-btn {
+    .submit-btn-profile-section {
         background-color: #f49028;
         color: white;
         padding: 12px 0;
@@ -118,9 +128,10 @@
         text-align: center;
         cursor: pointer;
         transition: background 0.3s ease;
+        width: 100%;
     }
 
-    .submit-btn:hover {
+    .submit-btn-profile-section:hover {
         background-color: #e07c21;
     }
 
@@ -141,7 +152,7 @@
 
    .name {
     display: flex;
-    color: #f49028;
+      color: #333;;
     font-size: 1.5rem;
     font-weight: bold;
     align-self: center;
@@ -160,3 +171,23 @@
         margin-top: 1rem;
     
    }
+
+
+   .transactions-link {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.transactions-text {
+    color: blue;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s ease-in-out;
+}
+
+.transactions-text:hover {
+    color: #6773cd;
+    text-decoration: underline;
+}
+
