@@ -1,5 +1,5 @@
 
-  .main-container {
+  .main-container-register-form {
     background-color: #f7e5d5;
     display: flex;
     flex-direction: column;  
@@ -7,7 +7,7 @@
     width: 100%;
  }
 
-  .register-section {
+  .register-section-register-form {
   display: flex;
   flex-direction: column;
   background-color: rgba(255, 255, 255, 0.7);
@@ -20,7 +20,7 @@
   
   }
 
-  .register-section h1 {
+  .register-section-register-form h1 {
   color: #f49028;
   font-size: 1.5rem;
   margin-bottom: 1rem;
@@ -35,19 +35,19 @@
   
   }
 
-  .form-group {
+  .form-group-register-form {
   display: flex;
   flex-direction: column;
   }
 
-  .form-label {
+  .form-label-register-form {
   font-size: 16px;
   font-weight: bold;
   color: gray;
   margin-bottom: 0.5rem;
   }
 
-  .form-input {
+  .form-input-register-form {
   width: 100%;
   padding: 10px;
   font-size: 16px;
@@ -56,6 +56,7 @@
   color: #555;
   accent-color: #f49028; 
   }
+
 
   .form-checkbox-section {
     display: flex; 
