@@ -251,9 +251,10 @@ export default function EditLuponIncident() {
       router.back();
     };
     
-    const handleGenerateDialouge = () => {
-        router.push(`/dashboard/IncidentModule/EditIncident/DialogueLetter?id=${docId}`);
-      };
+    const handleGenerateLetterAndInvitation = (e:any) => {
+      const action = e.currentTarget.name;
+      router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}?action=${action}`);
+    };
 
       const handleGenerateSummonLetter = () => {
         router.push(`/dashboard/IncidentModule/EditIncident/SummonLetter?id=${docId}`);
@@ -309,8 +310,8 @@ export default function EditLuponIncident() {
         <main className="main-container">
         
           <div className="letters-content">
-               <button className="letter-announcement-btn" onClick={handleGenerateDialouge}>Generate Dialouge Letter</button>
-               <button className="letter-announcement-btn" onClick={handleGenerateSummonLetter}>Generate Summon Letter</button>
+               <button className="letter-announcement-btn" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialouge Letter</button>
+               <button className="letter-announcement-btn" name="summon" onClick={handleGenerateLetterAndInvitation}>Generate Summon Letter</button>
                <select
                            id="status"
                            className={`status-dropdown ${status}`}  

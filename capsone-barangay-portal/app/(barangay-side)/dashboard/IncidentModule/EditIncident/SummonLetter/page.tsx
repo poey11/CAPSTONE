@@ -1,19 +1,9 @@
 "use client"
 import "@/CSS/IncidentModule/Letters.css";
-import type { Metadata } from "next";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 
-
-const metadata: Metadata = {
-  title: "Announcement Page for Residents",
-  description: "Stay updated with the latest announcements",
-};
-
 export default function GenerateSummonLetter() {
-
-   
 
     const router = useRouter();
 
