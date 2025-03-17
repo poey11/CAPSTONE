@@ -21,12 +21,12 @@ const homePage:React.FC = () => {
         location: "Sitio Ruby",
         },
         {
-        image: "/Images/feeding2.jpg",
+        image: "/Images/Sapamanai Covered Court.jpg",
         facility: "Sapamanai Covered Court",
         location: "Rose Street",
         },
         {
-        image: "/Images/feeding2.jpg",
+        image: "/Images/Fairview Elementary School.jpeg",
         facility: "Fairview Elementary School",
         location: "Tulip Lane",
         },
@@ -54,36 +54,36 @@ const homePage:React.FC = () => {
 	return (
 		
       
-        <main className="main-container">
+        <main className="main-container-home">
      
-        <div className="hompage-container">
+        <div className="homepage-container-home">
 
       
 
-         <div className="first-container">
+         <div className="first-container-home">
 
 
         
-            <div className="first-section">
-                  <p className="first-paragraph"> Discover Our Community</p>
-                  <p className="second-paragraph"> Barangay Fairview</p>
-                  <p className="third-paragraph"> The thriving heart of Barangay Fairview—where opportunities and progress come together. 
+            <div className="first-section-home">
+                  <p className="first-paragraph-home"> Discover Our Community</p>
+                  <p className="second-paragraph-home"> Barangay Fairview</p>
+                  <p className="third-paragraph-home"> The thriving heart of Barangay Fairview—where opportunities and progress come together. 
                     Let’s move forward as one community!</p>
                   
                     <Link href="/aboutus"> 
-                        <button type="button" className="learn-more-button">
+                        <button type="button" className="learn-more-button-home">
                           Learn More
                         </button>
                     </Link> 
                  
             </div>
 
-            <div className="second-section">
+            <div className="second-section-home">
 
             <img 
               src="/Images/CaptainImage.jpg" 
               alt="Barangay Captain" 
-              className="captain-image" 
+              className="captain-image-home" 
             />
 
             </div>
@@ -93,26 +93,26 @@ const homePage:React.FC = () => {
            </div>
 
 
-              <div className="second-container">
+              <div className="second-container-home">
 
-                  <div className="card">
-                        <p className="quantity"> 81k</p>
-                        <p className="name">Population </p>
+                  <div className="card-home">
+                        <p className="quantity-home"> 81k</p>
+                        <p className="name-home">Population </p>
                   </div>
 
-                  <div className="card">
-                        <p className="quantity"> 22k</p>
-                        <p className="name">Households </p>
+                  <div className="card-home">
+                        <p className="quantity-home"> 22k</p>
+                        <p className="name-home">Households </p>
                   </div>
 
-                  <div className="card">
-                        <p className="quantity"> 312</p>
-                        <p className="name">Hectares</p>
+                  <div className="card-home">
+                        <p className="quantity-home"> 312</p>
+                        <p className="name-home">Hectares</p>
                   </div>
 
-                  <div className="card">
-                        <p className="quantity"> 81k</p>
-                        <p className="name">Population </p>
+                  <div className="card-home">
+                        <p className="quantity-home"> 81k</p>
+                        <p className="name-home">Population </p>
                   </div>
 
 
@@ -124,35 +124,35 @@ const homePage:React.FC = () => {
           <hr/>
 
 
-          <div className="third-container">
+          <div className="third-container-home">
 
-              <div className="third-container-column1">
+              <div className="third-container-column1-home">
                  
-                    <p className="barangaycaptain"> Barangay Captain </p>
+                    <p className="barangaycaptain-home"> Barangay Captain </p>
               </div>
               
-              <div className="third-container-column2">
+              <div className="third-container-column2-home">
 
-                  <div className="column2-section1">
+                  <div className="column2-section1-home">
                        
                     <img 
                       src="/Images/CaptainImage.jpg" 
                       alt="Barangay Captain" 
-                      className="captain-image2" 
+                      className="captain-image2-home" 
                     />
 
                   </div>
 
-                  <div className="column2-section2">
+                  <div className="column2-section2-home">
 
-                        <p className="section2-title"> JONEL L. QUEBAL</p>
+                        <p className="section2-title-home"> JONEL L. QUEBAL</p>
 
-                        <p className="section2-quote">
+                        <p className="section2-quote-home">
 
                         “Great leaders inspire unity, progress, and hope within their community” 
                         </p>
 
-                        <p className="section2-description">
+                        <p className="section2-description-home">
                          Barangay Captain Jonel Quebal, a dedicated public servant and a true 
                          advocate for the well-being of Barangay Fairview.
                          A proud product of our barangay, Captain Jonel Quebal has been serving 
@@ -172,7 +172,7 @@ const homePage:React.FC = () => {
 
           <hr/>
 
-          <div className="fourth-container">
+          <div className="fourth-container-home">
           <div className="fourth-container-column1">
             <p className="BarangayFacilities">Barangay Facilities</p>
           </div>

@@ -87,7 +87,7 @@ const rLoginForm:React.FC = () => {
 
     return (   
 
-        <div className="login-container">
+        <div className="login-container-resident">
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
@@ -112,66 +112,49 @@ const rLoginForm:React.FC = () => {
                     </div>
                 </div>
             )}
-            <div className="login-contents">
-                <div className="login-card">
+            <div className="login-contents-resident">
+                <div className="login-card-resident">
                     <form onSubmit={handleLogin}>
-                        <div className="section1">
-                            <div className="form-group">
-                                <label htmlFor="Email" className="form-label">Email</label>
+                        <div className="section1-resident">
+                            <div className="form-group-resident">
+                                <label htmlFor="Email" className="form-label-resident">Email</label>
                                 <input 
                                     onChange={handleChange}
                                     value={resident.email}
                                     type="text"  
                                     id="email"  
                                     name="email"  
-                                    className="form-input"  
+                                    className="form-input-resident"  
                                     required  
                                 />
                             </div>
 
-                            <div className="form-group">
-                                <label htmlFor="password" className="form-label">Password</label>
+                            <div className="form-group-resident">
+                                <label htmlFor="password" className="form-label-resident">Password</label>
                                 <input 
                                     onChange={handleChange}
                                     value={resident.password}
                                     type="password"  
                                     id="password"  
                                     name="password"  
-                                    className="form-input" 
+                                    className="form-input-resident" 
                                     required  
                                 />
                             </div>
                         </div>
 
-                        <div className="section2">
-                            <button className="section2options">Forgot Password</button>
-                            <button className="section2options" onClick={handleRegister}>Create an Account</button>
+                        <div className="section2-resident">
+                            <button className="section2options-resident">Forgot Password</button>
+                            <button className="section2options-resident" onClick={handleRegister}>Create an Account</button>
                         </div>
 
-                        <div className="section3">
-                            <button type="submit" className="submit-button">Login</button>
+                        <div className="section3-resident">
+                            <button type="submit" className="submit-button-resident">Login</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-
-
-
-    // <form  onSubmit={handleLogin} className="flex flex-col  justify-center">
-    //     <label htmlFor="email">Email: </label>
-    //     <input value={resident.email} onChange={handleChange} id="email" type="email" name="email" className="border-2 border-black" required />
-        
-    //     <label htmlFor="password">Password: </label>
-    //     <input value={resident.password} onChange={handleChange} id="password" type="password" name="password" className="border-2 border-black" required />
-        
-    //     <label htmlFor="remember">Remember me: </label>
-    //     <input  checked={resident.remember} onChange={handleChange} id="remember" type="checkbox" name="remember" />
-
-    //     <Link className="text-blue-800" href="/forgot-password">Forgot Password?</Link>
-        
-    //     <button type="submit" className="bg-blue-500 text-white">Login</button>
-    // </form>
 
     );
 }
