@@ -17,6 +17,7 @@ interface User{
 export default function TopMenu() {
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement | null>(null);
+    const bUser = useSession().data?.user;
     const { data: session } = useSession();
     const currentUser: User = {
         name: session?.user?.fullName || "User",
@@ -55,7 +56,7 @@ export default function TopMenu() {
     const router = useRouter();
   
     const handleSettings = () => {
-        router.push(`/dashboard/settingsPage?id=${user?.uid}`);
+        router.push(`/dashboard/settingsPage?id=${bUser?.id}`);
     };
     
 
