@@ -306,7 +306,7 @@ export default function EditLuponIncident() {
 
   return (
     <>
-      {loading ? (       <p>Loading...</p> ) : (
+      {loading ? (       <p></p> ) : (
         <main className="main-container">
         
           <div className="letters-content">

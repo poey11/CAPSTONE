@@ -4,12 +4,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {  useEffect,useState } from "react";
 import { getSpecificDocument } from "@/app/helpers/firestorehelper";
 import { doc, updateDoc } from "firebase/firestore";
-
+import { useSession } from "next-auth/react";
 
 
 
 export default function GenerateDialougeLetter() {
-
+    const user = useSession().data?.user;
     const searchParam = useSearchParams();
     const docId = searchParam.get("id")?.split("?")[0];
     const actionId = searchParam.get("id")?.split("?")[1].split("=")[1];
@@ -206,9 +206,10 @@ export default function GenerateDialougeLetter() {
                         "Text25": day,
                         "Text28": month,
                         "Text29": year,
-                        // "Text27": otherInfo.DateOfMeeting, LT
+                        "Text27": user?.fullName,
                         "Text19": otherInfo.LuponStaff,
-                    }
+                    },
+                    centerField: ["Text27"]
                 })
             });
             if (!response.ok) throw new Error("Failed to generate PDF");
@@ -224,7 +225,44 @@ export default function GenerateDialougeLetter() {
         }
     }
     const printSummon = async () => {
-        
+       try{ 
+        const response = await fetch("/api/fillPDF", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                location: "/IncidentReports/Templates",
+                pdfTemplate: "summonTemplate.pdf",
+                data: {
+                    "Text1":otherInfo.complainant.fname,
+                    "Text2":otherInfo.complainant.address,
+                    "Text3":otherInfo.respondent.fname,
+                    "Text4":otherInfo.respondent.address,
+                    "Text5":"First",//make it dynamic
+                    "Text6": otherInfo.DateOfMeeting,//Month Day, Year
+                    "Text7":otherInfo.DateOfMeeting,//Day
+                    "Text8":otherInfo.DateOfMeeting,//MonthYear
+                    "Text9":otherInfo.DateOfMeeting,//Time
+                    "Text10":"Morning",//Collective
+                    "Text11":otherInfo.DateOfMeeting,//Day
+                    "Text12":otherInfo.DateOfMeeting,//MonthYear
+                    "Text14":user?.fullName,    
+                }
+            })
+        });
+        if (!response.ok) throw new Error("Failed to generate PDF");
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "SummonLetter.pdf";
+        a.click();
+        window.URL.revokeObjectURL(url);
+       }
+       catch(e:any){
+        console.log()
+       } 
     }
 
     const onSubmit = (e: any) => {
@@ -234,7 +272,9 @@ export default function GenerateDialougeLetter() {
         handleUpdate().then(() => {
             if (action === "print") {
                 if(actionId === "summon"){
-                    printSummon()
+                    printSummon().then(() => {
+                        clearForm();
+                    });
                 }
                 else{
                     printDialouge().then(() => {
@@ -276,14 +316,14 @@ export default function GenerateDialougeLetter() {
             LuponStaff: "",
             DateFiled: "",
             complainant:{
-                fname: "",
-                address: "",
-                contact: ""
+                fname: `${userInfo.complainant?.fname || ""} ${userInfo.complainant?.lname || ""}`.trim(),
+                address: userInfo.complainant?.address || "",
+                contact: userInfo.complainant?.contact || ""
             },
             respondent:{    
-                fname: "",
-                address: "",
-                contact: ""
+                fname: `${userInfo.respondent?.fname || ""} ${userInfo.respondent?.lname || ""}`.trim(),
+                address: userInfo.respondent?.address || "",
+                contact: userInfo.respondent?.contact || ""
             }
         })
     }

@@ -1,29 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PDFDocument, PDFTextField } from "pdf-lib";
+import { PDFDocument, PDFTextField, TextAlignment } from "pdf-lib";
 import { storage } from '@/app/db/firebase';
 import { ref, getDownloadURL } from 'firebase/storage';
 
-
-
-const getTextFieldCoordinates = async (pdfBytes: Uint8Array, fieldName: string) => {
-    
-};
-
-const addTextField = async (pdfBytes: Uint8Array) => {
-   
-};
-
-
-
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, res: NextResponse) {
     try {
         const body = await req.json();
-        const { location, pdfTemplate, data, method } = body;
+        const { location, pdfTemplate, data,centerField = []} = body;
         
         if (!location || !pdfTemplate || !data) {
             return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
         }
-        if( method == true ){
+            console.log("Center Field",centerField);
             try {
                 // Fetch PDF from Firebase Storage
                 const pdfRef = ref(storage, `${location}/${pdfTemplate}`);
@@ -39,7 +27,7 @@ export async function POST(req: NextRequest) {
                 }
             
                 const form = pdfDoc.getForm();
-            
+                console.log("📄 PDF Form Fields:", form.getFields().map(f => f.getName()));
             
                 for (const key in data) {
                     const field = form.getField(key);
@@ -51,6 +39,12 @@ export async function POST(req: NextRequest) {
                 
                     if (field instanceof PDFTextField) {
                         field.setText(data[key]);
+                        
+                        if (centerField.includes(key)) {
+                            field.setAlignment(TextAlignment.Center);
+                            console.log(`🎯 Centered text for field: ${key}`);
+                        }
+                        
                     } else {
                         console.warn(`⚠️ Skipping non-text field: ${key} (Type: ${field.constructor.name})`);
                     }
@@ -60,25 +54,18 @@ export async function POST(req: NextRequest) {
                 const pdfBytes = await pdfDoc.save();
             
                 return new NextResponse(pdfBytes, {
-                    status: 200,
-                    headers: {
-                        'Content-Type': 'application/pdf',
-                        'Content-Disposition': 'attachment; filename=filled_form.pdf',
-                    },
-                });
-                    } catch (error) {
-                        console.error("Error processing PDF:", error);
-                        return NextResponse.json({ message: "An error occurred while generating the PDF" }, { status: 501 });
-                    }
-        }else{
-            try {
-                
-            } catch (error) {
-                console.error("Error processing PDF:", error);
-                return NextResponse.json({ message: "An error occurred while generating the PDF" }, { status: 502 });
-            }
+                status: 200,
+                headers: {
+                    'Content-Type': 'application/pdf',
+                    'Content-Disposition': 'attachment; filename=filled_form.pdf',
+                },
+            });
+            }catch (error) {
+                    console.error("Error processing PDF:", error);
+                    return NextResponse.json({ message: "An error occurred while generating the PDF" }, { status: 501 });
+                }
         
-        }
+        
     } catch (error) {
         console.error("Error processing PDF:", error);
         return NextResponse.json({ message: "An error occurred while generating the PDF" }, { status: 500 });
