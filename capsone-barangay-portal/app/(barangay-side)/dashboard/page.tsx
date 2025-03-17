@@ -97,7 +97,7 @@ export default function Dashboard() {
           else if (resident.age < 18) minors++;
           else adults++;
 
-          if (resident.PWD === true) pwds++;
+          if (resident.isPWD === true) pwds++;
           if (resident.soloParent === true) soloParents++;
         });
 
