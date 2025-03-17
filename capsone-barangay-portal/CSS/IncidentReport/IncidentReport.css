@@ -1,4 +1,4 @@
-.Page {
+.Page-incident-report {
     background-image: url('/Images/Background.jpeg');
     background-size: cover; 
     background-position: 50% 50%;
@@ -14,7 +14,7 @@
     margin-bottom: 50px;
   }
 
-  .Page::before {
+  .Page-incident-report::before {
     content: '';
     position: absolute;
     top: 0;
@@ -25,19 +25,19 @@
     z-index: 1; /* Ensure the overlay appears above the background image */
   }
 
-  .Page > * {
+  .Page-incident-report > * {
     position: relative;
     z-index: 2; /* Ensure text is above the overlay */
   }
 
-  .main-container {
+  .main-container-incident-report {
     background-color: #f7e5d5;
     display: flex;
     flex-direction: column;  
     min-height: 100vh; 
  }
 
-  .register-section {
+  .register-section-incident-report {
   display: flex;
   flex-direction: column;
   background-color: rgba(255, 255, 255, 0.7);
@@ -50,7 +50,7 @@
   
   }
 
-  .register-section h1 {
+  .register-section-incident-report h1 {
   color: #f49028;
   font-size: 1.5rem;
   margin-bottom: 1rem;
@@ -58,26 +58,26 @@
   font-weight: bold;
   }
 
-  .register-form {
+  .register-form-incident-report {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   
   }
 
-  .form-group {
+  .form-group-incident-report {
   display: flex;
   flex-direction: column;
   }
 
-  .form-label {
+  .form-label-incident-report {
   font-size: 16px;
   font-weight: bold;
   color: gray;
   margin-bottom: 0.5rem;
   }
 
-  .form-input {
+  .form-input-incident-report {
   width: 100%;
   padding: 10px;
   font-size: 16px;
@@ -88,13 +88,13 @@
 
 
 
-  .form-input:focus {
+  .form-input-incident-report:focus {
   border-color: #f49028;
   outline: none;
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
 
-  .submit-button {
+  .submit-button-incident-report {
   background-color: #f49028;
   color: white;
   font-size: 16px;
@@ -110,15 +110,15 @@
   }
 
   
-  .submit-button:hover {
+  .submit-button-incident-report:hover {
   background-color: #d87d20;
   }
 
-  .submit-button:active {
+  .submit-button-incident-report:active {
   background-color: #bf6a18;
   }
 
-  .file-upload-container {
+  .file-upload-container-incident-report {
           margin-top: 5px;
           margin-bottom: 40px;
           border: 2px dashed rgba(0, 0, 0, 0.3);
@@ -133,15 +133,15 @@
           height: 100%; /* Set a fixed height for better UI experience */
           }
 
-  .file-upload-container:hover {
+  .file-upload-container-incident-report:hover {
     background-color: rgba(245, 143, 88, 0.2);
   }
 
-  .uploadedFiles-container{
+  .uploadedFiles-container-incident-report{
     display: block;
   }
 
-  .file-upload-label {
+  .file-upload-label-incident-report {
     font-size: 16px;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.6);
@@ -149,24 +149,24 @@
     
   }
 
-  .upload-link {
+  .upload-link-incident-report {
     color: rgb(245, 143, 88);
     text-decoration: underline;
     cursor: pointer;
   }
 
-  .file-upload-input {
+  .file-upload-input-incident-report {
     display: none;
   }
 
-  .file-name-image-display {
+  .file-name-image-display-incident-report {
     margin-top: 10px;
     font-size: 16px;
     color: rgba(0, 0, 0, 0.6);
     text-align: center;
   }
 
-  .file-name-image-display-indiv {
+  .file-name-image-display-indiv-incident-report {
     display: flex;
     align-items: center;
     justify-content: space-between; 
@@ -174,7 +174,7 @@
     border-bottom: 1px solid #ddd;
   }
 
-  .filename-image-container {
+  .filename-image-container-incident-report {
     display: flex;
     align-items: center;
     flex-grow: 1; 
@@ -182,7 +182,7 @@
     margin-top:10px;
   }
 
-  .file-name-image-display-indiv li {
+  .file-name-image-display-indiv-incident-report li {
     display: flex;
     flex-grow: 1;
     overflow: hidden; 
@@ -190,18 +190,18 @@
     text-overflow: ellipsis; 
   }
 
-  .delete-container {
+  .delete-container-incident-report {
     margin-left: auto; 
   }
 
-  .delete-button {
+  .delete-button-incident-report {
     background: none;
     border: none;
     cursor: pointer;
     padding: 5px;
   }
 
-  .delete-icon {
+  .delete-icon-incident-report {
     width: 20px;
     height: 20px;
   }
