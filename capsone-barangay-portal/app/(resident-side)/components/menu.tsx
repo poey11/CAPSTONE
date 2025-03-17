@@ -266,9 +266,7 @@ const barangayPermitRoutes: Record<string, string> = {
                   </p>
                   
                   <div className="Dropdown">
-                    <Link
-                      href={"/ResidentAccount/Profile"}
-                    >
+                    <Link href={`/ResidentAccount/Profile?id=${user?.uid}`}>
                       <p className="dropdown-item">Profile</p>
                     </Link>
 

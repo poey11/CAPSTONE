@@ -19,6 +19,13 @@ export default function registeredVotersModule() {
 
   const router = useRouter(); 
 
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [selectedVoterNumber, setSelectedVoterNumber] = useState<string | null>(null);
+
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showDeletePopup, setShowDeletePopup] = useState(false); 
+  const [showAlertPopup, setshowAlertPopup] = useState(false); 
 
 
   useEffect(() => {
@@ -71,18 +78,39 @@ export default function registeredVotersModule() {
     setFilteredResidents(filtered);
   }, [searchName, searchAddress, showCount, residents, sortOrder]);
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this resident?")) {
+
+  const handleDeleteClick = async (id: string, voterNumber: string) => {
+    setDeleteUserId(id);
+    setSelectedVoterNumber(voterNumber);
+    setShowDeletePopup(true); 
+  }
+
+  const confirmDelete = async () => {
+    if (deleteUserId) {
       try {
-        await deleteDoc(doc(db, "VotersList", id));
-        setResidents((prev) => prev.filter(resident => resident.id !== id));
-        alert("Resident deleted successfully!");
+        await deleteDoc(doc(db, "VotersList", deleteUserId));
+        setResidents((prev) => prev.filter(resident => resident.id !== deleteUserId));
+        
+        setShowDeletePopup(false);
+        setDeleteUserId(null);
+
+        setPopupMessage("Voter Record deleted successfully!");
+        setShowPopup(true);
+
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 3000);
+
       } catch (error) {
-        console.error("Error deleting resident:", error);
-        alert("Failed to delete resident.");
+        console.error("Error deleting voter:", error);
+        setPopupMessage("Failed to delete voter.");
+      
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 3000);
       }
     }
-  };
+  }
 
   const [currentPage, setCurrentPage] = useState(1);
   const residentsPerPage = 10; //pwede paltan 
@@ -117,31 +145,31 @@ export default function registeredVotersModule() {
   };
 
   return (
-    <main className="main-container">
-      <div className="section-1">
+    <main className="resident-module-main-container">
+      <div className="resident-module-section-1">
         <h1>Voter Masterlist</h1>
         <Link href="/dashboard/ResidentModule/registeredVoters/AddVoter">
           <button className="add-announcement-btn">Add New Voter</button>
         </Link>
       </div>
 
-      <div className="section-2">
+      <div className="resident-module-section-2">
         <input
           type="text"
-          className="search-bar"
+          className="resident-module-filter"
           placeholder="Search by Name"
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
         <input
           type="text"
-          className="search-bar"
+          className="resident-module-filter"
           placeholder="Search by Address"
           value={searchAddress}
           onChange={(e) => setSearchAddress(e.target.value)}
         />
       <select
-          className="featuredStatus"
+          className="resident-module-filter"
           value={showCount}
           onChange={(e) => setShowCount(Number(e.target.value))}
         >
@@ -151,7 +179,7 @@ export default function registeredVotersModule() {
         </select>
       </div>
 
-      <div className="main-section">
+      <div className="resident-module-main-section">
         {loading && <p>Loading voters...</p>}
         {error && <p className="error">{error}</p>}
 
@@ -185,10 +213,10 @@ export default function registeredVotersModule() {
                   <td>{resident.precinctNumber}</td>
                   <td>{resident.createdAt}</td>
                   <td>
-                    <div className="actions">
-                      <button className="action-view" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}>View</button>
-                      <button className="action-edit" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/EditVoter?id=${resident.id}`)}>Edit</button>
-                      <button className="action-delete" onClick={() => handleDelete(resident.id)}>Delete</button>
+                    <div className="residentmodule-actions">
+                      <button className="residentmodule-action-view" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}>View</button>
+                      <button className="residentmodule-action-edit" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/EditVoter?id=${resident.id}`)}>Edit</button>
+                      <button className="residentmodule-action-delete" onClick={() => handleDeleteClick(resident.id, resident.voterNumber)}>Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -212,6 +240,40 @@ export default function registeredVotersModule() {
         ))}
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
+
+      {showDeletePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                            <p>Are you sure you want to delete this Voter Record?</p>
+                            <h2>Voter Number: {selectedVoterNumber}</h2>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
+                                </div> 
+                            </div>
+                        </div>
+      )}
+
+
+      {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+      )}
+
+      {showAlertPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>{popupMessage}</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setshowAlertPopup(false)} className="no-button">Continue</button>
+                                </div> 
+                            </div>
+                        </div>
+       )}  
+                 
 
     </main>
   );

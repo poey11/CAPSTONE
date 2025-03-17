@@ -36,8 +36,8 @@ export default function OnlineReports() {
 
   const router = useRouter();
 
-    const handleViewBCPC = () => {
-      router.push("/dashboard/IncidentModule/BCPC/ViewIncident");
+    const handleViewOnlineReport = () => {
+      router.push("/dashboard/IncidentModule/OnlineReports/ViewOnlineReport");
     };
 
 
@@ -89,8 +89,7 @@ export default function OnlineReports() {
                 </td>
                 <td>
                   <div className="actions">
-                    <button className="action-notify">Notify</button>
-                    <button className="action-edit" >Edit</button>
+                    <button className="action-notify" onClick={handleViewOnlineReport}>View</button>
                   </div>
                 </td>
               </tr>

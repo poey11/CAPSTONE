@@ -6,6 +6,7 @@ import { db } from "../../../db/firebase";
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
 
+
 export default function ResidentModule() {
   const [residents, setResidents] = useState<any[]>([]);
   const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
@@ -26,9 +27,18 @@ export default function ResidentModule() {
 
   const [residentType, setResidentType] = useState<string>("");
 
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [selectedResidentNumber, setSelectedResidentNumber] = useState<string | null>(null);
+
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showDeletePopup, setShowDeletePopup] = useState(false); 
+  const [showAlertPopup, setshowAlertPopup] = useState(false); 
+
   const handleResidentTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setResidentType(e.target.value);
   };
+
 
   useEffect(() => {
     const fetchResidents = async () => {
@@ -95,18 +105,41 @@ export default function ResidentModule() {
     setFilteredResidents(filtered);
   }, [searchName, searchAddress, searchOccupation, residentType, showCount, residents, sortOrder]);
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this resident?")) {
+
+  const handleDeleteClick = async (id: string, residentNumber: string) => {
+    setDeleteUserId(id);
+    setSelectedResidentNumber(residentNumber);
+    setShowDeletePopup(true); 
+
+  }
+
+  const confirmDelete = async () => {
+    if (deleteUserId) {
       try {
-        await deleteDoc(doc(db, "Residents", id));
-        setResidents((prev) => prev.filter(resident => resident.id !== id));
-        alert("Resident deleted successfully!");
+        await deleteDoc(doc(db, "Residents", deleteUserId));
+        setResidents((prev) => prev.filter(resident => resident.id !== deleteUserId));
+        
+        setShowDeletePopup(false);
+        setDeleteUserId(null);
+
+        setPopupMessage("Resident Record deleted successfully!");
+        setShowPopup(true);
+
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 3000);
+
       } catch (error) {
         console.error("Error deleting resident:", error);
-        alert("Failed to delete resident.");
+        setPopupMessage("Failed to delete resident.");
+      
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 3000);
       }
     }
-  };
+
+  }
 
  
 
@@ -141,25 +174,25 @@ export default function ResidentModule() {
 
 
   return (
-    <main className="main-container">
-      <div className="section-1">
+    <main className="resident-module-main-container">
+      <div className="resident-module-section-1">
         <h1>Residents List</h1>
         <Link href="/dashboard/ResidentModule/AddResident">
           <button className="add-announcement-btn">Add New Resident</button>
         </Link>
       </div>
 
-      <div className="section-2">
+      <div className="resident-module-section-2">
         <input
           type="text"
-          className="search-bar"
+          className="resident-module-filter"
           placeholder="Search by Name"
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
         <input
           type="text"
-          className="search-bar"
+          className="resident-module-filter"
           placeholder="Search by Address"
           value={searchAddress}
           onChange={(e) => setSearchAddress(e.target.value)}
@@ -167,13 +200,13 @@ export default function ResidentModule() {
 
         <input
           type="text"
-          className="search-bar"
+          className="resident-module-filter"
           placeholder="Search by Occupation"
           value={searchOccupation}
           onChange={(e) => setSearchOccupation(e.target.value)}
         />
 
-        <select className="featuredStatus" value={residentType} onChange={handleResidentTypeChange}>
+        <select className="resident-module-filter" value={residentType} onChange={handleResidentTypeChange}>
           <option value="">Resident Type</option>
           <option value="senior-citizen">Senior Citizen</option>
           <option value="student">Student</option>
@@ -182,7 +215,7 @@ export default function ResidentModule() {
         </select>
 
         <select
-          className="featuredStatus"
+          className="resident-module-filter"
           value={showCount}
           onChange={(e) => setShowCount(Number(e.target.value))}
         >
@@ -192,7 +225,7 @@ export default function ResidentModule() {
         </select>
       </div>
 
-      <div className="main-section">
+      <div className="resident-module-main-section">
         {loading && <p>Loading residents...</p>}
         {error && <p className="error">{error}</p>}
 
@@ -233,22 +266,22 @@ export default function ResidentModule() {
                   <td>{resident.sex}</td>
                   <td>{resident.civilStatus}</td>
                   <td>
-                    <div className="actions">
+                    <div className="residentmodule-actions">
                       <button 
-                        className="action-view" 
+                        className="residentmodule-action-view" 
                         onClick={() => router.push(`/dashboard/ResidentModule/ViewResident?id=${resident.id}`)}
                       >
                         View
                       </button>
                       <button 
-                        className="action-edit" 
+                        className="residentmodule-action-edit" 
                         onClick={() => router.push(`/dashboard/ResidentModule/EditResident?id=${resident.id}`)}
                       >
                         Edit
                       </button>
                       <button 
-                        className="action-delete" 
-                        onClick={() => handleDelete(resident.id)}
+                        className="residentmodule-action-delete" 
+                        onClick={() => handleDeleteClick(resident.id, resident.residentNumber)}
                       >
                         Delete
                       </button>
@@ -274,6 +307,41 @@ export default function ResidentModule() {
         ))}
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
+
+
+
+      {showDeletePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                            <p>Are you sure you want to delete this Resident Record?</p>
+                            <h2>Resident Number: {selectedResidentNumber}</h2>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
+                                </div> 
+                            </div>
+                        </div>
+      )}
+
+
+      {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+      )}
+
+      {showAlertPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>{popupMessage}</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setshowAlertPopup(false)} className="no-button">Continue</button>
+                                </div> 
+                            </div>
+                        </div>
+       )}  
       
     </main>
   );

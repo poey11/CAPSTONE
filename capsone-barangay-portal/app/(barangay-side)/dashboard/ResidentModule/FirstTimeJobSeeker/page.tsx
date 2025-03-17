@@ -17,6 +17,13 @@ export default function JobSeekerListModule() {
 
   const router = useRouter();
 
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showDeletePopup, setShowDeletePopup] = useState(false); 
+  const [showAlertPopup, setshowAlertPopup] = useState(false); 
+
   useEffect(() => {
     const fetchJobSeekers = async () => {
       try {
@@ -67,6 +74,7 @@ export default function JobSeekerListModule() {
     return `${month}/${day}/${year}`;
   };
 
+  /*
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this job seeker?")) {
       try {
@@ -78,7 +86,36 @@ export default function JobSeekerListModule() {
         alert("Failed to delete job seeker.");
       }
     }
+  };*/
+
+  const handleDeleteClick = async (id: string) => {
+    setDeleteUserId(id);
+    setShowDeletePopup(true); 
+  }
+
+  const confirmDelete = async () => {
+    if (deleteUserId) {
+      try {
+        await deleteDoc(doc(db, "JobSeekerList", deleteUserId));
+        setJobSeekers((prev) => prev.filter(seeker => seeker.id !== deleteUserId));
+
+        setShowDeletePopup(false);
+        setDeleteUserId(null);
+
+        setPopupMessage("Jobseeker Record deleted successfully!");
+        setShowPopup(true);
+
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 3000);
+
+      } catch (error) {
+        console.error("Error deleting jobseeker:", error);
+        alert("Failed to delete jobseeker.");
+      }
+    }
   };
+
   const [currentPage, setCurrentPage] = useState(1);
   const residentsPerPage = 10; // Can be changed 
 
@@ -111,25 +148,25 @@ export default function JobSeekerListModule() {
   };
 
   return (
-    <main className="main-container">
-      <div className="section-1">
+    <main className="resident-module-main-container">
+      <div className="resident-module-section-1">
         <h1>First-Time Job Seeker List</h1>
         <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker/AddFirstTimeJobSeeker">
           <button className="add-announcement-btn">Add New Job Seeker</button>
         </Link>
       </div>
 
-      <div className="section-2">
+      <div className="resident-module-section-2">
         <input
           type="text"
-          className="search-bar"
+          className="resident-module-filter"
           placeholder="Search by Name"
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
       </div>
 
-      <div className="main-section">
+      <div className="resident-module-main-section">
         {loading && <p>Loading job seekers...</p>}
         {error && <p className="error">{error}</p>}
 
@@ -168,22 +205,22 @@ export default function JobSeekerListModule() {
                   <td>{seeker.sex}</td>
                   <td>{seeker.remarks}</td>
                   <td>
-                    <div className="actions">
+                    <div className="residentmodule-actions">
                       <button
-                        className="action-view"
+                        className="residentmodule-action-view"
                         onClick={() => router.push(`/dashboard/ResidentModule/FirstTimeJobSeeker/ViewFirstTimeJobSeeker?id=${seeker.id}`)}
                       >
                         View
                       </button>
                       <button
-                        className="action-edit"
+                        className="residentmodule-action-edit"
                         onClick={() => router.push(`/dashboard/ResidentModule/FirstTimeJobSeeker/EditFirstTimeJobSeeker?id=${seeker.id}`)}
                       >
                         Edit
                       </button>
                       <button
-                        className="action-delete"
-                        onClick={() => handleDelete(seeker.id)}
+                        className="residentmodule-action-delete"
+                        onClick={() => handleDeleteClick(seeker.id)}
                       >
                         Delete
                       </button>
@@ -210,6 +247,39 @@ export default function JobSeekerListModule() {
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
 
+
+      {showDeletePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                            <p>Are you sure you want to delete this Jobseeker Record?</p>
+          
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
+                                </div> 
+                            </div>
+                        </div>
+      )}
+
+
+      {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+      )}
+
+      {showAlertPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>{popupMessage}</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setshowAlertPopup(false)} className="no-button">Continue</button>
+                                </div> 
+                            </div>
+                        </div>
+       )}  
 
     </main>
   );

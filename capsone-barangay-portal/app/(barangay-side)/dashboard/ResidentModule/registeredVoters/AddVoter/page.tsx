@@ -19,6 +19,12 @@ export default function addVoter() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
+
   useEffect(() => {
     const fetchLatestNumber = async () => {
       try {
@@ -57,6 +63,43 @@ export default function addVoter() {
   };
   
 
+  const handleSubmitClick = async () => {
+    const { fullName, homeAddress} = formData;
+  
+    if (!fullName || !homeAddress) {
+
+      setPopupErrorMessage("Please fill up all required fields.");
+      setShowErrorPopup(true);
+  
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowErrorPopup(false);
+      
+    }, 3000);
+    
+      return;
+    }
+  
+    setShowSubmitPopup(true);
+  };
+
+  const confirmSubmit = async () => {
+    setShowSubmitPopup(false);
+  
+    setPopupMessage("Voter Record added successfully!");
+    setShowPopup(true);
+  
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+      router.push("/dashboard/ResidentModule/registeredVoters");
+    }, 3000);
+  
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -83,8 +126,7 @@ export default function addVoter() {
         createdAt: currentDate,
       });
 
-      alert("Voter added successfully!");
-      router.push("/dashboard/ResidentModule/registeredVoters");
+     
     } catch (err) {
       setError("Failed to add voter");
       console.error(err);
@@ -97,34 +139,84 @@ export default function addVoter() {
   };
 
   return (
-    <main className="main-container">
-      <div className="main-content">
-        <Link href="/dashboard/ResidentModule/registeredVoters">
-          <button type="button" className="back-button" onClick={handleBack}></button>
-        </Link>
-        <div className="section-1">
-          <p className="NewResident">New Voter</p>
-          <div className="actions">
-            <button className="action-view" type="submit" form="addVoterForm" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
-            </button>
-          </div>
+    <main className="add-resident-main-container">
+
+        <div className="addresident-page-title-section-1">
+          <h1>Add New Voter Record</h1>
         </div>
-        <form id="addVoterForm" onSubmit={handleSubmit} className="section-2">
-          <div className="section-2-left-side">
-            <p>Full Name</p>
-            <input type="text" className="search-bar" placeholder="Enter Full Name" name="fullName" value={formData.fullName} onChange={handleChange} required />
+        
+        <div className="add-resident-main-content">
+          <div className="add-resident-main-section1">
+            <div className="add-resident-main-section1-left">
+              <button onClick={handleBack}>
+                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+              </button>
 
-            <p>Home Address</p>
-            <input type="text" className="search-bar" placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+              <h1> New Voter </h1>
+            </div>
 
-            <p>Precinct Number</p>
-            <input type="text" className="search-bar" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
+            <div className="action-btn-section">
+              <button className="action-view"  onClick={handleSubmitClick} disabled={loading}>
+                {loading ? "Saving..." : "Save"}
+              </button>
+            </div>
+            
+          </div>
 
+          <hr/>
+
+
+        <form id="addVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
+          <div className="add-resident-section-2-left-side">
+
+            <div className="fields-container">
+              <div className="fields-section">
+                <p>Full Name <span className="required">*</span></p>
+                <input type="text" className="add-resident-input-field" placeholder="Enter Full Name" name="fullName" value={formData.fullName} onChange={handleChange} required />
+              </div>
+
+              <div className="fields-section">
+                <p>Home Address <span className="required">*</span></p>
+                <input type="text" className="add-resident-input-field" placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+              </div>
+              
+              <div className="fields-section">
+                <p>Precinct Number</p>
+                <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
+              </div>
+            </div>
           </div>
         </form>
         {error && <p className="error">{error}</p>}
       </div>
+
+      {showSubmitPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to submit?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmSubmit} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+        )}
+
+        {showPopup && (
+                <div className={`popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+        {showErrorPopup && (
+                <div className={`error-popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
     </main>
   );
 }

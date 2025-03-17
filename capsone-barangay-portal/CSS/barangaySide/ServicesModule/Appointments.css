@@ -1,4 +1,4 @@
-.main-container{
+.appointments-main-container{
     width: 100%;
     height: 100vh;
     background-color: #f9f9f9;
@@ -7,19 +7,19 @@
     margin-left: 2rem; 
 }
 
-.main-content{
+.appointments-main-content{
     display: flex;
     flex-direction: column;
 }
 
-.section-1{
+.appointments-section-1{
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
 }
 
-.section-1 h1{
+.appointments-section-1 h1{
     font-size: 20px;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
@@ -39,7 +39,7 @@
     background-color:#cc591b;
   }
 
-  .section-2{
+  .appointments-section-2{
     display: flex;
     gap: 20px;
     padding: 0;
@@ -60,21 +60,7 @@
     color: rgba(0, 0, 0, 0.4); 
   }
 
-  .section-3{
-    display: flex;
-    gap: 20px;
-    padding: 0;
-    margin-top: 25px;
-  }
-
-  .section-3 h1{
-    font-size: 15px;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.5);
-}
-
-
-.main-section {
+.appointments-main-section {
     flex: 1; /* Makes it take up remaining space */
     display: flex; /* Ensures proper alignment */
     flex-direction: column;
@@ -88,12 +74,12 @@
     max-height: 70%;
 }
 
-.main-section table {
+.appointments-main-section table {
     width: 100%; /* Ensures the table spans the full width */
     border-collapse: collapse; /* Removes unnecessary spacing between table cells */
 }
 
-.main-section td {
+.appointments-main-section td {
     padding: 1rem; 
     text-align: center; 
     border-bottom: 2px solid #ddd;
@@ -101,7 +87,7 @@
     font-weight: lighter;
 }
 
-.main-section th {
+.appointments-main-section th {
     padding: 1rem; 
     text-align: left; 
     border-bottom: 2px solid #ddd;
@@ -110,17 +96,32 @@
     
 }
 
-.main-section .announcement-info {
+.appointments-main-section .announcement-info {
     display: flex;
     align-items: center; /* Center align the image and text */
     gap: 1rem; /* Add space between the image and text */
 }
 
-.main-section .announcement-image {
+.appointments-main-section .announcement-image {
     width: 50px;
     height: 50px;
     border-radius: 10%; /* Make the image circular */
     object-fit: cover; /* Ensure the image is properly scaled */
+}
+
+.appointments-main-section tbody tr:hover {
+    background-color: #e0e0e0; 
+    cursor: pointer; 
+    transition: background-color 0.2s ease; 
+}
+  
+.appointments-main-section thead {
+    position: sticky;
+    top: 0;
+    background-color: rgb(232, 228, 228); /* Ensures it's visible when scrolled */
+    z-index: 10; /* Ensures it stays above other content */
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
+    height: 80px;
 }
 
 .actions {
