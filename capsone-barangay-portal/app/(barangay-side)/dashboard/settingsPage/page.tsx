@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
@@ -9,7 +9,10 @@ import "@/CSS/SettingsPage/settingsPage.css";
 
 export default function SettingsPage() {
     const router = useRouter();
-    const { data: session } = useSession();
+
+     const searchParams = useSearchParams();
+     const userId = searchParams.get("id")
+     
     const [userData, setUserData] = useState({
         firstName: "",
         lastName: "",
@@ -24,30 +27,32 @@ export default function SettingsPage() {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!session?.user?.id) return;
+        if (userId) {
 
         const fetchUserData = async () => {
-            const userId = session.user.id;
-            const userDocRef = doc(db, "BarangayUsers", userId);
-            const userDoc = await getDoc(userDocRef);
+            const docRef = doc(db, "BarangayUsers", userId);
+            const docSnap = await getDoc(docRef);
 
-            if (userDoc.exists()) {
-                const data = userDoc.data();
+            if (docSnap.exists()) {
+               
                 setUserData({
-                    firstName: data.firstName || "User",
-                    lastName: data.lastName || "User",
-                    address: data.address || "",
-                    birthDate: data.birthDate || "",
-                    sex: data.sex || "",
-                    phone: data.phone || "",
-                    position: data.position || "",
-                    profileImage: data.profileImage || "/images/user.png",
+                    firstName: docSnap.data().firstName || "User",
+                    lastName: docSnap.data().lastName || "User",
+                    address: docSnap.data().address || "",
+                    birthDate: docSnap.data().birthDate || "",
+                    sex: docSnap.data().sex || "",
+                    phone: docSnap.data().phone || "",
+                    position: docSnap.data().position || "",
+                    profileImage: docSnap.data().profileImage || "/images/user.png",
                 });
+
+                setPreview(docSnap.data().fileURL || null);
             }
         };
 
         fetchUserData();
-    }, [session]);
+        }
+    }, [userId]);
 
     const handleBack = () => {
         router.push("/dashboard");
@@ -82,8 +87,8 @@ export default function SettingsPage() {
         setLoading(true);
         setError("");
     
-        if (!session?.user?.id) {
-            setError("User ID not found");
+        if (!userId) {
+            setError("User ID not found.");
             setLoading(false);
             return;
         }
@@ -95,14 +100,15 @@ export default function SettingsPage() {
         }
     
         try {
-            const userId = session.user.id;
             const docRef = doc(db, "BarangayUsers", userId);
             const docSnap = await getDoc(docRef);
     
             if (docSnap.exists()) {
                 const currentData = docSnap.data();
                 const isDataChanged = Object.keys(userData).some(
-                    (key) => userData[key as keyof typeof userData]?.toString().trim() !== currentData[key]?.toString().trim()
+                    (key) =>
+                        userData[key as keyof typeof userData]?.toString().trim() !==
+                        currentData[key]?.toString().trim()
                 );
     
                 if (!isDataChanged) {
