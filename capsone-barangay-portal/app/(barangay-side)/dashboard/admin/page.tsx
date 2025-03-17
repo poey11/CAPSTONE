@@ -14,10 +14,10 @@ interface ResidentUser {
     address: string;
     phone: string;
     sex:string;
-    status:string;
     validIdDoc:string;
     role: string;
     email: string;
+    status:string;
   }
   
 interface BarangayUser{
@@ -63,6 +63,8 @@ const admin = () => {
     const [showDeletePopup, setShowDeletePopup] = useState(false);
     const [showAcceptPopup, setShowAcceptPopup] = useState(false); 
     const [showAlertPopup, setshowAlertPopup] = useState(false); 
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(()=>{
        
@@ -98,8 +100,11 @@ const admin = () => {
             }
             catch(error:String|any){
                 console.log(error.message);
-            
-            }
+                setError("Failed to load residents");
+            } finally {
+                setLoading(false);
+              }
+
         }
         fetchUsers();           
     },[])
@@ -161,107 +166,17 @@ const admin = () => {
         }
     };
 
-    const GenerateID = async (e: any) => {
-        e.preventDefault();
-        
-        const generateNewID = async (): Promise<string> => {
-            const year = new Date().getFullYear().toString(); // First 4 digits
-            const randomNum = Math.floor(100 + Math.random() * 900).toString(); // Ensures 3-digit number (100-999)
-            const randomId = year + randomNum; // Concatenates to make 7 digits
-    
-            // ✅ Check Firestore if the ID already exists
-            const barangayUsersCollection = collection(db, "BarangayUsers");
-            const querySnapshot = await getDocs(query(barangayUsersCollection, where("userId", "==", randomId)));
-    
-            if (!querySnapshot.empty) {
-                console.log(`ID ${randomId} already exists, regenerating...`);
-                return generateNewID(); // 🔄 Recursively call the function if ID exists
-            }
-    
-            return randomId; // ✅ Unique ID found
-        };
-    
-        const uniqueId = await generateNewID(); // Wait for a unique ID to be generated
-    
-        setUsers((prevUsers) => ({
-            ...prevUsers,
-            userId: uniqueId,
-        }));
-    
-    };
-
-
-    const handleChange = (  e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>)=>{
-        e.preventDefault();
-      
-        const {name, value} = e.target;
-        setUsers((prevUsers) => ({
-            ...prevUsers,
-            [name]: value
-        }));
-    }
-
-
-
-    const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        
-        if(!users.userId || !users.password || !users.position){
-            setPopupMessage("Please fill out all fields");
-            setshowAlertPopup(true);
-            return;
-        }
-        
-        console.log(users);
-        
-        try{
-            const respone = await fetch('/api/barangayRegister', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userid: users.userId,
-                    password: users.password,
-                    role: users.role,
-                    position: users.position,
-                    createdBy: "Assistant Secretary"
-                })
-            });
-            const data = await respone.json();
-
-            if(!respone.ok){
-                setPopupMessage(data.message);
-                setShowPopup(true);
-                return;
-            }
-                setPopupMessage("Barangay user created successfully!");
-                setShowPopup(true);
-
-                // Hide the popup after 3 seconds
-                setTimeout(() => {
-                    setShowPopup(false);
-                }, 3000);
-
-            setUsers({
-                userId:"",
-                position:"",
-                password:"",
-                role:"Barangay Official"
-            })
-        }
-        catch(error: string | any){
-            console.log(error.message);
-        }
-        
-   }
 
     const router = useRouter();
    
 
-
+    const [showPendingResidentTableContent, setShowPendingResidentTableContent] = useState(true); 
     const [showResidentTableContent, setShowResidentTableContent] = useState(false); 
-    const [showBarangayTableContent, setShowBarangayTableContent] = useState(true);
+    const [showBarangayTableContent, setShowBarangayTableContent] = useState(false);
+
+    const handleToggleClickPendingResidentTable = () => {
+        setShowPendingResidentTableContent(prevState => !prevState);
+    };
 
     const handleToggleClickResidentTable = () => {
         setShowResidentTableContent(prevState => !prevState);
@@ -291,53 +206,63 @@ const admin = () => {
                     <div className="resident-users-topsection">
                         <button type="button" 
                                 className={showResidentTableContent ? "user-role-minus-button" : "user-role-plus-button"} 
-                                onClick={handleToggleClickResidentTable}>
+                                onClick={handleToggleClickPendingResidentTable}>
                         </button>
-                        <h1>Resident Users Table</h1>
+                        <h1>Pending Resident Users Table</h1>
                     </div>
 
-                    {showResidentTableContent && (
+                    {showPendingResidentTableContent && (
                         <>
 
                             <div className="resident-users-main-section">
+
+                                {loading && <p>Loading residents...</p>}
+                                {error && <p className="error">{error}</p>}
+
+                                {!loading && !error && (
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
                                             <th>Name</th>
                                             <th>Address</th>
                                             <th>Phone</th>
                                             <th>Sex</th>
-                                            <th>Status</th>
-                                            <th>Valid ID Doc</th>
                                             <th>Role</th>
                                             <th>Email</th>
+                                            <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
 
                                     <tbody>
-                                        {residentUsers.map((user) => (
+                                        {residentUsers.filter(user => user.status !== "Verified").map((user) => (
                                             <tr key={user.id}>
-                                            <td>{user.id}</td>
                                             <td>{user.first_name} {user.last_name}</td>
                                             <td>{user.address}</td>
                                             <td>{user.phone}</td>
                                             <td>{user.sex}</td>
-                                            <td>{user.status}</td>
-                                            <td>{user.validIdDoc}</td>
                                             <td>{user.role}</td>
                                             <td>{user.email}</td>
                                             <td>
+                                                <span className={`status-badge ${user.status.toLowerCase().replace(" ", "-")}`}>
+                                                    {user.status}
+                                                </span>
+                                            </td>
+                                            <td>
                                                 <div className="admin-actions">
-                                                    <button className="admin-action-accept" onClick={() => handleAcceptClick(user.id)}>Accept</button>
-                                                    <button className="admin-action-reject" onClick={() => router.push(`/dashboard/admin/reasonForReject?id=${user.id}`)}>Reject</button>
+                                                    <button 
+                                                        className="admin-action-view"
+                                                        onClick={() => router.push(`/dashboard/admin/viewResidentUser?id=${user.id}`)}
+                                                    >
+                                                        View
+                                                    </button>
                                                 </div>
                                             </td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
+                            )}
                             </div>
                         </>
                     )}
@@ -356,6 +281,73 @@ const admin = () => {
                     )}
                 </div>
 
+                <div className="resident-users">
+
+                    <div className="resident-users-topsection">
+                        <button type="button" 
+                                className={showResidentTableContent ? "user-role-minus-button" : "user-role-plus-button"} 
+                                onClick={handleToggleClickResidentTable}>
+                        </button>
+                        <h1>Resident Users Table</h1>
+                    </div>
+
+                    {showResidentTableContent && (
+                        <>
+
+                            <div className="resident-users-main-section">
+
+                                {loading && <p>Loading residents...</p>}
+                                {error && <p className="error">{error}</p>}
+
+                                {!loading && !error && (
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Address</th>
+                                            <th>Phone</th>
+                                            <th>Sex</th>
+                                            <th>Role</th>
+                                            <th>Email</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {residentUsers.filter(user => user.status === "Verified").map((user) => (
+                                            <tr key={user.id}>
+                                            <td>{user.first_name} {user.last_name}</td>
+                                            <td>{user.address}</td>
+                                            <td>{user.phone}</td>
+                                            <td>{user.sex}</td>
+                                            <td>{user.role}</td>
+                                            <td>{user.email}</td>
+                                            <td>
+                                                <span className={`status-badge ${user.status.toLowerCase().replace(" ", "-")}`}>
+                                                    {user.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="admin-actions">
+                                                    <button 
+                                                        className="admin-action-view"
+                                                        onClick={() => router.push(`/dashboard/admin/viewResidentUser?id=${user.id}`)}
+                                                    >
+                                                        View
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                            </div>
+                        </>
+                    )}
+                </div>
+
                 <div className="barangay-users">
 
                     <div className="resident-users-topsection">
@@ -371,6 +363,11 @@ const admin = () => {
                     {showBarangayTableContent && (
                         <>
                             <div className="barangay-users-main-section">
+
+                            {loading && <p>Loading residents...</p>}
+                            {error && <p className="error">{error}</p>}
+
+                            {!loading && !error && (
                                 <table>
                                     <thead>
                                         <tr>
@@ -402,6 +399,12 @@ const admin = () => {
                                             <td>
                                                 <div className="admin-actions">
                                                     <button 
+                                                        className="admin-action-view"
+                                                        onClick={() => router.push(`/dashboard/admin/viewBarangayUser?id=${user.id}`)}
+                                                    >
+                                                        View
+                                                    </button>
+                                                    <button 
                                                         className="admin-action-edit" 
                                                         onClick={() => router.push(`/dashboard/admin/modifyBarangayAcc?id=${user.id}`)}
                                                     >
@@ -418,7 +421,9 @@ const admin = () => {
                                         ))}
                                     </tbody>
                                 </table>
+                            )}
                             </div>
+                            
                         </>
                     )}
                     {showDeletePopup && (

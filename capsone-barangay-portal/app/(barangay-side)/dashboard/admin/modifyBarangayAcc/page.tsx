@@ -27,6 +27,7 @@ interface BarangayUser {
     lastName: string;
     phone: string;
     sex: string;
+    department: string;
   }
 
 export default function EditBarangayAccount() {
@@ -48,6 +49,7 @@ export default function EditBarangayAccount() {
         lastName: "",
         phone: "",
         sex: "",
+        department: ""
       });
 
     const [loading, setLoading] = useState(false);
@@ -157,6 +159,7 @@ export default function EditBarangayAccount() {
                         lastName: docSnap.data().lastName || "",
                         phone: docSnap.data().phone || "",
                         sex: docSnap.data().sex || "",
+                        department: docSnap.data().department || "",
                     };
 
                     setFormData(data);
@@ -288,6 +291,28 @@ export default function EditBarangayAccount() {
                                             <option value="LF Staff">LF Staff</option>
                                         </select>
                                     </div>
+
+                                    
+
+                                    {formData.position === "LF Staff" && (
+                                        <div className="editbrgyacc-fields-section">
+                                            <p>Department:</p>
+
+                                            <select 
+                                                name="department" 
+                                                value={formData.department} 
+                                                onChange={handleChange}
+                                                className="editbrgyacc-input-field"
+                                                required
+                                            >
+                                                <option value="">Select a Department</option>
+                                                <option value="GAD">GAD</option>
+                                                <option value="Lupon">Lupon</option>
+                                                <option value="VAWC">VAWC</option>
+                                                <option value="BCPC">BCPC</option>
+                                            </select>
+                                        </div>
+                                    )}
                                     
                                     <div className="editbrgyacc-fields-section">
                                         <p>Birthday</p>
