@@ -47,13 +47,14 @@
 /* Input Fields */
 .accSetup-form input, 
 .accSetup-form select {
+    padding: 8px;
     width: 100%;
-    padding: 10px;
-    font-size: 1rem;
+    max-width: 100%;
+    margin-top: 10px;
     border: 1px solid #ccc;
-    border-radius: 6px;
-    outline: none;
-    transition: all 0.3s ease-in-out;
+    border-radius: 5px;
+    color: rgba(0, 0, 0, 0.4);
+    padding-right: 40px;
 }
 
 .accSetup-form input:focus,

@@ -140,7 +140,7 @@ export default function SettingsPage() {
 
             <div className="modifyaccsettings-main-section">
 
-            <form onSubmit={handleSubmit}>
+          
                 <div className="modifyaccsettings-main-section1">
                     <div className="modifyaccsettings-main-section1-left">
                         <button onClick={handleBack}>
@@ -151,13 +151,17 @@ export default function SettingsPage() {
 
                     <div className="action-btn-section">
                         <button className="discard-btn" type="button">Discard</button>
-                        <button className="save-btn" type="submit">Save</button>
+                        <button className="save-btn" type="submit" form="settings-form">Save</button>
                     </div>
                 </div>
 
                 <hr />
 
+                <form  id ="settings-form" onSubmit={handleSubmit}>
+
+
                 <div className="main-fields-container">
+
 
                     <div className="account-details-section">
                         <div className="icon-container">
