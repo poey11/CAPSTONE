@@ -25,8 +25,9 @@
 .accSetup-title-section h1 {
     font-size: 1.8rem;
     text-align: center;
-    color: #f49028;
+    color: grey;
     margin-bottom: 1rem;
+    font-weight: bold;
 }
 
 /* Form Styling */
@@ -63,7 +64,7 @@
 
 /* Submit Button */
 .accSetup-form button {
-    background-color: #a1a3a6;
+    background-color: #f49028;
     color: white;
     padding: 12px;
     font-size: 1rem;
@@ -76,7 +77,7 @@
 }
 
 .accSetup-form button:hover {
-    background-color: #cacdd0;
+    background-color: #dc7814;
 }
 
 /* Responsive Design */
