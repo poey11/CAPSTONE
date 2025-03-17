@@ -5,6 +5,7 @@ import {  useEffect,useState } from "react";
 import { getSpecificDocument } from "@/app/helpers/firestorehelper";
 import { doc, updateDoc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
+import { time } from "console";
 
 
 
@@ -225,6 +226,27 @@ export default function GenerateDialougeLetter() {
         }
     }
     const printSummon = async () => {
+        const day = otherInfo.DateOfMeeting.split("T")[0].split("-")[2];
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const monthIndex = parseInt(otherInfo.DateOfMeeting.split("T")[0].split("-")[1], 10) - 1;
+        const month = monthNames[monthIndex];
+        const year = otherInfo.DateOfMeeting.split("T")[0].split("-")[0];
+        const time24 = otherInfo.DateOfMeeting.split("T")[1];
+        const [hourStr, minuteStr] = time24.split(":");
+        let hour = parseInt(hourStr, 10);
+        const minute = minuteStr;
+        const ampm = hour >= 12 ? "PM" : "AM";
+        hour = hour % 12 || 12;
+        const time12 = `${hour}:${minute} ${ampm}`;
+        let collective = "Morning";
+        if (hour >= 12 && hour < 18 && ampm === "PM") {
+            collective = "Afternoon";
+        } else if ((hour >= 6 && ampm === "PM") || (hour < 4 && ampm === "AM")) {
+            collective = "Evening";
+        }
+
+
+        
        try{ 
         const response = await fetch("/api/fillPDF", {
             method: "POST",
@@ -240,12 +262,12 @@ export default function GenerateDialougeLetter() {
                     "Text3":otherInfo.respondent.fname,
                     "Text4":otherInfo.respondent.address,
                     "Text5":"First",//make it dynamic
-                    "Text6": otherInfo.DateOfMeeting,//Month Day, Year
-                    "Text7":otherInfo.DateOfMeeting,//Day
-                    "Text8":otherInfo.DateOfMeeting,//MonthYear
-                    "Text9":otherInfo.DateOfMeeting,//Time
-                    "Text10":"Morning",//Collective
-                    "Text11":otherInfo.DateOfMeeting,//Day
+                    "Text6": `${month} ${day}, ${year}`,//Month Day, Year
+                    "Text7":day,//Day
+                    "Text8":`${month} ${year}`,//MonthYear
+                    "Text9":time12,//Time
+                    "Text10":collective,//Collective
+                    "Text11":day,//Day
                     "Text12":otherInfo.DateOfMeeting,//MonthYear
                     "Text14":user?.fullName,    
                 }
