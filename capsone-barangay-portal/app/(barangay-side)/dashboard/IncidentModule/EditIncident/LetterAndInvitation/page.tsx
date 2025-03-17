@@ -245,8 +245,15 @@ export default function GenerateDialougeLetter() {
             collective = "Evening";
         }
 
+        const date = new Date();
+        const dayToday = date.toISOString();
 
-        
+        const issueDay = dayToday.split("T")[0].split("-")[2];
+        const issueMonthIndex = parseInt(dayToday.split("T")[0].split("-")[1], 10) - 1;
+        const issueMonth = monthNames[issueMonthIndex];
+        const issueYear = dayToday.split("T")[0].split("-")[0];
+
+       console.log(dayToday); 
        try{ 
         const response = await fetch("/api/fillPDF", {
             method: "POST",
@@ -267,8 +274,8 @@ export default function GenerateDialougeLetter() {
                     "Text8":`${month} ${year}`,//MonthYear
                     "Text9":time12,//Time
                     "Text10":collective,//Collective
-                    "Text11":day,//Day
-                    "Text12":otherInfo.DateOfMeeting,//MonthYear
+                    "Text11":issueDay,//Day
+                    "Text12":`${issueMonth} ${issueYear}`,//MonthYear
                     "Text14":user?.fullName,    
                 }
             })
@@ -285,7 +292,8 @@ export default function GenerateDialougeLetter() {
        catch(e:any){
         console.log()
        } 
-    }
+    
+}
 
     const onSubmit = (e: any) => {
         e.preventDefault();
