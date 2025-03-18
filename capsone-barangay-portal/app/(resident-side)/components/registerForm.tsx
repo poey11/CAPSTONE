@@ -193,7 +193,7 @@ const registerForm:React.FC = () => {
 
      
     return ( 
-      <main className="main-container">
+      <main className="main-container-register-form">
         {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
@@ -211,12 +211,12 @@ const registerForm:React.FC = () => {
                 </div>
             )}
 
-        <div className="register-section">
+        <div className="register-section-register-form">
           <h1>Register</h1>
           <form className="register-form" onSubmit={handleSubmit}> {/* Use onSubmit to trigger the redirect */}
-            <div className="form-group">
-              <label htmlFor="sex" className="form-label">Sex:</label>
-              <select  value={resident.sex}  onChange={handleChange} id="sex" name="sex"  className="form-input" required>
+            <div className="form-group-register-form">
+              <label htmlFor="sex" className="form-label-register-form">Sex:</label>
+              <select  value={resident.sex}  onChange={handleChange} id="sex" name="sex"  className="form-input-register-form " required>
                 <option value="" disabled>Select a Sex</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -224,78 +224,78 @@ const registerForm:React.FC = () => {
             
             </div>
 
-            <div className="form-group">
-            <label htmlFor="first_name" className="form-label">First Name: </label>
+            <div className="form-group-register-form">
+            <label htmlFor="first_name" className="form-label-register-form">First Name: </label>
             <input value={resident.first_name} onChange={handleChange} id="first_name" 
             type="text" name="first_name" 
-            className="form-input"
+            className="form-input-register-form "
             placeholder= "Enter Name"
             required />
 
             </div>
 
-            <div className="form-group">
-            <label htmlFor="last_name" className="form-label" >Last Name: </label>  
+            <div className="form-group-register-form">
+            <label htmlFor="last_name" className="form-label-register-form" >Last Name: </label>  
             
 
               <input value={resident.last_name} onChange={handleChange} id="last_name" 
               type="text" name="last_name" 
-              className="form-input" 
+              className="form-input-register-form " 
               placeholder="Enter Last Name"
               required/>
 
             </div>
 
-            <div className="form-group">
-            <label htmlFor="email" className="form-label" >Email: </label>
+            <div className="form-group-register-form">
+            <label htmlFor="email" className="form-label-register-form" >Email: </label>
             <input  value={resident.email} onChange={handleChange} id="email" 
             type="email" name="email" 
-            className="form-input" 
+            className="form-input-register-form " 
             placeholder="Enter Email"
             required />
             </div>
 
-            <div className="form-group">
-            <label htmlFor="phone" className="form-label" >Phone: </label>
+            <div className="form-group-register-form">
+            <label htmlFor="phone" className="form-label-register-form" >Phone: </label>
             <input  value={resident.phone} onChange={handleChange} id="phone" 
             type="tel" name="phone"
-            className="form-input" 
+            className="form-input-register-form " 
             placeholder="Enter Phone Number"
             required />
             </div>
 
 
-            <div className="form-group">
-            <label htmlFor="address" className="form-label">Address: </label>
+            <div className="form-group-register-form">
+            <label htmlFor="address" className="form-label-register-form">Address: </label>
             <input value={resident.address} onChange={handleChange} id="address" 
             type="text" name="address" 
-            className="form-input" 
+            className="form-input-register-form " 
             placeholder="Enter Address"
             required />
             </div>
 
 
-            <div className="form-group">
-            <label htmlFor="password" className="form-label">Password: </label>
+            <div className="form-group-register-form">
+            <label htmlFor="password" className="form-label-register-form">Password: </label>
             <input value={resident.password} onChange={handleChange} id="password"
             type="password" name="password" 
-            className="form-input"
+            className="form-input-register-form "
             placeholder="Enter Password"
             required/>
             </div>
 
-            <div className="form-group">
-            <label htmlFor="confirm_password" className="form-label">Confirm Password: </label>
+            <div className="form-group-register-form">
+            <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password: </label>
             <input id="confirm_password" type="password"
             name="confirm_password"
-            className="form-input"
+            className="form-input-register-form "
             placeholder="Confirm Password"
             />
             </div>
 
 
             <div className="signature/printedname-container">
-              <label className="form-label">Upload Valid ID with address: </label>
+              <label className="form-label-register-form">Upload Valid ID with address: </label>
 
               <div className="file-upload-container">
                 <label htmlFor="upload" className="upload-link">Click to Upload File</label>
@@ -360,7 +360,7 @@ const registerForm:React.FC = () => {
             </div>
 
             <div className="form-checkbox-section">
-            <label htmlFor="terms" className="form-label">I agree to the terms and conditions</label>
+            <label htmlFor="terms" className="form-label-register-form">I agree to the terms and conditions</label>
             <input id="terms" onChange={handleCheckBox}  type="checkbox" name="terms" className="form-checkbox" />
             </div>
 

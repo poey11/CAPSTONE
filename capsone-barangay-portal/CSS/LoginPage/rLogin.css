@@ -1,4 +1,4 @@
-.login-container {
+.login-container-resident {
     height: 100vh;
     width: 100vw;
     display: flex;
@@ -8,7 +8,7 @@
     overflow: hidden; /* Prevent scrolling */
   }
 
-  .login-container::before {
+  .login-container-resident::before {
     content: '';
     position: absolute;
     top: 0;
@@ -24,7 +24,7 @@
     height:100%;
   }
 
-  .login-container::after {
+  .login-container-resident::after {
     content: '';
     position: absolute;
     top: 0;
@@ -35,19 +35,19 @@
     z-index: 2; /* Overlay above blurred background */
   }
 
-  .login-container > * {
+  .login-container-resident > * {
     position: relative;
     z-index: 3; /* Ensure content is above overlay and background */
   }
 
-  .login-contents{
+  .login-contents-resident{
     height: 100%;
     display: flex;
     align-items: center; /* Vertical centering */
     justify-content: center; /* Horizontal centering */
   }
 
-  .login-card{
+  .login-card-resident{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -59,24 +59,26 @@
 
   }
 
-  .section1{
+  .section1-resident{
     margin-top: 50px;
   }
 
-  .form-group {
+  .form-group-resident {
     margin-top: 13px;
     margin-bottom: 0px;
   }
 
 
-.form-label {
+  
+
+.form-label-resident {
   display: block;
   font-size: 16px;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.5);
 }
 
-.form-input {
+.form-input-resident {
   width: 500px;
   padding: 10px;
   font-size: 16px;
@@ -87,36 +89,38 @@
   accent-color: #f49028; 
 }
 
-.form-input:focus {
+.form-input-resident:focus {
   border-color: #f49028;
   outline: none;
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
 
-.section2{
+  
+
+.section2-resident{
   margin-top: 30px;
   display: flex;
   justify-content: center;
   gap: 130px;
 }
 
-.section2options{
+.section2options-resident{
   font-size: 14px;
   color: rgba(0, 0, 0, 0.5);
   font-weight: bold;
 }
 
-.section2options:hover{
+.section2options-resident:hover{
   color: #e56723;
 }
 
-.section3{
+.section3-resident{
   margin-top:45px;
   display:flex;
   justify-content: center;
 }
 
-.submit-button {
+.submit-button-resident {
   padding: 10px 20px;
   font-size: 16px;
   background-color:rgb(245, 143, 88);
@@ -128,7 +132,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
 }
 
-.submit-button:hover {
+.submit-button-resident:hover {
   background-color: #e56723;
 }
 

@@ -45,7 +45,7 @@ const bLoginForm:React.FC = () => {
     }
 
     return (  
-        <main className="main-container">
+        <main className="main-container-officer-login">
 
             {showErrorPopup && (
                 <div className="popup-overlay">
@@ -55,46 +55,46 @@ const bLoginForm:React.FC = () => {
                     </div>
                 </div>
             )}
-            <div className="login-section">
-                <div className="first-section">
+            <div className="login-section-officer">
+                <div className="first-section-officer">
                     <img 
                         src="/Images/QCLogo.png" 
                         alt="Barangay Captain" 
-                        className="logo-image" 
+                        className="logo-image-officer" 
                     />
                 </div>
 
-                <div className="second-section">
+                <div className="second-section-officer">
                     <form onSubmit={handleLogin}>
-                        <div className="section1">
-                            <div className="form-group">
-                                <label htmlFor="username" className="form-label">User ID: </label>
+                        <div className="section1-officer">
+                            <div className="form-group-officer">
+                                <label htmlFor="username" className="form-label-officer">User ID: </label>
                                 <input 
                                     type="text"  
                                     onChange={handleChange} value={official.username}
                                     id="username"  
                                     name="username"  
-                                    className="form-input"  
+                                    className="form-input-officer"  
                                     required  
                                 />
                             </div>
 
-                            <div className="form-group">
-                                <label htmlFor="password" className="form-label">Password</label>
+                            <div className="form-group-officer">
+                                <label htmlFor="password" className="form-label-officer">Password</label>
                                 <input 
                                     onChange={handleChange} value={official.password}
                                     type="password"  
                                     id="password"  
                                     name="password"  
-                                    className="form-input" 
+                                    className="form-input-officer" 
                                     required  
                                 />
                             </div>
                         </div>
 
 
-                        <div className="section3">
-                            <button type="submit" className="submit-button">Login</button>
+                        <div className="section3-officer">
+                            <button type="submit" className="submit-button-officer">Login</button>
                         </div>
 
                     </form> 
