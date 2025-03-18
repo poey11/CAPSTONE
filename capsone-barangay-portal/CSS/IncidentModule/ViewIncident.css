@@ -1,4 +1,4 @@
-.main-container {
+.main-container-view {
   width: 100%;
   height: 100vh;
   background-color: #f9f9f9;
@@ -11,7 +11,7 @@
 }
 
 
-.main-content {
+.main-content-view {
 display: flex;
 flex-direction: column;
 align-self: center;
@@ -22,7 +22,7 @@ margin-top: 3rem;
 }
 
 
-.back-button {
+.back-button-view {
     background-image: url('/Images/left-arrow.png');
     background-size: contain;
     background-repeat: no-repeat;
@@ -33,19 +33,19 @@ margin-top: 3rem;
     padding: 0;
   }
   
-  .back-button:hover {
+  .back-button-view:hover {
     transform: scale(1.1); 
     transition: transform 0.2s ease;
   }
 
-  .section-1 {
+  .section-1-view {
     display: flex;
     border-bottom: 2px solid #ddd;
     width: 100%;
     padding: 2rem;
   }
 
-  .section-1 p {
+  .section-1-view p {
     font-weight: bold;
     color: grey;
     margin-left: 1rem;
@@ -53,30 +53,30 @@ margin-top: 3rem;
     
   }
 
-  .details-section {
+  .details-section-view {
     display: flex;
     border-bottom: 2px solid #ddd;
   }
 
-  .title {
+  .title-view {
     width: 15%;
     display: flex;
     justify-content: center;
     align-items: center;
   }
 
-  .title p {
+  .title-view p {
     font-weight: bold;
     color: grey;
     font-size: 1rem;
   }
 
-  .description {
+  .description-view {
     padding: 2rem;
     width: 80%;
   }
 
-  .description p {
+  .description-view p {
 
     color: grey;
     font-size: 1rem;
@@ -110,7 +110,7 @@ margin-top: 3rem;
     font-size: 15px;
   }
 
-  .status-badge {
+  .status-badge-view {
     padding: 10px 14px;            
     border-radius: 5px;          
     font-size: 15px;              
@@ -122,7 +122,7 @@ margin-top: 3rem;
     margin-top: 1rem;  
 }
 
-.status-section {
+.status-section-view {
   display: flex;
   justify-content: flex-end; 
   width: 100%; 

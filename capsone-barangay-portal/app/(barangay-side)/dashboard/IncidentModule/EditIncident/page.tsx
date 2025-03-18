@@ -304,14 +304,14 @@ export default function EditLuponIncident() {
   return (
     <>
       {loading ? (       <p></p> ) : (
-        <main className="main-container">
+        <main className="main-container-edit">
         
-          <div className="letters-content">
-               <button className="letter-announcement-btn" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialouge Letter</button>
-               <button className="letter-announcement-btn" name="summon" onClick={handleGenerateLetterAndInvitation}>Generate Summon Letter</button>
+          <div className="letters-content-edit">
+               <button className="letter-announcement-btn-edit" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialouge Letter</button>
+               <button className="letter-announcement-btn-edit" name="summon" onClick={handleGenerateLetterAndInvitation}>Generate Summon Letter</button>
                <select
                            id="status"
-                           className={`status-dropdown ${status}`}  
+                           className={`status-dropdown-edit ${status}`}  
                            name="status"
                             value={toUpdate.status ?? reportData.status ?? "Pending"} // Show db value or user-updated value
                            onChange={handleFormChange}               
@@ -326,28 +326,28 @@ export default function EditLuponIncident() {
           </div>
  
          
-          <form className="main-content" onSubmit={handleSubmit}>
-          <button type="button" className="back-button" onClick={handleBack}></button>
+          <form className="main-content-edit" onSubmit={handleSubmit}>
+          <button type="button" className="back-button-edit" onClick={handleBack}></button>
         
 
-               <div className="section-1">
-                   <p className="NewOfficial"> {reportData.caseNumber}</p>
-                       <div className="actions">
-                           <button type="button" className="action-delete" onClick={handleDeleteForm}>Delete</button>
-                           <button type="submit" className="action-view">Save</button>                 
+               <div className="section-1-edit">
+                   <p className="NewOfficial-edit"> {reportData.caseNumber}</p>
+                       <div className="actions-edit">
+                           <button type="button" className="action-delete-edit" onClick={handleDeleteForm}>Delete</button>
+                           <button type="submit" className="action-view-edit">Save</button>                 
                        </div>
                 </div>
         
         
-              <div className="section-2">
-                  <div className="section-2-left-side">
+              <div className="section-2-edit">
+                  <div className="section-2-left-side-edit">
 
                       <p >Update Complainant's Information</p>
                       <p>First Name</p>
 
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder={reportData.complainant.fname} 
                       name="complainant.fname"
                       id="complainant.fname"
@@ -358,7 +358,7 @@ export default function EditLuponIncident() {
 
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder= {reportData.complainant.lname}
                       value={toUpdate.complainant.lname}
                       name="complainant.lname"
@@ -368,7 +368,7 @@ export default function EditLuponIncident() {
 
                     <p>Sex</p>
                     <select 
-                      className="featuredStatus"                     
+                      className="featuredStatus-edit"                     
                       name="complainant.sex" 
                       id="complainant.sex"
                       value={toUpdate.complainant.sex || reportData.complainant.sex || ""} // Show db value or user-updated value
@@ -384,7 +384,7 @@ export default function EditLuponIncident() {
 
                       <input 
                       type="text" 
-                      className="search-bar"  
+                      className="search-bar-edit"  
                       placeholder={reportData.complainant.age} 
                       value={toUpdate.complainant.age}
                       name="complainant.age"
@@ -395,7 +395,7 @@ export default function EditLuponIncident() {
                       <p>Civil Status</p>
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder={reportData.complainant.civilStatus} 
                       value={toUpdate.complainant.civilStatus}
                       name="complainant.civilStatus"
@@ -407,7 +407,7 @@ export default function EditLuponIncident() {
 
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder={reportData.complainant.address}
                       value={toUpdate.complainant.address}
                       name="complainant.address"
@@ -419,7 +419,7 @@ export default function EditLuponIncident() {
 
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder={reportData.complainant.contact}
                       value={toUpdate.complainant.contact}
                       name="complainant.contact"
@@ -430,14 +430,14 @@ export default function EditLuponIncident() {
 
                   </div>
 
-                  <div className="section-2-right-side">
+                  <div className="section-2-right-side-edit">
 
                   <p >Update Respondent's Information</p>
                       <p>First Name</p>
 
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder={reportData.respondent.fname}
                       value={toUpdate.respondent.fname}
                       name="respondent.fname"
@@ -448,7 +448,7 @@ export default function EditLuponIncident() {
 
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder={reportData.respondent.lname}
                       value={toUpdate.respondent.lname}
                       name="respondent.lname"
@@ -459,7 +459,7 @@ export default function EditLuponIncident() {
 
                     <p>Sex</p>
                     <select 
-                      className="featuredStatus"                     
+                      className="featuredStatus-edit"                     
                       name="respondent.sex" 
                       id="respondent.sex"
                       value={toUpdate.respondent.sex || reportData.respondent.sex || ""} // Show db value or user-updated value
@@ -475,7 +475,7 @@ export default function EditLuponIncident() {
 
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder={reportData.respondent.age}
                       value={toUpdate.respondent.age}
                       name="respondent.age"
@@ -487,7 +487,7 @@ export default function EditLuponIncident() {
                       <p>Civil Status</p>
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder={reportData.respondent.civilStatus}
                       value={toUpdate.respondent.civilStatus}
                       name="respondent.civilStatus"
@@ -500,7 +500,7 @@ export default function EditLuponIncident() {
 
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder={reportData.respondent.address}
                       value={toUpdate.respondent.address}
                       name="respondent.address"
@@ -513,7 +513,7 @@ export default function EditLuponIncident() {
 
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder={reportData.respondent.contact} 
                       value={toUpdate.respondent.contact}
                       name="respondent.contact"
@@ -528,13 +528,13 @@ export default function EditLuponIncident() {
 
         
         
-               <div className="section-3">
-                   <p className="title">Incident Information</p>
+               <div className="section-3-edit">
+                   <p className="title-edit">Incident Information</p>
 
-                   <div className="bars">
-                       <div className="input-group">
+                   <div className="bars-edit">
+                       <div className="input-group-edit">
                            <p>Nature of Complaint</p>
-                           <input type="text" className="search-bar" 
+                           <input type="text" className="search-bar-edit" 
                             placeholder={reportData.nature}
                             value={toUpdate.nature}
                             name="nature"
@@ -542,9 +542,9 @@ export default function EditLuponIncident() {
                             onChange={handleFormChange}/>
                        </div>
         
-                       <div className="input-group">
+                       <div className="input-group-edit">
                            <p>Location</p>
-                           <input type="text" className="search-bar" 
+                           <input type="text" className="search-bar-edit" 
                            placeholder={reportData.location} 
                            value={toUpdate.location}
                            name="location"
@@ -552,27 +552,27 @@ export default function EditLuponIncident() {
                            onChange={handleFormChange}/>
                        </div>
 
-                       <div className="input-group">
+                       <div className="input-group-edit">
                            <p>Date & Time Filed</p>
-                           <input type="text" className="search-bar" placeholder={`${reportData.dateFiled} ${reportData.timeFiled}`} disabled/>
+                           <input type="text" className="search-bar-edit" placeholder={`${reportData.dateFiled} ${reportData.timeFiled}`} disabled/>
                        </div>
 
                        {department === "GAD" && (
                       <div>
-                        <div className="input-group">
+                        <div className="input-group-edit">
                           <p>Nos of Male Children Victim/s</p>
                           <input type="number" 
-                          className="search-bar"
+                          className="search-bar-edit"
                           value={toUpdate.nosofMaleChildren || reportData.nosofMaleChildren}
                           onChange={handleFormChange}
                           name="nosofMaleChildren"
                           required />    
                         </div>
 
-                        <div className="input-group">
+                        <div className="input-group-edit">
                           <p>Nos of Female Children Victim/s</p>
                           <input type="number"
-                            className="search-bar"
+                            className="search-bar-edit"
                             
                             value={toUpdate.nosofFemaleChildren||reportData.nosofFemaleChildren}
                             name="nosofFemaleChildren"
@@ -585,16 +585,16 @@ export default function EditLuponIncident() {
                    </div>
 
 
-                   <p className="title">Complainant/s Recieved By</p>
-                  <div className="bars">
+                   <p className="title-edit">Complainant/s Recieved By</p>
+                  <div className="bars-edit">
 
-                    <div className="input-group">
+                    <div className="input-group-edit">
 
                       <p>Barangay Desk Officer First Name</p>
 
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder={reportData.receivedBy.split(" ")[0]} 
                       value={toUpdate.fname}
                       name="fname"
@@ -604,13 +604,13 @@ export default function EditLuponIncident() {
 
                     </div>
 
-                      <div className="input-group">
+                      <div className="input-group-edit">
 
                       <p>Barangay Desk Officer Last Name</p>
 
                       <input 
                       type="text" 
-                      className="search-bar" 
+                      className="search-bar-edit" 
                       placeholder={reportData.receivedBy.split(" ")[1]} 
                       value={toUpdate.lname}
                       name="lname"
@@ -621,9 +621,9 @@ export default function EditLuponIncident() {
                     </div>
 
 
-                    <div className="input-group">
+                    <div className="input-group-edit">
                           <p>Date & Time Received</p>
-                          <input type="text" className="search-bar" placeholder={`${reportData.dateReceived} ${reportData.timeReceived}`} id="dateReceived" name="dateReceived" 
+                          <input type="text" className="search-bar-edit" placeholder={`${reportData.dateReceived} ${reportData.timeReceived}`} id="dateReceived" name="dateReceived" 
                         disabled />
                       </div>
 
@@ -632,11 +632,11 @@ export default function EditLuponIncident() {
 
                   </div>
 
-                  <p  className="title">Investigated Conducted By</p>
-                    <div className="bars">
-                        <div className="input-group">
+                  <p  className="title-edit">Investigated Conducted By</p>
+                    <div className="bars-edit">
+                        <div className="input-group-edit">
                             <p>Investigator Full Name (FN SN)</p>
-                            <input type="text" className="search-bar" 
+                            <input type="text" className="search-bar-edit" 
                             placeholder={reportData?.investigator?.fullname ?? "Enter Full Name"}
                             value={toUpdate?.investigator.fullname}
                             name="investigator.fullname"
@@ -645,9 +645,9 @@ export default function EditLuponIncident() {
                             />
                         </div>
 
-                        <div className="input-group">
+                        <div className="input-group-edit">
                             <p>Date Investigated</p>
-                            <input type="date" className="search-bar" 
+                            <input type="date" className="search-bar-edit" 
                               value={toUpdate?.investigator?.dateInvestigated || reportData?.investigator?.dateInvestigated || ""}
                               name="investigator.dateInvestigated"
                               id="investigator.dateInvestigated"
@@ -655,9 +655,9 @@ export default function EditLuponIncident() {
                   
                               />
                         </div>
-                        <div className="input-group">
+                        <div className="input-group-edit">
                             <p>Time Investigated</p>
-                            <input type="time" className="search-bar" 
+                            <input type="time" className="search-bar-edit" 
                             value={toUpdate?.investigator?.timeInvestigated || reportData?.investigator?.timeInvestigated  || ""} 
                             name="investigator.timeInvestigated"
                             id="investigator.timeInvestigated"
@@ -667,18 +667,18 @@ export default function EditLuponIncident() {
                         </div>
                     </div>
 
-                    <p  className="title">Image of Incident</p>
-                    <div className="description">
+                    <p  className="title-edit">Image of Incident</p>
+                    <div className="description-edit">
                       {concernImageUrl ? (
                         <>
                           <a href={concernImageUrl} target="_blank" rel="noopener noreferrer">
 
-                            <img src={concernImageUrl} alt="Incident" className="incident-image"  style={{ width: '30%', height: '100%', marginRight: '5px', cursor: "pointer" }} />
+                            <img src={concernImageUrl} alt="Incident" className="incident-image-edit"  style={{ width: '30%', height: '100%', marginRight: '5px', cursor: "pointer" }} />
                           </a>
                         </>
 
                        ) : ( 
-                         <div className="input-group">
+                         <div className="input-group-edit">
                            <p style={{ color: "gray", fontStyle: "italic" }}>No image available</p>
                          </div>
                        )}
@@ -688,14 +688,14 @@ export default function EditLuponIncident() {
                      
                      
                      
-               <div className="section-4">
+               <div className="section-4-edit">
                      
-                   <div className="section-4-left-side">
+                   <div className="section-4-left-side-edit">
                      
-                     <div className="fields-section">
+                     <div className="fields-section-edit">
                                  <p>Investigation Report</p>
                                      <textarea 
-                                          className="description" 
+                                          className="description-edit" 
                                           placeholder="Enter Investigation Report"
                                           rows={15}
                                           value={toUpdate.investigator.investigationReport}
@@ -707,33 +707,33 @@ export default function EditLuponIncident() {
                      
                     </div>
                      
-               <div className="section-4-right-side">
+               <div className="section-4-right-side-edit">
                      
-                 <div className="title">
+                 <div className="title-edit">
                        <p> Photo of Investigation (if Applicable)</p>
                  </div> 
                      
-                 <div className="file-upload-container">
-                   <label htmlFor="file-upload1" className="upload-link">Click to Upload File</label>
+                 <div className="file-upload-container-edit">
+                   <label htmlFor="file-upload1" className="upload-link-edit">Click to Upload File</label>
                    <input
                      id="file-upload1"
                      type="file"
-                     className="file-upload-input"
+                     className="file-upload-input-edit"
                      accept=".jpg,.jpeg,.png"
                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                        handleFileChangeContainer1(e);
                        handleFormChange(e);
                      }} // Handle file selection
                    />
-                   <div className="uploadedFiles-container">
+                   <div className="uploadedFiles-container-edit">
                      {filesContainer1.length > 0 && (
-                       <div className="file-name-image-display">
+                       <div className="file-name-image-display-edit">
                          <ul>
                            {filesContainer1.map((file, index) => (
-                             <div className="file-name-image-display-indiv" key={index}>
+                             <div className="file-name-image-display-indiv-edit" key={index}>
                                <li>
                                  {file.preview && (
-                                   <div className="filename-image-container">
+                                   <div className="filename-image-container-edit">
                                      <img
                                        src={file.preview}
                                        alt={file.name}
@@ -743,16 +743,16 @@ export default function EditLuponIncident() {
                                    </div>
                                  )}
                                  {file.name}
-                                 <div className="delete-container">
+                                 <div className="delete-container-edit">
                                    <button
                                      type="button"
                                      onClick={() => handleFileDeleteContainer1(file.name)}
-                                     className="delete-button"
+                                     className="delete-button-edit"
                                    >
                                      <img
                                        src="/images/trash.png"
                                        alt="Delete"
-                                       className="delete-icon"
+                                       className="delete-icon-edit"
                                      />
                                    </button>
                                  </div>
@@ -770,77 +770,77 @@ export default function EditLuponIncident() {
            
         </form>
      
-         <div className="dialouge-meeting-section">
+         <div className="dialouge-meeting-section-edit">
               
-                 <div className="title-section">
-                     <button type="button" className="plus-button" onClick={handleToggleClick}></button>
-                     <p className="NewOfficial">Dialogue Meeting</p>
+                 <div className="title-section-edit">
+                     <button type="button" className="plus-button-edit" onClick={handleToggleClick}></button>
+                     <p className="NewOfficial-edit">Dialogue Meeting</p>
                  </div>
  
                  {showDialogueContent && (
                      <>
-                         <div className="section-2-dialouge">
+                         <div className="section-2-dialouge-edit">
                              <p>Complainant's Information</p>
-                             <div className="bars">
-                                 <div className="input-group">
+                             <div className="bars-edit">
+                                 <div className="input-group-edit">
                                      <p>Date</p>
-                                     <input type="date" className="search-bar" placeholder="Enter Date" />
+                                     <input type="date" className="search-bar-edit" placeholder="Enter Date" />
                                  </div>
-                                 <div className="input-group">
+                                 <div className="input-group-edit">
                                      <p>For</p>
-                                     <input type="text" className="search-bar" placeholder="Enter For" />
+                                     <input type="text" className="search-bar-edit" placeholder="Enter For" />
                                  </div>
-                                 <div className="input-group">
+                                 <div className="input-group-edit">
                                      <p>Time</p>
-                                     <input type="time" className="search-bar" placeholder="Enter Time" />
+                                     <input type="time" className="search-bar-edit" placeholder="Enter Time" />
                                  </div>
                              </div>
                          </div>
  
-                         <div className="section-3-dialouge">
-                             <div className="fields-section">
+                         <div className="section-3-dialouge-edit">
+                             <div className="fields-section-edit">
                                  <p>Minutes of Dialogue</p>
-                                 <textarea className="description" placeholder="Enter Minutes of Dialogue" rows={13}></textarea>
+                                 <textarea className="description-edit" placeholder="Enter Minutes of Dialogue" rows={13}></textarea>
                              </div>
                          </div>
  
-                         <div className="section-4-dialouge">
-                             <div className="fields-section">
+                         <div className="section-4-dialouge-edit">
+                             <div className="fields-section-edit">
                                  <p>Remarks</p>
-                                 <textarea className="description" placeholder="Enter Remarks" rows={10}></textarea>
+                                 <textarea className="description-edit" placeholder="Enter Remarks" rows={10}></textarea>
                              </div>
-                             <div className="fields-section">
+                             <div className="fields-section-edit">
                                  <p>Parties</p>
-                                 <textarea className="description" placeholder="Enter Parties" rows={10}></textarea>
+                                 <textarea className="description-edit" placeholder="Enter Parties" rows={10}></textarea>
                              </div>
                          </div>
                      </>
                  )}
              </div>
  
-     <div className="hearing-section">
+     <div className="hearing-section-edit">
          
-             <div className="title-section">
-                 <button type="button" className="plus-button" onClick={handleToggleClick}></button>
-                 <p className="NewOfficial">First Hearing</p>
+             <div className="title-section-edit">
+                 <button type="button" className="plus-button-edit" onClick={handleToggleClick}></button>
+                 <p className="NewOfficial-edit">First Hearing</p>
              </div>
  
  
      </div>
  
-     <div className="hearing-section">
+     <div className="hearing-section-edit">
          
-             <div className="title-section">
-                 <button type="button" className="plus-button" onClick={handleToggleClick}></button>
-                 <p className="NewOfficial">Second Hearing</p>
+             <div className="title-section-edit">
+                 <button type="button" className="plus-button-edit" onClick={handleToggleClick}></button>
+                 <p className="NewOfficial-edit">Second Hearing</p>
              </div>
      </div>
  
-     <div className="hearing-section">
+     <div className="hearing-section-edit">
          
-         <div className="title-section">
-             <button type="button" className="plus-button" onClick={handleToggleClick}></button>
-             <p className="NewOfficial">Third Hearing</p>
+         <div className="title-section-edit">
+             <button type="button" className="plus-button-edit" onClick={handleToggleClick}></button>
+             <p className="NewOfficial-edit">Third Hearing</p>
          </div>
      </div>
  

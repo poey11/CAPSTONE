@@ -146,78 +146,78 @@ export default  function ViewLupon() {
     };
 
   return (
-    <main className="main-container">
+    <main className="main-container-view">
 
-          <div className="status-section">
-          <p className={`status-badge ${getStatusClass(status)}`}>{status}</p> 
+          <div className="status-section-view">
+          <p className={`status-badge-view ${getStatusClass(status)}`}>{status}</p> 
           </div>
 
      
-      <div className="main-content">
-        <div className="section-1">
+      <div className="main-content-view">
+        <div className="section-1-view">
     
-            <button type="submit" className="back-button" onClick={handleViewLupon}></button>
+            <button type="submit" className="back-button-view" onClick={handleViewLupon}></button>
   
           <p>Complainant's Details</p>
         </div>
 
         {complainantsFields.map((field) => (
-          <div className="details-section" key={field.key}>
-            <div className="title">
+          <div className="details-section-view" key={field.key}>
+            <div className="title-view">
               <p>{field.label}</p>
             </div>
-            <div className="description">
+            <div className="description-view">
               <p>{complainantsData[field.key as keyof typeof complainantsData]}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="main-content">
-        <div className="section-1">
+      <div className="main-content-view">
+        <div className="section-1-view">
           <p>Respondent's Details</p>
         </div>
 
         {respondentsField.map((field) => (
-          <div className="details-section" key={field.key}>
-            <div className="title">
+          <div className="details-section-view" key={field.key}>
+            <div className="title-view">
               <p>{field.label}</p>
             </div>
-            <div className="description">
+            <div className="description-view">
               <p>{respondent[field.key as keyof typeof respondent]}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="main-content">
-        <div className="section-1">
+      <div className="main-content-view">
+        <div className="section-1-view">
           <p>Barangay Desk Officer's Details</p>
         </div>
 
         {deskOfficerFields.map((field) => (
-          <div className="details-section" key={field.key}>
-            <div className="title">
+          <div className="details-section-view" key={field.key}>
+            <div className="title-view">
               <p>{field.label}</p>
             </div>
-            <div className="description">
+            <div className="description-view">
               <p>{deskOfficerData[field.key as keyof typeof deskOfficerData]}</p>
             </div>
           </div>
        ))}
       </div>
 
-      <div className="main-content">
-        <div className="section-1">
+      <div className="main-content-view">
+        <div className="section-1-view">
           <p>Incident Information</p>
         </div>
 
         {otherinformationFields.map((field) => (
-          <div className="details-section" key={field.key}>
-            <div className="title">
+          <div className="details-section-view" key={field.key}>
+            <div className="title-view">
               <p>{field.label}</p>
             </div>
-            <div className="description">
+            <div className="description-view">
               {field.key === "image" ? (
                 otherinformation.image ? ( // ✅ Check if image exists
                   <>
@@ -240,16 +240,16 @@ export default  function ViewLupon() {
             {departId === "GAD" && field.key === "location" && (
               <>
                
-                <div className="title">
+                <div className="title-view">
                   <p>Nos of Male Children Victim/s</p>
                 </div>
-                <div className="description">
+                <div className="description-view">
                     <p>{reportData?.nosofMaleChildren}</p>
                 </div>
-                <div className="title">
+                <div className="title-view">
                   <p>Nos of Female Children Victim/s</p>
                 </div>
-                <div className="description">
+                <div className="description-view">
                     <p>{reportData?.nosofFemaleChildren}</p>
                 </div>
               </>
@@ -262,17 +262,17 @@ export default  function ViewLupon() {
        
       </div>
 
-      <div className="main-content">
-        <div className="section-1">
+      <div className="main-content-view">
+        <div className="section-1-view">
           <p>Investigator's Details</p>
         </div>
 
         {investigatorFields.map((field) => (
-          <div className="details-section" key={field.key}>
-            <div className="title">
+          <div className="details-section-view" key={field.key}>
+            <div className="title-view">
               <p>{field.label}</p>
             </div>
-            <div className="description">
+            <div className="description-view">
               <p>{investigateData[field.key as keyof typeof investigateData]}</p>
             </div>
           </div>
