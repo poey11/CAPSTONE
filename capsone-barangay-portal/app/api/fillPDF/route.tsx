@@ -11,14 +11,12 @@ export async function POST(req: NextRequest, res: NextResponse) {
         if (!location || !pdfTemplate || !data) {
             return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
         }
-            console.log("Center Field",centerField);
             try {
                 // Fetch PDF from Firebase Storage
                 const pdfRef = ref(storage, `${location}/${pdfTemplate}`);
                 const pdfUrl = await getDownloadURL(pdfRef);
                 const pdfResponse = await fetch(pdfUrl);
                 const pdfData = await pdfResponse.arrayBuffer();
-                console.log("📂 PDF Data Length:", pdfData.byteLength); // Should be > 0
 
                 // Load and modify the PDF
                 const pdfDoc = await PDFDocument.load(pdfData);
@@ -27,7 +25,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 }
             
                 const form = pdfDoc.getForm();
-                console.log("📄 PDF Form Fields:", form.getFields().map(f => f.getName()));
             
                 for (const key in data) {
                     const field = form.getField(key);
@@ -42,7 +39,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
                         
                         if (centerField.includes(key)) {
                             field.setAlignment(TextAlignment.Center);
-                            console.log(`🎯 Centered text for field: ${key}`);
                         }
                         
                     } else {

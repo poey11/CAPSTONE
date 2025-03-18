@@ -3,7 +3,7 @@ import "@/CSS/IncidentModule/Letters.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import {  useEffect,useState } from "react";
 import { getSpecificDocument } from "@/app/helpers/firestorehelper";
-import { doc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
 
@@ -32,9 +32,8 @@ export default function GenerateDialougeLetter() {
     });
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-    const [nosHearing, setNosHearing] = useState<any>(null);
+    let nosHearing = userInfo?.nosHearing || "";
 
- 
     useEffect(() => {
         
         if (docId) {
@@ -68,15 +67,17 @@ export default function GenerateDialougeLetter() {
       router.back();
     };
     
-    const handleUpdate = async () => {
-        /* create a new subcollection to store each generation of summon and dialogue letter per respondent/complaint */
+    const handleUpdate = async (listofUpdates:any) => {
         try {
-            if (docId) {
-                const docRef = doc(db, "IncidentReports", docId);
-                
-            } else {
-                throw new Error("Document ID is undefined");
-            }
+            if(!docId) throw new Error("Document ID is undefined");
+
+            const docRef = doc(db, "IncidentReports", docId);
+            const updates = listofUpdates.reduce((acc: { [key: string]: any }, update: { field: string | number; value: any; }) => {
+                acc[update.field] = update.value;
+                return acc;
+            }, {});
+
+            await updateDoc(docRef, updates);
         } catch (error) {
             console.error(error);
         }
@@ -165,7 +166,7 @@ export default function GenerateDialougeLetter() {
         catch(err) {
           console.log(err);
         }  
-      }
+    }
   
 
     const printDialouge = async () => {
@@ -195,41 +196,42 @@ export default function GenerateDialougeLetter() {
         
 
         try {
-            const response = await fetch("/api/fillPDF", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    location: "/IncidentReports/Templates",
-                    pdfTemplate: "TEST2 - Copy.pdf",
-                    data: {
-                        "Text16": otherInfo.complainant.fname,
-                        "Text15": otherInfo.complainant.address,
-                        "Text17": otherInfo.respondent.fname,
-                        "Text18": otherInfo.respondent.address,
-                        "Text20": day,
-                        "Text21": month,
-                        "Text22": year,
-                        "Text23": time12,
-                        "Text24": collective,
-                        "Text25": day,
-                        "Text28": month,
-                        "Text29": year,
-                        "Text27": user?.fullName,
-                        "Text19": otherInfo.LuponStaff,
-                    },
-                    centerField: ["Text27"]
-                })
-            });
-            if (!response.ok) throw new Error("Failed to generate PDF");
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "DialogueLetter.pdf";
-            a.click();
-            window.URL.revokeObjectURL(url);
+            // const response = await fetch("/api/fillPDF", {
+            //     method: "POST",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //     },
+            //     body: JSON.stringify({
+            //         location: "/IncidentReports/Templates",
+            //         pdfTemplate: "TEST2 - Copy.pdf",
+            //         data: {
+            //             "Text16": otherInfo.complainant.fname,
+            //             "Text15": otherInfo.complainant.address,
+            //             "Text17": otherInfo.respondent.fname,
+            //             "Text18": otherInfo.respondent.address,
+            //             "Text20": day,
+            //             "Text21": month,
+            //             "Text22": year,
+            //             "Text23": time12,
+            //             "Text24": collective,
+            //             "Text25": day,
+            //             "Text28": month,
+            //             "Text29": year,
+            //             "Text27": user?.fullName,
+            //             "Text19": otherInfo.LuponStaff,
+            //         },
+            //         centerField: ["Text27"]
+            //     })
+            // });
+            // if (!response.ok) throw new Error("Failed to generate PDF");
+            // const blob = await response.blob();
+            // const url = URL.createObjectURL(blob);
+            // const a = document.createElement("a");
+            // a.href = url;
+            // a.download = "DialogueLetter.pdf";
+            // a.click();
+            // window.URL.revokeObjectURL(url);
+            
         } catch (error) {
             console.error(error)
         }
@@ -262,55 +264,54 @@ export default function GenerateDialougeLetter() {
         const issueMonth = monthNames[issueMonthIndex];
         const issueYear = dayToday.split("T")[0].split("-")[0];
         
-        setNosHearing(userInfo?.hearingNumber);
-
+        
         if(nosHearing === null || nosHearing === undefined || nosHearing === ""){ 
-            setNosHearing("First");
+            nosHearing = "First";
         }
         else if (nosHearing === "First"){
-            setNosHearing("Second");
+            nosHearing = "Second";
         }
         else if (nosHearing === "Second"){
-            setNosHearing("Third");
+            nosHearing = "Third";
         }
+       
         
-       console.log(dayToday); 
        try{ 
-        const response = await fetch("/api/fillPDF", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                location: "/IncidentReports/Templates",
-                pdfTemplate: "summonTemplate.pdf",
-                data: {
-                    "Text1":otherInfo.complainant.fname,
-                    "Text2":otherInfo.complainant.address,
-                    "Text3":otherInfo.respondent.fname,
-                    "Text4":otherInfo.respondent.address,
-                    "Text5":nosHearing,//make it dynamic
-                    "Text6": `${month} ${day}, ${year}`,//Month Day, Year
-                    "Text7":day,//Day
-                    "Text8":`${month} ${year}`,//MonthYear
-                    "Text9":time12,//Time
-                    "Text10":collective,//Collective
-                    "Text11":issueDay,//Day
-                    "Text12":`${issueMonth} ${issueYear}`,//MonthYear
-                    "Text14":user?.fullName,    
-                },
-                centerField: ["Text5","Text7","Text10","Text11","Text14"]
-            })
-        });
-        if (!response.ok) throw new Error("Failed to generate PDF");
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "SummonLetter.pdf";
-        a.click();
-        window.URL.revokeObjectURL(url);
-       }
+        // const response = await fetch("/api/fillPDF", {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json",
+        //     },
+        //     body: JSON.stringify({
+        //         location: "/IncidentReports/Templates",
+        //         pdfTemplate: "summonTemplate.pdf",
+        //         data: {
+        //             "Text1":otherInfo.complainant.fname,
+        //             "Text2":otherInfo.complainant.address,
+        //             "Text3":otherInfo.respondent.fname,
+        //             "Text4":otherInfo.respondent.address,
+        //             "Text5":nosHearing,//make it dynamic
+        //             "Text6": `${month} ${day}, ${year}`,//Month Day, Year
+        //             "Text7":day,//Day
+        //             "Text8":`${month} ${year}`,//MonthYear
+        //             "Text9":time12,//Time
+        //             "Text10":collective,//Collective
+        //             "Text11":issueDay,//Day
+        //             "Text12":`${issueMonth} ${issueYear}`,//MonthYear
+        //             "Text14":user?.fullName,    
+        //         },
+        //         centerField: ["Text5","Text7","Text10","Text11","Text14"]
+        //     })
+        // });
+        // if (!response.ok) throw new Error("Failed to generate PDF");
+        // const blob = await response.blob();
+        // const url = URL.createObjectURL(blob);
+        // const a = document.createElement("a");
+        // a.href = url;
+        // a.download = "SummonLetter.pdf";
+        // a.click();
+        // window.URL.revokeObjectURL(url);
+``       }
        catch(e:any){
         console.log()
        } 
@@ -320,23 +321,25 @@ export default function GenerateDialougeLetter() {
     const onSubmit = (e: any) => {
         e.preventDefault();
         const action = e.nativeEvent.submitter.name;
-
-        handleUpdate().then(() => {
-            if (action === "print") {
-                if(actionId === "summon"){
-                    printSummon().then(() => {
-                        clearForm();
-                    });
-                }
-                else{
-                    printDialouge().then(() => {
-                        clearForm();
-                    });
-                }
-            } else if (action === "sendSMS") {
-                //sendSMSForDialogue();
+        if (action === "print") {
+            if(actionId === "summon"){
+                printSummon().then(() => {
+                    const updates = [{field:"nosHearing",value:nosHearing},{field:"summonFiled",value:otherInfo.DateFiled}];
+                    handleUpdate(updates);
+                    clearForm();
+                });
             }
-        });
+            else{
+                printDialouge().then(() => {
+                    const updates = [{field:"dialogueFiled",value:otherInfo.DateFiled},{field:"isDialogue",value:true}];
+                    handleUpdate(updates);
+                    clearForm();
+                });
+            }
+        } else if (action === "sendSMS") {
+            //sendSMSForDialogue();
+            //sendSMSForSummons();
+        }
         console.log(otherInfo);
     }
     
@@ -378,7 +381,6 @@ export default function GenerateDialougeLetter() {
                 contact: userInfo.respondent?.contact || ""
             }
         })
-        setNosHearing(null);
     }
     
 
