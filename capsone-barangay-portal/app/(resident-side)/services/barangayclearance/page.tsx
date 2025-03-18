@@ -1,62 +1,92 @@
 "use client"
-import type { Metadata } from "next";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
+import {useAuth} from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 
 
 
-const metadata:Metadata = { 
-  title: "Barangay Clearance",
-  description: "Barangay Clearance form page for the barangay website",
-};
+
 export default function BarangayCertificate() {
+  const {user} = useAuth();
+  const [clearanceInput, setClearanceInput] = useState({
+    accountType: user?.uid || "Guest",
+    purpose: "",
+    dateRequested: new Date().toISOString().split('T')[0],
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    dateOfResidency: "",
+    address: "",
+    birthday: "",
+    age: "",
+    gender: "",
+    civilStatus: "",
+    contact: "",
+    citizenship: "",
+    signaturejpg: "",
+    barangayIDjpg: "",
+    validIDjpg: "",
+    letterjpg: "",
+  })
 
+// State for all file containers
+const [files, setFiles] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files, setFiles] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files, setFiles] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files, setFiles] = useState<{ name: string, preview: string | undefined }[]>([]);
 
-
-    // State for all file containers
-    const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
-      container1: [],
-      container2: [],
-      container3: [],
-      container4: [],
-    });
-
-    // Handle file selection for any container
-    const handleFileChange = (container: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-      const selectedFiles = event.target.files;
-      if (selectedFiles) {
-        const fileArray = Array.from(selectedFiles).map((file) => {
-          const preview = URL.createObjectURL(file);
-          return { name: file.name, preview };
-        });
-        setFiles((prevFiles) => ({
-          ...prevFiles,
-          [container]: [...prevFiles[container], ...fileArray], // Append new files to the specified container
-        }));
+  // Handle file selection for any container
+  const handleFileChangeContainer1 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      
+      if (!validImageTypes.includes(selectedFile.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
       }
+
+      // Replace existing file instead of adding multiple
+      const preview = URL.createObjectURL(selectedFile);
+      setFiles([{ name: selectedFile.name, preview }]);
+    }
     };
 
-    // Handle file deletion for any container
-    const handleFileDelete = (container: string, fileName: string) => {
-      setFiles((prevFiles) => ({
-        ...prevFiles,
-        [container]: prevFiles[container].filter((file) => file.name !== fileName),
+
+  // Handle file deletion for any container
+  const handleFileDeleteContainer1 = (fileName: string) => {
+    setFiles([]);
+
+    // Reset file input
+    const fileInput = document.getElementById(fileName) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
+
+    
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const {name,value,type} = e.target;
+      if (type === "file" && e.target instanceof HTMLInputElement && e.target.files) {
+        setClearanceInput((prev:any) => ({
+            ...prev,
+            file: (e.target as HTMLInputElement).files?.[0] || null,
+        }));
+        return;
+    }
+
+
+      setClearanceInput((prev) => ({
+        ...prev,
+        [name]: value
       }));
-    };
+    }
 
     // Handle form submission
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
 
-      // Manually trigger form validation
-      const form = event.target as HTMLFormElement;
-      if (form.checkValidity()) {
-        // Redirect to the Notification page after form submission if validation is successful
-        document.location.href = '/services/notification'; // Use JavaScript redirection
-      } else {
-        // If the form is invalid, trigger the validation
-        form.reportValidity(); // This will show validation messages for invalid fields
-      }
+      console.log(clearanceInput); // Log the form data
     };
 
   return (
@@ -82,7 +112,8 @@ export default function BarangayCertificate() {
                 name="purpose" 
                 className="form-input" 
                 required
-                defaultValue=""  
+                value={clearanceInput.purpose}
+                onChange={handleChange}
               >
                 <option value="" disabled>Select purpose</option>
                 <option value="Loan">Loan</option>
@@ -92,46 +123,30 @@ export default function BarangayCertificate() {
                 <option value="Maynilad">Maynilad</option>
                 <option value="Meralco">Meralco</option>
                 <option value="Bail Bond">Bail Bond</option>
-                <option value="Character Reputation">Character Reputation</option>
-                <option value="Request for Referral">Request for Referral</option>
-                <option value="Issuance of Postal ID">Issuance of Postal ID</option>
-                <option value="MWSI connection">MWSI connection</option>
-                <option value="Business Clearance">Business Clearance</option>
-                <option value="Others">Others</option>
+                {/* <option value="Character Reputation">Character Reputation</option> */}
+                {/* <option value="Request for Referral">Request for Referral</option> */}
+                {/* <option value="Issuance of Postal ID">Issuance of Postal ID</option> */}
+                {/* <option value="MWSI connection">MWSI connection</option> */}
+                {/* <option value="Business Clearance">Business Clearance</option> */}
+                {/* <option value="Firearms License">Police Clearance</option> */}
+                {/* <option value="Others">Others</option> */}
               </select>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="otherpurpose" className="form-label">Other Purpose</label>
-              <input 
-                type="text"  
-                id="otherpurpose"  
-                name="otherpurpose"  
-                className="form-input"    
-                placeholder="Enter Other Purpose" 
-              />
-            </div>
 
-            <div className="form-group">
-              <label htmlFor="date" className="form-label">Date</label>
-              <input 
-                type="date" 
-                id="date" 
-                name="date" 
-                className="form-input" 
-                required 
-              />
-            </div>
+           
 
             <div className="form-group">
               <label htmlFor="firstname" className="form-label">First Name</label>
               <input 
                 type="text"  
-                id="firstname"  
-                name="firstname"  
+                id="firstName"  
+                name="firstName"  
                 className="form-input"  
                 required  
                 placeholder="Enter First Name" 
+                value={clearanceInput.firstName}
+                onChange={handleChange}
               />
             </div>
 
@@ -139,10 +154,12 @@ export default function BarangayCertificate() {
               <label htmlFor="middlename" className="form-label">Middle Name</label>
               <input 
                 type="text"  
-                id="middlename"  
-                name="middlename"  
+                id="middleName"  
+                name="middleName"  
                 className="form-input" 
                 required  
+                value={clearanceInput.middleName}
+                onChange={handleChange}
                 placeholder="Enter Middle Name"  
               />
             </div>
@@ -151,10 +168,12 @@ export default function BarangayCertificate() {
               <label htmlFor="lastname" className="form-label">Last Name</label>
               <input 
                 type="text"  
-                id="lastname"  
-                name="lastname"  
+                id="lastName"  
+                name="lastName"  
                 className="form-input"  
                 required 
+                value={clearanceInput.lastName}
+                onChange={handleChange}
                 placeholder="Enter Last Name"  
               />
             </div>
@@ -163,8 +182,10 @@ export default function BarangayCertificate() {
               <label htmlFor="residentsince" className="form-label">Date of Residency in Barangay Fairview</label>
               <input 
                 type="date" 
-                id="residentsince" 
-                name="residentsince" 
+                id="dateOfResidency" 
+                name="dateOfResidency" 
+                value={clearanceInput.dateOfResidency}
+                onChange={handleChange}
                 className="form-input" 
                 required 
               />
@@ -176,6 +197,8 @@ export default function BarangayCertificate() {
                 type="text"  
                 id="address"  
                 name="address"  
+                value={clearanceInput.address}
+                onChange={handleChange}
                 className="form-input"  
                 required 
                 placeholder="Enter Address"  
@@ -189,6 +212,8 @@ export default function BarangayCertificate() {
                 id="birthday" 
                 name="birthday" 
                 className="form-input" 
+                value={clearanceInput.birthday}
+                onChange={handleChange}
                 required 
               />
             </div>
@@ -200,6 +225,8 @@ export default function BarangayCertificate() {
                 id="age"  
                 name="age"  
                 className="form-input" 
+                value={clearanceInput.age}
+                onChange={handleChange}
                 required 
                 min="1"  // Minimum age (you can adjust this as needed)
                 max="150"  // Maximum age (you can adjust this as needed)
@@ -215,8 +242,9 @@ export default function BarangayCertificate() {
                 name="gender" 
                 className="form-input" 
                 required
-                defaultValue=""  
-              >
+                value={clearanceInput.gender}
+                onChange={handleChange}
+               >
                 <option value="" disabled>Select gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -226,11 +254,13 @@ export default function BarangayCertificate() {
             <div className="form-group">
               <label htmlFor="civilstatus" className="form-label">Civil Status</label>
               <select 
-                id="civilstatus" 
-                name="civilstatus" 
+                id="civilStatus" 
+                name="civilStatus" 
                 className="form-input" 
                 required
-                defaultValue=""  
+                value={clearanceInput.civilStatus}
+                onChange={handleChange}
+  
               >
                 <option value="" disabled>Select civil status</option>
                 <option value="Single">Single</option>
@@ -244,10 +274,12 @@ export default function BarangayCertificate() {
               <label htmlFor="contactnumber" className="form-label">Contact Number</label>
               <input 
                 type="tel"  
-                id="contactnumber"  
-                name="contactnumber"  
+                id="contact"  
+                name="contact"  
                 className="form-input" 
                 required 
+                value={clearanceInput.contact}
+                onChange={handleChange}
                 placeholder="Enter Contact Number"  
                 maxLength={10}  // Restrict the input to 10 characters as a number
                 pattern="^[0-9]{10}$"  // Regular expression to enforce a 10-digit number format
@@ -262,6 +294,8 @@ export default function BarangayCertificate() {
                 id="citizenship"  
                 name="citizenship"  
                 className="form-input"  
+                value={clearanceInput.citizenship}
+                onChange={handleChange}
                 required 
                 placeholder="Enter Citizenship"  
               />
@@ -280,19 +314,21 @@ export default function BarangayCertificate() {
                 <input
                   id="file-upload1"
                   type="file"
-                  className="file-upload-input" 
-                  multiple
                   accept=".jpg,.jpeg,.png"
-                  required
-                  onChange={handleFileChange('container1')} // Handle file selection
+                  value={clearanceInput.signaturejpg}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFileChangeContainer1(e);
+                    handleChange(e);
+                  }} 
+                  
                 />
 
               <div className="uploadedFiles-container">
                 {/* Display the file names with image previews */}
-                {files.container1.length > 0 && (
+                {files.length > 0 && (
                   <div className="file-name-image-display">
                     <ul>
-                      {files.container1.map((file, index) => (
+                      {files.map((file, index) => (
                         <div className="file-name-image-display-indiv" key={index}>
                           <li> 
                               {/* Display the image preview */}
@@ -310,7 +346,7 @@ export default function BarangayCertificate() {
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container1', file.name)}
+                                  onClick={() => handleFileDeleteContainer1('container1')}
                                   className="delete-button"
                                 >
                                   <img
@@ -344,19 +380,20 @@ export default function BarangayCertificate() {
                 <input
                   id="file-upload2"
                   type="file"
-                  className="file-upload-input" 
-                  multiple
+                  value={clearanceInput.barangayIDjpg}
                   accept=".jpg,.jpeg,.png"
-                  required
-                  onChange={handleFileChange('container2')} // Handle file selection
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFileChangeContainer1(e);
+                    handleChange(e);
+                  }} // Handle file selection
                 />
 
               <div className="uploadedFiles-container">
                 {/* Display the file names with image previews */}
-                {files.container2.length > 0 && (
+                {files.length > 0 && (
                   <div className="file-name-image-display">
                     <ul>
-                      {files.container2.map((file, index) => (
+                      {files.map((file, index) => (
                         <div className="file-name-image-display-indiv" key={index}>
                           <li> 
                               {/* Display the image preview */}
@@ -374,7 +411,7 @@ export default function BarangayCertificate() {
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container2', file.name)}
+                                  onClick={() => handleFileDeleteContainer1('container2')}
                                   className="delete-button"
                                 >
                                   <img
@@ -407,19 +444,20 @@ export default function BarangayCertificate() {
                 <input
                   id="file-upload3"
                   type="file"
-                  className="file-upload-input" 
-                  multiple
+                  value={clearanceInput.validIDjpg}
                   accept=".jpg,.jpeg,.png"
-                  required
-                  onChange={handleFileChange('container3')} // Handle file selection
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFileChangeContainer1(e);
+                    handleChange(e);
+                  }} // Handle file selection
                 />
 
               <div className="uploadedFiles-container">
                 {/* Display the file names with image previews */}
-                {files.container3.length > 0 && (
+                {files.length > 0 && (
                   <div className="file-name-image-display">
                     <ul>
-                      {files.container3.map((file, index) => (
+                      {files.map((file, index) => (
                         <div className="file-name-image-display-indiv" key={index}>
                           <li> 
                               {/* Display the image preview */}
@@ -437,7 +475,7 @@ export default function BarangayCertificate() {
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container3', file.name)}
+                                  onClick={() => handleFileDeleteContainer1('container3')}
                                   className="delete-button"
                                 >
                                   <img
@@ -469,19 +507,20 @@ export default function BarangayCertificate() {
                 <input
                   id="file-upload4"
                   type="file"
-                  className="file-upload-input" 
-                  multiple
                   accept=".jpg,.jpeg,.png"
-                  required
-                  onChange={handleFileChange('container4')} // Handle file selection
+                  value={clearanceInput.letterjpg}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFileChangeContainer1(e);
+                    handleChange(e);
+                  }} // Handle file selection
                 />
 
               <div className="uploadedFiles-container">
                 {/* Display the file names with image previews */}
-                {files.container4.length > 0 && (
+                {files.length > 0 && (
                   <div className="file-name-image-display">
                     <ul>
-                      {files.container4.map((file, index) => (
+                      {files.map((file, index) => (
                         <div className="file-name-image-display-indiv" key={index}>
                           <li> 
                               {/* Display the image preview */}
@@ -499,7 +538,7 @@ export default function BarangayCertificate() {
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container4', file.name)}
+                                  onClick={() => handleFileDeleteContainer1(file.name)}
                                   className="delete-button"
                                 >
                                   <img
