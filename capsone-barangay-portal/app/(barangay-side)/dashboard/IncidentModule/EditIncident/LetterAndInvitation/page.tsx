@@ -5,8 +5,7 @@ import {  useEffect,useState } from "react";
 import { getSpecificDocument } from "@/app/helpers/firestorehelper";
 import { doc, updateDoc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
-import { time } from "console";
-
+import { db } from "@/app/db/firebase";
 
 
 export default function GenerateDialougeLetter() {
@@ -33,6 +32,8 @@ export default function GenerateDialougeLetter() {
     });
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const [nosHearing, setNosHearing] = useState<any>(null);
+
  
     useEffect(() => {
         
@@ -69,7 +70,16 @@ export default function GenerateDialougeLetter() {
     
     const handleUpdate = async () => {
         /* create a new subcollection to store each generation of summon and dialogue letter per respondent/complaint */
-
+        try {
+            if (docId) {
+                const docRef = doc(db, "IncidentReports", docId);
+                
+            } else {
+                throw new Error("Document ID is undefined");
+            }
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     const sendSMSForDialogue = async () => {
@@ -81,8 +91,8 @@ export default function GenerateDialougeLetter() {
             },
             body: JSON.stringify({
                 to: otherInfo.complainant.contact,
-                message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, a dialogue letter will be sent to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
-                Please wait for the letter. Thank you!`
+                message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, a dialogue invitation will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
+                Please wait for the invitation. Thank you!`
             })
         });
         if (!response.ok) throw new Error("Failed to send SMS");
@@ -101,8 +111,8 @@ export default function GenerateDialougeLetter() {
             },
             body: JSON.stringify({
                 to: otherInfo.respondent.contact,
-                message: `Hello Mr/Ms. ${otherInfo.respondent.fname}, a dialogue letter will be sent to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
-                Please wait for the letter. Thank you!`
+               message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, a dialogue invitation will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
+                Please wait for the invitation. Thank you!`
             })
         });
         if (!response.ok) throw new Error("Failed to send SMS");
@@ -124,8 +134,7 @@ export default function GenerateDialougeLetter() {
               },
               body: JSON.stringify({
                   to: otherInfo.complainant.contact,
-                  message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, you are being summoned to attend a meeting in the Lupon Tagapamaya Office at 
-                  ${otherInfo.DateOfMeeting} for the dialouge letter. Thank you!`
+                  message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, `
               })
           });
           if (!response.ok) throw new Error("Failed to send SMS");
@@ -252,7 +261,19 @@ export default function GenerateDialougeLetter() {
         const issueMonthIndex = parseInt(dayToday.split("T")[0].split("-")[1], 10) - 1;
         const issueMonth = monthNames[issueMonthIndex];
         const issueYear = dayToday.split("T")[0].split("-")[0];
+        
+        setNosHearing(userInfo?.hearingNumber);
 
+        if(nosHearing === null || nosHearing === undefined || nosHearing === ""){ 
+            setNosHearing("First");
+        }
+        else if (nosHearing === "First"){
+            setNosHearing("Second");
+        }
+        else if (nosHearing === "Second"){
+            setNosHearing("Third");
+        }
+        
        console.log(dayToday); 
        try{ 
         const response = await fetch("/api/fillPDF", {
@@ -268,7 +289,7 @@ export default function GenerateDialougeLetter() {
                     "Text2":otherInfo.complainant.address,
                     "Text3":otherInfo.respondent.fname,
                     "Text4":otherInfo.respondent.address,
-                    "Text5":"First",//make it dynamic
+                    "Text5":nosHearing,//make it dynamic
                     "Text6": `${month} ${day}, ${year}`,//Month Day, Year
                     "Text7":day,//Day
                     "Text8":`${month} ${year}`,//MonthYear
@@ -277,7 +298,8 @@ export default function GenerateDialougeLetter() {
                     "Text11":issueDay,//Day
                     "Text12":`${issueMonth} ${issueYear}`,//MonthYear
                     "Text14":user?.fullName,    
-                }
+                },
+                centerField: ["Text5","Text7","Text10","Text11","Text14"]
             })
         });
         if (!response.ok) throw new Error("Failed to generate PDF");
@@ -338,7 +360,7 @@ export default function GenerateDialougeLetter() {
         });
     };
     
-
+   
     const clearForm = () => {
         setOtherInfo({
             DateOfDelivery: "",
@@ -356,6 +378,7 @@ export default function GenerateDialougeLetter() {
                 contact: userInfo.respondent?.contact || ""
             }
         })
+        setNosHearing(null);
     }
     
 

@@ -6,7 +6,6 @@ import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/f
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../db/firebase";
 import React from "react";
-import { report } from "process";
 
 
 
@@ -57,7 +56,7 @@ export default function EditLuponIncident() {
         investigateImage: "",
       }
     });
-    let status = toUpdate.status//REMOVE PAG IMPLEMENTED NA SA BACKEND
+    let status = toUpdate.status;
    
 
     useEffect(() => {
@@ -256,11 +255,9 @@ export default function EditLuponIncident() {
       router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}?action=${action}`);
     };
 
-      const handleGenerateSummonLetter = () => {
-        router.push(`/dashboard/IncidentModule/EditIncident/SummonLetter?id=${docId}`);
-      };
+      
 
-      const handleDeleteForm=()=>{
+    const handleDeleteForm=()=>{
         setToUpdate({
           complainant: {
             fname: "",
@@ -295,11 +292,11 @@ export default function EditLuponIncident() {
             investigateImage: "",
           },
         });
-      }
+    }
 
-      const handleToggleClick = () => {
+    const handleToggleClick = () => {
           setShowDialogueContent(prevState => !prevState); // Toggle visibility
-      };
+    };
 
 
 
