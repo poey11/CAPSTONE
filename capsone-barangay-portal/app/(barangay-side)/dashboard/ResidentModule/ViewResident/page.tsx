@@ -67,7 +67,7 @@ export default function ViewResident() {
     <main className="viewresident-main-container">
 
         <div className="viewresident-page-title-section-1">
-          <h1>View Resident Details</h1>
+          <h1>Main Residents</h1>
         </div>
 
       <div className="viewresident-main-content">

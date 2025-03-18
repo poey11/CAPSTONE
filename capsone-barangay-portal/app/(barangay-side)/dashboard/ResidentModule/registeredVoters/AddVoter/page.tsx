@@ -142,7 +142,7 @@ export default function addVoter() {
     <main className="add-resident-main-container">
 
         <div className="addresident-page-title-section-1">
-          <h1>Add New Voter Record</h1>
+        <h1>Registered Voters</h1>
         </div>
         
         <div className="add-resident-main-content">
@@ -152,7 +152,7 @@ export default function addVoter() {
                 <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
               </button>
 
-              <h1> New Voter </h1>
+              <h1> Add New Voter </h1>
             </div>
 
             <div className="action-btn-section">
@@ -191,28 +191,28 @@ export default function addVoter() {
       </div>
 
       {showSubmitPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-add">
+                            <div className="confirmation-popup-add">
                                 <p>Are you sure you want to submit?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmSubmit} className="yes-button">Yes</button> 
+                                <div className="yesno-container-add">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
+                                    <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
                                 </div> 
                             </div>
                         </div>
         )}
 
         {showPopup && (
-                <div className={`popup-overlay show`}>
-                    <div className="popup">
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
                         <p>{popupMessage}</p>
                     </div>
                 </div>
                 )}
 
         {showErrorPopup && (
-                <div className={`error-popup-overlay show`}>
-                    <div className="popup">
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
                         <p>{popupErrorMessage}</p>
                     </div>
                 </div>

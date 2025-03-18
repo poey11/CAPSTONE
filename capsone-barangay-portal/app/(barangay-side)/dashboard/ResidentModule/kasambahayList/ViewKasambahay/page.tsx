@@ -68,7 +68,7 @@ export default function ViewKasambahay() {
   return (
     <main className="viewresident-main-container">
       <div className="viewresident-page-title-section-1">
-        <h1>View Kasambahay Details</h1>
+        <h1>Kasambahay Masterlist</h1>
       </div>
 
       <div className="viewresident-main-content">
@@ -76,7 +76,7 @@ export default function ViewKasambahay() {
           <button onClick={handleBack}>
             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
           </button>
-          <p>Kasambahay Details</p>
+          <p>View Kasambahay </p>
         </div>
 
         {kasambahayFields.map((field) => (

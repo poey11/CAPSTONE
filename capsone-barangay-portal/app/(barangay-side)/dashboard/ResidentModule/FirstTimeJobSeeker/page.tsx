@@ -15,6 +15,7 @@ export default function JobSeekerListModule() {
   const [searchName, setSearchName] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
+  const [showCount, setShowCount] = useState<number>(0);
   const router = useRouter();
 
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
@@ -65,8 +66,16 @@ export default function JobSeekerListModule() {
       return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
     });
 
+    if (showCount) {
+      filtered = filtered.slice(0, showCount);
+    }
+
+    if (showCount) {
+      filtered = filtered.slice(0, showCount);
+    }
+
     setFilteredJobSeekers(filtered);
-  }, [searchName, jobSeekers, sortOrder]);
+  }, [searchName, jobSeekers, sortOrder,showCount]);
 
   const formatDateToMMDDYYYY = (dateString: string) => {
     if (!dateString) return "";
@@ -164,6 +173,17 @@ export default function JobSeekerListModule() {
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
+
+
+      <select
+          className="resident-module-filter"
+          value={showCount}
+          onChange={(e) => setShowCount(Number(e.target.value))}
+        >
+          <option value="0">Show All</option>
+          <option value="5">Show 5</option>
+          <option value="10">Show 10</option>
+        </select>
       </div>
 
       <div className="resident-module-main-section">
@@ -249,13 +269,13 @@ export default function JobSeekerListModule() {
 
 
       {showDeletePopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-module">
+                            <div className="confirmation-popup-module">
                             <p>Are you sure you want to delete this Jobseeker Record?</p>
           
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
+                                <div className="yesno-container-module">
+                                    <button onClick={() => setShowDeletePopup(false)} className="no-button-module">No</button>
+                                    <button onClick={confirmDelete} className="yes-button-module">Yes</button>
                                 </div> 
                             </div>
                         </div>
@@ -263,19 +283,19 @@ export default function JobSeekerListModule() {
 
 
       {showPopup && (
-                <div className={`popup-overlay show`}>
-                    <div className="popup">
+                <div className={`popup-overlay-module show`}>
+                    <div className="popup-module">
                         <p>{popupMessage}</p>
                     </div>
                 </div>
       )}
 
       {showAlertPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-module">
+                            <div className="confirmation-popup-module">
                                 <p>{popupMessage}</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setshowAlertPopup(false)} className="no-button">Continue</button>
+                                <div className="yesno-container-module">
+                                    <button onClick={() => setshowAlertPopup(false)} className="no-button-module">Continue</button>
                                 </div> 
                             </div>
                         </div>

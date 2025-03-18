@@ -147,7 +147,7 @@ export default function registeredVotersModule() {
   return (
     <main className="resident-module-main-container">
       <div className="resident-module-section-1">
-        <h1>Voter Masterlist</h1>
+        <h1>Registered Voters</h1>
         <Link href="/dashboard/ResidentModule/registeredVoters/AddVoter">
           <button className="add-announcement-btn">Add New Voter</button>
         </Link>
@@ -242,13 +242,13 @@ export default function registeredVotersModule() {
       </div>
 
       {showDeletePopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-module">
+                            <div className="confirmation-popup-module">
                             <p>Are you sure you want to delete this Voter Record?</p>
                             <h2>Voter Number: {selectedVoterNumber}</h2>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
+                                <div className="yesno-container-module">
+                                    <button onClick={() => setShowDeletePopup(false)} className="no-button-module">No</button>
+                                    <button onClick={confirmDelete} className="yes-button-module">Yes</button>
                                 </div> 
                             </div>
                         </div>
@@ -256,19 +256,19 @@ export default function registeredVotersModule() {
 
 
       {showPopup && (
-                <div className={`popup-overlay show`}>
-                    <div className="popup">
+                <div className={`popup-overlay-module show`}>
+                    <div className="popup-module">
                         <p>{popupMessage}</p>
                     </div>
                 </div>
       )}
 
       {showAlertPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-module">
+                            <div className="confirmation-popup-module">
                                 <p>{popupMessage}</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setshowAlertPopup(false)} className="no-button">Continue</button>
+                                <div className="yesno-container-module">
+                                    <button onClick={() => setshowAlertPopup(false)} className="no-button-module">Continue</button>
                                 </div> 
                             </div>
                         </div>

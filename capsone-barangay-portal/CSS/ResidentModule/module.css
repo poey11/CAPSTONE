@@ -138,7 +138,7 @@
 }
 
 .resident-module-section-1 h1{
-    font-size: 20px;
+   font-size: 2rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
    
@@ -247,8 +247,8 @@
     }
   }
 
-.popup-overlay,
-.error-popup-overlay{
+.popup-overlay-module,
+.error-popup-overlay-module{
     position: fixed;
     top: 13%;
     right: -3px;
@@ -267,32 +267,32 @@
     border-left: 10px solid #403f3e;
   }
 
-  .popup-overlay{
+  .popup-overlay-module{
     background: #777575;
   }
 
-  .error-popup-overlay{
+  .error-popup-overlay-module{
     background: #991e1e;
   }
 
-  .popup{
+  .popup-module{
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 20px;
   }
   
-  .popup-overlay.show {
+  .popup-overlay-module.show {
     animation: slideIn 0.5s ease-out;
   }
   
-  .popup-overlay.hide {
+  .popup-overlay-module.hide {
     animation: slideOut 0.5s ease-out;
   }
 
 
 
-  .confirmation-popup-overlay {
+  .confirmation-popup-overlay-module {
     position: fixed;
     top: 0;
     left: 0;
@@ -305,7 +305,7 @@
     z-index: 9999; 
   }
   
-  .confirmation-popup {
+  .confirmation-popup-module {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -324,23 +324,23 @@
     left: 43%; /* Adjust the value */
   }
   
-  .confirmation-popup p{
+  .confirmation-popup-module p{
     color: rgb(97, 97, 97);
   }
 
-  .confirmation-popup h2{
+  .confirmation-popup-module h2{
     margin-top: 10px;
     color: #f44336;
     font-size: 15px;
   }
   
-  .yesno-container{
+  .yesno-container-module{
     display: flex;
     gap: 20px;
   }
   
-  .yes-button,
-  .no-button{
+  .yes-button-module,
+  .no-button-module{
     padding: 10px 20px;
     font-size: 16px;
     color: white;
@@ -352,18 +352,18 @@
     margin-top: 20px;
   }
   
-  .yes-button {
+  .yes-button-module {
     background-color: #4caf50; 
   }
 
-  .yes-button:hover {
+  .yes-button-module:hover {
     background-color: #3d8c40; 
   } 
 
-  .no-button {
+  .no-button-module {
     background-color: #f44336;
   }
 
-  .no-button:hover {
+  .no-button-module:hover {
     background-color:  #c2352b; 
   } 
