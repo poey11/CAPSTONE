@@ -40,6 +40,18 @@
   flex-direction: column;
   }
 
+  .form-group-register-form input, 
+  .form-group-register-form select {
+    padding: 8px;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: rgba(0, 0, 0, 0.4);
+    padding-right: 40px;
+}
+
   .form-label-register-form {
   font-size: 16px;
   font-weight: bold;
@@ -58,6 +70,7 @@
   }
 
 
+  
   .form-checkbox-section {
     display: flex; 
     flex-direction: column;
