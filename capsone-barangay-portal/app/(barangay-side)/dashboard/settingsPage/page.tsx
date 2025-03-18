@@ -133,25 +133,25 @@ export default function SettingsPage() {
     
 
     return (
-        <main className="modifyaccsettings-main-container">
-            <div className="section-1">
+        <main className="modifyaccsettings-main-container-settings">
+            <div className="section-1-settings">
                 <h1>Account Settings</h1>
             </div>
 
-            <div className="modifyaccsettings-main-section">
+            <div className="modifyaccsettings-main-section-settings">
 
           
-                <div className="modifyaccsettings-main-section1">
-                    <div className="modifyaccsettings-main-section1-left">
+                <div className="modifyaccsettings-main-section1-settings">
+                    <div className="modifyaccsettings-main-section1-left-settings">
                         <button onClick={handleBack}>
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
+                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-settings" />
                         </button>
                         <h1>Edit Account Settings</h1>
                     </div>
 
-                    <div className="action-btn-section">
-                        <button className="discard-btn" type="button">Discard</button>
-                        <button className="save-btn" type="submit" form="settings-form">Save</button>
+                    <div className="action-btn-section-settings">
+                        <button className="discard-btn-settings" type="button">Discard</button>
+                        <button className="save-btn-settings" type="submit" form="settings-form">Save</button>
                     </div>
                 </div>
 
@@ -160,15 +160,15 @@ export default function SettingsPage() {
                 <form  id ="settings-form" onSubmit={handleSubmit}>
 
 
-                <div className="main-fields-container">
+                <div className="main-fields-container-settings">
 
 
-                    <div className="account-details-section">
-                        <div className="icon-container">
+                    <div className="account-details-section-settings">
+                        <div className="icon-container-settings">
                         <img
                             src={selectedImage || userData.profileImage || undefined}
                             alt="User Icon"
-                            className="user-icon"
+                            className="user-icon-settings"
                         />
 
                             <input
@@ -179,68 +179,68 @@ export default function SettingsPage() {
                                 style={{ display: "none" }}
                                 onChange={handleImageChange}
                             />
-                            <button className="upload-btn" onClick={() => document.getElementById("fileUpload")?.click()}>
+                            <button className="upload-btn-settings" onClick={() => document.getElementById("fileUpload")?.click()}>
                                 Upload Image
                             </button>
                         </div>
 
-                        <div className="main-fields-container-section2">
-                            <div className="fields-container">
-                                <div className="fields-section">
+                        <div className="main-fields-container-section2-settings">
+                            <div className="fields-container-settings">
+                                <div className="fields-section-settings">
                                     <p>Official First Name</p>
                                     <input 
                                     id="firstName"
                                     name="firstName"
                                     type="text"
-                                     className="input-field" 
+                                     className="input-field-settings" 
                                      value={userData.firstName}
                                       onChange={handleChange} 
                                       />
                                 </div>
                                 
-                                <div className="fields-section">
+                                <div className="fields-section-settings">
                                     <p>Official Last Name</p>
                                     <input 
                                     id="lastName"
                                     name="lastName"
                                     type="text" 
-                                    className="input-field" 
+                                    className="input-field-settings" 
                                     value={userData.lastName } 
                                     onChange={handleChange} />
                                 </div>
 
-                                <div className="fields-section">
+                                <div className="fields-section-settings">
                                     <p>Address</p>
                                     <input 
                                     id="address"
                                     name="address"
                                     type="text" 
-                                    className="input-field"
+                                    className="input-field-settings"
                                      value={userData.address} 
                                      onChange={handleChange} />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="main-fields-container-section1">
-                            <div className="section-left">
-                                <div className="fields-container">
-                                    <div className="fields-section">
+                        <div className="main-fields-container-section1-settings">
+                            <div className="section-left-settings">
+                                <div className="fields-container-settings">
+                                    <div className="fields-section-settings">
                                         <p>Birthday</p>
                                         <input 
                                         id="birthDate"
                                         name="birthDate"
                                         type="date"
-                                         className="input-field" 
+                                         className="input-field-settings" 
                                          value={userData.birthDate} 
                                          onChange={handleChange} />
                                     </div>
-                                    <div className="fields-section">
+                                    <div className="fields-section-settings">
                                         <p>Sex</p>
                                         <select 
                                         id="sex"
                                         name="sex"
-                                        className="input-field"  
+                                        className="input-field-settings"  
                                         value={userData.sex} 
                                         onChange={(e) => setUserData({ ...userData, sex: e.target.value })}>
 
@@ -251,14 +251,14 @@ export default function SettingsPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="section-right">
-                                <div className="fields-section">
+                            <div className="section-right-settings">
+                                <div className="fields-section-settings">
                                     <p>Contact Number</p>
                                     <input
                                     id="phone"
                                     name="phone"
                                     type="tel"
-                                    className="input-field"
+                                    className="input-field-settings"
                                     maxLength={10}
                                     title="Please enter a valid 10-digit contact number"
                                     value={userData.phone}
@@ -267,13 +267,13 @@ export default function SettingsPage() {
 
                                 </div>
 
-                                <div className="fields-section">
+                                <div className="fields-section-settings">
                                     <p>Position</p>
                                     <input
                                       id="position"
                                       name="position"
                                       type="text" 
-                                      className="input-field"
+                                      className="input-field-settings"
                                       value={userData.position} 
                                       readOnly 
                                       onChange={handleChange} />
