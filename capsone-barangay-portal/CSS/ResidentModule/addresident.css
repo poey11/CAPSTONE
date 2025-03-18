@@ -31,8 +31,7 @@
     padding-bottom: 50px;
     margin:  auto; 
     background-color: #f4f2f2;
-    margin-top: 20px;
-    
+    margin-top: 20px;   
 }
 
 
@@ -55,7 +54,7 @@
 }
 
 .add-resident-main-section1 h1{
-  font-size: 17px;
+  font-size: 1.25rem;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.5);
 }
@@ -674,15 +673,4 @@
   background-color:  #c2352b; 
 } 
 
-.error-message {
-  position: absolute;
-  background-color: rgba(255, 0, 0, 0.8);
-  color: white;
-  font-size: 14px;
-  padding: 4px 8px;
-  border-radius: 5px;
-  top: -25px; /* Moves the error above the input field */
-  left: 5px;
-  z-index: 10;
-  white-space: nowrap;
-}
+

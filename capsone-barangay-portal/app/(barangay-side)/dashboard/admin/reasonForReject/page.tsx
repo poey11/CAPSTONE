@@ -1,8 +1,10 @@
 "use client"
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams} from "next/navigation";
 import type { Metadata } from "next";
 import { useState } from "react";
+import { db } from '@/app/db/firebase';
+import { doc, updateDoc } from "firebase/firestore";
 import "@/CSS/User&Roles/ReasonForRejection.css";
 
 
@@ -16,37 +18,55 @@ const metadata:Metadata = {
 export default function reasonForRejection() {
 
     const router = useRouter();
-    const handleBack = () => {
-        router.push("/dashboard/admin");
-    };
 
+
+    const searchParams = useSearchParams();
+    const userId = searchParams.get("id");
 
     const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+    const [rejectionReason, setRejectionReason] = useState("");
 
+
+    const handleBack = () => {
+        router.push("/dashboard/admin");
+    };
 
     const handleSubmitClick = async () => {
         setShowSubmitPopup(true);
     }
 
     const confirmSubmit = async () => {
-        setShowSubmitPopup(false);
+        if (!userId) {
+            console.error("User ID is missing!");
+            return;
+        }
 
-        setPopupMessage("Reason for Rejection submitted successfully!");
-                setShowPopup(true);
+        try {
+            const docRef = doc(db, "ResidentUsers", userId);
+            await updateDoc(docRef, {
+                rejectionReason: rejectionReason.trim(),
+                status: "Rejected",
+            });
 
-                // Hide the popup after 3 seconds
-                setTimeout(() => {
-                    setShowPopup(false);
-                    router.push("/dashboard/admin");
-                }, 3000);
+            setPopupMessage("Reason for Rejection submitted successfully!");
+            setShowPopup(true);
+
+            setTimeout(() => {
+                setShowPopup(false);
+                router.push("/dashboard/admin");
+            }, 3000);
+        } catch (error) {
+            console.error("Error updating rejection reason:", error);
+        }
     };
+
     
     return (
     <main className="reasonforrejection-main-container">
-        <div className="section-1">
-            <h1>Admin Module</h1>
+        <div className="reasonforrejection-section-1">
+            <h1>Reject Resident User</h1>
         </div>
 
         <div className="reasonforrejection-main-section">
@@ -73,6 +93,8 @@ export default function reasonForRejection() {
                                 className="reason" 
                                 placeholder="Enter Description"
                                 rows={10}
+                                value={rejectionReason}
+                            onChange={(e) => setRejectionReason(e.target.value)}
                             ></textarea>
                     </div>
                 </div>

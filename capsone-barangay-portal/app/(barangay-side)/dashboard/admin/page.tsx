@@ -4,7 +4,9 @@ import {db} from "../../../db/firebase";
 import {collection, getDocs, onSnapshot, query, where} from "firebase/firestore";
 import "@/CSS/User&Roles/User&Roles.css";
 import { useRouter } from "next/navigation";
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import Link from "next/link";
+
 interface ResidentUser {
     id: string;
     first_name: string;
@@ -12,10 +14,10 @@ interface ResidentUser {
     address: string;
     phone: string;
     sex:string;
-    status:string;
     validIdDoc:string;
     role: string;
     email: string;
+    status:string;
   }
   
 interface BarangayUser{
@@ -53,12 +55,16 @@ const admin = () => {
     const [barangayUsers, setBarangayUsers] = useState<dbBarangayUser[]>([]);
     const [residentUsers, setResidentUsers] = useState<ResidentUser[]>([]);
     const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+    const [selectedBarangayUserId, setSelectedBarangayUserId] = useState<string | null>(null);
 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
     const [showDeletePopup, setShowDeletePopup] = useState(false);
     const [showAcceptPopup, setShowAcceptPopup] = useState(false); 
     const [showAlertPopup, setshowAlertPopup] = useState(false); 
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(()=>{
        
@@ -94,31 +100,47 @@ const admin = () => {
             }
             catch(error:String|any){
                 console.log(error.message);
-            
-            }
+                setError("Failed to load residents");
+            } finally {
+                setLoading(false);
+              }
+
         }
         fetchUsers();           
     },[])
 
-    const handleAcceptClick = async () => {
+    const handleAcceptClick = (userId: string) => {
         setShowAcceptPopup(true);
-    }
+        setSelectedUserId(userId);
+    };
 
     const confirmAccept = async () => {
-        setShowAcceptPopup(false);
-
-                setPopupMessage("User accepted successfully!");
-                setShowPopup(true);
-
-                // Hide the popup after 3 seconds
-                setTimeout(() => {
-                    setShowPopup(false);
-                }, 3000);
+        if (!selectedUserId) return;
+    
+        try {
+            await updateDoc(doc(db, "ResidentUsers", selectedUserId), {
+                status: "Verified",
+            });
+    
+            setPopupMessage("User accepted successfully!");
+            setShowPopup(true);
+    
+            // Hide the popup after 3 seconds
+            setTimeout(() => {
+                setShowPopup(false);
+            }, 3000);
+        } catch (error) {
+            console.error("Error updating user status:", error);
+        } finally {
+            setShowAcceptPopup(false);
+            setSelectedUserId(null);
+        }
     };
 
 
-    const handleDeleteClick = (userId: string) => {
+    const handleDeleteClick = (userId: string, userid: string) => {
         setDeleteUserId(userId);
+        setSelectedBarangayUserId(userid);
         setShowDeletePopup(true); 
     };
     
@@ -130,7 +152,7 @@ const admin = () => {
                 setShowDeletePopup(false);
                 setDeleteUserId(null);
 
-                setPopupMessage("Barangay user deleted successfully!");
+                setPopupMessage("Barangay User deleted successfully!");
                 setShowPopup(true);
 
                 // Hide the popup after 3 seconds
@@ -144,306 +166,294 @@ const admin = () => {
         }
     };
 
-    const GenerateID = async (e: any) => {
-        e.preventDefault();
-        
-        const generateNewID = async (): Promise<string> => {
-            const year = new Date().getFullYear().toString(); // First 4 digits
-            const randomNum = Math.floor(100 + Math.random() * 900).toString(); // Ensures 3-digit number (100-999)
-            const randomId = year + randomNum; // Concatenates to make 7 digits
-    
-            // ✅ Check Firestore if the ID already exists
-            const barangayUsersCollection = collection(db, "BarangayUsers");
-            const querySnapshot = await getDocs(query(barangayUsersCollection, where("userId", "==", randomId)));
-    
-            if (!querySnapshot.empty) {
-                console.log(`ID ${randomId} already exists, regenerating...`);
-                return generateNewID(); // 🔄 Recursively call the function if ID exists
-            }
-    
-            return randomId; // ✅ Unique ID found
-        };
-    
-        const uniqueId = await generateNewID(); // Wait for a unique ID to be generated
-    
-        setUsers((prevUsers) => ({
-            ...prevUsers,
-            userId: uniqueId,
-        }));
-    
-    };
-
-
-    const handleChange = (  e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>)=>{
-        e.preventDefault();
-      
-        const {name, value} = e.target;
-        setUsers((prevUsers) => ({
-            ...prevUsers,
-            [name]: value
-        }));
-    }
-
-
-
-    const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        
-        if(!users.userId || !users.password || !users.position){
-            setPopupMessage("Please fill out all fields");
-            setshowAlertPopup(true);
-            return;
-        }
-        
-        console.log(users);
-        
-        try{
-            const respone = await fetch('/api/barangayRegister', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userid: users.userId,
-                    password: users.password,
-                    role: users.role,
-                    position: users.position,
-                    createdBy: "Assistant Secretary"
-                })
-            });
-            const data = await respone.json();
-
-            if(!respone.ok){
-                setPopupMessage(data.message);
-                setShowPopup(true);
-                return;
-            }
-                setPopupMessage("Barangay user created successfully!");
-                setShowPopup(true);
-
-                // Hide the popup after 3 seconds
-                setTimeout(() => {
-                    setShowPopup(false);
-                }, 3000);
-
-            setUsers({
-                userId:"",
-                position:"",
-                password:"",
-                role:"Barangay Official"
-            })
-        }
-        catch(error: string | any){
-            console.log(error.message);
-        }
-        
-   }
 
     const router = useRouter();
    
-    const handleEditBrgyAcc = () => {
-        router.push("/dashboard/admin/modifyBarangayAcc");
+
+    const [showPendingResidentTableContent, setShowPendingResidentTableContent] = useState(true); 
+    const [showResidentTableContent, setShowResidentTableContent] = useState(false); 
+    const [showBarangayTableContent, setShowBarangayTableContent] = useState(false);
+
+    const handleToggleClickPendingResidentTable = () => {
+        setShowPendingResidentTableContent(prevState => !prevState);
     };
 
-    const handleRejectResidentUser = () => {
-        router.push("/dashboard/admin/reasonForReject");
+    const handleToggleClickResidentTable = () => {
+        setShowResidentTableContent(prevState => !prevState);
     };
 
-
+    const handleToggleClickBarangayTable = () => {
+        setShowBarangayTableContent(prevState => !prevState);
+    };
     
 
 
 
 
     return (  
-        <main className="main-container">
-            <div className="section-1">
+        <main className="user-roles-module-main-container">
+            <div className="user-roles-module-section-1">
                 <h1>Admin Module</h1>
+                <Link href="/dashboard/admin/addBarangayUser">
+                    <button className="add-announcement-btn">Add New Barangay User</button>
+                </Link>
             </div>
 
-            <div className="main-section">
+            <div className="user-roles-main-section">
 
                 <div className="resident-users">
-                    <h1>Resident Users Table</h1>
 
-                    <div className="resident-users-main-section">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Address</th>
-                                    <th>Phone</th>
-                                    <th>Sex</th>
-                                    <th>Status</th>
-                                    <th>Valid ID Doc</th>
-                                    <th>Role</th>
-                                    <th>Email</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {residentUsers.map((user) => (
-                                    <tr key={user.id}>
-                                    <td>{user.id}</td>
-                                    <td>{user.first_name} {user.last_name}</td>
-                                    <td>{user.address}</td>
-                                    <td>{user.phone}</td>
-                                    <td>{user.sex}</td>
-                                    <td>{user.status}</td>
-                                    <td>{user.validIdDoc}</td>
-                                    <td>{user.role}</td>
-                                    <td>{user.email}</td>
-                                    <td>
-                                        <div className="actions">
-                                            <button className="action-accept" onClick={handleAcceptClick}>Accept</button>
-                                            <button className="action-reject" onClick={handleRejectResidentUser}>Reject</button>
-                                        </div>
-                                    </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <div className="resident-users-topsection">
+                        <button type="button" 
+                                className={showResidentTableContent ? "user-role-minus-button" : "user-role-plus-button"} 
+                                onClick={handleToggleClickPendingResidentTable}>
+                        </button>
+                        <h1>Pending Resident Users Table</h1>
                     </div>
 
+                    {showPendingResidentTableContent && (
+                        <>
+
+                            <div className="resident-users-main-section">
+
+                                {loading && <p>Loading residents...</p>}
+                                {error && <p className="error">{error}</p>}
+
+                                {!loading && !error && (
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Address</th>
+                                            <th>Phone</th>
+                                            <th>Sex</th>
+                                            <th>Role</th>
+                                            <th>Email</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {residentUsers.filter(user => user.status !== "Verified").map((user) => (
+                                            <tr key={user.id}>
+                                            <td>{user.first_name} {user.last_name}</td>
+                                            <td>{user.address}</td>
+                                            <td>{user.phone}</td>
+                                            <td>{user.sex}</td>
+                                            <td>{user.role}</td>
+                                            <td>{user.email}</td>
+                                            <td>
+                                                <span className={`status-badge ${user.status.toLowerCase().replace(" ", "-")}`}>
+                                                    {user.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="admin-actions">
+                                                    <button 
+                                                        className="admin-action-view"
+                                                        onClick={() => router.push(`/dashboard/admin/viewResidentUser?id=${user.id}`)}
+                                                    >
+                                                        View
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                            </div>
+                        </>
+                    )}
+
                     {showAcceptPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="user-roles-confirmation-popup-overlay">
+                            <div className="user-roles-confirmation-popup">
                                 <p>Are you sure you want to accept this user?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowAcceptPopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmAccept} className="yes-button">Yes</button>
+                                <h2>Resident ID: {selectedUserId}</h2>
+                                <div className="user-roles-yesno-container">
+                                    <button onClick={() => setShowAcceptPopup(false)} className="user-roles-no-button">No</button>
+                                    <button onClick={confirmAccept} className="user-roles-yes-button">Yes</button>
                                 </div> 
                             </div>
                         </div>
+                    )}
+                </div>
+
+                <div className="resident-users">
+
+                    <div className="resident-users-topsection">
+                        <button type="button" 
+                                className={showResidentTableContent ? "user-role-minus-button" : "user-role-plus-button"} 
+                                onClick={handleToggleClickResidentTable}>
+                        </button>
+                        <h1>Resident Users Table</h1>
+                    </div>
+
+                    {showResidentTableContent && (
+                        <>
+
+                            <div className="resident-users-main-section">
+
+                                {loading && <p>Loading residents...</p>}
+                                {error && <p className="error">{error}</p>}
+
+                                {!loading && !error && (
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Address</th>
+                                            <th>Phone</th>
+                                            <th>Sex</th>
+                                            <th>Role</th>
+                                            <th>Email</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {residentUsers.filter(user => user.status === "Verified").map((user) => (
+                                            <tr key={user.id}>
+                                            <td>{user.first_name} {user.last_name}</td>
+                                            <td>{user.address}</td>
+                                            <td>{user.phone}</td>
+                                            <td>{user.sex}</td>
+                                            <td>{user.role}</td>
+                                            <td>{user.email}</td>
+                                            <td>
+                                                <span className={`status-badge ${user.status.toLowerCase().replace(" ", "-")}`}>
+                                                    {user.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="admin-actions">
+                                                    <button 
+                                                        className="admin-action-view"
+                                                        onClick={() => router.push(`/dashboard/admin/viewResidentUser?id=${user.id}`)}
+                                                    >
+                                                        View
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                            </div>
+                        </>
                     )}
                 </div>
 
                 <div className="barangay-users">
-                    <h1>Barangay Users Table</h1>
 
-                    <div className="barangay-users-main-section">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>User ID</th>
-                                    <th>Official Name</th>
-                                    <th>Sex</th>
-                                    <th>Birth Date</th>
-                                    <th>Address</th>
-                                    <th>Phone</th>
-                                    <th>Position</th>
-                                    <th>Created By</th>
-                                    <th>Created At</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
+                    <div className="resident-users-topsection">
 
-                            <tbody>
-                                {barangayUsers.map((user) => (
-                                    <tr key={user.id}>
-                                    <td>{user.userid}</td>
-                                    <td>{user.firstName} {user.lastName}</td>
-                                    <td>{user.sex}</td>
-                                    <td>{user.birthDate}</td>
-                                    <td>{user.address}</td>
-                                    <td>{user.phone}</td>
-                                    <td>{user.position}</td>
-                                    <td>{user.createdBy}</td>
-                                    <td>{user.createdAt}</td>
-                                    <td>
-                                        <div className="actions">
-                                            <button className="action-modify" onClick={handleEditBrgyAcc}>Modify</button>
-                                            <button className="action-delete" onClick={() => handleDeleteClick(user.id)}>Delete</button>
-                                        </div>
-                                    </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                        <button type="button" 
+                                className={showBarangayTableContent ? "user-role-minus-button" : "user-role-plus-button"} 
+                                onClick={handleToggleClickBarangayTable}>
+                        </button>
+                        <h1>Barangay Users Table</h1>
                     </div>
 
+
+                    {showBarangayTableContent && (
+                        <>
+                            <div className="barangay-users-main-section">
+
+                            {loading && <p>Loading residents...</p>}
+                            {error && <p className="error">{error}</p>}
+
+                            {!loading && !error && (
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>User ID</th>
+                                            <th>Official Name</th>
+                                            <th>Sex</th>
+                                            <th>Birth Date</th>
+                                            <th>Address</th>
+                                            <th>Phone</th>
+                                            <th>Position</th>
+                                            <th>Created By</th>
+                                            <th>Created At</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {barangayUsers.map((user) => (
+                                            <tr key={user.id}>
+                                            <td>{user.userid}</td>
+                                            <td>{user.firstName} {user.lastName}</td>
+                                            <td>{user.sex}</td>
+                                            <td>{user.birthDate}</td>
+                                            <td>{user.address}</td>
+                                            <td>{user.phone}</td>
+                                            <td>{user.position}</td>
+                                            <td>{user.createdBy}</td>
+                                            <td>{user.createdAt}</td>
+                                            <td>
+                                                <div className="admin-actions">
+                                                    <button 
+                                                        className="admin-action-view"
+                                                        onClick={() => router.push(`/dashboard/admin/viewBarangayUser?id=${user.id}`)}
+                                                    >
+                                                        View
+                                                    </button>
+                                                    <button 
+                                                        className="admin-action-edit" 
+                                                        onClick={() => router.push(`/dashboard/admin/modifyBarangayAcc?id=${user.id}`)}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button 
+                                                        className="admin-action-delete" 
+                                                        onClick={() => handleDeleteClick(user.id, user.userid)}>
+                                                            Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                            </div>
+                            
+                        </>
+                    )}
                     {showDeletePopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
-                                <p>Are you sure you want to delete this user?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
+                        <div className="user-roles-confirmation-popup-overlay">
+                            <div className="user-roles-confirmation-popup">
+                                <p>Are you sure you want to delete this Barangay User?</p>
+                                <h2>User ID: {selectedBarangayUserId}</h2>
+                                <div className="user-roles-yesno-container">
+                                    <button onClick={() => setShowDeletePopup(false)} className="user-roles-no-button">No</button>
+                                    <button onClick={confirmDelete} className="user-roles-yes-button">Yes</button>
                                 </div> 
                             </div>
                         </div>
                     )}
                 </div>
 
-                <div className="create-new-barangay-user">
-                    <form onSubmit={handleSubmit}>
-                        <h1>Create New Barangay User</h1>
-                        <div className="fields-container">
-                            <div className="fields-section">
-                                <label htmlFor="username">User ID: </label>
-                                <input 
-                                    type="text" 
-                                    id="username"
-                                    className="userID" 
-                                    value={users.userId} 
-                                    placeholder="User ID"
-                                    disabled  
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <div className="fields-container">
-                            <div className="fields-section">
-                                <label htmlFor="roles">Role:</label>
-                                <select  value={users.position}  onChange={handleChange} id="roles" name="position" className="role" >
-                                    <option value="" disabled>Select a Role</option>
-                                    <option value="Punong Barangay">Punong Barangay</option>
-                                    <option value="Secretary">Secretary</option>
-                                    <option value="Assistant Secretary">Asst Secretary</option>
-                                    <option value="Admin Staff">Admin Staff</option>
-                                    <option value="LF Staff">LF Staff</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="fields-container">
-                            <div className="fields-section">
-                                <label htmlFor="password">Password: </label>
-                                <input 
-                                    value={users.password} 
-                                    onChange={handleChange} 
-                                    id="password" 
-                                    type="password" 
-                                    name="password" 
-                                    className="password" 
-                                    placeholder="Enter Password"
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <div className="actions-section">
-                            <button onClick={GenerateID} className="generateUserID">Generate User ID</button>
-                            <button className="createNewBarangayUser">Create New Barangay User</button>
-                        </div>
-                        
-                    </form>
-                </div>
-
                 {showPopup && (
-                <div className={`popup-overlay show`}>
-                    <div className="popup">
+                <div className={`user-roles-popup-overlay show`}>
+                    <div className="user-roles-popup">
                         <p>{popupMessage}</p>
                     </div>
                 </div>
                 )}
 
                 {showAlertPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="user-roles-confirmation-popup-overlay">
+                            <div className="user-roles-confirmation-popup">
                                 <p>{popupMessage}</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setshowAlertPopup(false)} className="no-button">Continue</button>
+                                <div className="user-roles-yesno-container">
+                                    <button onClick={() => setshowAlertPopup(false)} className="user-roles-no-button">Continue</button>
                                 </div> 
                             </div>
                         </div>
