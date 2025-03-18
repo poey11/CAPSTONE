@@ -324,7 +324,7 @@ export default function Dashboard() {
 
         <div className="metric-card">
           <div className="card-left-side">
-            <Link href="/dashboard/admin">
+            <Link href="/dashboard/ResidentModule">
               <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
                 {chartsBoxOne[currentChartBoxOne].title}
               </p>
@@ -384,7 +384,7 @@ export default function Dashboard() {
 
         <div className="metric-card">
           <div className="card-left-side">
-            <Link href="/dashboard/admin">
+            <Link href="/dashboard/ServicesModule/Appointments">
               <p
                 className="title"
                 style={{ cursor: "pointer", textDecoration: "underline" }}
@@ -421,7 +421,7 @@ export default function Dashboard() {
 
           <div className="metric-card">
               <div className="card-left-side">
-                <Link href="/dashboard/ResidentModule">
+                <Link href="/dashboard/ServicesModule/InBarangayRequests">
                   <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
                   Weekly Statuses of Requested Documents and Total statuses of Requested Documents( to be implemented):
                   </p>
@@ -473,7 +473,7 @@ export default function Dashboard() {
 
          <div className="metric-card">
           <div className="card-left-side">
-            <Link href="/dashboard/admin">
+            <Link href="/dashboard/IncidentModule">
               <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
                 {chartsBoxSix[currentChartBoxSix].title}
               </p>
@@ -507,8 +507,11 @@ export default function Dashboard() {
         </div>
       </div> 
 
-
-      <p className="dashboard">Weekly Incident Reports Chart</p>
+      <Link href="/dashboard/IncidentModule">
+        <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
+          Weekly Incident Reports Chart
+        </p>
+      </Link>
       <div className="heatmap-container">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={incidentReportsByWeek} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
