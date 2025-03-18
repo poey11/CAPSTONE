@@ -67,17 +67,20 @@ export default function ViewUser() {
 
         <main className="viewresident-main-container">
             <div className="viewresident-page-title-section-1">
-                <h1>View Barangay User Details</h1>
+                <h1>Admin Module</h1>
             </div>
 
 
             <div className="viewresident-main-content">
 
                 <div className="viewresident-section-1">
-                    <button onClick={handleBack}>
-                        <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
-                    </button>
-                    <p>Barangay User Details</p>
+                    <div className="viewresident-main-section1-left">
+                        <button onClick={handleBack}>
+                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                        </button>
+                        <h1>Barangay User Details</h1>
+
+                    </div>
                 </div>
 
                 {barangayUserFields.map((field) => (

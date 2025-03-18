@@ -12,7 +12,7 @@
 }
 
 .editbrgyacc-page-title-section-1 h1{
-  font-size: 20px;
+  font-size: 2rem;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.5);
 }
@@ -52,7 +52,7 @@
 }
 
 .editbrgyacc-main-section1-left h1{
-    font-size: 17px;
+  font-size: 1.25rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
 }
@@ -235,7 +235,8 @@
     }
   }
 
-.popup-overlay {
+.popup-overlay,
+.error-popup-overlay {
     position: fixed;
     top: 13%;
     right: -3px;
@@ -255,6 +256,16 @@
     border-left: 10px solid #403f3e;
   }
 
+  .popup-overlay{
+    background: #777575;
+    border-left: 10px solid #403f3e;
+  }
+
+  .error-popup-overlay{
+    background: #cc3434;
+    border-left: 10px solid #8a0f0f;
+  }
+
   .popup{
     display: flex;
     align-items: center;
@@ -262,11 +273,13 @@
     gap: 20px;
   }
   
-  .popup-overlay.show {
+  .popup-overlay.show,
+  .error-popup-overlay.show  {
     animation: slideIn 0.5s ease-out;
   }
   
-  .popup-overlay.hide {
+  .popup-overlay.hide,
+  .error-popup-overlay.hide  {
     animation: slideOut 0.5s ease-out;
   }
 

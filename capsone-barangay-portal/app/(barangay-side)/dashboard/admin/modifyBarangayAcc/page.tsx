@@ -8,6 +8,7 @@ import { db, storage } from "../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import "@/CSS/User&Roles/ModifyBarangayAcc.css";
 import { form } from "framer-motion/m";
+import { hash } from 'bcryptjs'; 
 
 const metadata:Metadata = { 
     title: "Modify Barangay Accounts",
@@ -35,6 +36,10 @@ export default function EditBarangayAccount() {
     const searchParams = useSearchParams();
     const userId = searchParams.get("id");
 
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    
+
 
     const [formData, setFormData] = useState({
         userid: 0,
@@ -52,9 +57,6 @@ export default function EditBarangayAccount() {
         department: ""
       });
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-
 
     const handleBack = () => {
         router.push("/dashboard/admin");
@@ -67,6 +69,11 @@ export default function EditBarangayAccount() {
     const [showSavePopup, setShowSavePopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
 
     const handleDiscardClick = async () => {
@@ -93,23 +100,41 @@ export default function EditBarangayAccount() {
     }
 
     const confirmSave = async () => {
-        setShowSavePopup(false);
 
-        setPopupMessage("Changes saved successfully!");
-        setShowPopup(true);
+        if (password !== confirmPassword) {
+            setPopupErrorMessage("Confirm password must match New password.");
+            setShowErrorPopup(true);
 
-        // Hide the popup after 3 seconds
-        setTimeout(() => {
-            setShowPopup(false);
-            router.push("/dashboard/admin");
-        }, 3000);
+            setShowSavePopup(false);
 
-         // Create a fake event and call handleSubmit
-        const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-        await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+            // Hide the popup after 3 seconds
+            setTimeout(() => {
+                setShowErrorPopup(false);
+            }, 3000);
+
+
+            return;  // Stop execution here if passwords do not match
+        }if (password === confirmPassword){
+            setShowSavePopup(false);
+            setPopupMessage("Changes saved successfully!");
+            setShowPopup(true);
+    
+            // Hide the popup after 3 seconds
+            setTimeout(() => {
+                setShowPopup(false);
+                router.push("/dashboard/admin");
+            }, 3000);
+    
+             // Create a fake event and call handleSubmit
+            const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+            await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+        }
+
+        
     };
 
 
+    
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!userId || !formData) return;
@@ -117,13 +142,20 @@ export default function EditBarangayAccount() {
         setLoading(true);
         try {
           const docRef = doc(db, "BarangayUsers", userId);
-          await updateDoc(docRef, { ...formData } as Partial<BarangayUser>);
+          let updatedData: Partial<BarangayUser> = { ...formData };
+
+          if (password) { // ✅ Only hash if user provided a new password
+            updatedData.password = await hash(password, 12);
+        }
+            await updateDoc(docRef, updatedData);
+
         } catch (err) {
           console.error(err);
           setError("Failed to update job seeker");
         }
         setLoading(false);
-      };
+    };
+
 
     const [showRecordDetails, setShowRecordDetails] = useState(false); 
     const [showPasswordDetails, setShowPasswordDetails] = useState(false);
@@ -172,13 +204,22 @@ export default function EditBarangayAccount() {
         
     }, [userId]);
 
+
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
+        
+        if (name === "password") {
+            setPassword(value);
+            setFormData((prevData) => ({ ...prevData, password: value })); // ✅ Update formData.password
+        } else if (name === "confirmPassword") {
+            setConfirmPassword(value);
+        } else {
+            setFormData((prevData) => ({ ...prevData, [name]: value }));
+        }
     };
+
+    
 
     return (
 
@@ -438,19 +479,38 @@ export default function EditBarangayAccount() {
 
                             <hr/>
 
+
                             {showPasswordDetails && (
                                 <>
                                     <div className="editbrgyacc-main-fields-container-section2">
                                             <div className="editbrgyacc-fields-container">
                                                 <div className="editbrgyacc-fields-section">
-                                                    <p>Current Password</p>
+                                                    <p>New Password</p>
                                                     <div className="relative">
                                                         <input
                                                             type={showPassword ? "text" : "password"}
                                                             className="editbrgyacc-input-field"
-                                                            value={formData.password}
                                                             onChange={handleChange}
                                                             name="password"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="toggle-password-btn"
+                                                            onClick={() => setShowPassword(!showPassword)}
+                                                        >
+                                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="editbrgyacc-fields-section">
+                                                    <p>Confirm Password</p>
+                                                    <div className="relative">
+                                                        <input
+                                                            type={showPassword ? "text" : "password"}
+                                                            className="editbrgyacc-input-field"
+                                                            onChange={handleChange}
+                                                            name="confirmPassword"
                                                         />
                                                         <button
                                                             type="button"
@@ -503,6 +563,14 @@ export default function EditBarangayAccount() {
                 <div className={`popup-overlay show`}>
                     <div className="popup">
                         <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+{showErrorPopup && (
+                <div className={`error-popup-overlay show`}>
+                    <div className="popup">
+                        <p>{popupErrorMessage}</p>
                     </div>
                 </div>
                 )}

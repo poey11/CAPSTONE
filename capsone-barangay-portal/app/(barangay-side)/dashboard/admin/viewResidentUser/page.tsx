@@ -101,7 +101,7 @@ export default function ViewUser() {
     return (
         <main className="viewresident-main-container">
             <div className="viewresident-page-title-section-1">
-                <h1>View Resident User Details</h1>
+                <h1>Admin Module</h1>
             </div>
 
             <div className="viewresident-main-content">

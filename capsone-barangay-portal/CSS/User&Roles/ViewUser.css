@@ -28,7 +28,7 @@ margin-top: 20px;
 }
 
 .viewresident-page-title-section-1 h1{
-  font-size: 20px;
+  font-size: 2rem;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.5);
 }
@@ -134,7 +134,7 @@ margin-top: 20px;
   }
 
   .viewresident-main-section1-left h1{
-    font-size: 17px;
+    font-size: 1.25rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
   }
