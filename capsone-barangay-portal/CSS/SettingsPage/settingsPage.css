@@ -1,27 +1,31 @@
-.modifyaccsettings-main-container{
+.modifyaccsettings-main-container-settings{
     width: 100%;
-    height: 100vh;
+    height: auto;
     background-color: #f9f9f9;
     padding:30px;
     z-index: 10;
-    margin-left: 2rem; 
+    margin-left: 3rem; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-.section-1{
+.section-1-settings{
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
 }
 
-.section-1 h1{
-    font-size: 20px;
+.section-1-settings h1{
+    font-size: 2rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
 }
 
-.modifyaccsettings-main-section{
-    width: 70%;
+.modifyaccsettings-main-section-settings{
+    width: 95%;
     border-radius: 10px;
     border: 2px solid rgba(0, 0, 0, 0.10);
     background-color: #f4f2f2;
@@ -29,49 +33,48 @@
     flex-direction:column;
     margin-top: 20px;
     padding: 30px;
-    align-self: center;
 }
 
-.modifyaccsettings-main-section hr{
+.modifyaccsettings-main-section-settings hr{
     border: none; 
     border-top: 2px solid rgba(0, 0, 0, 0.10);
     margin: 30px 0; 
 }
 
-.modifyaccsettings-main-section1{
+.modifyaccsettings-main-section1-settings{
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
-.modifyaccsettings-main-section1-left{
+.modifyaccsettings-main-section1-left-settings{
     display: flex;
     align-items: center;
     gap: 20px;
 }
 
-.modifyaccsettings-main-section1-left h1{
+.modifyaccsettings-main-section1-left-settings h1{
     font-size: 17px;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
 }
 
 
-.back-btn{
+.back-btn-settings{
     width: 25px;
     height: 25px;
     filter: grayscale(100%) brightness(0%) invert(50%);
 }
 
 
-.action-btn-section{
+.action-btn-section-settings{
     display: flex;
     align-items: center;
     gap: 20px;
 }
 
-.discard-btn,
-.save-btn {   
+.discard-btn-settings,
+.save-btn-settings {   
     border: none;
     cursor: pointer;
     padding: 8px 12px;
@@ -81,81 +84,81 @@
     width: 100px;
 }
 
-.discard-btn {
+.discard-btn-settings {
     background-color: #de3030;
     color: white;
 }
 
-.discard-btn:hover {
+.discard-btn-settings:hover {
     background-color: #CA2D2D; 
 }
 
-.save-btn {
+.save-btn-settings {
     background-color: #4caf50;
     color: white;
 }
-.save-btn:hover {
+.save-btn-settings:hover {
     background-color: #3e8f41; 
 }
 
-.main-fields-container{
+.main-fields-container-settings{
     display: flex;
     flex-direction: column;
     padding-left: 60px;
     padding-right: 60px;
 }
 
-.main-fields-container h1{
+.main-fields-container-settings h1{
     font-size: 17px;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
     margin-top: 50px;
 }
 
-.main-fields-container-section1{
+.main-fields-container-section1-settings{
     display: flex;
     gap: 50px;
   
 }
 
-.main-fields-container-section2{
+.main-fields-container-section2-settings{
     display: flex;
     flex-direction: column;
 }
 
-.fields-container{
+.fields-container-settings{
     display: flex;
     flex-direction: column;
     /*gap: 20px;
     margin: 30px;*/
 }
 
-.fields-section{
+.fields-section-settings{
     display: flex;
     flex-direction: column;
     margin-top: 30px;
 }
 
-.fields-section p{
+.fields-section-settings p{
     font-size: 15px;
     color: grey;
     font-weight: bold;
 }
 
-.section-left{
+.section-left-settings{
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 50px;
 }
 
-.section-right{
+.section-right-settings{
     width: 100%;
     display: flex;
     flex-direction: column;
 }
 
-.input-field{
+.input-field-settings{
     padding: 8px;
     width: 100%;
     max-width: 100%;
@@ -166,7 +169,7 @@
     padding-right: 40px;
 }
 
-.icon-container{
+.icon-container-settings{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -175,7 +178,7 @@
     margin-bottom: 30px;
 }
 
-.upload-btn {
+.upload-btn-settings {
     background-color: #a1a3a6;
     color: white;
     border: none;
@@ -186,11 +189,11 @@
     font-size: 14px;
 }
 
-.upload-btn:hover {
+.upload-btn-settings:hover {
     background-color: #cacdd0;
 }
 
-.user-icon{
+.user-icon-settings{
     width: 200px;
     height: 200px;
     border-radius: 100px;
