@@ -268,13 +268,13 @@ const admin = () => {
                     )}
 
                     {showAcceptPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="user-roles-confirmation-popup-overlay">
+                            <div className="user-roles-confirmation-popup">
                                 <p>Are you sure you want to accept this user?</p>
                                 <h2>Resident ID: {selectedUserId}</h2>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowAcceptPopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmAccept} className="yes-button">Yes</button>
+                                <div className="user-roles-yesno-container">
+                                    <button onClick={() => setShowAcceptPopup(false)} className="user-roles-no-button">No</button>
+                                    <button onClick={confirmAccept} className="user-roles-yes-button">Yes</button>
                                 </div> 
                             </div>
                         </div>
@@ -427,13 +427,13 @@ const admin = () => {
                         </>
                     )}
                     {showDeletePopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="user-roles-confirmation-popup-overlay">
+                            <div className="user-roles-confirmation-popup">
                                 <p>Are you sure you want to delete this Barangay User?</p>
                                 <h2>User ID: {selectedBarangayUserId}</h2>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
+                                <div className="user-roles-yesno-container">
+                                    <button onClick={() => setShowDeletePopup(false)} className="user-roles-no-button">No</button>
+                                    <button onClick={confirmDelete} className="user-roles-yes-button">Yes</button>
                                 </div> 
                             </div>
                         </div>
@@ -441,19 +441,19 @@ const admin = () => {
                 </div>
 
                 {showPopup && (
-                <div className={`popup-overlay show`}>
-                    <div className="popup">
+                <div className={`user-roles-popup-overlay show`}>
+                    <div className="user-roles-popup">
                         <p>{popupMessage}</p>
                     </div>
                 </div>
                 )}
 
                 {showAlertPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="user-roles-confirmation-popup-overlay">
+                            <div className="user-roles-confirmation-popup">
                                 <p>{popupMessage}</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setshowAlertPopup(false)} className="no-button">Continue</button>
+                                <div className="user-roles-yesno-container">
+                                    <button onClick={() => setshowAlertPopup(false)} className="user-roles-no-button">Continue</button>
                                 </div> 
                             </div>
                         </div>

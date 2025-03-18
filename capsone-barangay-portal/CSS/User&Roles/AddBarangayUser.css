@@ -236,8 +236,8 @@
     }
   }
   
-  .popup-overlay,
-  .error-popup-overlay{
+  .addbrgyuser-popup-overlay,
+  .addbrgyuser-error-popup-overlay{
       position: fixed;
       top: 13%;
       right: -3px;
@@ -255,35 +255,35 @@
       justify-content: center;
     }
   
-    .popup-overlay{
+    .addbrgyuser-popup-overlay{
       background: #777575;
       border-left: 10px solid #403f3e;
     }
   
-    .error-popup-overlay{
+    .addbrgyuser-error-popup-overlay{
       background: #cc3434;
       border-left: 10px solid #8a0f0f;
     }
   
-  .popup{
+  .addbrgyuser-popup{
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 20px;
   }
   
-  .popup-overlay.show,
-  .error-popup-overlay.show {
+  .addbrgyuser-popup-overlay.show,
+  .addbrgyuser-error-popup-overlay.show {
     animation: slideIn 0.5s ease-out;
   }
   
-  .popup-overlay.hide,
-  .error-popup-overlay.hide {
+  .addbrgyuser-popup-overlay.hide,
+  .addbrgyuser-error-popup-overlay.hide {
     animation: slideOut 0.5s ease-out;
   }
   
   
-  .confirmation-popup-overlay {
+  .addbrgyuser-confirmation-popup-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -296,7 +296,7 @@
     z-index: 9999; 
   }
   
-  .confirmation-popup {
+  .addbrgyuser-confirmation-popup {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -315,17 +315,17 @@
     left: 43%; /* Adjust the value */
   }
   
-  .confirmation-popup p{
+  .addbrgyuser-confirmation-popup p{
     color: rgb(97, 97, 97);
   }
   
-  .yesno-container{
+  .addbrgyuser-yesno-container{
     display: flex;
     gap: 20px;
   }
   
-  .yes-button,
-  .no-button{
+  .addbrgyuser-yes-button,
+  .addbrgyuser-no-button{
     padding: 10px 20px;
     font-size: 16px;
     color: white;
@@ -337,19 +337,19 @@
     margin-top: 20px;
   }
   
-  .yes-button {
+  .addbrgyuser-yes-button {
     background-color: #4caf50; 
   }
   
-  .yes-button:hover {
+  .addbrgyuser-yes-button:hover {
     background-color: #3d8c40; 
   } 
   
-  .no-button {
+  .addbrgyuser-no-button {
     background-color: #f44336;
   }
   
-  .no-button:hover {
+  .addbrgyuser-no-button:hover {
     background-color:  #c2352b; 
   } 
 

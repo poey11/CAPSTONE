@@ -295,7 +295,7 @@
     }
   }
 
-.popup-overlay {
+.user-roles-popup-overlay {
     position: fixed;
     top: 13%;
     right: -3px;
@@ -315,24 +315,24 @@
     border-left: 10px solid #403f3e;
   }
 
-  .popup{
+  .user-roles-popup{
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 20px;
   }
   
-  .popup-overlay.show {
+  .user-roles-popup-overlay.show {
     animation: slideIn 0.5s ease-out;
   }
   
-  .popup-overlay.hide {
+  .user-roles-popup-overlay.hide {
     animation: slideOut 0.5s ease-out;
   }
 
 
 
-  .confirmation-popup-overlay {
+  .user-roles-confirmation-popup-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -345,7 +345,7 @@
     z-index: 9999; 
   }
   
-  .confirmation-popup {
+  .user-roles-confirmation-popup {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -364,23 +364,23 @@
     left: 43%; /* Adjust the value */
   }
   
-  .confirmation-popup p{
+  .user-roles-confirmation-popup p{
     color: rgb(97, 97, 97);
   }
 
-  .confirmation-popup h2{
+  .user-roles-confirmation-popup h2{
     margin-top: 10px;
     color: #f44336;
     font-size: 15px;
   }
   
-  .yesno-container{
+  .user-roles-yesno-container{
     display: flex;
     gap: 20px;
   }
   
-  .yes-button,
-  .no-button{
+  .user-roles-yes-button,
+  .user-roles-no-button{
     padding: 10px 20px;
     font-size: 16px;
     color: white;
@@ -392,19 +392,19 @@
     margin-top: 20px;
   }
   
-  .yes-button {
+  .user-roles-yes-button {
     background-color: #4caf50; 
   }
 
-  .yes-button:hover {
+  .user-roles-yes-button:hover {
     background-color: #3d8c40; 
   } 
 
-  .no-button {
+  .user-roles-no-button {
     background-color: #f44336;
   }
 
-  .no-button:hover {
+  .user-roles-no-button:hover {
     background-color:  #c2352b; 
   } 
 

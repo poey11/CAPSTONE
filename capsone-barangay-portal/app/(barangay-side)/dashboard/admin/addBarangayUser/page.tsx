@@ -11,7 +11,7 @@ export default function AddBarangayUser() {
     interface BarangayUser{
         id?: string;
         userId: string;
-        position:string,
+        position:string;
         password:string;
         role: string;
     }
@@ -216,7 +216,7 @@ export default function AddBarangayUser() {
                                 <input 
                                     type="text" 
                                     id="username"
-                                    name="useID"
+                                    name="userId"
                                     className="userID" 
                                     value={users.userId} 
                                     placeholder="User ID"
@@ -236,28 +236,28 @@ export default function AddBarangayUser() {
 
 
             {showSubmitPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="addbrgyuser-confirmation-popup-overlay">
+                            <div className="addbrgyuser-confirmation-popup">
                                 <p>Are you sure you want to submit?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmSubmit} className="yes-button">Yes</button> 
+                                <div className="addbrgyuser-yesno-container">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="addbrgyuser-no-button">No</button>
+                                    <button onClick={confirmSubmit} className="addbrgyuser-yes-button">Yes</button> 
                                 </div> 
                             </div>
                         </div>
         )}
 
         {showPopup && (
-                <div className={`popup-overlay show`}>
-                    <div className="popup">
+                <div className={`addbrgyuser-popup-overlay show`}>
+                    <div className="addbrgyuser-popup">
                         <p>{popupMessage}</p>
                     </div>
                 </div>
                 )}
 
         {showErrorPopup && (
-                <div className={`error-popup-overlay show`}>
-                    <div className="popup">
+                <div className={`addbrgyuser-error-popup-overlay show`}>
+                    <div className="addbrgyuser-popup">
                         <p>{popupErrorMessage}</p>
                     </div>
                 </div>
