@@ -1,6 +1,6 @@
 "use client"
 import {auth,db,storage} from "../../db/firebase";
-import { deleteObject,ref, uploadBytes } from "firebase/storage";
+import { deleteObject,ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { deleteDoc,doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, sendEmailVerification,signOut } from "firebase/auth";
 import { useState, ChangeEvent } from "react";
@@ -24,13 +24,13 @@ interface Resident {
     phone: string;
     address: string;
     password: string;
-    upload: File | null;
   };
   
   type residentUser = Resident & {
     role: "Resident";
     status: "unverified";
   };
+  
   
 const registerForm:React.FC = () => {
     const router = useRouter();
@@ -48,30 +48,43 @@ const registerForm:React.FC = () => {
         address: "",
         password: "",
         role: "Resident",
-        upload: null,
         status: "unverified"
       });
+
+
+      const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+
+    
 
       const handleChange = (
         e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
       ) => {
         const { name, value, type } = e.target;
-        if(type=== "file" && e.target instanceof HTMLInputElement && e.target.files){
+      
+        if (type === "file" && e.target instanceof HTMLInputElement && e.target.files) {
           setResident({
             ...resident,
-            upload: e.target.files[0],
-          })
-        }
-        else{
-          setResident({
-            ...resident,
-            [name]:value,
-          })
+          });
+        } else if (name === "password") {
+          setPassword(value);
+          setResident((prevData) => ({ ...prevData, password: value })); 
+        } else if (name === "confirmPassword") {
+          setConfirmPassword(value);
+        } else {
+          setResident((prevData) => ({ ...prevData, [name]: value }));
         }
       };
 
       const handleSubmit =async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        // Check if passwords match
+        if (resident.password !== confirmPassword) {
+          setErrorPopup({ show: true, message: "Passwords do not match!" });
+          return;
+        }
+
         let user = null;
         let docRef = null;
         let storageRef = null;
@@ -80,14 +93,12 @@ const registerForm:React.FC = () => {
           user = userCredentials.user;
           await signOut(auth); 
             
-            let fileName ='';
-            if(resident.upload){
-              const timeStamp = Date.now().toString();
-              const fileExtention = resident.upload.name.split('.').pop();
-              fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtention}`
-              storageRef = ref(storage, `valid_id_image/${fileName}`);
-              await uploadBytes(storageRef,  resident.upload)
-            }
+            let fileURL = "";
+                  if (file) {
+                    const storageRef = ref(storage, `ResidentsFiles/${file.name}`);
+                    await uploadBytes(storageRef, file);
+                    fileURL = await getDownloadURL(storageRef);
+                  }
               
  
             const response = await fetch('/api/registerForm', {
@@ -112,7 +123,7 @@ const registerForm:React.FC = () => {
               role: resident.role,
               createdAt: new Date().getTime(),
               status: resident.status,
-              validIdDocID: fileName
+              validIdDocID: fileURL
           });
          
           await sendEmailVerification(user);
@@ -158,6 +169,9 @@ const registerForm:React.FC = () => {
         }        
       }
 
+    const [file, setFile] = useState<File | null>(null);
+    const [preview, setPreview] = useState<string | null>(null);
+
       const handleCheckBox = (e:ChangeEvent<HTMLInputElement>) => {
         setIsTermChecked(e.target.checked);
       }
@@ -168,24 +182,25 @@ const registerForm:React.FC = () => {
         }
       }
 
-      const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
+    
+      const handleFileDelete = () => {
+        setFile(null);
+        setPreview(null);
+      };
 
-  // Handle file selection for container 1
-  const handleFileChangeContainer1 = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = event.target.files;
-    if (selectedFiles) {
-      const fileArray = Array.from(selectedFiles).map((file) => {
-        const preview = URL.createObjectURL(file);
-        return { name: file.name, preview };
-      });
-      setFilesContainer1((prevFiles) => [...prevFiles, ...fileArray]); // Append new files to the first container
-    }
-  };
-
-  // Handle file deletion for container 1
-  const handleFileDeleteContainer1 = (fileName: string) => {
-    setFilesContainer1((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
-  };
+      const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+          const selectedFile = e.target.files[0];
+      
+          // Ensure only one file is processed
+          setFile(selectedFile);
+          setPreview(URL.createObjectURL(selectedFile));
+      
+          // Reset the file input to prevent multiple selections
+          e.target.value = "";
+        }
+      };
+ 
 
   
 
@@ -277,8 +292,11 @@ const registerForm:React.FC = () => {
 
             <div className="form-group-register-form">
             <label htmlFor="password" className="form-label-register-form">Password: </label>
-            <input value={resident.password} onChange={handleChange} id="password"
-            type="password" name="password" 
+            <input 
+            onChange={handleChange} 
+            id="password"
+            type="password" 
+            name="password" 
             className="form-input-register-form "
             placeholder="Enter Password"
             required/>
@@ -286,8 +304,11 @@ const registerForm:React.FC = () => {
 
             <div className="form-group-register-form">
             <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password: </label>
-            <input id="confirm_password" type="password"
-            name="confirm_password"
+            <input 
+            onChange={handleChange}
+            id="confirmPassword" 
+            type="password"
+            name="confirmPassword"
             className="form-input-register-form "
             placeholder="Confirm Password"
             />
@@ -298,64 +319,24 @@ const registerForm:React.FC = () => {
               <label className="form-label-register-form">Upload Valid ID with address: </label>
 
               <div className="file-upload-container">
-                <label htmlFor="upload" className="upload-link">Click to Upload File</label>
-                <input
-                  id="file-upload1"
-                  type="file"
-                  className="file-upload-input"
-                  multiple
-                  accept=".jpg,.jpeg,.png"
-                  onChange={handleFileChangeContainer1} // Handle file selection
-                />
+                <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
+                <input id="file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleFileChange} />
 
-            <input onChange={handleChange} id="upload" type="file" name="upload" className="file-upload-input" accept="image/*"  />
-          
-                <div className="uploadedFiles-container">
-
-
-                  
-                  {filesContainer1.length > 0 && (
-                    <div className="file-name-image-display">
-                      <ul>
-                        {filesContainer1.map((file, index) => (
-                          <div className="file-name-image-display-indiv" key={index}>
-                            <li>
-                              {file.preview && (
-                                <div className="filename-image-container">
-                                  <img
-                                    src={file.preview}
-                                    alt={file.name}
-                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                  />
-                                </div>
-                              )}
-                              {file.name}
-                              <div className="delete-container">
-                                <button
-                                  type="button"
-                                  onClick={() => handleFileDeleteContainer1(file.name)}
-                                  className="delete-button"
-                                >
-                                  <img
-                                    src="/images/trash.png"
-                                    alt="Delete"
-                                    className="delete-icon"
-                                  />
-                                </button>
-                              </div>
-                            </li>
-                          </div>
-                        ))}
-                      </ul>
-
-                      
+                {file && (
+                  <div className="file-name-image-display">
+                    <div className="file-name-image-display-indiv">
+                      {preview && <img src={preview} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />}
+                      <span>{file.name}</span>
+                      <div className="delete-container">
+                        <button type="button" onClick={handleFileDelete} className="delete-button">
+                          <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                        </button>
+                      </div>
                     </div>
+                  </div>
+                )}
 
-                    
-
-                    
-                  )}
-                </div>
+              
               </div>
             </div>
 
