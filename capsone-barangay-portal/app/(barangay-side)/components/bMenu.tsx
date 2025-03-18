@@ -132,7 +132,49 @@ const BMenu: React.FC = () => {
       </div>
 
         <Link href="/dashboard/announcements" className="module">Announcements</Link>
-        <Link href="/programs" className="module">Programs and Events</Link>
+
+
+
+            {/* Programs and Events Module */}
+          <div className="dropdown-wrapper"
+            onMouseEnter={() => setHoveredDropdown("programs")}
+            onMouseLeave={() => setHoveredDropdown(null)}
+        >
+
+            <div className="dropdown-button">
+              <Link href="/dashboard">Programs</Link>
+              <img 
+                  src={hoveredDropdown === "programs" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+                  alt="Menu Icon" 
+                  className="arrow" 
+                />
+            </div>
+            <div className="dropdown-container">
+            <Link href="/dashboard/ProgramsModule" className="dropdown-item">Volunteer Programs</Link>
+            <Link href="/dashboard/ProgramsModule/ProgramResponses" className="dropdown-item">Program Responses</Link>
+            </div>
+        </div>
+
+          {/* Events Module */}
+          <div className="dropdown-wrapper"
+            onMouseEnter={() => setHoveredDropdown("events")}
+            onMouseLeave={() => setHoveredDropdown(null)}
+          >
+
+            <div className="dropdown-button">
+              <Link href="/dashboard">Events</Link>
+              <img 
+                  src={hoveredDropdown === "events" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+                  alt="Menu Icon" 
+                  className="arrow" 
+                />
+            </div>
+            <div className="dropdown-container">
+            <Link href="/dashboard/EventsModule" className="dropdown-item">Events List</Link>
+            <Link href="/dashboard/EventsModule/EventResponses" className="dropdown-item">Event Responses</Link>
+            </div>
+        </div>  
+
       </div>
     </div>
   );
