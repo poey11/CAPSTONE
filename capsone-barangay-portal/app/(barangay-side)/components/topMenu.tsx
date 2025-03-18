@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import  { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import {useAuth} from "../../context/authContext";
 import "@/CSS/barangaySide/topMenu.css";
 
 
@@ -16,11 +17,14 @@ interface User{
 export default function TopMenu() {
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement | null>(null);
+    const bUser = useSession().data?.user;
     const { data: session } = useSession();
     const currentUser: User = {
         name: session?.user?.fullName || "User",
         role: session?.user?.position || session?.user?.role || "User",
     }
+
+    const {user, loading} = useAuth();
 
     if( currentUser.name === "undefined undefined"){
         currentUser.name = "User";
@@ -50,9 +54,11 @@ export default function TopMenu() {
     }, []);
 
     const router = useRouter();
+  
     const handleSettings = () => {
-        router.push("/dashboard/settingsPage");
+        router.push(`/dashboard/settingsPage?id=${bUser?.id}`);
     };
+    
 
     return (
         <div className="main-containerB">
