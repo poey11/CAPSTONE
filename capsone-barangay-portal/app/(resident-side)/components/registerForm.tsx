@@ -9,13 +9,6 @@ import ReCAPTCHA from "react-google-recaptcha";
 import "@/CSS/Components/registerform.css";
 
 
-/*Fixed the register func logic where any failure in the process will delete any partial passed through the db
- however form validation is still partially implemented.
- the only validation added are sex, email, and password requirement (confirm password is not yet added ). 
- if register the user is successful,  the form should be cleared.
-  have to double check the error handling of register process.
- terms and condition havent been implemented */
-
 interface Resident {
     sex: string;
     first_name: string;
@@ -29,7 +22,7 @@ interface Resident {
   
   type residentUser = Resident & {
     role: "Resident";
-    status: "unverified";
+    status: "Unverified";
   };
   
 const registerForm:React.FC = () => {
@@ -49,7 +42,7 @@ const registerForm:React.FC = () => {
         password: "",
         role: "Resident",
         upload: null,
-        status: "unverified"
+        status: "Unverified"
       });
 
       const handleChange = (
@@ -85,7 +78,7 @@ const registerForm:React.FC = () => {
               const timeStamp = Date.now().toString();
               const fileExtention = resident.upload.name.split('.').pop();
               fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtention}`
-              storageRef = ref(storage, `valid_id_image/${fileName}`);
+              storageRef = ref(storage, `ResidentUsers/valid_id_image/${fileName}`);
               await uploadBytes(storageRef,  resident.upload)
             }
               
@@ -110,7 +103,7 @@ const registerForm:React.FC = () => {
               address: resident.address,
               sex: resident.sex,
               role: resident.role,
-              createdAt: new Date().getTime(),
+              createdAt: new Date().toISOString(),
               status: resident.status,
               validIdDocID: fileName
           });

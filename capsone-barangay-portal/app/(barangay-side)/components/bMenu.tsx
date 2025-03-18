@@ -3,11 +3,12 @@ import { useState } from "react";
 
 import Link from "next/link";
 import "@/CSS/BMenu/header.css";
+import React from "react";
+
 
 const BMenu: React.FC = () => {
 
   const [hoveredDropdown, setHoveredDropdown] = useState<string | null>(null);
-
   return (
     <div className="side-bar">
       <div className="logo-side-bar">
@@ -123,10 +124,10 @@ const BMenu: React.FC = () => {
             />
         </div>
         <div className="dropdown-container">
-          <Link href="/dashboard/IncidentModule/Lupon" className="dropdown-item">Lupon</Link>
-          <Link href="/dashboard/IncidentModule/GAD" className="dropdown-item">GAD</Link>
-          <Link href="/dashboard/IncidentModule/BCPC" className="dropdown-item">BCPC</Link>
-          <Link href="/dashboard/IncidentModule/VAWC" className="dropdown-item">VAWC</Link>
+          <Link href="/dashboard/IncidentModule/Department?id=Lupon" className="dropdown-item">Lupon</Link>
+          <Link href="/dashboard/IncidentModule/Department?id=GAD" className="dropdown-item">GAD</Link>
+          <Link href="/dashboard/IncidentModule/Department?id=BCPC" className="dropdown-item">BCPC</Link>
+          <Link href="/dashboard/IncidentModule/Department?id=VAWC" className="dropdown-item">VAWC</Link>
           <Link href="/dashboard/IncidentModule/OnlineReports" className="dropdown-item">Online Requests</Link>
         </div>
       </div>

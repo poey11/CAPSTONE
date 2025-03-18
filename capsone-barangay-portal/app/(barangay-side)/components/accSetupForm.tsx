@@ -36,8 +36,7 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
         sex: '',
         department: '',
         password: '',
-        confirmPassword: ''
-        
+        confirmPassword: '',
     });
 
     const [error, setError] = useState<string | null>(null);
@@ -99,7 +98,8 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                 sex: user.sex,
                 department: position === "LF Staff" ? user.department : "", // Only save department if LF Staff
                 password: hashedPassword,
-                firstTimelogin: false
+                firstTimelogin: false,
+               
             });
 
             await update();
@@ -125,8 +125,7 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
 
                         <label htmlFor="lName">Last Name:</label>
                         <input onChange={handleChange} value={user.lName} id="lName" type="text" name="lName" required />
-
-                        <label htmlFor="sex">Sex:</label>
+                         <label htmlFor="sex">Sex:</label>
                         <select value={user.sex} onChange={handleChange} id="sex" name="sex" required>
                             <option value="" disabled>Select a Sex</option>
                             <option value="Male">Male</option>

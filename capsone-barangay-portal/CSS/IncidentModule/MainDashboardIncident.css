@@ -82,6 +82,7 @@
 
 .action-edit {
     background-color: #ff9800; /* Orange */
+    width: 80px;
     color: white;
 }
 
