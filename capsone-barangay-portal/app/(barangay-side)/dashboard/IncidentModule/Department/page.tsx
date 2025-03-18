@@ -1,28 +1,40 @@
 "use client"
-import "@/CSS/IncidentModule/AllDepartments.css";
-
+import "@/CSS/IncidentModule/MainDashboardIncident.css";
 import { useState,useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { deleteDocument, getAllSpecificDocument } from "@/app/helpers/firestorehelper";
-import Heatmap from "@/app/(barangay-side)/components/heatmap"
+import { useRouter,useSearchParams} from "next/navigation";
+import { getAllSpecificDocument,deleteDocument } from "@/app/helpers/firestorehelper";
 
 
-const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
-const departmentOptions = ["GAD", "BCPC", "VAWC", "Lupon"]
+const statusOptions = ["Pending","In Progress", "Resolved", "Settled", "Archived"];
 
-export default function MainPageIncident() {
+export default function Department() {
   const [incidentData, setIncidentData] = useState<any[]>([])
-  useEffect(() => {
-      const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "!=", "Online", setIncidentData);
+  const router = useRouter();
+  const searchParam = useSearchParams();
+  const departmentId = searchParam.get("id");
+  
+  useEffect(()=> {
+
+    if(departmentId){
+      const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==",departmentId, setIncidentData);
         return () => {
         if (unsubscribe) {
           unsubscribe(); 
         }
-    }  }, []);
+      };
+    }
 
+   
+  },[departmentId])
 
+  /*filtering and search is not yet working */
+  const handleStatusChange = (index: number, newStatus: string) => {
+    setIncidentData((prev) =>
+      prev.map((incident, i) => (i === index ? { ...incident, Status: newStatus } : incident))
+    );
+  };
 
-  const router = useRouter();
+ 
 
   const handleView = (reportId: string) => {
     router.push(`/dashboard/IncidentModule/ViewIncident?id=${reportId}`);
@@ -37,35 +49,27 @@ export default function MainPageIncident() {
     deleteDocument("IncidentReports/Investigator", reportId);
   }
 
+  const handleAdd = () => {
+    router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`);
+  };
 
-   
-  
+
+
   return (
     <main className="main-container">
       <div className="section-1">
-        <h1>All Departments</h1>
-
+        <h1>Lupon Tagapamayapa: {departmentId} Table</h1>
+          <button className="add-announcement-btn" onClick={handleAdd}>Add New Incident</button>
       </div>
 
       <div className="section-2">
         <input type="text" className="search-bar" placeholder="Enter Incident Case" />
-      
         <select className="featuredStatus" defaultValue="">
           <option value="" disabled>Status</option>
-          {statusOptions.map((Deparment) => (
-            <option key={Deparment} value={Deparment}>{Deparment}</option>
-          ))}
-        </select>
-        
-
-        <select className="featuredStatus" defaultValue="">
-          <option value="" disabled>Deparment</option>
-          {departmentOptions.map((status) => (
+          {statusOptions.map((status) => (
             <option key={status} value={status}>{status}</option>
           ))}
         </select>
-
-
         <select className="featuredStatus" defaultValue="">
           <option value="" disabled>Show...</option>
           <option value="5">Show 5</option>
@@ -73,20 +77,11 @@ export default function MainPageIncident() {
         </select>
       </div>
 
-    
-      <div className="titlesection">
-             <p className="title"> Most Recent Incidents</p>
-        </div>
-     
       <div className="main-section">
-        
-
-      <div className="table-section">
         <table>
           <thead>
             <tr>
               <th>Case #</th>
-              <th>Department</th>
               <th>Date & Time of the Incident</th>
               <th>Nature of Complaint</th>
               <th>Status</th>
@@ -97,7 +92,6 @@ export default function MainPageIncident() {
             {incidentData.map((incident, index) => (
               <tr key={index}>
                 <td>{incident.caseNumber}</td>
-                <td>{incident.department}</td>
                 <td>{incident.dateFiled} {incident.timeFiled}</td>
                 <td>{incident.nature}</td>
                 <td>
@@ -117,21 +111,6 @@ export default function MainPageIncident() {
           </tbody>
         </table>
       </div>
-        
-      </div>
-
-    
-     
-
-      <div className="incidentmap-section">
-        
-      <div className="titlesection">
-             <p className="title"> Incident HeatMap</p>
-        </div>
-        <Heatmap/>
-      
-      </div>
-
     </main>
   );
 }

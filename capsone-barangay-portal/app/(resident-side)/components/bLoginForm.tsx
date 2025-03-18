@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from 'next/navigation';
 
 interface official{
     username: string;
@@ -9,7 +8,7 @@ interface official{
 }
 
 const bLoginForm:React.FC = () => {
-    const router = useRouter();
+
     const [official, setOfficial] = useState<official>({
         username: "",
         password: "",

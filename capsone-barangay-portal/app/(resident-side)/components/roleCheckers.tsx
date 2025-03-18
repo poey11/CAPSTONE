@@ -23,6 +23,7 @@ const RoleChecker: React.FC<RoleCheckerProps> = ({children }) => {
 
   const pathname = usePathname();
  
+ 
   useEffect(() => {
     if (status === "loading") return; // Wait until status is resolved
       if(session){

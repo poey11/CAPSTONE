@@ -1,32 +1,25 @@
 "use client"
 import "@/CSS/IncidentModule/OnlineReporting.css";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getAllSpecificDocument } from "@/app/helpers/firestorehelper";
 import { useRouter } from "next/navigation";
 
-const metadata: Metadata = {
-  title: "Incident Management Module",
-  description: "Manage incidents efficiently with status tracking and actions",
-};
 
 const statusOptions = ["Acknowledged", "Pending"];
 
 export default function OnlineReports() {
-  const [incidentData, setIncidentData] = useState([
-    { ComplainantFirstName: "Malcolm", ComplainantLastName: "Payao", DateFiled: "2024-02-01", Concern: "Robbery", Status: "Acknowledged" },
-    { ComplainantFirstName: "Malcolm", ComplainantLastName: "Payao", DateFiled: "2024-02-01", Concern: "Robbery", Status: "Pending" },
-    { ComplainantFirstName: "Malcolm", ComplainantLastName: "Payao", DateFiled: "2024-02-01", Concern: "Robbery", Status: "Pending" },
-    { ComplainantFirstName: "Malcolm", ComplainantLastName: "Payao", DateFiled: "2024-02-01", Concern: "Robbery", Status: "Pending" },
-    { ComplainantFirstName: "Malcolm", ComplainantLastName: "Payao", DateFiled: "2024-02-01", Concern: "Robbery", Status: "Pending" },
-    { ComplainantFirstName: "Malcolm", ComplainantLastName: "Payao", DateFiled: "2024-02-01", Concern: "Robbery", Status: "Pending" },
-    { ComplainantFirstName: "Malcolm", ComplainantLastName: "Payao", DateFiled: "2024-02-01", Concern: "Robbery", Status: "Pending" },
-    { ComplainantFirstName: "Malcolm", ComplainantLastName: "Payao", DateFiled: "2024-02-01", Concern: "Robbery", Status: "Pending" },
-    { ComplainantFirstName: "Malcolm", ComplainantLastName: "Payao", DateFiled: "2024-02-01", Concern: "Robbery", Status: "Pending" },
-    { ComplainantFirstName: "Malcolm", ComplainantLastName: "Payao", DateFiled: "2024-02-01", Concern: "Robbery", Status: "Pending" },
-    { ComplainantFirstName: "Malcolm", ComplainantLastName: "Payao", DateFiled: "2024-02-01", Concern: "Robbery", Status: "Pending" },
-   
-  ]);
+  const [incidentData, setIncidentData] = useState<any[]>([]);
+
+  useEffect(() => {
+    const unsubscribe = getAllSpecificDocument("IncidentReports","department","==","Online", setIncidentData);
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, []);
+
 
   const handleStatusChange = (index: number, newStatus: string) => {
     setIncidentData((prev) =>
@@ -78,13 +71,13 @@ export default function OnlineReports() {
           <tbody>
             {incidentData.map((incident, index) => (
               <tr key={index}>
-                <td>{incident.ComplainantFirstName}</td>
-                <td>{incident.ComplainantLastName}</td>
-                <td>{incident.DateFiled}</td>
-                <td>{incident.Concern}</td>
+                <td>{incident.firstname}</td>
+                <td>{incident.lastname}</td>
+                <td>{incident.date}</td>
+                <td>{incident.concern}</td>
                 <td>
-                    <span className={`status-badge ${incident.Status.toLowerCase().replace(" ", "-")}`}>
-                        {incident.Status}
+                    <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
+                        {incident.status}
                     </span>
                 </td>
                 <td>

@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       role,
       position,
       createdBy,
-      createdAt: new Date().getTime(),
+      createdAt: new Date().toISOString(),
       firstTimelogin: true,
     });
 

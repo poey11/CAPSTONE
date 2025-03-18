@@ -1,5 +1,13 @@
 
 import "@/CSS/IncidentReport/Notification.css";
+import { Metadata } from "next";
+import Link from 'next/link';
+
+
+export const metadata: Metadata = {
+    title: "Incident Report Notification",
+    description: "Incident Report Notification",
+};
 
 export default function Notification() {
 
@@ -23,9 +31,10 @@ export default function Notification() {
                         If further information is needed, you will be contacred using the 
                         details you provided.
                     </p>
-            
-                <button type="submit" className="back-button">Back to Home</button>
-            
+                    
+                <Link href="/">
+                    <button type="submit" className="back-button">Back to Home</button>
+                </Link>
                     
             </div>
 
