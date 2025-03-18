@@ -1,6 +1,6 @@
 
 
-.main-container{
+.main-container-departments{
     width: 100%;
     height: 100vh;
     background-color: #f9f9f9;
@@ -10,7 +10,7 @@
 }
 
 
- .main-section {
+ .main-section-departments {
     flex: 1; /* Makes it take up remaining space */
     display: flex; /* Ensures proper alignment */
     flex-direction: column;
@@ -20,14 +20,25 @@
     width: 100%;
     height: 100%; /* Full height */
     margin-top: 2rem;
+    max-height: 70%;
+    border: 2px solid  #ddd;
 }
 
-.main-section table {
+.main-section-departments thead {
+    position: sticky;
+    top: 0;
+    background-color: rgb(232, 228, 228); /* Ensures it's visible when scrolled */
+    z-index: 10; /* Ensures it stays above other content */
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
+    height: 80px;
+}
+
+.main-section-departments table {
     width: 100%; /* Ensures the table spans the full width */
     border-collapse: collapse; /* Removes unnecessary spacing between table cells */
 }
 
-.main-section td {
+.main-section-departments td {
     padding: 1rem; 
     text-align: center; 
     border-bottom: 2px solid #ddd;
@@ -35,7 +46,7 @@
     font-weight: lighter;
 }
 
-.main-section th {
+.main-section-departments th {
     padding: 1rem; 
     text-align: left; 
     border-bottom: 2px solid #ddd;
@@ -44,28 +55,28 @@
     
 }
 
-.main-section .official-info {
+.main-section-departments .official-info-departments {
     display: flex;
     align-items: center; /* Center align the image and text */
     gap: 1rem; /* Add space between the image and text */
 }
 
-.main-section .official-image {
+.main-section-departments .official-image-departments {
     width: 50px;
     height: 50px;
     border-radius: 50%; /* Make the image circular */
     object-fit: cover; /* Ensure the image is properly scaled */
 }
 
-.actions {
+.actions-departments {
     display: flex;
     gap: 0.5rem; /* Space between action buttons */
     justify-content: center;
 }
 
-.action-view,
-.action-edit,
-.action-delete {
+.action-view-departments,
+.action-edit-departments,
+.action-delete-departments {
     border: none;
     cursor: pointer;
     padding: 8px 12px;
@@ -75,47 +86,47 @@
 
 }
 
-.action-view {
+.action-view-departments {
     background-color: #4caf50; /* Green */
     color: white;
 }
 
-.action-edit {
+.action-edit-departments {
     background-color: #ff9800; /* Orange */
     width: 80px;
     color: white;
 }
 
-.action-delete {
+.action-delete-departments {
     background-color: #f44336; /* Red */
     color: white;
 }
-.action-view {
+.action-view-departments {
     background-color: #4caf50; /* Green */
     color: white;
 }
 
-.action-view:hover {
+.action-view-departments:hover {
     background-color: #3e8f41; /* Green */
 }
 
-.action-edit {
+.action-edit-departments {
     background-color: #ff9800; /* Orange */
     color: white;
 }
-.action-edit:hover {
+.action-edit-departments:hover {
     background-color: #d58102; /* Orange */
 }
 
-.action-delete {
+.action-delete-departments {
     background-color: #f44336; /* Red */
     color: white;
 }
-.action-delete:hover {
+.action-delete-departments:hover {
     background-color: #d73c31; /* Red */
 }
 
-.section-1{
+.section-1-departments{
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -123,14 +134,14 @@
 
 }
 
-.section-1 h1{
+.section-1-departments h1{
     font-size: 20px;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
    
 }
 
-.add-announcement-btn {
+.add-announcement-btn-departments {
     background-color:#e56723;
     color: white;
     border: none;
@@ -140,18 +151,18 @@
     border-radius: 5px;
   }
   
-  .add-announcement-btn:hover {
+  .add-announcement-btn-departments:hover {
     background-color:#cc591b;
   }
 
-  .section-2{
+  .section-2-departments{
     display: flex;
     gap: 20px;
     padding: 0;
     margin-top: 25px;
   }
 
-  .search-bar, .featuredStatus{
+  .search-bar-departments, .featuredStatus-departments{
     padding: 8px;
     width: 100%;
     max-width: 400px;
@@ -162,11 +173,11 @@
     text-align: center;
   }
 
-  .featuredStatus option {
+  .featuredStatus-departments option {
     color: rgba(0, 0, 0, 0.4); 
   }
 
-  .status-dropdown {
+  .status-dropdown-departments {
     padding: 4px 8px;
     border-radius: 6px;
     font-weight: bold;
@@ -200,7 +211,7 @@
     font-size: 15px;
   }
 
-  .status-badge {
+  .status-badge-departments {
     padding: 8px 12px;            
     border-radius: 5px;          
     font-size: 13px;              
