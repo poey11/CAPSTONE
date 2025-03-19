@@ -1,17 +1,19 @@
-"use client"
+"use client";
 import "@/CSS/IncidentModule/OnlineReporting.css";
 import { useState, useEffect } from "react";
 import { getAllSpecificDocument } from "@/app/helpers/firestorehelper";
 import { useRouter } from "next/navigation";
 
-
-const statusOptions = ["Acknowledged", "Pending"];
+const statusOptions = ["All", "Acknowledged", "Pending"];
 
 export default function OnlineReports() {
   const [incidentData, setIncidentData] = useState<any[]>([]);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("All");
 
   useEffect(() => {
-    const unsubscribe = getAllSpecificDocument("IncidentReports","department","==","Online", setIncidentData);
+    const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", "Online", setIncidentData);
 
     return () => {
       if (unsubscribe) {
@@ -20,21 +22,29 @@ export default function OnlineReports() {
     };
   }, []);
 
-
-  const handleStatusChange = (index: number, newStatus: string) => {
-    setIncidentData((prev) =>
-      prev.map((incident, i) => (i === index ? { ...incident, Status: newStatus } : incident))
-    );
-  };
+  useEffect(() => {
+    let data = [...incidentData];
+  
+    if (searchQuery) {
+      data = data.filter((incident) =>
+        typeof incident.caseNumber === "string" && incident.caseNumber.includes(searchQuery)
+      );
+    }
+  
+    if (selectedStatus !== "All") {
+      data = data.filter((incident) => incident.status === selectedStatus);
+    }
+  
+    setFilteredData(data);
+  }, [incidentData, searchQuery, selectedStatus]);
+  
 
   const router = useRouter();
 
-    const handleViewOnlineReport = () => {
-      router.push("/dashboard/IncidentModule/OnlineReports/ViewOnlineReport");
-    };
+  const handleViewOnlineReport = () => {
+    router.push("/dashboard/IncidentModule/OnlineReports/ViewOnlineReport");
+  };
 
-
-  
   return (
     <main className="main-container">
       <div className="section-1">
@@ -42,9 +52,18 @@ export default function OnlineReports() {
       </div>
 
       <div className="section-2">
-        <input type="text" className="search-bar" placeholder="Enter Incident Case" />
-        <select className="featuredStatus" defaultValue="">
-          <option value="" disabled>Status</option>
+        <input
+          type="text"
+          className="search-bar"
+          placeholder="Enter Incident Case Number"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <select
+          className="featuredStatus"
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+        >
           {statusOptions.map((status) => (
             <option key={status} value={status}>{status}</option>
           ))}
@@ -70,17 +89,17 @@ export default function OnlineReports() {
             </tr>
           </thead>
           <tbody>
-            {incidentData.map((incident, index) => (
+            {filteredData.map((incident, index) => (
               <tr key={index}>
-                <td>{incident.caseNumber}</td>
+                <td>{incident.caseNumber || "N/A"}</td>
                 <td>{incident.firstname}</td>
                 <td>{incident.lastname}</td>
                 <td>{incident.date}</td>
                 <td>{incident.concern}</td>
                 <td>
-                    <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
-                        {incident.status}
-                    </span>
+                  <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
+                    {incident.status}
+                  </span>
                 </td>
                 <td>
                   <div className="actions">
@@ -89,6 +108,11 @@ export default function OnlineReports() {
                 </td>
               </tr>
             ))}
+            {filteredData.length === 0 && (
+              <tr>
+                <td colSpan={7} style={{ textAlign: "center" }}>No records found</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
