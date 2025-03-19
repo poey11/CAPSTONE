@@ -339,7 +339,7 @@ export default function Dashboard() {
 
           <div className="card-right-side">
             <div className="chart-controls">
-              <button onClick={toggleChartBoxOne}>Next</button>
+              <button onClick={toggleChartBoxOne}>Switch</button>
             </div>
             <ResponsiveContainer width={300} height={300}>
               <PieChart>
@@ -488,7 +488,7 @@ export default function Dashboard() {
 
           <div className="card-right-side">
             <div className="chart-controls">
-              <button onClick={toggleChartBoxSix}>Next</button>
+              <button onClick={toggleChartBoxSix}>Switch</button>
             </div>
             <ResponsiveContainer width={300} height={300}>
               <PieChart>
