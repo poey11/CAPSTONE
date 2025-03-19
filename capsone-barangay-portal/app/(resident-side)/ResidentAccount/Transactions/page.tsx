@@ -71,7 +71,7 @@ export default function Transactions() {
                             <tbody>
                                 {transactionData.map((report) => (
                                     <tr key={report.id} onClick={() => handleTransactionClick(report)}>
-                                        <td>{report.date || "N/A"}</td>
+                                        <td>{report.dateFiled || "N/A"}</td>
                                         <td>{report.caseNumber || "N/A"}</td>
                                         <td>{report.department || "N/A"}</td>
                                         <td>{report.concerns || "N/A"}</td>

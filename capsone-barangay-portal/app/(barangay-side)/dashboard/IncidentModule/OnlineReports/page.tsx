@@ -178,8 +178,8 @@ export default function OnlineReports() {
                 <td>{incident.caseNumber || "N/A"}</td>
                 <td>{incident.firstname}</td>
                 <td>{incident.lastname}</td>
-                <td>{incident.date}</td>
-                <td>{incident.concern}</td>
+                <td>{incident.dateFiled}</td>
+                <td>{incident.concerns}</td>
                 <td>
                   <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
                     {incident.status}
