@@ -240,29 +240,29 @@ const handleFileChange = (
                 <div className="main-form-radio-group">
                     <div className="form-radio-group">
                         <label className="form-radio">
-                        <input type="radio" id="structure" name="structure" value="structure" required />
+                        <input type="radio" id="structure" name="typeofconstruction"  value="structure"  checked={clearanceInput.typeofconstruction === 'structure'}  onChange={handleChange} required />
                             Structure
                         </label>
                         <label className="form-radio">
-                        <input type="radio" id="renovation" name="renovation" value="renovation" required />
+                        <input type="radio" id="renovation" name="typeofconstruction" value="renovation"  checked={clearanceInput.typeofconstruction === 'renovation'}  onChange={handleChange} required />
                             Renovation
                         </label>
                     </div>
 
                     <div className="form-radio-group">
                         <label className="form-radio">
-                        <input type="radio" id="fencing" name="fencing" value="fencing" required />
+                        <input type="radio" id="fencing" name="typeofconstruction" value="fencing" checked={clearanceInput.typeofconstruction === 'fencing'}  onChange={handleChange}   required />
                             Fencing
                         </label>
                         <label className="form-radio">
-                        <input type="radio" id="excavation" name="excavation" value="excavation" required />
+                        <input type="radio" id="excavation" name="typeofconstruction" value="excavation" checked={clearanceInput.typeofconstruction === 'excavation'}  onChange={handleChange} required />
                             Excavation
                         </label>
                     </div>
 
                     <div className="form-radio-group">
                         <label className="form-radio">
-                        <input type="radio" id="demolition" name="demolition" value="demolition" required />
+                        <input type="radio" id="demolition" name="typeofconstruction" value="demolition" checked={clearanceInput.typeofconstruction === 'demolition'}  onChange={handleChange}  required />
                             Demolition
                         </label>
                     </div>
@@ -319,10 +319,12 @@ const handleFileChange = (
                   <input 
                     type="text"  
                     id="businessname"  
-                    name="businessname"  
+                    name="businessName"  
                     className="form-input"  
                     required 
                     placeholder="Enter Business Name"  
+                    value={clearanceInput.businessName}
+                    onChange={handleChange}
                   />
               </div>            
               <div className="form-group">
@@ -334,6 +336,8 @@ const handleFileChange = (
                   className="form-input"  
                   required 
                   placeholder="Enter Home Address"  
+                  value={clearanceInput.address}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -342,8 +346,10 @@ const handleFileChange = (
                   <input 
                     type="text"  
                     id="businessloc"  
-                    name="businessloc"  
+                    name="businessLocation"  
                     className="form-input"  
+                    value={clearanceInput.businessLocation}
+                    onChange={handleChange}
                     required 
                     placeholder="Enter Home Address"  
                   />
@@ -359,6 +365,8 @@ const handleFileChange = (
                 name="address"  
                 className="form-input"  
                 required 
+                value={clearanceInput.address}
+                onChange={handleChange}
                 placeholder="Enter Home/Office Address"  
               />
             </div>
@@ -415,8 +423,10 @@ const handleFileChange = (
                 <input 
                   type="text" 
                   id="birthdayplace" 
-                  name="birthdayplace" 
+                  name="birthplace" 
                   className="form-input" 
+                  value={clearanceInput.birthplace}
+                  onChange={handleChange}
                   required 
                   placeholder="Enter Birthplace" 
                 />
@@ -430,7 +440,9 @@ const handleFileChange = (
               <input 
                 type="text"  
                 id="businessnature"  
-                name="businessnature"  
+                name="businessNature"  
+                value={clearanceInput.businessNature}
+                onChange={handleChange}
                 className="form-input"  
                 required 
                 placeholder="Enter Business Nature"  
@@ -444,8 +456,10 @@ const handleFileChange = (
               <input 
                 type="number"  // Ensures the input accepts only numbers
                 id="capital"  
-                name="capital"  
-                className="form-input" 
+                name="estimatedCapital"  
+                className="form-input"
+                value={clearanceInput.estimatedCapital}
+                onChange={handleChange} 
                 required 
                 min="1"  // Minimum age (you can adjust this as needed)
                 placeholder="Enter Estimated Capital"  
@@ -460,8 +474,10 @@ const handleFileChange = (
               <input 
                 type="text"  
                 id="projectloc"  
-                name="projectloc"  
+                name="businessLocation"  
                 className="form-input"  
+                value={clearanceInput.businessLocation}
+                onChange={handleChange}
                 required 
                 placeholder="Enter Project Location"  
               />
@@ -472,8 +488,10 @@ const handleFileChange = (
               <input 
                 type="text"  
                 id="buildingtype"  
-                name="buildingtype"  
+                name="typeofbldg"  
                 className="form-input"  
+                value={clearanceInput.typeofbldg}
+                onChange={handleChange}
                 required 
                 placeholder="Enter Business Nature"  
               />
@@ -525,6 +543,8 @@ const handleFileChange = (
                     id="religion" 
                     name="religion" 
                     className="form-input" 
+                    value={clearanceInput.religion}
+                    onChange={handleChange}
                     required 
                     placeholder="Enter Religion" 
                   />
@@ -537,6 +557,8 @@ const handleFileChange = (
                     name="nationality" 
                     className="form-input" 
                     required 
+                    value={clearanceInput.nationality}
+                    onChange={handleChange}
                     placeholder="Enter Nationality" 
                   />
                 </div>
@@ -551,8 +573,10 @@ const handleFileChange = (
               <input 
                 type="text"  
                 id="projecttitle"  
-                name="projecttitle"  
+                name="projectName"  
                 className="form-input"  
+                value={clearanceInput.projectName}
+                onChange={handleChange}
                 required 
                 placeholder="Enter Business Nature"  
               />
@@ -588,6 +612,8 @@ const handleFileChange = (
                     id="height" 
                     name="height" 
                     className="form-input" 
+                    value={clearanceInput.height}
+                    onChange={handleChange}
                     required 
                     placeholder="Enter Height" 
                   />
@@ -599,6 +625,8 @@ const handleFileChange = (
                     type="number" 
                     id="weight" 
                     name="weight" 
+                    value={clearanceInput.weight}
+                    onChange={handleChange}
                     className="form-input" 
                     required 
                     placeholder="Enter Weight" 
@@ -612,6 +640,8 @@ const handleFileChange = (
                     id="bloodtype" 
                     name="bloodtype" 
                     className="form-input" 
+                    value={clearanceInput.bloodtype}
+                    onChange={handleChange}
                     required 
                     placeholder="Enter Blood Type" 
                   />
@@ -624,6 +654,8 @@ const handleFileChange = (
                     id="occupation" 
                     name="occupation" 
                     className="form-input" 
+                    value={clearanceInput.occupation}
+                    onChange={handleChange}
                     required 
                     placeholder="Enter Occupation" 
                   />
@@ -656,8 +688,10 @@ const handleFileChange = (
               <input 
                 type="number" 
                 id="precinctno" 
-                name="precinctno" 
+                name="precinctnumber" 
                 className="form-input" 
+                value={clearanceInput.precinctnumber}
+                onChange={handleChange}
                 required 
                 placeholder="Enter Precinct Number" 
               />
@@ -689,8 +723,10 @@ const handleFileChange = (
                 <input 
                   type="text"  
                   id="firstname"  
-                  name="firstname"  
                   className="form-input"  
+                  name="emergencyDetails.firstName"  
+                  value={clearanceInput.emergencyDetails.firstName}
+                  onChange={handleChange}
                   required  
                   placeholder="Enter First Name" 
                 />
@@ -701,8 +737,10 @@ const handleFileChange = (
                 <input 
                   type="text"  
                   id="middlename"  
-                  name="middlename"  
+                  name="emergencyDetails.middleName"  
                   className="form-input" 
+                  value={clearanceInput.emergencyDetails.middleName}
+                  onChange={handleChange}
                   required  
                   placeholder="Enter Middle Name"  
                 />
@@ -713,7 +751,9 @@ const handleFileChange = (
                 <input 
                   type="text"  
                   id="lastname"  
-                  name="lastname"  
+                  name="emergencyDetails.lastName"  
+                  value={clearanceInput.emergencyDetails.lastName}
+                  onChange={handleChange}
                   className="form-input"  
                   required 
                   placeholder="Enter Last Name"  
@@ -725,8 +765,10 @@ const handleFileChange = (
                 <input 
                   type="text"  
                   id="address"  
-                  name="address"  
+                  name="emergencyDetails.address"  
                   className="form-input"  
+                  value={clearanceInput.emergencyDetails.address}
+                  onChange={handleChange}
                   required 
                   placeholder="Enter Address"  
                 />
@@ -737,8 +779,10 @@ const handleFileChange = (
                 <input 
                   type="text"  
                   id="relationship"  
-                  name="relationship"  
+                  name="emergencyDetails.relationship"  
                   className="form-input"  
+                  value={clearanceInput.emergencyDetails.relationship}
+                  onChange={handleChange}
                   required 
                   placeholder="Enter Relationship"  
                 />
@@ -748,7 +792,9 @@ const handleFileChange = (
                 <label htmlFor="contactnumber" className="form-label">Contact Number</label>
                 <input 
                   type="tel"  
-                  id="contactnumber"  
+                  id="emergencyDetails.contactNumber"  
+                  value={clearanceInput.emergencyDetails.contactNumber}
+                  onChange={handleChange}
                   name="contactnumber"  
                   className="form-input" 
                   required 
@@ -766,8 +812,10 @@ const handleFileChange = (
                 <input 
                   type="text"  
                   id="educattainment"  
-                  name="educattainment"  
+                  name="educationalAttainment"  
                   className="form-input"  
+                  value={clearanceInput.educationalAttainment}
+                  onChange={handleChange}
                   required 
                   placeholder="Enter Educational Attainment"  
                 />
@@ -780,6 +828,8 @@ const handleFileChange = (
                 id="course"  
                 name="course"  
                 className="form-input"  
+                value={clearanceInput.course}
+                  onChange={handleChange}
                 required 
                 placeholder="Enter Course"  
               />
@@ -791,11 +841,11 @@ const handleFileChange = (
                 </label>
                 <div className="form-radio-group">
                     <label className="form-radio">
-                    <input type="radio" id="radioYes" name="resident" value="yes" required />
+                    <input type="radio" id="radioYes" name="isBeneficiary" value="yes"  checked={clearanceInput.isBeneficiary === "yes"}  onChange={handleChange} required />
                         Yes
                     </label>
                     <label className="form-radio">
-                    <input type="radio" id="radioNo" name="resident" value="no" required />
+                    <input type="radio" id="radioNo" name="isBeneficiary" value="no" checked={clearanceInput.isBeneficiary === "no"}  onChange={handleChange}required />
                         No
                     </label>
                 </div>
