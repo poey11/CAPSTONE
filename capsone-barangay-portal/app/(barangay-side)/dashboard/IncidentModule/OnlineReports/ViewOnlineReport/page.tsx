@@ -3,8 +3,8 @@ import "@/CSS/IncidentModule/OnlineReporting.css";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { db } from "@/app/db/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { doc, getDoc, updateDoc, collection, getDocs, setDoc } from "firebase/firestore";
+import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
 
 const statusOptions = ["Acknowledged", "Pending"];
 
@@ -19,9 +19,19 @@ export default function ViewOnlineReports() {
     file: "",
   });
 
+  const [respondent, setRespondent] = useState<{
+    respondentName: string;
+    investigationReport: string;
+    file: string[]; 
+  }>({
+    respondentName: "",
+    investigationReport: "",
+    file: [],  // Default to an empty array
+  });
+
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [files, setFiles] = useState<{ name: string; preview: string | undefined }[]>([]);
+  const [files, setFiles] = useState<{ file: File; name: string; preview: string | undefined }[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
   const incidentId = searchParams.get("id");
@@ -32,21 +42,16 @@ export default function ViewOnlineReports() {
     }
   }, [incidentId]);
 
+
   const fetchIncidentData = async (id: string) => {
     try {
       const docRef = doc(db, "IncidentReports", id);
       const docSnap = await getDoc(docRef);
   
       if (docSnap.exists()) {
-        const data = docSnap.data() as {
-          firstname?: string;
-          lastname?: string;
-          date?: string;
-          concerns?: string;
-          status?: string;
-          file?: string;
-        };
+        const data = docSnap.data();
   
+        // Set form data
         setFormData({
           id,
           firstname: data.firstname || "",
@@ -57,6 +62,17 @@ export default function ViewOnlineReports() {
           file: data.file || "",
         });
   
+        // ✅ Fetch respondent details and files as an array
+        if (data.respondent) {
+          setRespondent({
+            respondentName: data.respondent.respondentName || "",
+            investigationReport: data.respondent.investigationReport || "",
+            file: Array.isArray(data.respondent.file) ? data.respondent.file : data.respondent.file ? [data.respondent.file] : [],
+          });
+          
+        }
+  
+        // ✅ Fetch the incident proof photo (if available)
         if (data.file) {
           const storage = getStorage();
           const fileRef = ref(storage, `IncidentReports/${data.file}`);
@@ -71,25 +87,45 @@ export default function ViewOnlineReports() {
     }
   };
   
+  
+  
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = event.target.files;
-    if (selectedFiles) {
-      const fileArray = Array.from(selectedFiles).map((file) => {
-        const preview = URL.createObjectURL(file);
-        return { name: file.name, preview };
-      });
-      setFiles((prevFiles) => [...prevFiles, ...fileArray]);
+  
+    if (name === "respondentName" || name === "investigationReport") {
+      setRespondent((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
     }
   };
+  
+  
+  
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files;
+    if (selectedFiles) {
+      const storage = getStorage();
+      const uploadedFiles = await Promise.all(
+        Array.from(selectedFiles).map(async (file) => {
+          const fileRef = ref(storage, `IncidentReports/Respondents/${file.name}`);
+          await uploadBytes(fileRef, file);
+          const url = await getDownloadURL(fileRef);
+          return { file, name: file.name, preview: url }; // ✅ Include `file` in object
+        })
+      );
+      setFiles((prevFiles) => [...prevFiles, ...uploadedFiles]);
+    }
+  };
+  
+  
 
   const handleFileDelete = (fileName: string) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
@@ -100,18 +136,39 @@ export default function ViewOnlineReports() {
       alert("Error: Missing incident ID.");
       return;
     }
+  
     try {
       const incidentRef = doc(db, "IncidentReports", formData.id);
+      const storage = getStorage();
+  
+      // Upload files and get their URLs
+      const uploadedFileUrls = await Promise.all(
+        files.map(async ({ file }) => { 
+          const fileRef = ref(storage, `IncidentReports/Respondents/${file.name}`);
+          await uploadBytes(fileRef, file);
+          return getDownloadURL(fileRef);
+        })
+      );
+  
+      // Update the IncidentReports document with respondent data as a map
       await updateDoc(incidentRef, {
         status: formData.status,
+        respondent: {  //  Save respondent as a nested map
+          respondentName: respondent.respondentName,
+          investigationReport: respondent.investigationReport,
+          file: uploadedFileUrls, //  Save file URLs as an array
+        },
       });
-      alert("Incident status updated successfully!");
+  
+      alert("Incident status and respondent info updated!");
       router.push("/dashboard/IncidentModule/OnlineReports");
     } catch (error) {
-      console.error("Error updating incident status:", error);
-      alert("Failed to update incident status.");
+      console.error("Error updating:", error);
+      alert("Failed to update incident.");
     }
   };
+  
+  
 
   return (
     <main className="main-container">
@@ -187,58 +244,68 @@ export default function ViewOnlineReports() {
           <div className="section-1-response">
             <div className="official-section-online-report">
               <p>Respondent Officer</p>
-              <select className="online-report-input-field" required defaultValue="">
-                <option value="" disabled>Choose</option>
-                <option value="Malcolm">Malcolm</option>
-                <option value="Luen">Luen</option>
-                <option value="Payao">Payao</option>
-              </select>
+              <input type="text" className="add-resident-input-field" placeholder="Enter Respondent Officer Name" name="respondentName" value={respondent.respondentName} onChange={handleChange} />
             </div>
 
             <div className="fields-section-online-report">
               <p>Investigation Report</p>
-              <textarea className="description" placeholder="Enter Description" rows={15}></textarea>
+              <textarea className="add-resident-input-field" placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange} rows={15} />
             </div>
           </div>
 
           <div className="section-2-response">
-            <p>Investigation Photo</p>
-            <div className="file-upload-container">
-              <label htmlFor="file-upload2" className="upload-link">Click to Upload File</label>
-              <input
-                id="file-upload2"
-                type="file"
-                className="file-upload-input"
-                multiple
-                accept=".jpg,.jpeg,.png"
-                onChange={handleFileChange}
-              />
+  <p>Investigation Photo</p>
+  <div className="file-upload-container">
+    <label htmlFor="file-upload2" className="upload-link">Click to Upload File</label>
+    <input
+      id="file-upload2"
+      type="file"
+      className="file-upload-input"
+      multiple
+      accept=".jpg,.jpeg,.png"
+      onChange={handleFileChange}
+    />
 
-              <div className="uploadedFiles-container">
-                {files.length > 0 && (
-                  <div className="file-name-image-display">
-                    <ul>
-                      {files.map((file, index) => (
-                        <div className="file-name-image-display-indiv" key={index}>
-                          <li>
-                            {file.preview && (
-                              <div className="filename&image-container">
-                                <img src={file.preview} alt={file.name} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
-                              </div>
-                            )}
-                            {file.name}
-                            <button type="button" onClick={() => handleFileDelete(file.name)} className="delete-button">
-                              <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                            </button>
-                          </li>
-                        </div>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+    <div className="uploadedFiles-container">
+      {(files.length > 0 || respondent.file.length > 0) && (
+        <div className="file-name-image-display">
+          <ul>
+            {/* Display existing respondent files */}
+              {respondent.file.map((url: string, index: number) => (
+                <div className="file-name-image-display-indiv" key={`existing-${index}`}> 
+                  <li>
+                    <div className="filename&image-container">
+                      <img src={url} alt={`Investigation Photo ${index + 1}`} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
+                    </div>
+                    <a href={url} target="_blank" rel="noopener noreferrer">View</a>
+                  </li>
+                </div>
+              ))}
+
+
+            {/* Display newly uploaded files */}
+            {files.map((file, index) => (
+              <div className="file-name-image-display-indiv" key={`new-${index}`}> 
+                <li>
+                  {file.preview && (
+                    <div className="filename&image-container">
+                      <img src={file.preview} alt={file.name} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
+                    </div>
+                  )}
+                  {file.name}
+                  <button type="button" onClick={() => handleFileDelete(file.name)} className="delete-button">
+                    <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                  </button>
+                </li>
               </div>
-            </div>
-          </div>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
         </div>
 
         <div className="submit-response-section">
