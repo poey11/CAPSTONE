@@ -6,6 +6,7 @@ import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/f
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../db/firebase";
 import React from "react";
+import { pre } from "framer-motion/m";
 
 
 
@@ -298,16 +299,17 @@ export default function EditLuponIncident() {
           setShowDialogueContent(prevState => !prevState); // Toggle visibility
     };
 
-
-    const [showRecordDetails, setShowRecordDetails] = useState(false);
+ const [showRecordDetails, setShowRecordDetails] = useState(false);
 const [showComplainantDetails, setShowComplainantDetails] = useState(false);
 const [showInvestigatedDetails, setShowInvestigatedDetails] = useState(false);
-const [showOtherDetails, setshowOtherDetails] = useState(false);
+const [showOtherDetails, setShowOtherDetails] = useState(false);
+const [showHearingContent, setShowHearingContent] = useState(false); // Initially hidden
 
 const toggleRecordDetails = () => setShowRecordDetails(prev => !prev);
 const toggleComplainantDetails = () => setShowComplainantDetails(prev => !prev);
 const toggleInvestigatedDetails = () => setShowInvestigatedDetails(prev => !prev);
-const toggleOtherDetails = () => setshowOtherDetails(prev => !prev);
+const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
+const toggleHearingContent = () => setShowHearingContent(prev => !prev);
 
 
 
@@ -375,7 +377,9 @@ const toggleOtherDetails = () => setshowOtherDetails(prev => !prev);
               <div className="section-2-edit">
                   <div className="section-2-left-side-edit">
 
-                      <p >Update Complainant's Information</p>
+                      <h1 className="title-side-edit">Update Complainant's Information</h1>
+                      
+                      
                       <p>First Name</p>
 
                       <input 
@@ -465,7 +469,7 @@ const toggleOtherDetails = () => setshowOtherDetails(prev => !prev);
 
                   <div className="section-2-right-side-edit">
 
-                  <p >Update Respondent's Information</p>
+                  <h1>Update Respondent's Information</h1>
                       <p>First Name</p>
 
                       <input 
@@ -715,6 +719,8 @@ const toggleOtherDetails = () => setshowOtherDetails(prev => !prev);
                    <h1>Investigated Conducted By</h1>
               </div>
 
+              <hr/>
+
 
                   {showInvestigatedDetails&& (   
                     <div className="bars-edit">
@@ -753,119 +759,128 @@ const toggleOtherDetails = () => setshowOtherDetails(prev => !prev);
 
                   )}
 
-            <hr/>
 
 
-                    
-
-                    <p  className="title-edit">Image of Incident</p>
-                    <div className="description-edit">
-                      {concernImageUrl ? (
-                        <>
-                          <a href={concernImageUrl} target="_blank" rel="noopener noreferrer">
-
-                            <img src={concernImageUrl} alt="Incident" className="incident-image-edit"  style={{ width: '30%', height: '100%', marginRight: '5px', cursor: "pointer" }} />
-                          </a>
-                        </>
-
-                       ) : ( 
-                         <div className="input-group-edit">
-                           <p style={{ color: "gray", fontStyle: "italic" }}>No image available</p>
-                         </div>
-                       )}
-                       
-                    </div>
-                    
     
                </div>
                
 
+             
                
+              
                
-                     
                      
                      
                <div className="section-4-edit">
-                     
-                   <div className="section-4-left-side-edit">
-                     
-                     <div className="fields-section-edit">
-                                 <p>Investigation Report</p>
-                                     <textarea 
-                                          className="description-edit" 
-                                          placeholder="Enter Investigation Report"
-                                          rows={15}
-                                          value={toUpdate.investigator.investigationReport}
-                                          name="investigator.investigationReport"
-                                          id="investigator.investigationReport"
-                                          onChange={handleFormChange} 
-                                  ></textarea>
-                       </div>
-                     
-                    </div>
-                     
-               <div className="section-4-right-side-edit">
-                     
-                 <div className="title-edit">
-                       <p> Photo of Investigation (if Applicable)</p>
-                 </div> 
-                     
-                 <div className="file-upload-container-edit">
-                   <label htmlFor="file-upload1" className="upload-link-edit">Click to Upload File</label>
-                   <input
-                     id="file-upload1"
-                     type="file"
-                     className="file-upload-input-edit"
-                     accept=".jpg,.jpeg,.png"
-                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                       handleFileChangeContainer1(e);
-                       handleFormChange(e);
-                     }} // Handle file selection
-                   />
-                   <div className="uploadedFiles-container-edit">
-                     {filesContainer1.length > 0 && (
-                       <div className="file-name-image-display-edit">
-                         <ul>
-                           {filesContainer1.map((file, index) => (
-                             <div className="file-name-image-display-indiv-edit" key={index}>
-                               <li>
-                                 {file.preview && (
-                                   <div className="filename-image-container-edit">
-                                     <img
-                                       src={file.preview}
-                                       alt={file.name}
-                                       
-                                       style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                     />
-                                   </div>
-                                 )}
-                                 {file.name}
-                                 <div className="delete-container-edit">
-                                   <button
-                                     type="button"
-                                     onClick={() => handleFileDeleteContainer1(file.name)}
-                                     className="delete-button-edit"
-                                   >
-                                     <img
-                                       src="/images/trash.png"
-                                       alt="Delete"
-                                       className="delete-icon-edit"
-                                     />
-                                   </button>
-                                 </div>
-                               </li>
-                             </div>
-                           ))}
-                         </ul>
-                       </div>
-                     )}
-                   </div>
-                 </div>
-                   
-               </div>
-               </div>
-    
+
+
+               <div className="record-details-topsection">
+                            <button type="button" 
+                                className={showOtherDetails ? "record-details-minus-button" : "record-details-plus-button"} 
+                                onClick={toggleOtherDetails}>
+                            </button>
+                   <h1>Other Details</h1>
+              </div>
+
+              <hr/>
+
+              
+
+              {showOtherDetails && (
+    <>
+
+
+      <div className="section-4-upper-edit">
+        <div className="section-4-left-side-edit">
+          <div className="fields-section-edit">
+            <p>Investigation Report</p>
+            <textarea
+              className="description-edit"
+              placeholder="Enter Investigation Report"
+              rows={15}
+              value={toUpdate.investigator.investigationReport}
+              name="investigator.investigationReport"
+              id="investigator.investigationReport"
+              onChange={handleFormChange}
+            ></textarea>
+          </div>
+        </div>
+
+        <div className="section-4-right-side-edit">
+          <div className="title-edit">
+            <p>Photo of Investigation (if Applicable)</p>
+          </div>
+
+          <div className="file-upload-container-edit">
+            <label htmlFor="file-upload1" className="upload-link-edit">Click to Upload File</label>
+            <input
+              id="file-upload1"
+              type="file"
+              className="file-upload-input-edit"
+              accept=".jpg,.jpeg,.png"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleFileChangeContainer1(e);
+                handleFormChange(e);
+              }}
+            />
+            <div className="uploadedFiles-container-edit">
+              {filesContainer1.length > 0 && (
+                <div className="file-name-image-display-edit">
+                  <ul>
+                    {filesContainer1.map((file, index) => (
+                      <div className="file-name-image-display-indiv-edit" key={index}>
+                        <li>
+                          {file.preview && (
+                            <div className="filename-image-container-edit">
+                              <img
+                                src={file.preview}
+                                alt={file.name}
+                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                              />
+                            </div>
+                          )}
+                          {file.name}
+                          <div className="delete-container-edit">
+                            <button
+                              type="button"
+                              onClick={() => handleFileDeleteContainer1(file.name)}
+                              className="delete-button-edit"
+                            >
+                              <img src="/images/trash.png" alt="Delete" className="delete-icon-edit" />
+                            </button>
+                          </div>
+                        </li>
+                      </div>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="section-4-lower-edit">
+        <p className="title">Image of Incident</p>
+        <div className="description">
+          {concernImageUrl ? (
+            <a href={concernImageUrl} target="_blank" rel="noopener noreferrer">
+              <img src={concernImageUrl} alt="Incident" className="incident-image" style={{ width: '30%', height: '100%', marginRight: '5px', cursor: "pointer" }} />
+            </a>
+          ) : (
+            <div className="input-group">
+              <p style={{ color: "gray", fontStyle: "italic" }}>No image available</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  )}
+</div>
+           
         </form>
+
+        
         
 
 
@@ -874,8 +889,8 @@ const toggleOtherDetails = () => setshowOtherDetails(prev => !prev);
          <div className="dialouge-meeting-section-edit">
               
                  <div className="title-section-edit">
-                     <button type="button" className="plus-button-edit" onClick={handleToggleClick}></button>
-                     <p className="NewOfficial-edit">Dialogue Meeting</p>
+                     <button type="button" className={showDialogueContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
+                     <h1>Dialogue Meeting</h1>
                  </div>
 
                  <hr/>
@@ -926,29 +941,61 @@ const toggleOtherDetails = () => setshowOtherDetails(prev => !prev);
      <div className="hearing-section-edit">
          
              <div className="title-section-edit">
-                 <button type="button" className="plus-button-edit" onClick={handleToggleClick}></button>
-                 <p className="NewOfficial-edit">First Hearing</p>
+                  <button type="button" className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={toggleHearingContent}></button>
+                
+                 <h1>Hearing Section</h1>
              </div>
+
+             <hr/>
+
+
+             {showHearingContent && (
+                     <>
+                         <div className="section-2-dialouge-edit">
+                             <p>Complainant's Information</p>
+                             <div className="bars-edit">
+                                 <div className="input-group-edit">
+                                     <p>Date</p>
+                                     <input type="date" className="search-bar-edit" placeholder="Enter Date" />
+                                 </div>
+                                 <div className="input-group-edit">
+                                     <p>For</p>
+                                     <input type="text" className="search-bar-edit" placeholder="Enter For" />
+                                 </div>
+                                 <div className="input-group-edit">
+                                     <p>Time</p>
+                                     <input type="time" className="search-bar-edit" placeholder="Enter Time" />
+                                 </div>
+                             </div>
+                         </div>
+ 
+                         <div className="section-3-dialouge-edit">
+                             <div className="fields-section-edit">
+                                 <p>Minutes of Hearing</p>
+                                 <textarea className="description-edit" placeholder="Enter Minutes of Hearing" rows={13}></textarea>
+                             </div>
+                         </div>
+ 
+                         <div className="section-4-dialouge-edit">
+                             <div className="fields-section-edit">
+                                 <p>Remarks</p>
+                                 <textarea className="description-edit" placeholder="Enter Remarks" rows={10}></textarea>
+                             </div>
+                             <div className="fields-section-edit">
+                                 <p>Parties</p>
+                                 <textarea className="description-edit" placeholder="Enter Parties" rows={10}></textarea>
+                             </div>
+                         </div>
+                     </>
+                 )}
+
+
+
  
  
      </div>
  
-     <div className="hearing-section-edit">
-         
-             <div className="title-section-edit">
-                 <button type="button" className="plus-button-edit" onClick={handleToggleClick}></button>
-                 <p className="NewOfficial-edit">Second Hearing</p>
-             </div>
-     </div>
- 
-     <div className="hearing-section-edit">
-         
-         <div className="title-section-edit">
-             <button type="button" className="plus-button-edit" onClick={handleToggleClick}></button>
-             <p className="NewOfficial-edit">Third Hearing</p>
-         </div>
-     </div>
- 
+    
  
      </main>
       )}

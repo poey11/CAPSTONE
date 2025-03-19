@@ -135,6 +135,13 @@
  padding: 1rem;
 }
 
+.section-2-left-side-edit h1 {
+  color: grey;
+ font-weight: bold;
+ font-size: 1.25rem;
+ padding: 1rem;
+}
+
 
 
 .section-2-right-side-edit {
@@ -150,6 +157,13 @@ font-weight: bold;
 font-size: 1rem;
 padding: 1rem;
 
+}
+
+.section-2-right-side-edit h1 {
+  color: grey;
+ font-weight: bold;
+ font-size: 1.25rem;
+ padding: 1rem;
 }
 
 
@@ -254,8 +268,9 @@ input:checked + .slider:before {
   align-items: center; 
   justify-content: center; 
   text-align: center;
-  height: 60%; /* Set a fixed height for better UI experience */
+  height: 75%; /* Set a fixed height for better UI experience */
   width: 80%;
+  margin-top: 1rem;
   
 }
 
@@ -434,6 +449,7 @@ input:checked + .slider:before {
 
 .section-4-edit {
 display: flex;
+flex-direction: column;
 width: 100%;
 }
 
@@ -489,6 +505,13 @@ width: 100%;
 border-bottom: 2px solid #ddd;
 padding-bottom: 1rem;
 padding-top: 1rem;
+}
+
+.title-section-edit h1 {
+  font-size: 17px;
+  font-weight: bold;
+  color: rgba(0,0,0,0.5);
+  margin: 0;
 }
 
 .section-2-dialouge-edit {
@@ -851,4 +874,23 @@ background-color:  #c2352b;
 .record-details-minus-button:hover {
   transform: scale(1.1); 
   transition: transform 0.2s ease;
+}
+
+.section-4-upper-edit {
+  display: flex;
+  width: 100%;
+}
+
+.section-4-lower-edit {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-left: 2.5rem;
+}
+
+.section-4-lower-edit p {
+  color: grey;
+font-weight: bold;
+font-size: 1rem;
+padding: 1rem;
 }
