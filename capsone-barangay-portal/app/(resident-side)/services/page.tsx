@@ -2,13 +2,24 @@
 import type { Metadata } from "next";
 import "@/CSS/ServicesPage/requestdocumentsmain/requestdocumentsmain.css";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 const metadata: Metadata = {
   title: "Services",
   description: "Services page for the barangay website",
 };
 
+
+
 export default function Services() {
+  const router = useRouter();
+
+  const goToServices = (e: any) => {
+    const action = e.currentTarget.id;
+    router.push(`/services/action?doc=${action}`);
+  }
+  
+  
+
   return (
     <main className="services-container">
       <div className="headerpic">
@@ -132,8 +143,8 @@ export default function Services() {
                 </Link>
               </div>
             </div>
-            <Link href="/services/barangayclearance">
-              <div className="documents-card">
+            
+              <div className="documents-card" onClick={goToServices} id="barangayclearance">
                 <img
                   src="/images/document.png"
                   alt="Document Icon"
@@ -141,7 +152,6 @@ export default function Services() {
                 />
                 <h1>Barangay Clearance</h1>
               </div>
-            </Link>
             <Link href="/services/firsttimejobseeker">
               <div className="documents-card">
                 <img
