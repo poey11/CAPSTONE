@@ -76,8 +76,8 @@ export default function Transactions() {
                                         <td>{report.department || "N/A"}</td>
                                         <td>{report.concerns || "N/A"}</td>
                                         <td>
-                                            <span className={`status-badge ${report.status?.toLowerCase().replace(" ", "-") || ""}`}>
-                                                {report.status || "Pending"}
+                                            <span className={`status-badge ${report.status?.toLowerCase().replace(/\s+/g, "-") || ""}`}>
+                                            {report.status}
                                             </span>
                                         </td>
                                     </tr>
