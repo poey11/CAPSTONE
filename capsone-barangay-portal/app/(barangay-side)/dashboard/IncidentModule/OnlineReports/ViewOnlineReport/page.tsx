@@ -17,6 +17,8 @@ export default function ViewOnlineReports() {
     concerns: "",
     status: "",
     file: "",
+    reportID: "",
+    caseNumber: "",
   });
 
   const [respondent, setRespondent] = useState<{
@@ -60,6 +62,8 @@ export default function ViewOnlineReports() {
           concerns: data.concerns || "",
           status: data.status || "",
           file: data.file || "",
+          reportID: data.reportID || "",
+          caseNumber: data.caseNumber || "",
         });
   
         // ✅ Fetch respondent details and files as an array
@@ -150,14 +154,25 @@ export default function ViewOnlineReports() {
         })
       );
   
-      // Update the IncidentReports document with respondent data as a map
+      // Update the IncidentReports document
       await updateDoc(incidentRef, {
         status: formData.status,
-        respondent: {  //  Save respondent as a nested map
+        respondent: {  
           respondentName: respondent.respondentName,
           investigationReport: respondent.investigationReport,
-          file: uploadedFileUrls, //  Save file URLs as an array
+          file: uploadedFileUrls,
         },
+      });
+  
+      // 🔔 Create a notification for the resident
+      const notificationRef = doc(collection(db, "Notifications"));
+      await setDoc(notificationRef, {
+        residentID: formData.reportID, // reportID == user id
+        incidentID: formData.id,
+        message: `Your incident report (${formData.caseNumber}) has been updated to "${formData.status}".`,
+        timestamp: new Date(),
+        transactionType: "Online Incident",
+        isRead: false,
       });
   
       alert("Incident status and respondent info updated!");
@@ -167,6 +182,7 @@ export default function ViewOnlineReports() {
       alert("Failed to update incident.");
     }
   };
+  
   
   
 
