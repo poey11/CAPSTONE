@@ -60,6 +60,7 @@ export default function OnlineReports() {
         <table>
           <thead>
             <tr>
+              <th>Case Number</th>
               <th>Complainant's First Name</th>
               <th>Complainant's Last Name</th>
               <th>Date Filed</th>
@@ -71,6 +72,7 @@ export default function OnlineReports() {
           <tbody>
             {incidentData.map((incident, index) => (
               <tr key={index}>
+                <td>{incident.caseNumber}</td>
                 <td>{incident.firstname}</td>
                 <td>{incident.lastname}</td>
                 <td>{incident.date}</td>
