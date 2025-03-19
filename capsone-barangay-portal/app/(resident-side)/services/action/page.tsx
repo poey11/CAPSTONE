@@ -2,12 +2,16 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import {useAuth} from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
+import {useSearchParams } from "next/navigation";
+import { doc } from "firebase/firestore";
 
 
 
 
 export default function BarangayCertificate() {
   const user = useAuth().user; // Get the current user from the context
+  const searchParam = useSearchParams();
+  const docType = searchParam.get("doc");
 
   const [clearanceInput, setClearanceInput] = useState({
     accountId: user?.uid || "Guest",
@@ -105,6 +109,8 @@ const handleFileChange = (
       console.log(clearanceInput); // Log the form data
     };
 
+
+    console.log(docType)
   return (
 
     <main className="main-form-container">
@@ -114,41 +120,72 @@ const handleFileChange = (
 
       <div className="form-content">
         <h1 className="form-title">
-            Barangay Clearance
+            Barangay {docType} Request Form
         </h1>
 
         <hr/>
 
         
         <form className="doc-req-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="purpose" className="form-label">Barangay Clearance Purpose</label>
-              <select 
-                id="purpose" 
-                name="purpose" 
-                className="form-input" 
-                required
-                value={clearanceInput.purpose}
-                onChange={handleChange}
-              >
-                <option value="" disabled>Select purpose</option>
-                <option value="Loan">Loan</option>
-                <option value="Bank Transaction">Bank Transaction</option>
-                <option value="Bank Transaction">Residency</option>
-                <option value="Local Employment">Local Employment</option>
-                <option value="Maynilad">Maynilad</option>
-                <option value="Meralco">Meralco</option>
-                <option value="Bail Bond">Bail Bond</option>
-                {/* <option value="Character Reputation">Character Reputation</option> */}
-                {/* <option value="Request for Referral">Request for Referral</option> */}
-                {/* <option value="Issuance of Postal ID">Issuance of Postal ID</option> */}
-                {/* <option value="MWSI connection">MWSI connection</option> */}
-                {/* <option value="Business Clearance">Business Clearance</option> */}
-                {/* <option value="Firearms License">Police Clearance</option> */}
-                {/* <option value="Others">Others</option> */}
-              </select>
-            </div>
+        {(docType === "Certificate" || docType === "Clearance" ||  docType === "Indigency") && (
+          <div className="form-group">
+            
+          <label htmlFor="purpose" className="form-label">Barangay {docType} Purpose</label>
+          <select 
+            id="purpose" 
+            name="purpose" 
+            className="form-input" 
+            required
+            value={clearanceInput.purpose}
+            onChange={handleChange}
+          >
+            <option value="" disabled>Select purpose</option>
+            {docType === "Certificate" ? (<>
+              <option value="Residency">Residency</option>
+              <option value="Loan">Occupancy /  Moving Out</option>
+              <option value="Bank Transaction">Estate Tax</option>
+              <option value="Local Employment">Death Residency</option>
+              <option value="Maynilad">No Income (Scholarship)</option>
+              <option value="Meralco">No Income (ESC)</option>
+              <option value="Bail Bond">No Income (For Discount)</option>
+              <option value="Character Reputation">Cohabitation</option>
+              <option value="Request for Referral">Guardianship</option>
+              <option value="Issuance of Postal ID">Good Moral and Probation</option>
+              <option value="MWSI connection">Garage/PUV</option>
+              <option value="Business Clearance">Garage/TRU</option>
+            
+            </>):docType === "Clearance" ? (<>
+              <option value="Loan">Loan</option>
+              <option value="Bank Transaction">Bank Transaction</option>
+              <option value="Bank Transaction">Residency</option>
+              <option value="Local Employment">Local Employment</option>
+              <option value="Maynilad">Maynilad</option>
+              <option value="Meralco">Meralco</option>
+              <option value="Bail Bond">Bail Bond</option>
+              {/* <option value="Character Reputation">Character Reputation</option> */}
+              {/* <option value="Request for Referral">Request for Referral</option> */}
+              {/* <option value="Issuance of Postal ID">Issuance of Postal ID</option> */}
+              {/* <option value="MWSI connection">MWSI connection</option> */}
+              {/* <option value="Business Clearance">Business Clearance</option> */}
+              {/* <option value="Firearms License">Police Clearance</option> */}
+              {/* <option value="Others">Others</option> */}
+            </>):docType === "Indigency"&&( <>
+              <option value="Loan">No Income</option>
+              <option value="Bank Transaction">Public Attorneys Office</option>
+              <option value="Bank Transaction">AKAP</option>
+              <option value="Local Employment">Financial Subsidy of Solo Parent</option>
+              <option value="Maynilad">Fire Emergency</option>
+              <option value="Meralco">Flood Victims</option>
+              <option value="Bail Bond">Philhealth Sponsor</option>
+              <option value="Character Reputation">Medical Assistance</option>
+            </>)}
+            
+          </select>
+        </div>
 
+
+        )}
+            
 
            
 
@@ -234,6 +271,20 @@ const handleFileChange = (
               />
             </div>
 
+            {docType ==="BarangayID" && (
+              <div className="form-group">
+                <label htmlFor="birthdayplace" className="form-label">Birthplace</label>
+                <input 
+                  type="text" 
+                  id="birthdayplace" 
+                  name="birthdayplace" 
+                  className="form-input" 
+                  required 
+                  placeholder="Enter Birthplace" 
+                />
+              </div>
+            )}
+
             <div className="form-group">
               <label htmlFor="age" className="form-label">Age</label>
               <input 
@@ -267,6 +318,33 @@ const handleFileChange = (
               </select>
             </div>
 
+            {docType ==="BarangayID" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="religion" className="form-label">Religion</label>
+                  <input 
+                    type="text" 
+                    id="religion" 
+                    name="religion" 
+                    className="form-input" 
+                    required 
+                    placeholder="Enter Religion" 
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nationality" className="form-label">Nationality</label>
+                  <input 
+                    type="text" 
+                    id="nationality" 
+                    name="nationality" 
+                    className="form-input" 
+                    required 
+                    placeholder="Enter Nationality" 
+                  />
+                </div>
+              </>
+            )}
+
             <div className="form-group">
               <label htmlFor="civilStatus" className="form-label">Civil Status</label>
               <select 
@@ -286,6 +364,58 @@ const handleFileChange = (
               </select>
             </div>
 
+            {docType ==="BarangayID" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="height" className="form-label">Height</label>
+                  <input 
+                    type="number" 
+                    id="height" 
+                    name="height" 
+                    className="form-input" 
+                    required 
+                    placeholder="Enter Height" 
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="weight" className="form-label">Weight</label>
+                  <input 
+                    type="number" 
+                    id="weight" 
+                    name="weight" 
+                    className="form-input" 
+                    required 
+                    placeholder="Enter Weight" 
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="bloodtype" className="form-label">Blood Type</label>
+                  <input 
+                    type="text" 
+                    id="bloodtype" 
+                    name="bloodtype" 
+                    className="form-input" 
+                    required 
+                    placeholder="Enter Blood Type" 
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="occupation" className="form-label">Occupation</label>
+                  <input 
+                    type="text" 
+                    id="occupation" 
+                    name="occupation" 
+                    className="form-input" 
+                    required 
+                    placeholder="Enter Occupation" 
+                  />
+                </div>
+
+            </>)}
+
             <div className="form-group">
               <label htmlFor="contact" className="form-label">Contact Number</label>
               <input 
@@ -303,7 +433,21 @@ const handleFileChange = (
               />
             </div>
 
-            <div className="form-group">
+            
+
+            {docType ==="BarangayID" ? (
+              <div className="form-group">
+              <label htmlFor="precinctno" className="form-label">Precinct Number</label>
+              <input 
+                type="number" 
+                id="precinctno" 
+                name="precinctno" 
+                className="form-input" 
+                required 
+                placeholder="Enter Precinct Number" 
+              />
+              </div>
+            ):(<div className="form-group">
               <label htmlFor="citizenship" className="form-label">Citizenship</label>
               <input 
                 type="text"  
@@ -315,10 +459,93 @@ const handleFileChange = (
                 required 
                 placeholder="Enter Citizenship"  
               />
-            </div>
+            </div>  )}
           
 
           <hr/>
+
+          {docType ==="BarangayID" && (
+            <>
+              <h1 className="form-requirements-title">Emergency Details</h1>
+
+              <div className="form-group">
+                <label htmlFor="firstname" className="form-label">First Name</label>
+                <input 
+                  type="text"  
+                  id="firstname"  
+                  name="firstname"  
+                  className="form-input"  
+                  required  
+                  placeholder="Enter First Name" 
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="middlename" className="form-label">Middle Name</label>
+                <input 
+                  type="text"  
+                  id="middlename"  
+                  name="middlename"  
+                  className="form-input" 
+                  required  
+                  placeholder="Enter Middle Name"  
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="lastname" className="form-label">Last Name</label>
+                <input 
+                  type="text"  
+                  id="lastname"  
+                  name="lastname"  
+                  className="form-input"  
+                  required 
+                  placeholder="Enter Last Name"  
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="address" className="form-label">Address</label>
+                <input 
+                  type="text"  
+                  id="address"  
+                  name="address"  
+                  className="form-input"  
+                  required 
+                  placeholder="Enter Address"  
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="relationship" className="form-label">Relationship</label>
+                <input 
+                  type="text"  
+                  id="relationship"  
+                  name="relationship"  
+                  className="form-input"  
+                  required 
+                  placeholder="Enter Relationship"  
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="contactnumber" className="form-label">Contact Number</label>
+                <input 
+                  type="tel"  
+                  id="contactnumber"  
+                  name="contactnumber"  
+                  className="form-input" 
+                  required 
+                  placeholder="Enter Contact Number"  
+                  maxLength={10}  // Restrict the input to 10 characters as a number
+                  pattern="^[0-9]{10}$"  // Regular expression to enforce a 10-digit number format
+                  title="Please enter a valid 10-digit contact number"  // Tooltip for invalid input
+                />
+              </div>
+
+              <hr/>
+            </>
+          )}
 
           <h1 className="form-requirements-title">Requirements</h1>
 

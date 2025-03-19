@@ -3,12 +3,6 @@ import type { Metadata } from "next";
 import "@/CSS/ServicesPage/requestdocumentsmain/requestdocumentsmain.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-const metadata: Metadata = {
-  title: "Services",
-  description: "Services page for the barangay website",
-};
-
-
 
 export default function Services() {
   const router = useRouter();
@@ -27,27 +21,18 @@ export default function Services() {
       </div>
       
       <div className="services-main-container">
-        <div className="documents-container">
+        <div className="documents-container"  >
           <div className="documents-container-column">
-            <div className="documents-card dropdown-container">
+            <div className="documents-card dropdown-container" onClick={goToServices} id="Certificate">
               <img
                   src="/images/document.png"
                   alt="Document Icon"
                   className="document-icon"
                 />
                 <h1>Barangay Certificate</h1>
-                <div className="dropdown">
-                  <Link href="/services/barangaycertificate/residency">
-                    <p>Residency</p>
-                  </Link>
-                  <Link href="/services/barangaycertificate/others">
-                      <p>Others</p>
-                  </Link>
-                </div>
             </div>
 
-            <Link href="/services/barangayindigency">
-              <div className="documents-card">
+              <div className="documents-card" onClick={goToServices} id="Indigency" >
                 <img
                   src="/images/document.png"
                   alt="Document Icon"
@@ -55,7 +40,6 @@ export default function Services() {
                 />
                 <h1>Barangay Indigency</h1>
               </div>
-            </Link>
 
             <Link href="/services/barangayID">
               <div className="documents-card">
@@ -144,7 +128,7 @@ export default function Services() {
               </div>
             </div>
             
-              <div className="documents-card" onClick={goToServices} id="barangayclearance">
+              <div className="documents-card" onClick={goToServices} id="Clearance">
                 <img
                   src="/images/document.png"
                   alt="Document Icon"
