@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "@/app/db/firebase"; 
+import { db, storage} from "@/app/db/firebase"; 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "@/CSS/ResidentAccount/profile.css";
 
@@ -18,6 +18,7 @@ export default function SettingsPageResident() {
         email: "",
         sex: "",
         status: "",
+        userIcon: ""
     });
 
     const [showPopup, setShowPopup] = useState(false);
@@ -28,29 +29,33 @@ export default function SettingsPageResident() {
     const [error, setError] = useState("");
     const [file, setFile] = useState<File | null>(null); // State for file upload
   
-    
+
     useEffect(() => {
         if (residentId) {
-            const fetchResidentData = async () => {
-                const docRef = doc(db, "ResidentUsers", residentId);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    setResident({
-                        first_name: docSnap.data().first_name || "",
-                        last_name: docSnap.data().last_name || "",
-                        phone: docSnap.data().phone || "",
-                        email: docSnap.data().email || "",
-                        sex: docSnap.data().sex || "",
-                        status: docSnap.data().status || "",
-                    });
-
-                    setPreview(docSnap.data().fileURL || null);
-                }
-            };
-            fetchResidentData();
+          const fetchResidentData = async () => {
+            const docRef = doc(db, "ResidentUsers", residentId);
+            const docSnap = await getDoc(docRef);
+    
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              setResident({
+                first_name: data.first_name || "",
+                last_name: data.last_name || "",
+                phone: data.phone || "",
+                email: data.email || "",
+                sex: data.sex || "",
+                status: data.status || "",
+                userIcon: data.userIcon || "",
+              });
+    
+              setPreview(data.userIcon)
+            }
+          };
+    
+          fetchResidentData();
         }
-    }, [residentId]);
+      }, [residentId]);
+    
 
     const handleBack = () => {
         window.location.href = "/dashboard";
@@ -64,94 +69,98 @@ export default function SettingsPageResident() {
         }));
     };
 
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = event.target.files?.[0];
+        if (selectedFile) {
+          setFile(selectedFile);
+          setPreview(URL.createObjectURL(selectedFile)); // Show preview before upload
+        }
+    };
+
+    const uploadImageToStorage = async (file: File) => {
+        const storageRef = ref(storage, `userIcons/${residentId}`);
+        await uploadBytes(storageRef, file);
+        return getDownloadURL(storageRef);
+      };
+
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
-        setError("");
     
         try {
-            const docRef = doc(db, "ResidentUsers", residentId!);
-            const docSnap = await getDoc(docRef);
+          const docRef = doc(db, "ResidentUsers", residentId!);
     
-            if (docSnap.exists()) {
-                const currentData = docSnap.data();
+          let updatedData = { ...resident };
     
-                // Check if there are any changes
-                const isDataChanged = Object.keys(resident).some(
-                    (key) => resident[key as keyof typeof resident] !== currentData[key]
-                );
+          // Upload profile image if a new file is selected
+          if (file) {
+            const downloadURL = await uploadImageToStorage(file);
+            updatedData.userIcon = downloadURL;
+          }
     
-                if (!isDataChanged) {
-                    alert("No changes detected.");
-                    setLoading(false);
-                    return;
-                }
-            }
+          await updateDoc(docRef, updatedData);
     
-            // Proceed with update if data has changed
-            await updateDoc(docRef, { ...resident });
-    
-            alert("Profile updated successfully!");
-            router.push("/ResidentAccount/Profile");
+          alert("Profile updated successfully!");
+          router.push("/ResidentAccount/Profile");
         } catch (err) {
-            setError("Failed to update resident");
-            console.error(err);
+          alert("Failed to update profile. Please try again.");
+          console.error(err);
         }
     
         setLoading(false);
-    };
+      };
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            setSelectedImage(imageUrl);
-        }
-    };
     
     return (
         <main className="main-container-resident-profile">
             <div className="first-section-resident-profile">
+
+
+                
+                
+
+                <div className="account-details-section">
+
+                <div className="acc-details-content-section-1">
+                    <p>Account Details</p>
+                </div>
+
+
                 <div className="account-profile-section">
-                    <p className="Details">Profile</p>
-
                     <div className="icon-container-profile-section">
+                    <img src={preview || resident.userIcon || undefined} alt="User Icon" className="user-icon-profile-section" />
 
-                        <img src={selectedImage || "/images/user.png"} alt="User Icon" className="user-icon-profile-section" />
-                                
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    id="fileUpload"
-                                    style={{ display: "none" }}
-                                    onChange={handleImageChange}
-                                />
-                                <button 
-                                    className="upload-btn-profile-section" 
-                                    onClick={() => document.getElementById("fileUpload")?.click()}
-                                >
-                                    Update Profile Image
-                                </button>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        id="fileUpload"
+                        style={{ display: "none" }}
+                        onChange={handleImageChange}
+                    />
+                    <button
+                        className="upload-btn-profile-section"
+                        onClick={() => document.getElementById("fileUpload")?.click()}
+                    >
+                        Update Profile Image
+                    </button>
                     </div>
 
                     <div className="name-section">
-                        <p className="name">{resident.first_name || "N/A"}</p>
-                        <p className="name">{resident.last_name || "N/A"}</p>
+                    <p className="name">{resident.first_name || "N/A"}</p>
+                    <p className="name">{resident.last_name || "N/A"}</p>
                     </div>
 
-                    {/* Transactions Link */}
                     <div className="transactions-link">
-                        <a href="/ResidentAccount/Transactions" className="transactions-text">
-                            View Transactions
-                        </a>
+                    <a href="/ResidentAccount/Transactions" className="transactions-text">
+                        View Transactions
+                    </a>
                     </div>
-
                 </div>
 
-                <div className="account-details-section">
-                    <p className="Details">Account Details</p>
+
+                    
 
                     <div className="edit-section-profile">
                       <form onSubmit={handleSubmit}>

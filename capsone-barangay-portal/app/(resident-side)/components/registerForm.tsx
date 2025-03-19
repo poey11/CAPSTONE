@@ -123,7 +123,8 @@ const registerForm:React.FC = () => {
               role: resident.role,
               createdAt: new Date().getTime(),
               status: resident.status,
-              validIdDocID: fileURL
+              validIdDocID: fileURL,
+              userIcon: "/images/user.png"
           });
          
           await sendEmailVerification(user);
