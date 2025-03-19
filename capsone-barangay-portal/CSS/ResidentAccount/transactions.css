@@ -152,6 +152,13 @@
     font-size: 15px;
     
   }
+
+  .acknowledged {
+    background-color: #d4d64f;
+    color: white;
+    font-size: 15px;
+    
+  }
   
   .resolved {
     background-color: #66c47a;
