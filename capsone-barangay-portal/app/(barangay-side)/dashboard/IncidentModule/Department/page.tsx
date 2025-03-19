@@ -56,28 +56,28 @@ export default function Department() {
 
 
   return (
-    <main className="main-container">
-      <div className="section-1">
+    <main className="main-container-departments">
+      <div className="section-1-departments">
         <h1>Lupon Tagapamayapa: {departmentId} Table</h1>
-          <button className="add-announcement-btn" onClick={handleAdd}>Add New Incident</button>
+          <button className="add-announcement-btn-departments" onClick={handleAdd}>Add New Incident</button>
       </div>
 
-      <div className="section-2">
-        <input type="text" className="search-bar" placeholder="Enter Incident Case" />
-        <select className="featuredStatus" defaultValue="">
+      <div className="section-2-departments">
+        <input type="text" className="search-bar-departments" placeholder="Enter Incident Case" />
+        <select className="featuredStatus-departments" defaultValue="">
           <option value="" disabled>Status</option>
           {statusOptions.map((status) => (
             <option key={status} value={status}>{status}</option>
           ))}
         </select>
-        <select className="featuredStatus" defaultValue="">
+        <select className="featuredStatus-departments" defaultValue="">
           <option value="" disabled>Show...</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
         </select>
       </div>
 
-      <div className="main-section">
+      <div className="main-section-departments">
         <table>
           <thead>
             <tr>
@@ -95,15 +95,15 @@ export default function Department() {
                 <td>{incident.dateFiled} {incident.timeFiled}</td>
                 <td>{incident.nature}</td>
                 <td>
-                    <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
+                    <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
                         {incident.status}
                     </span>
                 </td>   
                 <td>
-                  <div className="actions">
-                    <button className="action-view" onClick={() => handleView(incident.id)}>View</button>
-                    <button className="action-edit" onClick={()=>handleEdit(incident.id) }>Edit</button>
-                    <button className="action-delete" onClick={()=> handleDelete(incident.id)}>Delete</button>
+                  <div className="actions-departments">
+                    <button className="action-view-departments" onClick={() => handleView(incident.id)}>View</button>
+                    <button className="action-edit-departments" onClick={()=>handleEdit(incident.id) }>Edit</button>
+                    <button className="action-delete-departments" onClick={()=> handleDelete(incident.id)}>Delete</button>
                   </div>
                 </td>
               </tr>

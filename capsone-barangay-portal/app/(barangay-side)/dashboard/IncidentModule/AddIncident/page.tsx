@@ -302,24 +302,24 @@ export default function AddIncident() {
 
 
   return (
-    <main className="main-container">
-        <div className="main-content">
+    <main className="main-container-add">
+        <div className="main-content-add">
 
-        <button type="button" className="back-button" onClick={handleBack}></button>
+        <button type="button" className="back-button-add" onClick={handleBack}></button>
 
         <form onSubmit={handleSubmit}>
-            <div className="section-1">
-                <p className="NewOfficial"> New Incident</p>
+            <div className="section-1-add">
+                <p className="NewOfficial-add"> New Incident</p>
 
-                    <div className="actions">
-                        <button  type="button" onClick={deleteForm} className="action-delete">Delete</button>
-                        <button type="submit" className="action-view">Save</button>
+                    <div className="actions-add">
+                        <button  type="button" onClick={deleteForm} className="action-delete-add">Delete</button>
+                        <button type="submit" className="action-view-add">Save</button>
                     </div>
                 
              </div>
              <input 
                     type="text" 
-                    className="search-bar" 
+                    className="search-bar-add" 
                     value={reportInfo.caseNumber}
                     name="caseNumber"
                     id="caseNumber"
@@ -327,16 +327,16 @@ export default function AddIncident() {
                     
                     />
 
-             <div className="section-2">
+             <div className="section-2-add">
 
-                <div className="section-2-left-side">
+                <div className="section-2-left-side-add">
 
                     <p >Complainant's Information</p>
                     <p>First Name</p>
 
                     <input 
                     type="text" 
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Complaint's First Name" 
                     value={complainant.fname}
                     name="fname"
@@ -348,7 +348,7 @@ export default function AddIncident() {
 
                     <input 
                     type="text" 
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Complaint's First Name" 
                     value={complainant.lname}
                     name="lname"
@@ -360,7 +360,7 @@ export default function AddIncident() {
                   <p>Sex</p>
                   <select 
                     name="sex" 
-                    className="featuredStatus" 
+                    className="featuredStatus-add" 
                     required
                     id="complainant"
                     value={complainant.sex}
@@ -376,7 +376,7 @@ export default function AddIncident() {
 
                     <input 
                     type="text" 
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Age" 
                     value={complainant.age}
                     name="age"
@@ -388,7 +388,7 @@ export default function AddIncident() {
                     <p>Civil Status</p>
                     <input 
                     type="text" 
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Civil Status" 
                     value={complainant.civilStatus}
                     name="civilStatus"
@@ -401,7 +401,7 @@ export default function AddIncident() {
 
                     <input 
                     type="text" 
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Address" 
                     value={complainant.address}
                     name="address"
@@ -414,7 +414,7 @@ export default function AddIncident() {
 
                     <input 
                     type="text" 
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Contact Number" 
                     value={complainant.contact}
                     name="contact"
@@ -425,14 +425,14 @@ export default function AddIncident() {
 
                 </div>
               
-                <div className="section-2-right-side">
+                <div className="section-2-right-side-add">
                   
                 <p >Respondent's Information</p>
                     <p>First Name</p>
 
                     <input 
                     type="text" 
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Respondent's First Name" 
                     value={respondent.fname}
                     name="fname"
@@ -444,7 +444,7 @@ export default function AddIncident() {
 
                     <input 
                     type="text" 
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Respondent's First Name" 
                     value={respondent.lname}
                     name="lname"
@@ -457,7 +457,7 @@ export default function AddIncident() {
                   <select 
                     id="respondent"
                     name="sex" 
-                    className="featuredStatus" 
+                    className="featuredStatus-add" 
                     required
                     value={respondent.sex}
                     onChange={handleFormChange}
@@ -473,7 +473,7 @@ export default function AddIncident() {
                     <input 
                     type="text" 
                     id="respondent"
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Age" 
                     value={respondent.age}
                     name="age"
@@ -485,7 +485,7 @@ export default function AddIncident() {
                     <input 
                     type="text" 
                     id="respondent"
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Civil Status" 
                     value={respondent.civilStatus}
                     name="civilStatus"
@@ -498,7 +498,7 @@ export default function AddIncident() {
                     <input 
                     type="text" 
                     id="respondent"
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Address" 
                     value={respondent.address}
                     name="address"
@@ -511,7 +511,7 @@ export default function AddIncident() {
                     <input 
                     type="text" 
                     id="respondent"
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Contact Number" 
                     value={respondent.contact}
                     name="contact"
@@ -525,16 +525,16 @@ export default function AddIncident() {
             </div>
 
 
-              <div className="section-3">
+              <div className="section-3-add">
                 <p className="title">Other Information</p>
                 
-                <div className="bars">
+                <div className="bars-add">
                 {departmentId === "GAD" ? 
                 (
-                  <div className="input-group">
+                  <div className="input-group-add">
                     <p>Nature of Complaint</p>
                     <select 
-                    className="featuredStatus" 
+                    className="featuredStatus-add" 
                     required
                     id="nature" name="nature" 
                     value={reportInfo.nature}
@@ -551,38 +551,38 @@ export default function AddIncident() {
                   </select>
                   </div>
                 ):(
-                  <div className="input-group">
+                  <div className="input-group-add">
                     <p>Nature of Complaint</p>
-                    <input type="text" className="search-bar" placeholder="Enter Nature of Complaint"  id="nature" name="nature" 
+                    <input type="text" className="search-bar-add" placeholder="Enter Nature of Complaint"  id="nature" name="nature" 
                     value = {reportInfo.nature} onChange={handleFormChange} required/>
                   </div>
                 )}
                    
 
-                    <div className="input-group">
+                    <div className="input-group-add">
                         <p>Date Filed</p>
-                        <input type="date" className="search-bar" placeholder="Enter Date" id="dateFiled" name="dateFiled" 
+                        <input type="date" className="search-bar-add" placeholder="Enter Date" id="dateFiled" name="dateFiled" 
                         value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
                     </div>
 
-                    <div className="input-group">
+                    <div className="input-group-add">
                         <p>Time Filed</p>
-                        <input type="time" className="search-bar" placeholder="Enter Time" id="timeFiled" name="timeFiled" 
+                        <input type="time" className="search-bar-add" placeholder="Enter Time" id="timeFiled" name="timeFiled" 
                         value = {reportInfo.timeFiled} onChange={handleFormChange} required />
                     </div>
 
-                    <div className="input-group">
+                    <div className="input-group-add">
                         <p>Location</p>
-                        <input type="text" className="search-bar" placeholder="Enter Location" id="location" name="location" 
+                        <input type="text" className="search-bar-add" placeholder="Enter Location" id="location" name="location" 
                         value = {reportInfo.location} onChange={handleFormChange} required />
                     </div>
 
                     {departmentId === "GAD" && (
                       <div>
-                        <div className="input-group">
+                        <div className="input-group-add">
                           <p>Nos of Male Children Victim/s</p>
                           <input type="number" 
-                          className="search-bar"
+                          className="search-bar-add"
                           min="0"
                           value={reportInfo.nosofMaleChildren}
                           name="nosofMaleChildren"
@@ -590,10 +590,10 @@ export default function AddIncident() {
                           required />    
                         </div>
 
-                        <div className="input-group">
+                        <div className="input-group-add">
                           <p>Nos of Female Children Victim/s</p>
                           <input type="number"
-                            className="search-bar"
+                            className="search-bar-add"
                             min="0"
                             value={reportInfo.nosofFemaleChildren}
                             name="nosofFemaleChildren"
@@ -605,16 +605,16 @@ export default function AddIncident() {
                     )}
                 </div>
                 
-                <p className="title">Complainant/s Recieved By</p>
-                <div className="bars">
+                <p className="title-add">Complainant/s Recieved By</p>
+                <div className="bars-add">
                 
-                  <div className="input-group">
+                  <div className="input-group-add">
 
                     <p>Desk Officer First Name</p>
 
                     <input 
                     type="text" 
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Desk Officer First Name" 
                     id="staff"
                     required
@@ -624,13 +624,13 @@ export default function AddIncident() {
 
                   </div>
 
-                   <div className="input-group">
+                   <div className="input-group-add">
 
                     <p>Desk Officer Last Name</p>
 
                     <input 
                     type="text" 
-                    className="search-bar" 
+                    className="search-bar-add" 
                     placeholder="Enter Desk Officer Last Name" 
                     id="staff"
                     required
@@ -640,15 +640,15 @@ export default function AddIncident() {
 
                   </div> 
                             
-                  <div className="input-group">
+                  <div className="input-group-add">
                         <p>Date Received</p>
-                        <input type="date" className="search-bar" placeholder="Enter Date" id="dateReceived" name="dateReceived" 
+                        <input type="date" className="search-bar-add" placeholder="Enter Date" id="dateReceived" name="dateReceived" 
                         value = {reportInfo.dateReceived} onChange={handleFormChange} required/>
                     </div>
 
-                    <div className="input-group">
+                    <div className="input-group-add">
                         <p>Time Received</p>
-                        <input type="time" className="search-bar" placeholder="Enter Time" id="timeReceived" name="timeReceived" 
+                        <input type="time" className="search-bar-add" placeholder="Enter Time" id="timeReceived" name="timeReceived" 
                         value = {reportInfo.timeReceived} onChange={handleFormChange} required />
                     </div>
 
@@ -659,14 +659,14 @@ export default function AddIncident() {
 
 
 
-            <div className="section-4">
+            <div className="section-4-add">
 
-                <div className="section-4-left-side">
+                <div className="section-4-left-side-add">
 
-                  <div className="fields-section">
+                  <div className="fields-section-add">
                               <p>Nature of Facts</p>
                                   <textarea 
-                                      className="description" 
+                                      className="description-add" 
                                       required
                                       placeholder="Enter Nature of Facts of the Complaint"
                                       value={reportInfo.concern}
@@ -679,34 +679,34 @@ export default function AddIncident() {
 
                  </div>
 
-            <div className="section-4-right-side">
+            <div className="section-4-right-side-add">
               
               
-            <div className="title">
+            <div className="title-add">
                      <p> Photo of the Incident (if Applicable)</p>
                </div> 
  
-               <div className="file-upload-container">
-                 <label htmlFor="file-upload1" className="upload-link">Click to Upload File</label>
+               <div className="file-upload-container-add">
+                 <label htmlFor="file-upload1" className="upload-link-add">Click to Upload File</label>
                  <input
                    id="file-upload1"
                    type="file"
-                   className="file-upload-input"
+                   className="file-upload-input-add"
                    accept=".jpg,.jpeg,.png"
                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                      handleFileChangeContainer1(e);
                      handleFormChange(e);
                    }} // Handle file selection
                  />
-                 <div className="uploadedFiles-container">
+                 <div className="uploadedFiles-container-add">
                     {filesContainer1.length > 0 && (
-                      <div className="file-name-image-display">
+                      <div className="file-name-image-display-add">
                         <ul>
                           {filesContainer1.map((file, index) => (
-                            <div className="file-name-image-display-indiv" key={index}>
+                            <div className="file-name-image-display-indiv-add" key={index}>
                               <li>
                                 {file.preview && (
-                                  <div className="filename-image-container">
+                                  <div className="filename-image-container-add">
                                     <img
                                       src={file.preview}
                                       alt={file.name}
@@ -715,16 +715,16 @@ export default function AddIncident() {
                                   </div>
                                 )}
                                 {file.name}
-                                <div className="delete-container">
+                                <div className="delete-container-add">
                                   <button
                                     type="button"
                                     onClick={() => handleFileDeleteContainer1(file.name)}
-                                    className="delete-button"
+                                    className="delete-button-add"
                                   >
                                     <img
                                       src="/images/trash.png"
                                       alt="Delete"
-                                      className="delete-icon"
+                                      className="delete-icon-add"
                                     />
                                   </button>
                                 </div>
