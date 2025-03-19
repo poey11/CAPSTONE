@@ -38,6 +38,7 @@ export default function Dashboard() {
   const [GADReportsCount, setGADReportsCount] = useState(0);
   const [VAWCReportsCount, setVAWCReportsCount] = useState(0);
   const [LuponReportsCount, setLuponReportsCount] = useState(0);
+  const [OnlineReportsCount, setOnlineReportsCount] = useState(0);
 
   // for demographics
   const [pwdCount, setPwdCount] = useState(0);
@@ -47,6 +48,8 @@ export default function Dashboard() {
   const [adultsCount, setAdultsCount] = useState(0);
 
   // for document requests
+  const [documentRequestsCount, setdocumentRequestsCount] = useState(0);
+
   const [firstTimeJobSeekersCount, setFirstTimeJobSeekersCount] = useState(0);
   const [barangayPermitsCount, setBarangayPermitsCount] = useState(0);
   const [barangayIndigencyCount, setBarangayIndigencyCount] = useState(0);
@@ -56,7 +59,6 @@ export default function Dashboard() {
 
   // for charts that can be toggled
   const [currentChartBoxOne, setCurrentChartBoxOne] = useState(0);
-  const [currentChartBoxTwo, setCurrentChartBoxTwo] = useState(0);
   const [currentChartBoxThree, setCurrentChartBoxThree] = useState(0);
   const [currentChartBoxFour, setCurrentChartBoxFour] = useState(0);
   const [currentChartBoxFive, setCurrentChartBoxFive] = useState(0);
@@ -68,6 +70,33 @@ export default function Dashboard() {
     const fetchCounts = async () => {
       try {
 
+        // change this to documentRequests table
+        const documentRequestsSnapshots = await getDocs(collection(db, "ResidentUsers"));
+        setdocumentRequestsCount(documentRequestsSnapshots.size);
+
+        let firsttimejobseeker = 0,
+        indigency = 0,
+        barangayID = 0,
+        clearance = 0,
+        certificate = 0,
+        permit = 0;
+
+    documentRequestsSnapshots.docs.forEach((doc) => {
+        const documentType = doc.data().documentType;
+        if (documentType === "First Time Jobseeker") firsttimejobseeker++;
+        else if (documentType === "Barangay Clearance") clearance++;
+        else if (documentType === "Barangay Indigency") indigency++;
+        else if (documentType === "Barangay ID") barangayID++;
+        else if (documentType === "Barangay Permit") permit++;
+        else if (documentType === "Barangay Certificate") certificate++;
+      });
+
+      setFirstTimeJobSeekersCount(firsttimejobseeker);
+      setBarangayPermitsCount(permit);
+      setBarangayIndigencyCount(indigency);
+      setBarangayIDCount(barangayID);
+      setBarangayClearanceCount(clearance);
+      setBarangayCertificateCount(certificate)
 
         // for residents pie charts
         const residentUsersSnapshot = await getDocs(collection(db, "ResidentUsers"));
@@ -89,50 +118,6 @@ export default function Dashboard() {
         setwestResidentsCount(westCount);
         setsouthResidentsCount(southCount);
   
-        // for incident report pie charts
-        const incidentReportsSnapshot = await getDocs(collection(db, "IncidentReports"));
-        setIncidentReportsCount(incidentReportsSnapshot.size);
-
-        let pending = 0,
-        settled = 0,
-        archived = 0,
-        resolved = 0;
-
-        incidentReportsSnapshot.docs.forEach((doc) => {
-          const status = doc.data().status;
-          if (status === "Pending") pending++;
-          else if (status === "Settled") settled++;
-          else if (status === "Archived") archived++;
-          else if (status === "Resolved") resolved++;
-        });
-  
-        setPendingIncidentReportsCount(pending);
-        setSettledIncidentReportsCount(settled);
-        setArchivedIncidentReportsCount(archived);
-        setResolvedIncidentReportsCount(resolved);
-
-        let gad = 0,
-        bcpc = 0,
-        vawc = 0,
-        lupon = 0;
-
-    incidentReportsSnapshot.docs.forEach((doc) => {
-        const department = doc.data().department;
-        if (department === "GAD") gad++;
-        else if (department === "BCPC") bcpc++;
-        else if (department === "VAWC") vawc++;
-        else if (department === "Lupon") lupon++;
-      });
-
-      setBCPCReportsCount(bcpc);
-      setGADReportsCount(gad);
-      setVAWCReportsCount(vawc);
-      setLuponReportsCount(lupon);
-
-        const today = new Date();
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(today.getDate() - 7);
-
         // for demographics pie chart
         const residents = residentsSnapshot.docs.map((doc) => doc.data());
 
@@ -162,6 +147,55 @@ export default function Dashboard() {
         const verifiedSnapshot = await getDocs(verifiedQuery);
         setVerifiedResidentsCount(verifiedSnapshot.size);
 
+
+
+               // for incident report pie charts
+               const incidentReportsSnapshot = await getDocs(collection(db, "IncidentReports"));
+               setIncidentReportsCount(incidentReportsSnapshot.size);
+       
+               let pending = 0,
+               settled = 0,
+               archived = 0,
+               resolved = 0;
+       
+               incidentReportsSnapshot.docs.forEach((doc) => {
+                 const status = doc.data().status;
+                 if (status === "Pending") pending++;
+                 else if (status === "Settled") settled++;
+                 else if (status === "Archived") archived++;
+                 else if (status === "Resolved") resolved++;
+               });
+         
+               setPendingIncidentReportsCount(pending);
+               setSettledIncidentReportsCount(settled);
+               setArchivedIncidentReportsCount(archived);
+               setResolvedIncidentReportsCount(resolved);
+       
+               let online = 0,
+               gad = 0,
+               bcpc = 0,
+               vawc = 0,
+               lupon = 0;
+       
+           incidentReportsSnapshot.docs.forEach((doc) => {
+               const department = doc.data().department;
+               if (department === "GAD") gad++;
+               else if (department === "BCPC") bcpc++;
+               else if (department === "VAWC") vawc++;
+               else if (department === "Lupon") lupon++;
+               else if (department === "Online") online++;
+             });
+       
+             setBCPCReportsCount(bcpc);
+             setGADReportsCount(gad);
+             setVAWCReportsCount(vawc);
+             setLuponReportsCount(lupon);
+             setOnlineReportsCount(online);
+       
+               const today = new Date();
+               const sevenDaysAgo = new Date();
+               sevenDaysAgo.setDate(today.getDate() - 7);
+       
 
         // for incident report graph chart
         const incidentReportsData = incidentReportsSnapshot.docs.map((doc) => {
@@ -243,6 +277,35 @@ export default function Dashboard() {
     },
   ];
 
+
+  const chartsBoxFour = [
+    {
+      title: "Document Requests Total by Type:",
+      count: documentRequestsCount,
+      data: [
+        { name: "Barangay IDs", value: barangayIDCount },
+        { name: "Barangay Certificates", value: barangayCertificateCount },
+        { name: "Barangay Clearances", value: barangayClearanceCount },
+        { name: "Barangay Indigencies", value: barangayIndigencyCount },
+        { name: "Barangay Permits", value: barangayPermitsCount },
+        { name: "First-Time Job Seekers", value: firstTimeJobSeekersCount },
+      ],
+      colors: ["#4CAF50", "#2196F3", "#FF9800", "#F44336", "#9C27B0", "#FFEB3B"]
+    },
+    {
+      title: "Document Requests Status:",
+      count: documentRequestsCount,
+      data: [
+        { name: "Senior Citizens", value: seniorCitizensCount },
+        { name: "PWD", value: pwdCount },
+        { name: "Solo Parents", value: soloParentCount },
+        { name: "Minors", value: minorsCount },
+        { name: "Adults", value: adultsCount },
+      ],
+      colors: ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"],
+    },
+  ];
+
   const chartsBoxSix = [
     {
       title: "Incident Reports Total by Department",
@@ -252,8 +315,9 @@ export default function Dashboard() {
         { name: "BCPC", value: BCPCReportsCount },
         { name: "VAWC", value: VAWCReportsCount },
         { name: "Lupon", value: LuponReportsCount },
+        { name: "Online", value: OnlineReportsCount },
       ],
-      colors: ["#FF9800", "#4CAF50", "#D32F2F", "#03A9F4"],
+      colors: ["#E91E63", "#8E44AD", "#3498DB", "#27AE60", "#F39C12"]
     },    
     {
         title: "Total Incident Reports:",
@@ -274,15 +338,12 @@ export default function Dashboard() {
   const toggleChartBoxOne = () => {
     setCurrentChartBoxOne((prev) => (prev + 1) % chartsBoxOne.length);
   };
-  // const toggleChartBoxTwo = () => {
-  //   setCurrentChartBoxTwo((prev) => (prev + 1) % chartsBoxTwo.length);
-  // };
   // const toggleChartBoxThree = () => {
   //   setCurrentChartBoxThree((prev) => (prev + 1) % chartsBoxThree.length);
   // };
-  // const toggleChartBoxFour = () => {
-  //   setCurrentChartBoxFour((prev) => (prev + 1) % chartsBoxFour.length);
-  // };
+  const toggleChartBoxFour = () => {
+    setCurrentChartBoxFour((prev) => (prev + 1) % chartsBoxFour.length);
+  };
   // const toggleChartBoxFive = () => {
   //   setCurrentChartBoxFive((prev) => (prev + 1) % chartsBoxFive.length);
   // };
@@ -312,8 +373,6 @@ export default function Dashboard() {
 
   const DEMOGRAPHICS_COLORS = ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"];
   const VERIFICATION_COLORS = ["#2196F3", "#F3B50B"];
-  const IN_BARANGAY_REQUESTS_COLORS = ["#2196F3", "#673AB7", "#FF9800", "#4CAF50", "#FFEB3B", "#F44336"];
-  const WEEKLY_BARANGAY_REQUESTS_COLORS = ["#03A9F4", "#9C27B0", "#FF5722", "#8BC34A", "#FFC107", "#E91E63"];
   
   
 
@@ -334,7 +393,7 @@ export default function Dashboard() {
 
           <div className="card-right-side">
             <div className="chart-controls">
-              <button onClick={toggleChartBoxOne}>Next</button>
+              <button onClick={toggleChartBoxOne}>Switch</button>
             </div>
             <ResponsiveContainer width={300} height={300}>
               <PieChart>
@@ -483,7 +542,7 @@ export default function Dashboard() {
 
           <div className="card-right-side">
             <div className="chart-controls">
-              <button onClick={toggleChartBoxSix}>Next</button>
+              <button onClick={toggleChartBoxSix}>Switch</button>
             </div>
             <ResponsiveContainer width={300} height={300}>
               <PieChart>
