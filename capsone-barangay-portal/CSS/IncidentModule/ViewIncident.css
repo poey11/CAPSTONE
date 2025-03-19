@@ -40,9 +40,10 @@ margin-top: 3rem;
 
   .section-1-view {
     display: flex;
-    border-bottom: 2px solid #ddd;
     width: 100%;
     padding: 2rem;
+  background-color: #dddbdb95;
+  border-bottom: 2px solid #ddd;
   }
 
   .section-1-view p {
@@ -51,18 +52,21 @@ margin-top: 3rem;
     margin-left: 1rem;
     font-size: 1.25rem;
     
+    
   }
 
   .details-section-view {
     display: flex;
-    border-bottom: 2px solid #ddd;
+    border-top: 2px solid #ddd;
   }
 
   .title-view {
-    width: 15%;
+    width: 25%;
     display: flex;
     justify-content: center;
     align-items: center;
+    border-right: 2px solid #ddd;
+    background: #dddbdb33;
   }
 
   .title-view p {
