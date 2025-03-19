@@ -175,6 +175,7 @@
 
 .notification-item {
   padding-left: 8px;
+  cursor: pointer;
   /*border-bottom: 1px solid #f0eeee;*/
   border-bottom: 1px solid #d4cdc8;
   height: 90px;
