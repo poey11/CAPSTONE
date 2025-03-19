@@ -40,19 +40,27 @@ margin-top: 3rem;
 
   .section-1-view {
     display: flex;
+    border-bottom: 2px solid #ddd;
     width: 100%;
     padding: 2rem;
+    align-items: center;
+  justify-content: space-between;
   background-color: #dddbdb95;
   border-bottom: 2px solid #ddd;
   }
 
-  .section-1-view p {
+  .section-1-view h1 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .details-section-1-incident  {
     font-weight: bold;
     color: grey;
     margin-left: 1rem;
-    font-size: 1.25rem;
-    
-    
+    font-size: 1.25rem; 
+    max-width: 50%;
   }
 
   .details-section-view {
@@ -92,7 +100,7 @@ margin-top: 3rem;
   .pending {
     background-color: #d4d64f;
     color: white;
-    font-size: 15px;
+
     
   }
   
@@ -105,32 +113,51 @@ margin-top: 3rem;
   .settled {
     background-color: #1e5128;
     color: white;
-    font-size: 15px;
+
   }
   
   .archived {
-    background-color: #7f7f7f;
+    background-color: #5d74e8ee;
     color: white;
-    font-size: 15px;
+ 
   }
 
   .status-badge-view {
-    padding: 10px 14px;            
-    border-radius: 5px;          
-    font-size: 15px;              
+          
+        
+          
     color: white;                
     display: inline-block;        
     text-transform: capitalize;   
     text-align: center;    
-    width: 200px;     
-    margin-top: 1rem;  
+
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+    width: 100px;
 }
 
 .status-section-view {
   display: flex;
-  justify-content: flex-end; 
-  width: 100%; 
-  margin-top: 1rem; 
-  padding-right: 5rem;
+    align-items: center;
+    gap: 20px;
 }
+
+.viewincident-content-section1-left-view {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 50%;
+}
+
+.viewincident-content-section1-left-view h1 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+
 

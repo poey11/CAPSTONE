@@ -148,18 +148,30 @@ export default  function ViewLupon() {
   return (
     <main className="main-container-view">
 
-          <div className="status-section-view">
-          <p className={`status-badge-view ${getStatusClass(status)}`}>{status}</p> 
-          </div>
+          
 
      
       <div className="main-content-view">
+
+
+
         <div className="section-1-view">
-    
+
+       
+        <div className="viewincident-content-section1-left-view">
+
             <button type="submit" className="back-button-view" onClick={handleViewLupon}></button>
   
-          <p>Complainant's Details</p>
+             <h1>Complainant's Details</h1>
+
         </div>
+
+          <div className="status-section-view">
+              <p className={`status-badge-view ${getStatusClass(status)}`}>{status}</p> 
+          </div>
+          
+        </div>
+
 
         {complainantsFields.map((field) => (
           <div className="details-section-view" key={field.key}>
@@ -175,7 +187,7 @@ export default  function ViewLupon() {
 
       <div className="main-content-view">
         <div className="section-1-view">
-          <p>Respondent's Details</p>
+          <h1>Respondent's Details</h1>
         </div>
 
         {respondentsField.map((field) => (
@@ -192,7 +204,7 @@ export default  function ViewLupon() {
 
       <div className="main-content-view">
         <div className="section-1-view">
-          <p>Barangay Desk Officer's Details</p>
+          <h1>Barangay Desk Officer's Details</h1>
         </div>
 
         {deskOfficerFields.map((field) => (
@@ -209,7 +221,7 @@ export default  function ViewLupon() {
 
       <div className="main-content-view">
         <div className="section-1-view">
-          <p>Incident Information</p>
+          <h1>Incident Information</h1>
         </div>
 
         {otherinformationFields.map((field) => (
@@ -264,7 +276,7 @@ export default  function ViewLupon() {
 
       <div className="main-content-view">
         <div className="section-1-view">
-          <p>Investigator's Details</p>
+          <h1>Investigator's Details</h1>
         </div>
 
         {investigatorFields.map((field) => (
