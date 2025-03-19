@@ -3,6 +3,8 @@ import { ChangeEvent, useEffect, useState } from "react";
 import {useAuth} from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 import {useSearchParams } from "next/navigation";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "@/app/db/firebase";
 
 
 
@@ -19,17 +21,48 @@ export default function Action() {
     middleName: "",
     lastName: "",
     dateOfResidency: "",
-    address: "",
+    address: "",//will be also the home address
+    businessLocation: "",// will be project location
+    businessNature: "",
+    estimatedCapital: "",
+    businessName: "",
     birthday: "",
     age: "",
     gender: "",
     civilStatus: "",
     contact: "",
+    typeofconstruction: "",
+    typeofbldg:"",
+    projectName:"",
     citizenship: "",
+    educationalAttainment: "",
+    course: "",
+    isBeneficiary: "",
+    birthplace: "",
+    religion: "",
+    nationality: "",
+    height: "",
+    weight: "",
+    bloodtype: "",  
+    occupation:"",
+    precinctnumber:"",
+    emergencyDetails:{
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      address: "",
+      relationship: "",
+      contactNumber: "",
+    },
     signaturejpg: null,
     barangayIDjpg:null,
     validIDjpg: null,
     letterjpg:null,
+    copyOfPropertyTitle: null,
+    dtiRegistration: null,
+    isCCTV: null,
+    taxDeclaration: null,
+    approvedBldgPlan:null 
   })
 // State for all file containers
 const [files, setFiles] = useState<{ name: string, preview: string | undefined }[]>([]);
@@ -88,7 +121,20 @@ const handleFileChange = (
     }
   };
   
-
+  const handleReportUpload = async (key: any, storageRef: any) => {
+    try {
+      const docRef = collection(db, "IncidentReports");
+  
+      // Assuming key is an array with a single object containing all fields:
+      const updates = { ...key[0] };  // No filtering, just spread the object
+  
+      // Upload the report to Firestore
+      const newDoc = await addDoc(docRef, updates);
+  
+    } catch (e: any) {
+      console.log("Error uploading report:", e);
+    }
+  };
     
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -759,8 +805,7 @@ const handleFileChange = (
         )}
           <hr/>
           <h1 className="form-requirements-title">Requirements</h1>
-          <h1 className="form-label-reqs"> Upload either of the following requirements</h1>
-          <br/>
+          
 
           {(docType ==="Temporary Business Permit"||docType ==="Business Permit") && (
           // WILL Have to fix this part
@@ -890,67 +935,7 @@ const handleFileChange = (
           </div>
 
 
-          <div className="validID-container">
-            <h1 className="form-label">Endorsement of Homeowners Association </h1>
-            <h1 className="form-label-description">(if applicable)</h1>
 
-            <div className="file-upload-container">
-              <label htmlFor="file-upload3"  className="upload-link">Click to Upload File</label>
-                <input
-                  id="file-upload3"
-                  type="file"
-                  className="file-upload-input" 
-                  multiple
-                  accept=".jpg,.jpeg,.png"
-                  required
-                  // Handle file selection
-                />
-
-              <div className="uploadedFiles-container">
-                {/* Display the file names with image previews */}
-                {files.length > 0 && (
-                  <div className="file-name-image-display">
-                    <ul>
-                      {files.map((file, index) => (
-                        <div className="file-name-image-display-indiv" key={index}>
-                          <li> 
-                              {/* Display the image preview */}
-                              {file.preview && (
-                                <div className="filename&image-container">
-                                  <img
-                                    src={file.preview}
-                                    alt={file.name}
-                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                  />
-                                </div>
-                                )}
-                              {file.name}  
-                            <div className="delete-container">
-                              {/* Delete button with image */}
-                              <button
-                                  type="button"
-                                  onClick={() => handleFileDelete('container3', setFiles)}
-                                  className="delete-button"
-                                >
-                                  <img
-                                    src="/images/trash.png"  
-                                    alt="Delete"
-                                    className="delete-icon"
-                                  />
-                                </button>
-
-                            </div>
-                                        
-                              
-                          </li>
-                        </div>
-                      ))}  
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
 
           <div className="endorsementletter-container">
             <h1 className="form-label">Picture of CCTV installed in the establishment </h1>
@@ -1076,7 +1061,13 @@ const handleFileChange = (
               </div>
             </div>
           </div>
-
+          {docType ==="Barangay Clearance" && (
+            <>
+              <h1 className="form-label-reqs"> Upload either of the following requirements</h1>
+              <br/>
+            </>
+          )}
+       
           {docType === "Construction Permit" ? (<>
           
             <div className="signature/printedname-container">
@@ -1204,66 +1195,6 @@ const handleFileChange = (
           </div>
 
 
-          <div className="validID-container">
-            <h1 className="form-label">Endorsement of Homeowners Association </h1>
-            <h1 className="form-label-description">(if applicable)</h1>
-
-            <div className="file-upload-container">
-              <label htmlFor="file-upload3"  className="upload-link">Click to Upload File</label>
-                <input
-                  id="file-upload3"
-                  type="file"
-                  className="file-upload-input" 
-                  multiple
-                  accept=".jpg,.jpeg,.png"
-                  required
-                />
-
-              <div className="uploadedFiles-container">
-                {/* Display the file names with image previews */}
-                {files.length > 0 && (
-                  <div className="file-name-image-display">
-                    <ul>
-                      {files.map((file, index) => (
-                        <div className="file-name-image-display-indiv" key={index}>
-                          <li> 
-                              {/* Display the image preview */}
-                              {file.preview && (
-                                <div className="filename&image-container">
-                                  <img
-                                    src={file.preview}
-                                    alt={file.name}
-                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                  />
-                                </div>
-                                )}
-                              {file.name}  
-                            <div className="delete-container">
-                              {/* Delete button with image */}
-                              <button
-                                  type="button"
-                                  onClick={() => handleFileDelete('container3', setFiles)}
-                                  className="delete-button"
-                                >
-                                  <img
-                                    src="/images/trash.png"  
-                                    alt="Delete"
-                                    className="delete-icon"
-                                  />
-                                </button>
-
-                            </div>
-                                        
-                              
-                          </li>
-                        </div>
-                      ))}  
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
 
           <div className="endorsementletter-container">
             <h1 className="form-label">Approved Building/Construction Plan</h1>
@@ -1448,7 +1379,9 @@ const handleFileChange = (
               </div>
             </div>
           </div>
-
+          
+          
+          </>)}
           <div className="endorsementletter-container">
             <h1 className="form-label"> Endorsement Letter from Homeowner/Sitio President</h1>
             <h1 className="form-label-description">(for residents of Barangay Fairview for less than 6 months)</h1>
@@ -1510,16 +1443,11 @@ const handleFileChange = (
               </div>
             </div>
           </div>
-
           <div className="form-group button-container">
             
-              <button type="submit" className="submit-button">Submit</button>
-        
-          </div>
-          
-          
-          </>)}
-
+            <button type="submit" className="submit-button">Submit</button>
+      
+        </div>  
           
 
         </form>
