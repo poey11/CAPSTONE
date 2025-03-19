@@ -169,6 +169,8 @@ padding: 1rem;
 
 
 
+
+
 /* Toggle switch container */
 .active-edit {
   display: flex;
@@ -744,6 +746,8 @@ background-color:  #c2352b;
   align-items: center;
   gap: 20px;
 }
+
+
 
 .action-btn-section-edit-incident {
   display: flex;

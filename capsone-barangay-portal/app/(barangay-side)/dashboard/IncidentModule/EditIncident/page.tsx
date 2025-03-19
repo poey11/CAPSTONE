@@ -584,6 +584,7 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
             
               {showRecordDetails && (
 
+             
                 
                    <div className="bars-edit">
 
@@ -615,7 +616,7 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
                        </div>
 
                        {department === "GAD" && (
-                      <div>
+                       <>
                         <div className="input-group-edit">
                           <p>Nos of Male Children Victim/s</p>
                           <input type="number" 
@@ -637,12 +638,13 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
                             required />    
                         </div>
 
-                      </div>
+                        </>
                     )}
 
    
 
                    </div>
+
                    )}
 
 
