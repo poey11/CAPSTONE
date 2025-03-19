@@ -3,12 +3,10 @@ import { ChangeEvent, useEffect, useState } from "react";
 import {useAuth} from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 import {useSearchParams } from "next/navigation";
-import { doc } from "firebase/firestore";
 
 
 
-
-export default function BarangayCertificate() {
+export default function Action() {
   const user = useAuth().user; // Get the current user from the context
   const searchParam = useSearchParams();
   const docType = searchParam.get("doc");
@@ -105,12 +103,11 @@ const handleFileChange = (
     // Handle form submission
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
-
+      
       console.log(clearanceInput); // Log the form data
     };
 
 
-    console.log(docType)
   return (
 
     <main className="main-form-container">
@@ -120,17 +117,19 @@ const handleFileChange = (
 
       <div className="form-content">
         <h1 className="form-title">
-            Barangay {docType} Request Form
+        {docType} Request Form
         </h1>
 
         <hr/>
 
         
         <form className="doc-req-form" onSubmit={handleSubmit}>
-        {(docType === "Certificate" || docType === "Clearance" ||  docType === "Indigency") && (
+        {(docType === "Barangay Certificate" || docType === "Barangay Clearance" 
+        ||  docType === "Barangay Indigency" || docType === "Business Permit" || docType === "Temporary Business Permit" ) 
+      && (
           <div className="form-group">
             
-          <label htmlFor="purpose" className="form-label">Barangay {docType} Purpose</label>
+          <label htmlFor="purpose" className="form-label">{docType} Purpose</label>
           <select 
             id="purpose" 
             name="purpose" 
@@ -140,7 +139,7 @@ const handleFileChange = (
             onChange={handleChange}
           >
             <option value="" disabled>Select purpose</option>
-            {docType === "Certificate" ? (<>
+            {docType === "Barangay Certificate" ? (<>
               <option value="Residency">Residency</option>
               <option value="Loan">Occupancy /  Moving Out</option>
               <option value="Bank Transaction">Estate Tax</option>
@@ -154,7 +153,7 @@ const handleFileChange = (
               <option value="MWSI connection">Garage/PUV</option>
               <option value="Business Clearance">Garage/TRU</option>
             
-            </>):docType === "Clearance" ? (<>
+            </>):docType === "Barangay Clearance" ? (<>
               <option value="Loan">Loan</option>
               <option value="Bank Transaction">Bank Transaction</option>
               <option value="Bank Transaction">Residency</option>
@@ -169,7 +168,7 @@ const handleFileChange = (
               {/* <option value="Business Clearance">Business Clearance</option> */}
               {/* <option value="Firearms License">Police Clearance</option> */}
               {/* <option value="Others">Others</option> */}
-            </>):docType === "Indigency"&&( <>
+            </>):docType === "Barangay Indigency" ? ( <>
               <option value="Loan">No Income</option>
               <option value="Bank Transaction">Public Attorneys Office</option>
               <option value="Bank Transaction">AKAP</option>
@@ -178,16 +177,53 @@ const handleFileChange = (
               <option value="Meralco">Flood Victims</option>
               <option value="Bail Bond">Philhealth Sponsor</option>
               <option value="Character Reputation">Medical Assistance</option>
+            </>): (docType === "Business Permit" ||docType === "Temporary Business Permit") && (
+              <>
+              <option value="New">New</option>
+              <option value="Renewal">Renewal</option>
             </>)}
             
           </select>
         </div>
-
-
         )}
-            
+          
+          {docType === "Construction Permit" && (
+            <>
+              <div className="form-group">
+                <label className="form-label">Type of Construction Activity</label>
+                <div className="main-form-radio-group">
+                    <div className="form-radio-group">
+                        <label className="form-radio">
+                        <input type="radio" id="structure" name="structure" value="structure" required />
+                            Structure
+                        </label>
+                        <label className="form-radio">
+                        <input type="radio" id="renovation" name="renovation" value="renovation" required />
+                            Renovation
+                        </label>
+                    </div>
 
-           
+                    <div className="form-radio-group">
+                        <label className="form-radio">
+                        <input type="radio" id="fencing" name="fencing" value="fencing" required />
+                            Fencing
+                        </label>
+                        <label className="form-radio">
+                        <input type="radio" id="excavation" name="excavation" value="excavation" required />
+                            Excavation
+                        </label>
+                    </div>
+
+                    <div className="form-radio-group">
+                        <label className="form-radio">
+                        <input type="radio" id="demolition" name="demolition" value="demolition" required />
+                            Demolition
+                        </label>
+                    </div>
+                </div>   
+            </div>
+            </>
+          )}
 
             <div className="form-group">
               <label htmlFor="firstName" className="form-label">First Name</label>
@@ -230,19 +266,72 @@ const handleFileChange = (
                 placeholder="Enter Last Name"  
               />
             </div>
+            {(docType ==="Temporary Business Permit"||docType ==="Business Permit") ? (
+              <>  
+                <div className="form-group">
+                  <label htmlFor="businessname" className="form-label">Business Name</label>
+                  <input 
+                    type="text"  
+                    id="businessname"  
+                    name="businessname"  
+                    className="form-input"  
+                    required 
+                    placeholder="Enter Business Name"  
+                  />
+              </div>            
+              <div className="form-group">
+                <label htmlFor="address" className="form-label">Home Address</label>
+                <input 
+                  type="text"  
+                  id="address"  
+                  name="address"  
+                  className="form-input"  
+                  required 
+                  placeholder="Enter Home Address"  
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="dateOfResidency" className="form-label">Date of Residency in Barangay Fairview</label>
+                <div className="form-group">
+                  <label htmlFor="businessloc" className="form-label">Business Location</label>
+                  <input 
+                    type="text"  
+                    id="businessloc"  
+                    name="businessloc"  
+                    className="form-input"  
+                    required 
+                    placeholder="Enter Home Address"  
+                  />
+                </div>
+              </>
+            ):docType ==="Construction Permit"?(
+            <>
+              <div className="form-group">
+              <label htmlFor="address" className="form-label">Home/Office Address</label>
               <input 
-                type="date" 
-                id="dateOfResidency" 
-                name="dateOfResidency" 
-                value={clearanceInput.dateOfResidency}
-                onChange={handleChange}
-                className="form-input" 
+                type="text"  
+                id="address"  
+                name="address"  
+                className="form-input"  
                 required 
+                placeholder="Enter Home/Office Address"  
               />
             </div>
+            </>
+            ):(
+            
+            <>
+              <div className="form-group">
+                <label htmlFor="dateOfResidency" className="form-label">Date of Residency in Barangay Fairview</label>
+                <input 
+                  type="date" 
+                  id="dateOfResidency" 
+                  name="dateOfResidency" 
+                  value={clearanceInput.dateOfResidency}
+                  onChange={handleChange}
+                  className="form-input" 
+                  required 
+                />
+             </div>
 
             <div className="form-group">
               <label htmlFor="address" className="form-label">Address</label>
@@ -270,8 +359,11 @@ const handleFileChange = (
                 required 
               />
             </div>
+            
+            </>)}
+            
 
-            {docType ==="BarangayID" && (
+            {docType ==="Barangay ID" && (
               <div className="form-group">
                 <label htmlFor="birthdayplace" className="form-label">Birthplace</label>
                 <input 
@@ -284,8 +376,66 @@ const handleFileChange = (
                 />
               </div>
             )}
+  
+
+            {(docType ==="Temporary Business Permit"||docType ==="Business Permit")?(<>
+              <div className="form-group">
+              <label htmlFor="businessnature" className="form-label">Nature of Business</label>
+              <input 
+                type="text"  
+                id="businessnature"  
+                name="businessnature"  
+                className="form-input"  
+                required 
+                placeholder="Enter Business Nature"  
+              />
+            </div>
+
+            
 
             <div className="form-group">
+              <label htmlFor="capital" className="form-label">Estimated Capital</label>
+              <input 
+                type="number"  // Ensures the input accepts only numbers
+                id="capital"  
+                name="capital"  
+                className="form-input" 
+                required 
+                min="1"  // Minimum age (you can adjust this as needed)
+                placeholder="Enter Estimated Capital"  
+                step="1"  // Ensures only whole numbers can be entered
+              />
+            </div>
+              
+            </>):docType=="Construction Permit"?(
+              <>
+                <div className="form-group">
+              <label htmlFor="projectloc" className="form-label">Project Location</label>
+              <input 
+                type="text"  
+                id="projectloc"  
+                name="projectloc"  
+                className="form-input"  
+                required 
+                placeholder="Enter Project Location"  
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="buildingtype" className="form-label">Type of Building</label>
+              <input 
+                type="text"  
+                id="buildingtype"  
+                name="buildingtype"  
+                className="form-input"  
+                required 
+                placeholder="Enter Business Nature"  
+              />
+            </div>
+            
+              </>)
+            :(<>
+              <div className="form-group">
               <label htmlFor="age" className="form-label">Age</label>
               <input 
                 type="number"  // Ensures the input accepts only numbers
@@ -317,8 +467,10 @@ const handleFileChange = (
                 <option value="Female">Female</option>
               </select>
             </div>
+            </>)}
+           
 
-            {docType ==="BarangayID" && (
+            {docType ==="Barangay ID" && (
               <>
                 <div className="form-group">
                   <label htmlFor="religion" className="form-label">Religion</label>
@@ -344,8 +496,24 @@ const handleFileChange = (
                 </div>
               </>
             )}
-
-            <div className="form-group">
+            
+            {(docType ==="Temporary Business Permit"||docType ==="Business Permit") ? (<>
+            </>) : docType==="Construction Permit" ?(
+              <>
+                 <div className="form-group">
+              <label htmlFor="projecttitle" className="form-label">Project Title</label>
+              <input 
+                type="text"  
+                id="projecttitle"  
+                name="projecttitle"  
+                className="form-input"  
+                required 
+                placeholder="Enter Business Nature"  
+              />
+            </div>
+              </>
+            ):(<> 
+              <div className="form-group">
               <label htmlFor="civilStatus" className="form-label">Civil Status</label>
               <select 
                 id="civilStatus" 
@@ -362,9 +530,10 @@ const handleFileChange = (
                 <option value="Widow">Widow</option>
                 <option value="Separated">Separated</option>
               </select>
-            </div>
+            </div></>)}
+           
 
-            {docType ==="BarangayID" && (
+            {docType ==="Barangay ID" && (
               <>
                 <div className="form-group">
                   <label htmlFor="height" className="form-label">Height</label>
@@ -435,7 +604,7 @@ const handleFileChange = (
 
             
 
-            {docType ==="BarangayID" ? (
+            {docType ==="Barangay ID" ? (
               <div className="form-group">
               <label htmlFor="precinctno" className="form-label">Precinct Number</label>
               <input 
@@ -447,7 +616,8 @@ const handleFileChange = (
                 placeholder="Enter Precinct Number" 
               />
               </div>
-            ):(<div className="form-group">
+            ):(docType ==="Temporary Business Permit"||docType ==="Business Permit")?(<></>)
+            :docType=="Construction Permit"?(<></>):(<div className="form-group">
               <label htmlFor="citizenship" className="form-label">Citizenship</label>
               <input 
                 type="text"  
@@ -462,9 +632,9 @@ const handleFileChange = (
             </div>  )}
           
 
-          <hr/>
+        
 
-          {docType ==="BarangayID" && (
+          {docType ==="Barangay ID" ? (
             <>
               <h1 className="form-requirements-title">Emergency Details</h1>
 
@@ -542,12 +712,308 @@ const handleFileChange = (
                   title="Please enter a valid 10-digit contact number"  // Tooltip for invalid input
                 />
               </div>
-
-              <hr/>
             </>
-          )}
+          ):docType==="First Time Jobseeker" &&(
+            <>
+              <div className="form-group">
+                <label htmlFor="educattainment" className="form-label">Educational Attainment</label>
+                <input 
+                  type="text"  
+                  id="educattainment"  
+                  name="educattainment"  
+                  className="form-input"  
+                  required 
+                  placeholder="Enter Educational Attainment"  
+                />
+              </div>
 
+            <div className="form-group">
+              <label htmlFor="course" className="form-label">Course</label>
+              <input 
+                type="text"  
+                id="course"  
+                name="course"  
+                className="form-input"  
+                required 
+                placeholder="Enter Course"  
+              />
+            </div>
+              <br/>
+            <div className="form-group">
+                <label className="form-label">
+                    Are you a beneficiary of a JobStart Program under RA No. 10869, otherwise known as “An Act Institutionalizing the Nationwide Implementation of the Jobstart Philippines Program and Providing Funds therefor”?
+                </label>
+                <div className="form-radio-group">
+                    <label className="form-radio">
+                    <input type="radio" id="radioYes" name="resident" value="yes" required />
+                        Yes
+                    </label>
+                    <label className="form-radio">
+                    <input type="radio" id="radioNo" name="resident" value="no" required />
+                        No
+                    </label>
+                </div>
+            </div>
+
+            </>
+        )}
+          <hr/>
           <h1 className="form-requirements-title">Requirements</h1>
+          <h1 className="form-label-reqs"> Upload either of the following requirements</h1>
+          <br/>
+
+          {(docType ==="Temporary Business Permit"||docType ==="Business Permit") && (
+          // WILL Have to fix this part
+          <>
+            <div className="signature/printedname-container">
+            <h1 className="form-label">Certified True Copy of Title of the Property/Contract of Lease</h1>
+
+            <div className="file-upload-container">
+              <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
+                <input
+                  id="file-upload1"
+                  type="file"
+                  className="file-upload-input" 
+                  multiple
+                  accept=".jpg,.jpeg,.png"
+                  required
+                   // Handle file selection
+                />
+
+              <div className="uploadedFiles-container">
+                {/* Display the file names with image previews */}
+                {files.length > 0 && (
+                  <div className="file-name-image-display">
+                    <ul>
+                      {files.map((file, index) => (
+                        <div className="file-name-image-display-indiv" key={index}>
+                          <li> 
+                              {/* Display the image preview */}
+                              {file.preview && (
+                                <div className="filename&image-container">
+                                  <img
+                                    src={file.preview}
+                                    alt={file.name}
+                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                  />
+                                </div>
+                                )}
+                              {file.name}  
+                            <div className="delete-container">
+                              {/* Delete button with image */}
+                              <button
+                                  type="button"
+                                  onClick={() => handleFileDelete('container1', setFiles)}
+                                  className="delete-button"
+                                >
+                                  <img
+                                    src="/images/trash.png"  
+                                    alt="Delete"
+                                    className="delete-icon"
+                                  />
+                                </button>
+
+                            </div>
+                                        
+                              
+                          </li>
+                        </div>
+                      ))}  
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+            </div>
+
+          
+          <br/>
+
+          <div className="barangayID-container">
+            <h1 className="form-label">Certified True Copy of DTI Registration</h1>
+
+            <div className="file-upload-container">
+              <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
+                <input
+                  id="file-upload2"
+                  type="file"
+                  className="file-upload-input" 
+                  multiple
+                  accept=".jpg,.jpeg,.png"
+                  required
+                />
+
+              <div className="uploadedFiles-container">
+                {/* Display the file names with image previews */}
+                {files.length > 0 && (
+                  <div className="file-name-image-display">
+                    <ul>
+                      {files.map((file, index) => (
+                        <div className="file-name-image-display-indiv" key={index}>
+                          <li> 
+                              {/* Display the image preview */}
+                              {file.preview && (
+                                <div className="filename&image-container">
+                                  <img
+                                    src={file.preview}
+                                    alt={file.name}
+                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                  />
+                                </div>
+                                )}
+                              {file.name}  
+                            <div className="delete-container">
+                              {/* Delete button with image */}
+                              <button
+                                  type="button"
+                                  onClick={() => handleFileDelete('container2', setFiles)}
+                                  className="delete-button"
+                                >
+                                  <img
+                                    src="/images/trash.png"  
+                                    alt="Delete"
+                                    className="delete-icon"
+                                  />
+                                </button>
+
+                            </div>
+                                        
+                              
+                          </li>
+                        </div>
+                      ))}  
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+
+          <div className="validID-container">
+            <h1 className="form-label">Endorsement of Homeowners Association </h1>
+            <h1 className="form-label-description">(if applicable)</h1>
+
+            <div className="file-upload-container">
+              <label htmlFor="file-upload3"  className="upload-link">Click to Upload File</label>
+                <input
+                  id="file-upload3"
+                  type="file"
+                  className="file-upload-input" 
+                  multiple
+                  accept=".jpg,.jpeg,.png"
+                  required
+                  // Handle file selection
+                />
+
+              <div className="uploadedFiles-container">
+                {/* Display the file names with image previews */}
+                {files.length > 0 && (
+                  <div className="file-name-image-display">
+                    <ul>
+                      {files.map((file, index) => (
+                        <div className="file-name-image-display-indiv" key={index}>
+                          <li> 
+                              {/* Display the image preview */}
+                              {file.preview && (
+                                <div className="filename&image-container">
+                                  <img
+                                    src={file.preview}
+                                    alt={file.name}
+                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                  />
+                                </div>
+                                )}
+                              {file.name}  
+                            <div className="delete-container">
+                              {/* Delete button with image */}
+                              <button
+                                  type="button"
+                                  onClick={() => handleFileDelete('container3', setFiles)}
+                                  className="delete-button"
+                                >
+                                  <img
+                                    src="/images/trash.png"  
+                                    alt="Delete"
+                                    className="delete-icon"
+                                  />
+                                </button>
+
+                            </div>
+                                        
+                              
+                          </li>
+                        </div>
+                      ))}  
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="endorsementletter-container">
+            <h1 className="form-label">Picture of CCTV installed in the establishment </h1>
+            <h1 className="form-label-description">(for verification by Barangay Inspector)</h1>
+
+            <div className="file-upload-container">
+              <label htmlFor="file-upload4"  className="upload-link">Click to Upload File</label>
+                <input
+                  id="file-upload4"
+                  type="file"
+                  className="file-upload-input" 
+                  multiple
+                  accept=".jpg,.jpeg,.png"
+                  required
+                />
+
+              <div className="uploadedFiles-container">
+                {/* Display the file names with image previews */}
+                {files.length > 0 && (
+                  <div className="file-name-image-display">
+                    <ul>
+                      {files.map((file, index) => (
+                        <div className="file-name-image-display-indiv" key={index}>
+                          <li> 
+                              {/* Display the image preview */}
+                              {file.preview && (
+                                <div className="filename&image-container">
+                                  <img
+                                    src={file.preview}
+                                    alt={file.name}
+                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                  />
+                                </div>
+                                )}
+                              {file.name}  
+                            <div className="delete-container">
+                              {/* Delete button with image */}
+                              <button
+                                  type="button"
+                                  onClick={() => handleFileDelete('container4', setFiles)}
+                                  className="delete-button"
+                                >
+                                  <img
+                                    src="/images/trash.png"  
+                                    alt="Delete"
+                                    className="delete-icon"
+                                  />
+                                </button>
+
+                            </div>
+                                        
+                              
+                          </li>
+                        </div>
+                      ))}  
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+            
+          </>)}
 
           <div className="signature/printedname-container">
             <h1 className="form-label"> Upload Signature Over Printed Name</h1>
@@ -611,10 +1077,257 @@ const handleFileChange = (
             </div>
           </div>
 
-          <h1 className="form-label-reqs"> Upload either of the following requirements</h1>
+          {docType === "Construction Permit" ? (<>
+          
+            <div className="signature/printedname-container">
+            <h1 className="form-label">Certified True Copy of Title of the Property/Contract of Lease</h1>
+
+            <div className="file-upload-container">
+              <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
+                <input
+                  id="file-upload1"
+                  type="file"
+                  className="file-upload-input" 
+                  multiple
+                  accept=".jpg,.jpeg,.png"
+                  required
+               
+                />
+
+              <div className="uploadedFiles-container">
+                {/* Display the file names with image previews */}
+                {files.length > 0 && (
+                  <div className="file-name-image-display">
+                    <ul>
+                      {files.map((file, index) => (
+                        <div className="file-name-image-display-indiv" key={index}>
+                          <li> 
+                              {/* Display the image preview */}
+                              {file.preview && (
+                                <div className="filename&image-container">
+                                  <img
+                                    src={file.preview}
+                                    alt={file.name}
+                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                  />
+                                </div>
+                                )}
+                              {file.name}  
+                            <div className="delete-container">
+                              {/* Delete button with image */}
+                              <button
+                                  type="button"
+                                  onClick={() => handleFileDelete('container1', setFiles)}
+                                  className="delete-button"
+                                >
+                                  <img
+                                    src="/images/trash.png"  
+                                    alt="Delete"
+                                    className="delete-icon"
+                                  />
+                                </button>
+
+                            </div>
+                                        
+                              
+                          </li>
+                        </div>
+                      ))}  
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          
           <br/>
 
           <div className="barangayID-container">
+            <h1 className="form-label">Certified True Copy of Tax Declaration</h1>
+
+            <div className="file-upload-container">
+              <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
+                <input
+                  id="file-upload2"
+                  type="file"
+                  className="file-upload-input" 
+                  multiple
+                  accept=".jpg,.jpeg,.png"
+                  required
+                />
+
+              <div className="uploadedFiles-container">
+                {/* Display the file names with image previews */}
+                {files.length > 0 && (
+                  <div className="file-name-image-display">
+                    <ul>
+                      {files.map((file, index) => (
+                        <div className="file-name-image-display-indiv" key={index}>
+                          <li> 
+                              {/* Display the image preview */}
+                              {file.preview && (
+                                <div className="filename&image-container">
+                                  <img
+                                    src={file.preview}
+                                    alt={file.name}
+                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                  />
+                                </div>
+                                )}
+                              {file.name}  
+                            <div className="delete-container">
+                              {/* Delete button with image */}
+                              <button
+                                  type="button"
+                                  onClick={() => handleFileDelete('container2',setFiles)}
+                                  className="delete-button"
+                                >
+                                  <img
+                                    src="/images/trash.png"  
+                                    alt="Delete"
+                                    className="delete-icon"
+                                  />
+                                </button>
+
+                            </div>
+                                        
+                              
+                          </li>
+                        </div>
+                      ))}  
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+
+          <div className="validID-container">
+            <h1 className="form-label">Endorsement of Homeowners Association </h1>
+            <h1 className="form-label-description">(if applicable)</h1>
+
+            <div className="file-upload-container">
+              <label htmlFor="file-upload3"  className="upload-link">Click to Upload File</label>
+                <input
+                  id="file-upload3"
+                  type="file"
+                  className="file-upload-input" 
+                  multiple
+                  accept=".jpg,.jpeg,.png"
+                  required
+                />
+
+              <div className="uploadedFiles-container">
+                {/* Display the file names with image previews */}
+                {files.length > 0 && (
+                  <div className="file-name-image-display">
+                    <ul>
+                      {files.map((file, index) => (
+                        <div className="file-name-image-display-indiv" key={index}>
+                          <li> 
+                              {/* Display the image preview */}
+                              {file.preview && (
+                                <div className="filename&image-container">
+                                  <img
+                                    src={file.preview}
+                                    alt={file.name}
+                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                  />
+                                </div>
+                                )}
+                              {file.name}  
+                            <div className="delete-container">
+                              {/* Delete button with image */}
+                              <button
+                                  type="button"
+                                  onClick={() => handleFileDelete('container3', setFiles)}
+                                  className="delete-button"
+                                >
+                                  <img
+                                    src="/images/trash.png"  
+                                    alt="Delete"
+                                    className="delete-icon"
+                                  />
+                                </button>
+
+                            </div>
+                                        
+                              
+                          </li>
+                        </div>
+                      ))}  
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="endorsementletter-container">
+            <h1 className="form-label">Approved Building/Construction Plan</h1>
+            <div className="file-upload-container">
+              <label htmlFor="file-upload4"  className="upload-link">Click to Upload File</label>
+                <input
+                  id="file-upload4"
+                  type="file"
+                  className="file-upload-input" 
+                  multiple
+                  accept=".jpg,.jpeg,.png"
+                  required
+                />
+
+              <div className="uploadedFiles-container">
+                {/* Display the file names with image previews */}
+                {files.length > 0 && (
+                  <div className="file-name-image-display">
+                    <ul>
+                      {files.map((file, index) => (
+                        <div className="file-name-image-display-indiv" key={index}>
+                          <li> 
+                              {/* Display the image preview */}
+                              {file.preview && (
+                                <div className="filename&image-container">
+                                  <img
+                                    src={file.preview}
+                                    alt={file.name}
+                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                  />
+                                </div>
+                                )}
+                              {file.name}  
+                            <div className="delete-container">
+                              {/* Delete button with image */}
+                              <button
+                                  type="button"
+                                  onClick={() => handleFileDelete('container4', setFiles)}
+                                  className="delete-button"
+                                >
+                                  <img
+                                    src="/images/trash.png"  
+                                    alt="Delete"
+                                    className="delete-icon"
+                                  />
+                                </button>
+
+                            </div>
+                                        
+                              
+                          </li>
+                        </div>
+                      ))}  
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          
+          </>):(<>
+          
+            <div className="barangayID-container">
             <h1 className="form-label"> Barangay ID</h1>
 
             <div className="file-upload-container">
@@ -803,6 +1516,11 @@ const handleFileChange = (
               <button type="submit" className="submit-button">Submit</button>
         
           </div>
+          
+          
+          </>)}
+
+          
 
         </form>
       </div>

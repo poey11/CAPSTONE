@@ -23,7 +23,7 @@ export default function Services() {
       <div className="services-main-container">
         <div className="documents-container"  >
           <div className="documents-container-column">
-            <div className="documents-card dropdown-container" onClick={goToServices} id="Certificate">
+            <div className="documents-card dropdown-container" onClick={goToServices} id="Barangay Certificate">
               <img
                   src="/images/document.png"
                   alt="Document Icon"
@@ -32,7 +32,7 @@ export default function Services() {
                 <h1>Barangay Certificate</h1>
             </div>
 
-              <div className="documents-card" onClick={goToServices} id="Indigency" >
+              <div className="documents-card"   id="Barangay Indigency" onClick={goToServices}>
                 <img
                   src="/images/document.png"
                   alt="Document Icon"
@@ -41,8 +41,7 @@ export default function Services() {
                 <h1>Barangay Indigency</h1>
               </div>
 
-            <Link href="/services/barangayID">
-              <div className="documents-card">
+              <div className="documents-card" onClick={goToServices} id="Barangay ID">
                 <img
                   src="/images/document.png"
                   alt="Document Icon"
@@ -50,8 +49,7 @@ export default function Services() {
                 />
                 <h1>Barangay ID</h1>
               </div>
-            </Link>
-    
+            
           </div>
 
 
@@ -64,71 +62,16 @@ export default function Services() {
               />
               <h1>Barangay Permits</h1>
               <div className="dropdown">
-
-              <div
-                className="nested-dropdown-container"
-                onMouseEnter={(e) => {
-                    const dropdown = e.currentTarget.querySelector('.nested-dropdown') as HTMLElement | null;
-                    if (dropdown) {
-                    dropdown.style.display = 'block';
-                    }
-                }}
-                onMouseLeave={(e) => {
-                    const dropdown = e.currentTarget.querySelector('.nested-dropdown') as HTMLElement | null;
-                    if (dropdown) {
-                    dropdown.style.display = 'none';
-                    }
-                }}
-                >
-                <p className="nested-trigger">Business Permit</p>
-                <div className="nested-dropdown">
-                    <Link href="/services/barangaypermit/businesspermit/new">
-                    <p>New</p>
-                    </Link>
-                    <Link href="/services/barangaypermit/businesspermit/renewal">
-                    <p>Renewal</p>
-                    </Link>
-                </div>
-              </div>
                 
-              <div
-                className="nested-dropdown-container"
-                onMouseEnter={(e) => {
-                    const dropdown = e.currentTarget.querySelector('.nested-dropdown') as HTMLElement | null;
-                    if (dropdown) {
-                    dropdown.style.display = 'block';
-                    }
-                }}
-                onMouseLeave={(e) => {
-                    const dropdown = e.currentTarget.querySelector('.nested-dropdown') as HTMLElement | null;
-                    if (dropdown) {
-                    dropdown.style.display = 'none';
-                    }
-                }}
-                >
-                <p className="nested-trigger">Temporary Business Permit</p>
-                <div className="nested-dropdown">
-                    <Link href="/services/barangaypermit/tempbusinesspermit/new">
-                    <p>New</p>
-                    </Link>
-                    <Link href="/services/barangaypermit/tempbusinesspermit/renewal">
-                    <p>Renewal</p>
-                    </Link>
-                </div>
+              <div className="nested-dropdown-container" >
+                <p className="nested-trigger" onClick={goToServices} id="Temporary Business Permit" >Temporary Business Permit</p>
               </div>
-                <Link href="/services/barangaypermit/constructionpermit">
-                  <p>Construction Permit</p>
-                </Link>
-                <Link href="/services/barangaypermit/liquorpermit">
-                  <p>Liquor Permit</p>
-                </Link>
-                <Link href="/services/barangaypermit/coop">
-                  <p>COOP</p>
-                </Link>
+                <p onClick={goToServices} id="Business Permit">Business Permit</p>
+                <p onClick={goToServices} id="Construction Permit">Construction Permit</p>  
               </div>
             </div>
             
-              <div className="documents-card" onClick={goToServices} id="Clearance">
+              <div className="documents-card" onClick={goToServices} id="Barangay Clearance">
                 <img
                   src="/images/document.png"
                   alt="Document Icon"
@@ -136,8 +79,8 @@ export default function Services() {
                 />
                 <h1>Barangay Clearance</h1>
               </div>
-            <Link href="/services/firsttimejobseeker">
-              <div className="documents-card">
+            
+              <div className="documents-card" onClick={goToServices} id="First Time Jobseeker">
                 <img
                   src="/images/document.png"
                   alt="Document Icon"
@@ -145,7 +88,7 @@ export default function Services() {
                 />
                 <h1>First Time Jobseeker</h1>
               </div>
-            </Link>
+           
 
           </div>
 
