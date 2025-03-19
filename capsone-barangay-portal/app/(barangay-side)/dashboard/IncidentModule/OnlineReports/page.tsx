@@ -10,7 +10,10 @@ export default function OnlineReports() {
   const [incidentData, setIncidentData] = useState<any[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchNameQuery, setSearchNameQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
 
   useEffect(() => {
     const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", "Online", setIncidentData);
@@ -26,23 +29,95 @@ export default function OnlineReports() {
     let data = [...incidentData];
   
     if (searchQuery) {
-      data = data.filter((incident) =>
-        typeof incident.caseNumber === "string" && incident.caseNumber.includes(searchQuery)
+      data = data.filter(
+        (incident) =>
+          typeof incident.caseNumber === "string" && incident.caseNumber.includes(searchQuery)
       );
     }
-  
+
+    if (searchNameQuery) {
+      const query = searchNameQuery.toLowerCase();
+      data = data.filter(
+        (incident) =>
+          (typeof incident.firstname === "string" && incident.firstname.toLowerCase().includes(query)) ||
+          (typeof incident.lastname === "string" && incident.lastname.toLowerCase().includes(query))
+      );
+    }
+    
     if (selectedStatus !== "All") {
       data = data.filter((incident) => incident.status === selectedStatus);
     }
   
+    // Custom sorting function
+    data.sort((a, b) => {
+      const extractNumbers = (caseNum: string) => {
+        if (!caseNum || caseNum === "N/A") return [Infinity, Infinity]; // Push N/A to bottom
+        const match = caseNum.match(/^(\d{8})\s*-\s*(\d{4})$/); // Match "YYYYMMDD - XXXX"
+        return match ? [parseInt(match[1], 10), parseInt(match[2], 10)] : [Infinity, Infinity];
+      };
+  
+      const [dateA, seqA] = extractNumbers(a.caseNumber);
+      const [dateB, seqB] = extractNumbers(b.caseNumber);
+  
+      return dateA !== dateB ? dateB - dateA : seqA - seqB; // Sort by date (desc), then sequence (asc)
+    });
+  
     setFilteredData(data);
-  }, [incidentData, searchQuery, selectedStatus]);
+  }, [incidentData, searchQuery, searchNameQuery, selectedStatus]);
+  
+  const sortData = (data: any[]) => {
+    return [...data].sort((a, b) => {
+      const extractNumbers = (caseNum: string) => {
+        if (!caseNum || caseNum === "N/A") return [Infinity, Infinity]; // Push "N/A" to bottom
+        const match = caseNum.match(/^(\d{8})\s*-\s*(\d{4})$/); // Match "YYYYMMDD - XXXX"
+        return match ? [parseInt(match[1], 10), parseInt(match[2], 10)] : [Infinity, Infinity];
+      };
+  
+      const [dateA, seqA] = extractNumbers(a.caseNumber);
+      const [dateB, seqB] = extractNumbers(b.caseNumber);
+  
+      return sortOrder === "desc"
+        ? dateA !== dateB
+          ? dateA - dateB // Ascending by date
+          : seqA - seqB // Ascending by sequence
+        : dateA !== dateB
+        ? dateB - dateA // Descending by date
+        : seqB - seqA; // Descending by sequence
+    });
+  };
+  
+  useEffect(() => {
+    let data = [...incidentData];
+  
+    if (searchQuery) {
+      data = data.filter(
+        (incident) =>
+          typeof incident.caseNumber === "string" && incident.caseNumber.includes(searchQuery)
+      );
+    }
+
+    if (searchNameQuery) {
+      const query = searchNameQuery.toLowerCase();
+      data = data.filter(
+        (incident) =>
+          (typeof incident.firstname === "string" && incident.firstname.toLowerCase().includes(query)) ||
+          (typeof incident.lastname === "string" && incident.lastname.toLowerCase().includes(query))
+      );
+    }
+    
+    if (selectedStatus !== "All") {
+      data = data.filter((incident) => incident.status === selectedStatus);
+    }
+  
+    setFilteredData(sortData(data));
+  }, [incidentData, searchQuery, searchNameQuery, selectedStatus, sortOrder]);
+  
   
 
   const router = useRouter();
 
-  const handleViewOnlineReport = () => {
-    router.push("/dashboard/IncidentModule/OnlineReports/ViewOnlineReport");
+  const handleViewOnlineReport = (id: string) => {
+    router.push(`/dashboard/IncidentModule/OnlineReports/ViewOnlineReport?id=${id}`);
   };
 
   return (
@@ -58,6 +133,13 @@ export default function OnlineReports() {
           placeholder="Enter Incident Case Number"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <input
+          type="text"
+          className="search-bar"
+          placeholder="Enter Name"
+          value={searchNameQuery}
+          onChange={(e) => setSearchNameQuery(e.target.value)}
         />
         <select
           className="featuredStatus"
@@ -79,7 +161,9 @@ export default function OnlineReports() {
         <table>
           <thead>
             <tr>
-              <th>Case Number</th>
+              <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
+                Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
+              </th>
               <th>Complainant's First Name</th>
               <th>Complainant's Last Name</th>
               <th>Date Filed</th>
@@ -103,7 +187,7 @@ export default function OnlineReports() {
                 </td>
                 <td>
                   <div className="actions">
-                    <button className="action-notify" onClick={handleViewOnlineReport}>View</button>
+                    <button className="action-notify" onClick={() => handleViewOnlineReport(incident.id)}>View</button>
                   </div>
                 </td>
               </tr>
