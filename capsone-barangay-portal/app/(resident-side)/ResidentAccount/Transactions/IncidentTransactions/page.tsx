@@ -9,7 +9,7 @@ import { db } from "@/app/db/firebase";
 // ✅ Define Interface
 interface IncidentReport {
   id: string;
-  date?: string;
+  dateFiled?: string;
   caseNumber?: string;
   firstname?: string;
   lastname?: string;
@@ -75,7 +75,7 @@ export default function DocumentRequestTransactionsDetails() {
   }
 
   const incidentFields = [
-    { label: "Date of Incident", key: "date" },
+    { label: "Date of Incident", key: "dateFiled" },
     { label: "ID", key: "caseNumber" },
     { label: "First Name", key: "firstname" },
     { label: "Last Name", key: "lastname" },
