@@ -24,13 +24,12 @@ export default function SettingsPageResident() {
     });
 
     const [showPopup, setShowPopup] = useState(false);
-    const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [message, setMessage] = useState("");
 
     const [preview, setPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
     const [file, setFile] = useState<File | null>(null); // State for file upload
   
 
@@ -102,14 +101,15 @@ export default function SettingsPageResident() {
       const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
-        setError("");
+        setMessage("");
 
         try {
             const docRef = doc(db, "ResidentUsers", residentId!);
 
 
                 if (password !== confirmPassword) {
-                    alert("Passwords do not match!");
+                    setMessage("Passwords do not match!");
+                    setShowPopup(true);
                     setLoading(false);
                     return;
                 } 
@@ -142,10 +142,12 @@ export default function SettingsPageResident() {
                 
             });
 
-            alert("Profile updated successfully!");
+            setMessage("Profile updated successfully!");
+            setShowPopup(true);
             router.push("/ResidentAccount/Profile");
         } catch (err) {
-            setError("Failed to update profile. Please try again.");
+            setMessage("Failed to update profile. Please try again.");
+            setShowPopup(true);
             console.error(err);
         }
 
@@ -246,6 +248,7 @@ export default function SettingsPageResident() {
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required 
+                                disabled
                             />
                         </div>
 
@@ -312,6 +315,16 @@ export default function SettingsPageResident() {
                 </div>
 
             </div>
+
+
+            {showPopup && (
+                <div className="popup-overlay">
+                    <div className="popup">
+                        <p>{message}</p>
+                        <button onClick={() => setShowPopup(false)} className="continue-button">Continue</button>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
