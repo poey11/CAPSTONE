@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db, storage} from "@/app/db/firebase"; 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import bcrypt from "bcryptjs";
 import "@/CSS/ResidentAccount/profile.css";
 
 export default function SettingsPageResident() {
@@ -18,11 +19,14 @@ export default function SettingsPageResident() {
         email: "",
         sex: "",
         status: "",
-        userIcon: ""
+        userIcon: "",
+        password: ""
     });
 
     const [showPopup, setShowPopup] = useState(false);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const [preview, setPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -46,6 +50,7 @@ export default function SettingsPageResident() {
                 sex: data.sex || "",
                 status: data.status || "",
                 userIcon: data.userIcon || "",
+                password: data.password || "",
               });
     
               setPreview(data.userIcon)
@@ -67,6 +72,16 @@ export default function SettingsPageResident() {
             ...prevData,
             [name]: value,
         }));
+
+        if (name === "password") {
+            setPassword(value);
+            setResident((prevData) => ({ ...prevData, password: value })); // ✅ Update formData.password
+         } else if (name === "confirmPassword") {
+            setConfirmPassword(value);
+         } else {
+            setResident((prevData) => ({ ...prevData, [name]: value }));
+        }
+
     };
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,42 +99,64 @@ export default function SettingsPageResident() {
       };
 
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+      const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
-    
+        setError("");
+
         try {
-          const docRef = doc(db, "ResidentUsers", residentId!);
-    
-          let updatedData = { ...resident };
-    
-          // Upload profile image if a new file is selected
-          if (file) {
-            const downloadURL = await uploadImageToStorage(file);
-            updatedData.userIcon = downloadURL;
-          }
-    
-          await updateDoc(docRef, updatedData);
-    
-          alert("Profile updated successfully!");
-          router.push("/ResidentAccount/Profile");
+            const docRef = doc(db, "ResidentUsers", residentId!);
+
+
+                if (password !== confirmPassword) {
+                    alert("Passwords do not match!");
+                    setLoading(false);
+                    return;
+                } 
+        
+                let updatedPassword = resident.password;
+        
+                if (password) { 
+                    //updatedPassword = await bcrypt.hash(password, 12); // Hash only if a new password is entered
+
+                    updatedPassword = password;
+                }
+
+            if (file) {
+                const downloadURL = await uploadImageToStorage(file);
+                resident.userIcon = downloadURL;
+            }
+
+
+        
+
+            await updateDoc(docRef, {
+                first_name: resident.first_name,
+                last_name: resident.last_name,
+                phone: resident.phone,
+                email: resident.email,
+                sex: resident.sex,
+                status: resident.status,
+                userIcon: resident.userIcon,
+                password: updatedPassword,
+                
+            });
+
+            alert("Profile updated successfully!");
+            router.push("/ResidentAccount/Profile");
         } catch (err) {
-          alert("Failed to update profile. Please try again.");
-          console.error(err);
+            setError("Failed to update profile. Please try again.");
+            console.error(err);
         }
-    
+
         setLoading(false);
-      };
+    };
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     
     return (
         <main className="main-container-resident-profile">
             <div className="first-section-resident-profile">
-
-
-                
-                
 
                 <div className="account-details-section">
 
@@ -237,40 +274,24 @@ export default function SettingsPageResident() {
                             />
                         </div>
 
-                            {/* MALCOLM HERE */}
-
-
-                       <div className="form-group-profile-section">
-                            <label htmlFor="current-password" className="form-label-profile-section">Current Password:</label>
-                            <input 
-                                id="current-password" 
-                                name="current-password"
-                                className="form-input-profile-section" 
-                                required 
-                                disabled 
-                            />
-                        </div>
-
 
                         <div className="form-group-profile-section">
-                            <label htmlFor="new-password" className="form-label-profile-section">New Password:</label>
+                            <label htmlFor="password" className="form-label-profile-section">New Password:</label>
                             <input 
-                                id="new-password" 
-                                name="new-password"
+                                id="password" 
+                                name="password"
                                 className="form-input-profile-section" 
-                                required 
-                                disabled 
+                                onChange={handleChange}
                             />
                         </div>
 
                         <div className="form-group-profile-section">
-                            <label htmlFor="confirm-password" className="form-label-profile-section">Confirm Password:</label>
+                            <label htmlFor="confirmPassword" className="form-label-profile-section">Confirm Password:</label>
                             <input 
-                                id="confirm-password" 
-                                name="confirm-password"
+                                id="confirmPassword" 
+                                name="confirmPassword"
                                 className="form-input-profile-section" 
-                                required 
-                                disabled 
+                                onChange={handleChange}
                             />
                         </div>
 

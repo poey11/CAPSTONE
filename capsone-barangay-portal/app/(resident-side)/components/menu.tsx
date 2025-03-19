@@ -1,19 +1,37 @@
 "use client"
 import { useState, useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
-import { auth } from "../../db/firebase";
+import { usePathname, useSearchParams} from "next/navigation";
+import { auth, db} from "../../db/firebase";
 import {useAuth} from "../../context/authContext";
 import { signOut } from "firebase/auth";
 import SideNav from '../../(barangay-side)/components/bMenu';
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import "@/CSS/Components/menu.css";
 
+
+interface Resident {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  sex: string;
+  status: string;
+  userIcon: string;
+}
+
 const Menu = () => {
+  const searchParams = useSearchParams();
+  const residentId = searchParams.get("id");
   const {user, loading} = useAuth();
   const router = useRouter();
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const loginMenuRef = useRef<HTMLDivElement | null>(null);
+  const [userIcon, setUserIcon] = useState<string | undefined>(undefined);
+  const db = getFirestore();
+
+  const [resident, setResident] = useState<Resident | null>(null);
   
   const handleLogout = async() => {
     await signOut(auth);
@@ -39,6 +57,29 @@ const Menu = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    console.log("User email:", user?.email);
+
+    const fetchResidentData = async () => {
+      if (residentId) { // Ensure residentId is not null
+        const userDocRef = doc(db, "ResidentUsers", residentId);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (userDocSnap.exists()) {
+          const data = userDocSnap.data();
+          console.log("Resident data fetched:", data);
+          setResident(data as Resident);
+        } else {
+          console.log("No resident found in Firestore!");
+        }
+      }
+    };
+
+    fetchResidentData();
+}, [residentId, resident]);
+
+
 
 
   const [isOpen, setIsOpen] = useState(false);
@@ -262,7 +303,13 @@ const barangayPermitRoutes: Record<string, string> = {
                     id="profile-link"
                     onClick={toggleLoginOptions}
                   >
-                    <img src="/images/user.png" alt="User Icon" className="header-usericon" />
+                    {/*<img src={userIcon} alt="User Icon" className="header-usericon" />*/}
+
+                    {resident?.userIcon ? (
+                                        <img src={resident.userIcon} alt="User Icon" className="header-usericon" />
+                                    ) : (
+                                        <img src="/images/user.png" alt="Default User" className="header-usericon" />
+                                    )}
                   </p>
                   
                   <div className="Dropdown">

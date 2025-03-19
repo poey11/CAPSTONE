@@ -6,6 +6,7 @@ import { createUserWithEmailAndPassword, sendEmailVerification,signOut } from "f
 import { useState, ChangeEvent } from "react";
 import { useRouter } from 'next/navigation';
 import ReCAPTCHA from "react-google-recaptcha";
+import { hash } from 'bcryptjs'; 
 import "@/CSS/Components/registerform.css";
 
 
@@ -52,7 +53,7 @@ const registerForm:React.FC = () => {
       });
 
 
-      const [password, setPassword] = useState("");
+    const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
     
@@ -89,6 +90,8 @@ const registerForm:React.FC = () => {
         let docRef = null;
         let storageRef = null;
         try{
+
+          const hashedPassword = await hash(resident.password, 12);
           const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, resident.password);
           user = userCredentials.user;
           await signOut(auth); 
@@ -124,6 +127,7 @@ const registerForm:React.FC = () => {
               createdAt: new Date().getTime(),
               status: resident.status,
               validIdDocID: fileURL,
+              password: hashedPassword,
               userIcon: "/images/user.png"
           });
          
