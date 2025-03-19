@@ -38,6 +38,7 @@ export default function Dashboard() {
   const [GADReportsCount, setGADReportsCount] = useState(0);
   const [VAWCReportsCount, setVAWCReportsCount] = useState(0);
   const [LuponReportsCount, setLuponReportsCount] = useState(0);
+  const [OnlineReportsCount, setOnlineReportsCount] = useState(0);
 
   // for demographics
   const [pwdCount, setPwdCount] = useState(0);
@@ -111,7 +112,8 @@ export default function Dashboard() {
         setArchivedIncidentReportsCount(archived);
         setResolvedIncidentReportsCount(resolved);
 
-        let gad = 0,
+        let online = 0,
+        gad = 0,
         bcpc = 0,
         vawc = 0,
         lupon = 0;
@@ -122,12 +124,14 @@ export default function Dashboard() {
         else if (department === "BCPC") bcpc++;
         else if (department === "VAWC") vawc++;
         else if (department === "Lupon") lupon++;
+        else if (department === "Online") online++;
       });
 
       setBCPCReportsCount(bcpc);
       setGADReportsCount(gad);
       setVAWCReportsCount(vawc);
       setLuponReportsCount(lupon);
+      setOnlineReportsCount(online);
 
         const today = new Date();
         const sevenDaysAgo = new Date();
@@ -252,8 +256,9 @@ export default function Dashboard() {
         { name: "BCPC", value: BCPCReportsCount },
         { name: "VAWC", value: VAWCReportsCount },
         { name: "Lupon", value: LuponReportsCount },
+        { name: "Online", value: OnlineReportsCount },
       ],
-      colors: ["#FF9800", "#4CAF50", "#D32F2F", "#03A9F4"],
+      colors: ["#E91E63", "#8E44AD", "#3498DB", "#27AE60", "#F39C12"]
     },    
     {
         title: "Total Incident Reports:",
