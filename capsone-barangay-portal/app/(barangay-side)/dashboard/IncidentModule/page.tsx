@@ -126,7 +126,7 @@ export default function MainPageIncident() {
       <div className="incidentmap-section-all-department">
         
       <div className="titlesection-all-department">
-             <p className="title-all-department"> Incident HeatMap</p>
+             <p className="title"> Incident HeatMap</p>
         </div>
         <Heatmap/>
       

@@ -214,6 +214,8 @@ input:checked + .slider:before {
   font-weight: bold;
 }
 
+
+
 .search-bar-edit, .featuredStatus-edit{
   padding: 8px;
   width: 100%;
@@ -227,6 +229,8 @@ input:checked + .slider:before {
 .featuredStatus-edit option {
   color: rgba(0, 0, 0, 0.4); 
 }
+
+
 
 
 
@@ -394,18 +398,21 @@ input:checked + .slider:before {
   flex-direction: column;
   width: 100%;
   justify-content: space-between;
+  margin-top: 1rem;
 }
 
 .title-edit {
-  margin-bottom: 1rem;
+  margin-top: 2rem;
   color: grey;
   font-weight: bold;
   font-size: 1rem;
-  margin-left: 1.5rem;
+  margin-left: 2.5rem;
 }
 .bars-edit {
   display: flex;
 }
+
+
 
 .input-group-edit {
   display: flex;
@@ -418,9 +425,10 @@ input:checked + .slider:before {
 
 
 .input-group-edit p {
-  margin: 0 0 5px 0; /* Add space between label and input */
-  font-weight: bold;
   color: grey;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 1rem;
 }
 
 
@@ -690,4 +698,157 @@ background-color: #f44336;
 
 .no-button-edit:hover {
 background-color:  #c2352b; 
+}
+
+
+
+
+.edit-incident-main-section1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.edit-incident-main-section1 h1 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+
+.edit-incident-main-section1-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.action-btn-section-edit-incident {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+
+
+
+.action-view-edit,
+.action-delete-edit,
+.action-discard-edit {
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+  width: 100px;
+}
+
+.action-view-edit {
+    background-color: #4caf50; /* Green */
+    color: white;
+}
+
+
+.action-delete-edit {
+    background-color: #f44336; /* Red */
+    color: white;
+}
+
+
+.action-view-edit:hover {
+    background-color: #3e8f41; /* Green */
+}
+
+.action-edit-edit:hover {
+    background-color: #d58102; /* Orange */
+}
+
+.action-delete-edit {
+    background-color: #f44336; /* Red */
+    color: white;
+}
+.action-delete-edit:hover {
+    background-color: #d73c31; /* Red */
+}
+
+.action-discard-edit {
+  background-color: #de3030;
+  color: white;
+}
+
+.action-discard-edit:hover {
+  background-color: #CA2D2D; 
+}
+
+.main-content-edit hr {
+  border: none; 
+  border-top: 2px solid rgba(0, 0, 0, 0.10);
+  margin: 30px 0; 
+}
+
+.back-btn-edit{
+  width: 25px;
+  height: 25px;
+  filter: grayscale(100%) brightness(0%) invert(50%);
+}
+
+
+
+.record-details-topsection {
+  width: 100%;
+  display: flex;
+  margin-top: 5rem;
+}
+
+.record-details-topsection h1 {
+  font-size: 17px;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.5);
+  margin: 0;
+}
+
+.record-details {
+    display: flex;
+    flex-direction:column;
+    overflow: hidden;
+    height: auto;
+}
+
+
+
+
+.record-details-plus-button {
+  background-image: url('/Images/plus.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 20px; 
+  height: 20px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 1rem;
+  filter: grayscale(100%) brightness(0%) invert(50%);
+}
+
+.record-details-plus-button:hover {
+  transform: scale(1.1); 
+  transition: transform 0.2s ease;
+}
+
+.record-details-minus-button {
+  background-image: url('/Images/minus-sign.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 20px; 
+  height: 20px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 1rem;
+  filter: grayscale(100%) brightness(0%) invert(50%);
+}
+
+.record-details-minus-button:hover {
+  transform: scale(1.1); 
+  transition: transform 0.2s ease;
 }

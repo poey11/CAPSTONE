@@ -299,6 +299,26 @@ export default function EditLuponIncident() {
     };
 
 
+    const [showRecordDetails, setShowRecordDetails] = useState(false);
+const [showComplainantDetails, setShowComplainantDetails] = useState(false);
+const [showInvestigatedDetails, setShowInvestigatedDetails] = useState(false);
+const [showOtherDetails, setshowOtherDetails] = useState(false);
+
+const toggleRecordDetails = () => setShowRecordDetails(prev => !prev);
+const toggleComplainantDetails = () => setShowComplainantDetails(prev => !prev);
+const toggleInvestigatedDetails = () => setShowInvestigatedDetails(prev => !prev);
+const toggleOtherDetails = () => setshowOtherDetails(prev => !prev);
+
+
+
+
+
+
+
+
+  
+
+
 
 
   return (
@@ -309,35 +329,48 @@ export default function EditLuponIncident() {
           <div className="letters-content-edit">
                <button className="letter-announcement-btn-edit" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialouge Letter</button>
                <button className="letter-announcement-btn-edit" name="summon" onClick={handleGenerateLetterAndInvitation}>Generate Summon Letter</button>
+              
                <select
-                           id="status"
-                           className={`status-dropdown-edit ${status}`}  
-                           name="status"
-                            value={toUpdate.status ?? reportData.status ?? "Pending"} // Show db value or user-updated value
-                           onChange={handleFormChange}               
-                           >
-                           <option value="Pending">Pending</option>
-                           <option value="Resolved">Resolved</option>
-                           <option value="Settled">Settled</option>
-                           <option value="Archived">Archived</option>
-                 </select>
+                id="status"
+                className={`status-dropdown-edit ${toUpdate.status || reportData.status || "pending"}`}  
+                name="status"
+                value={toUpdate.status ?? reportData.status ?? "Pending"} 
+                onChange={handleFormChange}               
+              >
+                <option value="pending">Pending</option>
+                <option value="resolved">Resolved</option>
+                <option value="settled">Settled</option>
+                <option value="archived">Archived</option>
+              </select>
+
 
         
           </div>
  
          
           <form className="main-content-edit" onSubmit={handleSubmit}>
-          <button type="button" className="back-button-edit" onClick={handleBack}></button>
-        
 
-               <div className="section-1-edit">
-                   <p className="NewOfficial-edit"> {reportData.caseNumber}</p>
-                       <div className="actions-edit">
-                           <button type="button" className="action-delete-edit" onClick={handleDeleteForm}>Delete</button>
-                           <button type="submit" className="action-view-edit">Save</button>                 
-                       </div>
-                </div>
-        
+          <div className="edit-incident-main-section1">
+
+            <div className="edit-incident-main-section1-left">
+
+              <button type="button"  onClick={handleBack}>
+
+                  <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-edit"/>
+              </button>
+              <p className="NewOfficial-edit"> {reportData.caseNumber}</p>
+            </div>
+
+            <div className="action-btn-section-edit-incident">
+              <button type="button" className="action-delete-edit" onClick={handleDeleteForm}>Delete</button>
+              <button type="submit" className="action-view-edit">Save</button>   
+            </div>
+
+          </div>
+
+          <hr/>
+      
+
         
               <div className="section-2-edit">
                   <div className="section-2-left-side-edit">
@@ -529,9 +562,29 @@ export default function EditLuponIncident() {
         
         
                <div className="section-3-edit">
-                   <p className="title-edit">Incident Information</p>
 
+               <div className="record-details-topsection">
+                            <button type="button" 
+                                className={showRecordDetails ? "record-details-minus-button" : "record-details-plus-button"} 
+                                onClick={toggleRecordDetails}>
+                            </button>
+                   <h1>Incident Information</h1>
+
+              </div>
+
+              <hr/>
+
+
+
+            
+            
+              {showRecordDetails && (
+
+                
                    <div className="bars-edit">
+
+                   
+                     
                        <div className="input-group-edit">
                            <p>Nature of Complaint</p>
                            <input type="text" className="search-bar-edit" 
@@ -582,10 +635,29 @@ export default function EditLuponIncident() {
 
                       </div>
                     )}
+
+   
+
                    </div>
+                   )}
 
 
-                   <p className="title-edit">Complainant/s Recieved By</p>
+
+                <div className="record-details-topsection">
+                            <button type="button" 
+                                className={showComplainantDetails ? "record-details-minus-button" : "record-details-plus-button"} 
+                                onClick={toggleComplainantDetails}>
+                            </button>
+                   <h1>Complainant's Recieved by</h1>
+              </div>
+
+                    <hr/>
+
+
+                   {showComplainantDetails && (   
+
+
+
                   <div className="bars-edit">
 
                     <div className="input-group-edit">
@@ -632,7 +704,19 @@ export default function EditLuponIncident() {
 
                   </div>
 
-                  <p  className="title-edit">Investigated Conducted By</p>
+              )}
+
+
+            <div className="record-details-topsection">
+                            <button type="button" 
+                                className={showInvestigatedDetails ? "record-details-minus-button" : "record-details-plus-button"} 
+                                onClick={toggleInvestigatedDetails}>
+                            </button>
+                   <h1>Investigated Conducted By</h1>
+              </div>
+
+
+                  {showInvestigatedDetails&& (   
                     <div className="bars-edit">
                         <div className="input-group-edit">
                             <p>Investigator Full Name (FN SN)</p>
@@ -667,6 +751,13 @@ export default function EditLuponIncident() {
                         </div>
                     </div>
 
+                  )}
+
+            <hr/>
+
+
+                    
+
                     <p  className="title-edit">Image of Incident</p>
                     <div className="description-edit">
                       {concernImageUrl ? (
@@ -682,9 +773,15 @@ export default function EditLuponIncident() {
                            <p style={{ color: "gray", fontStyle: "italic" }}>No image available</p>
                          </div>
                        )}
+                       
                     </div>
-
+                    
+    
                </div>
+               
+
+               
+               
                      
                      
                      
@@ -767,8 +864,12 @@ export default function EditLuponIncident() {
                    
                </div>
                </div>
-           
+    
         </form>
+        
+
+
+
      
          <div className="dialouge-meeting-section-edit">
               
@@ -776,6 +877,8 @@ export default function EditLuponIncident() {
                      <button type="button" className="plus-button-edit" onClick={handleToggleClick}></button>
                      <p className="NewOfficial-edit">Dialogue Meeting</p>
                  </div>
+
+                 <hr/>
  
                  {showDialogueContent && (
                      <>
@@ -817,6 +920,8 @@ export default function EditLuponIncident() {
                      </>
                  )}
              </div>
+
+           
  
      <div className="hearing-section-edit">
          
