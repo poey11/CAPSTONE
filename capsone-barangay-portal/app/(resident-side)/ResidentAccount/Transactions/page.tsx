@@ -46,17 +46,19 @@ export default function Transactions() {
     };
 
     return (
-        <main className="main-container">
+        <main className="main-container-transactions">
             <div className="Page">
                 <p>TRANSACTIONS</p>
             </div>
 
-            <div className="transactions-history">
-                <div className="table-section">
+            <div className="transactions-history-transactions">
+                <div className="table-section-transactions">
                     {loading ? (
                         <p>Loading...</p>
                     ) : transactionData.length === 0 ? (
-                        <p>No transactions found.</p>
+                        <div className="no-transactions">
+                            <p>No transactions found.</p>
+                        </div>
                     ) : (
                         <table>
                             <thead>
@@ -76,8 +78,8 @@ export default function Transactions() {
                                         <td>{report.department || "N/A"}</td>
                                         <td>{report.concerns || "N/A"}</td>
                                         <td>
-                                            <span className={`status-badge ${report.status?.toLowerCase().replace(/\s+/g, "-") || ""}`}>
-                                            {report.status || "Pending" || "Acknowledged"}
+                                            <span className={`status-dropdown-transactions ${report.status?.toLowerCase() || ""}`}>
+                                                {report.status || "N/A"}
                                             </span>
                                         </td>
                                     </tr>

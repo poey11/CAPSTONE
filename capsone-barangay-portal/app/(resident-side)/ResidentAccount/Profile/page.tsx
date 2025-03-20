@@ -10,8 +10,7 @@ import { auth, db, storage } from "@/app/db/firebase"; // Ensure 'auth' is impor
 
 
 
-/*not working pa yung pag change ng pass sa db*/
-
+// need to fix yung pag gitna ng profile image section
 
 export default function SettingsPageResident() {
     const router = useRouter();
@@ -44,8 +43,6 @@ export default function SettingsPageResident() {
             const docRef = doc(db, "ResidentUsers", residentId);
             const docSnap = await getDoc(docRef);
     
-            console.log("Resident ID:", residentId);
-
             if (docSnap.exists()) {
               const data = docSnap.data();
               setResident({
@@ -80,7 +77,7 @@ export default function SettingsPageResident() {
 
         if (name === "password") {
             setPassword(value);
-            setResident((prevData) => ({ ...prevData, password: value })); // ✅ Update formData.password
+            setResident((prevData) => ({ ...prevData, password: value })); // formData.password
          } else if (name === "confirmPassword") {
             setConfirmPassword(value);
          } else {

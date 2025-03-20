@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 export default function FileReport() {
   
   return (
-    <div>
+   
       <Form />
-    </div>  
+   
   );
 }
