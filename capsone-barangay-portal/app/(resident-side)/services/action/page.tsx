@@ -3,8 +3,9 @@ import { ChangeEvent, useEffect, useState } from "react";
 import {useAuth} from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 import {useSearchParams } from "next/navigation";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
+import { Contact } from "lucide-react";
 
 
 
@@ -13,12 +14,13 @@ export default function Action() {
   const searchParam = useSearchParams();
   const docType = searchParam.get("doc");
 
-  const [clearanceInput, setClearanceInput] = useState({
+  const [clearanceInput, setClearanceInput] =  useState<any|null>({
     accountId: user?.uid || "Guest",
     purpose: "",
     dateRequested: new Date().toISOString().split('T')[0],
     firstName: "",
     middleName: "",
+    appointmentDate: "",
     lastName: "",
     dateOfResidency: "",
     address: "",//will be also the home address
@@ -70,9 +72,16 @@ const [files2, setFiles2] = useState<{ name: string, preview: string | undefined
 const [files3, setFiles3] = useState<{ name: string, preview: string | undefined }[]>([]);
 const [files4, setFiles4] = useState<{ name: string, preview: string | undefined }[]>([]);
 
+const [files5, setFiles5] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files6, setFiles6] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files7, setFiles7] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files8, setFiles8] = useState<{ name: string, preview: string | undefined }[]>([]);
+
+const [files9, setFiles9] = useState<{ name: string, preview: string | undefined }[]>([]);
+
 useEffect(() => {
   if (user) {
-    setClearanceInput((prev) => ({
+    setClearanceInput((prev: any) => ({
       ...prev,
       accountId: user.uid, // Ensure the latest value is set
     }));
@@ -99,7 +108,7 @@ const handleFileChange = (
     setFile([{ name: selectedFile.name, preview }]);
 
     // Update clearanceInput state with the selected file
-    setClearanceInput((prev) => ({
+    setClearanceInput((prev: any) => ({
       ...prev,
       [fileKey]: selectedFile, // Assign file directly
     }));
@@ -123,7 +132,7 @@ const handleFileChange = (
   
   const handleReportUpload = async (key: any, storageRef: any) => {
     try {
-      const docRef = collection(db, "IncidentReports");
+      const docRef = collection(db, "ServiceRequests"); // Reference to the collection
   
       // Assuming key is an array with a single object containing all fields:
       const updates = { ...key[0] };  // No filtering, just spread the object
@@ -139,18 +148,115 @@ const handleFileChange = (
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
   
-  
-    setClearanceInput((prev) => ({
-      ...prev,
-      [name]: value, // Handle other input types (text, textarea, select)
-    }));
+    setClearanceInput((prev: any) => {
+      const keys = name.split(".");
+      if (keys.length === 2) {
+        return {
+          ...prev,
+          [keys[0]]: {
+            ...prev[keys[0]],
+            [keys[1]]: value,
+          },
+        };
+      }
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
   };
-
+  
     // Handle form submission
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
+      if (docType === "Barangay Certificate" || docType === "Barangay Clearance" ||
+       docType === "Barangay Indigency" || docType === "Business ID"|| docType === "First Time Jobseeker") {
+        if (
+          clearanceInput.barangayIDjpg === null &&
+          clearanceInput.validIDjpg === null &&
+          clearanceInput.letterjpg === null
+        ) {
+          alert("Please upload one of the following documents: Barangay ID, Valid ID, or Endorsement Letter");
+          return;
+        }
+
+        const clearanceVars = {
+          firstName: clearanceInput.firstName,
+          middleName: clearanceInput.middleName,
+          lastName: clearanceInput.lastName,
+          dateOfResidency: clearanceInput.dateOfResidency,
+          address: clearanceInput.address,
+          birthday: clearanceInput.birthday,
+          age: clearanceInput.age,
+          gender: clearanceInput.gender,
+          civilStatus: clearanceInput.civilStatus,
+          contact: clearanceInput.contact,
+          citizenship: clearanceInput.citizenship,
+          signaturejpg: clearanceInput.signaturejpg,
+          ...(clearanceInput.barangayIDjpg !== null && {
+            barangayIDjpg: clearanceInput.barangayIDjpg,
+          }),
+          ...(clearanceInput.validIDjpg !== null && {
+            validIDjpg: clearanceInput.validIDjpg,
+          }),
+          ...(clearanceInput.letterjpg !== null && {
+            endorsementLetter: clearanceInput.letterjpg,
+          }),
+          ...((clearanceInput.purpose === "Residency" || docType=== "Barangay Indigency") && {
+            appointmentDate: clearanceInput.appointmentDate,
+            purpose: clearanceInput.purpose,
+          }),
+          ...(docType === "Business ID" && {
+            birthplace: clearanceInput.birthplace,
+            religion: clearanceInput.religion,
+            nationality: clearanceInput.nationality,
+            height: clearanceInput.height,
+            weight: clearanceInput.weight,
+            bloodtype: clearanceInput.bloodtype,
+            occupation: clearanceInput.occupation,
+            precinctnumber: clearanceInput.precinctnumber,
+            emergencyDetails: clearanceInput.emergencyDetails
+          }),
+          ...(docType === "First Time Jobseeker" && {
+            educationalAttainment: clearanceInput.educationalAttainment,
+            course: clearanceInput.course,
+            isBeneficiary: clearanceInput.isBeneficiary,
+          })
+        };
+
+        return;
+      }
       
-      console.log(clearanceInput); // Log the form data
+      const clearanceVars = {
+       ...((docType === "Temporary Business Permit"||docType === "Business Permit") && {
+          purpose: clearanceInput.purpose,
+          businessName: clearanceInput.businessName,
+          businessLocation: clearanceInput.businessLocation,
+          businessNature: clearanceInput.businessNature,
+          estimatedCapital: clearanceInput.estimatedCapital,
+       }),
+       ...((docType === "Construction Permit") && {
+        typeofconstruction: clearanceInput.typeofconstruction,
+        typeofbldg: clearanceInput.typeofbldg,
+        projectName: clearanceInput.projectName,
+        projectLocation: clearanceInput.businessLocation,
+        taxDeclaration: clearanceInput.taxDeclaration,
+        approvedBldgPlan: clearanceInput.approvedBldgPlan,
+       }),
+        firstName: clearanceInput.firstName,
+        middleName: clearanceInput.middleName,
+        lastName: clearanceInput.lastName,
+        Contact: clearanceInput.contact,
+        homeAddress: clearanceInput.address,
+        copyOfPropertyTitle: clearanceInput.copyOfPropertyTitle,
+        dtiRegistration: clearanceInput.dtiRegistration,
+        isCCTV: clearanceInput.isCCTV,
+        signaturejpg: clearanceInput.signaturejpg,
+        barangayIDjpg: clearanceInput.barangayIDjpg,
+        validIDjpg: clearanceInput.validIDjpg,
+        endorsementLetter: clearanceInput.letterjpg,
+      };
+     
     };
 
 
@@ -173,6 +279,7 @@ const handleFileChange = (
         {(docType === "Barangay Certificate" || docType === "Barangay Clearance" 
         ||  docType === "Barangay Indigency" || docType === "Business Permit" || docType === "Temporary Business Permit" ) 
       && (
+          <>
           <div className="form-group">
             
           <label htmlFor="purpose" className="form-label">{docType} Purpose</label>
@@ -230,9 +337,27 @@ const handleFileChange = (
             </>)}
             
           </select>
+         
         </div>
+        {(docType === "Barangay Indigency" || clearanceInput.purpose === "Residency") && (
+          <>
+            <div className="form-group">
+              <label htmlFor="dateOfResidency" className="form-label">Set An Appointment</label>
+              <input 
+                type="date" 
+                id="dateOfResidency" 
+                name="appointmentDate" 
+                value={clearanceInput.appointmentDate||""}
+                onChange={handleChange}
+                className="form-input" 
+                required
+              />
+            </div>
+          </>
         )}
-          
+        </>
+        )}
+         
           {docType === "Construction Permit" && (
             <>
               <div className="form-group">
@@ -730,7 +855,7 @@ const handleFileChange = (
                   required  
                   placeholder="Enter First Name" 
                 />
-              </div>
+              </div>`
 
               <div className="form-group">
                 <label htmlFor="middlename" className="form-label">Middle Name</label>
@@ -795,7 +920,7 @@ const handleFileChange = (
                   id="emergencyDetails.contactNumber"  
                   value={clearanceInput.emergencyDetails.contactNumber}
                   onChange={handleChange}
-                  name="contactnumber"  
+                  name="emergencyDetails.contactNumber"  
                   className="form-input" 
                   required 
                   placeholder="Enter Contact Number"  
@@ -857,30 +982,31 @@ const handleFileChange = (
           <h1 className="form-requirements-title">Requirements</h1>
           
 
-          {(docType ==="Temporary Business Permit"||docType ==="Business Permit") && (
+          {(docType ==="Temporary Business Permit"||docType ==="Business Permit" || docType === "Construction Permit") &&(
           // WILL Have to fix this part
           <>
             <div className="signature/printedname-container">
             <h1 className="form-label">Certified True Copy of Title of the Property/Contract of Lease</h1>
 
             <div className="file-upload-container">
-              <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
+              <label htmlFor="file-upload5"  className="upload-link">Click to Upload File</label>
                 <input
-                  id="file-upload1"
+                  id="file-upload5"
                   type="file"
-                  className="file-upload-input" 
-                  multiple
-                  accept=".jpg,.jpeg,.png"
                   required
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFileChange(e, setFiles5, 'copyOfPropertyTitle');
+                  }} 
+                  accept=".jpg,.jpeg,.png"
                    // Handle file selection
                 />
 
               <div className="uploadedFiles-container">
                 {/* Display the file names with image previews */}
-                {files.length > 0 && (
+                {files5.length > 0 && (
                   <div className="file-name-image-display">
                     <ul>
-                      {files.map((file, index) => (
+                      {files5.map((file, index) => (
                         <div className="file-name-image-display-indiv" key={index}>
                           <li> 
                               {/* Display the image preview */}
@@ -898,7 +1024,7 @@ const handleFileChange = (
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container1', setFiles)}
+                                  onClick={() => handleFileDelete('file-upload5', setFiles5)}
                                   className="delete-button"
                                 >
                                   <img
@@ -928,22 +1054,24 @@ const handleFileChange = (
             <h1 className="form-label">Certified True Copy of DTI Registration</h1>
 
             <div className="file-upload-container">
-              <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
+              <label htmlFor="file-upload6"  className="upload-link">Click to Upload File</label>
                 <input
-                  id="file-upload2"
+                  id="file-upload6"
                   type="file"
-                  className="file-upload-input" 
-                  multiple
+                  required={(docType === "Temporary Business Permit" || docType === "Business Permit" || docType === "Construction Permit")}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFileChange(e, setFiles6, 'dtiRegistration');
+                  }} 
                   accept=".jpg,.jpeg,.png"
-                  required
+                  
                 />
 
               <div className="uploadedFiles-container">
                 {/* Display the file names with image previews */}
-                {files.length > 0 && (
+                {files6.length > 0 && (
                   <div className="file-name-image-display">
                     <ul>
-                      {files.map((file, index) => (
+                      {files6.map((file, index) => (
                         <div className="file-name-image-display-indiv" key={index}>
                           <li> 
                               {/* Display the image preview */}
@@ -961,7 +1089,7 @@ const handleFileChange = (
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container2', setFiles)}
+                                  onClick={() => handleFileDelete('file-upload6', setFiles6)}
                                   className="delete-button"
                                 >
                                   <img
@@ -992,22 +1120,23 @@ const handleFileChange = (
             <h1 className="form-label-description">(for verification by Barangay Inspector)</h1>
 
             <div className="file-upload-container">
-              <label htmlFor="file-upload4"  className="upload-link">Click to Upload File</label>
+              <label htmlFor="file-upload7"  className="upload-link">Click to Upload File</label>
                 <input
-                  id="file-upload4"
+                  id="file-upload7"
                   type="file"
-                  className="file-upload-input" 
-                  multiple
+                  required={(docType === "Temporary Business Permit" || docType === "Business Permit" || docType === "Construction Permit")}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFileChange(e, setFiles7, 'isCCTV');
+                  }} 
                   accept=".jpg,.jpeg,.png"
-                  required
                 />
 
               <div className="uploadedFiles-container">
                 {/* Display the file names with image previews */}
-                {files.length > 0 && (
+                {files7.length > 0 && (
                   <div className="file-name-image-display">
                     <ul>
-                      {files.map((file, index) => (
+                      {files7.map((file, index) => (
                         <div className="file-name-image-display-indiv" key={index}>
                           <li> 
                               {/* Display the image preview */}
@@ -1025,7 +1154,7 @@ const handleFileChange = (
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container4', setFiles)}
+                                  onClick={() => handleFileDelete('file-upload7', setFiles7)}
                                   className="delete-button"
                                 >
                                   <img
@@ -1059,13 +1188,13 @@ const handleFileChange = (
                   id="file-upload1"
                   type="file"
                   accept=".jpg,.jpeg,.png"
-                 
+                  required
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleFileChange(e, setFiles, 'signaturejpg');
                   }} 
                   
                 />
-
+                
               <div className="uploadedFiles-container">
                 {/* Display the file names with image previews */}
                 {files.length > 0 && (
@@ -1089,7 +1218,7 @@ const handleFileChange = (
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container1', setFiles)}
+                                  onClick={() => handleFileDelete('file-upload1', setFiles)}
                                   className="delete-button"
                                 >
                                   <img
@@ -1111,99 +1240,37 @@ const handleFileChange = (
               </div>
             </div>
           </div>
-          {docType ==="Barangay Clearance" && (
+          {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction Permit" ) && (
             <>
-              <h1 className="form-label-reqs"> Upload either of the following requirements</h1>
+              <h1 className="form-label-reqs"> Upload of the following requirements</h1>
               <br/>
             </>
           )}
        
+       
           {docType === "Construction Permit" ? (<>
-          
-            <div className="signature/printedname-container">
-            <h1 className="form-label">Certified True Copy of Title of the Property/Contract of Lease</h1>
-
-            <div className="file-upload-container">
-              <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
-                <input
-                  id="file-upload1"
-                  type="file"
-                  className="file-upload-input" 
-                  multiple
-                  accept=".jpg,.jpeg,.png"
-                  required
-               
-                />
-
-              <div className="uploadedFiles-container">
-                {/* Display the file names with image previews */}
-                {files.length > 0 && (
-                  <div className="file-name-image-display">
-                    <ul>
-                      {files.map((file, index) => (
-                        <div className="file-name-image-display-indiv" key={index}>
-                          <li> 
-                              {/* Display the image preview */}
-                              {file.preview && (
-                                <div className="filename&image-container">
-                                  <img
-                                    src={file.preview}
-                                    alt={file.name}
-                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                  />
-                                </div>
-                                )}
-                              {file.name}  
-                            <div className="delete-container">
-                              {/* Delete button with image */}
-                              <button
-                                  type="button"
-                                  onClick={() => handleFileDelete('container1', setFiles)}
-                                  className="delete-button"
-                                >
-                                  <img
-                                    src="/images/trash.png"  
-                                    alt="Delete"
-                                    className="delete-icon"
-                                  />
-                                </button>
-
-                            </div>
-                                        
-                              
-                          </li>
-                        </div>
-                      ))}  
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          
-          <br/>
-
           <div className="barangayID-container">
             <h1 className="form-label">Certified True Copy of Tax Declaration</h1>
 
             <div className="file-upload-container">
-              <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
+              <label htmlFor="file-upload8"  className="upload-link">Click to Upload File</label>
                 <input
-                  id="file-upload2"
+                  id="file-upload8"
                   type="file"
-                  className="file-upload-input" 
-                  multiple
-                  accept=".jpg,.jpeg,.png"
                   required
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFileChange(e, setFiles8, 'taxDeclaration');
+                  }}
+                  accept=".jpg,.jpeg,.png"
+                 
                 />
 
               <div className="uploadedFiles-container">
                 {/* Display the file names with image previews */}
-                {files.length > 0 && (
+                {files8.length > 0 && (
                   <div className="file-name-image-display">
                     <ul>
-                      {files.map((file, index) => (
+                      {files8.map((file, index) => (
                         <div className="file-name-image-display-indiv" key={index}>
                           <li> 
                               {/* Display the image preview */}
@@ -1221,7 +1288,7 @@ const handleFileChange = (
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container2',setFiles)}
+                                  onClick={() => handleFileDelete('file-upload8',setFiles8)}
                                   className="delete-button"
                                 >
                                   <img
@@ -1249,22 +1316,23 @@ const handleFileChange = (
           <div className="endorsementletter-container">
             <h1 className="form-label">Approved Building/Construction Plan</h1>
             <div className="file-upload-container">
-              <label htmlFor="file-upload4"  className="upload-link">Click to Upload File</label>
+              <label htmlFor="file-upload9"  className="upload-link">Click to Upload File</label>
                 <input
-                  id="file-upload4"
+                  id="file-upload9"
                   type="file"
-                  className="file-upload-input" 
-                  multiple
-                  accept=".jpg,.jpeg,.png"
                   required
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFileChange(e, setFiles8, 'approvedBldgPlan');
+                  }}
+                  accept=".jpg,.jpeg,.png"
                 />
 
               <div className="uploadedFiles-container">
                 {/* Display the file names with image previews */}
-                {files.length > 0 && (
+                {files9.length > 0 && (
                   <div className="file-name-image-display">
                     <ul>
-                      {files.map((file, index) => (
+                      {files9.map((file, index) => (
                         <div className="file-name-image-display-indiv" key={index}>
                           <li> 
                               {/* Display the image preview */}
@@ -1282,7 +1350,7 @@ const handleFileChange = (
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container4', setFiles)}
+                                  onClick={() => handleFileDelete('file-upload9', setFiles9)}
                                   className="delete-button"
                                 >
                                   <img
@@ -1317,9 +1385,10 @@ const handleFileChange = (
                   id="file-upload2"
                   type="file"
                   accept=".jpg,.jpeg,.png"
+                  required={docType === "Temporary Business Permit" || docType === "Business Permit"}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleFileChange(e,setFiles2, 'barangayIDjpg');
-                  }} // Handle file selection
+                    handleFileChange(e, setFiles2, 'barangayIDjpg');
+                  }}
                 />
 
               <div className="uploadedFiles-container">
@@ -1345,7 +1414,7 @@ const handleFileChange = (
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container2', setFiles2)}
+                                  onClick={() => handleFileDelete('file-upload2', setFiles2)}
                                   className="delete-button"
                                 >
                                   <img
@@ -1379,6 +1448,7 @@ const handleFileChange = (
                   id="file-upload3"
                   type="file"
                   accept=".jpg,.jpeg,.png"
+                  required = {(docType === "Temporary Business Permit" || docType === "Business Permit")}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleFileChange(e,setFiles3, 'validIDjpg');
                   }} // Handle file selection
@@ -1407,7 +1477,7 @@ const handleFileChange = (
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container3', setFiles3)}
+                                  onClick={() => handleFileDelete('file-upload3', setFiles3)}
                                   className="delete-button"
                                 >
                                   <img
@@ -1442,6 +1512,7 @@ const handleFileChange = (
                   id="file-upload4"
                   type="file"
                   accept=".jpg,.jpeg,.png"
+                  required={(docType === "Temporary Business Permit" || docType === "Business Permit"|| docType === "Construction Permit")}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleFileChange(e,setFiles4, 'letterjpg');
                    
@@ -1471,7 +1542,7 @@ const handleFileChange = (
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('container4', setFiles4)}
+                                  onClick={() => handleFileDelete('file-upload4', setFiles4)}
                                   className="delete-button"
                                 >
                                   <img
