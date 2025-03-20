@@ -1,10 +1,10 @@
 .inbarangayreq-main-container{
-    width: 100%;
-    height: 100vh;
-    background-color: #f9f9f9;
-    padding:30px;
-    z-index: 10;
-    margin-left: 2rem; 
+  width: 100%;
+  height: 100vh;
+  background-color: #f9f9f9;
+  padding:30px;
+  margin-left: 3rem;
+  overflow-y: auto; 
 }
 
 .inbarangayreq-section-1{
@@ -15,9 +15,9 @@
 }
 
 .inbarangayreq-section-1 h1{
-    font-size: 20px;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.5);
+  font-size: 2rem;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.5);
 }
 
 .add-announcement-btn {

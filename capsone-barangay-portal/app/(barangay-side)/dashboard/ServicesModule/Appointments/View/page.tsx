@@ -50,8 +50,12 @@ export default function EditAppointment() {
     };
 
     return (
-        <main className="main-container">
-            <div className="main-content">
+        <main className="viewappointment-main-container">
+            <div className="viewonlinereq-page-title-section-1">
+                <h1>Appointments</h1>
+            </div>
+
+            <div className="viewappointment-main-content">
                 <div className="section-1">
                   <div className="left-section">
                     <Link href="/dashboard/ServicesModule/Appointments">

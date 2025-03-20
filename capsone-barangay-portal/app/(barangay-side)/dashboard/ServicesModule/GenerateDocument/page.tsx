@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import "@/CSS/barangaySide/ServicesModule/GenerateDocument.css";
 
 const metadata: Metadata = {
@@ -64,6 +65,8 @@ export default function GenerateDocument() {
                 <hr />
 
                 <form onSubmit={handleSubmit}>
+
+                    {/* 
                     <div className="main-select-container">
                         <div className="select-document-container">
                             <div className="Title-container">
@@ -124,6 +127,143 @@ export default function GenerateDocument() {
                     <div className="button-container">
                         <button type="submit" className="submit-button">Generate Document</button>
                     </div>
+
+                    */}
+
+<div className="documents-container">
+                            <div className="documents-container-column">
+                                <div className="documents-card dropdown-container">
+                                <img
+                                    src="/images/document.png"
+                                    alt="Document Icon"
+                                    className="document-icon"
+                                    />
+                                    <h1>Barangay Certificate</h1>
+                                    <div className="dropdown">
+                                    <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayCertificate">
+                                        <p>Residency</p>
+                                    </Link>
+                                    <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayCertificate">
+                                        <p>Others</p>
+                                    </Link>
+                                    </div>
+                                </div>
+
+                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayIndigency">
+                                <div className="documents-card">
+                                    <img
+                                    src="/images/document.png"
+                                    alt="Document Icon"
+                                    className="document-icon"
+                                    />
+                                    <h1>Barangay Indigency</h1>
+                                </div>
+                                </Link>
+
+                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayID">
+                                <div className="documents-card">
+                                    <img
+                                    src="/images/document.png"
+                                    alt="Document Icon"
+                                    className="document-icon"
+                                    />
+                                    <h1>Barangay ID</h1>
+                                </div>
+                                </Link>
+                        
+                            </div>
+
+
+                            <div className="documents-container-column">
+                            <div className="documents-card dropdown-container">
+                                <img
+                                    src="/images/document.png"
+                                    alt="Document Icon"
+                                    className="document-icon"
+                                />
+                                <h1>Barangay Permits</h1>
+                                <div className="dropdown">
+
+                                <div
+                                    className="nested-dropdown-container"
+                                    onMouseEnter={(e) => {
+                                        const dropdown = e.currentTarget.querySelector('.nested-dropdown') as HTMLElement | null;
+                                        if (dropdown) {
+                                        dropdown.style.display = 'block';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        const dropdown = e.currentTarget.querySelector('.nested-dropdown') as HTMLElement | null;
+                                        if (dropdown) {
+                                        dropdown.style.display = 'none';
+                                        }
+                                    }}
+                                    >
+                                    <p className="nested-trigger">Business Permit</p>
+                                    <div className="nested-dropdown">
+                                        <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/BusinessPermit">
+                                        <p>New</p>
+                                        </Link>
+                                        <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/BusinessPermit">
+                                        <p>Renewal</p>
+                                        </Link>
+                                    </div>
+                                </div>
+                                    
+                                <div
+                                    className="nested-dropdown-container"
+                                    onMouseEnter={(e) => {
+                                        const dropdown = e.currentTarget.querySelector('.nested-dropdown') as HTMLElement | null;
+                                        if (dropdown) {
+                                        dropdown.style.display = 'block';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        const dropdown = e.currentTarget.querySelector('.nested-dropdown') as HTMLElement | null;
+                                        if (dropdown) {
+                                        dropdown.style.display = 'none';
+                                        }
+                                    }}
+                                    >
+                                    <p className="nested-trigger">Temporary Business Permit</p>
+                                    <div className="nested-dropdown">
+                                        <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/TemporaryBusinessPermit">
+                                        <p>New</p>
+                                        </Link>
+                                        <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/TemporaryBusinessPermit">
+                                        <p>Renewal</p>
+                                        </Link>
+                                    </div>
+                                </div>
+                                    <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/ConstructionPermit">
+                                    <p>Construction Permit</p>
+                                    </Link>
+                                </div>
+                                </div>
+                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayClearance">
+                                <div className="documents-card">
+                                    <img
+                                    src="/images/document.png"
+                                    alt="Document Icon"
+                                    className="document-icon"
+                                    />
+                                    <h1>Barangay Clearance</h1>
+                                </div>
+                                </Link>
+                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/FirstTimeJobseeker">
+                                <div className="documents-card">
+                                    <img
+                                    src="/images/document.png"
+                                    alt="Document Icon"
+                                    className="document-icon"
+                                    />
+                                    <h1>First Time Jobseeker</h1>
+                                </div>
+                                </Link>
+
+                            </div>
+
+                        </div>
                 </form>
             </div>
         </main>
