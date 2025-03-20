@@ -1,4 +1,6 @@
-.viewonlinereq-main-container {
+
+.viewonlinereq-main-container,
+.viewappointment-main-container {
 
   width: 100%;
   height: 100vh;
@@ -8,22 +10,6 @@
   overflow-y: auto; 
  
 }
-
-/*
-.viewonlinereq-actions-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-  padding: 3rem;
-  background-color: #f4f2f2;
-  border: 2px solid  #ddd;
-  border-radius: 1rem;
-  margin-bottom: 2rem;
-  margin-left: 200px;
-  margin-right: 200px;
-  margin-top: 30px;
-}*/
 
 .viewonlinereq-actions-content{
   display: flex;
@@ -63,7 +49,8 @@
   color: rgba(0, 0, 0, 0.5);
 }
 
-.viewonlinereq-main-content {
+.viewonlinereq-main-content,
+.viewappointment-main-content {
   display: flex;
   flex-direction: column;
   align-self: center;
@@ -241,6 +228,18 @@
     background-color:#e56723;
 }
 
+.actions-button-reject{
+    border-radius: 5px;          
+    font-size: 13px;              
+    color: white;                
+    display: inline-block;        
+    text-transform: capitalize;   
+    text-align: center;    
+    width: 200px;  
+    height: 50px;
+    background-color: #e22929;  
+}
+
 .actions-button:hover{
   background-color:#cc591b;
 }
@@ -366,3 +365,4 @@
 .popup-overlay.hide {
   animation: slideOut 0.5s ease-out;
 }
+

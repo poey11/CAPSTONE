@@ -67,6 +67,10 @@ export default function ViewOnlineRequest() {
         window.location.href = "/dashboard/ServicesModule/Appointments/View";
     };
 
+    const handlerejection = () => {
+        window.location.href = "/dashboard/ServicesModule/OnlineRequests/ReasonForReject";
+    };
+
     const handleSMS = () => {
         window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
     };
@@ -80,6 +84,7 @@ export default function ViewOnlineRequest() {
 
             <div className="viewonlinereq-actions-content">
                 <div className="viewonlinereq-actions-content-section1">
+                    <button type="button" className="actions-button-reject" onClick ={handlerejection}>Reject</button>
                     <button type="button" className="actions-button">Print</button>
                     <button type="button" className="actions-button" onClick ={handleviewappointmentdetails}>View Appointment Details</button>
 
