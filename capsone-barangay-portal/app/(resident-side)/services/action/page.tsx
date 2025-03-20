@@ -7,6 +7,7 @@ import { addDoc, collection, doc, } from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/navigation";
+import { request } from "http";
 
 
 
@@ -228,6 +229,8 @@ const handleFileChange = (
         }
     
         const clearanceVars = {
+          requestDate: clearanceInput.dateRequested,
+          status: "Pending",
           accID: clearanceInput.accountId,
           docType: docType,
           firstName: clearanceInput.firstName,
@@ -274,6 +277,8 @@ const handleFileChange = (
       // 📌 Handling for Temporary Business Permit & Business Permit
       if (docType === "Temporary Business Permit" || docType === "Business Permit") {
         const clearanceVars = {
+          requestDate: clearanceInput.dateRequested,
+          status: "Pending",
           accID: clearanceInput.accountId,
           docType: docType,
           purpose: clearanceInput.purpose,
@@ -302,6 +307,8 @@ const handleFileChange = (
       // 📌 Handling for Construction Permit
       if (docType === "Construction Permit") {
         const clearanceVars = {
+          requestDate: clearanceInput.dateRequested,
+          status: "Pending",
           accID: clearanceInput.accountId,
           docType: docType,
           typeofconstruction: clearanceInput.typeofconstruction,
