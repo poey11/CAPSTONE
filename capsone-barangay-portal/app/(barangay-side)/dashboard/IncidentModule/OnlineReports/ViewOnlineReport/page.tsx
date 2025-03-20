@@ -273,12 +273,12 @@ export default function ViewOnlineReports() {
           <div className="section-1-response">
             <div className="official-section-online-report">
               <p>Respondent Officer</p>
-              <input type="text" className="add-resident-input-field" placeholder="Enter Respondent Officer Name" name="respondentName" value={respondent.respondentName} onChange={handleChange} />
+              <input type="text" className="online-report-input-field" placeholder="Enter Respondent Officer Name" name="respondentName" value={respondent.respondentName} onChange={handleChange} />
             </div>
 
             <div className="fields-section-online-report">
               <p>Investigation Report</p>
-              <textarea className="add-resident-input-field" placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange} rows={15} />
+              <textarea className="online-report-input-field" placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange} rows={15} />
             </div>
           </div>
 
