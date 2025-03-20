@@ -135,8 +135,9 @@ const BMenu: React.FC = () => {
         <Link href="/dashboard/announcements" className="module">Announcements</Link>
 
 
+{/* For CAP2 */}
 
-            {/* Programs and Events Module */}
+            {/* Programs and Events Module
           <div className="dropdown-wrapper"
             onMouseEnter={() => setHoveredDropdown("programs")}
             onMouseLeave={() => setHoveredDropdown(null)}
@@ -154,10 +155,10 @@ const BMenu: React.FC = () => {
             <Link href="/dashboard/ProgramsModule" className="dropdown-item">Volunteer Programs</Link>
             <Link href="/dashboard/ProgramsModule/ProgramResponses" className="dropdown-item">Program Responses</Link>
             </div>
-        </div>
+        </div> */}
 
           {/* Events Module */}
-          <div className="dropdown-wrapper"
+          {/* <div className="dropdown-wrapper"
             onMouseEnter={() => setHoveredDropdown("events")}
             onMouseLeave={() => setHoveredDropdown(null)}
           >
@@ -174,7 +175,7 @@ const BMenu: React.FC = () => {
             <Link href="/dashboard/EventsModule" className="dropdown-item">Events List</Link>
             <Link href="/dashboard/EventsModule/EventResponses" className="dropdown-item">Event Responses</Link>
             </div>
-        </div>  
+        </div>   */}
 
       </div>
     </div>
