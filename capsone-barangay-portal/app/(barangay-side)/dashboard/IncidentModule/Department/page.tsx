@@ -1,65 +1,68 @@
-"use client"
+"use client";
 import "@/CSS/IncidentModule/MainDashboardIncident.css";
-import { useState,useEffect } from "react";
-import { useRouter,useSearchParams} from "next/navigation";
-import { getAllSpecificDocument,deleteDocument } from "@/app/helpers/firestorehelper";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getAllSpecificDocument, deleteDocument } from "@/app/helpers/firestorehelper";
 
-
-const statusOptions = ["Pending","In Progress", "Resolved", "Settled", "Archived"];
+const statusOptions = ["Pending", "In Progress", "Resolved", "Settled", "Archived"];
 
 export default function Department() {
-  const [incidentData, setIncidentData] = useState<any[]>([])
+  const [incidentData, setIncidentData] = useState<any[]>([]);
+  const [filteredIncidents, setFilteredIncidents] = useState<any[]>([]); // Ensure this is populated
+  const [currentPage, setCurrentPage] = useState(1);
+  const incidentsPerPage = 10; // Can be changed
+
   const router = useRouter();
   const searchParam = useSearchParams();
   const departmentId = searchParam.get("id");
-  
-  useEffect(()=> {
 
-    if(departmentId){
-      const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==",departmentId, setIncidentData);
-        return () => {
+  useEffect(() => {
+    if (departmentId) {
+      const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", departmentId, (data) => {
+        setIncidentData(data);
+        setFilteredIncidents(data); // Update filteredIncidents when data is fetched
+      });
+
+      return () => {
         if (unsubscribe) {
-          unsubscribe(); 
+          unsubscribe();
         }
       };
     }
+  }, [departmentId]);
 
-   
-  },[departmentId])
+  // Pagination logic
+  const indexOfLastIncident = currentPage * incidentsPerPage;
+  const indexOfFirstIncident = indexOfLastIncident - incidentsPerPage;
+  const currentIncidents = filteredIncidents.slice(indexOfFirstIncident, indexOfLastIncident);
+  const totalPages = Math.ceil(filteredIncidents.length / incidentsPerPage);
 
-  /*filtering and search is not yet working */
-  const handleStatusChange = (index: number, newStatus: string) => {
-    setIncidentData((prev) =>
-      prev.map((incident, i) => (i === index ? { ...incident, Status: newStatus } : incident))
-    );
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+  const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+
+  const getPageNumbers = () => {
+    const pageNumbersToShow: (number | string)[] = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pageNumbersToShow.push(i);
+      } else if (
+        (i === currentPage - 2 || i === currentPage + 2) &&
+        pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
+      ) {
+        pageNumbersToShow.push("...");
+      }
+    }
+    return pageNumbersToShow;
   };
-
- 
-
-  const handleView = (reportId: string) => {
-    router.push(`/dashboard/IncidentModule/ViewIncident?id=${reportId}`);
-  };
-
-  const handleEdit = (reportId: string) => {
-    router.push(`/dashboard/IncidentModule/EditIncident?id=${reportId}`);
-  };
-
-  const handleDelete = (reportId: string) => {
-    deleteDocument("IncidentReports", reportId);
-    deleteDocument("IncidentReports/Investigator", reportId);
-  }
-
-  const handleAdd = () => {
-    router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`);
-  };
-
-
 
   return (
     <main className="main-container-departments">
       <div className="section-1-departments">
         <h1>Lupon Tagapamayapa: {departmentId} Table</h1>
-          <button className="add-announcement-btn-departments" onClick={handleAdd}>Add New Incident</button>
+        <button className="add-announcement-btn-departments" onClick={() => router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`)}>
+          Add New Incident
+        </button>
       </div>
 
       <div className="section-2-departments">
@@ -89,27 +92,41 @@ export default function Department() {
             </tr>
           </thead>
           <tbody>
-            {incidentData.map((incident, index) => (
+            {currentIncidents.map((incident, index) => (
               <tr key={index}>
                 <td>{incident.caseNumber}</td>
                 <td>{incident.dateFiled} {incident.timeFiled}</td>
                 <td>{incident.nature}</td>
                 <td>
-                    <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
-                        {incident.status}
-                    </span>
-                </td>   
+                  <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
+                    {incident.status}
+                  </span>
+                </td>
                 <td>
                   <div className="actions-departments">
-                    <button className="action-view-departments" onClick={() => handleView(incident.id)}>View</button>
-                    <button className="action-edit-departments" onClick={()=>handleEdit(incident.id) }>Edit</button>
-                    <button className="action-delete-departments" onClick={()=> handleDelete(incident.id)}>Delete</button>
+                    <button className="action-view-departments" onClick={() => router.push(`/dashboard/IncidentModule/ViewIncident?id=${incident.id}`)}>View</button>
+                    <button className="action-edit-departments" onClick={() => router.push(`/dashboard/IncidentModule/EditIncident?id=${incident.id}`)}>Edit</button>
+                    <button className="action-delete-departments" onClick={() => deleteDocument("IncidentReports", incident.id)}>Delete</button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="redirection-section-departments">
+        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+        {getPageNumbers().map((number, index) => (
+          <button
+            key={index}
+            onClick={() => typeof number === 'number' && paginate(number)}
+            className={currentPage === number ? "active" : ""}
+          >
+            {number}
+          </button>
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
     </main>
   );

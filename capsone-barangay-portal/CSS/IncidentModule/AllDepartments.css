@@ -19,7 +19,7 @@
     overflow: auto; /* Allow scrolling if content overflows */
     width: 100%;
     height: 100%; 
-    max-height: 40%;
+    max-height: 60%;
     margin-top: 2rem;
     border: 2px solid  #ddd;
 }
@@ -105,7 +105,7 @@
 }
 
 .section-1-all-department h1{
-    font-size: 20px;
+   font-size: 2rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
 
@@ -201,6 +201,7 @@
 
 .titlesection-all-department {
     display: flex;
+    margin-top: 2rem;
 }
 
 .table-section-all-department { 
@@ -222,6 +223,8 @@
 }
 
 
+
+
 .table-section-all-department  th {
     padding: 1rem; 
     text-align: left; 
@@ -238,5 +241,87 @@
     box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
     height: 80px;
 }
+
+
+
+.redirection-section-departments {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem auto;
+    width: fit-content;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    background: #f8f8f8;
+    gap: 5px;
+  }
+  
+  .redirection-section-departments button {
+    padding: 4px 8px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.3s;
+  }
+  
+  .redirection-section-departments button:hover {
+    background-color: #0056b3;
+  }
+  
+  .redirection-section-departments button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .redirection-section-departments .active {
+    background-color: #0056b3;
+    font-weight: bold;
+  }
+
+
+  .incidentmap-section-all-department {
+    display: flex;
+    flex-direction: column;
+  }
+.heatmap-container {
+  display: flex;
+  margin-top: 2rem;
+}
+
+.titlesection-all-department-heatmap {
+  display: flex;
+  margin-top: 3rem;
+}
+
+
+
+  
+
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+  
 
   

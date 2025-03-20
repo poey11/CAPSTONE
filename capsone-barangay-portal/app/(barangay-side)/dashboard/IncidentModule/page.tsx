@@ -125,10 +125,18 @@ export default function MainPageIncident() {
 
       <div className="incidentmap-section-all-department">
         
-      <div className="titlesection-all-department">
-             <p className="title"> Incident HeatMap</p>
+      <div className="titlesection-all-department-heatmap">
+             <p className="title-all-department"> Incident HeatMap</p>
         </div>
-        <Heatmap/>
+
+
+
+        <div className="heatmap-container">
+
+        <Heatmap />
+
+        </div>
+      
       
       </div>
 
