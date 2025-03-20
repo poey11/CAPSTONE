@@ -1,12 +1,20 @@
 "use client";
 import "@/CSS/ResidentModule/module.css";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { db } from "../../../../db/firebase";
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
 
 export default function KasambahayListModule() {
+
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
+  const userPosition = session?.user?.position;
+  const isAuthorized = ["Secretary", "Punong Barangay", "Assistant Secretary"].includes(userPosition || "");
+
+  
   const [residents, setResidents] = useState<any[]>([]);
   const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,10 +92,36 @@ export default function KasambahayListModule() {
   }, [searchName, searchAddress, showCount, residents, sortOrder]);
 
 
-  const handleDeleteClick = async (id: string, voterNumber: string) => {
+  const handleAddResidentClick = () => {
+  
+    if (isAuthorized) {
+      router.push("/dashboard/ResidentModule/kasambahayList/AddKasambahay");
+    } else {
+      alert("You are not authorized to create a new kasambahay.");
+      router.refresh(); // Refresh the page
+    }
+  };
+  
+
+  const handleEditClick = (id: string) => {
+    if (isAuthorized) {
+      router.push(`/dashboard/ResidentModule/kasambahayList/EditKasambahay?id=${id}`);
+    } else {
+      alert("You are not authorized to edit a current voter.");
+      router.refresh(); // Refresh the page
+    }
+  };
+
+
+  const handleDeleteClick = async (id: string, registrationControlNumber: string) => {
+    if (isAuthorized) {
     setDeleteUserId(id);
-    setSelectedRegistrationControlNumber(voterNumber);
+    setSelectedRegistrationControlNumber(registrationControlNumber);
     setShowDeletePopup(true); 
+    } else {
+      alert("You are not authorized to delete this resident.");
+      router.refresh(); // Refresh the page
+    }
   }
 
   const confirmDelete = async () => {
@@ -154,9 +188,13 @@ export default function KasambahayListModule() {
     <main className="resident-module-main-container">
       <div className="resident-module-section-1">
         <h1>Kasambahay Masterlist</h1>
+        {isAuthorized ? (
         <Link href="/dashboard/ResidentModule/kasambahayList/AddKasambahay">
           <button className="add-announcement-btn">Add New Kasambahay</button>
         </Link>
+        ) : (
+          <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Kasambahay</button>
+        )}
       </div>
 
       <div className="resident-module-section-2">
@@ -220,7 +258,7 @@ export default function KasambahayListModule() {
                   <td>{resident.registrationControlNumber}</td>
                   <td>{resident.lastName}</td>
                   <td>{resident.firstName}</td>
-                  <td>{resident.middleName}</td>
+                  <td>{resident.middleName || "N/A"}</td>
                   <td>{resident.homeAddress}</td>
                   <td>{resident.dateOfBirth}</td>
                   <td>{resident.placeOfBirth}</td>
@@ -230,8 +268,31 @@ export default function KasambahayListModule() {
                   <td>
                     <div className="residentmodule-actions">
                       <button className="residentmodule-action-view" onClick={() => router.push(`/dashboard/ResidentModule/kasambahayList/ViewKasambahay?id=${resident.id}`)}>View</button>
-                      <button className="residentmodule-action-edit" onClick={() => router.push(`/dashboard/ResidentModule/kasambahayList/EditKasambahay?id=${resident.id}`)}>Edit</button>
-                      <button className="residentmodule-action-delete" onClick={() => handleDeleteClick(resident.id, resident.registrationControlNumber)}>Delete</button>
+                      {isAuthorized ? (
+                    <>
+                      <button 
+                        className="residentmodule-action-edit" 
+                        onClick={() => handleEditClick(resident.id)}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        className="residentmodule-action-delete" 
+                        onClick={() => handleDeleteClick(resident.id, resident.voterNumber)}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
+                        Edit
+                      </button>
+                      <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
+                        Delete
+                      </button>
+                    </>
+                  )}
                     </div>
                   </td>
                 </tr>
