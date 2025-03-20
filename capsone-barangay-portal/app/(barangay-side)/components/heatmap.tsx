@@ -16,6 +16,19 @@ const incidents = [
   { lat: 14.682, lng: 121.049, area: "West Fairview" },
 ];
 
+// Define area boundaries (polygon coordinates for each area)
+const areaBoundaries = {
+  "South Fairview": [
+    [121.042, 14.674], [121.046, 14.674], [121.046, 14.678], [121.042, 14.678], [121.042, 14.674]
+  ],
+  "East Fairview": [
+    [121.046, 14.674], [121.050, 14.674], [121.050, 14.678], [121.046, 14.678], [121.046, 14.674]
+  ],
+  "West Fairview": [
+    [121.038, 14.678], [121.044, 14.678], [121.044, 14.682], [121.038, 14.682], [121.038, 14.678]
+  ],
+};
+
 // Count incidents per area
 const areaCounts = incidents.reduce((acc: { [key: string]: number }, incident) => {
   acc[incident.area] = (acc[incident.area] || 0) + 1;
@@ -77,6 +90,32 @@ const IncidentHeatmap = () => {
           "circle-color": ["get", "color"],
         },
       });
+
+      // Add area boundaries as a layer
+      map.current?.addSource("area-boundaries", {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: Object.entries(areaBoundaries).map(([area, coordinates]) => ({
+            type: "Feature",
+            geometry: {
+              type: "Polygon",
+              coordinates: [coordinates],
+            },
+            properties: { name: area, color: areaColors[area] || "#00FF00" },
+          })),
+        },
+      });
+
+      map.current?.addLayer({
+        id: "area-boundary-layer",
+        type: "fill",
+        source: "area-boundaries",
+        paint: {
+          "fill-color": ["get", "color"],
+          "fill-opacity": 0.2,
+        },
+      });
     });
 
     return () => map.current?.remove();
@@ -86,9 +125,3 @@ const IncidentHeatmap = () => {
 };
 
 export default IncidentHeatmap;
-  
-  // The heatmap component uses the  maplibre-gl  library to create a heatmap of incidents in a barangay. The component creates a map centered on a specific location and adds a source and layer to display the incidents as colored circles. The color of the circles is determined by the area of the incident, with the highest incident area shown in red, the second-highest in yellow, and the lowest in green. The component uses a list of incidents with latitude, longitude, and area information to generate the heatmap. 
-  // The component uses the  useRef  and  useState  hooks to manage the map container, map instance, and client state. It also uses the  useEffect  hook to initialize the map when the component is mounted and remove the map when the component is unmounted. 
-  // Overall, the heatmap component provides a visual representation of incidents in a barangay, allowing users to quickly identify areas with higher incident rates. 
-  // 3.3.2. IncidentList Component 
-  // The IncidentList component displays a list of incidents in a barangay. The component receives a list of incidents as props and renders each incident as a list item. The component also includes a button to view more details about each incident.
