@@ -6,8 +6,8 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 
 
 const metadata: Metadata = {
-    title: "View Barangay Indigency Appointment Details",
-    description: "View Barangay Indigency Appointment Details in Services Module",
+    title: "View Appointment Details",
+    description: "View  Appointment Details in Services Module",
   };
 
 
@@ -46,7 +46,7 @@ export default function EditAppointment() {
     };
 
     const handleviewdocumentdetails = () => {
-        window.location.href = "/dashboard/ServicesModule/OnlineRequests/View/BarangayIndigency";
+        window.location.href = "/dashboard/ServicesModule/OnlineRequests/View";
     };
 
     return (
@@ -57,7 +57,7 @@ export default function EditAppointment() {
                     <Link href="/dashboard/ServicesModule/Appointments">
                         <button type="button" className="back-button" onClick={handleBack}></button>
                     </Link>
-                    <p>Barangay Indigency Appointment Details</p>
+                    <p>Appointment Details</p>
                   </div>
                   <div className="right-section">
                       <span className={`status-badge ${residentData.status.toLowerCase().replace(" ", "-")}`}>
