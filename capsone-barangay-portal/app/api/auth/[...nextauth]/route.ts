@@ -43,7 +43,8 @@ import { JWT } from "next-auth/jwt";
                 role: userData.role,
                 position: userData.position,
                 loginStatus: userData.firstTimelogin,
-                fullName: `${userData.firstName} ${userData.lastName}`  
+                fullName: `${userData.firstName} ${userData.lastName}`,
+                department: userData.department,
             };
           
         }
@@ -57,7 +58,9 @@ import { JWT } from "next-auth/jwt";
                 role: token.role,
                 position: token.position,
                 loginStatus: token.loginStatus,
-                fullName: token.fullName
+                fullName: token.fullName,
+                department: token.department,
+
             }
             return session;
         },
@@ -70,6 +73,8 @@ import { JWT } from "next-auth/jwt";
                 token.position = user.position;
                 token.loginStatus = user.loginStatus;
                 token.fullName = user.fullName;
+                token.department = user.department
+
             } else if (token.id) {
                 // Fetch updated user data from Firestore
                 const userDoc = await getDoc(doc(db, "BarangayUsers", token.id));
@@ -77,6 +82,7 @@ import { JWT } from "next-auth/jwt";
                     const userData = userDoc.data();
                     token.loginStatus = userData.firstTimelogin; // Ensure session gets updated
                     token.fullName = `${userData.firstName} ${userData.lastName}`;
+                    token.department = userData.department
                 }
             }
             return token;
