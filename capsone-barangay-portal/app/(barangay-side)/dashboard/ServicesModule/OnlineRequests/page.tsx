@@ -258,16 +258,6 @@ const metadata: Metadata = {
                     >
                         View
                     </button>
-                    <button
-                        className="action-edit"
-                        onClick={() => handleEdit(request.documentType, request.purpose)}
-                    >
-                        Edit
-                    </button>
-                    <button className="action-delete">Delete</button>
-
-
-                    <button type="button" className="action-view" onClick={handleSMS}>SMS</button>
                   </div>
                 </td>
               </tr>
