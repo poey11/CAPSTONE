@@ -11,9 +11,6 @@ const incidents = [
   { lat: 14.706, lng: 121.0437, area: "South Fairview" },
   { lat: 14.715, lng: 121.044, area: "South Fairview" },
   { lat: 14.678, lng: 121.045, area: "East Fairview" },
-  { lat: 14.680, lng: 121.047, area: "West Fairview" },
-  { lat: 14.681, lng: 121.048, area: "West Fairview" },
-  { lat: 14.682, lng: 121.049, area: "West Fairview" },
 ];
 
 // Define area boundaries (polygon coordinates for each area)
@@ -59,9 +56,14 @@ const IncidentHeatmap = () => {
 
     map.current = new maplibregl.Map({
       container: mapContainer.current as HTMLElement,
-      style: "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json",
-      center: [121.0437, 14.676],
+      style: "https://tiles.stadiamaps.com/styles/osm_bright.json",
+      center: [121.0437, 14.678],
       zoom: 14,
+      minZoom: 12, // Limit minimum zoom
+      maxBounds: [ // Restrict movement to Fairview area
+        [121.030, 14.660], // Southwest corner
+        [121.060, 14.720]  // Northeast corner
+      ]
     });
 
     map.current.on("load", () => {
