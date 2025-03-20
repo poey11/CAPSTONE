@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams} from "next/navigation";
 import { auth, db } from "../../db/firebase";
 import {useAuth} from "../../context/authContext";
 import { signOut } from "firebase/auth";
@@ -36,6 +36,8 @@ interface Resident {
 }
 
 const Menu = () => {
+  const searchParams = useSearchParams();
+  const residentId = searchParams.get("id");
   const {user, loading} = useAuth();
   const router = useRouter();
   const [showLoginOptions, setShowLoginOptions] = useState(false);
@@ -75,8 +77,8 @@ const Menu = () => {
     console.log("User email:", user?.email);
 
     const fetchResidentData = async () => {
-      if (user) { // Ensure residentId is not null
-        const userDocRef = doc(db, "ResidentUsers", user.uid);
+      if (residentId) { // Ensure residentId is not null
+        const userDocRef = doc(db, "ResidentUsers", residentId);
         const userDocSnap = await getDoc(userDocRef);
         
         if (userDocSnap.exists()) {
@@ -90,8 +92,10 @@ const Menu = () => {
     };
 
     fetchResidentData();
-}, [user]);
+  }, [residentId, resident]);
 
+
+  
 
 
 
@@ -109,6 +113,10 @@ const Menu = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+
+  
+  
 
   // Fetch Notifications for the logged-in user in real time
   useEffect(() => {
