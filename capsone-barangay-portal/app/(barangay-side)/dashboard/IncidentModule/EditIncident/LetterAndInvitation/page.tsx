@@ -196,41 +196,41 @@ export default function GenerateDialougeLetter() {
         
 
         try {
-            // const response = await fetch("/api/fillPDF", {
-            //     method: "POST",
-            //     headers: {
-            //         "Content-Type": "application/json",
-            //     },
-            //     body: JSON.stringify({
-            //         location: "/IncidentReports/Templates",
-            //         pdfTemplate: "TEST2 - Copy.pdf",
-            //         data: {
-            //             "Text16": otherInfo.complainant.fname,
-            //             "Text15": otherInfo.complainant.address,
-            //             "Text17": otherInfo.respondent.fname,
-            //             "Text18": otherInfo.respondent.address,
-            //             "Text20": day,
-            //             "Text21": month,
-            //             "Text22": year,
-            //             "Text23": time12,
-            //             "Text24": collective,
-            //             "Text25": day,
-            //             "Text28": month,
-            //             "Text29": year,
-            //             "Text27": user?.fullName,
-            //             "Text19": otherInfo.LuponStaff,
-            //         },
-            //         centerField: ["Text27"]
-            //     })
-            // });
-            // if (!response.ok) throw new Error("Failed to generate PDF");
-            // const blob = await response.blob();
-            // const url = URL.createObjectURL(blob);
-            // const a = document.createElement("a");
-            // a.href = url;
-            // a.download = "DialogueLetter.pdf";
-            // a.click();
-            // window.URL.revokeObjectURL(url);
+            const response = await fetch("/api/fillPDF", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    location: "/IncidentReports/Templates",
+                    pdfTemplate: "TEST2 - Copy.pdf",
+                    data: {
+                        "Text16": otherInfo.complainant.fname,
+                        "Text15": otherInfo.complainant.address,
+                        "Text17": otherInfo.respondent.fname,
+                        "Text18": otherInfo.respondent.address,
+                        "Text20": day,
+                        "Text21": month,
+                        "Text22": year,
+                        "Text23": time12,
+                        "Text24": collective,
+                        "Text25": day,
+                        "Text28": month,
+                        "Text29": year,
+                        "Text27": user?.fullName,
+                        "Text19": otherInfo.LuponStaff,
+                    },
+                    centerField: ["Text27"]
+                })
+            });
+            if (!response.ok) throw new Error("Failed to generate PDF");
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "DialogueLetter.pdf";
+            a.click();
+            window.URL.revokeObjectURL(url);
             
         } catch (error) {
             console.error(error)
@@ -277,40 +277,40 @@ export default function GenerateDialougeLetter() {
        
         
        try{ 
-        // const response = await fetch("/api/fillPDF", {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify({
-        //         location: "/IncidentReports/Templates",
-        //         pdfTemplate: "summonTemplate.pdf",
-        //         data: {
-        //             "Text1":otherInfo.complainant.fname,
-        //             "Text2":otherInfo.complainant.address,
-        //             "Text3":otherInfo.respondent.fname,
-        //             "Text4":otherInfo.respondent.address,
-        //             "Text5":nosHearing,//make it dynamic
-        //             "Text6": `${month} ${day}, ${year}`,//Month Day, Year
-        //             "Text7":day,//Day
-        //             "Text8":`${month} ${year}`,//MonthYear
-        //             "Text9":time12,//Time
-        //             "Text10":collective,//Collective
-        //             "Text11":issueDay,//Day
-        //             "Text12":`${issueMonth} ${issueYear}`,//MonthYear
-        //             "Text14":user?.fullName,    
-        //         },
-        //         centerField: ["Text5","Text7","Text10","Text11","Text14"]
-        //     })
-        // });
-        // if (!response.ok) throw new Error("Failed to generate PDF");
-        // const blob = await response.blob();
-        // const url = URL.createObjectURL(blob);
-        // const a = document.createElement("a");
-        // a.href = url;
-        // a.download = "SummonLetter.pdf";
-        // a.click();
-        // window.URL.revokeObjectURL(url);
+        const response = await fetch("/api/fillPDF", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                location: "/IncidentReports/Templates",
+                pdfTemplate: "summonTemplate.pdf",
+                data: {
+                    "Text1":otherInfo.complainant.fname,
+                    "Text2":otherInfo.complainant.address,
+                    "Text3":otherInfo.respondent.fname,
+                    "Text4":otherInfo.respondent.address,
+                    "Text5":nosHearing,//make it dynamic
+                    "Text6": `${month} ${day}, ${year}`,//Month Day, Year
+                    "Text7":day,//Day
+                    "Text8":`${month} ${year}`,//MonthYear
+                    "Text9":time12,//Time
+                    "Text10":collective,//Collective
+                    "Text11":issueDay,//Day
+                    "Text12":`${issueMonth} ${issueYear}`,//MonthYear
+                    "Text14":user?.fullName,    
+                },
+                centerField: ["Text5","Text7","Text10","Text11","Text14"]
+            })
+        });
+        if (!response.ok) throw new Error("Failed to generate PDF");
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "SummonLetter.pdf";
+        a.click();
+        window.URL.revokeObjectURL(url);
 ``       }
        catch(e:any){
         console.log()
