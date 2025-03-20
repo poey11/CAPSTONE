@@ -266,12 +266,12 @@ const incidentForm:React.FC = () => {
               <label htmlFor="date" className="form-label-incident-report">Date of Incident</label>
               <input
                 type="date"
-                id="date"
-                name="date"
+                id="dateFiled"
+                name="dateFiled"
                 className="form-input-incident-report"
                 required
                 placeholder="Enter Date of Incident"
-                value={incidentReport.date}
+                value={incidentReport.dateFiled}
                 onChange={handleFormChange}
               />
             </div>
