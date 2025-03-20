@@ -2,10 +2,16 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db, storage} from "@/app/db/firebase"; 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import bcrypt from "bcryptjs";
 import "@/CSS/ResidentAccount/profile.css";
+
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import { auth, db, storage } from "@/app/db/firebase"; // Ensure 'auth' is imported
+
+
+
+/*not working pa yung pag change ng pass sa db*/
+
 
 export default function SettingsPageResident() {
     const router = useRouter();
@@ -20,7 +26,6 @@ export default function SettingsPageResident() {
         sex: "",
         status: "",
         userIcon: "",
-        password: ""
     });
 
     const [showPopup, setShowPopup] = useState(false);
@@ -49,7 +54,6 @@ export default function SettingsPageResident() {
                 sex: data.sex || "",
                 status: data.status || "",
                 userIcon: data.userIcon || "",
-                password: data.password || "",
               });
     
               setPreview(data.userIcon)
@@ -104,23 +108,54 @@ export default function SettingsPageResident() {
         setMessage("");
 
         try {
-            const docRef = doc(db, "ResidentUsers", residentId!);
+            
+            const user = auth.currentUser;
+            console.log("User Info:", user);
 
+            if (!user) {
+                setMessage("User session expired. Please log in again.");
+                setShowPopup(true);
+                setLoading(false);
+                return;
+            }
 
-                if (password !== confirmPassword) {
-                    setMessage("Passwords do not match!");
+            if (!user) {
+                setMessage("User not authenticated. Please log in again.");
+                setShowPopup(true);
+                setLoading(false);
+                return;
+            }
+
+            if (!user.email) {
+                setMessage("No email associated with this user.");
+                setShowPopup(true);
+                setLoading(false);
+                return;
+            }
+    
+            if (password && password !== confirmPassword) {
+                setMessage("Passwords do not match!");
+                setShowPopup(true);
+                setLoading(false);
+                return;
+            }
+    
+            if (password) {
+                // Reauthenticate user before changing password
+                if (!password) {
+                    setMessage("Current password is required for security.");
                     setShowPopup(true);
                     setLoading(false);
                     return;
-                } 
-        
-                let updatedPassword = resident.password;
-        
-                if (password) { 
-                    //updatedPassword = await bcrypt.hash(password, 12); // Hash only if a new password is entered
-
-                    updatedPassword = password;
                 }
+
+                const credential = EmailAuthProvider.credential(user.email, password);
+                await reauthenticateWithCredential(user, credential);
+
+                // Update password in Firebase Authentication
+                await updatePassword(user, password);
+                setMessage("Password updated successfully!");
+            }
 
             if (file) {
                 const downloadURL = await uploadImageToStorage(file);
@@ -128,8 +163,7 @@ export default function SettingsPageResident() {
             }
 
 
-        
-
+            const docRef = doc(db, "ResidentUsers", residentId!);
             await updateDoc(docRef, {
                 first_name: resident.first_name,
                 last_name: resident.last_name,
@@ -138,15 +172,14 @@ export default function SettingsPageResident() {
                 sex: resident.sex,
                 status: resident.status,
                 userIcon: resident.userIcon,
-                password: updatedPassword,
                 
             });
 
             setMessage("Profile updated successfully!");
             setShowPopup(true);
             router.push("/ResidentAccount/Profile");
-        } catch (err) {
-            setMessage("Failed to update profile. Please try again.");
+        } catch (err: any) {
+            setMessage("Failed to update profile. Please try again." + err.message);
             setShowPopup(true);
             console.error(err);
         }

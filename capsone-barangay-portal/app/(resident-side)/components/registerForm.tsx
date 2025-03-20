@@ -24,7 +24,7 @@ interface Resident {
     email: string;
     phone: string;
     address: string;
-    password: string;
+    //password: string;
   };
   
   type residentUser = Resident & {
@@ -47,7 +47,7 @@ const registerForm:React.FC = () => {
         email: "",
         phone: "",
         address: "",
-        password: "",
+        //password: "",
         role: "Resident",
         status: "unverified"
       });
@@ -81,7 +81,7 @@ const registerForm:React.FC = () => {
         e.preventDefault();
 
         // Check if passwords match
-        if (resident.password !== confirmPassword) {
+        if (password !== confirmPassword) {
           setErrorPopup({ show: true, message: "Passwords do not match!" });
           return;
         }
@@ -91,8 +91,8 @@ const registerForm:React.FC = () => {
         let storageRef = null;
         try{
 
-          const hashedPassword = await hash(resident.password, 12);
-          const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, resident.password);
+          const hashedPassword = await hash(password, 12);
+          const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, password);
           user = userCredentials.user;
           await signOut(auth); 
             
@@ -127,7 +127,6 @@ const registerForm:React.FC = () => {
               createdAt: new Date().getTime(),
               status: resident.status,
               validIdDocID: fileURL,
-              password: hashedPassword,
               userIcon: "/images/user.png"
           });
          
