@@ -187,7 +187,29 @@ export default function ViewOnlineReports() {
   
 
   return (
-    <main className="main-container">
+    <main className="main-container-report">
+
+      
+        <div className="letters-content-edit">
+                      
+        <select
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+          className={`status-badge-view ${formData.status.toLowerCase()}`}
+        >
+          {statusOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+
+
+        
+          </div>
+
+
       <div className="main-content-view-online-report">
         <div className="section-1-online-report">
           <div className="section-1-online-report-left-side">
@@ -224,16 +246,7 @@ export default function ViewOnlineReports() {
           </div>
         </div>
 
-        <div className="online-report-details-section">
-          <div className="title-section"><p>Status</p></div>
-          <div className="description-section">
-            <select name="status" value={formData.status} onChange={handleChange} className="select-field">
-              {statusOptions.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+    
 
         <div className="online-report-details-section">
           <div className="title-section"><p>Proof Photo</p></div>

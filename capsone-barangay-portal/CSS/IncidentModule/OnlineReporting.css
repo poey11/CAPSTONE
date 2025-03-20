@@ -568,4 +568,59 @@ FILE UPLOAD SECTION DAMI KASI TANGINA!
 
 
 
+.letters-content-edit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 3rem;
+  background-color: #f4f2f2;
+  border: 2px solid  #ddd;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+  width: 40%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+}
+
+
+.status-badge-view {
+  padding: 8px 12px;            
+  border-radius: 5px;          
+  font-size: 13px;              
+  color: white;                
+  display: inline-block;        
+  text-transform: capitalize;   
+  text-align: center;    
+  width: 200px; 
+  height: 40px;
+  }
+  
+  .status-badge-view.acknowledged {
+      background-color: #4caf50;   
+  }
+  
+  .status-badge-view.pending {
+      background-color: #325bd4;  
+  }
+
+
+  .main-container-report{
+    width: 100%;
+    height: 100vh;
+    background-color: #f9f9f9;
+    padding:30px;
+    margin-left: 2rem; 
+    overflow-y: auto; 
+    display: flex;
+    flex-direction: column;
+}
+  
+  
+
+
+
+
   
