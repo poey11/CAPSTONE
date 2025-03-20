@@ -138,26 +138,40 @@ const Menu = () => {
   }, [user]);
   
 
-  const handleNotificationClick = async (notification: any) => {
+  const handleNotificationClick = async (notification: Notification) => {
     console.log("Notification clicked:", notification);
   
+    // Check if the notification is unread
     if (!notification.isRead) {
-      await updateDoc(doc(db, "Notifications", notification.id), { isRead: true });
+      try {
+        const notificationRef = doc(db, "Notifications", notification.id);
+        await updateDoc(notificationRef, { isRead: true });
+  
+        // Update UI directly for a smoother experience
+        setNotifications((prevNotifications) =>
+          prevNotifications.map((notif) =>
+            notif.id === notification.id ? { ...notif, isRead: true } : notif
+          )
+        );
+        console.log("Notification marked as read!");
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
+      }
     }
   
+    // Navigate to the specified incident transaction
     const targetUrl = `/ResidentAccount/Transactions/IncidentTransactions?id=${notification.incidentID}`;
-    console.log("Navigating to:", targetUrl); // Log the URL before navigating
-  
-    router.push(targetUrl);  
-  
-    console.log("Navigation attempted"); // Check if this runs
+    router.push(targetUrl);
   };
   
   
   
+  
 
-  const unreadCount = notifications.filter((msg) => msg.status === "unread").length;
-  const filteredMessages = filter === "all" ? notifications : notifications.filter((msg) => msg.status === "unread");
+  const unreadCount = notifications.filter((msg) => msg.isRead === false).length;
+  const filteredMessages = filter === "all"
+  ? notifications
+  : notifications.filter((msg) => !msg.isRead);
 
   const pathname = usePathname();
   const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages
