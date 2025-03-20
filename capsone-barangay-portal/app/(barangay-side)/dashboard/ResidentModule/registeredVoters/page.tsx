@@ -1,5 +1,6 @@
 "use client";
 import "@/CSS/ResidentModule/module.css";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "../../../../db/firebase";
@@ -7,6 +8,13 @@ import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
 
 export default function registeredVotersModule() {
+  
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
+  const userPosition = session?.user?.position;
+  const isAuthorized = ["Secretary", "Punong Barangay", "Assistant Secretary"].includes(userPosition || "");
+
+
   const [residents, setResidents] = useState<any[]>([]);
   const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,11 +87,36 @@ export default function registeredVotersModule() {
   }, [searchName, searchAddress, showCount, residents, sortOrder]);
 
 
+  const handleAddResidentClick = () => {
+  
+    if (isAuthorized) {
+      router.push("/dashboard/ResidentModule/registeredVoters/AddVoter");
+    } else {
+      alert("You are not authorized to create a new voter.");
+      router.refresh(); // Refresh the page
+    }
+  };
+  
+
+  const handleEditClick = (id: string) => {
+    if (isAuthorized) {
+      router.push(`/dashboard/ResidentModule/registeredVoters/EditVoter?id=${id}`);
+    } else {
+      alert("You are not authorized to edit a current voter.");
+      router.refresh(); // Refresh the page
+    }
+  };
+
   const handleDeleteClick = async (id: string, voterNumber: string) => {
-    setDeleteUserId(id);
-    setSelectedVoterNumber(voterNumber);
-    setShowDeletePopup(true); 
-  }
+    if (isAuthorized) {
+      setDeleteUserId(id);
+      setSelectedVoterNumber(voterNumber);
+      setShowDeletePopup(true);
+    } else {
+      alert("You are not authorized to delete this resident.");
+      router.refresh(); // Refresh the page
+    }
+  };
 
   const confirmDelete = async () => {
     if (deleteUserId) {
@@ -147,10 +180,14 @@ export default function registeredVotersModule() {
   return (
     <main className="resident-module-main-container">
       <div className="resident-module-section-1">
-        <h1>Voter Masterlist</h1>
-        <Link href="/dashboard/ResidentModule/registeredVoters/AddVoter">
-          <button className="add-announcement-btn">Add New Voter</button>
-        </Link>
+        <h1>Registered Voters</h1>
+          {isAuthorized ? (
+            <Link href="/dashboard/ResidentModule/registeredVoters/AddVoter">
+              <button className="add-announcement-btn" onClick={handleAddResidentClick}>Add New Voter</button>
+            </Link>
+          ) : (
+            <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Voter</button>
+          )}
       </div>
 
       <div className="resident-module-section-2">
@@ -215,8 +252,31 @@ export default function registeredVotersModule() {
                   <td>
                     <div className="residentmodule-actions">
                       <button className="residentmodule-action-view" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}>View</button>
-                      <button className="residentmodule-action-edit" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/EditVoter?id=${resident.id}`)}>Edit</button>
-                      <button className="residentmodule-action-delete" onClick={() => handleDeleteClick(resident.id, resident.voterNumber)}>Delete</button>
+                  {isAuthorized ? (
+                    <>
+                      <button 
+                        className="residentmodule-action-edit" 
+                        onClick={() => handleEditClick(resident.id)}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        className="residentmodule-action-delete" 
+                        onClick={() => handleDeleteClick(resident.id, resident.voterNumber)}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
+                        Edit
+                      </button>
+                      <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
+                        Delete
+                      </button>
+                    </>
+                  )}
                     </div>
                   </td>
                 </tr>
@@ -242,13 +302,13 @@ export default function registeredVotersModule() {
       </div>
 
       {showDeletePopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-module">
+                            <div className="confirmation-popup-module">
                             <p>Are you sure you want to delete this Voter Record?</p>
                             <h2>Voter Number: {selectedVoterNumber}</h2>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
+                                <div className="yesno-container-module">
+                                    <button onClick={() => setShowDeletePopup(false)} className="no-button-module">No</button>
+                                    <button onClick={confirmDelete} className="yes-button-module">Yes</button>
                                 </div> 
                             </div>
                         </div>
@@ -256,19 +316,19 @@ export default function registeredVotersModule() {
 
 
       {showPopup && (
-                <div className={`popup-overlay show`}>
-                    <div className="popup">
+                <div className={`popup-overlay-module show`}>
+                    <div className="popup-module">
                         <p>{popupMessage}</p>
                     </div>
                 </div>
       )}
 
       {showAlertPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-module">
+                            <div className="confirmation-popup-module">
                                 <p>{popupMessage}</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setshowAlertPopup(false)} className="no-button">Continue</button>
+                                <div className="yesno-container-module">
+                                    <button onClick={() => setshowAlertPopup(false)} className="no-button-module">Continue</button>
                                 </div> 
                             </div>
                         </div>

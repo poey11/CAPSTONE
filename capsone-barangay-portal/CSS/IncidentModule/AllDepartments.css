@@ -1,6 +1,6 @@
 
 
-.main-container{
+.main-container-all-department{
     width: 100%;
     height: 100vh;
     background-color: #f9f9f9;
@@ -10,7 +10,7 @@
 }
 
 
- .main-section {
+ .main-section-all-department {
     flex: 1; 
     display: flex; 
     flex-direction: column;
@@ -19,35 +19,35 @@
     overflow: auto; /* Allow scrolling if content overflows */
     width: 100%;
     height: 100%; 
-    max-height: 40%;
+    max-height: 60%;
     margin-top: 2rem;
     border: 2px solid  #ddd;
 }
 
 
 
-.main-section .official-info {
+.main-section-all-department .official-info-all-department {
     display: flex;
     align-items: center; /* Center align the image and text */
     gap: 1rem; /* Add space between the image and text */
 }
 
-.main-section .official-image {
+.main-section-all-department .official-image-all-department {
     width: 50px;
     height: 50px;
     border-radius: 50%; /* Make the image circular */
     object-fit: cover; /* Ensure the image is properly scaled */
 }
 
-.actions {
+.actions-all-department {
     display: flex;
     gap: 0.5rem; /* Space between action buttons */
     justify-content: center;
 }
 
-.action-view,
-.action-edit,
-.action-delete {
+.action-view-all-department,
+.action-edit-all-department,
+.action-delete-all-department {
     border: none;
     cursor: pointer;
     padding: 8px 12px;
@@ -57,46 +57,46 @@
 
 }
 
-.action-view {
+.action-view-all-department {
     background-color: #4caf50; /* Green */
     color: white;
 }
 
-.action-edit {
+.action-edit-all-department {
     background-color: #ff9800; /* Orange */
     color: white;
 }
 
-.action-delete {
+.action-delete-all-department {
     background-color: #f44336; /* Red */
     color: white;
 }
-.action-view {
+.action-view-all-department {
     background-color: #4caf50; /* Green */
     color: white;
 }
 
-.action-view:hover {
+.action-view-all-department:hover {
     background-color: #3e8f41; /* Green */
 }
 
-.action-edit {
+.action-edit-all-department {
     background-color: #ff9800; /* Orange */
     color: white;
 }
-.action-edit:hover {
+.action-edit-all-department:hover {
     background-color: #d58102; /* Orange */
 }
 
-.action-delete {
+.action-delete-all-department {
     background-color: #f44336; /* Red */
     color: white;
 }
-.action-delete:hover {
+.action-delete-all-department:hover {
     background-color: #d73c31; /* Red */
 }
 
-.section-1{
+.section-1-all-department{
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -104,14 +104,14 @@
 
 }
 
-.section-1 h1{
-    font-size: 20px;
+.section-1-all-department h1{
+   font-size: 2rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
 
 }
 
-.add-announcement-btn {
+.add-announcement-btn-all-department {
     background-color:#e56723;
     color: white;
     border: none;
@@ -121,18 +121,18 @@
     border-radius: 5px;
   }
   
-  .add-announcement-btn:hover {
+  .add-announcement-btn-all-department:hover {
     background-color:#cc591b;
   }
 
-  .section-2{
+  .section-2-all-department{
     display: flex;
     gap: 20px;
     padding: 0;
     margin-top: 25px;
   }
 
-  .search-bar, .featuredStatus{
+  .search-bar-all-department, .featuredStatus-all-department{
     padding: 8px;
     width: 100%;
     max-width: 400px;
@@ -143,11 +143,11 @@
     text-align: center;
   }
 
-  .featuredStatus option {
+  .featuredStatus-all-department option {
     color: rgba(0, 0, 0, 0.4); 
   }
 
-  .status-dropdown {
+  .status-dropdown-all-department {
     padding: 4px 8px;
     border-radius: 6px;
     font-weight: bold;
@@ -181,7 +181,7 @@
     font-size: 15px;
   }
 
-  .status-badge {
+  .status-badge-all-department {
     padding: 8px 12px;            
     border-radius: 5px;          
     font-size: 13px;              
@@ -192,28 +192,29 @@
     width: 100px;       
 }
 
-.title {
+.title-all-department {
     font-size: 20px;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
     margin-top: 2rem;
 }
 
-.titlesection {
+.titlesection-all-department {
+    display: flex;
+    margin-top: 2rem;
+}
+
+.table-section-all-department { 
     display: flex;
 }
 
-.table-section { 
-    display: flex;
-}
 
-
-.table-section table {
+.table-section-all-department table {
     width: 100%; /* Ensures the table spans the full width */
     border-collapse: collapse; /* Removes unnecessary spacing between table cells */
 }
 
-.table-section  td {
+.table-section-all-department  td {
     padding: 1rem; 
     text-align: center; 
     border-bottom: 2px solid #ddd;
@@ -222,13 +223,105 @@
 }
 
 
-.table-section  th {
+
+
+.table-section-all-department  th {
     padding: 1rem; 
     text-align: left; 
     border-bottom: 2px solid #ddd;
     color: grey;
     text-align: center;
-    
 }
+
+.table-section-all-department thead {
+    position: sticky;
+    top: 0;
+    background-color: rgb(232, 228, 228); /* Ensures it's visible when scrolled */
+    z-index: 10; /* Ensures it stays above other content */
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
+    height: 80px;
+}
+
+
+
+.redirection-section-departments {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem auto;
+    width: fit-content;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    background: #f8f8f8;
+    gap: 5px;
+  }
+  
+  .redirection-section-departments button {
+    padding: 4px 8px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.3s;
+  }
+  
+  .redirection-section-departments button:hover {
+    background-color: #0056b3;
+  }
+  
+  .redirection-section-departments button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .redirection-section-departments .active {
+    background-color: #0056b3;
+    font-weight: bold;
+  }
+
+
+  .incidentmap-section-all-department {
+    display: flex;
+    flex-direction: column;
+  }
+.heatmap-container {
+  display: flex;
+  margin-top: 2rem;
+}
+
+.titlesection-all-department-heatmap {
+  display: flex;
+  margin-top: 2rem;
+}
+
+
+
+  
+
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+  
 
   

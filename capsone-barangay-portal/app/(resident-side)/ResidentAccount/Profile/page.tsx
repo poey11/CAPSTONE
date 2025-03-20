@@ -2,9 +2,15 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "@/app/db/firebase"; 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "@/CSS/ResidentAccount/profile.css";
+
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import { auth, db, storage } from "@/app/db/firebase"; // Ensure 'auth' is imported
+
+
+
+// need to fix yung pag gitna ng profile image section
 
 export default function SettingsPageResident() {
     const router = useRouter();
@@ -18,39 +24,45 @@ export default function SettingsPageResident() {
         email: "",
         sex: "",
         status: "",
+        userIcon: "",
     });
 
     const [showPopup, setShowPopup] = useState(false);
-    const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [message, setMessage] = useState("");
 
     const [preview, setPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
     const [file, setFile] = useState<File | null>(null); // State for file upload
   
-    
+
     useEffect(() => {
         if (residentId) {
-            const fetchResidentData = async () => {
-                const docRef = doc(db, "ResidentUsers", residentId);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    setResident({
-                        first_name: docSnap.data().first_name || "",
-                        last_name: docSnap.data().last_name || "",
-                        phone: docSnap.data().phone || "",
-                        email: docSnap.data().email || "",
-                        sex: docSnap.data().sex || "",
-                        status: docSnap.data().status || "",
-                    });
-
-                    setPreview(docSnap.data().fileURL || null);
-                }
-            };
-            fetchResidentData();
+          const fetchResidentData = async () => {
+            const docRef = doc(db, "ResidentUsers", residentId);
+            const docSnap = await getDoc(docRef);
+    
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              setResident({
+                first_name: data.first_name || "",
+                last_name: data.last_name || "",
+                phone: data.phone || "",
+                email: data.email || "",
+                sex: data.sex || "",
+                status: data.status || "",
+                userIcon: data.userIcon || "",
+              });
+    
+              setPreview(data.userIcon)
+            }
+          };
+    
+          fetchResidentData();
         }
-    }, [residentId]);
+      }, [residentId]);
+    
 
     const handleBack = () => {
         window.location.href = "/dashboard";
@@ -62,96 +74,149 @@ export default function SettingsPageResident() {
             ...prevData,
             [name]: value,
         }));
-    };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setLoading(true);
-        setError("");
-    
-        try {
-            const docRef = doc(db, "ResidentUsers", residentId!);
-            const docSnap = await getDoc(docRef);
-    
-            if (docSnap.exists()) {
-                const currentData = docSnap.data();
-    
-                // Check if there are any changes
-                const isDataChanged = Object.keys(resident).some(
-                    (key) => resident[key as keyof typeof resident] !== currentData[key]
-                );
-    
-                if (!isDataChanged) {
-                    alert("No changes detected.");
-                    setLoading(false);
-                    return;
-                }
-            }
-    
-            // Proceed with update if data has changed
-            await updateDoc(docRef, { ...resident });
-    
-            alert("Profile updated successfully!");
-            router.push("/ResidentAccount/Profile");
-        } catch (err) {
-            setError("Failed to update resident");
-            console.error(err);
+        if (name === "password") {
+            setPassword(value);
+            setResident((prevData) => ({ ...prevData, password: value })); // formData.password
+         } else if (name === "confirmPassword") {
+            setConfirmPassword(value);
+         } else {
+            setResident((prevData) => ({ ...prevData, [name]: value }));
         }
-    
-        setLoading(false);
-    };
 
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    };
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            setSelectedImage(imageUrl);
+        const selectedFile = event.target.files?.[0];
+        if (selectedFile) {
+          setFile(selectedFile);
+          setPreview(URL.createObjectURL(selectedFile)); // Show preview before upload
         }
     };
+
+    const uploadImageToStorage = async (file: File) => {
+        const storageRef = ref(storage, `userIcons/${residentId}`);
+        await uploadBytes(storageRef, file);
+        return getDownloadURL(storageRef);
+      };
+
+
+      const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage("");
+      
+        try {
+          const user = auth.currentUser;
+          if (!user) {
+            setMessage("User session expired. Please log in again.");
+            setShowPopup(true);
+            setLoading(false);
+            return;
+          }
+      
+          if (password || confirmPassword) {
+            if (password !== confirmPassword) {
+              setMessage("Passwords do not match!");
+              setShowPopup(true);
+              setLoading(false);
+              return;
+            }
+      
+            try {
+              await updatePassword(user, password);
+              setMessage("Password updated successfully!");
+              setShowPopup(true);
+            } catch (error: any) {
+              setMessage(`Failed to update password: ${error.message}`);
+              setShowPopup(true);
+              setLoading(false);
+              return;
+            }
+          }
+      
+          if (file) {
+            const downloadURL = await uploadImageToStorage(file);
+            resident.userIcon = downloadURL;
+          }
+      
+          const docRef = doc(db, "ResidentUsers", residentId!);
+          await updateDoc(docRef, {
+            phone: resident.phone,
+            userIcon: resident.userIcon,
+          });
+      
+          setMessage("Profile updated successfully!");
+          setShowPopup(true);
+          router.push("/ResidentAccount/Profile");
+        } catch (err: any) {
+          setMessage("Failed to update profile. Please try again. " + err.message);
+          setShowPopup(true);
+        }
+      
+        setLoading(false);
+      };
+      
+
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
     
     return (
         <main className="main-container-resident-profile">
             <div className="first-section-resident-profile">
+
+                <div className="account-details-section">
+
+                <div className="acc-details-content-section-1">
+                    <p>Account Details</p>
+                </div>
+
+
                 <div className="account-profile-section">
-                    <p className="Details">Profile</p>
-
                     <div className="icon-container-profile-section">
-
-                        <img src={selectedImage || "/images/user.png"} alt="User Icon" className="user-icon-profile-section" />
-                                
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    id="fileUpload"
-                                    style={{ display: "none" }}
-                                    onChange={handleImageChange}
+                    {preview ? (
+                                <img
+                                    src={preview}
+                                    alt="User Icon"
+                                    className="user-icon-profile-section"
                                 />
-                                <button 
-                                    className="upload-btn-profile-section" 
-                                    onClick={() => document.getElementById("fileUpload")?.click()}
-                                >
-                                    Update Profile Image
-                                </button>
+                            ) : resident.userIcon ? (
+                                <img
+                                    src={resident.userIcon}
+                                    alt="User Icon"
+                                    className="user-icon-profile-section"
+                                />
+                            ) : (
+                                <p>No Profile Image</p>
+                            )}
+                    <input
+                        type="file"
+                        accept="image/*"
+                        id="fileUpload"
+                        style={{ display: "none" }}
+                        onChange={handleImageChange}
+                    />
+                    <button
+                        className="upload-btn-profile-section"
+                        onClick={() => document.getElementById("fileUpload")?.click()}
+                    >
+                        Update Profile Image
+                    </button>
                     </div>
 
                     <div className="name-section">
-                        <p className="name">{resident.first_name || "N/A"}</p>
-                        <p className="name">{resident.last_name || "N/A"}</p>
+                    <p className="name">{resident.first_name || "N/A"}</p>
+                    <p className="name">{resident.last_name || "N/A"}</p>
                     </div>
 
-                    {/* Transactions Link */}
                     <div className="transactions-link">
-                        <a href="/ResidentAccount/Transactions" className="transactions-text">
-                            View Transactions
-                        </a>
+                    <a href="/ResidentAccount/Transactions" className="transactions-text">
+                        View Transactions
+                    </a>
                     </div>
-
                 </div>
 
-                <div className="account-details-section">
-                    <p className="Details">Account Details</p>
+
+                    
 
                     <div className="edit-section-profile">
                       <form onSubmit={handleSubmit}>
@@ -164,6 +229,7 @@ export default function SettingsPageResident() {
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required 
+                                disabled
                             />
                         </div>
 
@@ -176,6 +242,7 @@ export default function SettingsPageResident() {
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required 
+                                disabled
                             />
                         </div>
 
@@ -188,6 +255,7 @@ export default function SettingsPageResident() {
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required 
+                                disabled
                             />
                         </div>
 
@@ -200,6 +268,7 @@ export default function SettingsPageResident() {
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required 
+                                disabled
                             />
                         </div>
 
@@ -227,41 +296,26 @@ export default function SettingsPageResident() {
                                 disabled 
                             />
                         </div>
-
-                            {/* MALCOLM HERE */}
-
-
-                       <div className="form-group-profile-section">
-                            <label htmlFor="current-password" className="form-label-profile-section">Current Password:</label>
-                            <input 
-                                id="current-password" 
-                                name="current-password"
-                                className="form-input-profile-section" 
-                                required 
-                                disabled 
-                            />
-                        </div>
-
-
+                        
                         <div className="form-group-profile-section">
-                            <label htmlFor="new-password" className="form-label-profile-section">New Password:</label>
+                            <label htmlFor="password" className="form-label-profile-section">New Password:</label>
                             <input 
-                                id="new-password" 
-                                name="new-password"
+                                id="password" 
+                                name="password"
                                 className="form-input-profile-section" 
-                                required 
-                                disabled 
+                                type="password"
+                                onChange={handleChange}
                             />
                         </div>
 
                         <div className="form-group-profile-section">
-                            <label htmlFor="confirm-password" className="form-label-profile-section">Confirm Password:</label>
+                            <label htmlFor="confirmPassword" className="form-label-profile-section">Confirm Password:</label>
                             <input 
-                                id="confirm-password" 
-                                name="confirm-password"
+                                id="confirmPassword" 
+                                name="confirmPassword"
                                 className="form-input-profile-section" 
-                                required 
-                                disabled 
+                                type="password"
+                                onChange={handleChange}
                             />
                         </div>
 
@@ -282,6 +336,16 @@ export default function SettingsPageResident() {
                 </div>
 
             </div>
+
+
+            {showPopup && (
+                <div className="popup-overlay">
+                    <div className="popup">
+                        <p>{message}</p>
+                        <button onClick={() => setShowPopup(false)} className="continue-button">Continue</button>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

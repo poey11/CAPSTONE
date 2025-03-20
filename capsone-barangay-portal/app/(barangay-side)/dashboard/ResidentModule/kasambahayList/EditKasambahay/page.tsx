@@ -390,24 +390,24 @@ export default function EditKasambahay() {
       </div>
 
       {showDiscardPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-add">
+                            <div className="confirmation-popup-add">
                                 <p>Are you sure you want to discard the changes?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> 
+                                <div className="yesno-container-add">
+                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">No</button>
+                                    <button onClick={confirmDiscard} className="yes-button-add">Yes</button> 
                                 </div> 
                             </div>
                         </div>
                     )}
 
       {showSavePopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-add">
+                            <div className="confirmation-popup-add">
                                 <p>Are you sure you want to save the changes?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowSavePopup(false)} className="no-button">No</button> 
-                                    <button onClick={confirmSave} className="yes-button">Yes</button> 
+                                <div className="yesno-container-add">
+                                    <button onClick={() => setShowSavePopup(false)} className="no-button-add">No</button> 
+                                    <button onClick={confirmSave} className="yes-button-add">Yes</button> 
                                 </div> 
                             </div>
                         </div>
@@ -415,8 +415,8 @@ export default function EditKasambahay() {
                     
 
           {showPopup && (
-                <div className={`popup-overlay show`}>
-                    <div className="popup">
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
                         <p>{popupMessage}</p>
                     </div>
                 </div>

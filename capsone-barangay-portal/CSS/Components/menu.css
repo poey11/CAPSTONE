@@ -82,10 +82,12 @@
 }
 
 .header-usericon{
-  max-width: 100%; 
   height: auto;
   width: 40px;
+  height: 40px;
   margin-right:5px;
+  border-radius: 50%;
+  object-fit: cover; 
 }
 
 .header-inboxicon{
@@ -139,12 +141,13 @@
 .inbox-container{
   position: relative;
   display: inline-block;
+  width: 40px;
 }
 
 .notification-section {
   position: absolute;
   top: 89px; 
-  right: -290px;
+  right: -320px;
   width: 380px;
   height: 600px;
   /*background-color: #ed7014;*/
@@ -175,6 +178,7 @@
 
 .notification-item {
   padding-left: 8px;
+  cursor: pointer;
   /*border-bottom: 1px solid #f0eeee;*/
   border-bottom: 1px solid #d4cdc8;
   height: 90px;
@@ -190,7 +194,7 @@
 .notification-badge {
   position: absolute;
   top: 5px;
-  right: 50px;
+  right: 15px;
   background-color: rgb(219, 7, 7);
   color: white;
   font-size: 12px;

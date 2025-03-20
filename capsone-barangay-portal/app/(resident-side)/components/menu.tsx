@@ -1,19 +1,52 @@
 "use client"
 import { useState, useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
-import { auth } from "../../db/firebase";
+import { usePathname, useSearchParams} from "next/navigation";
+import { auth, db } from "../../db/firebase";
 import {useAuth} from "../../context/authContext";
 import { signOut } from "firebase/auth";
 import SideNav from '../../(barangay-side)/components/bMenu';
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
+import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc } from "firebase/firestore"; // Firestore functions
 import "@/CSS/Components/menu.css";
+import { Timestamp } from "firebase-admin/firestore";
+
+
+type Notification = {
+  id: string;
+  reportID?: string;
+  residentID: string;
+  message: string;
+  status: "read" | "unread";
+  timestamp?: Timestamp; 
+  transactionType: string;
+  incidentID: string;
+  isRead?: boolean;
+};
+
+
+interface Resident {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  sex: string;
+  status: string;
+  userIcon: string;
+}
 
 const Menu = () => {
+  const searchParams = useSearchParams();
+  const residentId = searchParams.get("id");
   const {user, loading} = useAuth();
   const router = useRouter();
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const loginMenuRef = useRef<HTMLDivElement | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [userIcon, setUserIcon] = useState<string | undefined>(undefined);
+  const db = getFirestore();
+
+  const [resident, setResident] = useState<Resident | null>(null);
   
   const handleLogout = async() => {
     await signOut(auth);
@@ -40,6 +73,31 @@ const Menu = () => {
     };
   }, []);
 
+  useEffect(() => {
+    console.log("User email:", user?.email);
+
+    const fetchResidentData = async () => {
+      if (residentId) { // Ensure residentId is not null
+        const userDocRef = doc(db, "ResidentUsers", residentId);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (userDocSnap.exists()) {
+          const data = userDocSnap.data();
+          console.log("Resident data fetched:", data);
+          setResident(data as Resident);
+        } else {
+          console.log("No resident found in Firestore!");
+        }
+      }
+    };
+
+    fetchResidentData();
+  }, [residentId, resident]);
+
+
+  
+
+
 
   const [isOpen, setIsOpen] = useState(false);
   const [filter, setFilter] = useState("all");
@@ -56,51 +114,64 @@ const Menu = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const documentRoutes: Record<string, string> = {
-    "Barangay Clearance": "/ResidentAccount/Transactions/DocumentRequestTransactions/Documents/BarangayCertificateIndigencyClearance",
-    "Barangay Indigency": "/ResidentAccount/Transactions/DocumentRequestTransactions/Documents/BarangayCertificateIndigencyClearance",
-    "Barangay ID": "/ResidentAccount/Transactions/DocumentRequestTransactions/Documents/BarangayID",
-    "First Time Jobseeker": "/ResidentAccount/Transactions/DocumentRequestTransactions/Documents/FirstTimeJobseeker",
-    "Barangay Certificate": "/ResidentAccount/Transactions/DocumentRequestTransactions/Documents/BarangayCertificateIndigencyClearance",
-    "Barangay Permit": "/ResidentAccount/Transactions/DocumentRequest/Permit",
-};
 
-const barangayPermitRoutes: Record<string, string> = {
-    "Business Permit": "/ResidentAccount/Transactions/DocumentRequestTransactions/Permits/Temporary-BusinessPermit(new&renewal)",
-    "Temporary Business Permit": "/ResidentAccount/Transactions/DocumentRequestTransactions/Permits/Temporary-BusinessPermit(new&renewal)",
-    "Construction Permit": "/ResidentAccount/Transactions/DocumentRequestTransactions/Permits/ConstructionPermit",
-    "Liquor Permit": "/ResidentAccount/Transactions/DocumentRequestTransactions/Permits/LiquorPermit",
-    "COOP": "/ResidentAccount/Transactions/DocumentRequestTransactions/Permits/COOP",
-};
+  
+  
 
-  const messages = [
-    { id: 1, text: "Online Incident Report is being reviewed. Wait for an update from the barangay official.", status: "unread", type: "Online Incident", Details: "Robbery Incident", Purpose: "N/A"},
-    { id: 2, text: "Barangay Clearance document request is being processed. SMS sent.", status: "read", type: "Document Request", Details: "Barangay Clearance", Purpose: "Loan"},
-    { id: 3, text: "Barangay Indigency document request is being processed. SMS sent.", status: "unread", type: "Document Request", Details: "Barangay Indigency", Purpose: "No Income"},
-    { id: 4, text: "Barangay ID document request is being processed. SMS sent.", status: "unread", type: "Document Request", Details: "Barangay ID", Purpose: "N/A"},
-    { id: 5, text: "Barangay Permit document request is being processed. SMS sent.", status: "read" , type: "Document Request", Details: "Barangay Permit", Purpose: "Business Permit"},
-    { id: 6, text: "Barangay Certificate request is being processed. SMS sent.", status: "unread" , type: "Document Request", Details: "Barangay Certificate", Purpose: "Death Residency"},
-    { id: 7, text: "First Time Jobseeker request is being processed. SMS sent.", status: "read" , type: "Document Request", Details: "First Time Jobseeker", Purpose: "N/A"},
-  ];
+  // Fetch Notifications for the logged-in user in real time
+  useEffect(() => {
+    if (user) {
+      console.log("Fetching notifications for user:", user.uid);
 
-  const handleNotificationClick = (transaction: { Type: string; Details: string; Purpose: string }) => {
-    if (transaction.Type === "Online Incident") {
-      router.push("/ResidentAccount/Transactions/IncidentTransactions");
-  } else if (transaction.Type === "Document Request") {
-      const encodedDetails = encodeURIComponent(transaction.Details);
-      const encodedPurpose = encodeURIComponent(transaction.Purpose);
+      const q = query(collection(db, "Notifications"), where("residentID", "==", user.uid));
+  
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const fetchedNotifications: Notification[] = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Notification[]; // Explicitly cast to Notification[]
+        setNotifications(fetchedNotifications);
+      });
+  
+      return () => unsubscribe();
+    }
+  }, [user]);
+  
 
-      if (transaction.Details === "Barangay Permit") {
-          const permitRoute = barangayPermitRoutes[transaction.Purpose] || "/ResidentAccount/Transactions/DocumentRequestTransactions/Permit/General";
-          router.push(`${permitRoute}?details=${encodedDetails}&purpose=${encodedPurpose}`);
-      } else {
-          router.push(`${documentRoutes[transaction.Details] || "/ResidentAccount/Transactions/DocumentRequestTransactions"}?details=${encodedDetails}&purpose=${encodedPurpose}`);
+  const handleNotificationClick = async (notification: Notification) => {
+    console.log("Notification clicked:", notification);
+  
+    // Check if the notification is unread
+    if (!notification.isRead) {
+      try {
+        const notificationRef = doc(db, "Notifications", notification.id);
+        await updateDoc(notificationRef, { isRead: true });
+  
+        // Update UI directly for a smoother experience
+        setNotifications((prevNotifications) =>
+          prevNotifications.map((notif) =>
+            notif.id === notification.id ? { ...notif, isRead: true } : notif
+          )
+        );
+        console.log("Notification marked as read!");
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
       }
-  }
-};
+    }
+  
+    // Navigate to the specified incident transaction
+    const targetUrl = `/ResidentAccount/Transactions/IncidentTransactions?id=${notification.incidentID}`;
+    router.push(targetUrl);
+  };
+  
+  
+  
+  
 
-  const unreadCount = messages.filter((msg) => msg.status === "unread").length;
-  const filteredMessages = filter === "all" ? messages : messages.filter((msg) => msg.status === "unread");
+  const unreadCount = notifications.filter((msg) => msg.isRead === false).length;
+  const filteredMessages = filter === "all"
+  ? notifications
+  : notifications.filter((msg) => !msg.isRead);
 
   const pathname = usePathname();
   const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages
@@ -197,60 +268,45 @@ const barangayPermitRoutes: Record<string, string> = {
 
 
             {!loading && user ? (
-            <div className="logged-in-container">  
-              <div className="dropdown-Container">
-                <div className="dropdown-item">
-                  <p
-                    id="inbox-link"
-                    onClick={toggleNotificationSection}
-                    className="inbox-container"
-                  >
-                    <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
-                    {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
-                  </p>
-                </div>
-                {isOpen && (
-                  <div className="notification-section" ref={dropdownRef}>
-                    <div className="top-section">
-                      <p className="notification-title">Notification Inbox</p>
-                      <div className="filter-container">
-                        <button className={`filter-option ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
-                        <button className={`filter-option ${filter === "unread" ? "active" : ""}`} onClick={() => setFilter("unread")}>Unread</button>
+              <div className="logged-in-container">
+                <div className="dropdown-Container">
+                  <div className="dropdown-item">
+                    <p id="inbox-link" onClick={toggleNotificationSection} className="inbox-container">
+                      <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
+                      {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+                    </p>
+                  </div>
+                  {isOpen && (
+                    <div className="notification-section" ref={dropdownRef}>
+                      <div className="top-section">
+                        <p className="notification-title">Notification Inbox</p>
+                        <div className="filter-container">
+                          <button className={`filter-option ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
+                          <button className={`filter-option ${filter === "unread" ? "active" : ""}`} onClick={() => setFilter("unread")}>Unread</button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="bottom-section">
-                      <div className="notification-content">
-                        {filteredMessages.length > 0 ? (
-                          filteredMessages.map((message) => (
-                            <div
-                              className="notification-item"
-                              key={message.id}
-                              onClick={() =>
-                                handleNotificationClick({
-                                  Type: message.type,
-                                  Details: message.Details,
-                                  Purpose: message.Purpose,
-                                })
-                              }
-                            >
-                              <div className="message-section">
-                                <p>{message.text}</p>
+                      <div className="bottom-section">
+                        <div className="notification-content">
+                          {filteredMessages.length > 0 ? (
+                            filteredMessages.map((message) => (
+                              <div
+                                className="notification-item"
+                                key={message.id}
+                                onClick={() => handleNotificationClick(message)}
+                              >
+                                <div className="message-section">
+                                  <p>{message.message}</p>
+                                </div>
+                                <div className="unread-icon-section">
+                                  {message.status === "unread" && (
+                                    <img src="/images/unread-icon.png" alt="Unread Icon" className="unread-icon" />
+                                  )}
+                                </div>
                               </div>
-                              <div className="unread-icon-section">
-                              
-                                {message.status === "unread" && (
-                                  <img
-                                    src="/images/unread-icon.png"
-                                    alt="Unread Icon"
-                                    className="unread-icon"
-                                  />
-                                )}
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <p>No messages found</p>
-                        )}
+                            ))
+                          ) : (
+                            <p>No messages found</p>
+                          )}
                       </div>
                     </div>
                   </div>
@@ -262,7 +318,13 @@ const barangayPermitRoutes: Record<string, string> = {
                     id="profile-link"
                     onClick={toggleLoginOptions}
                   >
-                    <img src="/images/user.png" alt="User Icon" className="header-usericon" />
+                    {/*<img src={userIcon} alt="User Icon" className="header-usericon" />*/}
+
+                    {resident?.userIcon ? (
+                                        <img src={resident.userIcon} alt="User Icon" className="header-usericon" />
+                                    ) : (
+                                        <img src="/images/user.png" alt="Default User" className="header-usericon" />
+                                    )}
                   </p>
                   
                   <div className="Dropdown">

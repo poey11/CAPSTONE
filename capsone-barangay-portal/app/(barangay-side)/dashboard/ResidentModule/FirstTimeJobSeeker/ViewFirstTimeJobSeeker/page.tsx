@@ -58,14 +58,14 @@ export default function ViewFirstTimeJobSeeker() {
     <main className="viewresident-main-container">
 
       <div className="viewresident-page-title-section-1">
-        <h1>View Jobseeker Details</h1>
+      <h1>First-Time Job Seeker List</h1>
       </div>
       <div className="viewresident-main-content">
         <div className="viewresident-section-1">
           <button onClick={handleBack}>
             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
           </button>
-          <p>First-Time Jobseeker Details</p>
+          <p>View First-Time Jobseeker</p>
         </div>
 
         {jobSeekerFields.map((field) => (

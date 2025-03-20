@@ -1,12 +1,12 @@
 "use client"
 import "@/CSS/IncidentReport/IncidentReport.css";
-import { ChangeEvent, useState } from "react"; 
+import { ChangeEvent, useEffect, useState } from "react"; 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/authContext";
 import { ref, uploadBytes } from "firebase/storage";
-import { addDoc, collection} from "firebase/firestore";
+import { addDoc, collection, updateDoc} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
-
+import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
 
 
 
@@ -20,7 +20,7 @@ const incidentForm:React.FC = () => {
       lastname: "",
       contactNos: "",
       concerns: "",
-      date: "",
+      dateFiled: "",
       time: "",
       address: "",
       file: null,
@@ -28,7 +28,25 @@ const incidentForm:React.FC = () => {
       department: "",
       status: "Pending",
   });
+  const [caseNumber, setCaseNumber] = useState("");
+  useEffect(() => {
+    const fetchCaseNumber = async () => {
+      const caseNumber = await getCaseNumber();
+      setCaseNumber(caseNumber);
+    }
+    fetchCaseNumber();
+  },[currentUser])
+  const currentDate = new Date().toISOString().split("T")[0].replace(/-/g, "");
 
+  const getCaseNumber = async () => {
+      let number = await getSpecificCountofCollection("IncidentReports", "reportID", currentUser);
+      const formattedNumber = number !== undefined ? String(number + 1).padStart(4, "0") : "0000";
+
+      const caseValue =`${currentDate} - ${formattedNumber}` ;
+      console.log("Generated Case Number:", caseValue); // ✅ Logs the correct value
+      return caseValue; // ✅ Ensure the function returns the computed value
+    
+  };
     const clearForm = () => {
       if(filesContainer1.length > 0){
         if(filesContainer1[0].name){  
@@ -40,15 +58,15 @@ const incidentForm:React.FC = () => {
         lastname: "",
         contactNos: "",
         concerns: "",
-        date: "",
+        dateFiled: "",
         time: "",
         address: "",
         file: null,
         reportID: "",
         department: "",
         status: "Pending",
-
       });
+      setCaseNumber("");
     }
 
     const handleFormChange = (e:ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -98,47 +116,77 @@ const incidentForm:React.FC = () => {
     };
     
 
-    const handleReportUpload = async () => {
-      try{
-        let filename = "";
-        if(incidentReport.file){
-          const timeStamp = Date.now().toString();
-          const fileExtention = incidentReport.file.name.split('.').pop();
-          filename = `incident_report_${currentUser}.${timeStamp}.${fileExtention}`;
-          const storageRef = ref(storage, `IncidentReports/${filename}`);
+    const handleReportUpload = async (key: any, storageRef: any) => {
+      try {
+        const docRef = collection(db, "IncidentReports");
+    
+        // Assuming key is an array with a single object containing all fields:
+        const updates = { ...key[0] };  // No filtering, just spread the object
+    
+        // Upload the report to Firestore
+        const newDoc = await addDoc(docRef, updates);
+    
+        // Upload the file only if storageRef is provided
+        if (storageRef) {
           await uploadBytes(storageRef, incidentReport.file);
         }
-        
-        const docRef = collection(db, "IncidentReports", );
-        await addDoc(docRef, {
-          firstname: incidentReport.firstname,
-          lastname: incidentReport.lastname,
-          contactNos: incidentReport.contactNos,
-          concerns: incidentReport.concerns,
-          date: incidentReport.date,
-          time: incidentReport.time,
-          address: incidentReport.address,
-          file: filename,
-          department: "Online",
-          reportID: currentUser, 
-          status: incidentReport.status,
-        });
-        
+    
         alert("Incident Report Submitted!");
-
+    
+      } catch (e: any) {
+        console.log("Error uploading report:", e);
       }
-      catch(e:string|any){
-        console.log(e);
-      }
-     
-    }
+    };
+    
 
 
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault(); 
       const form = event.target as HTMLFormElement;
       if (form.checkValidity()) {
-        handleReportUpload();
+        let filename = "";
+        let storageRef = null;
+        if(incidentReport.file){
+          const timeStamp = Date.now().toString();
+          const fileExtention = incidentReport.file.name.split('.').pop();
+          filename = `incident_report_${currentUser}.${timeStamp}.${fileExtention}`;
+          storageRef = ref(storage, `IncidentReports/${filename}`);
+        }
+        console.log(currentUser);
+        if(currentUser === "Guest"){
+          const toAdd = [{
+            firstname: incidentReport.firstname,
+            lastname: incidentReport.lastname,
+            contactNos: incidentReport.contactNos,
+            concerns: incidentReport.concerns,
+            dateFiled: incidentReport.dateFiled,
+            time: incidentReport.time,
+            address: incidentReport.address,
+            file: filename,
+            department: "Online",
+            reportID: currentUser, 
+            status: incidentReport.status,
+          }];
+          handleReportUpload(toAdd, storageRef)
+        }else{
+          
+          const toAdd = [{
+            caseNumber: caseNumber,
+            firstname: incidentReport.firstname,
+            lastname: incidentReport.lastname,
+            contactNos: incidentReport.contactNos,
+            concerns: incidentReport.concerns,
+            dateFiled: incidentReport.dateFiled,
+            time: incidentReport.time,
+            address: incidentReport.address,
+            file: filename,
+            department: "Online",
+            reportID: currentUser, 
+            status: incidentReport.status,
+          }];
+          console.log(toAdd);
+          handleReportUpload(toAdd, storageRef);
+        }
         clearForm(); // Clear the form after submission
         router.push('/IncidentReport/Notification'); 
       } else {
@@ -150,21 +198,21 @@ const incidentForm:React.FC = () => {
 
 
     return(
-      <main className="main-container">
-        <div className="Page">
+      <main className="main-container-incident-report">
+        <div className="Page-incident-report">
           <p>File an Incident Report</p>
         </div>
 
-        <div className="register-section">
+        <div className="register-section-incident-report">
           <h1>Minor Incident Report</h1>
-          <form className="register-form" onSubmit={handleSubmit}> {/* Use onSubmit to trigger the redirect */}
-            <div className="form-group">
-              <label htmlFor="firstname" className="form-label">First Name</label>
+          <form className="register-form-incident-report" onSubmit={handleSubmit}> {/* Use onSubmit to trigger the redirect */}
+            <div className="form-group-incident-report">
+              <label htmlFor="firstname" className="form-label-incident-report">First Name</label>
               <input
                 type="text"
                 id="firstname"
                 name="firstname"
-                className="form-input"
+                className="form-input-incident-report"
                 required
                 placeholder="Enter First Name"
                 value={incidentReport.firstname}
@@ -172,13 +220,13 @@ const incidentForm:React.FC = () => {
               />
             </div>
         
-            <div className="form-group">
-              <label htmlFor="lastname" className="form-label">Last Name</label>
+            <div className="form-group-incident-report">
+              <label htmlFor="lastname" className="form-label-incident-report">Last Name</label>
               <input
                 type="text"
                 id="lastname"
                 name="lastname"
-                className="form-input"
+                className="form-input-incident-report"
                 required
                 placeholder="Enter Last Name"
                 value={incidentReport.lastname}
@@ -186,13 +234,13 @@ const incidentForm:React.FC = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="contactNos" className="form-label">Cellphone Number:</label>
+            <div className="form-group-incident-report">
+              <label htmlFor="contactNos" className="form-label-incident-report">Cellphone Number:</label>
               <input
                 type="text"
                 id="contactNos"
                 name="contactNos"
-                className="form-input"
+                className="form-input-incident-report"
                 required
                 placeholder="Enter Your Contact Number"
                 value={incidentReport.contactNos}
@@ -200,13 +248,13 @@ const incidentForm:React.FC = () => {
               />
             </div>
         
-            <div className="form-group">
-              <label htmlFor="concerns" className="form-label">Concerns</label>
+            <div className="form-group-incident-report">
+              <label htmlFor="concerns" className="form-label-incident-report">Concerns</label>
               <input
                 type="text"
                 id="concerns"
                 name="concerns"
-                className="form-input"
+                className="form-input-incident-report"
                 required
                 placeholder="Enter your concerns"
                 value={incidentReport.concerns}
@@ -214,27 +262,27 @@ const incidentForm:React.FC = () => {
               />
             </div>
         
-            <div className="form-group">
-              <label htmlFor="date" className="form-label">Date of Incident</label>
+            <div className="form-group-incident-report">
+              <label htmlFor="date" className="form-label-incident-report">Date of Incident</label>
               <input
                 type="date"
-                id="date"
-                name="date"
-                className="form-input"
+                id="dateFiled"
+                name="dateFiled"
+                className="form-input-incident-report"
                 required
                 placeholder="Enter Date of Incident"
-                value={incidentReport.date}
+                value={incidentReport.dateFiled}
                 onChange={handleFormChange}
               />
             </div>
         
-            <div className="form-group">
-              <label htmlFor="time" className="form-label">Time of Incident</label>
+            <div className="form-group-incident-report">
+              <label htmlFor="time" className="form-label-incident-report">Time of Incident</label>
               <input
                 type="time"
                 id="time"
                 name="time"
-                className="form-input"
+                className="form-input-incident-report"
                 required
                 placeholder="Enter Time of Incident"
                 value={incidentReport.time}
@@ -243,13 +291,13 @@ const incidentForm:React.FC = () => {
             </div>
 
 
-            <div className="form-group">
-              <label htmlFor="address" className="form-label">Address of Incident</label>
+            <div className="form-group-incident-report">
+              <label htmlFor="address" className="form-label-incident-report">Address of Incident</label>
               <input
                 type="text"
                 id="address"
                 name="address"
-                className="form-input"
+                className="form-input-incident-report"
                 required
                 placeholder="Enter Location"
                 value={incidentReport.address}
@@ -258,29 +306,29 @@ const incidentForm:React.FC = () => {
             </div>
         
             <div className="signature/printedname-container">
-              <label className="form-label">Upload Proof of Incident (If Applicable)</label>
+              <label className="form-label-incident-report">Upload Proof of Incident (If Applicable)</label>
         
-              <div className="file-upload-container">
-                <label htmlFor="file-upload1" className="upload-link">Click to Upload File</label>
+              <div className="file-upload-container-incident-report">
+                <label htmlFor="file-upload1" className="upload-link-incident-report">Click to Upload File</label>
                 <input
                   id="file-upload1"
                   type="file"
-                  className="file-upload-input"
+                  className="file-upload-input-incident-report"
                   accept=".jpg,.jpeg,.png"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleFileChangeContainer1(e);
                     handleFormChange(e);
                   }} // Handle file selection
                 />
-                <div className="uploadedFiles-container">
+                <div className="uploadedFiles-container-incident-report">
                   {filesContainer1.length > 0 && (
-                    <div className="file-name-image-display">
+                    <div className="file-name-image-display-incident-report">
                       <ul>
                         {filesContainer1.map((file, index) => (
-                          <div className="file-name-image-display-indiv" key={index}>
+                          <div className="file-name-image-display-indiv-incident-report" key={index}>
                             <li>
                               {file.preview && (
-                                <div className="filename-image-container">
+                                <div className="filename-image-container-incident-report">
                                   <img
                                     src={file.preview}
                                     alt={file.name}
@@ -289,16 +337,16 @@ const incidentForm:React.FC = () => {
                                 </div>
                               )}
                               {file.name}
-                              <div className="delete-container">
+                              <div className="delete-container-incident-report">
                                 <button
                                   type="button"
                                   onClick={() => handleFileDeleteContainer1(file.name)}
-                                  className="delete-button"
+                                  className="delete-button-incident-report"
                                 >
                                   <img
                                     src="/images/trash.png"
                                     alt="Delete"
-                                    className="delete-icon"
+                                    className="delete-icon-incident-report"
                                   />
                                 </button>
                               </div>
@@ -313,7 +361,7 @@ const incidentForm:React.FC = () => {
             </div>
                 
             {/* Submit button */}
-            <button type="submit" className="submit-button">Submit</button>
+            <button type="submit" className="submit-button-incident-report">Submit</button>
           </form>
         </div>
                 

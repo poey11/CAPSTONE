@@ -2,11 +2,20 @@
 import "@/CSS/ResidentModule/module.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+
 import { db } from "../../../../db/firebase";
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
 
 export default function JobSeekerListModule() {
+
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
+  const userPosition = session?.user?.position;
+  const isAuthorized = ["Secretary", "Punong Barangay", "Assistant Secretary"].includes(userPosition || "");
+
+
   const [jobSeekers, setJobSeekers] = useState<any[]>([]);
   const [filteredJobSeekers, setFilteredJobSeekers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +24,7 @@ export default function JobSeekerListModule() {
   const [searchName, setSearchName] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
+  const [showCount, setShowCount] = useState<number>(0);
   const router = useRouter();
 
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
@@ -65,8 +75,16 @@ export default function JobSeekerListModule() {
       return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
     });
 
+    if (showCount) {
+      filtered = filtered.slice(0, showCount);
+    }
+
+    if (showCount) {
+      filtered = filtered.slice(0, showCount);
+    }
+
     setFilteredJobSeekers(filtered);
-  }, [searchName, jobSeekers, sortOrder]);
+  }, [searchName, jobSeekers, sortOrder,showCount]);
 
   const formatDateToMMDDYYYY = (dateString: string) => {
     if (!dateString) return "";
@@ -88,10 +106,35 @@ export default function JobSeekerListModule() {
     }
   };*/
 
+  const handleAddResidentClick = () => {
+  
+    if (isAuthorized) {
+      router.push("/dashboard/ResidentModule/FirstTimeJobSeeker/AddFirstTimeJobSeeker");
+    } else {
+      alert("You are not authorized to create a new kasambahay.");
+      router.refresh(); // Refresh the page
+    }
+  };
+  
+
+  const handleEditClick = (id: string) => {
+    if (isAuthorized) {
+      router.push(`/dashboard/ResidentModule/FirstTimeJobSeeker/EditFirstTimeJobSeeker?id=${id}`);
+    } else {
+      alert("You are not authorized to edit a current voter.");
+      router.refresh(); // Refresh the page
+    }
+  };
+
   const handleDeleteClick = async (id: string) => {
-    setDeleteUserId(id);
+    if (isAuthorized) {
+      setDeleteUserId(id);
     setShowDeletePopup(true); 
-  }
+  } else {
+    alert("You are not authorized to delete this resident.");
+    router.refresh(); // Refresh the page
+  }  
+}
 
   const confirmDelete = async () => {
     if (deleteUserId) {
@@ -164,6 +207,17 @@ export default function JobSeekerListModule() {
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
+
+
+      <select
+          className="resident-module-filter"
+          value={showCount}
+          onChange={(e) => setShowCount(Number(e.target.value))}
+        >
+          <option value="0">Show All</option>
+          <option value="5">Show 5</option>
+          <option value="10">Show 10</option>
+        </select>
       </div>
 
       <div className="resident-module-main-section">
@@ -212,18 +266,31 @@ export default function JobSeekerListModule() {
                       >
                         View
                       </button>
-                      <button
-                        className="residentmodule-action-edit"
-                        onClick={() => router.push(`/dashboard/ResidentModule/FirstTimeJobSeeker/EditFirstTimeJobSeeker?id=${seeker.id}`)}
+                      {isAuthorized ? (
+                    <>
+                      <button 
+                        className="residentmodule-action-edit" 
+                        onClick={() => handleEditClick(seeker.id)}
                       >
                         Edit
                       </button>
-                      <button
-                        className="residentmodule-action-delete"
+                      <button 
+                        className="residentmodule-action-delete" 
                         onClick={() => handleDeleteClick(seeker.id)}
                       >
                         Delete
                       </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
+                        Edit
+                      </button>
+                      <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
+                        Delete
+                      </button>
+                    </>
+                  )}
                     </div>
                   </td>
                 </tr>
@@ -249,13 +316,13 @@ export default function JobSeekerListModule() {
 
 
       {showDeletePopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-module">
+                            <div className="confirmation-popup-module">
                             <p>Are you sure you want to delete this Jobseeker Record?</p>
           
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
+                                <div className="yesno-container-module">
+                                    <button onClick={() => setShowDeletePopup(false)} className="no-button-module">No</button>
+                                    <button onClick={confirmDelete} className="yes-button-module">Yes</button>
                                 </div> 
                             </div>
                         </div>
@@ -263,19 +330,19 @@ export default function JobSeekerListModule() {
 
 
       {showPopup && (
-                <div className={`popup-overlay show`}>
-                    <div className="popup">
+                <div className={`popup-overlay-module show`}>
+                    <div className="popup-module">
                         <p>{popupMessage}</p>
                     </div>
                 </div>
       )}
 
       {showAlertPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-module">
+                            <div className="confirmation-popup-module">
                                 <p>{popupMessage}</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setshowAlertPopup(false)} className="no-button">Continue</button>
+                                <div className="yesno-container-module">
+                                    <button onClick={() => setshowAlertPopup(false)} className="no-button-module">Continue</button>
                                 </div> 
                             </div>
                         </div>

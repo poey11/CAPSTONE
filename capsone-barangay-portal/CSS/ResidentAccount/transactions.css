@@ -1,11 +1,11 @@
-.main-container {
+.main-container-transactions {
     background-color: #f7e5d5;
     display: flex;
     flex-direction: column;
     height: 100vh;
 }
 
-.transactions-history {
+.transactions-history-transactions {
     width: 90%;
     padding: 2rem;
     background-color: rgba(255, 255, 255, 0.9);
@@ -16,11 +16,10 @@
     height: 70%;
     align-self: center;
     margin-bottom: 3rem;
-    
-   
+      
 }
 
-.table-section {
+.table-section-transactions {
     flex: 1; 
     display: flex; 
     flex-direction: column;
@@ -28,30 +27,29 @@
     margin: 0; 
     overflow: auto; 
     width: 100%;
-    max-height: 100%;
     border: 2px solid  #ddd;
+    overflow-y: scroll;
+    height: 100%;
 }
 
-.table-section thead{
+.table-section-transactions thead{
   position: sticky;
   top: 0;
   background-color: rgb(232, 228, 228);
   z-index: 10; 
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); 
+  
 }
 
-.table-section table {
+.table-section-transactions table {
     width: 100%;
     border-collapse: collapse;
-    border: 2px solid  #ddd;
-    height: 100%;
-    table-layout: fixed;
     background-color: rgba(255, 255, 255, 0.7);
 }
 
 
 
-.table-section th {
+.table-section-transactions th {
     padding: 1rem;
     text-align: center;
     border-bottom: 2px solid #ddd;
@@ -64,7 +62,7 @@
 }
 
 
-.table-section td {
+.table-section-transactions td {
     padding: 1rem;
     text-align: center;
     border-bottom: 2px solid #ddd;
@@ -72,25 +70,67 @@
     white-space: nowrap;
     background-color: rgba(255, 255, 255, 0.7);
     font-size: 18px;
+   
 }
 
-.table-section tr:hover {
+.table-section-transactions tr:hover {
     background-color: #e0e0e0; 
     cursor: pointer; 
     transition: background-color 0.2s ease; 
 }
 
 
+
+
 @media (max-width: 768px) {
-    .table-section table {
+    .table-section-transactions table {
         display: block;
         overflow-x: auto;
     }
 
-    .transactions-history {
+    .transactions-history-transactions {
         padding: 1.5rem;
     }
 } 
+
+.no-transactions {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  height: 100%; /* Ensure it takes full height */
+  width: 100%; /* Ensure it takes full width */
+  text-align: center;
+}
+
+.no-transactions p {
+  color: gray;
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  align-self: center;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*Specific Incident Transactions*/
+
 
 .title-section {
     display: flex;
@@ -137,8 +177,8 @@
     z-index: 2; 
   }
 
-  .status-dropdown {
-    padding: 4px 8px;
+  .status-dropdown-transactions {
+    padding: 0.6rem;
     border-radius: 6px;
     font-weight: bold;
     border: none;
@@ -152,43 +192,45 @@
     font-size: 15px;
     
   }
+
+  .acknowledged {
+    background-color: #4fd69e;
+    color: white;
+    font-size: 15px;
+    
+  }
+
   
   .resolved {
     background-color: #66c47a;
     color: white;
+    font-size: 15px;
     
   }
 
   .rejected {
     background-color: red;
     color: white;
+    font-size: 15px;
   }
 
   .approved {
     background-color: #66c47a;
     color: white;
+    font-size: 15px;
   }
 
   .pick-up{
     background-color: #66a8c4;
     color: white;
+    font-size: 15px;
   }
 
   .completed{
     background-color: #d8b471;
     color: white;
+    font-size: 15px;
   }
-
-  .status-badge {
-    padding: 8px 12px;            
-    border-radius: 5px;          
-    font-size: 13px;              
-    color: white;                
-    display: inline-block;        
-    text-transform: capitalize;   
-    text-align: center;    
-    width: 100px;       
-}
 
 
 
@@ -273,7 +315,7 @@
   
   .title p {
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: #e07c21;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -313,4 +355,26 @@
       flex-direction: column;
     }
   }
+
+  .proof-incident-transactions {
+    display: flex;
+    flex-direction: column;
+
+  }
+
+  .proof-incident-transactions a {
+    margin-top: 10px;
+    display: inline-block;
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 15px;  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+  }
+
+  
+  
   

@@ -5,9 +5,17 @@ import { useRouter } from "next/navigation";
 import { db } from "../../../db/firebase";
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 
 export default function ResidentModule() {
+
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
+  const userPosition = session?.user?.position;
+  const isAuthorized = ["Secretary", "Punong Barangay", "Assistant Secretary"].includes(userPosition || "");
+
+
   const [residents, setResidents] = useState<any[]>([]);
   const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,11 +115,36 @@ export default function ResidentModule() {
 
 
   const handleDeleteClick = async (id: string, residentNumber: string) => {
-    setDeleteUserId(id);
-    setSelectedResidentNumber(residentNumber);
-    setShowDeletePopup(true); 
+    if (isAuthorized) {
+      setDeleteUserId(id);
+      setSelectedResidentNumber(residentNumber);
+      setShowDeletePopup(true);
+    } else {
+      alert("You are not authorized to delete this resident.");
+      router.refresh(); // Refresh the page
+    }
+  };
+  
+  
+  const handleAddResidentClick = () => {
+  
+    if (isAuthorized) {
+      router.push("/dashboard/ResidentModule/AddResident");
+    } else {
+      alert("You are not authorized to create a new resident.");
+      router.refresh(); // Refresh the page
+    }
+  };
+  
 
-  }
+  const handleEditClick = (id: string) => {
+    if (isAuthorized) {
+      router.push(`/dashboard/ResidentModule/EditResident?id=${id}`);
+    } else {
+      alert("You are not authorized to edit a resident.");
+      router.refresh(); // Refresh the page
+    }
+  };
 
   const confirmDelete = async () => {
     if (deleteUserId) {
@@ -176,10 +209,14 @@ export default function ResidentModule() {
   return (
     <main className="resident-module-main-container">
       <div className="resident-module-section-1">
-        <h1>Residents List</h1>
-        <Link href="/dashboard/ResidentModule/AddResident">
-          <button className="add-announcement-btn">Add New Resident</button>
-        </Link>
+        <h1>Main Residents</h1>
+          {isAuthorized ? (
+            <Link href="/dashboard/ResidentModule/AddResident">
+              <button className="add-announcement-btn" onClick={handleAddResidentClick}>Add New Resident</button>
+            </Link>
+          ) : (
+            <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Resident</button>
+          )}
       </div>
 
       <div className="resident-module-section-2">
@@ -273,9 +310,11 @@ export default function ResidentModule() {
                       >
                         View
                       </button>
+                  {isAuthorized ? (
+                    <>
                       <button 
                         className="residentmodule-action-edit" 
-                        onClick={() => router.push(`/dashboard/ResidentModule/EditResident?id=${resident.id}`)}
+                        onClick={() => handleEditClick(resident.id)}
                       >
                         Edit
                       </button>
@@ -285,6 +324,18 @@ export default function ResidentModule() {
                       >
                         Delete
                       </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
+                        Edit
+                      </button>
+                      <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
+                        Delete
+                      </button>
+                    </>
+                  )}
+
                     </div>
                   </td>
                 </tr>
@@ -311,13 +362,13 @@ export default function ResidentModule() {
 
 
       {showDeletePopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-module">
+                            <div className="confirmation-popup-module">
                             <p>Are you sure you want to delete this Resident Record?</p>
                             <h2>Resident Number: {selectedResidentNumber}</h2>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
+                                <div className="yesno-container-module">
+                                    <button onClick={() => setShowDeletePopup(false)} className="no-button-module">No</button>
+                                    <button onClick={confirmDelete} className="yes-button-module">Yes</button>
                                 </div> 
                             </div>
                         </div>
@@ -325,19 +376,19 @@ export default function ResidentModule() {
 
 
       {showPopup && (
-                <div className={`popup-overlay show`}>
-                    <div className="popup">
+                <div className={`popup-overlay-module show`}>
+                    <div className="popup-module">
                         <p>{popupMessage}</p>
                     </div>
                 </div>
       )}
 
       {showAlertPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-module">
+                            <div className="confirmation-popup-module">
                                 <p>{popupMessage}</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setshowAlertPopup(false)} className="no-button">Continue</button>
+                                <div className="yesno-container-module">
+                                    <button onClick={() => setshowAlertPopup(false)} className="no-button-module">Continue</button>
                                 </div> 
                             </div>
                         </div>

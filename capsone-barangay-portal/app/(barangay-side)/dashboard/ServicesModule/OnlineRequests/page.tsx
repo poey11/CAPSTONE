@@ -100,41 +100,11 @@ const metadata: Metadata = {
 
     const router = useRouter();
 
-    const handleView = (documentType: string, purpose: string) => {
-        const documentRoutes: { [key: string]: string } = {
-            "Barangay Clearance": "/dashboard/ServicesModule/OnlineRequests/View/BarangayClearance",
-            "Barangay Indigency": "/dashboard/ServicesModule/OnlineRequests/View/BarangayIndigency",
-            "Barangay ID": "/dashboard/ServicesModule/OnlineRequests/View/BarangayID",
-            "Barangay Certificate": "/dashboard/ServicesModule/OnlineRequests/View/BarangayCertificate",
-            "First Time Jobseeker": "/dashboard/ServicesModule/OnlineRequests/View/FirstTimeJobseeker",
-        };
-
-        if (documentType === "Barangay Permit" && purpose) {
-            const formattedPurpose = purpose.replace(/\s+/g, ""); // Remove spaces for URL consistency
-            router.push(`/dashboard/ServicesModule/OnlineRequests/View/BarangayPermit/${formattedPurpose}`);
-        } else {
-            const route = documentRoutes[documentType] || "/dashboard/ServicesModule/OnlineRequests/View";
-            router.push(route);
-        }
+    const handleView = () => {
+      router.push("/dashboard/ServicesModule/OnlineRequests/View");
+        
     };
 
-    const handleEdit = (documentType: string, purpose: string) => {
-      const documentRoutes: { [key: string]: string } = {
-          "Barangay Clearance": "/dashboard/ServicesModule/OnlineRequests/Edit/BarangayClearance",
-          "Barangay Indigency": "/dashboard/ServicesModule/OnlineRequests/Edit/BarangayIndigency",
-          "Barangay ID": "/dashboard/ServicesModule/OnlineRequests/Edit/BarangayID",
-          "Barangay Certificate": "/dashboard/ServicesModule/OnlineRequests/Edit/BarangayCertificate",
-          "First Time Jobseeker": "/dashboard/ServicesModule/OnlineRequests/Edit/FirstTimeJobseeker",
-      };
-
-      if (documentType === "Barangay Permit" && purpose) {
-          const formattedPurpose = purpose.replace(/\s+/g, ""); // Remove spaces for URL consistency
-          router.push(`/dashboard/ServicesModule/OnlineRequests/Edit/BarangayPermit/${formattedPurpose}`);
-      } else {
-          const route = documentRoutes[documentType] || "/dashboard/ServicesModule/OnlineRequests/View";
-          router.push(route);
-      }
-  };
 
   const handleSMS = () => {
     window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
@@ -254,20 +224,16 @@ const metadata: Metadata = {
                   <div className="actions">
                     <button
                         className="action-view"
-                        onClick={() => handleView(request.documentType, request.purpose)}
+                        onClick={handleView}
                     >
                         View
                     </button>
-                    <button
-                        className="action-edit"
-                        onClick={() => handleEdit(request.documentType, request.purpose)}
-                    >
-                        Edit
-                    </button>
-                    <button className="action-delete">Delete</button>
+                
 
 
+{/*
                     <button type="button" className="action-view" onClick={handleSMS}>SMS</button>
+*/}
                   </div>
                 </td>
               </tr>
