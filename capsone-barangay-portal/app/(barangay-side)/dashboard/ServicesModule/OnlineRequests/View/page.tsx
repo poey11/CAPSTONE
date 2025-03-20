@@ -108,9 +108,6 @@ export default function ViewOnlineRequest() {
                         <button type="button" className="actions-button" onClick={handleSMS}>SMS</button>
                     )}
                 </div>
-
-                
-            
             </div>
 
             <div className="viewonlinereq-main-content">

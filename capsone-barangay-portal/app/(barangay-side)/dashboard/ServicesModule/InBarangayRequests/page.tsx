@@ -108,41 +108,10 @@ const metadata: Metadata = {
       router.push("/dashboard/ServicesModule/GenerateDocument");
     };
 
-    const handleView = (documentType: string, purpose: string) => {
-      const documentRoutes: { [key: string]: string } = {
-          "Barangay Clearance": "/dashboard/ServicesModule/InBarangayRequests/View/BarangayClearance",
-          "Barangay Indigency": "/dashboard/ServicesModule/InBarangayRequests/View/BarangayIndigency",
-          "Barangay ID": "/dashboard/ServicesModule/InBarangayRequests/View/BarangayID",
-          "Barangay Certificate": "/dashboard/ServicesModule/InBarangayRequests/View/BarangayCertificate",
-          "First Time Jobseeker": "/dashboard/ServicesModule/InBarangayRequests/View/FirstTimeJobseeker",
-      };
-
-      if (documentType === "Barangay Permit" && purpose) {
-          const formattedPurpose = purpose.replace(/\s+/g, ""); // Remove spaces for URL consistency
-          router.push(`/dashboard/ServicesModule/InBarangayRequests/View/BarangayPermit/${formattedPurpose}`);
-      } else {
-          const route = documentRoutes[documentType] || "/dashboard/ServicesModule/InBarangayRequests/View";
-          router.push(route);
-      }
+    const handleView = () => {
+      router.push("/dashboard/ServicesModule/InBarangayRequests/View");
   };
 
-  const handleEdit = (documentType: string, purpose: string) => {
-    const documentRoutes: { [key: string]: string } = {
-        "Barangay Clearance": "/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayClearance",
-        "Barangay Indigency": "/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayIndigency",
-        "Barangay ID": "/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayID",
-        "Barangay Certificate": "/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayCertificate",
-        "First Time Jobseeker": "/dashboard/ServicesModule/InBarangayRequests/Edit/FirstTimeJobseeker",
-    };
-
-    if (documentType === "Barangay Permit" && purpose) {
-        const formattedPurpose = purpose.replace(/\s+/g, ""); // Remove spaces for URL consistency
-        router.push(`/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayPermit/${formattedPurpose}`);
-    } else {
-        const route = documentRoutes[documentType] || "/dashboard/ServicesModule/OnlineRequests/View";
-        router.push(route);
-    }
-};
 
   const [selectedDocumentType, setSelectedDocumentType] = useState<string | null>(null);
 
@@ -288,17 +257,10 @@ const confirmDelete = () => {
                 <div className="actions">
                     <button
                         className="action-view"
-                        onClick={() => handleView(request.documentType, request.purpose)}
+                        onClick={handleView}
                     >
                         View
                     </button>
-                    <button
-                        className="action-edit"
-                        onClick={() => handleEdit(request.documentType, request.purpose)}
-                    >
-                        Edit
-                    </button>
-                    <button className="action-delete" onClick={() => handleDeleteClick(request.documentType)}>Delete</button>
                   </div>
                 </td>
               </tr>

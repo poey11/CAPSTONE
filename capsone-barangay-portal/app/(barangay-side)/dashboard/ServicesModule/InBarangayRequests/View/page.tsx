@@ -7,8 +7,8 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 
 
 const metadata: Metadata = {
-    title: "View In Barangay Certificate Request",
-    description: "View In Barangay Certificate Request in Services Module",
+    title: "View In Barangay  Request",
+    description: "View In Barangay  Request in Services Module",
   };
 
 
@@ -33,8 +33,7 @@ const metadata: Metadata = {
 ];
 
 export default function ViewInBarangayRequest() {
-    const requestData = [
-        {
+    const requestData = {
             documentType: "Barangay Certificate",
             purpose: "Death Residency",
             date: "January 17, 2024",
@@ -51,10 +50,14 @@ export default function ViewInBarangayRequest() {
             contact: "09171218101",
             status: "In Progress",
             requirements: "/Images/document.png",
-        },
-    ];
+};
 
-    const residentData = requestData[0] as Record<string, string>;
+    const residentData = requestData as Record<string, string>;
+    const [status, setStatus] = useState(requestData.status.toLowerCase().replace(" ", "-"));
+
+    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setStatus(e.target.value.toLowerCase().replace(" ", "-"));
+    };
 
     const handleBack = () => {
         window.location.href = "/dashboard/ServicesModule/InBarangayRequests";
@@ -75,42 +78,75 @@ export default function ViewInBarangayRequest() {
     };
 
     return (
-        <main className="main-container">
-            <div className="main-content">
-                <div className="section-1">
-                  <div className="left-section">
-                    <Link href="/dashboard/ServicesModule/InBarangayRequests">
-                        <button type="button" className="back-button" onClick={handleBack}></button>
-                    </Link>
-                    <p>In Barangay Request Details</p>
-                  </div>
-                  <div className="right-section">
-                      <span className={`status-badge ${residentData.status.toLowerCase().replace(" ", "-")}`}>
-                          {residentData.status ?? "N/A"}
-                      </span>
+        <main className="viewinbarangay-main-container">
+
+            <div className="viewonlinereq-page-title-section-1">
+                <h1>In Barangay Document Requests</h1>
+            </div>
+
+            <div className="viewonlinereq-actions-content">
+                <div className="viewonlinereq-actions-content-section1">
+                    
+                    <button type="button" className="actions-button">Print</button>
+
+                    {/* Dropdown with dynamic class */}
+                    <select
+                        id="status"
+                        className={`status-dropdown-viewonlinereq ${status}`}
+                        name="status"
+                        value={status}
+                        onChange={handleStatusChange}
+                    >
+                        <option value="new">New</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+
+                </div>
+            </div>
+
+            <div className="viewinbarangay-main-content">
+
+                <div className="viewinbarangayonlinereq-section-1">
+                  <div className="viewinbarangayreq-main-section1-left">
+                        <button onClick={handleBack}>
+                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                        </button>
+
+                        <h1>In Barangay Request Details</h1>
                   </div>
                     
                 </div>
 
                 {residentFields.map((field) => (
-                    <div className="details-section" key={field.key}>
-                        <div className="title">
+                    <div className="viewinbarangayreq-details-section" key={field.key}>
+                        <div className="viewinbarangayreq-title">
                             <p>{field.label}</p>
                         </div>
-                        <div className="description">
+                        <div className="viewinbarangayreq-description">
                             {/* For 'requirements' field, check if it's an image path */}
                             {field.key === "requirements" ? (
-                                <img src={residentData[field.key] ?? ""} alt="Requirement" className="requirement-image" />
+                                <div className="resident-id-container">
+                                <img 
+                                    src={residentData[field.key] ?? ""} 
+                                    alt="Requirement" 
+                                    className="resident-id-image" 
+                                />
+                                <a
+                                href={residentData[field.key]}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="view-image-link"
+                                >
+                                    View Image
+                                </a>
+                            </div>
                             ) : (
                                 <p>{residentData[field.key] ?? "N/A"}</p>
                             )}
                         </div>
                     </div>
                 ))}
-            </div>
-
-            <div className="Actions-Section">
-                    <button type="button" className="actions-button" onClick={handlePrintClick}>Print</button>
             </div>
 
             {showPopup && (

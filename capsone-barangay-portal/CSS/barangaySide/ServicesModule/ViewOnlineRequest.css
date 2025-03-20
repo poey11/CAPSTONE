@@ -1,6 +1,7 @@
 
 .viewonlinereq-main-container,
-.viewappointment-main-container {
+.viewappointment-main-container,
+.viewinbarangay-main-container {
 
   width: 100%;
   height: 100vh;
@@ -50,7 +51,8 @@
 }
 
 .viewonlinereq-main-content,
-.viewappointment-main-content {
+.viewappointment-main-content,
+.viewinbarangay-main-content{
   display: flex;
   flex-direction: column;
   align-self: center;
@@ -64,7 +66,8 @@
   margin-top: 20px;
 }
 
-.viewonlinereq-section-1 {
+.viewonlinereq-section-1,
+.viewinbarangayonlinereq-section-1 {
   display: flex;
   border-bottom: 2px solid #ddd;
   width: 100%;
@@ -74,7 +77,7 @@
   justify-content: space-between;
 }
 
-.viewonlinereq-section-1 p {
+.viewinbarangayonlinereq-section-1 p {
   font-weight: bold;
   color: grey;
   margin-left: 1rem;
@@ -116,12 +119,14 @@
     justify-content: space-between;
   }
 
+  .viewinbarangayreq-main-section1-left,
   .viewonlinereq-main-section1-left{
     display: flex;
     align-items: center;
     gap: 20px;
   }
 
+  .viewinbarangayreq-main-section1-left h1,
   .viewonlinereq-main-section1-left h1{
     font-size: 1.25rem;
     font-weight: bold;
@@ -141,12 +146,14 @@
     
   }
 
-  .viewonlinereq-details-section {
+  .viewonlinereq-details-section,
+  .viewinbarangayreq-details-section {
     display: flex;
     border-top: 2px solid #ddd;
   }
 
-  .viewonlinereq-title {
+  .viewonlinereq-title,
+  .viewinbarangayreq-title {
     width: 25%;
     display: flex;
     justify-content: center;
@@ -155,19 +162,22 @@
     background: #dddbdb33;
   }
 
-  .viewonlinereq-title p {
+  .viewonlinereq-title p,
+  .viewinbarangayreq-title p {
     font-weight: bold;
     color: grey;
     font-size: 1rem;
   }
 
-  .viewonlinereq-description {
+  .viewonlinereq-description,
+  .viewinbarangayreq-description {
     padding: 2rem;
     width: 80%;
     margin-left: 20px;
   }
 
-  .viewonlinereq-description p {
+  .viewonlinereq-description p,
+  .viewinbarangayreq-description p {
 
     color: grey;
     font-size: 1rem;
