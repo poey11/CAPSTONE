@@ -70,6 +70,18 @@
   flex-direction: column;
   }
 
+  .form-group-incident-report input,
+  .form-group-incident-report select {
+    padding: 8px;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: rgba(0, 0, 0, 0.4);
+    padding-right: 40px;
+  }
+
   .form-label-incident-report {
   font-size: 16px;
   font-weight: bold;

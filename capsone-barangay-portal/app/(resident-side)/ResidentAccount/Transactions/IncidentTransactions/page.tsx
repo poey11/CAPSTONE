@@ -20,7 +20,7 @@ interface IncidentReport {
   file?: string;
 }
 
-export default function DocumentRequestTransactionsDetails() {
+export default function IncidentTransactionsDetails() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const referenceId = searchParams.get("id");
@@ -86,8 +86,12 @@ export default function DocumentRequestTransactionsDetails() {
     },
     { label: "Concern", key: "concerns" },
     { label: "Location", key: "address" },
-    { label: "Status", key: "status" },
+    {
+      label: "Status",
+      key: "status",
+    },
   ];
+  
 
   return (
     <main className="incident-transaction-container">
@@ -122,7 +126,7 @@ export default function DocumentRequestTransactionsDetails() {
           </div>
           <div className="description">
             {fileURL ? (
-              <>
+              <div className="proof-incident-transactions">
                 <img
                   src={fileURL}
                   alt="Proof of Incident"
@@ -134,7 +138,7 @@ export default function DocumentRequestTransactionsDetails() {
                     View Full Image
                   </a>
                 </p>
-              </>
+              </div>
             ) : (
               <p>No proof uploaded.</p>
             )}
