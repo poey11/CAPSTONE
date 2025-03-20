@@ -445,7 +445,7 @@ export default function AddIncident() {
                     <input 
                     type="text" 
                     className="search-bar-add" 
-                    placeholder="Enter Respondent's First Name" 
+                    placeholder="Enter Respondent's Last Name" 
                     value={respondent.lname}
                     name="lname"
                     id="respondent"
