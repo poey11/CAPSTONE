@@ -15,10 +15,6 @@ export default function ResidentModule() {
   const userPosition = session?.user?.position;
   const isAuthorized = ["Secretary", "Punong Barangay", "Assistant Secretary"].includes(userPosition || "");
 
-  useEffect(() => {
-    console.log("User Role:", userRole);
-    console.log("User Position:", userPosition);
-  }, [userRole, userPosition]);
 
   const [residents, setResidents] = useState<any[]>([]);
   const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
@@ -131,13 +127,11 @@ export default function ResidentModule() {
   
   
   const handleAddResidentClick = () => {
-    console.log("User Position:", userPosition);
-    console.log("Is Authorized:", isAuthorized);
   
     if (isAuthorized) {
       router.push("/dashboard/ResidentModule/AddResident");
     } else {
-      alert("You are not authorized to create a resident.");
+      alert("You are not authorized to create a new resident.");
       router.refresh(); // Refresh the page
     }
   };
@@ -147,7 +141,7 @@ export default function ResidentModule() {
     if (isAuthorized) {
       router.push(`/dashboard/ResidentModule/EditResident?id=${id}`);
     } else {
-      alert("You are not authorized to create a resident.");
+      alert("You are not authorized to edit a resident.");
       router.refresh(); // Refresh the page
     }
   };
