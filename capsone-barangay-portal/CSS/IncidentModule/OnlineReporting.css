@@ -197,6 +197,7 @@ FOR ONLINE INCIDENT REPORTING CSS
     width: 100%;
     padding: 2rem;
     justify-content: space-between;
+    background-color: #dddbdb95;
 }
 
 
@@ -244,7 +245,7 @@ FOR ONLINE INCIDENT REPORTING CSS
 
   .online-report-details-section{
     display: flex;
-    border-bottom: 2px solid #ddd;
+    border-top: 2px solid #ddd;
   }
 
   .title-section {
@@ -252,6 +253,8 @@ FOR ONLINE INCIDENT REPORTING CSS
     display: flex;
     justify-content: center;
     align-items: center;
+    border-right: 2px solid #ddd;
+    background: #dddbdb33;
   }
 
   .title-section p {
@@ -263,6 +266,7 @@ FOR ONLINE INCIDENT REPORTING CSS
   .description-section {
     padding: 2rem;
     width: 80%;
+    
   }
 
   .description-section p {
