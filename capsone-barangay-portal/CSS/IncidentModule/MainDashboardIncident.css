@@ -68,15 +68,15 @@
     object-fit: cover; /* Ensure the image is properly scaled */
 }
 
-.actions-departments {
+.actions-departments-main {
     display: flex;
     gap: 0.5rem; /* Space between action buttons */
     justify-content: center;
 }
 
-.action-view-departments,
-.action-edit-departments,
-.action-delete-departments {
+.action-view-departments-main,
+.action-edit-departments-main,
+.action-delete-departments-main {
     border: none;
     cursor: pointer;
     padding: 8px 12px;
@@ -86,43 +86,42 @@
 
 }
 
-.action-view-departments {
+.action-view-departments-main {
     background-color: #4caf50; /* Green */
     color: white;
 }
 
-.action-edit-departments {
+.action-edit-departments-main {
     background-color: #ff9800; /* Orange */
-    width: 80px;
     color: white;
 }
 
-.action-delete-departments {
+.action-delete-departments-main {
     background-color: #f44336; /* Red */
     color: white;
 }
-.action-view-departments {
+.action-view-departments-main {
     background-color: #4caf50; /* Green */
     color: white;
 }
 
-.action-view-departments:hover {
+.action-view-departments-main:hover {
     background-color: #3e8f41; /* Green */
 }
 
-.action-edit-departments {
+.action-edit-departments-main {
     background-color: #ff9800; /* Orange */
     color: white;
 }
-.action-edit-departments:hover {
+.action-edit-departments-main:hover {
     background-color: #d58102; /* Orange */
 }
 
-.action-delete-departments {
+.action-delete-departments-main {
     background-color: #f44336; /* Red */
     color: white;
 }
-.action-delete-departments:hover {
+.action-delete-departments-main:hover {
     background-color: #d73c31; /* Red */
 }
 

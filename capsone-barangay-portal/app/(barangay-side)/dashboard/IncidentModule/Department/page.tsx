@@ -103,10 +103,10 @@ export default function Department() {
                   </span>
                 </td>
                 <td>
-                  <div className="actions-departments">
-                    <button className="action-view-departments" onClick={() => router.push(`/dashboard/IncidentModule/ViewIncident?id=${incident.id}`)}>View</button>
-                    <button className="action-edit-departments" onClick={() => router.push(`/dashboard/IncidentModule/EditIncident?id=${incident.id}`)}>Edit</button>
-                    <button className="action-delete-departments" onClick={() => deleteDocument("IncidentReports", incident.id)}>Delete</button>
+                  <div className="actions-departments-main">
+                    <button className="action-view-departments-main" onClick={() => router.push(`/dashboard/IncidentModule/ViewIncident?id=${incident.id}`)}>View</button>
+                    <button className="action-edit-departments-main" onClick={() => router.push(`/dashboard/IncidentModule/EditIncident?id=${incident.id}`)}>Edit</button>
+                    <button className="action-delete-departments-main" onClick={() => deleteDocument("IncidentReports", incident.id)}>Delete</button>
                   </div>
                 </td>
               </tr>
