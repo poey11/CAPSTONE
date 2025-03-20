@@ -30,6 +30,7 @@ const registerForm:React.FC = () => {
     const captchaSiteKey = process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY || "";
     const [captchaToken, setCaptchaToken] = useState<string>("");
     const [isTermChecked, setIsTermChecked] = useState<boolean>(false);
+    const [confirmPassword, setConfirmPassword] = useState<string>("");
     const [showPopup, setShowPopup] = useState(false);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
     const [resident, setResident] = useState<residentUser>({
@@ -49,74 +50,68 @@ const registerForm:React.FC = () => {
         e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
       ) => {
         const { name, value, type } = e.target;
-        if(type=== "file" && e.target instanceof HTMLInputElement && e.target.files){
-          setResident({
-            ...resident,
-            upload: e.target.files[0],
-          })
-        }
-        else{
-          setResident({
-            ...resident,
-            [name]:value,
-          })
+      
+        if (name === "confirm_password") {
+          setConfirmPassword(value);
+        } else if (type === "file" && e.target instanceof HTMLInputElement) {
+          const files = e.target.files;
+          if (files && files.length > 0) {
+            setResident((prev) => ({
+              ...prev,
+              upload: files[0],
+            }));
+          }
+        } else {
+          setResident((prev) => ({
+            ...prev,
+            [name]: value,
+          }));
         }
       };
+      
 
-      const handleSubmit =async(e: React.FormEvent<HTMLFormElement>) => {
+      const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        // Check if password matches confirmPassword
+        if (resident.password !== confirmPassword) {
+          setErrorPopup({ show: true, message: "Passwords do not match!" });
+          setConfirmPassword(""); // Clear the confirm password field
+          return;
+        }
+
         let user = null;
         let docRef = null;
         let storageRef = null;
-        try{
-          const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, resident.password);
+        
+        try {
+          const userCredentials = await createUserWithEmailAndPassword(auth, resident.email, resident.password);
           user = userCredentials.user;
           await signOut(auth); 
-            
-            let fileName ='';
-            if(resident.upload){
-              const timeStamp = Date.now().toString();
-              const fileExtention = resident.upload.name.split('.').pop();
-              fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtention}`
-              storageRef = ref(storage, `ResidentUsers/valid_id_image/${fileName}`);
-              await uploadBytes(storageRef,  resident.upload)
-            }
-              
- 
-            const response = await fetch('/api/registerForm', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ captchaToken }),
-            });
-            const data = await response.json();
-            if (!response.ok) {
-              throw new Error(data.message || 'Something went wrong');
-            }
-            docRef = doc(db, "ResidentUsers", user.uid);
-            await setDoc(docRef, {
-              first_name: resident.first_name,  
-              last_name: resident.last_name,
-              email: resident.email,
-              phone: resident.phone,
-              address: resident.address,
-              sex: resident.sex,
-              role: resident.role,
-              createdAt: new Date().toISOString(),
-              status: resident.status,
-              validIdDocID: fileName
+          
+          let fileName = '';
+          if (resident.upload) {
+            const timeStamp = Date.now().toString();
+            const fileExtension = resident.upload.name.split('.').pop();
+            fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtension}`;
+            storageRef = ref(storage, `ResidentUsers/valid_id_image/${fileName}`);
+            await uploadBytes(storageRef, resident.upload);
+          }
+
+          docRef = doc(db, "ResidentUsers", user.uid);
+          await setDoc(docRef, {
+            ...resident,
+            createdAt: new Date().toISOString(),
+            validIdDocID: fileName,
           });
-         
+
           await sendEmailVerification(user);
 
-
-
           setShowPopup(true);
-            setTimeout(() => {
-                setShowPopup(false);
-                router.push("/resident/login");
-            }, 3000);
+          setTimeout(() => {
+            setShowPopup(false);
+            router.push("/resident/login");
+          }, 3000);
           
         }
         catch (error: any) {
@@ -279,11 +274,15 @@ const registerForm:React.FC = () => {
 
             <div className="form-group-register-form">
             <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password: </label>
-            <input id="confirm_password" type="password"
-            name="confirm_password"
-            className="form-input-register-form "
-            placeholder="Confirm Password"
-            />
+              <input
+                id="confirm_password"
+                type="password"
+                name="confirm_password"
+                value={confirmPassword}
+                onChange={handleChange}
+                className="form-input-register-form"
+                placeholder="Confirm Password"
+              />
             </div>
 
 
