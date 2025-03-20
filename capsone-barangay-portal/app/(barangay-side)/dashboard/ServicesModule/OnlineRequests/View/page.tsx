@@ -67,6 +67,10 @@ export default function ViewOnlineRequest() {
         window.location.href = "/dashboard/ServicesModule/Appointments/View";
     };
 
+    const handleSMS = () => {
+        window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
+    };
+
     return (
         <main className="viewonlinereq-main-container">
 
@@ -74,22 +78,34 @@ export default function ViewOnlineRequest() {
                 <h1>Online Document Requests</h1>
             </div>
 
-            <div className="letters-content-edit">
-                <button type="button" className="actions-button">Print</button>
-                <button type="button" className="actions-button">View Appointment Details</button>
+            <div className="viewonlinereq-actions-content">
+                <div className="viewonlinereq-actions-content-section1">
+                    <button type="button" className="actions-button">Print</button>
+                    <button type="button" className="actions-button" onClick ={handleviewappointmentdetails}>View Appointment Details</button>
 
-                {/* Dropdown with dynamic class */}
-                <select
-                    id="status"
-                    className={`status-dropdown-edit ${status}`}
-                    name="status"
-                    value={status}
-                    onChange={handleStatusChange}
-                >
-                    <option value="pick-up">Pick-up</option>
-                    <option value="completed">Completed</option>
-                    <option value="pending">Pending</option>
-                </select>
+                    {/* Dropdown with dynamic class */}
+                    <select
+                        id="status"
+                        className={`status-dropdown-viewonlinereq ${status}`}
+                        name="status"
+                        value={status}
+                        onChange={handleStatusChange}
+                    >
+                        <option value="pick-up">Pick-up</option>
+                        <option value="completed">Completed</option>
+                        <option value="pending">Pending</option>
+                    </select>
+
+                </div>
+                
+                <div className="viewonlinereq-actions-content-section2">
+                    {status === "pick-up" && (
+                        <button type="button" className="actions-button" onClick={handleSMS}>SMS</button>
+                    )}
+                </div>
+
+                
+            
             </div>
 
             <div className="viewonlinereq-main-content">

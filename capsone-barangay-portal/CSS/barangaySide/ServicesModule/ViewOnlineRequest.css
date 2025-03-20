@@ -9,7 +9,8 @@
  
 }
 
-.letters-content-edit {
+/*
+.viewonlinereq-actions-content {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -21,6 +22,33 @@
   margin-bottom: 2rem;
   margin-left: 200px;
   margin-right: 200px;
+  margin-top: 30px;
+}*/
+
+.viewonlinereq-actions-content{
+  display: flex;
+  flex-direction: column;
+  padding: 3rem;
+  background-color: #f4f2f2;
+  border: 2px solid  #ddd;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+  margin-left: 200px;
+  margin-right: 200px;
+  margin-top: 30px;
+}
+
+.viewonlinereq-actions-content-section1{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.viewonlinereq-actions-content-section2{
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-top: 30px;
 }
 
@@ -218,7 +246,7 @@
 }
 
 
-.status-dropdown-edit {
+.status-dropdown-viewonlinereq {
     padding: 8px 12px;            
     border-radius: 5px;          
     font-size: 13px;              
@@ -230,28 +258,28 @@
     height: 50px;   
 }
 
-.status-dropdown-edit.rejected { 
+.status-dropdown-viewonlinereq.rejected { 
     background-color: #e22929;    
 }
 
-.status-dropdown-edit.completed {
+.status-dropdown-viewonlinereq.completed {
     background-color: #4caf50;    
 }
 
-.status-dropdown-edit.pick-up {
+.status-dropdown-viewonlinereq.pick-up {
     background-color: #be5cb6;    
 }
 
-.status-dropdown-edit.pending {
+.status-dropdown-viewonlinereq.pending {
     background-color: #325bd4;    
 }
 
-.status-badge.in-progress {
+.status-dropdown-viewonlinereq.in-progress {
   background-color: #ffd700;    
 }
 
 
-.status-dropdown-edit.new {
+.status-dropdown-viewonlinereq.new {
   background-color: #f79233;    
 }
 
