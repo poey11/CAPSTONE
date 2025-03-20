@@ -1,12 +1,17 @@
-.main-container {
-    background-color: #f7e5d5;
-   min-height: 100vh;
-       display: flex; 
-     justify-content: center;
+.main-container-incident-notification {
+  display: flex;
+  justify-self: center;
+  align-items: center; 
+
+  background-color: #f7e5d5;
+  height: 100%;
+  display: flex; 
+  justify-content: center;
      align-items: center;
+     width: 100%;
   }
   
-  .notification-section {
+  .notification-section-incident-notification {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -15,9 +20,10 @@
     border-radius: 8px; /* Optional for rounded corners */
     width: 75%;
     padding: 2.5rem;
+    margin: 5rem;
   }
 
- .message1 {
+ .message1-incident-notification {
   color: grey;
   font-weight: bold;
   margin-bottom: 2rem;
@@ -25,20 +31,21 @@
   font-size: 1.75rem;
  }
 
- .message2 {
+ .message2-incident-notification {
    color: grey;
    font-weight: light;
    font-size: 1rem;
    margin-bottom: 1rem;
+   width: 80%;
  }
 
- .image {
+ .image-incident-notification{
  width: 80px;
  height: 80px;
  margin-top: 1.5rem;
  }
 
- .back-button {
+ .back-button-incident-notification {
    background-color: #f49028;
    color: white;
    font-size: 16px;
@@ -54,10 +61,10 @@
    }
 
    
-   .back-button:hover {
+   .back-button-incident-notification:hover {
    background-color: #d87d20;
    }
 
-   .back-button:active {
+   .back-button-incident-notification:active {
    background-color: #bf6a18;
    }
