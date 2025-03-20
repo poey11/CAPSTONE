@@ -3,9 +3,10 @@ import { ChangeEvent, useEffect, useState } from "react";
 import {useAuth} from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 import {useSearchParams } from "next/navigation";
-import { addDoc, collection, doc } from "firebase/firestore";
-import { db } from "@/app/db/firebase";
-import { Contact } from "lucide-react";
+import { addDoc, collection, doc, } from "firebase/firestore";
+import { db, storage } from "@/app/db/firebase";
+import { ref, uploadBytes } from "firebase/storage";
+import { useRouter } from "next/navigation";
 
 
 
@@ -13,7 +14,7 @@ export default function Action() {
   const user = useAuth().user; // Get the current user from the context
   const searchParam = useSearchParams();
   const docType = searchParam.get("doc");
-
+  const router = useRouter();
   const [clearanceInput, setClearanceInput] =  useState<any|null>({
     accountId: user?.uid || "Guest",
     purpose: "",
@@ -130,20 +131,29 @@ const handleFileChange = (
     }
   };
   
-  const handleReportUpload = async (key: any, storageRef: any) => {
-    try {
-      const docRef = collection(db, "ServiceRequests"); // Reference to the collection
-  
-      // Assuming key is an array with a single object containing all fields:
-      const updates = { ...key[0] };  // No filtering, just spread the object
-  
-      // Upload the report to Firestore
-      const newDoc = await addDoc(docRef, updates);
-  
-    } catch (e: any) {
-      console.log("Error uploading report:", e);
+ const handleReportUpload = async (key: any, storageRefs: Record<string, any>) => {
+  try {
+    const docRef = collection(db, "ServiceRequests"); // Reference to the collection
+    const updates = { ...key };  // No filtering, just spread the object
+
+    // Upload files to Firebase Storage if there are any
+    for (const [key, storageRef] of Object.entries(storageRefs)) {
+      const file = clearanceInput[key];
+      if (file && storageRef) {
+        // Upload each file to storage
+        await uploadBytes(storageRef, file);
+        console.log(`${key} uploaded successfully`);
+      }
     }
-  };
+
+    // Upload the report to Firestore
+    const newDoc = await addDoc(docRef, updates);
+    console.log("Report uploaded with ID:", newDoc.id);
+  } catch (e: any) {
+    console.error("Error uploading report:", e);
+  }
+};
+
     
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -169,18 +179,57 @@ const handleFileChange = (
     // Handle form submission
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
-      if (docType === "Barangay Certificate" || docType === "Barangay Clearance" ||
-       docType === "Barangay Indigency" || docType === "Business ID"|| docType === "First Time Jobseeker") {
+      console.log(clearanceInput);
+    
+      // List all file-related keys in an array for easier maintenance
+      const fileKeys = [
+        "barangayIDjpg",
+        "validIDjpg",
+        "letterjpg",
+        "signaturejpg",
+        "copyOfPropertyTitle",
+        "dtiRegistration",
+        "isCCTV",
+        "taxDeclaration",
+        "approvedBldgPlan"
+      ];
+    
+      const filenames: Record<string, string> = {};
+      const storageRefs: Record<string, any> = {};
+      
+    
+      // Generate unique filenames for each uploaded file
+      fileKeys.forEach((key) => {
+        if (clearanceInput[key]) {
+          let timeStamp = Date.now().toString() + Math.floor(Math.random() * 1000); // Add random digits to prevent collisions
+          const file = clearanceInput[key];
+          const fileExtension = file.name.split('.').pop();
+          const filename = `service_request_${clearanceInput.accountId}.${key}.${timeStamp}.${fileExtension}`;
+          filenames[key] = filename;
+          storageRefs[key] = ref(storage, `ServiceRequests/${filename}`);
+        }
+      });
+    
+      // 📌 Handling for Barangay Certificate, Clearance, Indigency, Business ID, First Time Jobseeker
+      if (
+        docType === "Barangay Certificate" ||
+        docType === "Barangay Clearance" ||
+        docType === "Barangay Indigency" ||
+        docType === "Barangay ID" ||
+        docType === "First Time Jobseeker"
+      ) {
         if (
-          clearanceInput.barangayIDjpg === null &&
-          clearanceInput.validIDjpg === null &&
-          clearanceInput.letterjpg === null
+          !clearanceInput.barangayIDjpg &&
+          !clearanceInput.validIDjpg &&
+          !clearanceInput.letterjpg
         ) {
           alert("Please upload one of the following documents: Barangay ID, Valid ID, or Endorsement Letter");
           return;
         }
-
+    
         const clearanceVars = {
+          accID: clearanceInput.accountId,
+          docType: docType,
           firstName: clearanceInput.firstName,
           middleName: clearanceInput.middleName,
           lastName: clearanceInput.lastName,
@@ -192,21 +241,15 @@ const handleFileChange = (
           civilStatus: clearanceInput.civilStatus,
           contact: clearanceInput.contact,
           citizenship: clearanceInput.citizenship,
-          signaturejpg: clearanceInput.signaturejpg,
-          ...(clearanceInput.barangayIDjpg !== null && {
-            barangayIDjpg: clearanceInput.barangayIDjpg,
-          }),
-          ...(clearanceInput.validIDjpg !== null && {
-            validIDjpg: clearanceInput.validIDjpg,
-          }),
-          ...(clearanceInput.letterjpg !== null && {
-            endorsementLetter: clearanceInput.letterjpg,
-          }),
-          ...((clearanceInput.purpose === "Residency" || docType=== "Barangay Indigency") && {
+          signaturejpg: filenames.signaturejpg, // Store filename instead of file object
+          ...(clearanceInput.barangayIDjpg && { barangayIDjpg: filenames.barangayIDjpg }),
+          ...(clearanceInput.validIDjpg && { validIDjpg: filenames.validIDjpg }),
+          ...(clearanceInput.letterjpg && { endorsementLetter: filenames.letterjpg }),
+          ...(((clearanceInput.purpose === "Residency" && docType === "Barangay Certificate") || docType === "Barangay Indigency") && {
             appointmentDate: clearanceInput.appointmentDate,
             purpose: clearanceInput.purpose,
           }),
-          ...(docType === "Business ID" && {
+          ...(docType === "Barangay ID" && {
             birthplace: clearanceInput.birthplace,
             religion: clearanceInput.religion,
             nationality: clearanceInput.nationality,
@@ -223,41 +266,71 @@ const handleFileChange = (
             isBeneficiary: clearanceInput.isBeneficiary,
           })
         };
-
-        return;
+        console.log(clearanceVars, storageRefs);
+        handleReportUpload(clearanceVars, storageRefs);
+   
       }
-      
-      const clearanceVars = {
-       ...((docType === "Temporary Business Permit"||docType === "Business Permit") && {
+    
+      // 📌 Handling for Temporary Business Permit & Business Permit
+      if (docType === "Temporary Business Permit" || docType === "Business Permit") {
+        const clearanceVars = {
+          accID: clearanceInput.accountId,
+          docType: docType,
           purpose: clearanceInput.purpose,
           businessName: clearanceInput.businessName,
           businessLocation: clearanceInput.businessLocation,
           businessNature: clearanceInput.businessNature,
           estimatedCapital: clearanceInput.estimatedCapital,
-       }),
-       ...((docType === "Construction Permit") && {
-        typeofconstruction: clearanceInput.typeofconstruction,
-        typeofbldg: clearanceInput.typeofbldg,
-        projectName: clearanceInput.projectName,
-        projectLocation: clearanceInput.businessLocation,
-        taxDeclaration: clearanceInput.taxDeclaration,
-        approvedBldgPlan: clearanceInput.approvedBldgPlan,
-       }),
-        firstName: clearanceInput.firstName,
-        middleName: clearanceInput.middleName,
-        lastName: clearanceInput.lastName,
-        Contact: clearanceInput.contact,
-        homeAddress: clearanceInput.address,
-        copyOfPropertyTitle: clearanceInput.copyOfPropertyTitle,
-        dtiRegistration: clearanceInput.dtiRegistration,
-        isCCTV: clearanceInput.isCCTV,
-        signaturejpg: clearanceInput.signaturejpg,
-        barangayIDjpg: clearanceInput.barangayIDjpg,
-        validIDjpg: clearanceInput.validIDjpg,
-        endorsementLetter: clearanceInput.letterjpg,
-      };
-     
+          firstName: clearanceInput.firstName,
+          middleName: clearanceInput.middleName,
+          lastName: clearanceInput.lastName,
+          contact: clearanceInput.contact,
+          homeAddress: clearanceInput.address,
+          copyOfPropertyTitle: filenames.copyOfPropertyTitle,
+          dtiRegistration: filenames.dtiRegistration,
+          isCCTV: filenames.isCCTV,
+          signaturejpg: filenames.signaturejpg,
+          barangayIDjpg: filenames.barangayIDjpg,
+          validIDjpg: filenames.validIDjpg,
+          endorsementLetter: filenames.letterjpg,
+        };
+        console.log(clearanceVars, storageRefs);
+        handleReportUpload(clearanceVars, storageRefs);
+        
+      }
+    
+      // 📌 Handling for Construction Permit
+      if (docType === "Construction Permit") {
+        const clearanceVars = {
+          accID: clearanceInput.accountId,
+          docType: docType,
+          typeofconstruction: clearanceInput.typeofconstruction,
+          typeofbldg: clearanceInput.typeofbldg,
+          projectName: clearanceInput.projectName,
+          projectLocation: clearanceInput.businessLocation,
+          taxDeclaration: filenames.taxDeclaration,
+          approvedBldgPlan: filenames.approvedBldgPlan,
+          firstName: clearanceInput.firstName,
+          middleName: clearanceInput.middleName,
+          lastName: clearanceInput.lastName,
+          contact: clearanceInput.contact,
+          homeAddress: clearanceInput.address,
+          copyOfPropertyTitle: filenames.copyOfPropertyTitle,
+          dtiRegistration: filenames.dtiRegistration,
+          isCCTV: filenames.isCCTV,
+          signaturejpg: filenames.signaturejpg,
+          barangayIDjpg: filenames.barangayIDjpg,
+          validIDjpg: filenames.validIDjpg,
+          endorsementLetter: filenames.letterjpg,
+        };
+        console.log(clearanceVars, storageRefs);
+        handleReportUpload(clearanceVars, storageRefs);
+      }
+      alert("Document request submitted successfully!");
+      router.push("/services");
     };
+    
+    
 
 
   return (
@@ -294,22 +367,22 @@ const handleFileChange = (
             <option value="" disabled>Select purpose</option>
             {docType === "Barangay Certificate" ? (<>
               <option value="Residency">Residency</option>
-              <option value="Loan">Occupancy /  Moving Out</option>
-              <option value="Bank Transaction">Estate Tax</option>
-              <option value="Local Employment">Death Residency</option>
-              <option value="Maynilad">No Income (Scholarship)</option>
-              <option value="Meralco">No Income (ESC)</option>
-              <option value="Bail Bond">No Income (For Discount)</option>
-              <option value="Character Reputation">Cohabitation</option>
-              <option value="Request for Referral">Guardianship</option>
-              <option value="Issuance of Postal ID">Good Moral and Probation</option>
-              <option value="MWSI connection">Garage/PUV</option>
-              <option value="Business Clearance">Garage/TRU</option>
+              <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
+              <option value="Estate Tax">Estate Tax</option>
+              <option value="Death Residency">Death Residency</option>
+              <option value="No Income (Scholarship)">No Income (Scholarship)</option>
+              <option value="No Income (ESC)">No Income (ESC)</option>
+              <option value="No Income (For Discount)">No Income (For Discount)</option>
+              <option value="Cohabitation">Cohabitation</option>
+              <option value="Guardianship">Guardianship</option>
+              <option value="Good Moral and Probation">Good Moral and Probation</option>
+              <option value="Garage/PUV">Garage/PUV</option>
+              <option value="Garage/TRU">Garage/TRU</option>
             
             </>):docType === "Barangay Clearance" ? (<>
               <option value="Loan">Loan</option>
               <option value="Bank Transaction">Bank Transaction</option>
-              <option value="Bank Transaction">Residency</option>
+              <option value="Residency">Residency</option>
               <option value="Local Employment">Local Employment</option>
               <option value="Maynilad">Maynilad</option>
               <option value="Meralco">Meralco</option>
@@ -322,14 +395,14 @@ const handleFileChange = (
               {/* <option value="Firearms License">Police Clearance</option> */}
               {/* <option value="Others">Others</option> */}
             </>):docType === "Barangay Indigency" ? ( <>
-              <option value="Loan">No Income</option>
-              <option value="Bank Transaction">Public Attorneys Office</option>
-              <option value="Bank Transaction">AKAP</option>
-              <option value="Local Employment">Financial Subsidy of Solo Parent</option>
-              <option value="Maynilad">Fire Emergency</option>
-              <option value="Meralco">Flood Victims</option>
-              <option value="Bail Bond">Philhealth Sponsor</option>
-              <option value="Character Reputation">Medical Assistance</option>
+              <option value="No Income">No Income</option>
+              <option value="Public Attorneys Office">Public Attorneys Office</option>
+              <option value="AKAP">AKAP</option>
+              <option value="Financial Subsidy of Solo Parent">Financial Subsidy of Solo Parent</option>
+              <option value="Fire Emergency">Fire Emergency</option>
+              <option value="Flood Victims">Flood Victims</option>
+              <option value="Philhealth Sponsor">Philhealth Sponsor</option>
+              <option value="Medical Assistance">Medical Assistance</option>
             </>): (docType === "Business Permit" ||docType === "Temporary Business Permit") && (
               <>
               <option value="New">New</option>
@@ -339,7 +412,7 @@ const handleFileChange = (
           </select>
          
         </div>
-        {(docType === "Barangay Indigency" || clearanceInput.purpose === "Residency") && (
+        {(docType === "Barangay Indigency" || (clearanceInput.purpose === "Residency" && docType === "Barangay Certificate")) && (
           <>
             <div className="form-group">
               <label htmlFor="dateOfResidency" className="form-label">Set An Appointment</label>
