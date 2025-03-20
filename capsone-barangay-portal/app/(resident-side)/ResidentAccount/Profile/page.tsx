@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase"; 
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import "@/CSS/ResidentAccount/profile.css";
 
 export default function SettingsPageResident() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const residentId = searchParams.get("id");
+    const auth = getAuth();
 
     const [resident, setResident] = useState({
         first_name: "",
@@ -20,15 +21,12 @@ export default function SettingsPageResident() {
         status: "",
     });
 
-    const [showPopup, setShowPopup] = useState(false);
-    const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
-
-    const [preview, setPreview] = useState<string | null>(null);
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [file, setFile] = useState<File | null>(null); // State for file upload
-  
-    
+
     useEffect(() => {
         if (residentId) {
             const fetchResidentData = async () => {
@@ -44,17 +42,11 @@ export default function SettingsPageResident() {
                         sex: docSnap.data().sex || "",
                         status: docSnap.data().status || "",
                     });
-
-                    setPreview(docSnap.data().fileURL || null);
                 }
             };
             fetchResidentData();
         }
     }, [residentId]);
-
-    const handleBack = () => {
-        window.location.href = "/dashboard";
-    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -64,99 +56,44 @@ export default function SettingsPageResident() {
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handlePasswordChange = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setLoading(true);
-        setError("");
-    
-        try {
-            const docRef = doc(db, "ResidentUsers", residentId!);
-            const docSnap = await getDoc(docRef);
-    
-            if (docSnap.exists()) {
-                const currentData = docSnap.data();
-    
-                // Check if there are any changes
-                const isDataChanged = Object.keys(resident).some(
-                    (key) => resident[key as keyof typeof resident] !== currentData[key]
-                );
-    
-                if (!isDataChanged) {
-                    alert("No changes detected.");
-                    setLoading(false);
-                    return;
-                }
+        if (newPassword !== confirmPassword) {
+            setError("Passwords do not match.");
+            return;
+        }
+
+        const user = auth.currentUser;
+        if (user && resident.email) {
+            try {
+                const credential = EmailAuthProvider.credential(resident.email, currentPassword);
+                await reauthenticateWithCredential(user, credential);
+                await updatePassword(user, newPassword);
+                alert("Password updated successfully!");
+            } catch (error) {
+                setError("Failed to update password. Check your current password.");
+                console.error(error);
             }
-    
-            // Proceed with update if data has changed
-            await updateDoc(docRef, { ...resident });
-    
-            alert("Profile updated successfully!");
-            router.push("/ResidentAccount/Profile");
-        } catch (err) {
-            setError("Failed to update resident");
-            console.error(err);
-        }
-    
-        setLoading(false);
-    };
-
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            setSelectedImage(imageUrl);
         }
     };
-    
+
     return (
         <main className="main-container-resident-profile">
             <div className="first-section-resident-profile">
                 <div className="account-profile-section">
                     <p className="Details">Profile</p>
-
-                    <div className="icon-container-profile-section">
-
-                        <img src={selectedImage || "/images/user.png"} alt="User Icon" className="user-icon-profile-section" />
-                                
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    id="fileUpload"
-                                    style={{ display: "none" }}
-                                    onChange={handleImageChange}
-                                />
-                                <button 
-                                    className="upload-btn-profile-section" 
-                                    onClick={() => document.getElementById("fileUpload")?.click()}
-                                >
-                                    Update Profile Image
-                                </button>
-                    </div>
-
                     <div className="name-section">
                         <p className="name">{resident.first_name || "N/A"}</p>
                         <p className="name">{resident.last_name || "N/A"}</p>
                     </div>
-
-                    {/* Transactions Link */}
-                    <div className="transactions-link">
-                        <a href="/ResidentAccount/Transactions" className="transactions-text">
-                            View Transactions
-                        </a>
-                    </div>
-
                 </div>
 
                 <div className="account-details-section">
                     <p className="Details">Account Details</p>
-
-                    <div className="edit-section-profile">
-                      <form onSubmit={handleSubmit}>
+                    <form onSubmit={handlePasswordChange}>
+                        {error && <p className="error-text">{error}</p>}
                         <div className="form-group-profile-section">
-                            <label htmlFor="first_name" className="form-label-profile-section">First Name: </label>
+                        <label htmlFor="first_name" className="form-label-profile-section">First Name: </label>
                             <input 
                                 id="first_name" 
                                 name="first_name"
@@ -230,57 +167,48 @@ export default function SettingsPageResident() {
 
                             {/* MALCOLM HERE */}
 
-
-                       <div className="form-group-profile-section">
-                            <label htmlFor="current-password" className="form-label-profile-section">Current Password:</label>
+           
+                            <div className="form-group-profile-section">
+                            <label htmlFor="currentPassword" className="form-label-profile-section">Current Password:</label>
                             <input 
                                 id="current-password" 
-                                name="current-password"
+                                type="password"
+                                name="currentPassword"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
                                 className="form-input-profile-section" 
                                 required 
-                                disabled 
                             />
                         </div>
-
-
                         <div className="form-group-profile-section">
-                            <label htmlFor="new-password" className="form-label-profile-section">New Password:</label>
+                            <label htmlFor="newPassword" className="form-label-profile-section">New Password:</label>
                             <input 
                                 id="new-password" 
-                                name="new-password"
+                                type="password"
+                                name="newPassword"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
                                 className="form-input-profile-section" 
                                 required 
-                                disabled 
                             />
                         </div>
-
                         <div className="form-group-profile-section">
-                            <label htmlFor="confirm-password" className="form-label-profile-section">Confirm Password:</label>
+                            <label htmlFor="confirmPassword" className="form-label-profile-section">Confirm Password:</label>
                             <input 
                                 id="confirm-password" 
-                                name="confirm-password"
+                                type="password"
+                                name="confirmPassword"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
                                 className="form-input-profile-section" 
                                 required 
-                                disabled 
                             />
                         </div>
-
-
-                        
-                        <div className="submit-section-resident-account">
-
-                            <button type="submit" className="submit-btn-profile-section" disabled={loading}>
-                                {loading ? "Updating..." : "Update Profile"}
-                            </button>
-
-                        </div>
-
-                       
-
-                        </form>
-                    </div>
+                        <button type="submit" className="submit-btn-profile-section" disabled={loading}>
+                            {loading ? "Updating..." : "Change Password"}
+                        </button>
+                    </form>
                 </div>
-
             </div>
         </main>
     );
