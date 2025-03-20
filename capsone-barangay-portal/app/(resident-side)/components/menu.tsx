@@ -7,7 +7,7 @@ import { signOut } from "firebase/auth";
 import SideNav from '../../(barangay-side)/components/bMenu';
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
-import { collection, query, where, onSnapshot, updateDoc, doc } from "firebase/firestore"; // Firestore functions
+import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc } from "firebase/firestore"; // Firestore functions
 import "@/CSS/Components/menu.css";
 import { Timestamp } from "firebase-admin/firestore";
 
@@ -24,12 +24,27 @@ type Notification = {
   isRead?: boolean;
 };
 
+
+interface Resident {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  sex: string;
+  status: string;
+  userIcon: string;
+}
+
 const Menu = () => {
   const {user, loading} = useAuth();
   const router = useRouter();
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const loginMenuRef = useRef<HTMLDivElement | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [userIcon, setUserIcon] = useState<string | undefined>(undefined);
+  const db = getFirestore();
+
+  const [resident, setResident] = useState<Resident | null>(null);
   
   const handleLogout = async() => {
     await signOut(auth);
@@ -55,6 +70,29 @@ const Menu = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    console.log("User email:", user?.email);
+
+    const fetchResidentData = async () => {
+      if (user) { // Ensure residentId is not null
+        const userDocRef = doc(db, "ResidentUsers", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (userDocSnap.exists()) {
+          const data = userDocSnap.data();
+          console.log("Resident data fetched:", data);
+          setResident(data as Resident);
+        } else {
+          console.log("No resident found in Firestore!");
+        }
+      }
+    };
+
+    fetchResidentData();
+}, [user]);
+
+
 
 
   const [isOpen, setIsOpen] = useState(false);
@@ -258,7 +296,13 @@ const Menu = () => {
                     id="profile-link"
                     onClick={toggleLoginOptions}
                   >
-                    <img src="/images/user.png" alt="User Icon" className="header-usericon" />
+                    {/*<img src={userIcon} alt="User Icon" className="header-usericon" />*/}
+
+                    {resident?.userIcon ? (
+                                        <img src={resident.userIcon} alt="User Icon" className="header-usericon" />
+                                    ) : (
+                                        <img src="/images/user.png" alt="Default User" className="header-usericon" />
+                                    )}
                   </p>
                   
                   <div className="Dropdown">

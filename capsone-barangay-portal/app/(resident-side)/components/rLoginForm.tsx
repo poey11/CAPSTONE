@@ -63,16 +63,6 @@ const rLoginForm:React.FC = () => {
                 setShowVerifyPopup(true);
             }
             
-            /* ok di ko to gets HAHAHAH */
-            // // Manually trigger form validation
-            // const form = e.target as HTMLFormElement;
-            // if (form.checkValidity()) {
-            //     // Redirect to the Notification page after form submission if validation is successful
-            //     document.location.href = '/services/barangayclearance/notification'; // Use JavaScript redirection
-            // } else {
-            // // If the form is invalid, trigger the validation
-            //     form.reportValidity(); // This will show validation messages for invalid fields
-            // }
             
         } catch (error: string | any) {
             setErrorMessage(error.message);

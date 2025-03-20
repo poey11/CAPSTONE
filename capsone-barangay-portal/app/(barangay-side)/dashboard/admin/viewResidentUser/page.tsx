@@ -162,15 +162,15 @@ export default function ViewUser() {
                         <p>Valid ID</p>
                     </div>
                     <div className="viewresident-description">
-                        {ResidentUserData.fileURL ? (
+                        {ResidentUserData.validIdDocID ? (
                             <div className="resident-id-container">
                                 <img
-                                    src={ResidentUserData.fileURL}
+                                    src={ResidentUserData.validIdDocID}
                                     alt="Resident's Valid ID"
                                     className="resident-id-image"
                                 />
                                 <a
-                                    href={ResidentUserData.fileURL}
+                                    href={ResidentUserData.validIdDocID}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="view-image-link"
