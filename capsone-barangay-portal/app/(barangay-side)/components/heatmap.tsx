@@ -58,13 +58,15 @@ const IncidentHeatmap = () => {
       container: mapContainer.current as HTMLElement,
       style: "https://tiles.stadiamaps.com/styles/osm_bright.json",
       center: [121.0437, 14.678],
-      zoom: 14,
-      minZoom: 12, // Limit minimum zoom
-      maxBounds: [ // Restrict movement to Fairview area
-        [121.030, 14.660], // Southwest corner
-        [121.060, 14.720]  // Northeast corner
+      zoom: 13, // More noticeable zoom-out
+      minZoom: 12,
+      maxBounds: [
+        [121.035, 14.670], // Southwest corner
+        [121.055, 14.685]  // Northeast corner
       ]
     });
+    
+  
 
     map.current.on("load", () => {
       map.current?.addSource("incidents", {
@@ -87,7 +89,7 @@ const IncidentHeatmap = () => {
         type: "circle",
         source: "incidents",
         paint: {
-          "circle-radius": 10,
+          "circle-radius": 6,
           "circle-opacity": 0.9,
           "circle-color": ["get", "color"],
         },
