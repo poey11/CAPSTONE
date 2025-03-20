@@ -333,17 +333,17 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
                <button className="letter-announcement-btn-edit" name="summon" onClick={handleGenerateLetterAndInvitation}>Generate Summon Letter</button>
               
                <select
-                id="status"
-                className={`status-dropdown-edit ${toUpdate.status || reportData.status || "pending"}`}  
-                name="status"
-                value={toUpdate.status ?? reportData.status ?? "Pending"} 
-                onChange={handleFormChange}               
-              >
-                <option value="pending">Pending</option>
-                <option value="resolved">Resolved</option>
-                <option value="settled">Settled</option>
-                <option value="archived">Archived</option>
-              </select>
+                  id="status"
+                  className={`status-dropdown-edit ${toUpdate.status?.toLowerCase() || reportData.status?.toLowerCase() || "pending"}`}
+                  name="status"
+                  value={toUpdate.status ?? reportData.status ?? "Pending"} 
+                  onChange={handleFormChange}               
+                >
+                  <option value="pending">Pending</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="settled">Settled</option>
+                  <option value="archived">Archived</option>
+                </select>
 
 
         
