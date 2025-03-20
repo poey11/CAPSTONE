@@ -10,8 +10,7 @@ import { auth, db, storage } from "@/app/db/firebase"; // Ensure 'auth' is impor
 
 
 
-/*not working pa yung pag change ng pass sa db*/
-
+// need to fix yung pag gitna ng profile image section
 
 export default function SettingsPageResident() {
     const router = useRouter();
@@ -78,7 +77,7 @@ export default function SettingsPageResident() {
 
         if (name === "password") {
             setPassword(value);
-            setResident((prevData) => ({ ...prevData, password: value })); // ✅ Update formData.password
+            setResident((prevData) => ({ ...prevData, password: value })); // formData.password
          } else if (name === "confirmPassword") {
             setConfirmPassword(value);
          } else {
@@ -106,86 +105,58 @@ export default function SettingsPageResident() {
         e.preventDefault();
         setLoading(true);
         setMessage("");
-
+      
         try {
-            
-            const user = auth.currentUser;
-            console.log("User Info:", user);
-
-            if (!user) {
-                setMessage("User session expired. Please log in again.");
-                setShowPopup(true);
-                setLoading(false);
-                return;
-            }
-
-            if (!user) {
-                setMessage("User not authenticated. Please log in again.");
-                setShowPopup(true);
-                setLoading(false);
-                return;
-            }
-
-            if (!user.email) {
-                setMessage("No email associated with this user.");
-                setShowPopup(true);
-                setLoading(false);
-                return;
-            }
-    
-            if (password && password !== confirmPassword) {
-                setMessage("Passwords do not match!");
-                setShowPopup(true);
-                setLoading(false);
-                return;
-            }
-    
-            if (password) {
-                // Reauthenticate user before changing password
-                if (!password) {
-                    setMessage("Current password is required for security.");
-                    setShowPopup(true);
-                    setLoading(false);
-                    return;
-                }
-
-                const credential = EmailAuthProvider.credential(user.email, password);
-                await reauthenticateWithCredential(user, credential);
-
-                // Update password in Firebase Authentication
-                await updatePassword(user, password);
-                setMessage("Password updated successfully!");
-            }
-
-            if (file) {
-                const downloadURL = await uploadImageToStorage(file);
-                resident.userIcon = downloadURL;
-            }
-
-
-            const docRef = doc(db, "ResidentUsers", residentId!);
-            await updateDoc(docRef, {
-                first_name: resident.first_name,
-                last_name: resident.last_name,
-                phone: resident.phone,
-                email: resident.email,
-                sex: resident.sex,
-                status: resident.status,
-                userIcon: resident.userIcon,
-                
-            });
-
-            setMessage("Profile updated successfully!");
+          const user = auth.currentUser;
+          if (!user) {
+            setMessage("User session expired. Please log in again.");
             setShowPopup(true);
-            router.push("/ResidentAccount/Profile");
+            setLoading(false);
+            return;
+          }
+      
+          if (password || confirmPassword) {
+            if (password !== confirmPassword) {
+              setMessage("Passwords do not match!");
+              setShowPopup(true);
+              setLoading(false);
+              return;
+            }
+      
+            try {
+              await updatePassword(user, password);
+              setMessage("Password updated successfully!");
+              setShowPopup(true);
+            } catch (error: any) {
+              setMessage(`Failed to update password: ${error.message}`);
+              setShowPopup(true);
+              setLoading(false);
+              return;
+            }
+          }
+      
+          if (file) {
+            const downloadURL = await uploadImageToStorage(file);
+            resident.userIcon = downloadURL;
+          }
+      
+          const docRef = doc(db, "ResidentUsers", residentId!);
+          await updateDoc(docRef, {
+            phone: resident.phone,
+            userIcon: resident.userIcon,
+          });
+      
+          setMessage("Profile updated successfully!");
+          setShowPopup(true);
+          router.push("/ResidentAccount/Profile");
         } catch (err: any) {
-            setMessage("Failed to update profile. Please try again." + err.message);
-            setShowPopup(true);
-            console.error(err);
+          setMessage("Failed to update profile. Please try again. " + err.message);
+          setShowPopup(true);
         }
-
+      
         setLoading(false);
-    };
+      };
+      
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     
@@ -202,8 +173,21 @@ export default function SettingsPageResident() {
 
                 <div className="account-profile-section">
                     <div className="icon-container-profile-section">
-                    <img src={preview || resident.userIcon || undefined} alt="User Icon" className="user-icon-profile-section" />
-
+                    {preview ? (
+                                <img
+                                    src={preview}
+                                    alt="User Icon"
+                                    className="user-icon-profile-section"
+                                />
+                            ) : resident.userIcon ? (
+                                <img
+                                    src={resident.userIcon}
+                                    alt="User Icon"
+                                    className="user-icon-profile-section"
+                                />
+                            ) : (
+                                <p>No Profile Image</p>
+                            )}
                     <input
                         type="file"
                         accept="image/*"
@@ -245,6 +229,7 @@ export default function SettingsPageResident() {
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required 
+                                disabled
                             />
                         </div>
 
@@ -257,6 +242,7 @@ export default function SettingsPageResident() {
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required 
+                                disabled
                             />
                         </div>
 
@@ -269,6 +255,7 @@ export default function SettingsPageResident() {
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required 
+                                disabled
                             />
                         </div>
 
@@ -309,14 +296,14 @@ export default function SettingsPageResident() {
                                 disabled 
                             />
                         </div>
-
-
+                        
                         <div className="form-group-profile-section">
                             <label htmlFor="password" className="form-label-profile-section">New Password:</label>
                             <input 
                                 id="password" 
                                 name="password"
                                 className="form-input-profile-section" 
+                                type="password"
                                 onChange={handleChange}
                             />
                         </div>
@@ -327,6 +314,7 @@ export default function SettingsPageResident() {
                                 id="confirmPassword" 
                                 name="confirmPassword"
                                 className="form-input-profile-section" 
+                                type="password"
                                 onChange={handleChange}
                             />
                         </div>

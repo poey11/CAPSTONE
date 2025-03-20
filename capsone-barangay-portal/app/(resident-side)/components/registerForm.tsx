@@ -1,14 +1,12 @@
 "use client"
-import {auth,db,storage} from "../../db/firebase";
-import { deleteObject,ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { deleteDoc,doc, setDoc } from "firebase/firestore";
-import { createUserWithEmailAndPassword, sendEmailVerification,signOut } from "firebase/auth";
+import { auth, db, storage } from "../../db/firebase";
+import { deleteObject, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword, sendEmailVerification, signOut } from "firebase/auth";
 import { useState, ChangeEvent } from "react";
 import { useRouter } from 'next/navigation';
 import ReCAPTCHA from "react-google-recaptcha";
-import { hash } from 'bcryptjs'; 
 import "@/CSS/Components/registerform.css";
-
 
 interface Resident {
     sex: string;
@@ -17,22 +15,24 @@ interface Resident {
     email: string;
     phone: string;
     address: string;
-    //password: string;
-  };
-  
-  type residentUser = Resident & {
+    password: string;
+    upload: File | null;
+}
+
+type residentUser = Resident & {
     role: "Resident";
     status: "Unverified";
-  };
-  
-  
-const registerForm:React.FC = () => {
+};
+
+const RegisterForm: React.FC = () => {
     const router = useRouter();
     const captchaSiteKey = process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY || "";
     const [captchaToken, setCaptchaToken] = useState<string>("");
     const [isTermChecked, setIsTermChecked] = useState<boolean>(false);
+    const [confirmPassword, setConfirmPassword] = useState<string>("");
     const [showPopup, setShowPopup] = useState(false);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+
     const [resident, setResident] = useState<residentUser>({
         sex: "",
         first_name: "",
@@ -40,173 +40,106 @@ const registerForm:React.FC = () => {
         email: "",
         phone: "",
         address: "",
-        //password: "",
+        password: "",
         role: "Resident",
-        status: "Unverified",
-      });
+        upload: null,
+        status: "Unverified"
+    });
 
+    const [filePreview, setFilePreview] = useState<string | null>(null);
 
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-
-    
-
-      const handleChange = (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-      ) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
-      
-        if (type === "file" && e.target instanceof HTMLInputElement && e.target.files) {
-          setResident({
-            ...resident,
-          });
-        } else if (name === "password") {
-          setPassword(value);
-          setResident((prevData) => ({ ...prevData, password: value })); 
-        } else if (name === "confirmPassword") {
-          setConfirmPassword(value);
+
+        if (name === "confirm_password") {
+            setConfirmPassword(value);
+        } else if (type === "file" && e.target instanceof HTMLInputElement) {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                setResident((prev) => ({
+                    ...prev,
+                    upload: files[0],
+                }));
+                setFilePreview(URL.createObjectURL(files[0])); // Set file preview
+            }
         } else {
-          setResident((prevData) => ({ ...prevData, [name]: value }));
+            setResident((prev) => ({
+                ...prev,
+                [name]: value,
+            }));
         }
-      };
+    };
 
-      const handleSubmit =async(e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        // Check if passwords match
-        if (password !== confirmPassword) {
-          setErrorPopup({ show: true, message: "Passwords do not match!" });
-          return;
-        }
-
-        let user = null;
-        let docRef = null;
-        let storageRef = null;
-        try{
-
-          const hashedPassword = await hash(password, 12);
-          const userCredentials= await createUserWithEmailAndPassword(auth, resident.email, password);
-          user = userCredentials.user;
-          await signOut(auth); 
-            
-            let fileURL = "";
-                  if (file) {
-                    const storageRef = ref(storage, `ResidentsFiles/${file.name}`);
-                    await uploadBytes(storageRef, file);
-                    fileURL = await getDownloadURL(storageRef);
-                  }
-              
- 
-            const response = await fetch('/api/registerForm', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ captchaToken }),
-            });
-            const data = await response.json();
-            if (!response.ok) {
-              throw new Error(data.message || 'Something went wrong');
-            }
-            docRef = doc(db, "ResidentUsers", user.uid);
-            await setDoc(docRef, {
-              first_name: resident.first_name,  
-              last_name: resident.last_name,
-              email: resident.email,
-              phone: resident.phone,
-              address: resident.address,
-              sex: resident.sex,
-              role: resident.role,
-              createdAt: new Date().toISOString(),
-              status: resident.status,
-              validIdDocID: fileURL,
-              userIcon: "/images/user.png"
-          });
-         
-          await sendEmailVerification(user);
-
-
-
-          setShowPopup(true);
-            setTimeout(() => {
-                setShowPopup(false);
-                router.push("/resident/login");
-            }, 3000);
-          
-        }
-        catch (error: any) {
-          setErrorPopup({ show: true, message: "Register failed! " + error.message });
-            if(docRef){
-              try{
-                await deleteDoc(docRef);
-              }
-              catch(e){
-                console.log("Error deleting document: ", e);
-              }
-            }
-            if(storageRef){
-              try{
-                await deleteObject(storageRef);
-              }
-              catch(e){
-                console.log("Error deleting file: ", e);
-              }
-            }
-
-            if(user){
-              try{
-                await user.delete();
-              }
-              catch(e){
-                console.log("Error deleting user: ", e);
-              }
-            }
-            
-            
-        }        
-      }
-
-    const [file, setFile] = useState<File | null>(null);
-    const [preview, setPreview] = useState<string | null>(null);
-
-      const handleCheckBox = (e:ChangeEvent<HTMLInputElement>) => {
-        setIsTermChecked(e.target.checked);
-      }
-
-      const handleToken = (token: string | null) => {
-        if(token){
-          setCaptchaToken(token);
-        }
-      }
-
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
     
-      const handleFileDelete = () => {
-        setFile(null);
-        setPreview(null);
-      };
-
-      const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files.length > 0) {
-          const selectedFile = e.target.files[0];
-      
-          // Ensure only one file is processed
-          setFile(selectedFile);
-          setPreview(URL.createObjectURL(selectedFile));
-      
-          // Reset the file input to prevent multiple selections
-          e.target.value = "";
+      if (resident.password !== confirmPassword) {
+        setErrorPopup({ show: true, message: "Passwords do not match!" });
+        setConfirmPassword("");
+        return;
+      }
+    
+      let user = null;
+      let docRef = null;
+      let storageRef = null;
+      let fileDownloadURL = '';
+    
+      try {
+        // Create the user
+        const userCredentials = await createUserWithEmailAndPassword(auth, resident.email, resident.password);
+        user = userCredentials.user;
+        await signOut(auth);
+    
+        // Upload the file to Firebase Storage if available
+        if (resident.upload) {
+          const timeStamp = Date.now().toString();
+          const fileExtension = resident.upload.name.split('.').pop();
+          const fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtension}`;
+          storageRef = ref(storage, `ResidentUsers/valid_id_image/${fileName}`);
+    
+          await uploadBytes(storageRef, resident.upload);
+          fileDownloadURL = await getDownloadURL(storageRef); // Get the download URL
         }
-      };
- 
+    
+        // Store resident data in Firestore
+        docRef = doc(db, "ResidentUsers", user.uid);
+        await setDoc(docRef, {
+          ...resident,
+          upload: fileDownloadURL, // Save the file URL instead of the file object
+          createdAt: new Date().toISOString(),
+        });
+    
+        await sendEmailVerification(user);
+    
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+          router.push("/resident/login");
+        }, 3000);
+      } catch (error: any) {
+        setErrorPopup({ show: true, message: "Register failed! " + error.message });
+    
+        // Cleanup in case of error
+        if (docRef) await deleteDoc(docRef);
+        if (storageRef) await deleteObject(storageRef);
+        if (user) await user.delete();
+      }
+    };
+    
 
-  
+    const handleCheckBox = (e: ChangeEvent<HTMLInputElement>) => {
+        setIsTermChecked(e.target.checked);
+    };
 
- 
+    const handleToken = (token: string | null) => {
+        if (token) {
+            setCaptchaToken(token);
+        }
+    };
 
-     
-    return ( 
-      <main className="main-container-register-form">
-        {showPopup && (
+    return (
+        <main className="main-container-register-form">
+            {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
                         <p>Registration Successful!</p>
@@ -214,7 +147,7 @@ const registerForm:React.FC = () => {
                     </div>
                 </div>
             )}
-        {errorPopup.show && (
+            {errorPopup.show && (
                 <div className="popup-overlay error">
                     <div className="popup">
                         <p>{errorPopup.message}</p>
@@ -223,20 +156,19 @@ const registerForm:React.FC = () => {
                 </div>
             )}
 
-        <div className="register-section-register-form">
-          <h1>Register</h1>
-          <form className="register-form" onSubmit={handleSubmit}> {/* Use onSubmit to trigger the redirect */}
-            <div className="form-group-register-form">
-              <label htmlFor="sex" className="form-label-register-form">Sex:</label>
-              <select  value={resident.sex}  onChange={handleChange} id="sex" name="sex"  className="form-input-register-form " required>
-                <option value="" disabled>Select a Sex</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-            
-            </div>
+            <div className="register-section-register-form">
+                <h1>Register</h1>
+                <form className="register-form" onSubmit={handleSubmit}>
+                    <div className="form-group-register-form">
+                        <label htmlFor="sex" className="form-label-register-form">Sex:</label>
+                        <select value={resident.sex} onChange={handleChange} id="sex" name="sex" className="form-input-register-form" required>
+                            <option value="" disabled>Select a Sex</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
 
-            <div className="form-group-register-form">
+                    <div className="form-group-register-form">
             <label htmlFor="first_name" className="form-label-register-form">First Name: </label>
             <input value={resident.first_name} onChange={handleChange} id="first_name" 
             type="text" name="first_name" 
@@ -289,11 +221,8 @@ const registerForm:React.FC = () => {
 
             <div className="form-group-register-form">
             <label htmlFor="password" className="form-label-register-form">Password: </label>
-            <input 
-            onChange={handleChange} 
-            id="password"
-            type="password" 
-            name="password" 
+            <input value={resident.password} onChange={handleChange} id="password"
+            type="password" name="password" 
             className="form-input-register-form "
             placeholder="Enter Password"
             required/>
@@ -301,69 +230,58 @@ const registerForm:React.FC = () => {
 
             <div className="form-group-register-form">
             <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password: </label>
-            <input 
-            onChange={handleChange}
-            id="confirmPassword" 
-            type="password"
-            name="confirmPassword"
-            className="form-input-register-form "
-            placeholder="Confirm Password"
-            />
+              <input
+                id="confirm_password"
+                type="password"
+                name="confirm_password"
+                value={confirmPassword}
+                onChange={handleChange}
+                className="form-input-register-form"
+                placeholder="Confirm Password"
+              />
             </div>
 
 
             <div className="signature/printedname-container">
-              <label className="form-label-register-form">Upload Valid ID with address: </label>
+                <label className="form-label-register-form" htmlFor="upload">Upload Valid ID with address:</label>
+                
+                {/* Single File Input */}
+                <label htmlFor="upload" className="upload-link">Click to Upload File</label>
 
-              <div className="file-upload-container">
-                <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
-                <input id="file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleFileChange} />
-
-                {file && (
-                  <div className="file-name-image-display">
-                    <div className="file-name-image-display-indiv">
-                      {preview && <img src={preview} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />}
-                      <span>{file.name}</span>
-                      <div className="delete-container">
-                        <button type="button" onClick={handleFileDelete} className="delete-button">
-                          <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                        </button>
-                      </div>
+                <input
+                    id="upload"
+                    type="file"
+                    name="upload"
+                    className="file-upload-input"
+                    accept="image/*"
+                    onChange={handleChange}
+                />
+                
+                {/* File Preview */}
+                {filePreview && (
+                    <div className="file-preview">
+                    <img src={filePreview} alt="Preview" style={{ width: '100px', height: '100px', marginTop: '10px' }} />
                     </div>
-                  </div>
                 )}
-
-              
-              </div>
-            </div>
-
-            <div className="form-checkbox-section">
-            <label htmlFor="terms" className="form-label-register-form">I agree to the terms and conditions</label>
-            <input id="terms" onChange={handleCheckBox}  type="checkbox" name="terms" className="form-checkbox" />
-            </div>
-
-            <div className="form-captcha">
-            <ReCAPTCHA sitekey= {captchaSiteKey} onChange={handleToken}  />
             </div>
 
 
-            {/* Submit button */}
-            <button
-              type="submit"
-              className= "submit-button"
-              disabled={!isTermChecked}
-            >
-              Register
-            </button>
-          </form>
+                    <div className="form-checkbox-section">
+                        <label htmlFor="terms" className="form-label-register-form">I agree to the terms and conditions</label>
+                        <input id="terms" onChange={handleCheckBox} type="checkbox" name="terms" className="form-checkbox" />
+                    </div>
 
+                    <div className="form-captcha">
+                        <ReCAPTCHA sitekey={captchaSiteKey} onChange={handleToken} />
+                    </div>
 
-        </div>
+                    <button type="submit" className="submit-button" disabled={!isTermChecked}>
+                        Register
+                    </button>
+                </form>
+            </div>
+        </main>
+    );
+};
 
-
-     
-    </main>
-     );
-}
- 
-export default registerForm;
+export default RegisterForm;
