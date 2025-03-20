@@ -5,9 +5,21 @@ import { useRouter } from "next/navigation";
 import { db } from "../../../db/firebase";
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 
 export default function ResidentModule() {
+
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
+  const userPosition = session?.user?.position;
+  const isAuthorized = ["Secretary", "Punong Barangay", "Assistant Secretary"].includes(userPosition || "");
+
+  useEffect(() => {
+    console.log("User Role:", userRole);
+    console.log("User Position:", userPosition);
+  }, [userRole, userPosition]);
+
   const [residents, setResidents] = useState<any[]>([]);
   const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,11 +119,38 @@ export default function ResidentModule() {
 
 
   const handleDeleteClick = async (id: string, residentNumber: string) => {
-    setDeleteUserId(id);
-    setSelectedResidentNumber(residentNumber);
-    setShowDeletePopup(true); 
+    if (isAuthorized) {
+      setDeleteUserId(id);
+      setSelectedResidentNumber(residentNumber);
+      setShowDeletePopup(true);
+    } else {
+      alert("You are not authorized to delete this resident.");
+      router.refresh(); // Refresh the page
+    }
+  };
+  
+  
+  const handleAddResidentClick = () => {
+    console.log("User Position:", userPosition);
+    console.log("Is Authorized:", isAuthorized);
+  
+    if (isAuthorized) {
+      router.push("/dashboard/ResidentModule/AddResident");
+    } else {
+      alert("You are not authorized to create a resident.");
+      router.refresh(); // Refresh the page
+    }
+  };
+  
 
-  }
+  const handleEditClick = (id: string) => {
+    if (isAuthorized) {
+      router.push(`/dashboard/ResidentModule/EditResident?id=${id}`);
+    } else {
+      alert("You are not authorized to create a resident.");
+      router.refresh(); // Refresh the page
+    }
+  };
 
   const confirmDelete = async () => {
     if (deleteUserId) {
@@ -177,9 +216,13 @@ export default function ResidentModule() {
     <main className="resident-module-main-container">
       <div className="resident-module-section-1">
         <h1>Main Residents</h1>
-        <Link href="/dashboard/ResidentModule/AddResident">
-          <button className="add-announcement-btn">Add New Resident</button>
-        </Link>
+          {isAuthorized ? (
+            <Link href="/dashboard/ResidentModule/AddResident">
+              <button className="add-announcement-btn" onClick={handleAddResidentClick}>Add New Resident</button>
+            </Link>
+          ) : (
+            <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Resident</button>
+          )}
       </div>
 
       <div className="resident-module-section-2">
@@ -273,9 +316,11 @@ export default function ResidentModule() {
                       >
                         View
                       </button>
+                  {isAuthorized ? (
+                    <>
                       <button 
                         className="residentmodule-action-edit" 
-                        onClick={() => router.push(`/dashboard/ResidentModule/EditResident?id=${resident.id}`)}
+                        onClick={() => handleEditClick(resident.id)}
                       >
                         Edit
                       </button>
@@ -285,6 +330,18 @@ export default function ResidentModule() {
                       >
                         Delete
                       </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
+                        Edit
+                      </button>
+                      <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
+                        Delete
+                      </button>
+                    </>
+                  )}
+
                     </div>
                   </td>
                 </tr>
