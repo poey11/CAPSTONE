@@ -10,6 +10,7 @@ declare module "next-auth" {
       position: string;
       loginStatus: boolean;
       fullName: string;
+      department: string;
     };
   }
 
@@ -20,6 +21,7 @@ declare module "next-auth" {
     position: string;
     loginStatus: boolean;
     fullName: string;
+    department: string;
 
   }
 }
@@ -32,5 +34,7 @@ declare module "next-auth/jwt" {
     position: string;
     loginStatus: boolean;
     fullName: string;
+    department: string;
+
   }
 }

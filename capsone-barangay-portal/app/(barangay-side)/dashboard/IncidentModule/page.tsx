@@ -1,6 +1,6 @@
 "use client"
 import "@/CSS/IncidentModule/AllDepartments.css";
-
+import { useSession } from "next-auth/react";
 import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { deleteDocument, getAllSpecificDocument } from "@/app/helpers/firestorehelper";
@@ -75,7 +75,7 @@ export default function MainPageIncident() {
 
     
       <div className="titlesection-all-department">
-             <p className="title-all-department"> Most Recent Incidents</p>
+             <p className="title-all-department"> Most Recent Incidents (Click to View)</p>
         </div>
      
       <div className="main-section-all-department">
@@ -90,12 +90,11 @@ export default function MainPageIncident() {
               <th>Date & Time of the Incident</th>
               <th>Nature of Complaint</th>
               <th>Status</th>
-              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {incidentData.map((incident, index) => (
-              <tr key={index}>
+            <tr key={index} onClick={() => handleView(incident.id)} className="clickable-row">
                 <td>{incident.caseNumber}</td>
                 <td>{incident.department}</td>
                 <td>{incident.dateFiled} {incident.timeFiled}</td>
@@ -105,13 +104,6 @@ export default function MainPageIncident() {
                         {incident.status}
                     </span>
                 </td>   
-                <td>
-                  <div className="actions-all-department">
-                    <button className="action-view-all-department" onClick={() => handleView(incident.id)}>View</button>
-                    <button className="action-edit-all-department" onClick={()=>handleEdit(incident.id) }>Edit</button>
-                    <button className="action-delete-all-department" onClick={()=> handleDelete(incident.id)}>Delete</button>
-                  </div>
-                </td>
               </tr>
             ))}
           </tbody>
