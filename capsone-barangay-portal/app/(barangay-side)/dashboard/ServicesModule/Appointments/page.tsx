@@ -49,24 +49,12 @@ const metadata: Metadata = {
       router.push("/dashboard/ServicesModule/Appointments/CalendarView");
     };
 
-    const handleView = (appointmentType: string, purpose: string) => {
-        const appointmentRoutes: { [key: string]: string } = {
-            "Barangay Indigency": "/dashboard/ServicesModule/Appointments/View/BarangayIndigency",
-            "Barangay Certificate": "/dashboard/ServicesModule/Appointments/View/BarangayCertificate",
-        };
-
-        const route = appointmentRoutes[appointmentType] || "/dashboard/ServicesModule/OnlineRequests/View";
-        router.push(route);
+    const handleView = () => {
+      router.push("/dashboard/ServicesModule/Appointments/View");
     };
 
-    const handleEdit = (appointmentType: string, purpose: string) => {
-      const appointmentRoutes: { [key: string]: string } = {
-        "Barangay Indigency": "/dashboard/ServicesModule/Appointments/Edit/BarangayIndigency",
-        "Barangay Certificate": "/dashboard/ServicesModule/Appointments/Edit/BarangayCertificate",
-      };
-
-      const route = appointmentRoutes[appointmentType] || "/dashboard/ServicesModule/OnlineRequests/Edit";
-        router.push(route);
+    const handleEdit = () => {
+      router.push("/dashboard/ServicesModule/Appointments/Edit");
   };
 
   const handleSMS = () => {
@@ -196,13 +184,13 @@ const getPageNumbers = () => {
                   <div className="actions">
                     <button
                         className="action-view"
-                        onClick={() => handleView(request.appointmentType, request.purpose)}
+                        onClick={handleView}
                     >
                         View
                     </button>
                     <button
                         className="action-edit"
-                        onClick={() => handleEdit(request.appointmentType, request.purpose)}
+                        onClick={handleEdit}
                     >
                         Edit
                     </button>
