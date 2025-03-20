@@ -56,14 +56,9 @@ export default function Transactions() {
                     {loading ? (
                         <p>Loading...</p>
                     ) : transactionData.length === 0 ? (
-
-                    
                         <div className="no-transactions">
-                              <p>No transactions found.</p>
+                            <p>No transactions found.</p>
                         </div>
-
-                   
-
                     ) : (
                         <table>
                             <thead>
@@ -83,8 +78,8 @@ export default function Transactions() {
                                         <td>{report.department || "N/A"}</td>
                                         <td>{report.concerns || "N/A"}</td>
                                         <td>
-                                            <span className={`status-badge ${report.status?.toLowerCase().replace(/\s+/g, "-") || ""}`}>
-                                            {report.status || "Pending" || "Acknowledged"}
+                                            <span className={`status-dropdown-transactions ${report.status?.toLowerCase() || ""}`}>
+                                                {report.status || "N/A"}
                                             </span>
                                         </td>
                                     </tr>
