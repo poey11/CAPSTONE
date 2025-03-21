@@ -6,6 +6,7 @@ import "@/CSS/User&Roles/User&Roles.css";
 import { useRouter } from "next/navigation";
 import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 interface ResidentUser {
     id: string;
@@ -45,6 +46,12 @@ interface dbBarangayUser{
 }
 
 const admin = () => {
+
+    const { data: session } = useSession();
+    const userRole = session?.user?.role;
+    const userPosition = session?.user?.position;
+    const isAuthorized = ["Assistant Secretary"].includes(userPosition || "");
+
     /*Kulang pa search and filter, downloadable/viewable ID pic column, and table actions are not yet working */
     const [users, setUsers] = useState<BarangayUser>({
         userId:"",
@@ -65,6 +72,27 @@ const admin = () => {
     const [showAlertPopup, setshowAlertPopup] = useState(false); 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+
+    const handleAddBarangayUserClick = () => {
+  
+        if (isAuthorized) {
+          router.push("/dashboard/admin/addBarangayUser");
+        } else {
+          alert("You are not authorized to create a new barangay user.");
+          router.refresh(); // Refresh the page
+        }
+      };
+      
+    
+      const handleEditClick = (id: string) => {
+        if (isAuthorized) {
+          router.push(`/dashboard/ResidentModule/EditResident?id=${id}`);
+        } else {
+          alert("You are not authorized to edit a resident.");
+          router.refresh(); // Refresh the page
+        }
+      };
 
     useEffect(()=>{
        
@@ -194,9 +222,13 @@ const admin = () => {
         <main className="user-roles-module-main-container">
             <div className="user-roles-module-section-1">
                 <h1>Admin Module</h1>
-                <Link href="/dashboard/admin/addBarangayUser">
-                    <button className="add-announcement-btn">Add New Barangay User</button>
-                </Link>
+                {isAuthorized ? (
+            <Link href="/dashboard/admin/addBarangayUser">
+              <button className="add-announcement-btn" onClick={handleAddBarangayUserClick}>Add New Barangay User</button>
+            </Link>
+          ) : (
+            <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Barangay User</button>
+          )}
             </div>
 
             <div className="user-roles-main-section">
