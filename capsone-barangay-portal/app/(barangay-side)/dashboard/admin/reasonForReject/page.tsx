@@ -57,7 +57,7 @@ export default function reasonForRejection() {
                         const notificationRef = doc(collection(db, "Notifications"));
                         await setDoc(notificationRef, {
                         residentID: userId, // == user id
-                        message: `Your account was REJECTED due to: "${rejectionReason}".`,
+                        message: `Your account was REJECTED due to: "${rejectionReason}". Please update your Profile!`,
                         transactionType: "Verification",
                         timestamp: new Date(),
                         isRead: false,
