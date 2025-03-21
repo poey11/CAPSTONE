@@ -159,9 +159,12 @@ const Menu = () => {
       }
     }
   
-    // Navigate to the specified incident transaction
-    const targetUrl = `/ResidentAccount/Transactions/IncidentTransactions?id=${notification.incidentID}`;
-    router.push(targetUrl);
+    if (notification.transactionType === "Online Incident") {
+      const targetUrl = `/ResidentAccount/Transactions/IncidentTransactions?id=${notification.incidentID}`;
+      router.push(targetUrl);
+    } else {
+      console.log("Transaction is not an Online Incident. No navigation performed.");
+    }
   };
   
   

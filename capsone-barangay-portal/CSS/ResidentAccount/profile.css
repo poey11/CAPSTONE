@@ -8,12 +8,12 @@
     }
 
     .first-section-resident-profile {
-     display: flex;
-     height: auto; 
-     width: 100%;
-     gap: 2rem; 
-     padding: 3rem;
-     justify-content: center;
+    display: flex;
+    height: auto; 
+    width: 100%;
+    gap: 2rem; 
+    padding: 3rem;
+    justify-content: center;
     }
 
     .account-profile-section {
@@ -29,7 +29,7 @@
         text-align: center;
         height: 50%;
         align-self: center;
-       
+    
     }
 
     .acc-details-content-section-1{
@@ -45,7 +45,7 @@
         justify-content: center;
     }
 
-    
+
 
 
     .icon-container-profile-section {
@@ -65,9 +65,9 @@
 
     .submit-section-resident-account {
         padding: 2rem;
-      display: flex;
-       justify-content: center;
-       align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     }
 
     .upload-btn-profile-section {
@@ -170,15 +170,15 @@
     }
 
 
-   .name {
+    .name {
     display: flex;
-      color: #333;;
+    color: #333;;
     font-size: 1.5rem;
     font-weight: bold;
     align-self: center;
-   }
+    }
 
-   .transactions-history {
+    .transactions-history {
         width: 50%;
         display: flex;
         flex-direction: column;
@@ -189,30 +189,30 @@
         justify-content: center;
         align-items: center;
         margin-top: 1rem;
-    
-   }
+
+    }
 
 
-   .transactions-link {
+    .transactions-link {
     text-align: center;
     margin-top: 10px;
-}
+    }
 
-.transactions-text {
+    .transactions-text {
     color: blue;
     font-weight: bold;
     text-decoration: none;
     font-size: 16px;
     transition: color 0.3s ease-in-out;
-}
+    }
 
-.transactions-text:hover {
+    .transactions-text:hover {
     color: #6773cd;
     text-decoration: underline;
-}
+    }
 
 
-.popup-overlay {
+    .popup-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -223,9 +223,9 @@
     align-items: center;
     justify-content: center;
     z-index: 9999; /* Ensure it appears above all other elements */
-  }
-  
-  .popup {
+    }
+
+    .popup {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -240,13 +240,13 @@
     text-align: center;
     font-size: 18px;
     font-weight: lighter;
-  }
-  
-  .popup p{
+    }
+
+    .popup p{
     color: rgb(97, 97, 97);
-  }
-  
-  .continue-button{
+    }
+
+    .continue-button{
     padding: 10px 20px;
     font-size: 16px;
     background-color:rgb(245, 143, 88);
@@ -257,8 +257,21 @@
     width: 200px;
     box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
     margin-top: 20px;
-  }
-  
-  .continue-button:hover {
+    }
+
+    .continue-button:hover {
     background-color: #e56723;
-  }
+    }
+
+    .valid-id-container-profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #ccc;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    width: 600px;
+    height: 300px;
+    }
