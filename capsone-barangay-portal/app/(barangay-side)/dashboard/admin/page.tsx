@@ -51,7 +51,6 @@ const admin = () => {
     const userPosition = session?.user?.position;
     const isAuthorized = ["Assistant Secretary"].includes(userPosition || "");
 
-    /*Kulang pa search and filter, downloadable/viewable ID pic column, and table actions are not yet working */
     const [users, setUsers] = useState<BarangayUser>({
         userId:"",
         position:"",
