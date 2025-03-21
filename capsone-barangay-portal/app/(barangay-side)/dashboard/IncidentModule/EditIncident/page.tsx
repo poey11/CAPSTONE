@@ -3,13 +3,20 @@ import "@/CSS/IncidentModule/EditIncident.css";
 import { ChangeEvent,useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/firestorehelper";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../../../../db/firebase";
 import React from "react";
 import { pre } from "framer-motion/m";
 
 
-
+interface HearingDetails {
+  date?: string;
+  for?: string;
+  time?: string;
+  minutesOfHearing?: string;
+  remarks?: string;
+  parties?: string;
+}
 
 export default function EditLuponIncident() {
     /* do the partial edit/modify of info of the incident.*/
@@ -21,8 +28,27 @@ export default function EditLuponIncident() {
     const [reportData, setReportData] = useState<any>();
     const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
     const [showDialogueContent, setShowDialogueContent] = useState(false); // Initially hidden
-  
- 
+
+    const [hasDialogueDetails, setHasDialogueDetails] = useState(reportData?.hasDialogueDetails || false);
+    const isDialogue = reportData?.isDialogue ?? false;
+    const nosHearings = reportData?.nosHearing ?? null;
+    const hasDialogue = reportData?.hasDialogueDetails ?? false;
+    const hasHearing = (nosHearings === "First" && !!reportData?.hearingDetailsFirst) ||
+    (nosHearings === "Second" && !!reportData?.hearingDetailsSecond) ||
+    (nosHearings === "Third" && !!reportData?.hearingDetailsThird);
+
+    const isHearingEnabled = isDialogue && hasDialogue && !hasHearing;
+
+    const [dialogueDetails, setDialogueDetails] = useState({
+      date: "",
+      for: "",
+      time: "",
+      minutesOfDialogue: "",
+      remarks: "",
+      parties: "",
+    });
+    
+
     const [toUpdate, setToUpdate] = useState<any|null>({
       complainant: {
         fname: "",
@@ -58,11 +84,192 @@ export default function EditLuponIncident() {
       }
     });
     let status = toUpdate.status;
+
+    // for dialogue meeting section
+
+    const handleDialogueDetailsInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setDialogueDetails((prevDetails) => ({
+        ...prevDetails,
+        [name]: value,
+      }));
+    };
+
+    const saveDialogueDetails = async () => {
+        if (!docId) {
+          console.error("No document ID provided.");
+          return;
+        }
+      
+        try {
+          const docRef = doc(db, "IncidentReports", docId);
+          await updateDoc(docRef, {
+            dialogueDetails,
+            hasDialogueDetails: true,
+          });
+      
+          setHasDialogueDetails(true);
+          alert("Dialogue Details Saved Successfully!");
+        } catch (error) {
+          console.error("Error saving dialogue details:", error);
+          alert("Failed to save dialogue details.");
+        }
+      };
+    
+      const fetchDialogueDetails = async (incidentId: string) => {
+        try {
+          const incidentDocRef = doc(db, 'IncidentReports', incidentId);
+          const incidentDoc = await getDoc(incidentDocRef);
+      
+          if (incidentDoc.exists()) {
+            const data = incidentDoc.data();
+            if (data.dialogueDetails) {
+              setDialogueDetails(data.dialogueDetails);
+              setShowDialogueContent(true); // Show content if dialogueDetails exist
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching dialogue details:', error);
+        }
+      };
+
+      // for hearing section
+
+      const [hearingDetailsFirst, setHearingDetailsFirst] = useState<HearingDetails>({} as HearingDetails);
+      const [hearingDetailsSecond, setHearingDetailsSecond] = useState<HearingDetails>({} as HearingDetails);
+      const [hearingDetailsThird, setHearingDetailsThird] = useState<HearingDetails>({} as HearingDetails);
+      
+      const [hearingDetails, setHearingDetails] = useState<HearingDetails>({} as HearingDetails);
+      
+      useEffect(() => {
+        if (nosHearings === 'First') {
+          setHearingDetails(hearingDetailsFirst);
+        } else if (nosHearings === 'Second') {
+          setHearingDetails(hearingDetailsSecond);
+        } else if (nosHearings === 'Third') {
+          setHearingDetails(hearingDetailsThird);
+        }
+      }, [nosHearings, hearingDetailsFirst, hearingDetailsSecond, hearingDetailsThird]);
+
+      const saveHearingDetails = async () => {
+        if (!docId) {
+          console.error("No document ID provided.");
+          return;
+        }
+      
+        let selectedHearingDetails;
+        let hearingFieldName;
+      
+        switch (nosHearings) {
+          case 'First':
+            selectedHearingDetails = hearingDetailsFirst;
+            hearingFieldName = 'hearingDetailsFirst';
+            break;
+          case 'Second':
+            selectedHearingDetails = hearingDetailsSecond;
+            hearingFieldName = 'hearingDetailsSecond';
+            break;
+          case 'Third':
+            selectedHearingDetails = hearingDetailsThird;
+            hearingFieldName = 'hearingDetailsThird';
+            break;
+          default:
+            console.error("Invalid hearing selection.");
+            return;
+        }
+      
+        if (!selectedHearingDetails || Object.keys(selectedHearingDetails).length === 0) {
+          console.error("No hearing details provided.");
+          return;
+        }
+      
+        try {
+          const docRef = doc(db, "IncidentReports", docId);
+          await updateDoc(docRef, {
+            [hearingFieldName]: selectedHearingDetails,
+            hasHearingDetails: true,
+          });
+      
+          alert("Hearing Details Saved Successfully!");
+        } catch (error) {
+          console.error("Error saving hearing details:", error);
+          alert("Failed to save hearing details.");
+        }
+      };
+      
+
+      const handleHearingDetailsInputChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      ) => {
+        const { name, value } = e.target;
+      
+        if (nosHearings === 'First') {
+          setHearingDetailsFirst((prevState) => ({
+            ...prevState,
+            [name]: value,
+          }));
+        } else if (nosHearings === 'Second') {
+          setHearingDetailsSecond((prevState) => ({
+            ...prevState,
+            [name]: value,
+          }));
+        } else if (nosHearings === 'Third') {
+          setHearingDetailsThird((prevState) => ({
+            ...prevState,
+            [name]: value,
+          }));
+        }
+      
+        // Update the general hearingDetails state for display
+        setHearingDetails((prevState) => ({
+          ...prevState,
+          [name]: value,
+        }));
+      };
+      
+
+      const fetchHearingDetails = async (incidentId: string) => {
+        try {
+          const incidentDocRef = doc(db, 'IncidentReports', incidentId);
+          const incidentDoc = await getDoc(incidentDocRef);
+      
+          if (incidentDoc.exists()) {
+            const data = incidentDoc.data();
+            
+            if (data.hearingDetailsThird) {
+              setHearingDetails(data.hearingDetailsThird);
+              console.log('Showing Third Hearing Details:', data.hearingDetailsThird);
+            } else if (data.hearingDetailsSecond) {
+              setHearingDetails(data.hearingDetailsSecond);
+              console.log('Showing Second Hearing Details:', data.hearingDetailsSecond);
+            } else if (data.hearingDetailsFirst) {
+              setHearingDetails(data.hearingDetailsFirst);
+              console.log('Showing First Hearing Details:', data.hearingDetailsFirst);
+            } else {
+              console.error('No hearing details available.');
+            }
+          } else {
+            console.error('Incident report not found for ID:', incidentId);
+          }
+        } catch (error) {
+          console.error('Error fetching hearing details:', error);
+        }
+      };
+      
+      
+      useEffect(() => {
+        console.log('Updated hearingDetails:', hearingDetails);
+      }, [hearingDetails]);
+      
    
 
     useEffect(() => {
       if(docId){
         getSpecificDocument("IncidentReports", docId, setReportData).then(() => setLoading(false));
+        fetchDialogueDetails(docId);
+        fetchHearingDetails(docId);
+
+
            }
       else{
         console.log("No document ID provided.");
@@ -70,6 +277,7 @@ export default function EditLuponIncident() {
        
       }
     }, [docId]);
+
     useEffect(() => {
       if(reportData?.file){
         generateDownloadLink(reportData?.file, "IncidentReports").then(url => {
@@ -329,7 +537,7 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
         <main className="main-container-edit">
         
           <div className="letters-content-edit">
-               <button className="letter-announcement-btn-edit" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialouge Letter</button>
+               <button className="letter-announcement-btn-edit" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialogue Letter</button>
                <button className="letter-announcement-btn-edit" name="summon" onClick={handleGenerateLetterAndInvitation}>Generate Summon Letter</button>
               
                <select
@@ -891,8 +1099,18 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
          <div className="dialouge-meeting-section-edit">
               
                  <div className="title-section-edit">
-                     <button type="button" className={showDialogueContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
-                     <h1>Dialogue Meeting</h1>
+                    <button
+                        type="button"
+                        className={showDialogueContent ? "record-details-minus-button" : "record-details-plus-button"}
+                        onClick={handleToggleClick}
+                        disabled={!isDialogue}
+                        >
+                    </button>
+                        <h1>Dialogue Meeting</h1>
+                        {!isDialogue && (
+                        <span className="text-red-500 ml-4">In order to create a Dialogue Meeting, you must generate a Dialogue Letter first</span>
+                    )}
+
                  </div>
 
                  <hr/>
@@ -904,15 +1122,30 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
                              <div className="bars-edit">
                                  <div className="input-group-edit">
                                      <p>Date</p>
-                                     <input type="date" className="search-bar-edit" placeholder="Enter Date" />
+                                        <input 
+                                            type="date" 
+                                            name="date" 
+                                            value={dialogueDetails.date}
+                                            onChange={handleDialogueDetailsInputChange}
+                                        />
                                  </div>
                                  <div className="input-group-edit">
                                      <p>For</p>
-                                     <input type="text" className="search-bar-edit" placeholder="Enter For" />
+                                        <input 
+                                            type="text" 
+                                            name="for"
+                                            value={dialogueDetails.for}
+                                            onChange={handleDialogueDetailsInputChange}
+                                        />
                                  </div>
                                  <div className="input-group-edit">
                                      <p>Time</p>
-                                     <input type="time" className="search-bar-edit" placeholder="Enter Time" />
+                                        <input 
+                                            type="time" 
+                                            name="time" 
+                                            value={dialogueDetails.time}
+                                            onChange={handleDialogueDetailsInputChange}
+                                        />
                                  </div>
                              </div>
                          </div>
@@ -920,20 +1153,35 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
                          <div className="section-3-dialouge-edit">
                              <div className="fields-section-edit">
                                  <p>Minutes of Dialogue</p>
-                                 <textarea className="description-edit" placeholder="Enter Minutes of Dialogue" rows={13}></textarea>
-                             </div>
+                                    <textarea 
+                                        name="minutesOfDialogue"
+                                        value={dialogueDetails.minutesOfDialogue}
+                                        onChange={handleDialogueDetailsInputChange}
+                                    />                             
+                            </div>
                          </div>
  
                          <div className="section-4-dialouge-edit">
                              <div className="fields-section-edit">
                                  <p>Remarks</p>
-                                 <textarea className="description-edit" placeholder="Enter Remarks" rows={10}></textarea>
+                                    <textarea 
+                                        name="remarks"
+                                        value={dialogueDetails.remarks}
+                                        onChange={handleDialogueDetailsInputChange}
+                                    />
                              </div>
                              <div className="fields-section-edit">
                                  <p>Parties</p>
-                                 <textarea className="description-edit" placeholder="Enter Parties" rows={10}></textarea>
+                                    <textarea 
+                                        name="parties"
+                                        value={dialogueDetails.parties}
+                                        onChange={handleDialogueDetailsInputChange}
+                                    />
                              </div>
                          </div>
+                      <button type="button" onClick={saveDialogueDetails}>
+                        Save Dialogue Details
+                      </button>
                      </>
                  )}
              </div>
@@ -943,9 +1191,27 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
      <div className="hearing-section-edit">
          
              <div className="title-section-edit">
-                  <button type="button" className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={toggleHearingContent}></button>
-                
-                 <h1>Hearing Section</h1>
+                <button
+                  type="button"
+                  className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}
+                  onClick={toggleHearingContent}
+                  disabled={!isHearingEnabled}
+                ></button>
+
+                <h1>Hearing Section</h1>
+
+                {!isHearingEnabled && (
+                  <span className="text-red-500 ml-4">
+                    {!isDialogue 
+                      ? "You must generate a Dialogue Letter and a Summons Letter first"
+                      : nosHearings === "Third"
+                      ? "You have reached the limit of 3 possible hearings for this incident"
+                      : hasHearing
+                      ? "You must generate a Summons Letter first"
+                      : ""
+                    }
+                  </span>
+                )}
              </div>
 
              <hr/>
@@ -958,15 +1224,36 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
                              <div className="bars-edit">
                                  <div className="input-group-edit">
                                      <p>Date</p>
-                                     <input type="date" className="search-bar-edit" placeholder="Enter Date" />
+                                        <input 
+                                          type="date"
+                                          className="search-bar-edit"
+                                          placeholder="Enter Date"
+                                          name="date"
+                                          value={hearingDetails.date || ''}
+                                          onChange={handleHearingDetailsInputChange}
+                                        />
                                  </div>
                                  <div className="input-group-edit">
                                      <p>For</p>
-                                     <input type="text" className="search-bar-edit" placeholder="Enter For" />
+                                        <input
+                                          type="text"
+                                          className="search-bar-edit"
+                                          placeholder="Enter For"
+                                          name="for"
+                                          value={hearingDetails.for || ''}
+                                          onChange={handleHearingDetailsInputChange}
+                                        />
                                  </div>
                                  <div className="input-group-edit">
                                      <p>Time</p>
-                                     <input type="time" className="search-bar-edit" placeholder="Enter Time" />
+                                        <input
+                                          type="time"
+                                          className="search-bar-edit"
+                                          placeholder="Enter Time"
+                                          name="time"
+                                          value={hearingDetails.time || ''}
+                                          onChange={handleHearingDetailsInputChange}
+                                        />
                                  </div>
                              </div>
                          </div>
@@ -974,20 +1261,44 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
                          <div className="section-3-dialouge-edit">
                              <div className="fields-section-edit">
                                  <p>Minutes of Hearing</p>
-                                 <textarea className="description-edit" placeholder="Enter Minutes of Hearing" rows={13}></textarea>
+                                <textarea
+                                  className="description-edit"
+                                  placeholder="Enter Minutes of Hearing"
+                                  name="minutesOfHearing"
+                                  rows={13}
+                                  value={hearingDetails.minutesOfHearing || ''}
+                                  onChange={handleHearingDetailsInputChange}
+                                ></textarea>
                              </div>
                          </div>
  
                          <div className="section-4-dialouge-edit">
                              <div className="fields-section-edit">
                                  <p>Remarks</p>
-                                 <textarea className="description-edit" placeholder="Enter Remarks" rows={10}></textarea>
+                                <textarea
+                                  className="description-edit"
+                                  placeholder="Enter Remarks"
+                                  name="remarks"
+                                  rows={10}
+                                  value={hearingDetails.remarks || ''}
+                                  onChange={handleHearingDetailsInputChange}
+                                ></textarea>
                              </div>
                              <div className="fields-section-edit">
                                  <p>Parties</p>
-                                 <textarea className="description-edit" placeholder="Enter Parties" rows={10}></textarea>
+                                 <textarea
+                                  className="description-edit"
+                                  placeholder="Enter Parties"
+                                  name="parties"
+                                  rows={10}
+                                  value={hearingDetails.parties || ''}
+                                  onChange={handleHearingDetailsInputChange}
+                                ></textarea>
                              </div>
                          </div>
+                         <button type="button" onClick={saveHearingDetails}>
+                        Save Hearing Details
+                      </button>
                      </>
                  )}
 
