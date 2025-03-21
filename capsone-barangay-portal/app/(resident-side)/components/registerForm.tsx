@@ -160,7 +160,7 @@ const RegisterForm: React.FC = () => {
                 <h1>Register</h1>
                 <form className="register-form" onSubmit={handleSubmit}>
                     <div className="form-group-register-form">
-                        <label htmlFor="sex" className="form-label-register-form">Sex:</label>
+                        <label htmlFor="sex" className="form-label-register-form">Sex:<span className="required">*</span></label>
                         <select value={resident.sex} onChange={handleChange} id="sex" name="sex" className="form-input-register-form" required>
                             <option value="" disabled>Select a Sex</option>
                             <option value="male">Male</option>
@@ -169,7 +169,7 @@ const RegisterForm: React.FC = () => {
                     </div>
 
                     <div className="form-group-register-form">
-            <label htmlFor="first_name" className="form-label-register-form">First Name: </label>
+            <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
             <input value={resident.first_name} onChange={handleChange} id="first_name" 
             type="text" name="first_name" 
             className="form-input-register-form "
@@ -179,7 +179,7 @@ const RegisterForm: React.FC = () => {
             </div>
 
             <div className="form-group-register-form">
-            <label htmlFor="last_name" className="form-label-register-form" >Last Name: </label>  
+            <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
             
 
               <input value={resident.last_name} onChange={handleChange} id="last_name" 
@@ -191,7 +191,7 @@ const RegisterForm: React.FC = () => {
             </div>
 
             <div className="form-group-register-form">
-            <label htmlFor="email" className="form-label-register-form" >Email: </label>
+            <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
             <input  value={resident.email} onChange={handleChange} id="email" 
             type="email" name="email" 
             className="form-input-register-form " 
@@ -200,7 +200,7 @@ const RegisterForm: React.FC = () => {
             </div>
 
             <div className="form-group-register-form">
-            <label htmlFor="phone" className="form-label-register-form" >Phone: </label>
+            <label htmlFor="phone" className="form-label-register-form" >Phone:<span className="required">*</span> </label>
             <input  value={resident.phone} onChange={handleChange} id="phone" 
             type="tel" name="phone"
             className="form-input-register-form " 
@@ -210,7 +210,7 @@ const RegisterForm: React.FC = () => {
 
 
             <div className="form-group-register-form">
-            <label htmlFor="address" className="form-label-register-form">Address: </label>
+            <label htmlFor="address" className="form-label-register-form">Address:<span className="required">*</span> </label>
             <input value={resident.address} onChange={handleChange} id="address" 
             type="text" name="address" 
             className="form-input-register-form " 
@@ -220,7 +220,7 @@ const RegisterForm: React.FC = () => {
 
 
             <div className="form-group-register-form">
-            <label htmlFor="password" className="form-label-register-form">Password: </label>
+            <label htmlFor="password" className="form-label-register-form">Password:<span className="required">*</span> </label>
             <input value={resident.password} onChange={handleChange} id="password"
             type="password" name="password" 
             className="form-input-register-form "
@@ -229,7 +229,7 @@ const RegisterForm: React.FC = () => {
             </div>
 
             <div className="form-group-register-form">
-            <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password: </label>
+            <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password:<span className="required">*</span></label>
               <input
                 id="confirm_password"
                 type="password"
@@ -238,12 +238,13 @@ const RegisterForm: React.FC = () => {
                 onChange={handleChange}
                 className="form-input-register-form"
                 placeholder="Confirm Password"
+                required
               />
             </div>
 
 
             <div className="signature/printedname-container">
-                <label className="form-label-register-form" htmlFor="upload">Upload Valid ID with address:</label>
+                <label className="form-label-register-form" htmlFor="upload">Upload Valid ID with address:<span className="required">*</span></label>
                 
                 {/* Single File Input */}
                 <label htmlFor="upload" className="upload-link">Click to Upload File</label>
@@ -255,6 +256,7 @@ const RegisterForm: React.FC = () => {
                     className="file-upload-input"
                     accept="image/*"
                     onChange={handleChange}
+                    required
                 />
                 
                 {/* File Preview */}
@@ -267,8 +269,8 @@ const RegisterForm: React.FC = () => {
 
 
                     <div className="form-checkbox-section">
-                        <label htmlFor="terms" className="form-label-register-form">I agree to the terms and conditions</label>
-                        <input id="terms" onChange={handleCheckBox} type="checkbox" name="terms" className="form-checkbox" />
+                        <label htmlFor="terms" className="form-label-register-form">I agree to the terms and conditions <span className="required">*</span></label>
+                        <input id="terms" onChange={handleCheckBox} type="checkbox" name="terms" className="form-checkbox" required/>
                     </div>
 
                     <div className="form-captcha">
