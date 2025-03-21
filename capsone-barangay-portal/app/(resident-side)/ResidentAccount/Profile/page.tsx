@@ -25,6 +25,7 @@ export default function SettingsPageResident() {
         sex: "",
         status: "",
         userIcon: "",
+        upload: "",
     });
 
     const [showPopup, setShowPopup] = useState(false);
@@ -33,8 +34,10 @@ export default function SettingsPageResident() {
     const [message, setMessage] = useState("");
 
     const [preview, setPreview] = useState<string | null>(null);
+    const [preview2, setPreview2] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [file, setFile] = useState<File | null>(null); // State for file upload
+    const [profileFile, setProfileFile] = useState<File | null>(null);
+    const [validIDFile, setValidIDFile] = useState<File | null>(null); 
   
 
     useEffect(() => {
@@ -53,6 +56,7 @@ export default function SettingsPageResident() {
                 sex: data.sex || "",
                 status: data.status || "",
                 userIcon: data.userIcon || "",
+                upload: data.upload || "",
               });
     
               setPreview(data.userIcon)
@@ -89,13 +93,27 @@ export default function SettingsPageResident() {
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files?.[0];
         if (selectedFile) {
-          setFile(selectedFile);
+          setProfileFile(selectedFile);
           setPreview(URL.createObjectURL(selectedFile)); // Show preview before upload
         }
-    };
+      };
 
-    const uploadImageToStorage = async (file: File) => {
-        const storageRef = ref(storage, `userIcons/${residentId}`);
+      const uploadImageToStorage = async (file: File, path: string) => {
+        const storageRef = ref(storage, path);
+        await uploadBytes(storageRef, file);
+        return getDownloadURL(storageRef);
+      };
+
+      const handleValidIDChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = event.target.files?.[0];
+        if (selectedFile) {
+          setValidIDFile(selectedFile);
+          setPreview2(URL.createObjectURL(selectedFile)); // Show preview before upload
+        }
+      };
+      
+      const uploadValidIDToStorage = async (file: File) => {
+        const storageRef = ref(storage, `validIDs/${residentId}`);
         await uploadBytes(storageRef, file);
         return getDownloadURL(storageRef);
       };
@@ -135,10 +153,20 @@ export default function SettingsPageResident() {
             }
           }
       
-          if (file) {
-            const downloadURL = await uploadImageToStorage(file);
-            resident.userIcon = downloadURL;
-          }
+            // Upload profile picture if it exists
+            if (profileFile) {
+                const downloadURL = await uploadImageToStorage(profileFile, `userIcons/${residentId}`);
+                resident.userIcon = downloadURL;
+                }
+    
+            // Upload valid ID if status is "Rejected" and file exists
+            if (validIDFile && resident.status === "Rejected") {
+                const timeStamp = Date.now().toString();
+                const fileExtension = validIDFile.name.split('.').pop();
+                const fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtension}`;
+            const downloadURL = await uploadImageToStorage(validIDFile, `ResidentUsers/valid_id_image/${fileName}`);
+            resident.upload = downloadURL;
+            }
       
           const docRef = doc(db, "ResidentUsers", residentId!);
           await updateDoc(docRef, {
@@ -213,6 +241,42 @@ export default function SettingsPageResident() {
                         View Transactions
                     </a>
                     </div>
+
+                                    {/* Show Valid ID section only if status is "Rejected" */}
+                {resident.status === "Rejected" && (
+                <div className="account-profile-section">
+                    <div className="icon-container-profile-section">
+                    {preview2 ? (
+                        <img
+                        src={preview2}
+                        alt="User Valid ID"
+                        className="valid-id-container-profile-section"
+                        />
+                    ) : resident.upload ? (
+                        <img
+                        src={resident.upload}
+                        alt="User Valid ID"
+                        className="valid-id-container-profile-section"
+                        />
+                    ) : (
+                        <p>No Valid ID</p>
+                    )}
+                    <input
+                        type="file"
+                        accept="image/*"
+                        id="validIdUpload"
+                        style={{ display: "none" }}
+                        onChange={handleValidIDChange}
+                    />
+                    <button
+                        className="upload-btn-profile-section"
+                        onClick={() => document.getElementById("validIdUpload")?.click()}
+                    >
+                        Update Valid ID
+                    </button>
+                    </div>
+                </div>
+                )}
                 </div>
 
 
@@ -349,3 +413,4 @@ export default function SettingsPageResident() {
         </main>
     );
 }
+
