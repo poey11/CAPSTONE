@@ -7,7 +7,7 @@ import { signOut } from "firebase/auth";
 import SideNav from '../../(barangay-side)/components/bMenu';
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
-import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc } from "firebase/firestore"; // Firestore functions
+import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc, orderBy } from "firebase/firestore"; // Firestore functions
 import "@/CSS/Components/menu.css";
 import { Timestamp } from "firebase-admin/firestore";
 
@@ -123,8 +123,11 @@ const Menu = () => {
     if (user) {
       console.log("Fetching notifications for user:", user.uid);
 
-      const q = query(collection(db, "Notifications"), where("residentID", "==", user.uid));
-  
+      const q = query(
+        collection(db, "Notifications"),
+        where("residentID", "==", user.uid),
+        orderBy("timestamp", "desc") // Sort by timestamp in descending order
+      );  
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const fetchedNotifications: Notification[] = snapshot.docs.map((doc) => ({
           id: doc.id,
