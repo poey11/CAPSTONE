@@ -9,6 +9,8 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import "@/CSS/User&Roles/ModifyBarangayAcc.css";
 import { form } from "framer-motion/m";
 import { hash } from 'bcryptjs'; 
+import { useSession } from "next-auth/react";
+
 
 const metadata:Metadata = { 
     title: "Modify Barangay Accounts",
@@ -32,6 +34,11 @@ interface BarangayUser {
   }
 
 export default function EditBarangayAccount() {
+    const { data: session } = useSession();
+    const userRole = session?.user?.role;
+    const userPosition = session?.user?.position;
+    const isAuthorized = ["Assistant Secretary"].includes(userPosition || "");
+    
     const router = useRouter();
     const searchParams = useSearchParams();
     const userId = searchParams.get("id");
@@ -239,8 +246,31 @@ export default function EditBarangayAccount() {
                     </div>
 
                     <div className="action-btn-section">
-                        <button className="discard-btn" onClick={handleDiscardClick}>Discard</button>
-                        <button className="save-btn" onClick={handleSaveClick}>Save</button>
+                        {isAuthorized ? (
+                            <>
+                            <button 
+                                className="discard-btn" 
+                                onClick={() => handleDiscardClick}
+                            >
+                                Discard
+                            </button>
+                            <button 
+                                className="save-btn" 
+                                onClick={() => handleSaveClick}
+                            >
+                                Save
+                            </button>
+                            </>
+                        ) : (
+                            <>
+                            <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
+                                Edit
+                            </button>
+                            <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
+                                Delete
+                            </button>
+                            </>
+                        )}
                     </div>
                 </div>
 
