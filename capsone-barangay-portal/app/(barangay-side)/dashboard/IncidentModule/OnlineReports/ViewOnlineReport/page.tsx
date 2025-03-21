@@ -66,7 +66,7 @@ export default function ViewOnlineReports() {
           caseNumber: data.caseNumber || "",
         });
   
-        //  Fetch respondent details and files as an array
+        // ✅ Fetch respondent details and files as an array
         if (data.respondent) {
           setRespondent({
             respondentName: data.respondent.respondentName || "",
@@ -76,7 +76,7 @@ export default function ViewOnlineReports() {
           
         }
   
-        //  Fetch the incident proof photo (if available)
+        // ✅ Fetch the incident proof photo (if available)
         if (data.file) {
           const storage = getStorage();
           const fileRef = ref(storage, `IncidentReports/${data.file}`);
@@ -164,7 +164,7 @@ export default function ViewOnlineReports() {
         },
       });
   
-      // Create a notification for the resident
+      //  Create a notification for the resident
       const notificationRef = doc(collection(db, "Notifications"));
       await setDoc(notificationRef, {
         residentID: formData.reportID, // reportID == user id
@@ -344,3 +344,4 @@ export default function ViewOnlineReports() {
     </main>
   );
 }
+
