@@ -1,9 +1,9 @@
 "use client"
-
-import { useRouter } from "next/navigation";
 import "@/CSS/barangaySide/ServicesModule/OnlineRequests.css";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getAllDocument, getAllSpecificDocument } from "@/app/helpers/firestorehelper";
+import { getAllDocument } from "@/app/helpers/firestorehelper";
+import OnlineForm from "@/app/(barangay-side)/components/onlinerequestform";
 
 
 
@@ -11,21 +11,17 @@ import { getAllDocument, getAllSpecificDocument } from "@/app/helpers/firestoreh
   export default function OnlineRequests() {
     const [requestData, setRequestData] = useState<any[]>([]);
     const router = useRouter();
+    
+    useEffect(() => {
+      const unsubscribe = getAllDocument("ServiceRequests", setRequestData);
+      return () => {
+        if (unsubscribe) {
+          unsubscribe();
+        }
+      }
+    },[])
 
-    const handleView = (id:string) => {
-      router.push("/dashboard/ServicesModule/OnlineRequests/View?id=" + id);  
-        
-    };
-
-
-  const handleSMS = () => {
-    window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
-};
-  useEffect(() => {
-    getAllDocument("ServiceRequests", setRequestData);
-
-  },[])
-
+    console.log(requestData);
   const [currentPage, setCurrentPage] = useState(1);
   const residentsPerPage = 10; //pwede paltan 
 
@@ -59,7 +55,16 @@ import { getAllDocument, getAllSpecificDocument } from "@/app/helpers/firestoreh
 
     return pageNumbersToShow;
   };
-  
+  const handleView = (id:string) => {
+    router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
+ 
+
+  };
+
+
+  const handleSMS = () => {
+    //window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
+  };
 
     return (
 
@@ -138,16 +143,13 @@ import { getAllDocument, getAllSpecificDocument } from "@/app/helpers/firestoreh
                   <div className="actions">
                     <button
                         className="action-view"
-                        onClick={() => router.push(`/dashboard/ServicesModule/OnlineRequests/View?id=${request.id}`)}
+                        onClick={() => handleView(request.id)}
                     >
                         View
                     </button>
-                
 
-
-{/*
                     <button type="button" className="action-view" onClick={handleSMS}>SMS</button>
-*/}
+
                   </div>
                 </td>
               </tr>
