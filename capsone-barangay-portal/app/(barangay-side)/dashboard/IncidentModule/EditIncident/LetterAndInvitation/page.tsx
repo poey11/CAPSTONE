@@ -104,26 +104,7 @@ export default function GenerateDialougeLetter() {
       catch(err) {
         console.log(err);
       }  
-      try{
-        const response = await fetch("/api/clickSendApi", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                to: otherInfo.respondent.contact,
-               message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, a dialogue invitation will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
-                Please wait for the invitation. Thank you!`
-            })
-        });
-        if (!response.ok) throw new Error("Failed to send SMS");
-
-        const data = await response.json();
-        console.log(data);
-      }
-      catch(err) {
-        console.log(err);
-      }  
+      
     }
 
     const sendSMSForSummons = async () => {
@@ -134,28 +115,9 @@ export default function GenerateDialougeLetter() {
                   "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                  to: otherInfo.complainant.contact,
-                  message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, `
-              })
-          });
-          if (!response.ok) throw new Error("Failed to send SMS");
-  
-          const data = await response.json();
-          console.log(data);
-        }
-        catch(err) {
-          console.log(err);
-        }  
-        try{
-          const response = await fetch("/api/clickSendApi", {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
                   to: otherInfo.respondent.contact,
-                  message: `Hello Mr/Ms. ${otherInfo.respondent.fname}, you are being summoned to attend a meeting in the Lupon Tagapamaya Office at 
-                  ${otherInfo.DateOfMeeting} for the dialouge letter. Thank you!`
+                  message: `Hello Mr/Ms. ${otherInfo.respondent.fname}, a summons will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
+                Please wait for the invitation. Thank you!`
               })
           });
           if (!response.ok) throw new Error("Failed to send SMS");
@@ -337,8 +299,8 @@ export default function GenerateDialougeLetter() {
                 });
             }
         } else if (action === "sendSMS") {
-            //sendSMSForDialogue();
-            //sendSMSForSummons();
+            sendSMSForDialogue();
+            sendSMSForSummons();
         }
         console.log(otherInfo);
     }
