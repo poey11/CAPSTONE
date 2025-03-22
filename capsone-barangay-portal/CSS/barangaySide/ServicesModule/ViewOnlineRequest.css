@@ -182,6 +182,10 @@
     width: 50%;
     text-align: center;
   }
+
+  .resident-id-container p{
+    text-align: left;
+  }
   
   .view-image-link{
     margin-top: 10px;

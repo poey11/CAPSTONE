@@ -1,18 +1,19 @@
-.addAnnouncement-main-container{
+.generatedocument-main-container{
     width: 100%;
-    height: 100px;
+    height: 100vh;
     background-color: #f9f9f9;
     padding:30px;
-    z-index: 10;
-    margin-left: 2rem; 
+    margin-left: 3rem;
+    overflow-y: auto; 
+
 }
 
-.section-1{
+.generatedocument-section-1{
     width: 100%;
 }
 
-.section-1 h1{
-    font-size: 20px;
+.generatedocument-section-1 h1{
+    font-size: 2rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
 }
@@ -26,7 +27,7 @@
     flex-direction:column;
     margin-top: 20px;
     padding: 30px;
-    height: 450px;
+    height: auto;
 }
 
 .addAnnouncement-main-section hr{
@@ -111,7 +112,7 @@
     color: rgba(0, 0, 0, 0.4);
 }
 
-.main-select-container{
+.generate-documents-main-select-container{
     display: flex;
     flex-direction: column;
 }
@@ -173,4 +174,171 @@
     
 .submit-button:hover {
     background-color: #e56723;
+}
+
+
+
+.generate-documents-container-column {
+    margin-top: 20px;
+    display: block;
+    flex-wrap: wrap;
+  }
+
+  .generate-documents-documents-container h1 {
+    color: #ed7014;
+    font-size: 20px;
+  }
+
+  .generate-documents-dropdown{
+    display: none;
+    position: absolute;
+    top: 70px; /* Aligns directly below the container */
+    left: 0;
+    background-color: rgb(228, 223, 220);
+    border: 1px solid #ddd;
+    border-radius: 0px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    z-index: 100; /* Ensure dropdown is above other elements */
+    width: 332px; /* Optional: Set a minimum width for the dropdown */
+  }
+
+
+  .generate-documents-dropdown p {
+    margin: 0;
+    padding: 5px 10px;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+.generate-documents-dropdown p:hover {
+    background-color: rgb(204, 199, 196); /* Highlight option on hover */
+    color: white;
+}
+
+  .generate-documents-dropdown-container:hover .generate-documents-dropdown,
+  .generate-documents-dropdown-container .generate-documents-dropdown:hover {
+      display: block; /* Ensure the dropdown stays open when interacting with it */
+  }
+  
+  .generate-documents-dropdown-container {
+      position: relative;
+      display: flex;
+      align-items: center; /* Ensures elements stay aligned */
+      justify-content: center; /* Keeps spacing balanced */
+      flex-wrap: wrap; /* Allows elements to wrap instead of breaking layout */
+      gap: 0;
+      padding-left: 0;
+  }
+
+  .generate-documents-document-icon {
+    max-width: 100%;
+    height: 40px;
+    width: 40px;
+  }
+
+
+  .generate-documents-documents-card {
+    flex: 1 1 calc(50% - 20px);
+    background-color: rgba(243, 238, 235, 0.341);
+    padding: 20px;
+    padding-left: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+    height: 70px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    transition: all 0.3s ease;
+    display: flex;
+    gap: 55px;
+    align-items: center;
+    z-index: 10;
+    width: 350px; /* Adjusted for better fit */
+    max-width: 90%; /* Responsive width */
+    text-align: center;
+    justify-content: center;
+  }
+  
+  .generate-documents-documents-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    background-color: rgb(190, 187, 184);
+    cursor: pointer;
+    color: white;
+  }
+
+
+  .generate-documents-container{
+    gap: 40px;
+    display: flex;
+    justify-content: center;
+    margin-left: 80px;
+    align-items: center;
+    width: 90%; /* Make it flexible */
+    max-width: 1000px; /* Restrict maximum width */
+
+}
+
+
+
+.generate-document-dropdown {
+    display: none;
+    position: absolute;
+    top: 70px; /* Aligns directly below the container */
+    left: 0;
+    background-color: rgb(246, 195, 159);
+    border: 1px solid #ddd;
+    border-radius: 0px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    z-index: 100; /* Ensure dropdown is above other elements */
+    width: 332px; /* Optional: Set a minimum width for the dropdown */
+}
+
+.generate-document-dropdown-dropdown p {
+    margin: 0;
+    padding: 5px 10px;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+.generate-document-dropdown-dropdown p:hover {
+    background-color: rgba(237, 112, 20, 0.3); /* Highlight option on hover */
+    color: white;
+}
+
+/* Nested Dropdown */
+.nested-dropdown-container {
+    position: relative;
+}
+
+.nested-trigger {
+    margin: 0;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.nested-dropdown {
+    display: none; /* Hidden by default */
+    padding: 5px 10px;
+    background-color: #f6c39f;
+    border-radius: 8px;
+    margin-top: 5px;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.nested-dropdown p {
+    margin: 0;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+/* Hover Behavior */
+    .nested-trigger:hover + .nested-dropdown {
+    display: block;
 }

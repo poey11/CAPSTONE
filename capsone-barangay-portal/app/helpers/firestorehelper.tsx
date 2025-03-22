@@ -77,9 +77,13 @@ const  getAllSpecificDocument =  (collect: string,  attribute: string, sign:any,
 
 const getSpecificDocument = async (mainCollection: string, id: string, setData:(data: any)=> void) => {
     try{
+        console.log(id, mainCollection);
         const docRef = doc(db, mainCollection, id);
+
         const docSnap = await getDoc(docRef);
+        
         if (docSnap.exists()) {
+            console.log("Document data:", docSnap.data());
             return setData(docSnap.data());
         } else {
             console.log("No such document!");

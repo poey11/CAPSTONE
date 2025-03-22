@@ -2,13 +2,18 @@
 import type { Metadata } from "next";
 import "@/CSS/ServicesPage/requestdocumentsmain/requestdocumentsmain.css";
 import Link from "next/link";
-
-const metadata: Metadata = {
-  title: "Services",
-  description: "Services page for the barangay website",
-};
+import { useRouter } from "next/navigation";
 
 export default function Services() {
+  const router = useRouter();
+
+  const goToServices = (e: any) => {
+    const action = e.currentTarget.id;
+    router.push(`/services/action?doc=${action}`);
+  }
+  
+  
+
   return (
     <main className="services-container">
       <div className="headerpic">
@@ -16,27 +21,18 @@ export default function Services() {
       </div>
       
       <div className="services-main-container">
-        <div className="documents-container">
+        <div className="documents-container"  >
           <div className="documents-container-column">
-            <div className="documents-card dropdown-container">
+            <div className="documents-card dropdown-container" onClick={goToServices} id="Barangay Certificate">
               <img
                   src="/images/document.png"
                   alt="Document Icon"
                   className="document-icon"
                 />
                 <h1>Barangay Certificate</h1>
-                <div className="dropdown">
-                  <Link href="/services/barangaycertificate/residency">
-                    <p>Residency</p>
-                  </Link>
-                  <Link href="/services/barangaycertificate/others">
-                      <p>Others</p>
-                  </Link>
-                </div>
             </div>
 
-            <Link href="/services/barangayindigency">
-              <div className="documents-card">
+              <div className="documents-card"   id="Barangay Indigency" onClick={goToServices}>
                 <img
                   src="/images/document.png"
                   alt="Document Icon"
@@ -44,10 +40,8 @@ export default function Services() {
                 />
                 <h1>Barangay Indigency</h1>
               </div>
-            </Link>
 
-            <Link href="/services/barangayID">
-              <div className="documents-card">
+              <div className="documents-card" onClick={goToServices} id="Barangay ID">
                 <img
                   src="/images/document.png"
                   alt="Document Icon"
@@ -55,8 +49,7 @@ export default function Services() {
                 />
                 <h1>Barangay ID</h1>
               </div>
-            </Link>
-    
+            
           </div>
 
 
@@ -69,71 +62,16 @@ export default function Services() {
               />
               <h1>Barangay Permits</h1>
               <div className="dropdown">
-
-              <div
-                className="nested-dropdown-container"
-                onMouseEnter={(e) => {
-                    const dropdown = e.currentTarget.querySelector('.nested-dropdown') as HTMLElement | null;
-                    if (dropdown) {
-                    dropdown.style.display = 'block';
-                    }
-                }}
-                onMouseLeave={(e) => {
-                    const dropdown = e.currentTarget.querySelector('.nested-dropdown') as HTMLElement | null;
-                    if (dropdown) {
-                    dropdown.style.display = 'none';
-                    }
-                }}
-                >
-                <p className="nested-trigger">Business Permit</p>
-                <div className="nested-dropdown">
-                    <Link href="/services/barangaypermit/businesspermit/new">
-                    <p>New</p>
-                    </Link>
-                    <Link href="/services/barangaypermit/businesspermit/renewal">
-                    <p>Renewal</p>
-                    </Link>
-                </div>
-              </div>
                 
-              <div
-                className="nested-dropdown-container"
-                onMouseEnter={(e) => {
-                    const dropdown = e.currentTarget.querySelector('.nested-dropdown') as HTMLElement | null;
-                    if (dropdown) {
-                    dropdown.style.display = 'block';
-                    }
-                }}
-                onMouseLeave={(e) => {
-                    const dropdown = e.currentTarget.querySelector('.nested-dropdown') as HTMLElement | null;
-                    if (dropdown) {
-                    dropdown.style.display = 'none';
-                    }
-                }}
-                >
-                <p className="nested-trigger">Temporary Business Permit</p>
-                <div className="nested-dropdown">
-                    <Link href="/services/barangaypermit/tempbusinesspermit/new">
-                    <p>New</p>
-                    </Link>
-                    <Link href="/services/barangaypermit/tempbusinesspermit/renewal">
-                    <p>Renewal</p>
-                    </Link>
-                </div>
+              <div className="nested-dropdown-container" >
+                <p className="nested-trigger" onClick={goToServices} id="Temporary Business Permit" >Temporary Business Permit</p>
               </div>
-                <Link href="/services/barangaypermit/constructionpermit">
-                  <p>Construction Permit</p>
-                </Link>
-                <Link href="/services/barangaypermit/liquorpermit">
-                  <p>Liquor Permit</p>
-                </Link>
-                <Link href="/services/barangaypermit/coop">
-                  <p>COOP</p>
-                </Link>
+                <p onClick={goToServices} id="Business Permit">Business Permit</p>
+                <p onClick={goToServices} id="Construction Permit">Construction Permit</p>  
               </div>
             </div>
-            <Link href="/services/barangayclearance">
-              <div className="documents-card">
+            
+              <div className="documents-card" onClick={goToServices} id="Barangay Clearance">
                 <img
                   src="/images/document.png"
                   alt="Document Icon"
@@ -141,9 +79,8 @@ export default function Services() {
                 />
                 <h1>Barangay Clearance</h1>
               </div>
-            </Link>
-            <Link href="/services/firsttimejobseeker">
-              <div className="documents-card">
+            
+              <div className="documents-card" onClick={goToServices} id="First Time Jobseeker">
                 <img
                   src="/images/document.png"
                   alt="Document Icon"
@@ -151,7 +88,7 @@ export default function Services() {
                 />
                 <h1>First Time Jobseeker</h1>
               </div>
-            </Link>
+           
 
           </div>
 

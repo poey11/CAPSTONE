@@ -109,21 +109,7 @@ const metadata: Metadata = {
     };
 
     const handleView = (documentType: string, purpose: string) => {
-      const documentRoutes: { [key: string]: string } = {
-          "Barangay Clearance": "/dashboard/ServicesModule/InBarangayRequests/View/BarangayClearance",
-          "Barangay Indigency": "/dashboard/ServicesModule/InBarangayRequests/View/BarangayIndigency",
-          "Barangay ID": "/dashboard/ServicesModule/InBarangayRequests/View/BarangayID",
-          "Barangay Certificate": "/dashboard/ServicesModule/InBarangayRequests/View/BarangayCertificate",
-          "First Time Jobseeker": "/dashboard/ServicesModule/InBarangayRequests/View/FirstTimeJobseeker",
-      };
-
-      if (documentType === "Barangay Permit" && purpose) {
-          const formattedPurpose = purpose.replace(/\s+/g, ""); // Remove spaces for URL consistency
-          router.push(`/dashboard/ServicesModule/InBarangayRequests/View/BarangayPermit/${formattedPurpose}`);
-      } else {
-          const route = documentRoutes[documentType] || "/dashboard/ServicesModule/InBarangayRequests/View";
-          router.push(route);
-      }
+      router.push("/dashboard/ServicesModule/InBarangayRequests/View");
   };
 
   const handleEdit = (documentType: string, purpose: string) => {
