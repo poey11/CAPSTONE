@@ -235,10 +235,14 @@ const ViewOnlineRequest = () => {
                             {["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg", "copyOfPropertyTitle", "dtiRegistration", "isCCTV", "taxDeclaration", "approvedBldgPlan"].includes(field.key) ? (
                                 fieldValue && typeof fieldValue === "string" ? (
                                     <div className="resident-id-container">
+                                        {/*
                                         <img src={fieldValue} alt={field.label} className="resident-id-image" />
                                         <a href={fieldValue} target="_blank" rel="noopener noreferrer" className="view-image-link">
                                             {fieldValue}
                                         </a>
+                                        */}
+
+                                        <p>N/A</p>
                                     </div>
                                 ) : (
                                     <p>No File Uploaded</p>

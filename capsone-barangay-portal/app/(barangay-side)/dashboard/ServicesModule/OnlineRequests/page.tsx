@@ -3,7 +3,7 @@ import "@/CSS/barangaySide/ServicesModule/OnlineRequests.css";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getAllDocument } from "@/app/helpers/firestorehelper";
-import OnlineForm from "@/app/(barangay-side)/components/onlinerequestform";
+/*import OnlineForm from "@/app/(barangay-side)/components/onlinerequestform";*/
 
 
 
@@ -148,7 +148,8 @@ import OnlineForm from "@/app/(barangay-side)/components/onlinerequestform";
                         View
                     </button>
 
-                    <button type="button" className="action-view" onClick={handleSMS}>SMS</button>
+
+                    
 
                   </div>
                 </td>
