@@ -292,8 +292,7 @@ export default function SettingsPageResident() {
                                 value={resident.first_name ||  "N/A"} 
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
-                                required 
-                                disabled
+                                required
                             />
                         </div>
 
@@ -304,9 +303,7 @@ export default function SettingsPageResident() {
                                 name="last_name"
                                 value={resident.last_name ||  "N/A"} 
                                 onChange={handleChange} 
-                                className="form-input-profile-section" 
-                                required 
-                                disabled
+                                className="form-input-profile-section"
                             />
                         </div>
 
@@ -319,7 +316,6 @@ export default function SettingsPageResident() {
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required 
-                                disabled
                             />
                         </div>
 
@@ -344,7 +340,7 @@ export default function SettingsPageResident() {
                                 value={resident.phone ||  "N/A"} 
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
-                                required 
+
                             />
                         </div>
 
