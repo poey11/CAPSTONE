@@ -132,11 +132,11 @@ export default function Department() {
                 </td>
                 <td>
                   <div className="actions-departments-main">
-                      <button className="action-view-departments" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}>View</button>
+                      <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}>View</button>
                     {isAuthorized && (
                       <>
-                        <button className="action-edit-departments" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}>Edit</button>
-                        <button className="action-delete-departments" onClick={(e) => { e.stopPropagation(); handleDelete(incident.id); }}>Delete</button>
+                        <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}>Edit</button>
+                        <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDelete(incident.id); }}>Delete</button>
                       </>
                     )}
                   </div>
