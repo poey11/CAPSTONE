@@ -1,115 +1,27 @@
 "use client"
-
-import { useRouter } from "next/navigation";
-import type { Metadata } from "next";
 import "@/CSS/barangaySide/ServicesModule/OnlineRequests.css";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getAllDocument } from "@/app/helpers/firestorehelper";
+/*import OnlineForm from "@/app/(barangay-side)/components/onlinerequestform";*/
 
 
-const metadata: Metadata = {
-    title: "Online Request",
-    description: "Online Request in Services Module",
-  };
 
 
   export default function OnlineRequests() {
-    const requestData = [
-        {
-            documentType: "Barangay Clearance",
-            purpose: "Loan",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pick Up",
-        },
-        {
-            documentType: "Barangay Indigency",
-            purpose: "No Income",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pick Up",
-        },
-        {
-            documentType: "Barangay ID",
-            purpose: "N/A",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Completed",
-        },
-        {
-            documentType: "Barangay Permit",
-            purpose: "Business Permit",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pending",
-        },
-        {
-            documentType: "Barangay Permit",
-            purpose: "Temporary Business Permit",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pending",
-        },
-        {
-            documentType: "Barangay Permit",
-            purpose: "Construction Permit",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pending",
-        },
-        {
-            documentType: "Barangay Permit",
-            purpose: "Liquor Permit",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pending",
-        },
-        {
-            documentType: "Barangay Permit",
-            purpose: "COOP",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pending",
-        },
-        {
-          documentType: "Barangay Certificate",
-          purpose: "Certificate of Residency",
-          name: "Rose Yap Fernandez",
-          contact: "09171218101",
-          date: "2024-01-17",
-          status: "Pending",
-      },
-        {
-            documentType: "First Time Jobseeker",
-            purpose: "N/A",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            status: "Pick Up",
-        },
-        
-      
-    ];
-
+    const [requestData, setRequestData] = useState<any[]>([]);
     const router = useRouter();
+    
+    useEffect(() => {
+      const unsubscribe = getAllDocument("ServiceRequests", setRequestData);
+      return () => {
+        if (unsubscribe) {
+          unsubscribe();
+        }
+      }
+    },[])
 
-    const handleView = () => {
-      router.push("/dashboard/ServicesModule/OnlineRequests/View");
-        
-    };
-
-
-  const handleSMS = () => {
-    window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
-};
-
+    console.log(requestData);
   const [currentPage, setCurrentPage] = useState(1);
   const residentsPerPage = 10; //pwede paltan 
 
@@ -143,7 +55,16 @@ const metadata: Metadata = {
 
     return pageNumbersToShow;
   };
-  
+  const handleView = (id:string) => {
+    router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
+ 
+
+  };
+
+
+  const handleSMS = () => {
+    //window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
+  };
 
     return (
 
@@ -199,7 +120,6 @@ const metadata: Metadata = {
             <thead>
               <tr>
                 <th>Document Type</th>
-                <th>Purpose</th>
                 <th>Name</th>
                 <th>Contact</th>
                 <th>Date</th>
@@ -210,11 +130,10 @@ const metadata: Metadata = {
             <tbody>
             {requestData.map((request, index) => (
               <tr key={index}>
-                <td>{request.documentType}</td>
-                <td>{request.purpose}</td>
-                <td>{request.name}</td>
+                <td>{request.docType}</td>
+                <td>{request.firstName} {request.middleName} {request.lastName}</td>
                 <td>{request.contact}</td>
-                <td>{request.date}</td>
+                <td>{request.requestDate}</td>
                 <td>
                     <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
                         {request.status}
@@ -224,16 +143,14 @@ const metadata: Metadata = {
                   <div className="actions">
                     <button
                         className="action-view"
-                        onClick={handleView}
+                        onClick={() => handleView(request.id)}
                     >
                         View
                     </button>
-                
 
 
-{/*
-                    <button type="button" className="action-view" onClick={handleSMS}>SMS</button>
-*/}
+                    
+
                   </div>
                 </td>
               </tr>

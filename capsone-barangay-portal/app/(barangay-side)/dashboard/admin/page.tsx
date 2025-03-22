@@ -1,11 +1,11 @@
 "use client"
 import React,{useState, useEffect, ChangeEvent} from "react";
 import {db} from "../../../db/firebase";
-import {collection, getDocs, onSnapshot, query, where} from "firebase/firestore";
+import {collection, getDocs, onSnapshot, deleteDoc, doc, updateDoc, setDoc, query, where} from "firebase/firestore";
 import "@/CSS/User&Roles/User&Roles.css";
 import { useRouter } from "next/navigation";
-import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 interface ResidentUser {
     id: string;
@@ -45,7 +45,12 @@ interface dbBarangayUser{
 }
 
 const admin = () => {
-    /*Kulang pa search and filter, downloadable/viewable ID pic column, and table actions are not yet working */
+
+    const { data: session } = useSession();
+    const userRole = session?.user?.role;
+    const userPosition = session?.user?.position;
+    const isAuthorized = ["Assistant Secretary"].includes(userPosition || "");
+
     const [users, setUsers] = useState<BarangayUser>({
         userId:"",
         position:"",
@@ -65,6 +70,39 @@ const admin = () => {
     const [showAlertPopup, setshowAlertPopup] = useState(false); 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+
+    const handleAddBarangayUserClick = () => {
+  
+        if (isAuthorized) {
+          router.push("/dashboard/admin/addBarangayUser");
+        } else {
+          alert("You are not authorized to create a new barangay user.");
+          router.refresh(); // Refresh the page
+        }
+      };
+      
+    
+      const handleEditBarangayUserClick = (id: string) => {
+        if (isAuthorized) {
+          router.push(`/dashboard/admin/modifyBarangayAcc?id=${id}`);
+        } else {
+          alert("You are not authorized to edit a resident.");
+          router.refresh(); // Refresh the page
+        }
+      };
+
+      const handleDeleteBarangayUserClick = async (id: string,) => {
+        if (isAuthorized) {
+                setDeleteUserId(id);
+                setSelectedBarangayUserId(id);
+                setShowDeletePopup(true); 
+
+        } else {
+          alert("You are not authorized to delete this resident.");
+          router.refresh(); // Refresh the page
+        }
+      };
 
     useEffect(()=>{
        
@@ -109,10 +147,7 @@ const admin = () => {
         fetchUsers();           
     },[])
 
-    const handleAcceptClick = (userId: string) => {
-        setShowAcceptPopup(true);
-        setSelectedUserId(userId);
-    };
+
 
     const confirmAccept = async () => {
         if (!selectedUserId) return;
@@ -124,6 +159,16 @@ const admin = () => {
     
             setPopupMessage("User accepted successfully!");
             setShowPopup(true);
+
+            // Create a notification for the resident
+            const notificationRef = doc(collection(db, "Notifications"));
+            await setDoc(notificationRef, {
+            residentID: selectedUserId, // == user id
+            message: `Your account is now VERIFIED.`,
+            transactionType: "Verification",
+            timestamp: new Date(),
+            isRead: false,
+            });
     
             // Hide the popup after 3 seconds
             setTimeout(() => {
@@ -138,10 +183,8 @@ const admin = () => {
     };
 
 
-    const handleDeleteClick = (userId: string, userid: string) => {
-        setDeleteUserId(userId);
-        setSelectedBarangayUserId(userid);
-        setShowDeletePopup(true); 
+    const handleRejectClick = (userId: string ) => {
+        router.push(`/dashboard/admin/reasonForReject?id=${userId}`);
     };
     
 
@@ -194,9 +237,13 @@ const admin = () => {
         <main className="user-roles-module-main-container">
             <div className="user-roles-module-section-1">
                 <h1>Admin Module</h1>
-                <Link href="/dashboard/admin/addBarangayUser">
-                    <button className="add-announcement-btn">Add New Barangay User</button>
-                </Link>
+                {isAuthorized ? (
+            <Link href="/dashboard/admin/addBarangayUser">
+              <button className="add-announcement-btn" onClick={handleAddBarangayUserClick}>Add New Barangay User</button>
+            </Link>
+          ) : (
+            <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Barangay User</button>
+          )}
             </div>
 
             <div className="user-roles-main-section">
@@ -235,7 +282,7 @@ const admin = () => {
                                     </thead>
 
                                     <tbody>
-                                        {residentUsers.filter(user => user.status !== "Verified").map((user) => (
+                                        {residentUsers.filter(user => user.status !== "Verified" && user.status !== "Rejected").map((user) => (
                                             <tr key={user.id}>
                                             <td>{user.first_name} {user.last_name}</td>
                                             <td>{user.address}</td>
@@ -404,17 +451,31 @@ const admin = () => {
                                                     >
                                                         View
                                                     </button>
-                                                    <button 
-                                                        className="admin-action-edit" 
-                                                        onClick={() => router.push(`/dashboard/admin/modifyBarangayAcc?id=${user.id}`)}
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button 
-                                                        className="admin-action-delete" 
-                                                        onClick={() => handleDeleteClick(user.id, user.userid)}>
-                                                            Delete
-                                                    </button>
+                                                        {isAuthorized ? (
+                                                            <>
+                                                            <button 
+                                                                className="admin-action-edit" 
+                                                                onClick={() => handleEditBarangayUserClick(user.id)}
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                            <button 
+                                                                className="admin-action-delete" 
+                                                                onClick={() => handleDeleteBarangayUserClick(user.id)}
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                            <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
+                                                                Edit
+                                                            </button>
+                                                            <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
+                                                                Delete
+                                                            </button>
+                                                            </>
+                                                        )}
                                                 </div>
                                             </td>
                                             </tr>

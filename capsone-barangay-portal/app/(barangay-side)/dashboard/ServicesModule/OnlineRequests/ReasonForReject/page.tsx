@@ -3,25 +3,19 @@
 import { useRouter, useSearchParams} from "next/navigation";
 import type { Metadata } from "next";
 import { useState } from "react";
-import { db } from '@/app/db/firebase';
-import { doc, updateDoc, collection, setDoc } from "firebase/firestore";
 import "@/CSS/User&Roles/ReasonForRejection.css";
 
 
-
-
 const metadata:Metadata = { 
-  title: "Reason For Rejection for Barangay Side",
-  description: "Reason For Rejection for Barangay Side",
-};
+    title: "Reason For Rejection for Barangay Side",
+    description: "Reason For Rejection for Barangay Side",
+  };
 
-export default function reasonForRejection() {
+
+  export default function reasonForRejection() {
 
     const router = useRouter();
 
-
-    const searchParams = useSearchParams();
-    const userId = searchParams.get("id");
 
     const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
@@ -30,7 +24,7 @@ export default function reasonForRejection() {
 
 
     const handleBack = () => {
-        router.push("/dashboard/admin");
+        router.push("/dashboard/ServicesModule/OnlineRequests/View");
     };
 
     const handleSubmitClick = async () => {
@@ -38,43 +32,25 @@ export default function reasonForRejection() {
     }
 
     const confirmSubmit = async () => {
-        if (!userId) {
-            console.error("User ID is missing!");
-            return;
-        }
+        
 
         try {
-            const docRef = doc(db, "ResidentUsers", userId);
-            await updateDoc(docRef, {
-                rejectionReason: rejectionReason.trim(),
-                status: "Rejected",
-            });
 
             setPopupMessage("Reason for Rejection submitted successfully!");
             setShowPopup(true);
 
-                        // Create a notification for the resident
-                        const notificationRef = doc(collection(db, "Notifications"));
-                        await setDoc(notificationRef, {
-                        residentID: userId, // == user id
-                        message: `Your account was REJECTED due to: "${rejectionReason}". Please update your Profile!`,
-                        transactionType: "Verification",
-                        timestamp: new Date(),
-                        isRead: false,
-                        });
-
             setTimeout(() => {
                 setShowPopup(false);
-                router.push("/dashboard/admin");
+                router.push("/dashboard/ServicesModule/OnlineRequests");
             }, 3000);
         } catch (error) {
             console.error("Error updating rejection reason:", error);
         }
     };
 
-    
     return (
-    <main className="reasonforrejection-main-container">
+
+        <main className="reasonforrejection-main-container">
         <div className="reasonforrejection-section-1">
             <h1>Reject Resident User</h1>
         </div>
@@ -103,8 +79,6 @@ export default function reasonForRejection() {
                                 className="reason" 
                                 placeholder="Enter Description"
                                 rows={10}
-                                value={rejectionReason}
-                            onChange={(e) => setRejectionReason(e.target.value)}
                             ></textarea>
                     </div>
                 </div>
@@ -112,7 +86,6 @@ export default function reasonForRejection() {
             </div>
             
         </div>
-
 
         {showSubmitPopup && (
                         <div className="confirmation-popup-overlay">
@@ -135,5 +108,6 @@ export default function reasonForRejection() {
         )}
 
     </main>
-);
+
+    );
 }

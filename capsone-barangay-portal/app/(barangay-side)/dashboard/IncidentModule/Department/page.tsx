@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import "@/CSS/IncidentModule/MainDashboardIncident.css";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -12,11 +12,12 @@ export default function Department() {
   const userDepartment = session?.user?.department;
   const userRole = session?.user?.role;
 
+  
   const [incidentData, setIncidentData] = useState<any[]>([]);
-
   const [filteredIncidents, setFilteredIncidents] = useState<any[]>([]); // Ensure this is populated
   const [currentPage, setCurrentPage] = useState(1);
   const incidentsPerPage = 10; // Can be changed
+  
 
   const router = useRouter();
   const searchParam = useSearchParams();
@@ -24,9 +25,14 @@ export default function Department() {
 
   const isAuthorized = userDepartment === departmentId;
 
+
   useEffect(() => {
     if (departmentId) {
-      const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", departmentId, setIncidentData);
+      const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", departmentId, (data) => {
+        setIncidentData(data);
+        setFilteredIncidents(data); // Update filteredIncidents when data is fetched
+      });
+
       return () => {
         if (unsubscribe) {
           unsubscribe();
@@ -34,6 +40,7 @@ export default function Department() {
       };
     }
   }, [departmentId]);
+
 
   const handleView = (reportId: string) => {
     router.push(`/dashboard/IncidentModule/ViewIncident?id=${reportId}`);
@@ -50,6 +57,7 @@ export default function Department() {
       deleteDocument("IncidentReports", reportId);
       deleteDocument("IncidentReports/Investigator", reportId);
     }
+  };
 
   // Pagination logic
   const indexOfLastIncident = currentPage * incidentsPerPage;
@@ -75,87 +83,83 @@ export default function Department() {
     }
     return pageNumbersToShow;
   };
-  const handleAdd = () => {
-    if (isAuthorized) {
-      router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`);
-    }
-  };
 
   return (
-        <main className="main-container-departments">
-        <div className="section-1-departments">
-            <h1>Lupon Tagapamayapa: {departmentId} Table</h1>
-            {isAuthorized && (
-            <button className="add-announcement-btn-departments" onClick={handleAdd}>Add New Incident</button>
-            )}
-        </div>
+    <main className="main-container-departments">
+      <div className="section-1-departments">
+        <h1>Lupon Tagapamayapa: {departmentId} Table</h1>
+        <button className="add-announcement-btn-departments" onClick={() => router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`)}>
+          Add New Incident
+        </button>
+      </div>
 
-        <div className="section-2-departments">
-            <input type="text" className="search-bar-departments" placeholder="Enter Incident Case" />
-            <select className="featuredStatus-departments" defaultValue="">
-            <option value="" disabled>Status</option>
-            {statusOptions.map((status) => (
-                <option key={status} value={status}>{status}</option>
+      <div className="section-2-departments">
+        <input type="text" className="search-bar-departments" placeholder="Enter Incident Case" />
+        <select className="featuredStatus-departments" defaultValue="">
+          <option value="" disabled>Status</option>
+          {statusOptions.map((status) => (
+            <option key={status} value={status}>{status}</option>
+          ))}
+        </select>
+        <select className="featuredStatus-departments" defaultValue="">
+          <option value="" disabled>Show...</option>
+          <option value="5">Show 5</option>
+          <option value="10">Show 10</option>
+        </select>
+      </div>
+
+      <div className="main-section-departments">
+        <table>
+          <thead>
+            <tr>
+              <th>Case #</th>
+              <th>Date & Time of the Incident</th>
+              <th>Nature of Complaint</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentIncidents.map((incident, index) => (
+              <tr key={index}>
+                <td>{incident.caseNumber}</td>
+                <td>{incident.dateFiled} {incident.timeFiled}</td>
+                <td>{incident.nature}</td>
+                <td>
+                  <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
+                    {incident.status}
+                  </span>
+                </td>
+                <td>
+                  <div className="actions-departments-main">
+                      <button className="action-view-departments" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}>View</button>
+                    {isAuthorized && (
+                      <>
+                        <button className="action-edit-departments" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}>Edit</button>
+                        <button className="action-delete-departments" onClick={(e) => { e.stopPropagation(); handleDelete(incident.id); }}>Delete</button>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
             ))}
-            </select>
-            <select className="featuredStatus-departments" defaultValue="">
-            <option value="" disabled>Show...</option>
-            <option value="5">Show 5</option>
-            <option value="10">Show 10</option>
-            </select>
-        </div>
+          </tbody>
+        </table>
+      </div>
 
-        <div className="main-section-departments">
-            <table>
-            <thead>
-                <tr>
-                <th>Case #</th>
-                <th>Date & Time of the Incident</th>
-                <th>Nature of Complaint</th>
-                <th>Status</th>
-                <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {incidentData.map((incident, index) => (
-                <tr key={index} onClick={() => handleView(incident.id)} className="clickable-row">
-                    <td>{incident.caseNumber}</td>
-                    <td>{incident.dateFiled} {incident.timeFiled}</td>
-                    <td>{incident.nature}</td>
-                    <td>
-                    <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>{incident.status}</span>
-                    </td>
-                    <td>
-                    <div className="actions-departments">
-                        <button className="action-view-departments" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}>View</button>
-                        {isAuthorized && (
-                        <>
-                            <button className="action-edit-departments" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}>Edit</button>
-                            <button className="action-delete-departments" onClick={(e) => { e.stopPropagation(); handleDelete(incident.id); }}>Delete</button>
-                        </>
-                        )}
-                    </div>
-                    </td>
-                </tr>
-                ))}
-            </tbody>
-            </table>
-        </div>
-
-        <div className="redirection-section-departments">
-            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-            {getPageNumbers().map((number, index) => (
-            <button
-                key={index}
-                onClick={() => typeof number === 'number' && paginate(number)}
-                className={currentPage === number ? "active" : ""}
-            >
-                {number}
-            </button>
-            ))}
-            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-        </div>
-        </main>
-    );
- };
+      <div className="redirection-section-departments">
+        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+        {getPageNumbers().map((number, index) => (
+          <button
+            key={index}
+            onClick={() => typeof number === 'number' && paginate(number)}
+            className={currentPage === number ? "active" : ""}
+          >
+            {number}
+          </button>
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+      </div>
+    </main>
+  );
 }

@@ -120,6 +120,38 @@ export default function OnlineReports() {
     router.push(`/dashboard/IncidentModule/OnlineReports/ViewOnlineReport?id=${id}`);
   };
 
+
+    // Pagination logic
+
+   
+    const [filteredIncidents, setFilteredIncidents] = useState<any[]>([]); // Ensure this is populated
+    const [currentPage, setCurrentPage] = useState(1);
+  const incidentsPerPage = 10; // Can be changed
+  const indexOfLastIncident = currentPage * incidentsPerPage;
+  const indexOfFirstIncident = indexOfLastIncident - incidentsPerPage;
+  const currentIncidents = filteredData.slice(indexOfFirstIncident, indexOfLastIncident);
+  const totalPages = Math.ceil(filteredData.length / incidentsPerPage);
+  
+  
+    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+    const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+    const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+  
+    const getPageNumbers = () => {
+      const pageNumbersToShow: (number | string)[] = [];
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+          pageNumbersToShow.push(i);
+        } else if (
+          (i === currentPage - 2 || i === currentPage + 2) &&
+          pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
+        ) {
+          pageNumbersToShow.push("...");
+        }
+      }
+      return pageNumbersToShow;
+    };
+
   return (
     <main className="main-container">
       <div className="section-1">
@@ -173,7 +205,7 @@ export default function OnlineReports() {
             </tr>
           </thead>
           <tbody>
-            {filteredData.map((incident, index) => (
+            {currentIncidents.map((incident, index) => (
               <tr key={index}>
                 <td>{incident.caseNumber || "N/A"}</td>
                 <td>{incident.firstname}</td>
@@ -200,6 +232,22 @@ export default function OnlineReports() {
           </tbody>
         </table>
       </div>
+
+      <div className="redirection-section-online">
+        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+        {getPageNumbers().map((number, index) => (
+          <button
+            key={index}
+            onClick={() => typeof number === 'number' && paginate(number)}
+            className={currentPage === number ? "active" : ""}
+          >
+            {number}
+          </button>
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+      </div>
+
+
     </main>
   );
 }

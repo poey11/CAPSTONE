@@ -4,11 +4,17 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "../../../../db/firebase";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, updateDoc} from "firebase/firestore";
-
+import { doc, getDoc, updateDoc, collection, setDoc} from "firebase/firestore";
+import { useSession } from "next-auth/react";
 
 
 export default function ViewUser() {
+
+    const { data: session } = useSession();
+    const userRole = session?.user?.role;
+    const userPosition = session?.user?.position;
+    const isAuthorized = ["Assistant Secretary"].includes(userPosition || "");
+
     const router = useRouter();
     const searchParams = useSearchParams();
     const residentUserId = searchParams.get("id");
@@ -23,7 +29,9 @@ export default function ViewUser() {
     const [showAlertPopup, setshowAlertPopup] = useState(false); 
 
     
-
+    const handleRejectClick = (userId: string ) => {
+        router.push(`/dashboard/admin/reasonForReject?id=${userId}`);
+    };
 
     useEffect(() => {
         if (!residentUserId) return;
@@ -82,7 +90,17 @@ export default function ViewUser() {
         
                 setPopupMessage("User accepted successfully!");
                 setShowPopup(true);
-        
+
+            // Create a notification for the resident
+            const notificationRef = doc(collection(db, "Notifications"));
+            await setDoc(notificationRef, {
+            residentID: selectedUserId, // == user id
+            message: `Your account is now VERIFIED.`,
+            transactionType: "Verification",
+            timestamp: new Date(),
+            isRead: false,
+            });
+                
                 // Hide the popup after 3 seconds
                 setTimeout(() => {
                     setShowPopup(false);
@@ -115,6 +133,8 @@ export default function ViewUser() {
 
                     {ResidentUserData?.status !== "Verified" && (
                         <div className="action-btn-section">
+                            {isAuthorized ? (
+                            <>
                             <button 
                                 className="viewadmin-action-accept" 
                                 onClick={() => handleAcceptClick(residentUserId)}
@@ -122,15 +142,25 @@ export default function ViewUser() {
                                 Accept
                             </button>
                             <button 
-                                className="viewadmin-action-reject"
-                                onClick={() => router.push(`/dashboard/admin/reasonForReject?id=${residentUserId}`)}
+                                className="viewadmin-action-reject" 
+                                onClick={() => handleRejectClick(residentUserId)}
                             >
                                 Reject
                             </button>
+                            </>
+                        ) : (
+                            <>
+                            <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
+                                Edit
+                            </button>
+                            <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
+                                Reject
+                            </button>
+                            </>
+                        )}
                         </div>
-                    )}
-
-                </div>
+                        )}
+                    </div>
 
                 
                 {residentUserFields.map((field) => (
@@ -162,15 +192,15 @@ export default function ViewUser() {
                         <p>Valid ID</p>
                     </div>
                     <div className="viewresident-description">
-                        {ResidentUserData.validIdDocID ? (
+                        {ResidentUserData.upload ? (
                             <div className="resident-id-container">
                                 <img
-                                    src={ResidentUserData.validIdDocID}
+                                    src={ResidentUserData.upload}
                                     alt="Resident's Valid ID"
                                     className="resident-id-image"
                                 />
                                 <a
-                                    href={ResidentUserData.validIdDocID}
+                                    href={ResidentUserData.upload}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="view-image-link"

@@ -164,7 +164,7 @@ export default function ViewOnlineReports() {
         },
       });
   
-      // 🔔 Create a notification for the resident
+      //  Create a notification for the resident
       const notificationRef = doc(collection(db, "Notifications"));
       await setDoc(notificationRef, {
         residentID: formData.reportID, // reportID == user id
@@ -187,7 +187,29 @@ export default function ViewOnlineReports() {
   
 
   return (
-    <main className="main-container">
+    <main className="main-container-report">
+
+      
+        <div className="letters-content-edit">
+                      
+        <select
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+          className={`status-badge-view ${formData.status.toLowerCase()}`}
+        >
+          {statusOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+
+
+        
+          </div>
+
+
       <div className="main-content-view-online-report">
         <div className="section-1-online-report">
           <div className="section-1-online-report-left-side">
@@ -224,16 +246,7 @@ export default function ViewOnlineReports() {
           </div>
         </div>
 
-        <div className="online-report-details-section">
-          <div className="title-section"><p>Status</p></div>
-          <div className="description-section">
-            <select name="status" value={formData.status} onChange={handleChange} className="select-field">
-              {statusOptions.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+    
 
         <div className="online-report-details-section">
           <div className="title-section"><p>Proof Photo</p></div>
@@ -260,12 +273,12 @@ export default function ViewOnlineReports() {
           <div className="section-1-response">
             <div className="official-section-online-report">
               <p>Respondent Officer</p>
-              <input type="text" className="add-resident-input-field" placeholder="Enter Respondent Officer Name" name="respondentName" value={respondent.respondentName} onChange={handleChange} />
+              <input type="text" className="online-report-input-field" placeholder="Enter Respondent Officer Name" name="respondentName" value={respondent.respondentName} onChange={handleChange} />
             </div>
 
             <div className="fields-section-online-report">
               <p>Investigation Report</p>
-              <textarea className="add-resident-input-field" placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange} rows={15} />
+              <textarea className="online-report-input-field" placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange} rows={15} />
             </div>
           </div>
 
@@ -331,3 +344,4 @@ export default function ViewOnlineReports() {
     </main>
   );
 }
+

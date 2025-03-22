@@ -392,9 +392,6 @@ export default function Dashboard() {
           </div>
 
           <div className="card-right-side">
-            <div className="chart-controls">
-              <button onClick={toggleChartBoxOne}>Switch</button>
-            </div>
             <ResponsiveContainer width={300} height={300}>
               <PieChart>
                 <Pie
@@ -414,6 +411,10 @@ export default function Dashboard() {
               </PieChart>
             </ResponsiveContainer>
           </div>
+
+          <div className="chart-controls">
+              <button className="action-next" onClick={toggleChartBoxOne}>Next</button>
+            </div>
         </div>
           
           <div className="metric-card">
@@ -541,9 +542,6 @@ export default function Dashboard() {
           </div>
 
           <div className="card-right-side">
-            <div className="chart-controls">
-              <button onClick={toggleChartBoxSix}>Switch</button>
-            </div>
             <ResponsiveContainer width={300} height={300}>
               <PieChart>
                 <Pie
@@ -563,6 +561,9 @@ export default function Dashboard() {
               </PieChart>
             </ResponsiveContainer>
           </div>
+          <div className="chart-controls">
+              <button className="action-next" onClick={toggleChartBoxSix}>Switch</button>
+            </div>
         </div>
       </div> 
 
@@ -584,7 +585,8 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      <p className="dashboard">Incident Heat Map</p>
+{/*
+      <p className="dashboard">Incident Heat Map</p>*/}
 
           <div className="heatmap-container">
                   

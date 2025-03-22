@@ -111,7 +111,7 @@
 }
 
 .section-1 h1{
-    font-size: 20px;
+    font-size: 2rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
    
@@ -197,6 +197,7 @@ FOR ONLINE INCIDENT REPORTING CSS
     width: 100%;
     padding: 2rem;
     justify-content: space-between;
+    background-color: #dddbdb95;
 }
 
 
@@ -244,7 +245,7 @@ FOR ONLINE INCIDENT REPORTING CSS
 
   .online-report-details-section{
     display: flex;
-    border-bottom: 2px solid #ddd;
+    border-top: 2px solid #ddd;
   }
 
   .title-section {
@@ -252,6 +253,8 @@ FOR ONLINE INCIDENT REPORTING CSS
     display: flex;
     justify-content: center;
     align-items: center;
+    border-right: 2px solid #ddd;
+    background: #dddbdb33;
   }
 
   .title-section p {
@@ -263,6 +266,7 @@ FOR ONLINE INCIDENT REPORTING CSS
   .description-section {
     padding: 2rem;
     width: 80%;
+    
   }
 
   .description-section p {
@@ -525,6 +529,100 @@ FILE UPLOAD SECTION DAMI KASI TANGINA!
   }
 
 
+
+.redirection-section-online {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem auto;
+  width: fit-content;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  background: #f8f8f8;
+  gap: 5px;
+}
+
+.redirection-section-online button {
+  padding: 4px 8px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.3s;
+}
+
+.redirection-section-online button:hover {
+  background-color: #0056b3;
+}
+
+.redirection-section-online button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.redirection-section-online .active {
+  background-color: #0056b3;
+  font-weight: bold;
+}
+
+
+
+
+
+
+.letters-content-edit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 3rem;
+  background-color: #f4f2f2;
+  border: 2px solid  #ddd;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+  width: 40%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+}
+
+
+.status-badge-view {
+  padding: 8px 12px;            
+  border-radius: 5px;          
+  font-size: 13px;              
+  color: white;                
+  display: inline-block;        
+  text-transform: capitalize;   
+  text-align: center;    
+  width: 200px; 
+  height: 40px;
+  }
+  
+  .status-badge-view.acknowledged {
+      background-color: #4caf50;   
+  }
+  
+  .status-badge-view.pending {
+      background-color: #325bd4;  
+  }
+
+
+  .main-container-report{
+    width: 100%;
+    height: 100vh;
+    background-color: #f9f9f9;
+    padding:30px;
+    margin-left: 2rem; 
+    overflow-y: auto; 
+    display: flex;
+    flex-direction: column;
+}
+  
+  
 
 
 
