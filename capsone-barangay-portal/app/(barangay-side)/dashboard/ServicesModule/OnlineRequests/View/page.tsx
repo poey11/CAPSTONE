@@ -2,57 +2,37 @@
 
 import Link from "next/link";
 import type { Metadata } from "next";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
+import { useSearchParams } from "next/navigation";
+import { getSpecificDocument } from "@/app/helpers/firestorehelper";
 
 
-const metadata: Metadata = {
-    title: "View Online Barangay Certificate Request",
-    description: "View Online Barangay Certificate Request in Services Module",
-  };
 
 
   
-  const residentFields = [
-    { key: "documentType", label: "Document Type" },
-    { key: "purpose", label: "Purpose" },
-    { key: "daterequested", label: "Date Requested" },
-    { key: "residentsince", label: "Resident Since" },
-    { key: "firstname", label: "First Name" },
-    { key: "middlename", label: "Middle Name" },
-    { key: "lastname", label: "Last Name" },
-    { key: "address", label: "Address" },
-    { key: "age", label: "Age" },
-    { key: "civilstatus", label: "Civil Status" },
-    { key: "citizenship", label: "Citizenship" },
-    { key: "birthday", label: "Birthday" },
-    { key: "gender", label: "Gender" },
-    { key: "contact", label: "Contact" },
-    { key: "status", label: "Status" },
-    { key: "requirements", label: "Requirements" },
-];
 
 export default function ViewOnlineRequest() {
-    const requestData = {
-        documentType: "Barangay Certificate",
-        purpose: "Certificate of Residency",
-        date: "January 17, 2024",
-        residentsince: "January 14, 2002",
-        firstname: "Rose",
-        middlename: "Yap",
-        lastname: "Fernandez",
-        address: "Calamba, Laguna",
-        age: "23",
-        civilstatus: "Single",
-        citizenship: "Filipino",
-        birthday: "September 6, 2002",
-        gender: "Female",
-        contact: "09171218101",
-        status: "Pending",
-        requirements: "/Images/document.png",
-    };
+    const [requestData, setRequestData] = useState<any>();
+    const searchParams =  useSearchParams();
+    const id = searchParams.get("id");
+    console.log(id);
+    useEffect(() => {
+        console.log("hi");
+        if(id){
+            console.log("hi");
+            getSpecificDocument("ServiceRequests", id, setRequestData);
+        }
+        else{
+            console.log("No document ID provided.");
+            setRequestData(null)
+            }
+    },[id])
+    console.log(id);
 
+    console.log(requestData);
     const residentData = requestData as Record<string, string>;
+
     const [status, setStatus] = useState(requestData.status.toLowerCase().replace(" ", "-"));
 
     const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -74,6 +54,26 @@ export default function ViewOnlineRequest() {
     const handleSMS = () => {
         window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
     };
+
+    const residentFields = [
+        { key: "documentType", label: "Document Type" },
+        { key: "purpose", label: "Purpose" },
+        { key: "daterequested", label: "Date Requested" },
+        { key: "residentsince", label: "Resident Since" },
+        { key: "firstname", label: "First Name" },
+        { key: "middlename", label: "Middle Name" },
+        { key: "lastname", label: "Last Name" },
+        { key: "address", label: "Address" },
+        { key: "age", label: "Age" },
+        { key: "civilstatus", label: "Civil Status" },
+        { key: "citizenship", label: "Citizenship" },
+        { key: "birthday", label: "Birthday" },
+        { key: "gender", label: "Gender" },
+        { key: "contact", label: "Contact" },
+        { key: "status", label: "Status" },
+        { key: "requirements", label: "Requirements" },
+    ];
+    
 
     return (
         <main className="viewonlinereq-main-container">
