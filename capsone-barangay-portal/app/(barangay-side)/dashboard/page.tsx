@@ -585,7 +585,8 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      <p className="dashboard">Incident Heat Map</p>
+{/*
+      <p className="dashboard">Incident Heat Map</p>*/}
 
           <div className="heatmap-container">
                   
