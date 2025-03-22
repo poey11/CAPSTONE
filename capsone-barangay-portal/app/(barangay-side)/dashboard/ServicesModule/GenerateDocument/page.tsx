@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import "@/CSS/barangaySide/ServicesModule/GenerateDocument.css";
 
 const metadata: Metadata = {
@@ -43,10 +44,12 @@ export default function GenerateDocument() {
         }
     };
 
+    const [isDropdownVisible, setDropdownVisible] = useState(false);
+
 
     return (
-        <main className="addAnnouncement-main-container">
-            <div className="section-1">
+        <main className="generatedocument-main-container">
+            <div className="generatedocument-section-1">
                 <h1>In Barangay Document Request</h1>
             </div>
 
@@ -63,68 +66,71 @@ export default function GenerateDocument() {
 
                 <hr />
 
-                <form onSubmit={handleSubmit}>
-                    <div className="main-select-container">
-                        <div className="select-document-container">
-                            <div className="Title-container">
-                                <h1>Document Type</h1>
+            
+                    <div className="generate-documents-main-select-container">
+
+                        <div className="generate-documents-container">
+
+                            <div className="generate-documents-container-column">
+                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayCertificate">
+                                    <div className="generate-documents-documents-card">
+                                        <h1>Barangay Certificate</h1>
+                                    </div>
+                                </Link>
+
+                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayIndigency">
+                                    <div className="generate-documents-documents-card">
+                                        <h1>Barangay Indigency</h1>
+                                    </div>
+                                </Link>
+
+                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayID">
+                                    <div className="generate-documents-documents-card">
+                                        <h1>Barangay ID</h1>
+                                    </div>
+                                </Link>
                             </div>
-                            <div className="Option-container">
-                                <select 
-                                    id="featuredStatus" 
-                                    name="featuredStatus" 
-                                    className="featuredStatus" 
-                                    required
-                                    value={selectedDocument}
-                                    onChange={handleDocumentChange}
-                                >
-                                    <option value="" disabled>Select Document Type</option>
-                                    <option value="BarangayClearance">Barangay Clearance</option>
-                                    <option value="BarangayIndigency">Barangay Indigency</option>
-                                    <option value="BarangayID">Barangay ID</option>
-                                    <option value="BarangayPermit">Barangay Permit</option>
-                                    <option value="BarangayCertificate">Barangay Certificate</option>
-                                    <option value="FirstTimeJobseeker">First Time Jobseeker</option>
-                                </select>
+
+                            <div className="generate-documents-container-column">
+                            <div 
+                                className="generate-documents-documents-card generate-documents-dropdown-container"
+                                onMouseEnter={() => setDropdownVisible(true)}
+                                onMouseLeave={() => setDropdownVisible(false)}
+                            >
+                                <h1>Barangay Permits</h1>
+                                {isDropdownVisible && (
+                                <div className="generate-documents-dropdown">
+                                    <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/BusinessPermit">
+                                    <p className="dropdown-item">Business Permit</p>
+                                    </Link>
+                                    <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/TemporaryBusinessPermit">
+                                    <p className="dropdown-item">Temporary Business Permit</p>
+                                    </Link>
+                                    <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/ConstructionPermit">
+                                    <p className="dropdown-item">Construction Permit</p>
+                                    </Link>
+                                </div>
+                                )}
+                            </div>
+                            
+
+                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayClearance">
+                                    <div className="generate-documents-documents-card">
+                                        <h1>Barangay Clearance</h1>
+                                    </div>
+                                </Link>
+
+                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/FirstTimeJobseeker">
+                                    <div className="generate-documents-documents-card">
+                                        <h1>First Time Jobseeker</h1>
+                                    </div>
+                                </Link>
 
                             </div>
-                            
-                            
                         </div>
 
-                        {showPermitType && (
-                            <div className="select-permit-type-container">
-                                <div className="Title-container">
-                                    <h1>Permit Type</h1>
-                                 </div>
-                                 <div className="Option-container">
-                                    <select 
-                                        id="permitType" 
-                                        name="permitType" 
-                                        className="featuredStatus" 
-                                        required
-                                        value={selectedPermitType}
-                                        onChange={handlePermitTypeChange}
-                                    >
-                                        <option value="" disabled>Select Permit Type</option>
-                                        <option value="BusinessPermit">Business Permit</option>
-                                        <option value="TemporaryBusinessPermit">Temporary Business Permit</option>
-                                        <option value="ConstructionPermit">Construction Permit</option>
-                                        <option value="LiquorPermit">Liquor Permit</option>
-                                        <option value="COOP">COOP</option>
-                                    </select>
-                                 </div>
-                                
-                            </div>
-                        )}
-
                     </div>
-                    
-
-                    <div className="button-container">
-                        <button type="submit" className="submit-button">Generate Document</button>
-                    </div>
-                </form>
+            
             </div>
         </main>
     );
