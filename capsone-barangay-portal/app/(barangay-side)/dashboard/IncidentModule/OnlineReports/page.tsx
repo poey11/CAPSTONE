@@ -219,7 +219,7 @@ export default function OnlineReports() {
                 </td>
                 <td>
                   <div className="actions">
-                    <button className="action-notify" onClick={() => handleViewOnlineReport(incident.id)}>View</button>
+                    <button className="action-edit" onClick={() => handleViewOnlineReport(incident.id)}>Edit</button>
                   </div>
                 </td>
               </tr>
