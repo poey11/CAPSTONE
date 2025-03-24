@@ -20,6 +20,8 @@ export default function ViewOnlineReports() {
     reportID: "",
     caseNumber: "",
   });
+  
+  
 
   const [respondent, setRespondent] = useState<{
     respondentName: string;
@@ -30,6 +32,9 @@ export default function ViewOnlineReports() {
     investigationReport: "",
     file: [],  // Default to an empty array
   });
+
+  const [initialRespondent, setInitialRespondent] = useState(respondent);
+
 
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -44,6 +49,7 @@ export default function ViewOnlineReports() {
     }
   }, [incidentId]);
 
+  
 
   const fetchIncidentData = async (id: string) => {
     try {
@@ -68,12 +74,13 @@ export default function ViewOnlineReports() {
   
         // ✅ Fetch respondent details and files as an array
         if (data.respondent) {
-          setRespondent({
+          const initialData = {
             respondentName: data.respondent.respondentName || "",
             investigationReport: data.respondent.investigationReport || "",
             file: Array.isArray(data.respondent.file) ? data.respondent.file : data.respondent.file ? [data.respondent.file] : [],
-          });
-          
+          };
+          setRespondent(initialData);
+          setInitialRespondent(initialData);
         }
   
         // ✅ Fetch the incident proof photo (if available)
@@ -92,6 +99,13 @@ export default function ViewOnlineReports() {
   };
   
   
+  const hasRespondentChanged = () => {
+    return (
+      initialRespondent.respondentName !== respondent.respondentName ||
+      initialRespondent.investigationReport !== respondent.investigationReport ||
+      JSON.stringify(initialRespondent.file) !== JSON.stringify(respondent.file)
+    );
+  };
   
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -174,6 +188,18 @@ export default function ViewOnlineReports() {
         transactionType: "Online Incident",
         isRead: false,
       });
+
+      if (hasRespondentChanged()) {
+        const respondentNotificationRef = doc(collection(db, "Notifications"));
+        await setDoc(respondentNotificationRef, {
+          residentID: formData.reportID,
+          incidentID: formData.id,
+          message: `Respondent information for your incident report (${formData.caseNumber}) has been updated.`,
+          timestamp: new Date(),
+          transactionType: "Online Incident",
+          isRead: false,
+        });
+      }
   
       alert("Incident status and respondent info updated!");
       router.push("/dashboard/IncidentModule/OnlineReports");
