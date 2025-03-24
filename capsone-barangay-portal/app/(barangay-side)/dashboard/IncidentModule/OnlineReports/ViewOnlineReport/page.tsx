@@ -13,7 +13,7 @@ export default function ViewOnlineReports() {
     id: "",
     firstname: "",
     lastname: "",
-    date: "",
+    dateFiled: "",
     concerns: "",
     status: "",
     file: "",
@@ -58,7 +58,7 @@ export default function ViewOnlineReports() {
           id,
           firstname: data.firstname || "",
           lastname: data.lastname || "",
-          date: data.date || "",
+          dateFiled: data.dateFiled || "",
           concerns: data.concerns || "",
           status: data.status || "",
           file: data.file || "",
@@ -235,7 +235,7 @@ export default function ViewOnlineReports() {
         <div className="online-report-details-section">
           <div className="title-section"><p>Date Of Incident</p></div>
           <div className="description-section">
-            <p>{formData.date}</p>
+            <p>{formData.dateFiled}</p>
           </div>
         </div>
 
