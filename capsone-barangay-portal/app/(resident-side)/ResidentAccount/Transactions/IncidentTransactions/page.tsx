@@ -6,7 +6,13 @@ import { doc, getDoc } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { db } from "@/app/db/firebase";
 
-// ✅ Define Interface
+// ✅ Define Interfaces
+interface Respondent {
+  respondentName?: string;
+  investigationReport?: string;
+  file?: string[];
+}
+
 interface IncidentReport {
   id: string;
   dateFiled?: string;
@@ -18,6 +24,7 @@ interface IncidentReport {
   address?: string;
   status?: string;
   file?: string;
+  respondent?: Respondent;
 }
 
 export default function IncidentTransactionsDetails() {
@@ -66,13 +73,9 @@ export default function IncidentTransactionsDetails() {
     router.push("/ResidentAccount/Transactions");
   };
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
+  if (loading) return <p>Loading...</p>;
 
-  if (!transactionData) {
-    return <p>Incident report not found.</p>;
-  }
+  if (!transactionData) return <p>Incident report not found.</p>;
 
   const incidentFields = [
     { label: "Date of Incident", key: "dateFiled" },
@@ -86,12 +89,28 @@ export default function IncidentTransactionsDetails() {
     },
     { label: "Concern", key: "concerns" },
     { label: "Location", key: "address" },
+    { label: "Status", key: "status" },
+  ];
+
+  const respondentFields = [
+    { label: "Respondent Name", key: "respondentName" },
+    { label: "Investigation Report", key: "investigationReport" },
     {
-      label: "Status",
-      key: "status",
+      label: "Uploaded Investigation Files",
+      key: "file",
+      render: (files?: string[] | string) => {
+        if (!files) return <p>No files uploaded.</p>;
+        const fileArray = Array.isArray(files) ? files : [files];
+        return fileArray.map((fileUrl, index) => (
+          <p key={index}>
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+              View File {index + 1}
+            </a>
+          </p>
+        ));
+      },
     },
   ];
-  
 
   return (
     <main className="incident-transaction-container">
@@ -144,6 +163,19 @@ export default function IncidentTransactionsDetails() {
             )}
           </div>
         </div>
+
+        {respondentFields.map((field) => (
+          <div className="details-section" key={field.key}>
+            <div className="title">
+              <p>{field.label}</p>
+            </div>
+            <div className="description">
+              {field.render
+                ? field.render(transactionData?.respondent?.[field.key as keyof Respondent])
+                : transactionData?.respondent?.[field.key as keyof Respondent] || "N/A"}
+            </div>
+          </div>
+        ))}
       </div>
     </main>
   );

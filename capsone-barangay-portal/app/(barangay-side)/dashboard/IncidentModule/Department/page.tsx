@@ -23,7 +23,7 @@ export default function Department() {
   const searchParam = useSearchParams();
   const departmentId = searchParam.get("id");
 
-  const isAuthorized = userDepartment === departmentId;
+  const isAuthorized = userDepartment === departmentId || userRole === "LT Staff";
 
 
   useEffect(() => {
