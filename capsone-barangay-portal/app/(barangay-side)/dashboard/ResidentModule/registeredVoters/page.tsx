@@ -236,7 +236,7 @@ export default function registeredVotersModule() {
                 <th>Full Name</th>                
                 <th>Home Address</th>
                 <th>Precinct Number</th>
-                <th>Date of Birth</th>
+                <th>Creation At</th>
 
                 <th>Actions</th>
               </tr>

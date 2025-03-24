@@ -278,7 +278,7 @@ export default function KasambahayListModule() {
                       </button>
                       <button 
                         className="residentmodule-action-delete" 
-                        onClick={() => handleDeleteClick(resident.id, resident.voterNumber)}
+                        onClick={() => handleDeleteClick(resident.id, resident.registrationControlNumber)}
                       >
                         Delete
                       </button>
