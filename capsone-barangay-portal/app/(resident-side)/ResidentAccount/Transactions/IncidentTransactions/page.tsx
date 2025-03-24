@@ -6,7 +6,6 @@ import { doc, getDoc } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { db } from "@/app/db/firebase";
 
-// ✅ Define Interfaces
 interface Respondent {
   respondentName?: string;
   investigationReport?: string;
