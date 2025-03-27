@@ -158,8 +158,8 @@ export default function TopMenu() {
                     All
                   </button>
                   <button
-                    className={`filter-option ${filter === "unread" ? "active" : ""}`}
-                    onClick={() => setFilter("unread")}
+                    className={`filter-option ${filter === "false" ? "active" : ""}`}
+                    onClick={() => setFilter("false")}
                   >
                     Unread
                   </button>
