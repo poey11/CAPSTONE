@@ -43,8 +43,8 @@ const incidentForm:React.FC = () => {
       const formattedNumber = number !== undefined ? String(number + 1).padStart(4, "0") : "0000";
 
       const caseValue =`${currentDate} - ${formattedNumber}` ;
-      console.log("Generated Case Number:", caseValue); // ✅ Logs the correct value
-      return caseValue; // ✅ Ensure the function returns the computed value
+      console.log("Generated Case Number:", caseValue);
+      return caseValue; 
     
   };
     const clearForm = () => {
@@ -125,11 +125,24 @@ const incidentForm:React.FC = () => {
     
         // Upload the report to Firestore
         const newDoc = await addDoc(docRef, updates);
+        const incidentID = newDoc.id;
     
         // Upload the file only if storageRef is provided
         if (storageRef) {
           await uploadBytes(storageRef, incidentReport.file);
         }
+        
+        // Create a notification for LF Staff
+        const notificationRef = collection(db, "BarangayNotifications");
+        await addDoc(notificationRef, {
+          message: `New incident report filed by ${key[0].firstname} ${key[0].lastname}.`,
+          timestamp: new Date(),
+          reportID: currentUser,
+          isRead: false,
+          transactionType: "Online Incident",
+          recipientRole: "LF Staff",
+          incidentID: incidentID,
+        });
     
         alert("Incident Report Submitted!");
     
@@ -166,6 +179,7 @@ const incidentForm:React.FC = () => {
             department: "Online",
             reportID: currentUser, 
             status: incidentReport.status,
+            isFiled: false,
           }];
           handleReportUpload(toAdd, storageRef)
         }else{
@@ -183,6 +197,7 @@ const incidentForm:React.FC = () => {
             department: "Online",
             reportID: currentUser, 
             status: incidentReport.status,
+            isFiled: false,
           }];
           console.log(toAdd);
           handleReportUpload(toAdd, storageRef);
