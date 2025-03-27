@@ -43,8 +43,8 @@ const incidentForm:React.FC = () => {
       const formattedNumber = number !== undefined ? String(number + 1).padStart(4, "0") : "0000";
 
       const caseValue =`${currentDate} - ${formattedNumber}` ;
-      console.log("Generated Case Number:", caseValue); // ✅ Logs the correct value
-      return caseValue; // ✅ Ensure the function returns the computed value
+      console.log("Generated Case Number:", caseValue);
+      return caseValue; 
     
   };
     const clearForm = () => {
@@ -125,6 +125,7 @@ const incidentForm:React.FC = () => {
     
         // Upload the report to Firestore
         const newDoc = await addDoc(docRef, updates);
+        const incidentID = newDoc.id;
     
         // Upload the file only if storageRef is provided
         if (storageRef) {
@@ -138,7 +139,9 @@ const incidentForm:React.FC = () => {
           timestamp: new Date(),
           reportID: currentUser,
           isRead: false,
+          transactionType: "Online Incident",
           recipientRole: "LF Staff",
+          incidentID: incidentID,
         });
     
         alert("Incident Report Submitted!");
