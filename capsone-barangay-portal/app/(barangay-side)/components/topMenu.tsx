@@ -178,7 +178,7 @@ export default function TopMenu() {
                           <p>{message.message}</p>
                         </div>
                         <div className="unread-icon-section">
-                          {message.status === "unread" && (
+                          {message.isRead === false && (
                             <img
                               src="/images/unread-icon.png"
                               alt="Unread Icon"
