@@ -179,6 +179,7 @@ const incidentForm:React.FC = () => {
             department: "Online",
             reportID: currentUser, 
             status: incidentReport.status,
+            isFiled: false,
           }];
           handleReportUpload(toAdd, storageRef)
         }else{
@@ -196,6 +197,7 @@ const incidentForm:React.FC = () => {
             department: "Online",
             reportID: currentUser, 
             status: incidentReport.status,
+            isFiled: false,
           }];
           console.log(toAdd);
           handleReportUpload(toAdd, storageRef);

@@ -87,6 +87,10 @@ export default function OnlineReports() {
   };
   
   useEffect(() => {
+    console.log("Fetched Incident Data:", incidentData);
+  }, [incidentData]);
+
+  useEffect(() => {
     let data = [...incidentData];
   
     if (searchQuery) {
@@ -193,6 +197,7 @@ export default function OnlineReports() {
         <table>
           <thead>
             <tr>
+            <th>Filed</th>
               <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
                 Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
               </th>
@@ -207,6 +212,7 @@ export default function OnlineReports() {
           <tbody>
             {currentIncidents.map((incident, index) => (
               <tr key={index}>
+                <td>{incident.isFiled === true ? "Filed" : "Not Yet Filed"}</td>
                 <td>{incident.caseNumber || "N/A"}</td>
                 <td>{incident.firstname}</td>
                 <td>{incident.lastname}</td>
