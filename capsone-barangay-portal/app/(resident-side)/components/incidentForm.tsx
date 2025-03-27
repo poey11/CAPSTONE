@@ -130,6 +130,16 @@ const incidentForm:React.FC = () => {
         if (storageRef) {
           await uploadBytes(storageRef, incidentReport.file);
         }
+        
+        // Create a notification for LF Staff
+        const notificationRef = collection(db, "BarangayNotifications");
+        await addDoc(notificationRef, {
+          message: `New incident report filed by ${key[0].firstname} ${key[0].lastname}.`,
+          timestamp: new Date(),
+          reportID: currentUser,
+          status: "unread",
+          recipientRole: "LF Staff",
+        });
     
         alert("Incident Report Submitted!");
     
