@@ -137,7 +137,7 @@ const incidentForm:React.FC = () => {
           message: `New incident report filed by ${key[0].firstname} ${key[0].lastname}.`,
           timestamp: new Date(),
           reportID: currentUser,
-          status: "unread",
+          isRead: false,
           recipientRole: "LF Staff",
         });
     
