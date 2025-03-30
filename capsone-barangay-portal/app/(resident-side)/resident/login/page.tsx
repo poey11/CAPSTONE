@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "@/CSS/LoginPage/rLogin.css";
 
 export const metadata:Metadata = { 
-    title: "Login for Residents",
+    title: "Login",
     description: "Login for Residents for the barangay website",
   };
   export default function LoginResidents() {   
