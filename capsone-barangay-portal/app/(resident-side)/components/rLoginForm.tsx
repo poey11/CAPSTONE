@@ -4,7 +4,8 @@ import { useState } from "react";
 import { auth } from '../../db/firebase';
 import { signInWithEmailAndPassword,signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-interface Resident {
+import {signIn} from 'next-auth/react';
+interface User {
     email: string;
     password: string;
 }
@@ -17,7 +18,7 @@ const rLoginForm:React.FC = () => {
       router.push("/register");
     };
 
-    const [resident, setResident] = useState<Resident>({
+    const [resident, setResident] = useState<User>({
         email: "",
         password: "",
     });
@@ -57,19 +58,29 @@ const rLoginForm:React.FC = () => {
                 setTimeout(() => {
                     setShowPopup(false);
                     router.push("/");
-                }, 3000);
+                }, 2000);
+                return;
             } else {
                 await signOut(auth);
                 setShowVerifyPopup(true);
             }
+
             
             
         } catch (error: string | any) {
+            const result = await signIn("credentials", {
+                userid: resident.email,
+                password: resident.password,
+                redirect: false,
+            });
+            
             setErrorMessage(error.message);
             setShowErrorPopup(true);
+           
         }
      
-
+       
+            
        
     }
     
@@ -97,7 +108,7 @@ const rLoginForm:React.FC = () => {
             {showErrorPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
-                        <p>Error: {errorMessage}</p>
+                        <p>{errorMessage}</p>
                         <button onClick={() => setShowErrorPopup(false)} className="continue-button">Continue</button>
                     </div>
                 </div>

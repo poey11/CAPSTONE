@@ -368,16 +368,10 @@ const Menu = () => {
 
                   <div className="Dropdown">
                       <Link
-                        //href="/official"
-                        href="/official/login"
-                      >
-                        <p className="dropdown-item">Login For Officials</p>
-                      </Link>
-                      <Link
                         //href="/resident"
                         href="/resident/login"
                       >
-                        <p className="dropdown-item">Login For Residents</p>
+                        <p className="dropdown-item">Log In</p>
                       </Link>
                       <Link
                         href="/register"
