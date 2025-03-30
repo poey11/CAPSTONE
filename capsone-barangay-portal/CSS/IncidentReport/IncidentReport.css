@@ -31,7 +31,7 @@
   }
 
   .main-container-incident-report {
-    background-color: #f7e5d5;
+    background-color: #D8DFE5;
     display: flex;
     flex-direction: column;  
     min-height: 100vh; 
@@ -51,7 +51,7 @@
   }
 
   .register-section-incident-report h1 {
-  color: #f49028;
+  color: #DF7426;
   font-size: 1.5rem;
   margin-bottom: 1rem;
   text-align: center;
@@ -101,13 +101,13 @@
 
 
   .form-input-incident-report:focus {
-  border-color: #f49028;
+  border-color: #DF7426;
   outline: none;
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
 
   .submit-button-incident-report {
-  background-color: #f49028;
+  background-color: #DF7426;
   color: white;
   font-size: 16px;
   font-weight: bold;
@@ -217,3 +217,10 @@
     width: 20px;
     height: 20px;
   }
+
+
+  .required {
+    color: red;
+    margin-left: 5px;
+  }
+  

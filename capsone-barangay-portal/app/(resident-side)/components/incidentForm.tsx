@@ -219,10 +219,12 @@ const incidentForm:React.FC = () => {
         </div>
 
         <div className="register-section-incident-report">
-          <h1>Minor Incident Report</h1>
+          <h1>MINOR INCIDENT REPORT</h1>
           <form className="register-form-incident-report" onSubmit={handleSubmit}> {/* Use onSubmit to trigger the redirect */}
             <div className="form-group-incident-report">
-              <label htmlFor="firstname" className="form-label-incident-report">First Name</label>
+              <label htmlFor="firstname" className="form-label-incident-report">
+                First Name <span className="required">*</span>
+                </label>
               <input
                 type="text"
                 id="firstname"
@@ -236,7 +238,12 @@ const incidentForm:React.FC = () => {
             </div>
         
             <div className="form-group-incident-report">
-              <label htmlFor="lastname" className="form-label-incident-report">Last Name</label>
+
+            <label htmlFor="lastname" className="form-label-incident-report">
+              Last Name <span className="required">*</span>
+            </label>
+
+             
               <input
                 type="text"
                 id="lastname"
@@ -250,7 +257,9 @@ const incidentForm:React.FC = () => {
             </div>
 
             <div className="form-group-incident-report">
-              <label htmlFor="contactNos" className="form-label-incident-report">Cellphone Number:</label>
+              <label htmlFor="contactNos" className="form-label-incident-report">
+                Cellphone Number <span className="required">*</span>
+                </label>
               <input
                 type="text"
                 id="contactNos"
@@ -264,7 +273,9 @@ const incidentForm:React.FC = () => {
             </div>
         
             <div className="form-group-incident-report">
-              <label htmlFor="concerns" className="form-label-incident-report">Concerns</label>
+              <label htmlFor="concerns" className="form-label-incident-report">
+                Concerns <span className="required">*</span>
+                </label>
               <input
                 type="text"
                 id="concerns"
@@ -278,7 +289,9 @@ const incidentForm:React.FC = () => {
             </div>
         
             <div className="form-group-incident-report">
-              <label htmlFor="date" className="form-label-incident-report">Date of Incident</label>
+              <label htmlFor="date" className="form-label-incident-report">
+                Date of Incident <span className="required">*</span>
+                </label>
               <input
                 type="date"
                 id="dateFiled"
@@ -292,7 +305,9 @@ const incidentForm:React.FC = () => {
             </div>
         
             <div className="form-group-incident-report">
-              <label htmlFor="time" className="form-label-incident-report">Time of Incident</label>
+              <label htmlFor="time" className="form-label-incident-report">
+                Time of Incident <span className="required">*</span>
+                </label>
               <input
                 type="time"
                 id="time"
@@ -307,7 +322,9 @@ const incidentForm:React.FC = () => {
 
 
             <div className="form-group-incident-report">
-              <label htmlFor="address" className="form-label-incident-report">Address of Incident</label>
+              <label htmlFor="address" className="form-label-incident-report">
+                Address of Incident <span className="required">*</span>
+                </label>
               <input
                 type="text"
                 id="address"
