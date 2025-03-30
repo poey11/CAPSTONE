@@ -147,11 +147,21 @@ const ReportsPage = () => {
         }
       });
       
+      const headerRow = worksheet.getRow(footerStartRow);
+      headerRow.getCell(1).value = `(NEW MEMBERS ${currentMonthYear.replace(" ", " ")})`;
+      headerRow.getCell(1).font = { bold: false, italic: true, size: 22, color: { argb: "FF0000" } };
+      headerRow.height = 25;
+      
+      worksheet.mergeCells(footerStartRow, 1, footerStartRow, 18); 
+      
+      headerRow.alignment = { horizontal: "left", vertical: "middle" };
+      headerRow.commit();      
             
       let insertionRow = footerStartRow + 1;
   
       newMembers.forEach((member) => {
         const row = worksheet.getRow(insertionRow);
+        row.height = 20;
         
         const cells = [
           member.registrationControlNumber, member.lastName, member.firstName, 
@@ -249,7 +259,8 @@ footerDrawings.forEach((drawing) => {
   
       jobSeekers.forEach((seeker) => {
         const row = worksheet.getRow(insertionRow);
-  
+        row.height = 20;
+
         const cells = [
           seeker.dateApplied ? new Date(seeker.dateApplied).toLocaleDateString("en-US") : "",
           seeker.lastName || "",
@@ -331,6 +342,8 @@ footerDrawings.forEach((drawing) => {
   
       residents.forEach((resident) => {
         const row = worksheet.getRow(insertionRow);
+        row.height = 20;
+
         const cells = [
           resident.residentNumber || "",
           resident.name || "",
