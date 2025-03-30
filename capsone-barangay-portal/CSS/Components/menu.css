@@ -58,7 +58,7 @@
 .Dropdown p:hover {
   color: #294c6b;
   background-color: #82b0d8;
-  
+  box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-container{

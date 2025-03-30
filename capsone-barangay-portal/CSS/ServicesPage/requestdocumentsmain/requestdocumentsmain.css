@@ -91,7 +91,7 @@
   padding-left: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  box-shadow: 0 4px 6px rgba(244, 90, 24, 0.906);
   height: 70px;
   margin-bottom: 20px;
   margin-left: 20px;
@@ -105,8 +105,8 @@
 }
 
 .documents-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  transform: scale(1.10);
+  box-shadow: 0 8px 10px rgba(244, 90, 24, 0.906);
   background-color: #0C508F;
   cursor: pointer;
 }
@@ -135,28 +135,29 @@
 .dropdown {
     display: none;
     position: absolute;
-    top: 70px; /* Aligns directly below the container */
+    top: 70px;
     left: 0;
     background-color: #0C508F;
     border: 1px solid #ddd;
     border-radius: 0px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 10px;
-    z-index: 100; /* Ensure dropdown is above other elements */
-    width: 332px; /* Optional: Set a minimum width for the dropdown */
+    z-index: 100; 
+    width: 332px; 
 }
 
 .dropdown p {
     margin: 0;
-    padding: 5px 10px;
+    padding: 8px 10px;
     color: #ece9e7;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
     transition: color 0.2s ease-in-out;
 }
 
 .dropdown p:hover {
-    background-color: #a8c7e3; /* Highlight option on hover */
+    background-color: rgb(91, 152, 206); 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.386);
     color: #294c6b;
     border-radius: 10px;
 

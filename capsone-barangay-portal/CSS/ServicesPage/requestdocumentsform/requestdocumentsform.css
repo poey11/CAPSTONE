@@ -1,40 +1,51 @@
 .main-form-container{
-    background-color: #f7e5d5;
+  background-color: #D8DFE5;
     display: flex;
     flex-direction: column;  
     min-height: 100vh; 
   }
   
-  .headerpic {
-  position: relative; /* Required for pseudo-elements */
-  height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 40px;
-  font-weight: bold;
-  overflow: hidden; /* Ensures blur doesn't spill outside */
+  .headerpic-documentreq {
+    position: relative; /* Required for pseudo-elements */
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    overflow: hidden; /* Ensures blur doesn't spill outside */
   }
   
-  .headerpic::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('/images/header.jpg');
-  background-size: cover;
-  background-position: 50% 50%;
-  background-repeat: no-repeat;
-  filter: blur(2px); /* Adjust the blur intensity */
-  z-index: 1; /* Place the blurred background below the text */
+  .headerpic-documentreq::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/images/headerpic.jpg');
+    background-size: cover;
+    background-position: 50% 60%;
+    background-repeat: no-repeat;
+    filter: blur(1.2px); /* Adjust the blur intensity */
+    z-index: 1; /* Place the blurred background below the text */
   }
   
-  .headerpic > * {
-  position: relative;
-  z-index: 2; /* Ensure text is above the blurred background */
+  .headerpic-documentreq::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.173); /* Dark overlay */
+    z-index: 2; /* Ensure it overlays the background */
+  }
+  
+  .headerpic-documentreq > * {
+    position: relative;
+    z-index: 3; /* Ensure text is above the overlays */
   }
   
   .form-content{
