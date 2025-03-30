@@ -144,7 +144,8 @@
 
   
   .submit-button-incident-report:hover {
-  background-color: #d87d20;
+    background-color: #BC5F1C;
+    transform: scale(1.05);
   }
 
   .submit-button-incident-report:active {
