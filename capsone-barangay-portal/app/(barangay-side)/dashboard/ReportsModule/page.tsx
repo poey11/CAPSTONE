@@ -430,9 +430,8 @@ const ReportsPage = () => {
   
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
-      const worksheet = workbook.worksheets[0]; 
+      const worksheet = workbook.worksheets[0];
   
-      // Update title
       worksheet.getCell("A1").value = reportTitle;
   
       const dataStartRow = 3;
@@ -440,8 +439,8 @@ const ReportsPage = () => {
   
       residents.forEach((resident) => {
         const row = worksheet.getRow(insertionRow);
-        row.height = 20;
-
+        row.height = 55;
+  
         const cells = [
           resident.residentNumber || "",
           resident.name || "",
@@ -459,28 +458,44 @@ const ReportsPage = () => {
   
         cells.forEach((value, index) => {
           row.getCell(index + 1).value = value;
-          row.getCell(index + 1).font = { name: "Times New Roman", size: 10, bold: false }; // Ensure uniform font & remove bold
-          row.getCell(index +1).alignment = {
-            horizontal: 'center'
+          row.getCell(index + 1).font = { name: "Calibri", size: 12, bold: false }; 
+          row.getCell(index + 1).alignment = {
+            horizontal: 'center',
+            wrapText: true,
           };
+          row.getCell(index + 1).border = {
+            top: { style: "medium", color: { argb: "000000" } },
+            bottom: { style: "medium", color: { argb: "000000" } },
+            left: { style: "medium", color: { argb: "000000" } },
+            right: { style: "medium", color: { argb: "000000" } },            
+          }
+          
         });
   
         row.commit();
         insertionRow++;
       });
   
-      // Add "TOTAL" row after last entry
       const totalRow = worksheet.getRow(insertionRow);
       worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
       Object.assign(totalRow.getCell(1), { value: `TOTAL: ${residents.length}`, alignment: { horizontal: "center", vertical: "middle" }, font: { name: "Times New Roman", size: 10, bold: false } });
   
       totalRow.commit();
   
+      // Create a buffer and upload to Firebase Storage
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      saveAs(blob, `Inhabitant Record_${year}.xlsx`);
   
-      alert("Resident Masterlist generated successfully!");
+      const fileName = `Inhabitant_Record_${year}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+  
+      alert("Resident Masterlist generated successfully. Please wait for the downloadable file!");
+  
+      // Return file URL for conversion
+      return fileUrl;
     } catch (error) {
       console.error("Error generating report:", error);
       alert("Failed to generate Resident Masterlist Report.");
@@ -488,6 +503,38 @@ const ReportsPage = () => {
       setLoadingResident(false);
     }
   };
+
+  const handleGenerateResidentPDF = async () => {
+    setLoadingResident(true);
+    try {
+      const fileUrl = await generateResidentListReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      // Get PDF as a Blob
+      const blob = await response.blob();
+  
+      // Save the file with the correct name dynamically
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      saveAs(blob, `Inhabitant_Record_${year}.pdf`);
+  
+      alert("Resident Masterlist Report successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingResident(false);
+    }
+  };
+  
   
   
   
@@ -535,7 +582,7 @@ const ReportsPage = () => {
 
           {selectedModule === "Resident Module" && (
             <>
-              <button onClick={generateResidentListReport} disabled={loadingResident} className="report-button">
+              <button onClick={handleGenerateResidentPDF} disabled={loadingResident} className="report-button">
                 {loadingResident ? "Generating..." : "Generate Resident Masterlist"}
               </button>                    <button className="report-button">Generate East Fairview Resident List</button>
               <button className="report-button">Generate South Fairview Resident List</button>
