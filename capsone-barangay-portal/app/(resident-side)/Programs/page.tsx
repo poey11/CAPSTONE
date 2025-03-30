@@ -62,21 +62,21 @@ export default function Programs() {
 
 
   return (
-    <main className="main-container">
-      <div className="Page">
+    <main className="main-container-programs">
+      <div className="headerpic-programs">
         <p>PROGRAMS</p>
       </div>
 
-      <div className="TitlePage">
+      <div className="TitlePage-programs">
         <p>Discover Programs Offered by the Barangay</p>
         <img 
           src="/images/QCLogo.png" 
           alt="Barangay Captain" 
-          className="aboutus-image" 
+          className="aboutus-image-programs" 
         />
       </div>
 
-      <section className="programs-section">
+      <section className="programs-section-programs">
         {programs.map((program, index) => (
           <Link
             key={index}
@@ -93,16 +93,16 @@ export default function Programs() {
               },
             }}
           >
-            <div className="programs-card">
+            <div className="programs-card-programs">
             <img
                 src={program.images[0]}
                 alt={`${program.title} first image`}
-                className="programs-image"
+                className="programs-image-programs"
               />
-              <div className="programs-content">
+              <div className="programs-content-programs">
                 
-                <p className="programs-date">{program.date}</p>
-                <h2 className="programs-title">{program.title}</h2>
+                <p className="programs-date-programs">{program.date}</p>
+                <h2 className="programs-title-programs">{program.title}</h2>
                 
              
               </div>

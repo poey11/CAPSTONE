@@ -80,21 +80,21 @@ export default function Announcement() {
 
 
   return (
-    <main className="main-container">
-      <div className="Page">
+    <main className="main-container-announcement">
+      <div className="headerpic-announcement">
         <p>ANNOUNCEMENTS</p>
       </div>
 
-      <div className="TitlePage">
+      <div className="TitlePage-announcement">
         <p>Strengthening our community through information</p>
         <img 
           src="/images/QCLogo.png" 
           alt="Barangay Captain" 
-          className="aboutus-image" 
+          className="aboutus-image-announcement" 
         />
       </div>
 
-      <section className="announcements-section">
+      <section className="announcements-section-announcement">
         {announcements.map((announcement, index) => (
           <Link
             key={index}
@@ -108,23 +108,23 @@ export default function Announcement() {
               },
             }}
           >
-            <div className="announcement-card">
+            <div className="announcement-card-announcement">
               <img
                 src={announcement.image}
                 alt={announcement.title}
-                className="announcement-image"
+                className="announcement-image-announcement"
               />
-              <div className="announcement-content">
-                <h2 className="announcement-title">{announcement.title}</h2>
-                <p className="announcement-description">
+              <div className="announcement-content-announcement">
+                <h2 className="announcement-title-announcement">{announcement.title}</h2>
+                <p className="announcement-description-announcement">
                   {announcement.description.length > 300
                     ? `${announcement.description.slice(0, 300)}...`
                     : announcement.description}
                 </p>
                 {announcement.description.length > 300 && (
-                  <span className="read-more">Read more</span>
+                  <span className="read-more-announcement">Read more</span>
                 )}
-                <p className="announcement-date">{announcement.date}</p>
+                <p className="announcement-date-announcement">{announcement.date}</p>
               </div>
             </div>
           </Link>
