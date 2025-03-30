@@ -11,39 +11,39 @@ export default function AnnouncementDetails() {
   const image = searchParams.get("image");
 
   return (
-    <main className="main-container">
+    <main className="main-container-specific-announcement">
 
 
 
-    <div className="Page">
+    <div className="headerpic-specific-announcement">
         <p>ANNOUNCEMENTS</p>
     </div>
 
 
-      <div className="TitlePage">
+      <div className="TitlePage-specific-announcement">
         <p>Strengthening our community through information</p>
         <img 
           src="/images/QCLogo.png" 
           alt="Barangay Captain" 
-          className="aboutus-image" 
+          className="aboutus-image-specific-announcement" 
         />
       </div>
 
       {title && description && date && image ? (
-        <div className="announcement-details">
+        <div className="announcement-details-specific-announcement">
 
-          <div className="announcement-image-container">
+          <div className="announcement-image-container-specific-announcement">
             <img
               src={image}
               alt={title}
-              className="announcement-image"
+              className="announcement-image-specific-announcement"
             />
           </div>
 
-          <div className="announcement-content">
-            <h1 className="announcement-title">{title}</h1>
-            <p className="announcement-date">{date}</p>
-            <p className="announcement-description">{description}</p>
+          <div className="announcement-content-specific-announcement">
+            <h1 className="announcement-title-specific-announcement">{title}</h1>
+            <p className="announcement-date-specific-announcement">{date}</p>
+            <p className="announcement-description-specific-announcement">{description}</p>
           </div>
         </div>
       ) : (

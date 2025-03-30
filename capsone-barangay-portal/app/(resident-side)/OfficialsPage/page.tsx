@@ -3,7 +3,6 @@
 import "@/CSS/OfficialsPage/OfficialsPage.css";
 
 
-
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -71,35 +70,35 @@ export default function Official() {
   return (
 
     
-    <main className="main-container">
+    <main className="main-container-officials">
 
-      <div className="Page">
+      <div className="headerpic-officials">
         <p>MEET OUR BARANGAY OFFICIALS</p>
       </div>
 
       {/* Captain Section */}
-      <section className="Captain-section">
-        <div className="captain-card">
-          <img src={captain.image} className="Captain-image" alt="Captain" />
-          <div className="Captain-content">
-            <h2 className="official-name">{captain.Name}</h2>
-            <p className="official-role">{captain.Role}</p>
-            <p className="official-term">{captain.Term}</p>
-            <p className="official-phonenumber">{captain.Phonenumber}</p>
+      <section className="Captain-section-officials">
+        <div className="captain-card-officials">
+          <img src={captain.image} className="Captain-image-officials" alt="Captain" />
+          <div className="Captain-content-officials">
+            <h2 className="official-name-officials">{captain.Name}</h2>
+            <p className="official-role-officials">{captain.Role}</p>
+            <p className="official-term-officials">{captain.Term}</p>
+            <p className="official-phonenumber-officials">{captain.Phonenumber}</p>
           </div>
         </div>
       </section>
 
       {/* Officials Section */}
-      <section className="Officials-section">
+      <section className="Officials-section-officials">
         {officials.map((official, index) => (
-          <div key={index} className="official-card">
-            <img src={official.image} className="official-image" alt={official.Name} />
-            <div className="official-content">
-              <h2 className="official-name">{official.Name}</h2>
-              <p className="official-role">{official.Role}</p>
-              <p className="official-term">{official.Term}</p>
-              <p className="official-phonenumber">{official.Phonenumber}</p>
+          <div key={index} className="official-card-officials">
+            <img src={official.image} className="official-image-officials" alt={official.Name} />
+            <div className="official-content-officials">
+              <h2 className="official-name-officials">{official.Name}</h2>
+              <p className="official-role-officials">{official.Role}</p>
+              <p className="official-term-officials">{official.Term}</p>
+              <p className="official-phonenumber-officials">{official.Phonenumber}</p>
             </div>
           </div>
         ))}

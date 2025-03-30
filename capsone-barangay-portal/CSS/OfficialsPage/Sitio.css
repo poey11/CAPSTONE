@@ -1,97 +1,107 @@
-.Page {
-  height: 200px; 
+.headerpic-sitio {
+  position: relative; /* Required for pseudo-elements */
+  height: 250px;
   display: flex;
   align-items: center;
-  justify-content: center; 
-  color: white; 
-  font-size: 40px; 
-  font-weight: bold; 
-  position: relative;
-  margin-bottom: 50px;
+  justify-content: center;
+  color: rgb(255, 255, 255);
+  font-size: 50px;
+  font-weight:bolder;
+  overflow: hidden; /* Ensures blur doesn't spill outside */
+  margin-bottom: 2rem;
 }
 
-.Page::before {
+.headerpic-sitio::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('/Images/Background.jpeg');
-  background-size: cover; 
-  background-position: 50% 50%;
-  background-repeat: no-repeat; 
-  z-index: 1; /* Ensure the overlay appears above the background image */
-  filter: blur(2px); /* Adjust the blur intensity */
+  background-image: url('/images/brgyheaderpic.jpg');
+  background-size: cover;
+  background-position: 50% 60%;
+  background-repeat: no-repeat;
+  filter: blur(1.2px); /* Adjust the blur intensity */
+  z-index: 1; /* Place the blurred background below the text */
 }
 
-.Page > * {
+.headerpic-sitio::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.173); /* Dark overlay */
+  z-index: 2; /* Ensure it overlays the background */
+}
+
+.headerpic-sitio > * {
   position: relative;
-  z-index: 2; /* Ensure text is above the overlay */
+  z-index: 3; /* Ensure text is above the overlays */
 }
 
-.main-container {
-  background-color: #f7e5d5;
-  width: 100%;
-  height: 100%;
-}
-
-/* Officials Section */
-.Officials-section {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4rem;
-  padding: 3rem;
-}
-  
-.official-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  background-color: white;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  background-color: rgba(255, 255, 255, 0.7);
-  border: 2px solid #ddd;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-  transition: transform 0.3s ease, box-shadow 0.3s ease; 
-}
-
-.official-card:hover {
-  transform: translateY(-10px); 
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.official-image {
-  width: 300px; 
-  height: 300px;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-  object-fit: cover;
-}
-
-.official-content .official-name {
-  font-size: 1.5rem; /* Smaller font size than captain */
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-  color: orange;
-}
-
-.official-content .official-role {
-   font-weight: bold;
-   color: grey;
-}
-
-@media (max-width: 768px) {
-  .Officials-section {
-    grid-template-columns: repeat(2, 1fr);
+  .main-container-sitio {
+    background-color: #D8DFE5;
+    width: 100%;
+    height: 100%;
   }
-}
 
-@media (max-width: 480px) {
-  .Officials-section {
-    grid-template-columns: 1fr;
+  /* Officials Section */
+  .Officials-section-sitio {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4rem;
+    padding: 3rem;
   }
-}
+    
+  .official-card-sitio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 2px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+  }
+
+  .official-card-sitio:hover {
+    transform: translateY(-10px); 
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .official-image-sitio {
+    width: 300px; 
+    height: 300px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    object-fit: cover;
+  }
+
+  .official-content-sitio .official-name-sitio {
+    font-size: 1.5rem; /* Smaller font size than captain */
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #DF7426;
+  }
+
+  .official-content-sitio .official-role-sitio {
+     font-weight: bold;
+     color: grey;
+  }
+
+  @media (max-width: 768px) {
+    .Officials-sectio-sitio {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .Officials-section-sitio {
+      grid-template-columns: 1fr;
+    }
+  }

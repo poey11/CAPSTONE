@@ -1,47 +1,59 @@
 
-.main-container {
-  background-color: #f7e5d5;
+.main-container-specific-announcement {
+  background-color: #d8dfe5;
   flex-direction: column; /* Stack children vertically */
   justify-content: center; /* Center horizontally */
   align-items: center; /* Center vertically */
   height: 100%;
 }
 
-.Page {
-    background-image: url('/Images/Background.jpeg');
-    background-size: cover; 
-    background-position: 50% 50%;
-    background-repeat: no-repeat; 
-    height: 200px; 
-    display: flex;
-    align-items: center;
-    justify-content: center; 
-    color: white; 
-    font-size: 40px; 
-    font-weight: bold; 
-    position: relative;
-    margin-bottom: 50px;
-  }
+.headerpic-specific-announcement {
+  position: relative; /* Required for pseudo-elements */
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(255, 255, 255);
+  font-size: 50px;
+  font-weight:bolder;
+  overflow: hidden; /* Ensures blur doesn't spill outside */
+  margin-bottom: 2rem;
+}
 
-  .Page::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.1); /* White overlay with 30% opacity */
-    z-index: 1; /* Ensure the overlay appears above the background image */
-  }
+.headerpic-specific-announcement::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/images/brgyheaderpic.jpg');
+  background-size: cover;
+  background-position: 50% 60%;
+  background-repeat: no-repeat;
+  filter: blur(1.2px); /* Adjust the blur intensity */
+  z-index: 1; /* Place the blurred background below the text */
+}
 
-  .Page > * {
-    position: relative;
-    z-index: 2; /* Ensure text is above the overlay */
-  }
+.headerpic-specific-announcement::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.173); /* Dark overlay */
+  z-index: 2; /* Ensure it overlays the background */
+}
+
+.headerpic-specific-announcement > * {
+  position: relative;
+  z-index: 3; /* Ensure text is above the overlays */
+}
 
  
 
-  .TitlePage {
+  .TitlePage-specific-announcement {
     background-color: rgba(255, 255, 255, 0.7);
     width: 800px;
     height: 100px;
@@ -58,8 +70,8 @@
     border: 2px solid #ddd;
   }
 
-  .TitlePage p {
-    color: black;
+  .TitlePage-specific-announcement p {
+    color: #DF7426;
     font-size: 24px;
     font-weight: bold;
     text-overflow: ellipsis; 
@@ -70,12 +82,12 @@
     
   }
 
-  .aboutus-image {
+  .aboutus-image-specific-announcement {
     width: 160px;
     height: 80px;
   }
 
-  .announcement-details {
+  .announcement-details-specific-announcement {
     display: flex;
     flex-direction: column;
     align-items: center; /* Center image and content horizontally */
@@ -88,7 +100,7 @@
     border: 2px solid #ddd;
   }
 
-  .announcement-image-container {
+  .announcement-image-container-specific-announcement {
     display: flex;
     justify-content: center; /* Center image horizontally */
     align-items: center; /* Center image vertically if needed */
@@ -96,7 +108,7 @@
     margin-bottom: 1rem;
   }
 
-  .announcement-image {
+  .announcement-image-specific-announcement {
     width: 450px;
     height: 400px;
     object-fit: cover; /* Maintain aspect ratio and cover the area */
@@ -104,9 +116,9 @@
     margin-top: 30px;
   }
 
-  .announcement-content {
+  .announcement-content-specific-announcement {
     padding: 50px;
-    background-color: #FFE0CA;
+    background-color: #F7FCF8;
     justify-content: center;
     align-items: center; 
     border-radius: 20px;
@@ -117,19 +129,19 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
-  .announcement-title {
-    color: #e56723;
+  .announcement-title-specific-announcement {
+    color: #DF7426;
     font-weight: bold;
-    font-size: 30px;
+    font-size: 35px;
     white-space: normal; 
     margin-bottom: 5px;
   }
 
- .announcement-date {
+ .announcement-date-specific-announcement {
     color: grey;
     margin-bottom: 30px;
   }
 
-.announcement-description {
+.announcement-description-specific-announcement {
   text-align: justify;
   }
