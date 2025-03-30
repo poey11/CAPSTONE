@@ -63,17 +63,18 @@
   .form-content hr {
   border: none; 
   border-top: 2px solid rgba(0, 0, 0, 0.20);
-  margin-top: 20px;
+  margin-top: 30px;
   margin-bottom: 40px;
   }
   
   .form-title {
   font-size: 30px; 
-  color: rgba(0, 0, 0, 0.5);
+  color: #DF7426;
   text-align: center;
   font-weight: bold;  
   margin-top: 20px;
   margin-bottom: 10px;
+  text-transform: uppercase;
   }
   
   .form-subtitle{
@@ -131,10 +132,12 @@
   
   .form-requirements-title{
   font-size: 20px;
-  color: rgba(0, 0, 0, 0.5); 
+  /*color: rgba(0, 0, 0, 0.5); */
+  color: #DF7426;
   text-align: center;
   font-weight: bold;  
   margin-bottom: 40px;
+  text-transform: uppercase;
   }
   
   
@@ -167,6 +170,7 @@
   
   .file-upload-container:hover {
   background-color: rgba(245, 143, 88, 0.2);
+  
   }
   
   .uploadedFiles-container{
@@ -262,17 +266,24 @@
   .submit-button {
   padding: 10px 20px;
   font-size: 16px;
-  background-color:rgb(245, 143, 88);
+  background-color: #DF7426;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer; 
   width: 350px;
   box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
   }
   
   .submit-button:hover {
-  background-color: #e56723;
+  background-color: #BC5F1C;
+  transform: scale(1.05);
+
   }
   
+  .required {
+    color: red;
+    margin-left: 5px;
+  }
   

@@ -362,7 +362,7 @@ const handleFileChange = (
           <>
           <div className="form-group">
             
-          <label htmlFor="purpose" className="form-label">{docType} Purpose</label>
+          <label htmlFor="purpose" className="form-label">{docType} Purpose<span className="required">*</span></label>
           <select 
             id="purpose" 
             name="purpose" 
@@ -422,7 +422,7 @@ const handleFileChange = (
         {(docType === "Barangay Indigency" || (clearanceInput.purpose === "Residency" && docType === "Barangay Certificate")) && (
           <>
             <div className="form-group">
-              <label htmlFor="dateOfResidency" className="form-label">Set An Appointment</label>
+              <label htmlFor="dateOfResidency" className="form-label">Set An Appointment<span className="required">*</span></label>
               <input 
                 type="date" 
                 id="dateOfResidency" 
@@ -441,7 +441,7 @@ const handleFileChange = (
           {docType === "Construction Permit" && (
             <>
               <div className="form-group">
-                <label className="form-label">Type of Construction Activity</label>
+                <label className="form-label">Type of Construction Activity<span className="required">*</span></label>
                 <div className="main-form-radio-group">
                     <div className="form-radio-group">
                         <label className="form-radio">
@@ -477,7 +477,7 @@ const handleFileChange = (
           )}
 
             <div className="form-group">
-              <label htmlFor="firstName" className="form-label">First Name</label>
+              <label htmlFor="firstName" className="form-label">First Name<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="firstName"  
@@ -491,7 +491,7 @@ const handleFileChange = (
             </div>
 
             <div className="form-group">
-              <label htmlFor="middleName" className="form-label">Middle Name</label>
+              <label htmlFor="middleName" className="form-label">Middle Name<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="middleName"  
@@ -505,7 +505,7 @@ const handleFileChange = (
             </div>
 
             <div className="form-group">
-              <label htmlFor="lastName" className="form-label">Last Name</label>
+              <label htmlFor="lastName" className="form-label">Last Name<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="lastName"  
@@ -520,7 +520,7 @@ const handleFileChange = (
             {(docType ==="Temporary Business Permit"||docType ==="Business Permit") ? (
               <>  
                 <div className="form-group">
-                  <label htmlFor="businessname" className="form-label">Business Name</label>
+                  <label htmlFor="businessname" className="form-label">Business Name<span className="required">*</span></label>
                   <input 
                     type="text"  
                     id="businessname"  
@@ -533,7 +533,7 @@ const handleFileChange = (
                   />
               </div>            
               <div className="form-group">
-                <label htmlFor="address" className="form-label">Home Address</label>
+                <label htmlFor="address" className="form-label">Home Address<span className="required">*</span></label>
                 <input 
                   type="text"  
                   id="address"  
@@ -547,7 +547,7 @@ const handleFileChange = (
               </div>
 
                 <div className="form-group">
-                  <label htmlFor="businessloc" className="form-label">Business Location</label>
+                  <label htmlFor="businessloc" className="form-label">Business Location<span className="required">*</span></label>
                   <input 
                     type="text"  
                     id="businessloc"  
@@ -563,7 +563,7 @@ const handleFileChange = (
             ):docType ==="Construction Permit"?(
             <>
               <div className="form-group">
-              <label htmlFor="address" className="form-label">Home/Office Address</label>
+              <label htmlFor="address" className="form-label">Home/Office Address<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="address"  
@@ -580,7 +580,7 @@ const handleFileChange = (
             
             <>
               <div className="form-group">
-                <label htmlFor="dateOfResidency" className="form-label">Date of Residency in Barangay Fairview</label>
+                <label htmlFor="dateOfResidency" className="form-label">Date of Residency in Barangay Fairview<span className="required">*</span></label>
                 <input 
                   type="date" 
                   id="dateOfResidency" 
@@ -593,7 +593,7 @@ const handleFileChange = (
              </div>
 
             <div className="form-group">
-              <label htmlFor="address" className="form-label">Address</label>
+              <label htmlFor="address" className="form-label">Address<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="address"  
@@ -607,7 +607,7 @@ const handleFileChange = (
             </div>
 
             <div className="form-group">
-              <label htmlFor="birthday" className="form-label">Birthday</label>
+              <label htmlFor="birthday" className="form-label">Birthday<span className="required">*</span></label>
               <input 
                 type="date" 
                 id="birthday" 
@@ -624,7 +624,7 @@ const handleFileChange = (
 
             {docType ==="Barangay ID" && (
               <div className="form-group">
-                <label htmlFor="birthdayplace" className="form-label">Birthplace</label>
+                <label htmlFor="birthdayplace" className="form-label">Birthplace<span className="required">*</span></label>
                 <input 
                   type="text" 
                   id="birthdayplace" 
@@ -641,7 +641,7 @@ const handleFileChange = (
 
             {(docType ==="Temporary Business Permit"||docType ==="Business Permit")?(<>
               <div className="form-group">
-              <label htmlFor="businessnature" className="form-label">Nature of Business</label>
+              <label htmlFor="businessnature" className="form-label">Nature of Business<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="businessnature"  
@@ -657,7 +657,7 @@ const handleFileChange = (
             
 
             <div className="form-group">
-              <label htmlFor="capital" className="form-label">Estimated Capital</label>
+              <label htmlFor="capital" className="form-label">Estimated Capital<span className="required">*</span></label>
               <input 
                 type="number"  // Ensures the input accepts only numbers
                 id="capital"  
@@ -675,7 +675,7 @@ const handleFileChange = (
             </>):docType=="Construction Permit"?(
               <>
                 <div className="form-group">
-              <label htmlFor="projectloc" className="form-label">Project Location</label>
+              <label htmlFor="projectloc" className="form-label">Project Location<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="projectloc"  
@@ -689,7 +689,7 @@ const handleFileChange = (
             </div>
 
             <div className="form-group">
-              <label htmlFor="buildingtype" className="form-label">Type of Building</label>
+              <label htmlFor="buildingtype" className="form-label">Type of Building<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="buildingtype"  
@@ -705,7 +705,7 @@ const handleFileChange = (
               </>)
             :(<>
               <div className="form-group">
-              <label htmlFor="age" className="form-label">Age</label>
+              <label htmlFor="age" className="form-label">Age<span className="required">*</span></label>
               <input 
                 type="number"  // Ensures the input accepts only numbers
                 id="age"  
@@ -722,7 +722,7 @@ const handleFileChange = (
             </div>
 
             <div className="form-group">
-              <label htmlFor="gender" className="form-label">Gender</label>
+              <label htmlFor="gender" className="form-label">Gender<span className="required">*</span></label>
               <select 
                 id="gender" 
                 name="gender" 
@@ -742,7 +742,7 @@ const handleFileChange = (
             {docType ==="Barangay ID" && (
               <>
                 <div className="form-group">
-                  <label htmlFor="religion" className="form-label">Religion</label>
+                  <label htmlFor="religion" className="form-label">Religion<span className="required">*</span></label>
                   <input 
                     type="text" 
                     id="religion" 
@@ -755,7 +755,7 @@ const handleFileChange = (
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="nationality" className="form-label">Nationality</label>
+                  <label htmlFor="nationality" className="form-label">Nationality<span className="required">*</span></label>
                   <input 
                     type="text" 
                     id="nationality" 
@@ -774,7 +774,7 @@ const handleFileChange = (
             </>) : docType==="Construction Permit" ?(
               <>
                  <div className="form-group">
-              <label htmlFor="projecttitle" className="form-label">Project Title</label>
+              <label htmlFor="projecttitle" className="form-label">Project Title<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="projecttitle"  
@@ -789,7 +789,7 @@ const handleFileChange = (
               </>
             ):(<> 
               <div className="form-group">
-              <label htmlFor="civilStatus" className="form-label">Civil Status</label>
+              <label htmlFor="civilStatus" className="form-label">Civil Status<span className="required">*</span></label>
               <select 
                 id="civilStatus" 
                 name="civilStatus" 
@@ -811,7 +811,7 @@ const handleFileChange = (
             {docType ==="Barangay ID" && (
               <>
                 <div className="form-group">
-                  <label htmlFor="height" className="form-label">Height</label>
+                  <label htmlFor="height" className="form-label">Height<span className="required">*</span></label>
                   <input 
                     type="number" 
                     id="height" 
@@ -825,7 +825,7 @@ const handleFileChange = (
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="weight" className="form-label">Weight</label>
+                  <label htmlFor="weight" className="form-label">Weight<span className="required">*</span></label>
                   <input 
                     type="number" 
                     id="weight" 
@@ -839,7 +839,7 @@ const handleFileChange = (
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="bloodtype" className="form-label">Blood Type</label>
+                  <label htmlFor="bloodtype" className="form-label">Blood Type<span className="required">*</span></label>
                   <input 
                     type="text" 
                     id="bloodtype" 
@@ -853,7 +853,7 @@ const handleFileChange = (
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="occupation" className="form-label">Occupation</label>
+                  <label htmlFor="occupation" className="form-label">Occupation<span className="required">*</span></label>
                   <input 
                     type="text" 
                     id="occupation" 
@@ -869,7 +869,7 @@ const handleFileChange = (
             </>)}
 
             <div className="form-group">
-              <label htmlFor="contact" className="form-label">Contact Number</label>
+              <label htmlFor="contact" className="form-label">Contact Number<span className="required">*</span></label>
               <input 
                 type="tel"  
                 id="contact"  
@@ -889,7 +889,7 @@ const handleFileChange = (
 
             {docType ==="Barangay ID" ? (
               <div className="form-group">
-              <label htmlFor="precinctno" className="form-label">Precinct Number</label>
+              <label htmlFor="precinctno" className="form-label">Precinct Number<span className="required">*</span></label>
               <input 
                 type="number" 
                 id="precinctno" 
@@ -903,7 +903,7 @@ const handleFileChange = (
               </div>
             ):(docType ==="Temporary Business Permit"||docType ==="Business Permit")?(<></>)
             :docType=="Construction Permit"?(<></>):(<div className="form-group">
-              <label htmlFor="citizenship" className="form-label">Citizenship</label>
+              <label htmlFor="citizenship" className="form-label">Citizenship<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="citizenship"  
@@ -924,7 +924,7 @@ const handleFileChange = (
               <h1 className="form-requirements-title">Emergency Details</h1>
 
               <div className="form-group">
-                <label htmlFor="firstname" className="form-label">First Name</label>
+                <label htmlFor="firstname" className="form-label">First Name<span className="required">*</span></label>
                 <input 
                   type="text"  
                   id="firstname"  
@@ -938,7 +938,7 @@ const handleFileChange = (
               </div>`
 
               <div className="form-group">
-                <label htmlFor="middlename" className="form-label">Middle Name</label>
+                <label htmlFor="middlename" className="form-label">Middle Name<span className="required">*</span></label>
                 <input 
                   type="text"  
                   id="middlename"  
@@ -952,7 +952,7 @@ const handleFileChange = (
               </div>
 
               <div className="form-group">
-                <label htmlFor="lastname" className="form-label">Last Name</label>
+                <label htmlFor="lastname" className="form-label">Last Name<span className="required">*</span></label>
                 <input 
                   type="text"  
                   id="lastname"  
@@ -966,7 +966,7 @@ const handleFileChange = (
               </div>
 
               <div className="form-group">
-                <label htmlFor="address" className="form-label">Address</label>
+                <label htmlFor="address" className="form-label">Address<span className="required">*</span></label>
                 <input 
                   type="text"  
                   id="address"  
@@ -980,7 +980,7 @@ const handleFileChange = (
               </div>
 
               <div className="form-group">
-                <label htmlFor="relationship" className="form-label">Relationship</label>
+                <label htmlFor="relationship" className="form-label">Relationship<span className="required">*</span></label>
                 <input 
                   type="text"  
                   id="relationship"  
@@ -994,7 +994,7 @@ const handleFileChange = (
               </div>
 
               <div className="form-group">
-                <label htmlFor="contactnumber" className="form-label">Contact Number</label>
+                <label htmlFor="contactnumber" className="form-label">Contact Number<span className="required">*</span></label>
                 <input 
                   type="tel"  
                   id="emergencyDetails.contactNumber"  
@@ -1013,7 +1013,7 @@ const handleFileChange = (
           ):docType==="First Time Jobseeker" &&(
             <>
               <div className="form-group">
-                <label htmlFor="educattainment" className="form-label">Educational Attainment</label>
+                <label htmlFor="educattainment" className="form-label">Educational Attainment<span className="required">*</span></label>
                 <input 
                   type="text"  
                   id="educattainment"  
@@ -1027,14 +1027,14 @@ const handleFileChange = (
               </div>
 
             <div className="form-group">
-              <label htmlFor="course" className="form-label">Course</label>
+              <label htmlFor="course" className="form-label">Course<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="course"  
                 name="course"  
                 className="form-input"  
                 value={clearanceInput.course}
-                  onChange={handleChange}
+                onChange={handleChange}
                 required 
                 placeholder="Enter Course"  
               />
@@ -1042,7 +1042,7 @@ const handleFileChange = (
               <br/>
             <div className="form-group">
                 <label className="form-label">
-                    Are you a beneficiary of a JobStart Program under RA No. 10869, otherwise known as “An Act Institutionalizing the Nationwide Implementation of the Jobstart Philippines Program and Providing Funds therefor”?
+                    Are you a beneficiary of a JobStart Program under RA No. 10869, otherwise known as “An Act Institutionalizing the Nationwide Implementation of the Jobstart Philippines Program and Providing Funds therefor”?<span className="required">*</span>
                 </label>
                 <div className="form-radio-group">
                     <label className="form-radio">
@@ -1058,7 +1058,11 @@ const handleFileChange = (
 
             </>
         )}
+
+          <br/>
           <hr/>
+
+          <br/>
           <h1 className="form-requirements-title">Requirements</h1>
           
 
@@ -1066,7 +1070,7 @@ const handleFileChange = (
           // WILL Have to fix this part
           <>
             <div className="signature/printedname-container">
-            <h1 className="form-label">Certified True Copy of Title of the Property/Contract of Lease</h1>
+            <h1 className="form-label">Certified True Copy of Title of the Property/Contract of Lease<span className="required">*</span></h1>
 
             <div className="file-upload-container">
               <label htmlFor="file-upload5"  className="upload-link">Click to Upload File</label>
@@ -1078,7 +1082,7 @@ const handleFileChange = (
                     handleFileChange(e, setFiles5, 'copyOfPropertyTitle');
                   }} 
                   accept=".jpg,.jpeg,.png"
-                   // Handle file selection
+                  style={{ display: "none" }}
                 />
 
               <div className="uploadedFiles-container">
@@ -1131,7 +1135,7 @@ const handleFileChange = (
           <br/>
 
           <div className="barangayID-container">
-            <h1 className="form-label">Certified True Copy of DTI Registration</h1>
+            <h1 className="form-label">Certified True Copy of DTI Registration<span className="required">*</span></h1>
 
             <div className="file-upload-container">
               <label htmlFor="file-upload6"  className="upload-link">Click to Upload File</label>
@@ -1143,7 +1147,7 @@ const handleFileChange = (
                     handleFileChange(e, setFiles6, 'dtiRegistration');
                   }} 
                   accept=".jpg,.jpeg,.png"
-                  
+                  style={{ display: "none" }}
                 />
 
               <div className="uploadedFiles-container">
@@ -1196,7 +1200,7 @@ const handleFileChange = (
 
 
           <div className="endorsementletter-container">
-            <h1 className="form-label">Picture of CCTV installed in the establishment </h1>
+            <h1 className="form-label">Picture of CCTV installed in the establishment<span className="required">*</span></h1>
             <h1 className="form-label-description">(for verification by Barangay Inspector)</h1>
 
             <div className="file-upload-container">
@@ -1209,6 +1213,7 @@ const handleFileChange = (
                     handleFileChange(e, setFiles7, 'isCCTV');
                   }} 
                   accept=".jpg,.jpeg,.png"
+                  style={{ display: "none" }}
                 />
 
               <div className="uploadedFiles-container">
@@ -1260,7 +1265,7 @@ const handleFileChange = (
           </>)}
 
           <div className="signature/printedname-container">
-            <h1 className="form-label"> Upload Signature Over Printed Name</h1>
+            <h1 className="form-label"> Upload Signature Over Printed Name<span className="required">*</span></h1>
 
             <div className="file-upload-container">
               <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
@@ -1273,6 +1278,7 @@ const handleFileChange = (
                     handleFileChange(e, setFiles, 'signaturejpg');
                   }} 
                   
+                  style={{ display: "none" }}
                 />
                 
               <div className="uploadedFiles-container">
@@ -1322,7 +1328,8 @@ const handleFileChange = (
           </div>
           {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction Permit" ) && (
             <>
-              <h1 className="form-label-reqs"> Upload of the following requirements</h1>
+              <br/>
+              <h1 className="form-label-reqs"> Upload any of the following requirements</h1>
               <br/>
             </>
           )}
@@ -1330,7 +1337,7 @@ const handleFileChange = (
        
           {docType === "Construction Permit" ? (<>
           <div className="barangayID-container">
-            <h1 className="form-label">Certified True Copy of Tax Declaration</h1>
+            <h1 className="form-label">Certified True Copy of Tax Declaration<span className="required">*</span></h1>
 
             <div className="file-upload-container">
               <label htmlFor="file-upload8"  className="upload-link">Click to Upload File</label>
@@ -1342,7 +1349,7 @@ const handleFileChange = (
                     handleFileChange(e, setFiles8, 'taxDeclaration');
                   }}
                   accept=".jpg,.jpeg,.png"
-                 
+                  style={{ display: "none" }}
                 />
 
               <div className="uploadedFiles-container">
@@ -1394,7 +1401,7 @@ const handleFileChange = (
 
 
           <div className="endorsementletter-container">
-            <h1 className="form-label">Approved Building/Construction Plan</h1>
+            <h1 className="form-label">Approved Building/Construction Plan<span className="required">*</span></h1>
             <div className="file-upload-container">
               <label htmlFor="file-upload9"  className="upload-link">Click to Upload File</label>
                 <input
@@ -1405,6 +1412,8 @@ const handleFileChange = (
                     handleFileChange(e, setFiles8, 'approvedBldgPlan');
                   }}
                   accept=".jpg,.jpeg,.png"
+
+                  style={{ display: "none" }}
                 />
 
               <div className="uploadedFiles-container">
@@ -1469,6 +1478,7 @@ const handleFileChange = (
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleFileChange(e, setFiles2, 'barangayIDjpg');
                   }}
+                  style={{ display: "none" }}
                 />
 
               <div className="uploadedFiles-container">
@@ -1532,6 +1542,7 @@ const handleFileChange = (
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleFileChange(e,setFiles3, 'validIDjpg');
                   }} // Handle file selection
+                  style={{ display: "none" }}
                 />
 
               <div className="uploadedFiles-container">
@@ -1597,6 +1608,8 @@ const handleFileChange = (
                     handleFileChange(e,setFiles4, 'letterjpg');
                    
                   }} // Handle file selection
+
+                  style={{ display: "none" }}
                 />
 
               <div className="uploadedFiles-container">
