@@ -16,7 +16,7 @@ export default function Services() {
 
   return (
     <main className="services-container">
-      <div className="headerpic">
+      <div className="headerpic-services">
         <p>SERVICES</p>
       </div>
       
@@ -63,9 +63,9 @@ export default function Services() {
               <h1>Barangay Permits</h1>
               <div className="dropdown">
                 
-              <div className="nested-dropdown-container" >
-                <p className="nested-trigger" onClick={goToServices} id="Temporary Business Permit" >Temporary Business Permit</p>
-              </div>
+              
+                <p onClick={goToServices} id="Temporary Business Permit" >Temporary Business Permit</p>
+    
                 <p onClick={goToServices} id="Business Permit">Business Permit</p>
                 <p onClick={goToServices} id="Construction Permit">Construction Permit</p>  
               </div>
