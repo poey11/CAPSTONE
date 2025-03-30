@@ -20,11 +20,12 @@
   transition: color 0.2s ease-in-out;
   font-weight: normal;
   font-size: 16px;
+  border-radius: 10px;
 }
 
 .dropdown-item:hover {
   color: white;
-  background-color: #ed7014;
+  background-color: #376791;
 }
 
 
@@ -37,24 +38,27 @@
   position: absolute;
   top: 100%; 
   left: 0;
-  background-color: #ed7014;
+  background-color: #618FB9;
   padding: 10px;
   z-index: 2; 
-  width: 200px;
+  width: 250px;
 }
 
 .Dropdown p {
   margin: 0;
-  padding: 5px 10px;
+  padding: 10px 20px;
   color: black;
   font-size: 16px;
   cursor: pointer;
   font-weight: normal;
+  border-radius: 10px;
+ 
 }
 
 .Dropdown p:hover {
-  color: white;
-  background-color:rgb(220, 98, 11);
+  color: #294c6b;
+  background-color: #82b0d8;
+  
 }
 
 .navbar-container{
@@ -66,12 +70,13 @@
 }
 
 .navbar-card {
-  background-color: #ed7014;
+  background-color: #618fb9;
   display: flex;
   justify-content: space-between; 
   align-items: center; 
   height: 120px; 
   padding: 0 20px; 
+  
 }
 
 .header-brgylogo {
@@ -127,7 +132,7 @@
 
 .dropdown-Container p {
   cursor: pointer;
-  color: black;
+  color: #fffcfc;
   transition: color 0.2s ease-in-out;
 }
 
@@ -216,7 +221,7 @@
 }
 
 .filter-option:hover{
-  color: #ed7014;
+  color: #618fb9;
 }
 
 .top-section{
@@ -266,10 +271,12 @@
 
 .menu-section-container{
   display: flex; 
+  gap: 10px;
 }
 
 .dropdown-icon{
   width: 13px;
   height: 13px;
   margin-top: 18px;
+  filter: invert(100%);
 }

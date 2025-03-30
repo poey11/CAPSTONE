@@ -4,9 +4,9 @@
     width: 100%;
 }
 
-.headerpic {
+.headerpic-services {
   position: relative; /* Required for pseudo-elements */
-  height: 200px;
+  height: 250px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,24 +16,35 @@
   overflow: hidden; /* Ensures blur doesn't spill outside */
 }
 
-.headerpic::before {
+.headerpic-services::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('/images/header.jpg');
+  background-image: url('/images/headerpic.jpg');
   background-size: cover;
-  background-position: 50% 50%;
+  background-position: 50% 60%;
   background-repeat: no-repeat;
-  filter: blur(2px); /* Adjust the blur intensity */
+  filter: blur(1.2px); /* Adjust the blur intensity */
   z-index: 1; /* Place the blurred background below the text */
 }
 
-.headerpic > * {
+.headerpic-services::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.173); /* Dark overlay */
+  z-index: 2; /* Ensure it overlays the background */
+}
+
+.headerpic-services > * {
   position: relative;
-  z-index: 2; /* Ensure text is above the blurred background */
+  z-index: 3; /* Ensure text is above the overlays */
 }
 
 
@@ -41,7 +52,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f7e5d5;
+  background-color: #D8DFE5;
  
 }
 
@@ -62,7 +73,7 @@
 }
 
 .documents-container h1 {
-  color: #ed7014;
+  color: #ece9e7;
   font-size: 20px;
 }
 
@@ -74,7 +85,8 @@
 
 .documents-card {
   flex: 1 1 calc(50% - 20px);
-  background-color: rgba(237, 112, 20, 0.3);
+  /*background-color: rgb(222, 133, 69);*/
+  background-color: #5a84ac;
   padding: 20px;
   padding-left: 20px;
   border: 1px solid #ddd;
@@ -95,7 +107,7 @@
 .documents-card:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-  background-color: rgba(237, 112, 20, 0.4);
+  background-color: #0C508F;
   cursor: pointer;
 }
 
@@ -125,7 +137,7 @@
     position: absolute;
     top: 70px; /* Aligns directly below the container */
     left: 0;
-    background-color: rgb(246, 195, 159);
+    background-color: #0C508F;
     border: 1px solid #ddd;
     border-radius: 0px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -137,22 +149,25 @@
 .dropdown p {
     margin: 0;
     padding: 5px 10px;
-    color: #333;
+    color: #ece9e7;
     font-size: 14px;
     cursor: pointer;
     transition: color 0.2s ease-in-out;
 }
 
 .dropdown p:hover {
-    background-color: rgba(237, 112, 20, 0.3); /* Highlight option on hover */
-    color: white;
-}
+    background-color: #a8c7e3; /* Highlight option on hover */
+    color: #294c6b;
+    border-radius: 10px;
+
+} 
 
 
 /* Nested Dropdown */
 .nested-dropdown-container {
     position: relative;
 }
+
 
 .nested-trigger {
     margin: 0;
@@ -212,7 +227,7 @@ to {
 }
 
 @media (max-width: 480px) {
-  .headerpic {
+  .headerpic-services {
     font-size: 24px; 
   }
 

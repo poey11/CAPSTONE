@@ -1,5 +1,5 @@
 .footer-container {
-  background-color: #ed7014;
+  background-color: #618fb9;
   color: white;
   padding: 10px 40px;
   font-size:16px;
@@ -90,7 +90,7 @@
   position: absolute;
   right: 20px;
   bottom: 10px;
-  background-color: #d65a00; /* Darker orange */
+  background-color: #4e779e; /* Darker orange */
   border: none;
   padding: 10px;
   border-radius: 50%;
@@ -99,7 +99,8 @@
 }
 
 .scroll-to-top:hover {
-  background-color: #b55300; /* Even darker orange */
+  background-color: #436a8f
+
 }
 
 .scroll-icon {
