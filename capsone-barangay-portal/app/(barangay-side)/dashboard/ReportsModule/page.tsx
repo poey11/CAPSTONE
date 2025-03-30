@@ -5,8 +5,6 @@ import { getFirestore, collection, query, where, getDocs, QueryDocumentSnapshot,
 import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
-import { motion } from "framer-motion";
-
 
 interface FileData {
   name: string;
@@ -101,28 +99,46 @@ const ReportsPage = () => {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
       const month = String(currentDate.getMonth() + 1).padStart(2, "0");
-      const currentMonthYear = currentDate.toLocaleString("en-US", { month: "long", year: "numeric" }).toUpperCase();
+      const currentMonthYear = currentDate
+        .toLocaleString("en-US", { month: "long", year: "numeric" })
+        .toUpperCase();
   
-      const db = getFirestore();
+      // for the previous month
+      const previousMonth = currentDate.getMonth();
+      const previousYear = previousMonth === 0 ? currentDate.getFullYear() - 1 : currentDate.getFullYear();
+      const previousMonthName = String(previousMonth === 0 ? 12 : previousMonth).padStart(2, "0");
+      const previousMonthYear = new Date(previousYear, previousMonth, 1)
+        .toLocaleString("en-US", { month: "long", year: "numeric" })
+        .toUpperCase();
+  
       const kasambahayRef = collection(db, "KasambahayList");
-      const q = query(
+  
+      // Fetch all records before current month
+      const qOldRecords = query(
+        kasambahayRef,
+        where("createdAt", "<", `${year}-${month}-01`)
+      );
+      const oldRecordsSnapshot = await getDocs(qOldRecords);
+      let oldMembers = oldRecordsSnapshot.docs.map((doc) => doc.data());
+  
+      // Fetch records for the current month
+      const qCurrentMonthRecords = query(
         kasambahayRef,
         where("createdAt", ">=", `${year}-${month}-01`),
         where("createdAt", "<=", `${year}-${month}-31`)
       );
+      const currentMonthSnapshot = await getDocs(qCurrentMonthRecords);
+      let currentMonthMembers = currentMonthSnapshot.docs.map((doc) => doc.data());
   
-      const querySnapshot = await getDocs(q);
-      let newMembers = querySnapshot.docs.map((doc) => doc.data());
-  
-      if (newMembers.length === 0) {
-        alert("No new members found for the current month.");
+      if (oldMembers.length === 0 && currentMonthMembers.length === 0) {
+        alert("No new members found.");
         setLoadingKasambahay(false);
         return;
       }
   
-      newMembers.sort((a, b) => Number(a.registrationControlNumber) - Number(b.registrationControlNumber));
+      oldMembers.sort((a, b) => Number(a.registrationControlNumber) - Number(b.registrationControlNumber));
+      currentMonthMembers.sort((a, b) => Number(a.registrationControlNumber) - Number(b.registrationControlNumber));
   
-      const storage = getStorage();
       const templateRef = ref(storage, "ReportsModule/Kasambahay Masterlist Report Template.xlsx");
       const url = await getDownloadURL(templateRef);
       const response = await fetch(url);
@@ -133,65 +149,151 @@ const ReportsPage = () => {
       const worksheet = workbook.worksheets[0];
   
       const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow === 0);
-      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 186);
+      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 5);
   
-      const footerStartRow = 187; 
-  
-      worksheet.spliceRows(footerStartRow, 0, ...new Array(newMembers.length + 2).fill([]));
+      const footerStartRow = 6; 
+      worksheet.spliceRows(footerStartRow, 0, ...new Array(oldMembers.length + currentMonthMembers.length + 2).fill([]));
   
       headerDrawings.forEach((drawing) => {
         if (drawing.range?.tl) drawing.range.tl.nativeRow = 0;
-      
+  
         if (drawing.range?.br) {
           drawing.range.br.nativeRow = 0;
         }
       });
-      
-            
-      let insertionRow = footerStartRow + 1;
   
-      newMembers.forEach((member) => {
-        const row = worksheet.getRow(insertionRow);
-        
+      // Use separate insertionRows for old and new members
+      let oldInsertionRow = footerStartRow + 1; 
+      let newInsertionRow = footerStartRow + oldMembers.length + 2; 
+  
+      // Insert records from previous months first
+      oldMembers.forEach((member) => {
+        const row = worksheet.getRow(oldInsertionRow);
+        row.height = 100;
+  
         const cells = [
-          member.registrationControlNumber, member.lastName, member.firstName, 
-          member.middleName, member.homeAddress, member.placeOfBirth, 
-          member.dateOfBirth, member.sex, member.age, member.civilStatus, 
-          member.educationalAttainment, member.natureOfWork, 
-          member.employmentArrangement, member.salary, 
+          member.registrationControlNumber, 
+          member.lastName.toUpperCase(), 
+          member.firstName.toUpperCase(), 
+          member.middleName.toUpperCase(), 
+          member.homeAddress.toUpperCase(), 
+          member.placeOfBirth.toUpperCase(), 
+          `${String(new Date(member.dateOfBirth).getMonth() + 1).padStart(2, "0")}/${String(new Date(member.dateOfBirth).getDate()).padStart(2, "0")}/${new Date(member.dateOfBirth).getFullYear()}`, 
+          member.sex === "Female" ? "F" : member.sex === "Male" ? "M" : "", 
+          member.age, 
+          member.civilStatus.toUpperCase(), 
+          member.educationalAttainment, 
+          member.natureOfWork, 
+          member.employmentArrangement, 
+          member.salary, 
           member.sssMember ? "YES" : "NO", 
           member.pagibigMember ? "YES" : "NO", 
           member.philhealthMember ? "YES" : "NO", 
-          member.employerName, member.employerAddress
+          member.employerName.toUpperCase(), 
+          member.employerAddress.toUpperCase()
         ];
   
         cells.forEach((value, index) => {
           const cell = row.getCell(index + 1);
           cell.value = value;
-          cell.font = { name: "Calibri", size: 20 };
+          cell.font = { name: "Calibri", size: 21 }; // Increased font size
+          cell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" }; // Enable text wrapping
+  
+          cell.border = {
+            top: { style: "medium", color: { argb: "000000" } },
+            bottom: { style: "medium", color: { argb: "000000" } },
+            left: { style: "medium", color: { argb: "000000" } },
+            right: { style: "medium", color: { argb: "000000" } },
+          };
         });
   
         row.commit();
-        insertionRow++;
+        oldInsertionRow++;
       });
   
-footerDrawings.forEach((drawing) => {
-  const newRow = (drawing.range?.tl?.nativeRow || 186) + newMembers.length + 2;
-
-  if (drawing.range?.tl) drawing.range.tl.nativeRow = newRow;
-
-  if (drawing.range?.br) {
-    drawing.range.br.nativeRow = newRow + 1;
-  }
-});
-   
+      const headerRow = worksheet.getRow(footerStartRow + oldMembers.length + 1);
+  
+      worksheet.unMergeCells(footerStartRow, 1, footerStartRow, 18);
+      
+      // Set the value and styles for the header
+      headerRow.getCell(1).value = `(NEW MEMBERS ${currentMonthYear})`;
+      headerRow.getCell(1).font = { bold: false, italic: true, size: 21, color: { argb: "FF0000" } }; // Increased font size
+      headerRow.height = 25;
+      headerRow.alignment = { horizontal: "left", vertical: "middle" };
+      
+      worksheet.mergeCells(footerStartRow + oldMembers.length + 1, 1, footerStartRow + oldMembers.length + 1, 18);
+      headerRow.commit();
+  
+      // Insert records from the current month
+      currentMonthMembers.forEach((member) => {
+        const row = worksheet.getRow(newInsertionRow);
+        row.height = 100;
+  
+        const cells = [
+          member.registrationControlNumber, 
+          member.lastName.toUpperCase(), 
+          member.firstName.toUpperCase(), 
+          member.middleName.toUpperCase(), 
+          member.homeAddress.toUpperCase(), 
+          member.placeOfBirth.toUpperCase(), 
+          `${String(new Date(member.dateOfBirth).getMonth() + 1).padStart(2, "0")}/${String(new Date(member.dateOfBirth).getDate()).padStart(2, "0")}/${new Date(member.dateOfBirth).getFullYear()}`, 
+          member.sex === "Female" ? "F" : member.sex === "Male" ? "M" : "", 
+          member.age, 
+          member.civilStatus.toUpperCase(), 
+          member.educationalAttainment, 
+          member.natureOfWork, 
+          member.employmentArrangement, 
+          member.salary, 
+          member.sssMember ? "YES" : "NO", 
+          member.pagibigMember ? "YES" : "NO", 
+          member.philhealthMember ? "YES" : "NO", 
+          member.employerName.toUpperCase(), 
+          member.employerAddress.toUpperCase()
+        ];
+  
+        cells.forEach((value, index) => {
+          const cell = row.getCell(index + 1);
+          cell.value = value;
+          cell.font = { name: "Calibri", size: 21 }; // Increased font size
+          cell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" }; // Enable text wrapping
+  
+          // Apply medium black border to each cell
+          cell.border = {
+            top: { style: "medium", color: { argb: "000000" } },
+            bottom: { style: "medium", color: { argb: "000000" } },
+            left: { style: "medium", color: { argb: "000000" } },
+            right: { style: "medium", color: { argb: "000000" } },
+          };
+        });
+  
+        row.commit();
+        newInsertionRow++;
+      });
+  
+      footerDrawings.forEach((drawing) => {
+        const newRow = (drawing.range?.tl?.nativeRow || 5) + oldMembers.length + currentMonthMembers.length + 2;
+  
+        if (drawing.range?.tl) drawing.range.tl.nativeRow = newRow;
+  
+        if (drawing.range?.br) {
+          drawing.range.br.nativeRow = newRow + 1;
+        }
+      });
+  
+      // Create a buffer and upload to Firebase Storage
       const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
+      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   
-      saveAs(blob, `Kasambahay_Masterlist_${currentMonthYear}.xlsx`);
-      alert("Kasambahay Masterlist Report generated successfully!");
+      const fileName = `Kasambahay_Masterlist_${currentMonthYear}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+  
+      alert("Kasambahay Masterlist Report generated successfully. Please wait for the downloadable file!");
+  
+      // Return file URL for conversion
+      return fileUrl;
     } catch (error) {
       console.error("Unexpected error:", error);
       alert("Failed to generate Kasambahay Masterlist Report.");
@@ -199,7 +301,38 @@ footerDrawings.forEach((drawing) => {
       setLoadingKasambahay(false);
     }
   };
-
+  
+  
+  
+  const handleGenerateKasambahayPDF = async () => {
+    setLoadingKasambahay(true);
+  
+    try {
+      const fileUrl = await generateKasambahayReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+  
+      const currentDate = new Date();
+      const currentMonthYear = currentDate.toLocaleString("en-US", { month: "long", year: "numeric" }).toUpperCase();
+      saveAs(blob, `Kasambahay_Masterlist_${currentMonthYear}.pdf`);
+  
+      alert("Kasambahay Report successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingKasambahay(false);
+    }
+  };
   
   const generateFirstTimeJobSeekerReport = async () => {
     setLoadingJobSeeker(true);
@@ -230,61 +363,76 @@ footerDrawings.forEach((drawing) => {
   
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
-      const worksheet = workbook.worksheets[0]; 
-  
+      const worksheet = workbook.worksheets[0];
+
       const monthNames = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
       ];
   
       const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow === 0);
-      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 186);
+      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 5);
   
-      const dataStartRow = 8; 
+      worksheet.getRow(5).getCell(1).value = `As of ${currentMonthYear}`;
+      worksheet.getRow(5).getCell(1).font = { name: "Calibri", size: 12, bold: true }; 
+  
+      const dataStartRow = 8;
       const footerStartRow = 13; 
-  
+
       worksheet.spliceRows(dataStartRow + jobSeekers.length, 0, ...new Array(footerDrawings.length).fill([])); 
-  
+      
       let insertionRow = dataStartRow;
+
+      const lastDataRow = insertionRow + jobSeekers.length - 1;
+
   
       jobSeekers.forEach((seeker) => {
         const row = worksheet.getRow(insertionRow);
   
         const cells = [
-          seeker.dateApplied ? new Date(seeker.dateApplied).toLocaleDateString("en-US") : "",
-          seeker.lastName || "",
-          seeker.firstName || "",
-          seeker.middleName || "",
-          seeker.age || "",
-          seeker.monthOfBirth ? monthNames[parseInt(seeker.monthOfBirth, 10) - 1] : "",
-          seeker.dayOfBirth || "",
-          seeker.yearOfBirth || "",
-          seeker.sex === "M" ? "*" : "",
-          seeker.sex === "F" ? "*" : "",
-          seeker.remarks || ""
-        ];
+            seeker.dateApplied ? new Date(seeker.dateApplied).toLocaleDateString("en-US") : "",
+            seeker.lastName || "",
+            seeker.firstName || "",
+            seeker.middleName || "",
+            seeker.age || "",
+            seeker.monthOfBirth ? monthNames[parseInt(seeker.monthOfBirth, 10) - 1] : "",
+            seeker.dayOfBirth || "",
+            seeker.yearOfBirth || "",
+            seeker.sex === "M" ? "*" : "",
+            seeker.sex === "F" ? "*" : "",
+            seeker.remarks || ""
+          ];
   
-        cells.forEach((value, index) => {
-          const cell = row.getCell(index + 1);
-          cell.value = value;
-          cell.font = { name: "Calibri", size: 20 };
+          cells.forEach((value, index) => {
+            const cell = row.getCell(index + 1);
+            cell.value = value;
+            cell.font = { name: "Calibri", size: 12 };
+          });
+    
+          row.commit();
+          insertionRow++;
         });
-  
-        row.commit();
-        insertionRow++;
-      });
-  
-      footerDrawings.forEach((drawing) => {
-        const newRow = (drawing.range?.tl?.nativeRow || 186) + jobSeekers.length + 1;
-        if (drawing.range?.tl) drawing.range.tl.nativeRow = newRow;
-        if (drawing.range?.br) drawing.range.br.nativeRow = newRow + 1;
-      });
-  
+    
+        footerDrawings.forEach((drawing) => {
+          const newRow = (drawing.range?.tl?.nativeRow || 186) + jobSeekers.length + 1;
+          if (drawing.range?.tl) drawing.range.tl.nativeRow = newRow;
+          if (drawing.range?.br) drawing.range.br.nativeRow = newRow + 1;
+        });
+
+      // Create a buffer and upload to Firebase Storage
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      saveAs(blob, `FirstTimeJobSeekers_${currentMonthYear}.xlsx`);
   
-      alert("First-Time Job Seeker Report generated successfully!");
+      const fileName = `FirstTimeJobSeekers_${currentMonthYear}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+  
+      alert("First-Time Job Seeker Report generated successfully. Please wait for the downloadable file!");
+  
+      // Return file URL for conversion
+      return fileUrl;
     } catch (error) {
       console.error("Error generating report:", error);
       alert("Failed to generate First-Time Job Seeker Report.");
@@ -292,6 +440,39 @@ footerDrawings.forEach((drawing) => {
       setLoadingJobSeeker(false);
     }
   };
+
+  const handleGenerateJobSeekerPDF = async () => {
+    setLoadingJobSeeker(true);
+    try {
+      const fileUrl = await generateFirstTimeJobSeekerReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      // Get PDF as a Blob
+      const blob = await response.blob();
+  
+      // Save file with the correct name dynamically
+      const currentDate = new Date();
+      const currentMonthYear = currentDate.toLocaleString("en-US", { month: "long", year: "numeric" }).toUpperCase();
+      saveAs(blob, `FirstTimeJobSeekers_${currentMonthYear}.pdf`);
+  
+      alert("First-Time Job Seeker Report successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingJobSeeker(false);
+    }
+  };
+  
+
 
   const generateResidentListReport = async () => {
     setLoadingResident(true);
@@ -321,9 +502,8 @@ footerDrawings.forEach((drawing) => {
   
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
-      const worksheet = workbook.worksheets[0]; 
+      const worksheet = workbook.worksheets[0];
   
-      // Update title
       worksheet.getCell("A1").value = reportTitle;
   
       const dataStartRow = 3;
@@ -331,6 +511,8 @@ footerDrawings.forEach((drawing) => {
   
       residents.forEach((resident) => {
         const row = worksheet.getRow(insertionRow);
+        row.height = 55;
+  
         const cells = [
           resident.residentNumber || "",
           resident.name || "",
@@ -348,28 +530,44 @@ footerDrawings.forEach((drawing) => {
   
         cells.forEach((value, index) => {
           row.getCell(index + 1).value = value;
-          row.getCell(index + 1).font = { name: "Times New Roman", size: 10, bold: false }; // Ensure uniform font & remove bold
-          row.getCell(index +1).alignment = {
-            horizontal: 'center'
+          row.getCell(index + 1).font = { name: "Calibri", size: 12, bold: false }; 
+          row.getCell(index + 1).alignment = {
+            horizontal: 'center',
+            wrapText: true,
           };
+          row.getCell(index + 1).border = {
+            top: { style: "medium", color: { argb: "000000" } },
+            bottom: { style: "medium", color: { argb: "000000" } },
+            left: { style: "medium", color: { argb: "000000" } },
+            right: { style: "medium", color: { argb: "000000" } },            
+          }
+          
         });
   
         row.commit();
         insertionRow++;
       });
   
-      // Add "TOTAL" row after last entry
       const totalRow = worksheet.getRow(insertionRow);
       worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
       Object.assign(totalRow.getCell(1), { value: `TOTAL: ${residents.length}`, alignment: { horizontal: "center", vertical: "middle" }, font: { name: "Times New Roman", size: 10, bold: false } });
   
       totalRow.commit();
   
+      // Create a buffer and upload to Firebase Storage
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      saveAs(blob, `Inhabitant Record_${year}.xlsx`);
   
-      alert("Resident Masterlist generated successfully!");
+      const fileName = `Inhabitant_Record_${year}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+  
+      alert("Resident Masterlist generated successfully. Please wait for the downloadable file!");
+  
+      // Return file URL for conversion
+      return fileUrl;
     } catch (error) {
       console.error("Error generating report:", error);
       alert("Failed to generate Resident Masterlist Report.");
@@ -377,6 +575,38 @@ footerDrawings.forEach((drawing) => {
       setLoadingResident(false);
     }
   };
+
+  const handleGenerateResidentPDF = async () => {
+    setLoadingResident(true);
+    try {
+      const fileUrl = await generateResidentListReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      // Get PDF as a Blob
+      const blob = await response.blob();
+  
+      // Save the file with the correct name dynamically
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      saveAs(blob, `Inhabitant_Record_${year}.pdf`);
+  
+      alert("Resident Masterlist Report successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingResident(false);
+    }
+  };
+  
   
   
   
@@ -424,15 +654,15 @@ footerDrawings.forEach((drawing) => {
 
           {selectedModule === "Resident Module" && (
             <>
-              <button onClick={generateResidentListReport} disabled={loadingResident} className="report-button">
-                {loadingJobSeeker ? "Generating..." : "Generate Resident Masterlist"}
+              <button onClick={handleGenerateResidentPDF} disabled={loadingResident} className="report-button">
+                {loadingResident ? "Generating..." : "Generate Resident Masterlist"}
               </button>                    <button className="report-button">Generate East Fairview Resident List</button>
               <button className="report-button">Generate South Fairview Resident List</button>
               <button className="report-button">Generate West Fairview Resident List</button>
-              <button onClick={generateKasambahayReport} disabled={loadingKasambahay} className="report-button">
+              <button onClick={handleGenerateKasambahayPDF} disabled={loadingKasambahay} className="report-button">
                 {loadingKasambahay ? "Generating..." : "Generate Kasambahay Masterlist"}
               </button>
-              <button onClick={generateFirstTimeJobSeekerReport} disabled={loadingJobSeeker} className="report-button">
+              <button onClick={handleGenerateJobSeekerPDF} disabled={loadingJobSeeker} className="report-button">
                 {loadingJobSeeker ? "Generating..." : "Generate First-Time Job Seeker List"}
               </button>       
               </>
