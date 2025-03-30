@@ -103,23 +103,41 @@ const ReportsPage = () => {
         .toLocaleString("en-US", { month: "long", year: "numeric" })
         .toUpperCase();
   
+      // Calculate the previous month
+      const previousMonth = currentDate.getMonth();
+      const previousYear = previousMonth === 0 ? currentDate.getFullYear() - 1 : currentDate.getFullYear();
+      const previousMonthName = String(previousMonth === 0 ? 12 : previousMonth).padStart(2, "0");
+      const previousMonthYear = new Date(previousYear, previousMonth, 1)
+        .toLocaleString("en-US", { month: "long", year: "numeric" })
+        .toUpperCase();
+  
       const kasambahayRef = collection(db, "KasambahayList");
-      const q = query(
+  
+      // Fetch records before current month
+      const qOldRecords = query(
+        kasambahayRef,
+        where("createdAt", "<", `${year}-${month}-01`)
+      );
+      const oldRecordsSnapshot = await getDocs(qOldRecords);
+      let oldMembers = oldRecordsSnapshot.docs.map((doc) => doc.data());
+  
+      // Fetch records for the current month
+      const qCurrentMonthRecords = query(
         kasambahayRef,
         where("createdAt", ">=", `${year}-${month}-01`),
         where("createdAt", "<=", `${year}-${month}-31`)
       );
+      const currentMonthSnapshot = await getDocs(qCurrentMonthRecords);
+      let currentMonthMembers = currentMonthSnapshot.docs.map((doc) => doc.data());
   
-      const querySnapshot = await getDocs(q);
-      let newMembers = querySnapshot.docs.map((doc) => doc.data());
-  
-      if (newMembers.length === 0) {
-        alert("No new members found for the current month.");
+      if (oldMembers.length === 0 && currentMonthMembers.length === 0) {
+        alert("No new members found.");
         setLoadingKasambahay(false);
         return;
       }
   
-      newMembers.sort((a, b) => Number(a.registrationControlNumber) - Number(b.registrationControlNumber));
+      oldMembers.sort((a, b) => Number(a.registrationControlNumber) - Number(b.registrationControlNumber));
+      currentMonthMembers.sort((a, b) => Number(a.registrationControlNumber) - Number(b.registrationControlNumber));
   
       const templateRef = ref(storage, "ReportsModule/Kasambahay Masterlist Report Template.xlsx");
       const url = await getDownloadURL(templateRef);
@@ -131,10 +149,10 @@ const ReportsPage = () => {
       const worksheet = workbook.worksheets[0];
   
       const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow === 0);
-      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 186);
+      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 5);
   
-      const footerStartRow = 187; 
-      worksheet.spliceRows(footerStartRow, 0, ...new Array(newMembers.length + 2).fill([]));
+      const footerStartRow = 6; // Changed footer start row to 6
+      worksheet.spliceRows(footerStartRow, 0, ...new Array(oldMembers.length + currentMonthMembers.length + 2).fill([]));
   
       headerDrawings.forEach((drawing) => {
         if (drawing.range?.tl) drawing.range.tl.nativeRow = 0;
@@ -144,17 +162,13 @@ const ReportsPage = () => {
         }
       });
   
-      const headerRow = worksheet.getRow(footerStartRow);
-      headerRow.getCell(1).value = `(NEW MEMBERS ${currentMonthYear})`;
-      headerRow.getCell(1).font = { bold: false, italic: true, size: 22, color: { argb: "FF0000" } };
-      headerRow.height = 25;
-      worksheet.mergeCells(footerStartRow, 1, footerStartRow, 18);
-      headerRow.alignment = { horizontal: "left", vertical: "middle" };
-      headerRow.commit();
+      // Use separate insertionRows for old and new members
+      let oldInsertionRow = footerStartRow + 1; // For old members
+      let newInsertionRow = footerStartRow + oldMembers.length + 2; // For new members
   
-      let insertionRow = footerStartRow + 1;
-      newMembers.forEach((member) => {
-        const row = worksheet.getRow(insertionRow);
+      // Insert records from previous months first
+      oldMembers.forEach((member) => {
+        const row = worksheet.getRow(oldInsertionRow);
         row.height = 20;
   
         const cells = [
@@ -164,16 +178,14 @@ const ReportsPage = () => {
           member.middleName.toUpperCase(), 
           member.homeAddress.toUpperCase(), 
           member.placeOfBirth.toUpperCase(), 
-          // Format the date as MM/DD/YYYY
           `${String(new Date(member.dateOfBirth).getMonth() + 1).padStart(2, "0")}/${String(new Date(member.dateOfBirth).getDate()).padStart(2, "0")}/${new Date(member.dateOfBirth).getFullYear()}`, 
-          // Format sex as "F" for Female and "M" for Male
           member.sex === "Female" ? "F" : member.sex === "Male" ? "M" : "", 
-          member.age, // assuming age is a number
+          member.age, 
           member.civilStatus.toUpperCase(), 
-          member.educationalAttainment, // assuming it's a number or a pre-defined value
-          member.natureOfWork, // assuming it's a pre-defined value
-          member.employmentArrangement, // assuming it's a pre-defined value
-          member.salary, // assuming salary is a number
+          member.educationalAttainment, 
+          member.natureOfWork, 
+          member.employmentArrangement, 
+          member.salary, 
           member.sssMember ? "YES" : "NO", 
           member.pagibigMember ? "YES" : "NO", 
           member.philhealthMember ? "YES" : "NO", 
@@ -196,11 +208,71 @@ const ReportsPage = () => {
         });
   
         row.commit();
-        insertionRow++;
+        oldInsertionRow++;
+      });
+  
+      const headerRow = worksheet.getRow(footerStartRow + oldMembers.length + 1);
+  
+      // Unmerge any previously merged cells in the row before merging again
+      worksheet.unMergeCells(footerStartRow, 1, footerStartRow, 18);
+      
+      // Set the value and styles for the header
+      headerRow.getCell(1).value = `(NEW MEMBERS ${currentMonthYear})`;
+      headerRow.getCell(1).font = { bold: false, italic: true, size: 22, color: { argb: "FF0000" } };
+      headerRow.height = 25;
+      headerRow.alignment = { horizontal: "left", vertical: "middle" };
+      
+      // Merge cells for the header without overlapping with other data
+      worksheet.mergeCells(footerStartRow + oldMembers.length + 1, 1, footerStartRow + oldMembers.length + 1, 18);
+      headerRow.commit();
+  
+      // Insert records from the current month
+      currentMonthMembers.forEach((member) => {
+        const row = worksheet.getRow(newInsertionRow);
+        row.height = 20;
+  
+        const cells = [
+          member.registrationControlNumber, 
+          member.lastName.toUpperCase(), 
+          member.firstName.toUpperCase(), 
+          member.middleName.toUpperCase(), 
+          member.homeAddress.toUpperCase(), 
+          member.placeOfBirth.toUpperCase(), 
+          `${String(new Date(member.dateOfBirth).getMonth() + 1).padStart(2, "0")}/${String(new Date(member.dateOfBirth).getDate()).padStart(2, "0")}/${new Date(member.dateOfBirth).getFullYear()}`, 
+          member.sex === "Female" ? "F" : member.sex === "Male" ? "M" : "", 
+          member.age, 
+          member.civilStatus.toUpperCase(), 
+          member.educationalAttainment, 
+          member.natureOfWork, 
+          member.employmentArrangement, 
+          member.salary, 
+          member.sssMember ? "YES" : "NO", 
+          member.pagibigMember ? "YES" : "NO", 
+          member.philhealthMember ? "YES" : "NO", 
+          member.employerName.toUpperCase(), 
+          member.employerAddress.toUpperCase()
+        ];
+  
+        cells.forEach((value, index) => {
+          const cell = row.getCell(index + 1);
+          cell.value = value;
+          cell.font = { name: "Calibri", size: 20 };
+  
+          // Apply medium black border to each cell
+          cell.border = {
+            top: { style: "medium", color: { argb: "000000" } },
+            bottom: { style: "medium", color: { argb: "000000" } },
+            left: { style: "medium", color: { argb: "000000" } },
+            right: { style: "medium", color: { argb: "000000" } },
+          };
+        });
+  
+        row.commit();
+        newInsertionRow++;
       });
   
       footerDrawings.forEach((drawing) => {
-        const newRow = (drawing.range?.tl?.nativeRow || 186) + newMembers.length + 2;
+        const newRow = (drawing.range?.tl?.nativeRow || 5) + oldMembers.length + currentMonthMembers.length + 2;
   
         if (drawing.range?.tl) drawing.range.tl.nativeRow = newRow;
   
@@ -299,7 +371,7 @@ const ReportsPage = () => {
       ];
   
       const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow === 0);
-      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 186);
+      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 5);
   
       worksheet.getRow(5).getCell(1).value = `As of ${currentMonthYear}`;
       worksheet.getRow(5).getCell(1).font = { name: "Calibri", size: 12, bold: true }; // Optional styling
