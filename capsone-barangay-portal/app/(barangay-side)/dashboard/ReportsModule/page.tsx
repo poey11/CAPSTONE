@@ -103,7 +103,7 @@ const ReportsPage = () => {
         .toLocaleString("en-US", { month: "long", year: "numeric" })
         .toUpperCase();
   
-      // Calculate the previous month
+      // for the previous month
       const previousMonth = currentDate.getMonth();
       const previousYear = previousMonth === 0 ? currentDate.getFullYear() - 1 : currentDate.getFullYear();
       const previousMonthName = String(previousMonth === 0 ? 12 : previousMonth).padStart(2, "0");
@@ -113,7 +113,7 @@ const ReportsPage = () => {
   
       const kasambahayRef = collection(db, "KasambahayList");
   
-      // Fetch records before current month
+      // Fetch all records before current month
       const qOldRecords = query(
         kasambahayRef,
         where("createdAt", "<", `${year}-${month}-01`)
@@ -151,7 +151,7 @@ const ReportsPage = () => {
       const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow === 0);
       const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 5);
   
-      const footerStartRow = 6; // Changed footer start row to 6
+      const footerStartRow = 6; 
       worksheet.spliceRows(footerStartRow, 0, ...new Array(oldMembers.length + currentMonthMembers.length + 2).fill([]));
   
       headerDrawings.forEach((drawing) => {
@@ -163,13 +163,13 @@ const ReportsPage = () => {
       });
   
       // Use separate insertionRows for old and new members
-      let oldInsertionRow = footerStartRow + 1; // For old members
-      let newInsertionRow = footerStartRow + oldMembers.length + 2; // For new members
+      let oldInsertionRow = footerStartRow + 1; 
+      let newInsertionRow = footerStartRow + oldMembers.length + 2; 
   
       // Insert records from previous months first
       oldMembers.forEach((member) => {
         const row = worksheet.getRow(oldInsertionRow);
-        row.height = 20;
+        row.height = 100;
   
         const cells = [
           member.registrationControlNumber, 
@@ -196,9 +196,9 @@ const ReportsPage = () => {
         cells.forEach((value, index) => {
           const cell = row.getCell(index + 1);
           cell.value = value;
-          cell.font = { name: "Calibri", size: 20 };
+          cell.font = { name: "Calibri", size: 21 }; // Increased font size
+          cell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" }; // Enable text wrapping
   
-          // Apply medium black border to each cell
           cell.border = {
             top: { style: "medium", color: { argb: "000000" } },
             bottom: { style: "medium", color: { argb: "000000" } },
@@ -213,23 +213,21 @@ const ReportsPage = () => {
   
       const headerRow = worksheet.getRow(footerStartRow + oldMembers.length + 1);
   
-      // Unmerge any previously merged cells in the row before merging again
       worksheet.unMergeCells(footerStartRow, 1, footerStartRow, 18);
       
       // Set the value and styles for the header
       headerRow.getCell(1).value = `(NEW MEMBERS ${currentMonthYear})`;
-      headerRow.getCell(1).font = { bold: false, italic: true, size: 22, color: { argb: "FF0000" } };
+      headerRow.getCell(1).font = { bold: false, italic: true, size: 21, color: { argb: "FF0000" } }; // Increased font size
       headerRow.height = 25;
       headerRow.alignment = { horizontal: "left", vertical: "middle" };
       
-      // Merge cells for the header without overlapping with other data
       worksheet.mergeCells(footerStartRow + oldMembers.length + 1, 1, footerStartRow + oldMembers.length + 1, 18);
       headerRow.commit();
   
       // Insert records from the current month
       currentMonthMembers.forEach((member) => {
         const row = worksheet.getRow(newInsertionRow);
-        row.height = 20;
+        row.height = 100;
   
         const cells = [
           member.registrationControlNumber, 
@@ -256,7 +254,8 @@ const ReportsPage = () => {
         cells.forEach((value, index) => {
           const cell = row.getCell(index + 1);
           cell.value = value;
-          cell.font = { name: "Calibri", size: 20 };
+          cell.font = { name: "Calibri", size: 21 }; // Increased font size
+          cell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" }; // Enable text wrapping
   
           // Apply medium black border to each cell
           cell.border = {
@@ -302,6 +301,7 @@ const ReportsPage = () => {
       setLoadingKasambahay(false);
     }
   };
+  
   
   
   const handleGenerateKasambahayPDF = async () => {
@@ -374,7 +374,7 @@ const ReportsPage = () => {
       const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 5);
   
       worksheet.getRow(5).getCell(1).value = `As of ${currentMonthYear}`;
-      worksheet.getRow(5).getCell(1).font = { name: "Calibri", size: 12, bold: true }; // Optional styling
+      worksheet.getRow(5).getCell(1).font = { name: "Calibri", size: 12, bold: true }; 
   
       const dataStartRow = 8;
       const footerStartRow = 13; 
