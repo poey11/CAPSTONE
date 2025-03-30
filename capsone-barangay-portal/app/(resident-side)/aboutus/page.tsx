@@ -9,7 +9,7 @@ export default function AboutUs() {
   return (
 
     <main className="aboutus-container">
-      <div className="headerpic">
+      <div className="headerpic-abtus">
         <p>ABOUT US</p>
       </div>
 

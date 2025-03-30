@@ -10,9 +10,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 40px;
-  font-weight: bold;
+  color: rgb(255, 255, 255);
+  font-size: 50px;
+  font-weight:bolder;
   overflow: hidden; /* Ensures blur doesn't spill outside */
 }
 
@@ -23,7 +23,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('/images/headerpic.jpg');
+  background-image: url('/images/brgyheaderpic.JPG');
   background-size: cover;
   background-position: 50% 60%;
   background-repeat: no-repeat;
@@ -38,7 +38,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.173); /* Dark overlay */
+  background-color: rgba(61, 60, 60, 0.158); /* Dark overlay */
   z-index: 2; /* Ensure it overlays the background */
 }
 
@@ -67,8 +67,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 90%; /* Make it flexible */
-    max-width: 1000px; /* Restrict maximum width */
+    width: 90%; 
+    max-width: 1000px; 
 
 }
 
@@ -85,8 +85,7 @@
 
 .documents-card {
   flex: 1 1 calc(50% - 20px);
-  /*background-color: rgb(222, 133, 69);*/
-  background-color: #5a84ac;
+  background-color: #547ba0;
   padding: 20px;
   padding-left: 20px;
   border: 1px solid #ddd;
@@ -100,8 +99,8 @@
   gap: 55px;
   align-items: center;
   z-index: 10;
-  width: 350px; /* Adjusted for better fit */
-  max-width: 90%; /* Responsive width */
+  width: 350px;
+  max-width: 90%; 
 }
 
 .documents-card:hover {

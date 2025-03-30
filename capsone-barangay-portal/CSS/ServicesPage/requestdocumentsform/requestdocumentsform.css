@@ -11,9 +11,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-size: 40px;
-    font-weight: bold;
+    color: rgb(255, 255, 255);
+    font-size: 50px;
+    font-weight:bolder;
     overflow: hidden; /* Ensures blur doesn't spill outside */
   }
   
@@ -24,7 +24,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('/images/headerpic.jpg');
+    background-image: url('/images/brgyheaderpic.JPG');
     background-size: cover;
     background-position: 50% 60%;
     background-repeat: no-repeat;
@@ -39,7 +39,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.173); /* Dark overlay */
+    background-color: rgba(61, 60, 60, 0.158); /* Dark overlay */
     z-index: 2; /* Ensure it overlays the background */
   }
   
@@ -63,17 +63,18 @@
   .form-content hr {
   border: none; 
   border-top: 2px solid rgba(0, 0, 0, 0.20);
-  margin-top: 20px;
+  margin-top: 30px;
   margin-bottom: 40px;
   }
   
   .form-title {
   font-size: 30px; 
-  color: rgba(0, 0, 0, 0.5);
+  color: #DF7426;
   text-align: center;
   font-weight: bold;  
   margin-top: 20px;
   margin-bottom: 10px;
+  text-transform: uppercase;
   }
   
   .form-subtitle{
@@ -131,10 +132,12 @@
   
   .form-requirements-title{
   font-size: 20px;
-  color: rgba(0, 0, 0, 0.5); 
+  /*color: rgba(0, 0, 0, 0.5); */
+  color: #DF7426;
   text-align: center;
   font-weight: bold;  
   margin-bottom: 40px;
+  text-transform: uppercase;
   }
   
   
@@ -167,6 +170,7 @@
   
   .file-upload-container:hover {
   background-color: rgba(245, 143, 88, 0.2);
+  
   }
   
   .uploadedFiles-container{
@@ -262,17 +266,24 @@
   .submit-button {
   padding: 10px 20px;
   font-size: 16px;
-  background-color:rgb(245, 143, 88);
+  background-color: #DF7426;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer; 
   width: 350px;
   box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
   }
   
   .submit-button:hover {
-  background-color: #e56723;
+  background-color: #BC5F1C;
+  transform: scale(1.05);
+
   }
   
+  .required {
+    color: red;
+    margin-left: 5px;
+  }
   
