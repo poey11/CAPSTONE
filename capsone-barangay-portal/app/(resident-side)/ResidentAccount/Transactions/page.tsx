@@ -47,7 +47,8 @@ export default function Transactions() {
 
     return (
         <main className="main-container-transactions">
-            <div className="Page">
+            
+            <div className="headerpic-transactions">
                 <p>TRANSACTIONS</p>
             </div>
 
