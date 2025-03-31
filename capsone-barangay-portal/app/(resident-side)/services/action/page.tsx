@@ -1069,7 +1069,7 @@ const handleFileChange = (
           {(docType ==="Temporary Business Permit"||docType ==="Business Permit" || docType === "Construction Permit") &&(
           // WILL Have to fix this part
           <>
-            <div className="signature/printedname-container">
+            <div className="signature-printedname-container">
             <h1 className="form-label">Certified True Copy of Title of the Property/Contract of Lease<span className="required">*</span></h1>
 
             <div className="file-upload-container">
@@ -1264,7 +1264,7 @@ const handleFileChange = (
             
           </>)}
 
-          <div className="signature/printedname-container">
+          <div className="signature-printedname-container">
             <h1 className="form-label"> Upload Signature Over Printed Name<span className="required">*</span></h1>
 
             <div className="file-upload-container">

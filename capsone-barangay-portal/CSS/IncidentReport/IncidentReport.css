@@ -81,15 +81,18 @@
   }
 
   .register-form-incident-report {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   .form-group-incident-report {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
   }
 
   .form-group-incident-report input,
@@ -97,7 +100,6 @@
     padding: 8px;
     width: 100%;
     max-width: 100%;
-    margin-top: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     color: rgba(0, 0, 0, 0.4);
@@ -105,41 +107,40 @@
   }
 
   .form-label-incident-report {
-  font-size: 16px;
-  font-weight: bold;
-  color: gray;
-  margin-bottom: 0.5rem;
+    font-size: 16px;
+    font-weight: bold;
+    color: gray;
   }
 
   .form-input-incident-report {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  color: #555;
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #555;
   }
 
 
 
   .form-input-incident-report:focus {
-  border-color: #DF7426;
-  outline: none;
-  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+    border-color: #DF7426;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
 
   .submit-button-incident-report {
-  background-color: #DF7426;
-  padding: 10px 20px;
-  font-size: 16px;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer; 
-  width: 350px;
-  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
-  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
-  align-self: center; 
+    background-color: #DF7426;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer; 
+    width: 350px;
+    box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+    transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+    align-self: center; 
   }
 
   
@@ -149,23 +150,23 @@
   }
 
   .submit-button-incident-report:active {
-  background-color: #bf6a18;
+    background-color: #bf6a18;
   }
 
   .file-upload-container-incident-report {
-          margin-top: 5px;
-          margin-bottom: 40px;
-          border: 2px dashed rgba(0, 0, 0, 0.3);
-          border-radius: 8px;
-          padding: 30px;
-          background-color: rgba(255, 255, 255, 0.9);
-          transition: background-color 0.3s ease;
-          display: block;
-          align-items: center; 
-          justify-content: center; 
-          text-align: center;
-          height: 100%; 
-          }
+    margin-top: 5px;
+    margin-bottom: 40px;
+    border: 2px dashed rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: background-color 0.3s ease;
+    display: block;
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    height: 100%; 
+  }
 
   .file-upload-container-incident-report:hover {
     background-color: rgba(245, 143, 88, 0.2);

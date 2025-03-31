@@ -87,15 +87,15 @@
   }
   
   .doc-req-form{
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
   }
   
   .form-group {
-  margin-top: 13px;
-  margin-bottom: 0px;
-  padding: 10px;
+    margin-top: 13px;
+    margin-bottom: 0px;
+    padding: 10px;
   }
   
   .form-label {
@@ -284,5 +284,14 @@
   .required {
     color: red;
     margin-left: 5px;
+  }
+
+
+  .signature-printedname-container,
+  .barangayID-container,
+  .endorsementletter-container,
+  .validID-container{
+    padding-left: 10px;
+    padding-right: 10px;
   }
   
