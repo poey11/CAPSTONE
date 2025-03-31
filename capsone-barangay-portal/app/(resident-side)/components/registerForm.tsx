@@ -162,6 +162,8 @@ const RegisterForm: React.FC = () => {
 
             <div className="register-section-register-form">
                 <h1>Register</h1>
+
+                <hr/>
                 <form className="register-form" onSubmit={handleSubmit}>
                     <div className="form-group-register-form">
                         <label htmlFor="sex" className="form-label-register-form">Sex:<span className="required">*</span></label>
