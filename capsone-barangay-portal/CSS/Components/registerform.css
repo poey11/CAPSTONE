@@ -122,6 +122,25 @@
     color: #555;
   }
 
+  .file-upload-container-register {
+    margin-top: 5px;
+    margin-bottom: 40px;
+    border: 2px dashed rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: background-color 0.3s ease;
+    display: block;
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    height: 100%; 
+  }
+
+  .file-upload-container-register:hover {
+    background-color: rgba(245, 143, 88, 0.2);
+  }
+
 
   
   .form-checkbox-section {
@@ -334,3 +353,63 @@
       color: red;
       margin-left: 5px;
     }
+
+    .file-upload-input-register {
+      display: none;
+    }
+
+    .uploadedFiles-container-register{
+      display: block;
+    }
+
+    .file-name-image-display-register{
+      margin-top: 10px;
+      font-size: 16px;
+      color: rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+
+
+    .file-name-image-display-indiv-register li{
+      display: flex;
+      flex-grow: 1;
+      overflow: hidden; 
+      white-space: nowrap; 
+      text-overflow: ellipsis; 
+    }
+
+
+    .file-name-image-display-indiv-register{
+      display: flex;
+      align-items: center;
+      justify-content: space-between; 
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+
+.filename-image-container-register{
+    display: flex;
+    align-items: center;
+    flex-grow: 1; 
+    overflow: hidden; 
+    margin-top:10px;
+}
+
+
+.delete-container-register{
+  margin-left: auto; 
+}
+
+
+.delete-button-register {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.delete-icon-register {
+  width: 20px;
+  height: 20px;
+}
