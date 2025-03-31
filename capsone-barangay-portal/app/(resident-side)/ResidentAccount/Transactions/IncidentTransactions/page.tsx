@@ -113,7 +113,7 @@ export default function IncidentTransactionsDetails() {
 
   return (
     <main className="incident-transaction-container">
-      <div className="Page">
+      <div className="headerpic-specific-transactions">
         <p>TRANSACTIONS</p>
       </div>
 
