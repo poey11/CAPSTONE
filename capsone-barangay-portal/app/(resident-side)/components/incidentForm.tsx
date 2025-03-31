@@ -145,7 +145,7 @@ const incidentForm:React.FC = () => {
           incidentID: incidentID,
         });
     
-        alert("Incident Report Submitted!");
+       // alert("Incident Report Submitted!");
     
       } catch (e: any) {
         console.log("Error uploading report:", e);

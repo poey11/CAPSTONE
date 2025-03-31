@@ -333,8 +333,9 @@ const handleFileChange = (
         console.log(clearanceVars, storageRefs);
         handleReportUpload(clearanceVars, storageRefs);
       }
-      alert("Document request submitted successfully!");
-      router.push("/services");
+     // alert("Document request submitted successfully!");
+      router.push('/services/notification'); 
+    //  router.push("/services");
     };
     
     
