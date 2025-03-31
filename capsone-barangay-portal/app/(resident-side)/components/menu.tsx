@@ -303,9 +303,9 @@ const Menu = () => {
                                   <p>{message.message}</p>
                                 </div>
                                 <div className="unread-icon-section">
-                                  {message.status === "unread" && (
+                                {message.isRead === false && (
                                     <img src="/images/unread-icon.png" alt="Unread Icon" className="unread-icon" />
-                                  )}
+                                )}
                                 </div>
                               </div>
                             ))
