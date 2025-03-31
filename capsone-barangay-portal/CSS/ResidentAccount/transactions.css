@@ -1,14 +1,60 @@
 .main-container-transactions {
-    background-color: #f7e5d5;
+  background-color: #D8DFE5;
     display: flex;
     flex-direction: column;
     height: 100vh;
 }
 
+.headerpic-transactions {
+  position: relative; 
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(255, 255, 255);
+  font-size: 50px;
+  font-weight:bolder;
+  overflow: hidden; 
+
+}
+
+.headerpic-transactions::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/images/brgyheaderpic.JPG');
+  background-size: cover;
+  background-position: 50% 60%;
+  background-repeat: no-repeat;
+  filter: blur(1.2px); 
+  z-index: 1;
+}
+
+.headerpic-transactions::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.150); 
+  z-index: 2; 
+}
+
+.headerpic-transactions > * {
+  position: relative;
+  z-index: 3; 
+}
+  
+
+
 .transactions-history-transactions {
     width: 90%;
     padding: 2rem;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.7);
     border-radius: 16px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     text-align: center;
@@ -16,6 +62,7 @@
     height: 70%;
     align-self: center;
     margin-bottom: 3rem;
+    margin-top: 3rem;
       
 }
 
@@ -53,10 +100,10 @@
     padding: 1rem;
     text-align: center;
     border-bottom: 2px solid #ddd;
-    color:#e07c21 ;
+    color:#F7FCF8 ;
     cursor: pointer;
     white-space: nowrap;
-    background-color: #f7e5d5;
+    background-color: #618FB9;
     font-weight: bold;
     font-size: 18px;
 }
@@ -132,6 +179,52 @@
 /*Specific Incident Transactions*/
 
 
+.headerpic-specific-transactions {
+  position: relative; 
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(255, 255, 255);
+  font-size: 50px;
+  font-weight:bolder;
+  overflow: hidden; 
+
+}
+
+.headerpic-specific-transactions::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/images/brgyheaderpic.JPG');
+  background-size: cover;
+  background-position: 50% 60%;
+  background-repeat: no-repeat;
+  filter: blur(1.2px); 
+  z-index: 1;
+}
+
+.headerpic-specific-transactions::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.150); 
+  z-index: 2; 
+}
+
+.headerpic-specific-transactions > * {
+  position: relative;
+  z-index: 3; 
+}
+  
+
+
 .title-section {
     display: flex;
 
@@ -145,37 +238,7 @@
     margin-bottom: 2rem;
 }
 
-.Page {
-    height: 200px; 
-    display: flex;
-    align-items: center;
-    justify-content: center; 
-    color: white; 
-    font-size: 40px; 
-    font-weight: bold; 
-    position: relative;
-    margin-bottom: 50px;
-  }
 
-  .Page::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url('/Images/Background.jpeg');
-    background-size: cover; 
-    background-position: 50% 50%;
-    background-repeat: no-repeat; 
-    z-index: 1; 
-    filter: blur(2px); 
-  }
-
-  .Page > * {
-    position: relative;
-    z-index: 2; 
-  }
 
   .status-dropdown-transactions {
     padding: 0.6rem;
@@ -184,6 +247,8 @@
     border: none;
     cursor: pointer;
     text-align: center;
+    min-width: 120px; /* Set a fixed width or min-width */
+    display: inline-block; /* Ensure uniform width */
   }
   
   .pending {
@@ -232,10 +297,8 @@
     font-size: 15px;
   }
 
-
-
 .incident-transaction-container {
-    background: linear-gradient(to bottom, #f7e5d5, #f3d3b0); 
+  background-color: #D8DFE5;
     display: flex;
     flex-direction: column;
     min-height: 100vh; 
@@ -254,6 +317,7 @@
     overflow: hidden; 
     margin-bottom: 3rem;
     transition: transform 0.3s ease;
+    margin-top: 3rem;
   }
   
   .incident-content:hover,
@@ -266,7 +330,7 @@
     display: flex;
     align-items: center;
     padding: 2rem;
-    background: #e07c21; 
+    background-color: #618FB9;
     color: white;
     font-size: 1.5rem;
     font-weight: bold;
@@ -303,7 +367,7 @@
   }
   
   .details-section:hover {
-    background: rgba(224, 124, 33, 0.1); 
+    background: #D8DFE5
   }
   
   .title {
@@ -315,8 +379,8 @@
   
   .title p {
     font-weight: bold;
-    font-size: 1rem;
-    color: #e07c21;
+    font-size: 1.15rem;
+    color: #DF7426;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     text-align: center;
@@ -330,7 +394,7 @@
   
   .description p {
     color: #555;
-    font-size: 1.10rem;
+    font-size: 1.20rem;
     line-height: 1.6;
   }
 
