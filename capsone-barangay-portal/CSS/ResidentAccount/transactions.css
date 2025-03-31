@@ -247,6 +247,8 @@
     border: none;
     cursor: pointer;
     text-align: center;
+    min-width: 120px; /* Set a fixed width or min-width */
+    display: inline-block; /* Ensure uniform width */
   }
   
   .pending {
