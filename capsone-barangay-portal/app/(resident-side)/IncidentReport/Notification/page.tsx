@@ -28,7 +28,7 @@ export default function Notification() {
                     
                     <p className="message2-incident-notification">
                         Your report had been received and will be reviewed by the barangay official.
-                        If further information is needed, you will be contacred using the 
+                        If further information is needed, you will be contacted using the 
                         details you provided.
                     </p>
                     
