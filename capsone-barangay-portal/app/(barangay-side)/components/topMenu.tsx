@@ -142,14 +142,14 @@ export default function TopMenu() {
               onClick={toggleNotificationSection}
               className="inbox-container"
             >
-              <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
-              {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+              <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon-brgyside" />
+              {unreadCount > 0 && <span className="notification-badge-brgyside">{unreadCount}</span>}
             </p>
           </div>
           {isNotificationOpen && (
-            <div className="notification-section" ref={notificationRef}>
-              <div className="top-section">
-                <p className="notification-title">Notification Inbox</p>
+            <div className="notification-section-brgyside" ref={notificationRef}>
+              <div className="top-section-brgyside">
+                <p className="notification-title-brgyside">Notification Inbox</p>
                 <div className="filter-container">
                   <button
                     className={`filter-option ${filter === "all" ? "active" : ""}`}
@@ -166,11 +166,11 @@ export default function TopMenu() {
                 </div>
               </div>
               <div className="bottom-section">
-                <div className="notification-content">
+                <div className="notification-content-brgyside">
                   {filteredMessages.length > 0 ? (
                     filteredMessages.map((message) => (
                       <div
-                        className="notification-item"
+                        className="notification-item-brgyside"
                         key={message.id}
                         onClick={() => handleNotificationClick(message)}
                       >

@@ -413,7 +413,7 @@ export default function Dashboard() {
           </div>
 
           <div className="chart-controls">
-              <button className="action-next" onClick={toggleChartBoxOne}>Next</button>
+              <button className="action-next" onClick={toggleChartBoxOne}>Switch</button>
             </div>
         </div>
           
