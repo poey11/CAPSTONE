@@ -157,7 +157,6 @@ export default function IncidentTransactionsDetails() {
       {transactionData?.status === "Acknowledged" && (
           <div className="incident-content">
             <div className="incident-content-section-1">
-              <button type="button" className="back-button" onClick={handleBack}></button>
               <p>Respondent Report Details</p>
             </div>
             {respondentFields.map((field) => (
