@@ -166,13 +166,15 @@ const incidentForm:React.FC = () => {
           filename = `incident_report_${currentUser}.${timeStamp}.${fileExtention}`;
           storageRef = ref(storage, `IncidentReports/${filename}`);
         }
+
+        const concernValue = incidentReport.concerns === "Other" ? incidentReport.otherConcern : incidentReport.concerns;
         console.log(currentUser);
         if(currentUser === "Guest"){
           const toAdd = [{
             firstname: incidentReport.firstname,
             lastname: incidentReport.lastname,
             contactNos: incidentReport.contactNos,
-            concerns: incidentReport.concerns,
+            concerns: concernValue,  // Updated this line
             dateFiled: incidentReport.dateFiled,
             time: incidentReport.time,
             address: incidentReport.address,
@@ -190,7 +192,7 @@ const incidentForm:React.FC = () => {
             firstname: incidentReport.firstname,
             lastname: incidentReport.lastname,
             contactNos: incidentReport.contactNos,
-            concerns: incidentReport.concerns,
+            concerns: concernValue,  // Updated this line
             dateFiled: incidentReport.dateFiled,
             time: incidentReport.time,
             address: incidentReport.address,
