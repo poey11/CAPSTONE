@@ -1,11 +1,54 @@
 
   .main-container-register-form {
-    background-color: #f7e5d5;
+    background-color: #D8DFE5;
     display: flex;
     flex-direction: column;  
     min-height: 100vh; 
     width: 100%;
  }
+
+ .headerpic-reg {
+  position: relative; 
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(255, 255, 255);
+  font-size: 50px;
+  font-weight:bolder;
+  overflow: hidden; 
+}
+
+.headerpic-reg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/images/brgyheaderpic.JPG');
+  background-size: cover;
+  background-position: 50% 60%;
+  background-repeat: no-repeat;
+  filter: blur(1.2px); 
+  z-index: 1;
+}
+
+.headerpic-reg::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.173);
+  z-index: 2;
+}
+
+.headerpic-reg > * {
+  position: relative;
+  z-index: 3;
+}
 
   .register-section-register-form {
   display: flex;
@@ -15,8 +58,8 @@
   padding: 2rem;
   margin: auto;
   width: 60%;
-  margin-top: 2rem;
-  margin-bottom: 4rem;
+  margin-top: 5rem;
+  margin-bottom: 5rem;
   
   }
 
@@ -106,7 +149,7 @@
   cursor: pointer;
   margin-top: 1rem;
   transition: background-color 0.3s ease;
-  align-self: center; /* Centers the button */
+  align-self: center;
   width: 350px;
   }
 
@@ -142,7 +185,7 @@
           align-items: center; 
           justify-content: center; 
           text-align: center;
-          height: 100%; /* Set a fixed height for better UI experience */
+          height: 100%; 
           }
 
   .file-upload-container:hover {
@@ -232,11 +275,11 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: rgba(0, 0, 0, 0.224); /* Semi-transparent background */
+      background-color: rgba(0, 0, 0, 0.224); 
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 9999; /* Ensure it appears above all other elements */
+      z-index: 9999; 
     }
     
     .popup {

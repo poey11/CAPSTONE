@@ -156,6 +156,10 @@ const RegisterForm: React.FC = () => {
                 </div>
             )}
 
+            <div className="headerpic-reg">
+                <p>REGISTER</p>
+            </div>
+
             <div className="register-section-register-form">
                 <h1>Register</h1>
                 <form className="register-form" onSubmit={handleSubmit}>

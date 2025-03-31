@@ -1,5 +1,5 @@
 .headerpic-report {
-  position: relative; /* Required for pseudo-elements */
+  position: relative; 
   height: 250px;
   display: flex;
   align-items: center;
@@ -7,8 +7,8 @@
   color: rgb(255, 255, 255);
   font-size: 50px;
   font-weight:bolder;
-  overflow: hidden; /* Ensures blur doesn't spill outside */
-  margin-bottom: 2rem;
+  overflow: hidden; 
+
 }
 
 .headerpic-report::before {
@@ -18,12 +18,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('/images/brgyheaderpic.jpg');
+  background-image: url('/images/brgyheaderpic.JPG');
   background-size: cover;
   background-position: 50% 60%;
   background-repeat: no-repeat;
-  filter: blur(1.2px); /* Adjust the blur intensity */
-  z-index: 1; /* Place the blurred background below the text */
+  filter: blur(1.2px); 
+  z-index: 1;
 }
 
 .headerpic-report::after {
@@ -33,13 +33,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.173); /* Dark overlay */
-  z-index: 2; /* Ensure it overlays the background */
+  background-color: rgba(0, 0, 0, 0.150); 
+  z-index: 2; 
 }
 
 .headerpic-report > * {
   position: relative;
-  z-index: 3; /* Ensure text is above the overlays */
+  z-index: 3; 
 }
   
 
@@ -58,8 +58,8 @@
   padding: 2rem;
   margin: auto;
   width: 60%;
-  margin-top: 2rem;
-  margin-bottom: 4rem;
+  margin-top: 5rem;
+  margin-bottom: 5rem;
   
   }
 
@@ -139,7 +139,7 @@
   width: 350px;
   box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
   transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
-  align-self: center; /* Centers the button */
+  align-self: center; 
   }
 
   
@@ -164,7 +164,7 @@
           align-items: center; 
           justify-content: center; 
           text-align: center;
-          height: 100%; /* Set a fixed height for better UI experience */
+          height: 100%; 
           }
 
   .file-upload-container-incident-report:hover {
