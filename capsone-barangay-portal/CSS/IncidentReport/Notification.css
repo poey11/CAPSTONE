@@ -2,13 +2,12 @@
   display: flex;
   justify-self: center;
   align-items: center; 
-
-  background-color: #f7e5d5;
-  height: 100%;
+  background-color: #D8DFE5;
+  height: 80vh;
   display: flex; 
   justify-content: center;
-     align-items: center;
-     width: 100%;
+  align-items: center;
+  width: 100%;
   }
   
   .notification-section-incident-notification {
@@ -40,13 +39,13 @@
  }
 
  .image-incident-notification{
- width: 80px;
- height: 80px;
+ width: 100px;
+ height: 100px;
  margin-top: 1.5rem;
  }
 
  .back-button-incident-notification {
-   background-color: #f49028;
+   background-color: #DF7426;
    color: white;
    font-size: 16px;
    font-weight: bold;
@@ -62,7 +61,7 @@
 
    
    .back-button-incident-notification:hover {
-   background-color: #d87d20;
+   background-color: #BC5F1C;
    }
 
    .back-button-incident-notification:active {

@@ -20,6 +20,7 @@ const incidentForm:React.FC = () => {
       lastname: "",
       contactNos: "",
       concerns: "",
+      otherConcern: "", 
       dateFiled: "",
       time: "",
       address: "",
@@ -144,7 +145,7 @@ const incidentForm:React.FC = () => {
           incidentID: incidentID,
         });
     
-        alert("Incident Report Submitted!");
+       // alert("Incident Report Submitted!");
     
       } catch (e: any) {
         console.log("Error uploading report:", e);
@@ -165,13 +166,15 @@ const incidentForm:React.FC = () => {
           filename = `incident_report_${currentUser}.${timeStamp}.${fileExtention}`;
           storageRef = ref(storage, `IncidentReports/${filename}`);
         }
+
+        const concernValue = incidentReport.concerns === "Other" ? incidentReport.otherConcern : incidentReport.concerns;
         console.log(currentUser);
         if(currentUser === "Guest"){
           const toAdd = [{
             firstname: incidentReport.firstname,
             lastname: incidentReport.lastname,
             contactNos: incidentReport.contactNos,
-            concerns: incidentReport.concerns,
+            concerns: concernValue,  // Updated this line
             dateFiled: incidentReport.dateFiled,
             time: incidentReport.time,
             address: incidentReport.address,
@@ -189,7 +192,7 @@ const incidentForm:React.FC = () => {
             firstname: incidentReport.firstname,
             lastname: incidentReport.lastname,
             contactNos: incidentReport.contactNos,
-            concerns: incidentReport.concerns,
+            concerns: concernValue,  // Updated this line
             dateFiled: incidentReport.dateFiled,
             time: incidentReport.time,
             address: incidentReport.address,
@@ -276,22 +279,44 @@ const incidentForm:React.FC = () => {
                 onChange={handleFormChange}
               />
             </div>
-        
             <div className="form-group-incident-report">
-              <label htmlFor="concerns" className="form-label-incident-report">
-                Concerns<span className="required">*</span>
-                </label>
+            <label htmlFor="concerns" className="form-label-incident-report">
+              Concerns<span className="required">*</span>
+            </label>
+            <select
+              id="concerns"
+              name="concerns"
+              className="resident-module-filter"
+              value={incidentReport.concerns}
+              onChange={handleFormChange}
+              required
+            >
+              <option value="">Incident Type</option>
+              <option value="Noise Complaint">Noise Complaint</option>
+              <option value="Pet-Related Issues">Pet-Related Issues</option>
+              <option value="Littering">Littering</option>
+              <option value="Obstruction of Pathways">Obstruction of Pathways</option>
+              <option value="Minor Verbal Altercation">Minor Verbal Altercation</option>
+              <option value="Lost and Found Items">Lost and Found Items</option>
+              <option value="Damaged Streetlights">Damaged Streetlights</option>
+              <option value="Unauthorized Public Gatherings">Unauthorized Public Gatherings</option>
+              <option value="Vandalism">Vandalism</option>
+              <option value="Water Leakage">Water Leakage</option>
+              <option value="Other">Other</option>
+            </select>
+            {incidentReport.concerns === "Other" && (
               <input
                 type="text"
-                id="concerns"
-                name="concerns"
+                id="otherConcern"
+                name="otherConcern"
                 className="form-input-incident-report"
-                required
-                placeholder="Enter your concerns"
-                value={incidentReport.concerns}
+                placeholder="Specify your concern"
+                value={incidentReport.otherConcern}
                 onChange={handleFormChange}
+                required
               />
-            </div>
+            )}
+          </div>
         
             <div className="form-group-incident-report">
               <label htmlFor="date" className="form-label-incident-report">
