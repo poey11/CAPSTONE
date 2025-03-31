@@ -15,11 +15,11 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('/images/header.jpg');
+    background-image: url('/images/brgyheaderpic.jpg');
     background-size: cover;
     background-position: 50% 50%;
     background-repeat: no-repeat;
-    filter: blur(2px); /* Apply blur effect */
+    filter: blur(1px); /* Apply blur effect */
     z-index: 1; /* Ensure it appears below content */
     height:100%;
   }
@@ -53,10 +53,8 @@
     align-items: center;
     height: 400px;
     width: 650px;
-    background-color: #f7e5d5;
+    background-color: #bac8d6;
     border-radius: 20px;
-    border: 2px solid rgb(168, 161, 158);
-
   }
 
   .section1-resident{
@@ -123,7 +121,7 @@
 .submit-button-resident {
   padding: 10px 20px;
   font-size: 16px;
-  background-color:rgb(245, 143, 88);
+  background-color: #DF7426;
   color: white;
   border: none;
   border-radius: 4px;
@@ -133,7 +131,7 @@
 }
 
 .submit-button-resident:hover {
-  background-color: #e56723;
+  background-color: #BC5F1C;
 }
 
 
