@@ -275,7 +275,7 @@ const Menu = () => {
             {!loading && user ? (
               <div className="logged-in-container">
                 <div className="dropdown-Container">
-                  <div className="dropdown-item">
+                  <div className="dropdown-item-no-hover">
                     <p id="inbox-link" onClick={toggleNotificationSection} className="inbox-container">
                       <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
                       {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
@@ -318,7 +318,7 @@ const Menu = () => {
                 )}
               </div>
               <div className="dropdown-Container">
-                <div className="dropdown-item" ref={loginMenuRef}>
+                <div className="dropdown-item-no-hover" ref={loginMenuRef}>
                   <p
                     id="profile-link"
                     onClick={toggleLoginOptions}
@@ -358,7 +358,7 @@ const Menu = () => {
           ):(
 
             <div className="dropdown-Container">
-              <div className="dropdown-item" ref={loginMenuRef}>
+              <div className="menu-section-container" ref={loginMenuRef}>
                 <p
                   id="login-link"
                   className="dropdown-item"

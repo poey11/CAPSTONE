@@ -6,7 +6,7 @@
   }
   
   .headerpic-documentreq {
-    position: relative; /* Required for pseudo-elements */
+    position: relative; 
     height: 250px;
     display: flex;
     align-items: center;
@@ -14,7 +14,7 @@
     color: rgb(255, 255, 255);
     font-size: 50px;
     font-weight:bolder;
-    overflow: hidden; /* Ensures blur doesn't spill outside */
+    overflow: hidden; 
   }
   
   .headerpic-documentreq::before {
@@ -28,8 +28,8 @@
     background-size: cover;
     background-position: 50% 60%;
     background-repeat: no-repeat;
-    filter: blur(1.2px); /* Adjust the blur intensity */
-    z-index: 1; /* Place the blurred background below the text */
+    filter: blur(1.2px); 
+    z-index: 1; 
   }
   
   .headerpic-documentreq::after {
@@ -39,13 +39,13 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(61, 60, 60, 0.158); /* Dark overlay */
-    z-index: 2; /* Ensure it overlays the background */
+    background-color: rgba(0, 0, 0, 0.150); 
+    z-index: 2; 
   }
   
   .headerpic-documentreq > * {
     position: relative;
-    z-index: 3; /* Ensure text is above the overlays */
+    z-index: 3;
   }
   
   .form-content{
@@ -56,8 +56,8 @@
   padding: 2rem;
   margin: auto;
   width: 60%;
-  margin-top: 2rem;
-  margin-bottom: 4rem;
+  margin-top: 5rem;
+  margin-bottom: 5rem;
   }
   
   .form-content hr {
@@ -87,15 +87,15 @@
   }
   
   .doc-req-form{
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
   }
   
   .form-group {
-  margin-top: 13px;
-  margin-bottom: 0px;
-  padding: 10px;
+    margin-top: 13px;
+    margin-bottom: 0px;
+    padding: 10px;
   }
   
   .form-label {
@@ -132,7 +132,6 @@
   
   .form-requirements-title{
   font-size: 20px;
-  /*color: rgba(0, 0, 0, 0.5); */
   color: #DF7426;
   text-align: center;
   font-weight: bold;  
@@ -165,7 +164,7 @@
   align-items: center; 
   justify-content: center; 
   text-align: center;
-  height: 100%; /* Set a fixed height for better UI experience */
+  height: 100%; 
   }
   
   .file-upload-container:hover {
@@ -246,21 +245,21 @@
     margin-left: 20px;
     margin-top: 10px;
     display: flex;
-    flex-direction: column; /* Stack items vertically */
-    gap: 0.5rem; /* Add space between the radio buttons */
+    flex-direction: column;
+    gap: 0.5rem; 
     }
   
     .form-radio {
     display: flex;
-    align-items: center; /* Align radio button and label */
-    gap: 0.5rem; /* Add space between the button and text */
+    align-items: center; 
+    gap: 0.5rem; 
     color: rgba(0, 0, 0, 0.6);
     }
   
   .button-container {
   display: flex;
   justify-content: center; 
-  margin-top: 50px; 
+  margin-top: 20px; 
   }
   
   .submit-button {
@@ -285,5 +284,14 @@
   .required {
     color: red;
     margin-left: 5px;
+  }
+
+
+  .signature-printedname-container,
+  .barangayID-container,
+  .endorsementletter-container,
+  .validID-container{
+    padding-left: 10px;
+    padding-right: 10px;
   }
   
