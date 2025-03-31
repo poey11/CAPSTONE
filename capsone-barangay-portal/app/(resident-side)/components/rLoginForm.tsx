@@ -114,7 +114,14 @@ const rLoginForm:React.FC = () => {
                 </div>
             )}
             <div className="login-contents-resident">
+
+
                 <div className="login-card-resident">
+                <div className="login-title-page">
+                <h1>User Login</h1>
+                </div>
+              
+
                     <form onSubmit={handleLogin}>
                         <div className="section1-resident">
                             <div className="form-group-resident">
