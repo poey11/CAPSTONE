@@ -1,5 +1,4 @@
 "use client";
-import Link from 'next/link';
 import { useState } from "react";
 import { auth } from '../../db/firebase';
 import { signInWithEmailAndPassword,signOut, sendPasswordResetEmail } from 'firebase/auth';
@@ -163,7 +162,7 @@ const rLoginForm:React.FC = () => {
 
                         <div className="section2-resident">
                             <button type="button" className="section2options-resident" onClick={handleForgotPassword}>Forgot Password</button>
-                            <button className="section2options-resident" onClick={handleRegister}>Create an Account</button>
+                            <button type="button"className="section2options-resident" onClick={handleRegister}>Create an Account</button>
                         </div>
 
                         <div className="section3-resident">
