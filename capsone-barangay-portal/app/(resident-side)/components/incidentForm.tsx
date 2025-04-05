@@ -7,6 +7,7 @@ import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection, updateDoc} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
 import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
+import {dateHelper,timeHelper} from "@/app/helpers/helpers";
 
 
 
@@ -14,6 +15,8 @@ const incidentForm:React.FC = () => {
   const router = useRouter();
   const {user} = useAuth();
   const currentUser = user?.uid || "Guest";
+  const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+
   const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
   const [incidentReport, setIncidentReport] = useState<any>({
       firstname: "",
@@ -144,7 +147,6 @@ const incidentForm:React.FC = () => {
           incidentID: incidentID,
         });
     
-        alert("Incident Report Submitted!");
     
       } catch (e: any) {
         console.log("Error uploading report:", e);
@@ -153,10 +155,20 @@ const incidentForm:React.FC = () => {
     
 
 
+
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault(); 
       const form = event.target as HTMLFormElement;
       if (form.checkValidity()) {
+        const isValidDate = dateHelper(incidentReport.dateFiled);
+        const isValidTime = timeHelper(incidentReport.time);
+  
+        if(isValidDate || isValidTime){
+          // fix it. should consider the scenario  Today + future time = invalid
+          setErrorPopup({ show: true, message: "Invalid Date/Time. Please Select A Valid Date/Time" });
+          return;
+        }
+
         let filename = "";
         let storageRef = null;
         if(incidentReport.file){
@@ -214,6 +226,18 @@ const incidentForm:React.FC = () => {
 
     return(
       <main className="main-container-incident-report">
+
+    
+          {errorPopup.show && (
+              <div className="popup-overlay error">
+                  <div className="popup">
+                      <p>{errorPopup.message}</p>
+                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+                  </div>
+              </div>
+        )}
+
+
         <div className="Page-incident-report">
           <p>File an Incident Report</p>
         </div>

@@ -7,6 +7,7 @@ import { useState, ChangeEvent } from "react";
 import { useRouter } from 'next/navigation';
 import ReCAPTCHA from "react-google-recaptcha";
 import "@/CSS/Components/registerform.css";
+import {dateHelper} from "@/app/helpers/helpers";
 
 interface Resident {
     sex: string;
@@ -15,6 +16,7 @@ interface Resident {
     email: string;
     phone: string;
     address: string;
+    dateOfBirth: string;
     password: string;
     upload: File | null;
 }
@@ -41,6 +43,7 @@ const RegisterForm: React.FC = () => {
         phone: "",
         address: "",
         password: "",
+        dateOfBirth: "",
         role: "Resident",
         upload: null,
         status: "Unverified"
@@ -73,6 +76,13 @@ const RegisterForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
     
+      const isValidDate = dateHelper(resident.dateOfBirth);
+      if (isValidDate) {
+        //if isValidDate is true, then the inputed date is after current date
+        setErrorPopup({ show: true, message: "Invalid Birthdate. Please select a date of birth that matches with your valid ID." });
+        return;
+    }
+
       if (resident.password !== confirmPassword) {
         setErrorPopup({ show: true, message: "Passwords do not match!" });
         setConfirmPassword("");
@@ -126,7 +136,7 @@ const RegisterForm: React.FC = () => {
       }
     };
     
-
+    
     const handleCheckBox = (e: ChangeEvent<HTMLInputElement>) => {
         setIsTermChecked(e.target.checked);
     };
@@ -194,6 +204,15 @@ const RegisterForm: React.FC = () => {
             <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
             <input  value={resident.email} onChange={handleChange} id="email" 
             type="email" name="email" 
+            className="form-input-register-form " 
+            placeholder="Enter Email"
+            required />
+            </div>
+
+            <div className="form-group-register-form">
+            <label htmlFor="email" className="form-label-register-form" >Date Of Birth:<span className="required">*</span> </label>
+            <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
+            type="date" name="dateOfBirth" 
             className="form-input-register-form " 
             placeholder="Enter Email"
             required />
