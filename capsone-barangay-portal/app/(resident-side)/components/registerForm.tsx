@@ -137,6 +137,36 @@ const RegisterForm: React.FC = () => {
         }
     };
 
+    const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
+
+    const handleFileChangeContainer1 = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = event.target.files?.[0];
+        if (selectedFile) {
+            const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+            
+            if (!validImageTypes.includes(selectedFile.type)) {
+                alert("Only JPG, JPEG, and PNG files are allowed.");
+                return;
+            }
+        
+            const preview = URL.createObjectURL(selectedFile);
+            setFilesContainer1([{ name: selectedFile.name, preview }]);
+    
+            // Update resident state with the file
+            setResident((prev) => ({ ...prev, upload: selectedFile }));
+        }
+    };
+
+  const handleFileDeleteContainer1 = (fileName: string) => {
+    setFilesContainer1([]);
+    
+    // Reset file input
+    const fileInput = document.getElementById('file-upload-register') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
+
     return (
         <main className="main-container-register-form">
             {showPopup && (
@@ -156,8 +186,14 @@ const RegisterForm: React.FC = () => {
                 </div>
             )}
 
+            <div className="headerpic-reg">
+                <p>REGISTER</p>
+            </div>
+
             <div className="register-section-register-form">
                 <h1>Register</h1>
+
+                <hr/>
                 <form className="register-form" onSubmit={handleSubmit}>
                     <div className="form-group-register-form">
                         <label htmlFor="sex" className="form-label-register-form">Sex:<span className="required">*</span></label>
@@ -169,103 +205,134 @@ const RegisterForm: React.FC = () => {
                     </div>
 
                     <div className="form-group-register-form">
-            <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
-            <input value={resident.first_name} onChange={handleChange} id="first_name" 
-            type="text" name="first_name" 
-            className="form-input-register-form "
-            placeholder= "Enter Name"
-            required />
+                    <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
+                    <input value={resident.first_name} onChange={handleChange} id="first_name" 
+                    type="text" name="first_name" 
+                    className="form-input-register-form "
+                    placeholder= "Enter Name"
+                    required />
 
-            </div>
-
-            <div className="form-group-register-form">
-            <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
-            
-
-              <input value={resident.last_name} onChange={handleChange} id="last_name" 
-              type="text" name="last_name" 
-              className="form-input-register-form " 
-              placeholder="Enter Last Name"
-              required/>
-
-            </div>
-
-            <div className="form-group-register-form">
-            <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
-            <input  value={resident.email} onChange={handleChange} id="email" 
-            type="email" name="email" 
-            className="form-input-register-form " 
-            placeholder="Enter Email"
-            required />
-            </div>
-
-            <div className="form-group-register-form">
-            <label htmlFor="phone" className="form-label-register-form" >Phone:<span className="required">*</span> </label>
-            <input  value={resident.phone} onChange={handleChange} id="phone" 
-            type="tel" name="phone"
-            className="form-input-register-form " 
-            placeholder="Enter Phone Number"
-            required />
-            </div>
-
-
-            <div className="form-group-register-form">
-            <label htmlFor="address" className="form-label-register-form">Address:<span className="required">*</span> </label>
-            <input value={resident.address} onChange={handleChange} id="address" 
-            type="text" name="address" 
-            className="form-input-register-form " 
-            placeholder="Enter Address"
-            required />
-            </div>
-
-
-            <div className="form-group-register-form">
-            <label htmlFor="password" className="form-label-register-form">Password:<span className="required">*</span> </label>
-            <input value={resident.password} onChange={handleChange} id="password"
-            type="password" name="password" 
-            className="form-input-register-form "
-            placeholder="Enter Password"
-            required/>
-            </div>
-
-            <div className="form-group-register-form">
-            <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password:<span className="required">*</span></label>
-              <input
-                id="confirm_password"
-                type="password"
-                name="confirm_password"
-                value={confirmPassword}
-                onChange={handleChange}
-                className="form-input-register-form"
-                placeholder="Confirm Password"
-                required
-              />
-            </div>
-
-
-            <div className="signature/printedname-container">
-                <label className="form-label-register-form" htmlFor="upload">Upload Valid ID with address:<span className="required">*</span></label>
-                
-                {/* Single File Input */}
-                <label htmlFor="upload" className="upload-link">Click to Upload File</label>
-
-                <input
-                    id="upload"
-                    type="file"
-                    name="upload"
-                    className="file-upload-input"
-                    accept="image/*"
-                    onChange={handleChange}
-                    required
-                />
-                
-                {/* File Preview */}
-                {filePreview && (
-                    <div className="file-preview">
-                    <img src={filePreview} alt="Preview" style={{ width: '100px', height: '100px', marginTop: '10px' }} />
                     </div>
-                )}
-            </div>
+
+                    <div className="form-group-register-form">
+                    <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
+                    
+
+                    <input value={resident.last_name} onChange={handleChange} id="last_name" 
+                    type="text" name="last_name" 
+                    className="form-input-register-form " 
+                    placeholder="Enter Last Name"
+                    required/>
+
+                    </div>
+
+                    <div className="form-group-register-form">
+                    <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
+                    <input  value={resident.email} onChange={handleChange} id="email" 
+                    type="email" name="email" 
+                    className="form-input-register-form " 
+                    placeholder="Enter Email"
+                    required />
+                    </div>
+
+                    <div className="form-group-register-form">
+                    <label htmlFor="phone" className="form-label-register-form" >Phone:<span className="required">*</span> </label>
+                    <input  value={resident.phone} onChange={handleChange} id="phone" 
+                    type="tel" name="phone"
+                    className="form-input-register-form " 
+                    placeholder="Enter Phone Number"
+                    required />
+                    </div>
+
+
+                    <div className="form-group-register-form">
+                    <label htmlFor="address" className="form-label-register-form">Address:<span className="required">*</span> </label>
+                    <input value={resident.address} onChange={handleChange} id="address" 
+                    type="text" name="address" 
+                    className="form-input-register-form " 
+                    placeholder="Enter Address"
+                    required />
+                    </div>
+
+
+                    <div className="form-group-register-form">
+                    <label htmlFor="password" className="form-label-register-form">Password:<span className="required">*</span> </label>
+                    <input value={resident.password} onChange={handleChange} id="password"
+                    type="password" name="password" 
+                    className="form-input-register-form "
+                    placeholder="Enter Password"
+                    required/>
+                    </div>
+
+                    <div className="form-group-register-form">
+                    <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password:<span className="required">*</span></label>
+                    <input
+                        id="confirm_password"
+                        type="password"
+                        name="confirm_password"
+                        value={confirmPassword}
+                        onChange={handleChange}
+                        className="form-input-register-form"
+                        placeholder="Confirm Password"
+                        required
+                    />
+                    </div>
+
+
+                    <div className="signature/printedname-container">
+                        <label className="form-label-register-form">Upload Valid ID with address:<span className="required">*</span></label>
+                        
+                        <div className="file-upload-container-register">
+                            <label htmlFor="file-upload-register" className="upload-link">Click to Upload File</label>
+                            <input
+                            id="file-upload-register"
+                            type="file"
+                            className="file-upload-input-register"
+                            accept="image/*"
+                            onChange={handleFileChangeContainer1}
+                            required
+
+                            style={{ display: "none" }}
+                            />
+                            <div className="uploadedFiles-container-register">
+                            {filesContainer1.length > 0 && (
+                                <div className="file-name-image-display-register">
+                                <ul>
+                                    {filesContainer1.map((file, index) => (
+                                    <div className="file-name-image-display-indiv-register" key={index}>
+                                        <li>
+                                        {file.preview && (
+                                            <div className="filename-image-container-register">
+                                            <img
+                                                src={file.preview}
+                                                alt={file.name}
+                                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                            />
+                                            </div>
+                                        )}
+                                        {file.name}
+                                        <div className="delete-container-register">
+                                            <button
+                                            type="button"
+                                            onClick={() => handleFileDeleteContainer1(file.name)}
+                                            className="delete-button-register"
+                                            >
+                                            <img
+                                                src="/images/trash.png"
+                                                alt="Delete"
+                                                className="delete-icon-register"
+                                            />
+                                            </button>
+                                        </div>
+                                        </li>
+                                    </div>
+                                    ))}
+                                </ul>
+                                </div>
+                            )}
+                            </div>
+                        </div>
+                    </div>
 
 
                     <div className="form-checkbox-section">
@@ -282,6 +349,8 @@ const RegisterForm: React.FC = () => {
                     </button>
                 </form>
             </div>
+
+    
         </main>
     );
 };

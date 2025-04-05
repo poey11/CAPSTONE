@@ -3,44 +3,55 @@
     width: 100%;
 }
 
-.headerpic {
+.headerpic-abtus {
     position: relative; /* Required for pseudo-elements */
-    height: 200px;
+    height: 250px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-size: 40px;
-    font-weight: bold;
+    color: rgb(255, 255, 255);
+    font-size: 50px;
+    font-weight:bolder;
     overflow: hidden; /* Ensures blur doesn't spill outside */
   }
-
-.headerpic::before {
+  
+  .headerpic-abtus::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('/images/header.jpg');
+    background-image: url('/images/brgyheaderpic.JPG');
     background-size: cover;
-    background-position: 50% 50%;
+    background-position: 50% 60%;
     background-repeat: no-repeat;
-    filter: blur(2px); /* Adjust the blur intensity */
+    filter: blur(1.2px); /* Adjust the blur intensity */
     z-index: 1; /* Place the blurred background below the text */
-}
-
-.headerpic > * {
+  }
+  
+  .headerpic-abtus::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(61, 60, 60, 0.158); /* Dark overlay */
+    z-index: 2; /* Ensure it overlays the background */
+  }
+  
+  .headerpic-abtus > * {
     position: relative;
-    z-index: 2; /* Ensure text is above the blurred background */
-}
+    z-index: 3; /* Ensure text is above the overlays */
+  }
 
 .aboutus-main-container{
     display: flex;
     flex-direction:column;
     justify-content: center;
     align-items: center;
-    background-color: #f7e5d5;
+    background-color: #d8dfe5;
 }
 
 .container{
@@ -101,7 +112,7 @@
 .aboutus-kapinfo-name {
     font-size: 50px;
     font-weight: bold;
-    color: #e56723;
+    color: #df7426;
 }
 
 .aboutus-kapinfo-position{
@@ -164,7 +175,7 @@
 
 .aboutus-history-title {
     font-size: 30px;
-    color: #e56723;
+    color: #df7426;
     font-weight: bold;
     margin-bottom: 10px;
     margin-top: 20px;
@@ -204,7 +215,7 @@
 
   .visionmission-title {
     font-size: 30px;
-    color: #e56723;
+    color: #df7426;
     font-weight: bold;
     margin-bottom: 15px;
     margin-top: 20px;
@@ -240,7 +251,7 @@
 
   .aboutus-map-title{
     font-size: 30px;
-    color: #e56723;
+    color: #df7426;
     font-weight: bold;
     margin-bottom: 15px;
     margin-top: 20px;

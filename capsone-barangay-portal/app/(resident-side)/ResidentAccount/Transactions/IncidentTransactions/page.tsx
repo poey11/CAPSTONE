@@ -73,7 +73,6 @@ export default function IncidentTransactionsDetails() {
   };
 
   if (loading) return <p>Loading...</p>;
-
   if (!transactionData) return <p>Incident report not found.</p>;
 
   const incidentFields = [
@@ -113,7 +112,7 @@ export default function IncidentTransactionsDetails() {
 
   return (
     <main className="incident-transaction-container">
-      <div className="Page">
+      <div className="headerpic-specific-transactions">
         <p>TRANSACTIONS</p>
       </div>
 
@@ -129,11 +128,7 @@ export default function IncidentTransactionsDetails() {
               <p>{field.label}</p>
             </div>
             <div className="description">
-              <p>
-                {field.format
-                  ? field.format((transactionData as Record<string, any>)[field.key] || "N/A")
-                  : (transactionData as Record<string, any>)[field.key] || "N/A"}
-              </p>
+              <p>{field.format ? field.format((transactionData as Record<string, any>)[field.key] || "N/A") : (transactionData as Record<string, any>)[field.key] || "N/A"}</p>
             </div>
           </div>
         ))}
@@ -145,16 +140,9 @@ export default function IncidentTransactionsDetails() {
           <div className="description">
             {fileURL ? (
               <div className="proof-incident-transactions">
-                <img
-                  src={fileURL}
-                  alt="Proof of Incident"
-                  className="proofOfIncident-image"
-                  onError={(e) => (e.currentTarget.style.display = "none")}
-                />
+                <img src={fileURL} alt="Proof of Incident" className="proofOfIncident-image" onError={(e) => (e.currentTarget.style.display = "none")} />
                 <p>
-                  <a href={fileURL} target="_blank" rel="noopener noreferrer">
-                    View Full Image
-                  </a>
+                  <a href={fileURL} target="_blank" rel="noopener noreferrer">View Full Image</a>
                 </p>
               </div>
             ) : (
@@ -163,19 +151,26 @@ export default function IncidentTransactionsDetails() {
           </div>
         </div>
 
-        {respondentFields.map((field) => (
-          <div className="details-section" key={field.key}>
-            <div className="title">
-              <p>{field.label}</p>
-            </div>
-            <div className="description">
-              {field.render
-                ? field.render(transactionData?.respondent?.[field.key as keyof Respondent])
-                : transactionData?.respondent?.[field.key as keyof Respondent] || "N/A"}
-            </div>
-          </div>
-        ))}
+       
       </div>
+
+      {transactionData?.status === "Acknowledged" && (
+          <div className="incident-content">
+            <div className="incident-content-section-1">
+              <p>Respondent Report Details</p>
+            </div>
+            {respondentFields.map((field) => (
+              <div className="details-section" key={field.key}>
+                <div className="title">
+                  <p>{field.label}</p>
+                </div>
+                <div className="description">
+                  {field.render ? field.render(transactionData?.respondent?.[field.key as keyof Respondent]) : transactionData?.respondent?.[field.key as keyof Respondent] || "N/A"}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
     </main>
   );
 }

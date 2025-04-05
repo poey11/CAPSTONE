@@ -214,7 +214,11 @@ export default function SettingsPageResident() {
                                     className="user-icon-profile-section"
                                 />
                             ) : (
-                                <p>No Profile Image</p>
+                                <img
+                                    src="/images/user.png"
+                                    alt="User Icon"
+                                    className="user-icon-profile-section"
+                                />
                             )}
                     <input
                         type="file"

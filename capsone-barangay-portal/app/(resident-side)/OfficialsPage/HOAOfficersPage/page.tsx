@@ -62,23 +62,23 @@ export default function HOAOfficersPage() {
   return (
 
     
-    <main className="main-container">
+    <main className="main-container-hoa">
 
-      <div className="Page">
+      <div className="headerpic-hoa">
         <p>MEET OUR HOA OFFICERS</p>
       </div>
 
      
       {/* Officials Section */}
-      <section className="Officials-section">
+      <section className="Officials-section-hoa">
         {officials.map((official, index) => (
-          <div key={index} className="official-card">
-            <img src={official.image} className="official-image" alt={official.Name} />
-            <div className="official-content">
-              <h2 className="official-name">{official.Name}</h2>
-              <p className="official-role">{official.Role}</p>
-              <p className="official-location">{official.Location}</p>
-              <p className="official-phonenumber">{official.Phonenumber}</p>
+          <div key={index} className="official-card-hoa">
+            <img src={official.image} className="official-image-hoa" alt={official.Name} />
+            <div className="official-content-hoa">
+              <h2 className="official-name-hoa">{official.Name}</h2>
+              <p className="official-role-hoa">{official.Role}</p>
+              <p className="official-location-hoa">{official.Location}</p>
+              <p className="official-phonenumber-hoa">{official.Phonenumber}</p>
             </div>
           </div>
         ))}

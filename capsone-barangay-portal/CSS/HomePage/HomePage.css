@@ -1,5 +1,5 @@
 .main-container-home {
-    background-color: #f7e5d5;
+    background-color: #D8DFE5;
     height: 100%;
     width: 100%;
   }
@@ -13,7 +13,7 @@
 
   .first-container-home{
     display: flex;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0.53);
     width: 75%;
     border-radius: 2rem;
     margin-top: 5rem;
@@ -37,7 +37,7 @@
   .second-paragraph-home {
     font-weight: bold;
     font-size: 2.5rem;
-    color: grey;
+    color: #DF7426;
   }
 
   .third-paragraph-home {
@@ -48,7 +48,7 @@
 
 
   .learn-more-button-home {
-  background-color: #f49028;
+  background-color: #DF7426;
   color: white;
   font-size: 16px;
   font-weight: bold;
@@ -57,13 +57,14 @@
   border-radius: 4px;
   cursor: pointer;
   margin-top: 2rem;
-  transition: background-color 0.3s ease;
   width: 250px;
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
 }
 
   
 .learn-more-button-home:hover {
-  background-color: #dc7814;
+  background-color: #bc5f1c;
+  transform: scale(1.05);
 }
 
 
@@ -109,9 +110,9 @@ align-items: center;
 }
 
 .name-home {
-color: #e56723;
-font-weight: bold;
-font-size: 2rem;
+  color: #DF7426;
+  font-weight: bold;
+  font-size: 2rem;
 }
 
  .homepage-container-home hr {
@@ -165,7 +166,7 @@ font-size: 2rem;
 }
 
 .section2-title-home {
- color: #e56723;
+ color: #DF7426;
   font-weight: bold;
   font-size: 2rem;
 }
@@ -209,7 +210,7 @@ font-size: 2rem;
  
  .BarangayFacilities {
   font-weight: Bold;
-  color: grey;
+  color: #DF7426;
   font-size: 2.5rem;
  }
  
@@ -253,7 +254,7 @@ font-size: 2rem;
 
 .facility {
   font-size: 1.5rem;
-  color: #e56723;
+  color: #DF7426;
   font-weight: bold;
   margin-bottom: 0.5rem; /* Added margin for spacing */
 }
@@ -305,7 +306,13 @@ font-size: 2rem;
      font-size: 20px;
      cursor: pointer;
      z-index: 10;
+     transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
    }
+
+   .slideshow-button:hover {
+    transform: scale(1.2);
+    background-color: rgba(0, 0, 0, 0.7);
+  }
  
    .slideshow-button.left {
      left: -50px;
@@ -319,3 +326,66 @@ font-size: 2rem;
     display: flex;
     
    }
+
+
+  
+
+.slideshowpics{
+  height: 300px;
+  width: 100%;
+  background-image: url('/images/slideshow/pic5.jpg');
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  transition: background-image 0.5s;
+
+  animation-name: animate;
+  animation-direction: alternate-reverse;
+  animation-play-state: running;
+  animation-timing-function: ease-in-out;
+  animation-duration: 30s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+}
+
+
+
+@keyframes animate{
+  0%{
+    background-image: url('/images/slideshow/pic7.jpg');
+    background-position: 50% 70%;
+  }
+  20%{
+    background-image: url('/images/slideshow/pic3.jpg');
+    background-position: 50% 50%;
+  }
+  40%{
+    background-image: url('/images/slideshow/pic4.jpg');
+    background-position: 50% 50%;
+  }
+  60%{
+    background-image: url('/images/slideshow/pic1.jpg');
+    background-position: 50% 40%;
+  }
+  80%{
+    background-image: url('/images/slideshow/pic6.jpg');
+    background-position: 50% 60%;
+
+  }
+  100%{
+    background-image: url('/images/slideshow/pic5.jpg');
+    background-position: 50% 50%;
+  }
+}
+
+
+.slideshowpics::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 420px;
+  background-color: rgba(75, 74, 74, 0.234);
+}

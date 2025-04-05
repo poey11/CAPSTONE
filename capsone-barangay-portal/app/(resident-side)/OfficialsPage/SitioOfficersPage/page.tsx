@@ -60,23 +60,23 @@ export default function SitioOfficersPage() {
   return (
 
     
-    <main className="main-container">
+    <main className="main-container-sitio">
 
-      <div className="Page">
+      <div className="headerpic-sitio">
         <p>MEET OUR SITIO OFFICERS</p>
       </div>
 
      
       {/* Officials Section */}
-      <section className="Officials-section">
+      <section className="Officials-section-sitio">
         {officials.map((official, index) => (
-          <div key={index} className="official-card">
-            <img src={official.image} className="official-image" alt={official.Name} />
-            <div className="official-content">
-              <h2 className="official-name">{official.Name}</h2>
-              <p className="official-role">{official.Role}</p>
-              <p className="official-location">{official.Location}</p>
-              <p className="official-phonenumber">{official.Phonenumber}</p>
+          <div key={index} className="official-card-sitio">
+            <img src={official.image} className="official-image-sitio" alt={official.Name} />
+            <div className="official-content-sitio">
+              <h2 className="official-name-sitio">{official.Name}</h2>
+              <p className="official-role-sitio">{official.Role}</p>
+              <p className="official-location-sitio">{official.Location}</p>
+              <p className="official-phonenumber-sitio">{official.Phonenumber}</p>
             </div>
           </div>
         ))}

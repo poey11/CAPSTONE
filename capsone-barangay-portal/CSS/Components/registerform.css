@@ -1,11 +1,54 @@
 
   .main-container-register-form {
-    background-color: #f7e5d5;
+    background-color: #D8DFE5;
     display: flex;
     flex-direction: column;  
     min-height: 100vh; 
     width: 100%;
  }
+
+ .headerpic-reg {
+  position: relative; 
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(255, 255, 255);
+  font-size: 50px;
+  font-weight:bolder;
+  overflow: hidden; 
+}
+
+.headerpic-reg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/images/brgyheaderpic.JPG');
+  background-size: cover;
+  background-position: 50% 60%;
+  background-repeat: no-repeat;
+  filter: blur(1.2px); 
+  z-index: 1;
+}
+
+.headerpic-reg::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.173);
+  z-index: 2;
+}
+
+.headerpic-reg > * {
+  position: relative;
+  z-index: 3;
+}
 
   .register-section-register-form {
   display: flex;
@@ -15,29 +58,41 @@
   padding: 2rem;
   margin: auto;
   width: 60%;
-  margin-top: 2rem;
-  margin-bottom: 4rem;
+  margin-top: 5rem;
+  margin-bottom: 5rem;
   
   }
 
   .register-section-register-form h1 {
-  color: #f49028;
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  text-align: center;
-  font-weight: bold;
+    font-size: 30px; 
+    color: #DF7426;
+    text-align: center;
+    font-weight: bold;  
+    margin-top: 20px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
   }
 
+  .register-section-register-form hr {
+    border: none; 
+    border-top: 2px solid rgba(0, 0, 0, 0.20);
+    margin-top: 30px;
+    margin-bottom: 40px;
+    }
+
   .register-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   .form-group-register-form {
   display: flex;
   flex-direction: column;
+  margin-bottom: 10px;
   }
 
   .form-group-register-form input, 
@@ -45,7 +100,6 @@
     padding: 8px;
     width: 100%;
     max-width: 100%;
-    margin-top: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     color: rgba(0, 0, 0, 0.4);
@@ -56,17 +110,35 @@
   font-size: 16px;
   font-weight: bold;
   color: gray;
-  margin-bottom: 0.5rem;
+
   }
 
   .form-input-register-form {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  color: #555;
-  accent-color: #f49028; 
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #555;
+  }
+
+  .file-upload-container-register {
+    margin-top: 5px;
+    margin-bottom: 40px;
+    border: 2px dashed rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: background-color 0.3s ease;
+    display: block;
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    height: 100%; 
+  }
+
+  .file-upload-container-register:hover {
+    background-color: rgba(245, 143, 88, 0.2);
   }
 
 
@@ -106,7 +178,7 @@
   cursor: pointer;
   margin-top: 1rem;
   transition: background-color 0.3s ease;
-  align-self: center; /* Centers the button */
+  align-self: center;
   width: 350px;
   }
 
@@ -142,7 +214,7 @@
           align-items: center; 
           justify-content: center; 
           text-align: center;
-          height: 100%; /* Set a fixed height for better UI experience */
+          height: 100%; 
           }
 
   .file-upload-container:hover {
@@ -232,11 +304,11 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: rgba(0, 0, 0, 0.224); /* Semi-transparent background */
+      background-color: rgba(0, 0, 0, 0.224); 
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 9999; /* Ensure it appears above all other elements */
+      z-index: 9999; 
     }
     
     .popup {
@@ -281,3 +353,63 @@
       color: red;
       margin-left: 5px;
     }
+
+    .file-upload-input-register {
+      display: none;
+    }
+
+    .uploadedFiles-container-register{
+      display: block;
+    }
+
+    .file-name-image-display-register{
+      margin-top: 10px;
+      font-size: 16px;
+      color: rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+
+
+    .file-name-image-display-indiv-register li{
+      display: flex;
+      flex-grow: 1;
+      overflow: hidden; 
+      white-space: nowrap; 
+      text-overflow: ellipsis; 
+    }
+
+
+    .file-name-image-display-indiv-register{
+      display: flex;
+      align-items: center;
+      justify-content: space-between; 
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+
+.filename-image-container-register{
+    display: flex;
+    align-items: center;
+    flex-grow: 1; 
+    overflow: hidden; 
+    margin-top:10px;
+}
+
+
+.delete-container-register{
+  margin-left: auto; 
+}
+
+
+.delete-button-register {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.delete-icon-register {
+  width: 20px;
+  height: 20px;
+}

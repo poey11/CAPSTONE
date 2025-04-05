@@ -33,62 +33,62 @@ export default function AnnouncementDetails() {
   
 
   return (
-    <main className="main-container">
+    <main className="main-container-specific">
 
 
 
-     <div className="Page">
+     <div className="headerpic-specific">
         <p>ANNOUNCEMENTS</p>
       </div>
 
 
-      <div className="TitlePage">
+      <div className="TitlePage-specific">
         <p>{title}</p>
         
       </div>
       
-      <div className="slideshow-container">
+      <div className="slideshow-container-specific">
         {images.length > 0 && (
-          <div className="slideshow">
+          <div className="slideshow-specific">
             <img
               src={images[currentSlide]}
               alt={`Slide ${currentSlide + 1}`}
-              className="slideshow-image"
+              className="slideshow-image-specific"
             />
           </div>
         )}
-        <button onClick={prevSlide} className="slideshow-button left">
+        <button onClick={prevSlide} className="slideshow-button-specific left">
           &#8249;
         </button>
-        <button onClick={nextSlide} className="slideshow-button right">
+        <button onClick={nextSlide} className="slideshow-button-specific right">
           &#8250;
         </button>
       </div>
                 
-    <div className="programs-section">
+    <div className="programs-section-specific">
 
-        <div className="description-card">
+        <div className="description-card-specific">
             <h1>Description:</h1>
-            <p>{description}</p>
+            <p>{description} </p>
         </div>
 
-        <div className="info-cards">
-            <div className="info-card">
+        <div className="info-cards-specific">
+            <div className="info-card-specific">
                 <h2>Schedule</h2>
                 <p>{date}</p>
             </div>
-            <div className="info-card">
+            <div className="info-card-specific">
                 <h2>Location</h2>
                 <p>{Location}</p>
             </div>
         </div>
 
-            <div className="info-cards">
-            <div className="info-card">
+            <div className="info-cards-specific">
+            <div className="info-card-specific">
                 <h2>Progress Status</h2>
                 <p>{ProgresStatus}</p>
             </div>
-            <div className="info-card">
+            <div className="info-card-specific">
                 <h2>Participants</h2>
                 <p>{Participants}</p>
             </div>
@@ -96,71 +96,81 @@ export default function AnnouncementDetails() {
 
         </div>
 
-        <div className="register-section">
+        <div className="register-section-specific">
         <h1>Register for this Event:</h1>
-        <form className="register-form">
+        <form className="register-form-specific">
 
-            <div className="form-group">
-            <label htmlFor="firstname" className="form-label">First Name</label>
+            <div className="form-group-specific">
+            <label htmlFor="firstname" className="form-label-specific">
+              First Name <span className="required">*</span>
+              </label>
             <input
                 type="text"
                 id="firstname"
                 name="firstname"
-                className="form-input"
+                className="form-input-specific"
                 required
                 placeholder="Enter First Name"
             />
             </div>
 
-            <div className="form-group">
-            <label htmlFor="lastname" className="form-label">Last Name</label>
+            <div className="form-group-specific">
+            <label htmlFor="lastname" className="form-label-specific">
+              Last Name<span className="required">*</span>
+              </label>
             <input
                 type="text"
                 id="lastname"
                 name="lastname"
-                className="form-input"
+                className="form-input-specific"
                 required
                 placeholder="Enter Last Name"
             />
             </div>
 
-            <div className="form-group">
-            <label htmlFor="contact" className="form-label">Contact Number</label>
+            <div className="form-group-specific">
+            <label htmlFor="contact" className="form-label-specific">
+              Contact Number<span className="required">*</span>
+              </label>
             <input
                 type="tel"
                 id="contact"
                 name="contact"
-                className="form-input"
+                className="form-input-specific"
                 required
                 placeholder="Enter Contact Number"
             />
             </div>
 
-            <div className="form-group">
-            <label htmlFor="email" className="form-label">Email Address</label>
+            <div className="form-group-specific">
+            <label htmlFor="email" className="form-label-specific">
+              Email Address<span className="required">*</span>
+              </label>
             <input
                 type="email"
                 id="email"
                 name="email"
-                className="form-input"
+                className="form-input-specific"
                 required
                 placeholder="Enter Email Address"
             />
             </div>
 
-            <div className="form-group">
-            <label htmlFor="location" className="form-label">Location</label>
+            <div className="form-group-specific">
+            <label htmlFor="location" className="form-label-specific">
+              Location <span className="required">*</span>
+              </label>
             <input
                 type="text"
                 id="location"
                 name="location"
-                className="form-input"
+                className="form-input-specific"
                 required
                 placeholder="Enter Location"
             />
             </div>
 
-            <button type="submit" className="register-button">Register</button>
+            <button type="submit" className="register-button-specific">Register</button>
 
         </form>
         </div>
