@@ -69,9 +69,10 @@ export default function ResidentModule() {
     let filtered = [...residents];
 
     if (searchName) {
-      filtered = filtered.filter((resident) =>
-        resident.name?.toLowerCase().includes(searchName.toLowerCase())
-      );
+      filtered = filtered.filter((resident) => {
+        const fullName = `${resident.lastName || ""} ${resident.firstName || ""} ${resident.middleName || ""}`.toLowerCase();
+        return fullName.includes(searchName.toLowerCase());
+      });
     }
 
     if (searchAddress) {
@@ -291,56 +292,72 @@ export default function ResidentModule() {
               </tr>
             </thead>
             <tbody>
-              {currentResidents.map((resident) => (
-                <tr key={resident.id}>
-                  <td>{resident.residentNumber}</td>
-                  <td>{resident.name}</td>
-                  <td>{resident.address}</td>
-                  <td>{resident.generalLocation}</td>
-                  <td>{resident.dateOfBirth}</td>
-                  <td>{resident.placeOfBirth}</td>
-                  <td>{resident.age}</td>
-                  <td>{resident.sex}</td>
-                  <td>{resident.civilStatus}</td>
-                  <td>
-                    <div className="residentmodule-actions">
-                      <button 
-                        className="residentmodule-action-view" 
-                        onClick={() => router.push(`/dashboard/ResidentModule/ViewResident?id=${resident.id}`)}
-                      >
-                        View
-                      </button>
-                  {isAuthorized ? (
-                    <>
-                      <button 
-                        className="residentmodule-action-edit" 
-                        onClick={() => handleEditClick(resident.id)}
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        className="residentmodule-action-delete" 
-                        onClick={() => handleDeleteClick(resident.id, resident.residentNumber)}
-                      >
-                        Delete
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
-                        Edit
-                      </button>
-                      <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
-                        Delete
-                      </button>
-                    </>
-                  )}
+          {currentResidents.map((resident) => {
+            const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
 
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+            return (
+              <tr key={resident.id}>
+                <td>{resident.residentNumber}</td>
+                <td>{fullName}</td>
+                <td>{resident.address}</td>
+                <td>{resident.generalLocation}</td>
+                <td>{resident.dateOfBirth}</td>
+                <td>{resident.placeOfBirth}</td>
+                <td>{resident.age}</td>
+                <td>{resident.sex}</td>
+                <td>{resident.civilStatus}</td>
+                <td>
+                  <div className="residentmodule-actions">
+                    <button
+                      className="residentmodule-action-view"
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/ResidentModule/ViewResident?id=${resident.id}`
+                        )
+                      }
+                    >
+                      View
+                    </button>
+                    {isAuthorized ? (
+                      <>
+                        <button
+                          className="residentmodule-action-edit"
+                          onClick={() => handleEditClick(resident.id)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="residentmodule-action-delete"
+                          onClick={() =>
+                            handleDeleteClick(resident.id, resident.residentNumber)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className="residentmodule-action-edit opacity-0 cursor-not-allowed"
+                          disabled
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="residentmodule-action-delete opacity-0 cursor-not-allowed"
+                          disabled
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+
           </table>
         )}
       </div>

@@ -78,20 +78,29 @@ export default function ViewResident() {
           <p>Resident Details</p>
         </div>
 
-        {residentFields.map((field) => (
-          <div className="viewresident-details-section" key={field.key}>
-            <div className="viewresident-title">
-              <p>{field.label}</p>
+        {residentFields.map((field) => {
+          let value;
+
+          if (field.key === "name") {
+            const { lastName = "", firstName = "", middleName = "" } = residentData;
+            value = `${lastName}, ${firstName} ${middleName}`.trim();
+          } else if (field.isBoolean !== undefined) {
+            value = residentData[field.key] ? "Yes" : "No";
+          } else {
+            value = residentData[field.key] ?? "N/A";
+          }
+
+          return (
+            <div className="viewresident-details-section" key={field.key}>
+              <div className="viewresident-title">
+                <p>{field.label}</p>
+              </div>
+              <div className={`viewresident-description ${field.key === "residentNumber" ? "disabled-field" : ""}`}>
+                <p>{value}</p>
+              </div>
             </div>
-            <div className={`viewresident-description ${field.key === "residentNumber" ? "disabled-field" : ""}`}>
-              <p>
-                {field.isBoolean !== undefined
-                  ? residentData[field.key] ? "Yes" : "No"
-                  : residentData[field.key] ?? "N/A"}
-              </p>
-            </div>    
-          </div>
-        ))}
+          );
+        })}
 
         {/* Display Valid ID */}
         <div className="viewresident-details-section">
