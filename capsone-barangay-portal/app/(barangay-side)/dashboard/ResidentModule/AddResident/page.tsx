@@ -12,7 +12,9 @@ export default function AddResident() {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
     address: "",
     dateOfBirth: "",
     placeOfBirth: "",
@@ -44,13 +46,30 @@ export default function AddResident() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     let newValue: any = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
-
+  
     if (name === "age") {
       const ageValue = parseInt(value, 10) || 0;
       setFormData((prevData) => ({
         ...prevData,
         age: ageValue,
         isSeniorCitizen: ageValue >= 60,
+      }));
+    } else if (name === "dateOfBirth") {
+      const birthDate = new Date(value);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      const dayDiff = today.getDate() - birthDate.getDate();
+  
+      if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+        age--; // adjust if birthday hasn't happened yet this year
+      }
+  
+      setFormData((prevData) => ({
+        ...prevData,
+        dateOfBirth: value,
+        age: age,
+        isSeniorCitizen: age >= 60,
       }));
     } else {
       setFormData((prevData) => ({
@@ -59,6 +78,7 @@ export default function AddResident() {
       }));
     }
   };
+  
   
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,11 +102,11 @@ export default function AddResident() {
 
   const handleSubmitClick = async () => {
     const { 
-      name, address, generalLocation, placeOfBirth, dateOfBirth, 
+      firstName, lastName, address, generalLocation, placeOfBirth, dateOfBirth, 
       age, sex, civilStatus, contactNumber 
   } = formData;
   
-    if (!name || !address || !generalLocation || !placeOfBirth || !dateOfBirth || !age || !sex || !civilStatus || !contactNumber) {
+    if (!firstName || !lastName || !address || !generalLocation || !placeOfBirth || !dateOfBirth || !age || !sex || !civilStatus || !contactNumber) {
 
       setPopupErrorMessage("Please fill up all required fields.");
       setShowErrorPopup(true);
@@ -199,8 +219,18 @@ const confirmSubmit = async () => {
             <div className="add-resident-section-2-left-side">
               <div className="fields-container">
                 <div className="fields-section">
-                  <p>Full Name <span className="required">*</span></p>
-                  <input type="text" className="add-resident-input-field" placeholder="Enter Full Name" name="name" value={formData.name} onChange={handleChange} required />
+                  <p>First Name <span className="required">*</span></p>
+                  <input type="text" className="add-resident-input-field" placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                </div>
+
+                <div className="fields-section">
+                  <p>Last Name <span className="required">*</span></p>
+                  <input type="text" className="add-resident-input-field" placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                </div>
+
+                <div className="fields-section">
+                  <p>Middle Name</p>
+                  <input type="text" className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} required />
                 </div>
 
                 <div className="fields-section">

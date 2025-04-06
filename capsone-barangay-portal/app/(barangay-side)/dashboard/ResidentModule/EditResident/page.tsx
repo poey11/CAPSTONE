@@ -13,7 +13,9 @@ export default function EditResident() {
 
   const [formData, setFormData] = useState({
     residentNumber: 0,
-    name: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
     address: "",
     dateOfBirth: "",
     placeOfBirth: "",
@@ -77,7 +79,9 @@ export default function EditResident() {
         if (docSnap.exists()) {
           const data = {
             residentNumber: docSnap.data().residentNumber || 0,
-            name: docSnap.data().name || "",
+            firstName: docSnap.data().firstName || "",
+            lastName: docSnap.data().lastName || "",
+            middleName: docSnap.data().middleName || "",
             address: docSnap.data().address || "",
             dateOfBirth: docSnap.data().dateOfBirth || "",
             placeOfBirth: docSnap.data().placeOfBirth || "",
@@ -232,10 +236,20 @@ export default function EditResident() {
                   </div>
 
                   <div className="fields-section">
-                    <p>Full Name</p>
-                    <input type="text" className="add-resident-input-field" placeholder="Enter Full Name" name="name" value={formData.name} onChange={handleChange} required />
+                    <p>First Name</p>
+                    <input type="text" className="add-resident-input-field" placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
                   </div>
-                  
+
+                  <div className="fields-section">
+                    <p>Last Name</p>
+                    <input type="text" className="add-resident-input-field" placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                  </div>
+
+                  <div className="fields-section">
+                    <p>Middle Name</p>
+                    <input type="text" className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} required />
+                  </div>
+
                   <div className="fields-section">
                     <p>Address</p>
                     <input type="text" className="add-resident-input-field" placeholder="Enter Address" name="address" value={formData.address} onChange={handleChange} required />

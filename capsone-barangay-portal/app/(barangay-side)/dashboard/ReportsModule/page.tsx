@@ -14,7 +14,10 @@ interface FileData {
 const ReportsPage = () => {
   const [loadingKasambahay, setLoadingKasambahay] = useState(false); 
   const [loadingJobSeeker, setLoadingJobSeeker] = useState(false);    
-  const [loadingResident, setLoadingResident] = useState(false);    
+  const [loadingMasterResident, setLoadingMasterResident] = useState(false);    
+  const [loadingEastResident, setLoadingEastResident] = useState(false);
+  const [loadingWestResident, setLoadingWestResident] = useState(false);    
+  const [loadingSouthResident, setLoadingSouthResident] = useState(false);  
   const [files, setFiles] = useState<FileData[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
   const [selectedModule, setSelectedModule] = useState<string>("");
@@ -92,6 +95,8 @@ const ReportsPage = () => {
     window.location.reload();
 
   };
+
+  // kasambahay report
 
   const generateKasambahayReport = async () => {
     setLoadingKasambahay(true);
@@ -333,6 +338,8 @@ const ReportsPage = () => {
       setLoadingKasambahay(false);
     }
   };
+
+  // jobseekers
   
   const generateFirstTimeJobSeekerReport = async () => {
     setLoadingJobSeeker(true);
@@ -473,9 +480,10 @@ const ReportsPage = () => {
   };
   
 
+  // all residents
 
   const generateResidentListReport = async () => {
-    setLoadingResident(true);
+    setLoadingMasterResident(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -489,12 +497,16 @@ const ReportsPage = () => {
   
       if (residents.length === 0) {
         alert("No resident found.");
-        setLoadingResident(false);
+        setLoadingMasterResident(false);
         return;
       }
   
-      residents.sort((a, b) => (Number(a.residentNumber) || 0) - (Number(b.residentNumber) || 0));
-  
+      residents.sort((a, b) => {
+        const nameCompare = (a.lastName || "").localeCompare(b.lastName || "");
+        if (nameCompare !== 0) return nameCompare;
+        return (a.address || "").localeCompare(b.address || "");
+      });
+
       const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
       const url = await getDownloadURL(templateRef);
       const response = await fetch(url);
@@ -509,13 +521,14 @@ const ReportsPage = () => {
       const dataStartRow = 3;
       let insertionRow = dataStartRow;
   
-      residents.forEach((resident) => {
+        residents.forEach((resident, index) => {
         const row = worksheet.getRow(insertionRow);
         row.height = 55;
-  
+
+        const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();  
         const cells = [
-          resident.residentNumber || "",
-          resident.name || "",
+          (index + 1).toString(),
+          fullName,
           resident.address || "",
           resident.dateOfBirth || "",
           resident.placeOfBirth || "",
@@ -572,12 +585,12 @@ const ReportsPage = () => {
       console.error("Error generating report:", error);
       alert("Failed to generate Resident Masterlist Report.");
     } finally {
-      setLoadingResident(false);
+      setLoadingMasterResident(false);
     }
   };
 
   const handleGenerateResidentPDF = async () => {
-    setLoadingResident(true);
+    setLoadingMasterResident(true);
     try {
       const fileUrl = await generateResidentListReport();
       if (!fileUrl) return alert("Failed to generate Excel report.");
@@ -603,14 +616,164 @@ const ReportsPage = () => {
       console.error("Error:", error);
       alert("Failed to generate PDF.");
     } finally {
-      setLoadingResident(false);
+      setLoadingMasterResident(false);
     }
   };
   
-  
-  
-  
+  // residents per general location
 
+  const handleGenerateEastResidentPDF = () =>
+    handleGenerateResidentPDFByLocation("East Fairview", setLoadingEastResident);
+
+  const handleGenerateWestResidentPDF = () =>
+    handleGenerateResidentPDFByLocation("West Fairview", setLoadingWestResident);
+
+  const handleGenerateSouthResidentPDF = () =>
+    handleGenerateResidentPDFByLocation("South Fairview", setLoadingSouthResident);
+
+
+  
+    const generateResidentListReportByLocation = async (
+      location: string,
+      setLoadingFn: React.Dispatch<React.SetStateAction<boolean>>
+    ) => {
+      setLoadingFn(true);
+      try {
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const reportTitle = `RECORD OF BARANGAY INHABITANTS ${year} - ${location.toUpperCase()}`;
+    
+        const residentRef = collection(db, "Residents");
+        const q = query(residentRef);
+        const querySnapshot = await getDocs(q);
+    
+        let residents = querySnapshot.docs
+          .map((doc) => doc.data())
+          .filter((resident) => resident.generalLocation === location);
+    
+        if (residents.length === 0) {
+          alert(`No residents found in ${location}.`);
+          return;
+        }
+    
+        residents.sort((a, b) => {
+          const nameCompare = (a.lastName || "").localeCompare(b.lastName || "");
+          if (nameCompare !== 0) return nameCompare;
+          return (a.address || "").localeCompare(b.address || "");
+        });
+    
+        const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
+        const url = await getDownloadURL(templateRef);
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+    
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(arrayBuffer);
+        const worksheet = workbook.worksheets[0];
+    
+        worksheet.getCell("A1").value = reportTitle;
+    
+        const dataStartRow = 3;
+        let insertionRow = dataStartRow;
+    
+        residents.forEach((resident, index) => {
+          const row = worksheet.getRow(insertionRow);
+          row.height = 55;
+
+
+          const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
+
+    
+          const cells = [
+            (index + 1).toString(),
+            fullName,
+            resident.address || "",
+            resident.dateOfBirth || "",
+            resident.placeOfBirth || "",
+            resident.age || "",
+            resident.sex || "",
+            resident.civilStatus || "",
+            resident.occupation || "",
+            resident.contactNumber || "",
+            resident.emailAddress || "",
+            resident.precinctNumber || "",
+          ];
+    
+          cells.forEach((value, index) => {
+            const cell = row.getCell(index + 1);
+            cell.value = value;
+            cell.font = { name: "Calibri", size: 12 };
+            cell.alignment = { horizontal: "center", wrapText: true };
+            cell.border = {
+              top: { style: "medium", color: { argb: "000000" } },
+              bottom: { style: "medium", color: { argb: "000000" } },
+              left: { style: "medium", color: { argb: "000000" } },
+              right: { style: "medium", color: { argb: "000000" } },
+            };
+          });
+    
+          row.commit();
+          insertionRow++;
+        });
+    
+        const totalRow = worksheet.getRow(insertionRow);
+        worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
+        totalRow.getCell(1).value = `TOTAL: ${residents.length}`;
+        totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
+        totalRow.getCell(1).font = { name: "Times New Roman", size: 10 };
+        totalRow.commit();
+    
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+    
+        const fileName = `Inhabitant_Record_${location.replace(" ", "")}_${year}.xlsx`;
+        const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+        await uploadBytes(storageRef, blob);
+    
+        const fileUrl = await getDownloadURL(storageRef);
+    
+        alert(`${location} Masterlist generated successfully. Please wait for the downloadable file!`);
+        return fileUrl;
+      } catch (error) {
+        console.error("Error generating report:", error);
+        alert("Failed to generate Resident Masterlist Report.");
+      } finally {
+        setLoadingFn(false);
+      }
+    };
+
+  const handleGenerateResidentPDFByLocation = async (
+    location: string,
+    setLoadingFn: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    setLoadingFn(true);
+    try {
+      const fileUrl = await generateResidentListReportByLocation(location, setLoadingFn);
+      if (!fileUrl) return;
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+      const year = new Date().getFullYear();
+      saveAs(blob, `Inhabitant_Record_${location.replace(" ", "")}_${year}.pdf`);
+  
+      alert(`${location} PDF report generated successfully!`);
+    } catch (error) {
+      console.error("PDF Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingFn(false);
+    }
+  };
+  
   
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedName = e.target.value;
@@ -654,11 +817,20 @@ const ReportsPage = () => {
 
           {selectedModule === "Resident Module" && (
             <>
-              <button onClick={handleGenerateResidentPDF} disabled={loadingResident} className="report-button">
-                {loadingResident ? "Generating..." : "Generate Resident Masterlist"}
-              </button>                    <button className="report-button">Generate East Fairview Resident List</button>
-              <button className="report-button">Generate South Fairview Resident List</button>
-              <button className="report-button">Generate West Fairview Resident List</button>
+              <button onClick={handleGenerateResidentPDF} disabled={loadingMasterResident} className="report-button">
+                {loadingMasterResident ? "Generating..." : "Generate Resident Masterlist"}
+              </button>
+              <button onClick={handleGenerateEastResidentPDF} disabled={loadingEastResident} className="report-button">
+                {loadingEastResident ? "Generating..." : "Generate East Resident List"}
+              </button>
+
+              <button onClick={handleGenerateWestResidentPDF} disabled={loadingWestResident} className="report-button">
+                {loadingWestResident ? "Generating..." : "Generate West Resident List"}
+              </button>
+
+              <button onClick={handleGenerateSouthResidentPDF} disabled={loadingSouthResident} className="report-button">
+                {loadingSouthResident ? "Generating..." : "Generate South Resident List"}
+              </button>
               <button onClick={handleGenerateKasambahayPDF} disabled={loadingKasambahay} className="report-button">
                 {loadingKasambahay ? "Generating..." : "Generate Kasambahay Masterlist"}
               </button>
