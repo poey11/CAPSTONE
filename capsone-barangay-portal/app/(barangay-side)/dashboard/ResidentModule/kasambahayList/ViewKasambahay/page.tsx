@@ -93,6 +93,33 @@ export default function ViewKasambahay() {
             </div>
           </div>
         ))}
+        {/* Display Valid ID */}
+        <div className="viewresident-details-section">
+          <div className="viewresident-title">
+            <p>Valid ID</p>
+          </div>
+          <div className="viewresident-description">
+            {kasambahayData.fileURL ? (
+              <div className="resident-id-container">
+                <img
+                  src={kasambahayData.fileURL}
+                  alt="Resident's Valid ID"
+                  className="resident-id-image"
+                />
+                <a
+                  href={kasambahayData.fileURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="view-image-link"
+                >
+                  View Image
+                </a>
+              </div>
+            ) : (
+              <p>No ID uploaded</p>
+            )}
+          </div>
+        </div>
       </div>
     </main>
   );
