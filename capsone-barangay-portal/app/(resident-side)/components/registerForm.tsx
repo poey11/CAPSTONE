@@ -7,7 +7,7 @@ import { useState, ChangeEvent } from "react";
 import { useRouter } from 'next/navigation';
 import ReCAPTCHA from "react-google-recaptcha";
 import "@/CSS/Components/registerform.css";
-import {dateHelper} from "@/app/helpers/helpers";
+import {isPastDate} from "@/app/helpers/helpers";
 
 interface Resident {
     sex: string;
@@ -76,10 +76,9 @@ const RegisterForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
     
-      const isValidDate = dateHelper(resident.dateOfBirth);
-      if (isValidDate) {
-        //if isValidDate is true, then the inputed date is after current date
-        setErrorPopup({ show: true, message: "Invalid Birthdate. Please select a date of birth that matches with your valid ID." });
+      const isValidDate = isPastDate(resident.dateOfBirth);
+      if (!isValidDate) {
+        setErrorPopup({ show: true, message: "Invalid Birthdate. Please select a date of birth that matches with in your valid ID." });
         return;
     }
 

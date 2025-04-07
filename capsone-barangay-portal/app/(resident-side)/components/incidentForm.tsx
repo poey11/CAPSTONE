@@ -7,7 +7,7 @@ import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection, updateDoc} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
 import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
-import {dateHelper,timeHelper} from "@/app/helpers/helpers";
+import {isPastDate,isToday,isPastOrCurrentTime} from "@/app/helpers/helpers";
 
 
 
@@ -160,12 +160,22 @@ const incidentForm:React.FC = () => {
       event.preventDefault(); 
       const form = event.target as HTMLFormElement;
       if (form.checkValidity()) {
-        const isValidDate = dateHelper(incidentReport.dateFiled);
-        const isValidTime = timeHelper(incidentReport.time);
-  
-        if(isValidDate || isValidTime){
-          // fix it. should consider the scenario  Today + future time = invalid
-          setErrorPopup({ show: true, message: "Invalid Date/Time. Please Select A Valid Date/Time" });
+        const dateFiled = incidentReport.dateFiled;
+        const timeFiled = incidentReport.time;
+        const dateIsPast = isPastDate(dateFiled);
+        const dateIsToday = isToday(dateFiled);
+        const timeIsPastOrNow = isPastOrCurrentTime(timeFiled);
+        
+        const isInvalid =
+       !dateIsPast && // not in the past
+      (!dateIsToday || !timeIsPastOrNow); // if not today, it's future — or if today but time is still in future
+
+
+        if (isInvalid) {
+          setErrorPopup({
+              show: true,
+              message: "Invalid Date/Time. Please select a past or current date and time.",
+          });
           return;
         }
 
