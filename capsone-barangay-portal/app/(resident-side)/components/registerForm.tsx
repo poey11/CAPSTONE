@@ -115,15 +115,23 @@ const RegisterForm: React.FC = () => {
         setTimeout(() => {
           setShowPopup(false);
           router.push("/resident/login");
-        }, 3000);
-      } catch (error: any) {
-        setErrorPopup({ show: true, message: "Register failed! Email already in use."});
+        }, 2000);
+    } catch (error: any) {
+        let errorMessage = "Register failed!";
+    
+        if (error.code === "auth/email-already-in-use") {
+            errorMessage = "Email already in use.";
+        } else if (error.code === "auth/weak-password") {
+            errorMessage = "Password should be at least 6 characters.";
+        }
+    
+        setErrorPopup({ show: true, message: errorMessage });
     
         // Cleanup in case of error
         if (docRef) await deleteDoc(docRef);
         if (storageRef) await deleteObject(storageRef);
         if (user) await user.delete();
-      }
+    }
     };
     
 

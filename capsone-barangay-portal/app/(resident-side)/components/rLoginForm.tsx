@@ -5,6 +5,9 @@ import { auth } from '../../db/firebase';
 import { signInWithEmailAndPassword,signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import {signIn} from 'next-auth/react';
+import { doc, getDoc } from "firebase/firestore";
+import { db } from '../../db/firebase';
+
 interface User {
     email: string;
     password: string;
@@ -13,6 +16,8 @@ interface User {
 
 const rLoginForm:React.FC = () => {
     const router = useRouter(); 
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
 
     const handleRegister = () => {
       router.push("/register");
@@ -52,8 +57,18 @@ const rLoginForm:React.FC = () => {
         try{
             const userCredentials = await signInWithEmailAndPassword(auth, resident.email, resident.password);
             const user = userCredentials.user;
+
             if (user.emailVerified) {
-                setUserEmail(resident.email);
+               
+                const userDocRef = doc(db, "ResidentUsers", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+    
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    setFirstName(userData.first_name || "");
+                    setLastName(userData.last_name || "");
+                }
+    
                 setShowPopup(true);
                 setTimeout(() => {
                     setShowPopup(false);
@@ -74,7 +89,7 @@ const rLoginForm:React.FC = () => {
                 redirect: false,
             });
             
-            setErrorMessage(error.message);
+            setErrorMessage("Invalid user credentials.");
             setShowErrorPopup(true);
            
         }
@@ -92,7 +107,9 @@ const rLoginForm:React.FC = () => {
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
-                        <p>Welcome, {userEmail}!</p>
+                    <img src="/Images/successful.png" alt="warning icon" className="warning-icon-popup" />
+                        <p>Welcome, {firstName} {lastName}!</p>
+                        <br/>
                         <p>Redirecting to the Home Page...</p>
                     </div>
                 </div>
@@ -100,6 +117,7 @@ const rLoginForm:React.FC = () => {
             {showVerifyPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
+                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
                         <p>Please verify your email first.</p>
                         <button onClick={() => setShowVerifyPopup(false)} className="continue-button">Continue</button>
                     </div>
@@ -108,6 +126,7 @@ const rLoginForm:React.FC = () => {
             {showErrorPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
+                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
                         <p>{errorMessage}</p>
                         <button onClick={() => setShowErrorPopup(false)} className="continue-button">Continue</button>
                     </div>
