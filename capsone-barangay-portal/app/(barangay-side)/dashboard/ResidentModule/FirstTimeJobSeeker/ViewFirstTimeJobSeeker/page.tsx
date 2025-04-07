@@ -82,6 +82,33 @@ export default function ViewFirstTimeJobSeeker() {
             </div>
           </div>
         ))}
+        {/* Display Valid ID */}
+        <div className="viewresident-details-section">
+          <div className="viewresident-title">
+            <p>Valid ID</p>
+          </div>
+          <div className="viewresident-description">
+            {jobSeekerData.fileURL ? (
+              <div className="resident-id-container">
+                <img
+                  src={jobSeekerData.fileURL}
+                  alt="Resident's Valid ID"
+                  className="resident-id-image"
+                />
+                <a
+                  href={jobSeekerData.fileURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="view-image-link"
+                >
+                  View Image
+                </a>
+              </div>
+            ) : (
+              <p>No ID uploaded</p>
+            )}
+          </div>
+        </div>
       </div>
     </main>
   );

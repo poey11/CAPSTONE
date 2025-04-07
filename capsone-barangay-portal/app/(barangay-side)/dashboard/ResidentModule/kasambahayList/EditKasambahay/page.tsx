@@ -2,9 +2,11 @@
 import "@/CSS/ResidentModule/addresident.css"; 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { db } from "../../../../../db/firebase";
+import { db, storage } from "../../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Link from "next/link";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
 
 interface KasambahayFormData {
   registrationControlNumber: string;
@@ -26,6 +28,7 @@ interface KasambahayFormData {
   sssMember: boolean;
   philhealthMember: boolean;
   pagibigMember: boolean;
+  fileURL: string;
 }
 
 export default function EditKasambahay() {
@@ -53,8 +56,11 @@ export default function EditKasambahay() {
     sssMember: false,
     philhealthMember: false,
     pagibigMember: false,
+    fileURL: "",
   });
 
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -114,6 +120,7 @@ export default function EditKasambahay() {
             sssMember: docSnap.data().sssMember ?? false,
             philhealthMember: docSnap.data().philhealthMember ?? false,
             pagibigMember: docSnap.data().pagibigMember ?? false,
+            fileURL: docSnap.data().fileURL || "",
           };
 
           setFormData(data);
@@ -130,6 +137,32 @@ export default function EditKasambahay() {
 
     fetchKasambahay();
   }, [kasambahayId]);
+
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
+      e.target.value = "";
+    }
+  };
+
+  const handleFileDelete = () => {
+    setFile(null);
+    setPreview(null); // ✅ Ensure it's undefined
+    setFormData((prev) => {
+      if (!prev) return prev; 
+    
+      return {
+        ...prev,
+        fileURL: "", 
+      } as KasambahayFormData;
+    });
+      };
+
+
+
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -175,6 +208,15 @@ export default function EditKasambahay() {
     setError("");
 
     try {
+      let fileURL = formData.fileURL; // Default to existing URL
+  
+      //  If new file is selected, upload to Firebase Storage
+      if (file) {
+        const storageRef = ref(storage, `KasambahayFiles/${kasambahayId}/${file.name}`);
+        await uploadBytes(storageRef, file);
+        fileURL = await getDownloadURL(storageRef);
+      }
+
       const docRef = doc(db, "KasambahayList", kasambahayId);
       await updateDoc(docRef, {
         registrationControlNumber: formData.registrationControlNumber,
@@ -196,6 +238,7 @@ export default function EditKasambahay() {
         sssMember: formData.sssMember,
         philhealthMember: formData.philhealthMember,
         pagibigMember: formData.pagibigMember,
+        fileURL,
       });
       
     } catch (err) {
@@ -385,7 +428,53 @@ export default function EditKasambahay() {
 
             </div>
           </div>
-        </form>
+              {/* Right Side - Checkboxes & File Upload */}
+              <div className="add-resident-section-2-right-side">  
+                {/* File Upload Section Paayos na lang dito mapapasok yung new image*/}
+                <div className="file-upload-container">  
+                  <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
+                  <input 
+                    id="file-upload" 
+                    type="file" 
+                    className="file-upload-input" 
+                    accept=".jpg,.jpeg,.png" 
+                    onChange={handleFileChange} 
+                  />
+
+                  {/* Current Image Section */}
+                  {formData.fileURL && (
+                    <div className="file-name-image-display">
+                      <span className="section-title">Current Image</span>
+                      <div className="file-name-image-display-indiv">
+                        <img src={formData.fileURL} alt="Current Resident Image" style={{ width: "100px", height: "100px" }} />
+                        <div className="delete-container">
+                          <button type="button" onClick={handleFileDelete} className="delete-button">
+                            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* New Image Section (Only if a file is uploaded) */}
+                  {file && (
+                    <div className="file-name-image-display">
+                      <span className="section-title">New Image</span>
+                      <div className="file-name-image-display-indiv">
+                        <img src={preview || ""} alt="New Resident Image" style={{ width: "100px", height: "100px" }} />
+                        <span>{file.name}</span>
+                        <div className="delete-container">
+                          <button type="button" onClick={handleFileDelete} className="delete-button">
+                            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            </form>
         {error && <p className="error">{error}</p>}
       </div>
 
