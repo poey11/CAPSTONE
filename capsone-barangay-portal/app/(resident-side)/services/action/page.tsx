@@ -7,7 +7,6 @@ import { addDoc, collection, doc, } from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/navigation";
-import { request } from "http";
 
 
 
@@ -81,6 +80,7 @@ const [files8, setFiles8] = useState<{ name: string, preview: string | undefined
 
 const [files9, setFiles9] = useState<{ name: string, preview: string | undefined }[]>([]);
 
+const [minDate, setMinDate] = useState<string>("");
 useEffect(() => {
   if (user) {
     setClearanceInput((prev: any) => ({
@@ -89,6 +89,13 @@ useEffect(() => {
     }));
   }
 }, [user]); // Runs when `user` changes
+
+useEffect(() => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1); // Set to tomorrow
+  setMinDate(tomorrow.toISOString().split('T')[0]); // Format as YYYY-MM-DD
+
+},[])
 
 
 const handleFileChange = (
@@ -426,6 +433,8 @@ const handleFileChange = (
               <input 
                 type="date" 
                 id="dateOfResidency" 
+                min={minDate} // Set minimum date to tomorrow
+                onKeyDown={(e) => e.preventDefault()} // Prevent manual input
                 name="appointmentDate" 
                 value={clearanceInput.appointmentDate||""}
                 onChange={handleChange}
