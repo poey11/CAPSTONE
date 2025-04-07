@@ -73,23 +73,26 @@ export default function SettingsPageResident() {
         window.location.href = "/dashboard";
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setResident((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
 
-        if (name === "password") {
-            setPassword(value);
-            setResident((prevData) => ({ ...prevData, password: value })); // formData.password
-         } else if (name === "confirmPassword") {
-            setConfirmPassword(value);
-         } else {
-            setResident((prevData) => ({ ...prevData, [name]: value }));
-        }
-
-    };
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+          const { name, value } = e.target;
+          setResident((prevData) => ({
+              ...prevData,
+              [name]: value,
+          }));
+  
+          if (name === "password") {
+              setPassword(value);
+              setResident((prevData) => ({ ...prevData, password: value })); // formData.password
+           
+           } else if (name === "confirmPassword") {
+              setConfirmPassword(value);
+           } 
+           else {
+              setResident((prevData) => ({ ...prevData, [name]: value }));
+          }
+  
+      };
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files?.[0];
@@ -170,8 +173,12 @@ export default function SettingsPageResident() {
       
           const docRef = doc(db, "ResidentUsers", residentId!);
           await updateDoc(docRef, {
+            first_name: resident.first_name,
+            last_name: resident.last_name,
             phone: resident.phone,
+            sex: resident.sex,
             userIcon: resident.userIcon,
+            upload: resident.upload,
           });
       
           setMessage("Profile updated successfully!");
@@ -310,17 +317,22 @@ export default function SettingsPageResident() {
                             />
                         </div>
 
+                    
                         <div className="form-group-profile-section">
                             <label htmlFor="sex" className="form-label-profile-section">Sex:</label>
-                            <input 
-                                id="sex" 
+                            <select
+                                id="sex"
                                 name="sex"
-                                value={resident.sex ||  "N/A"}  
-                                onChange={handleChange} 
-                                className="form-input-profile-section" 
-                                required 
-                            />
+                                value={resident.sex || "N/A"}
+                                onChange={handleChange}
+                                className="form-input-profile-section"
+                                required
+                            >
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
                         </div>
+
 
                         <div className="form-group-profile-section">
                             <label htmlFor="email" className="form-label-profile-section">Email:</label>
