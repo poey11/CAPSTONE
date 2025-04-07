@@ -34,6 +34,9 @@ export default function AddKasambahay() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
   const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
@@ -77,6 +80,25 @@ export default function AddKasambahay() {
     });
   };
   
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFile = e.target.files[0];
+  
+      // Ensure only one file is processed
+      setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
+  
+      // Reset the file input to prevent multiple selections
+      e.target.value = "";
+    }
+  };
+  
+  const handleFileDelete = () => {
+    setFile(null);
+    setPreview(null);
+  };
+
 
   const handleSubmitClick = async () => {
     const { lastName, firstName, homeAddress, placeOfBirth, dateOfBirth, age, sex, civilStatus, educationalAttainment, natureOfWork, employmentArrangement, salary, employerName, employerAddress} = formData;
@@ -336,7 +358,31 @@ export default function AddKasambahay() {
                 </div>
             </div>
           </div>
-        </form>
+            {/* Right Side - Checkboxes & File Upload */}
+            <div className="add-resident-section-2-right-side">
+              {/* File Upload Section */}
+              <div className="file-upload-container">
+                <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
+                <input id="file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleFileChange} />
+
+                {file && (
+                  <div className="file-name-image-display">
+                    <div className="file-name-image-display-indiv">
+                      {preview && <img src={preview} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />}
+                      <span>{file.name}</span>
+                      <div className="delete-container">
+                        <button type="button" onClick={handleFileDelete} className="delete-button">
+                          <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              
+              </div>
+            </div>
+          </form>
         {error && <p className="error">{error}</p>}
       </div>
 
