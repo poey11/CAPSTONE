@@ -74,7 +74,7 @@ const RegisterForm: React.FC = () => {
       e.preventDefault();
     
       if (resident.password !== confirmPassword) {
-        setErrorPopup({ show: true, message: "Passwords do not match!" });
+        setErrorPopup({ show: true, message: "Make sure passwords match." });
         setConfirmPassword("");
         return;
       }
@@ -117,7 +117,7 @@ const RegisterForm: React.FC = () => {
           router.push("/resident/login");
         }, 3000);
       } catch (error: any) {
-        setErrorPopup({ show: true, message: "Register failed! " + error.message });
+        setErrorPopup({ show: true, message: "Register failed! Email already in use."});
     
         // Cleanup in case of error
         if (docRef) await deleteDoc(docRef);
@@ -172,6 +172,7 @@ const RegisterForm: React.FC = () => {
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
+                        <img src="/Images/successful.png" alt="warning icon" className="warning-icon-popup" />
                         <p>Registration Successful!</p>
                         <p>Redirecting to Login Page...</p>
                     </div>
@@ -180,8 +181,9 @@ const RegisterForm: React.FC = () => {
             {errorPopup.show && (
                 <div className="popup-overlay error">
                     <div className="popup">
+                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
                         <p>{errorPopup.message}</p>
-                        <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+                        <button onClick={() => setErrorPopup({ show: false, message: "" })} className="close-button">Close</button>
                     </div>
                 </div>
             )}

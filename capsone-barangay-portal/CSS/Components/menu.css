@@ -232,7 +232,7 @@
   -webkit-line-clamp: 3; /* Limit to two lines */
   line-clamp: 3; /* Non-standard, but future-proof */
   overflow: hidden;
-  max-height: 90px; /* Approximate height for two lines */
+  max-height: 0px; /* Approximate height for two lines */
   text-overflow: ellipsis;
   white-space: normal;
   word-break: break-word; /* Ensures words wrap properly */
