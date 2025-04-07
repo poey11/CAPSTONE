@@ -12,6 +12,7 @@ interface Resident {
     sex: string;
     first_name: string;
     last_name: string;
+    middle_name: string;
     email: string;
     phone: string;
     address: string;
@@ -37,6 +38,7 @@ const RegisterForm: React.FC = () => {
         sex: "",
         first_name: "",
         last_name: "",
+        middle_name: "",
         email: "",
         phone: "",
         address: "",
@@ -215,24 +217,34 @@ const RegisterForm: React.FC = () => {
                     </div>
 
                     <div className="form-group-register-form">
-                    <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
-                    <input value={resident.first_name} onChange={handleChange} id="first_name" 
-                    type="text" name="first_name" 
-                    className="form-input-register-form "
-                    placeholder= "Enter Name"
-                    required />
+                        <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
+                        <input value={resident.first_name} onChange={handleChange} id="first_name" 
+                        type="text" name="first_name" 
+                        className="form-input-register-form "
+                        placeholder= "Enter First Name"
+                        required />
 
                     </div>
 
                     <div className="form-group-register-form">
-                    <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
-                    
+                        <label htmlFor="middle_name" className="form-label-register-form">Middle Name:<span className="required">*</span> </label>
+                        <input value={resident.middle_name} onChange={handleChange} id="middle_name" 
+                        type="text" name="middle_name" 
+                        className="form-input-register-form "
+                        placeholder= "Enter Middle Name"
+                        required />
 
-                    <input value={resident.last_name} onChange={handleChange} id="last_name" 
-                    type="text" name="last_name" 
-                    className="form-input-register-form " 
-                    placeholder="Enter Last Name"
-                    required/>
+                    </div>
+
+                    <div className="form-group-register-form">
+                        <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
+                        
+
+                        <input value={resident.last_name} onChange={handleChange} id="last_name" 
+                        type="text" name="last_name" 
+                        className="form-input-register-form " 
+                        placeholder="Enter Last Name"
+                        required/>
 
                     </div>
 
