@@ -3,8 +3,8 @@ import { ChangeEvent, useEffect, useState } from "react";
 import {useAuth} from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 import {useSearchParams } from "next/navigation";
-import { addDoc, collection, doc, } from "firebase/firestore";
-import { db, storage } from "@/app/db/firebase";
+import { addDoc, collection, doc, getDoc} from "firebase/firestore";
+import { db, storage, auth } from "@/app/db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/navigation";
 import { request } from "http";
@@ -14,11 +14,12 @@ import { request } from "http";
 export default function Action() {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const user = useAuth().user; // Get the current user from the context
+  const user = useAuth().user; 
   const searchParam = useSearchParams();
   const docType = searchParam.get("doc");
   const router = useRouter();
-  const [clearanceInput, setClearanceInput] =  useState<any|null>({
+
+  const [clearanceInput, setClearanceInput] =  useState<any>({
     accountId: user?.uid || "Guest",
     purpose: "",
     dateRequested: new Date().toISOString().split('T')[0],
@@ -70,6 +71,46 @@ export default function Action() {
     taxDeclaration: null,
     approvedBldgPlan:null 
   })
+
+
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [contact, setContact] = useState("");
+  const [address, setAddress] = useState("");
+  const [gender, setGender] = useState("");
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const docRef = doc(db, "ResidentUsers", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setFirstName(data.first_name || "");
+          setMiddleName(data.middle_name || "");
+          setLastName(data.last_name || "");
+          setContact(data.phone || "");
+          setAddress(data.address || "");
+          setGender(data.sex || "");
+          // Set firstName in the clearanceInput state when user data is fetched
+          setClearanceInput((prev: any) => ({
+            ...prev,
+            firstName: data.first_name || "",
+            middleName: data.middle_name || "",
+            lastName: data.last_name || "",
+            contact: data.phone || "",
+            address: data.address || "",
+            gender: data.sex || "",
+          }));
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
+  
 // State for all file containers
 const [files, setFiles] = useState<{ name: string, preview: string | undefined }[]>([]);
 const [files2, setFiles2] = useState<{ name: string, preview: string | undefined }[]>([]);
@@ -737,8 +778,8 @@ const handleFileChange = (
                 onChange={handleChange}
                >
                 <option value="" disabled>Select gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
               </select>
             </div>
             </>)}
