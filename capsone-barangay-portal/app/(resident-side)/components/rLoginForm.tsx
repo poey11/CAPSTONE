@@ -107,7 +107,7 @@ const rLoginForm:React.FC = () => {
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
-                    <img src="/Images/successful.png" alt="warning icon" className="warning-icon-popup" />
+                    <img src="/Images/successful.png" alt="warning icon" className="successful-icon-popup" />
                         <p>Welcome, {firstName} {lastName}!</p>
                         <br/>
                         <p>Redirecting to the Home Page...</p>

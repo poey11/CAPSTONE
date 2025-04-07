@@ -21,10 +21,10 @@
         width: 70%;
         display: flex;
         flex-direction: column;
-        background-color: rgba(255, 255, 255, 0.7);
+        /*background-color: rgba(255, 255, 255, 0.7);*/
         padding: 3rem;
         border-radius: 16px;
-        box-shadow: 0 10px 20px rgba(95, 94, 94, 0.1);
+        /*box-shadow: 0 10px 20px rgba(95, 94, 94, 0.1);*/
         justify-content: center;
         align-items: center;
         text-align: center;
@@ -56,8 +56,8 @@
     }
 
     .user-icon-profile-section {
-        width: 180px;
-        height: 180px;
+        width: 250px;
+        height: 250px;
         border-radius: 50%;
         object-fit: cover; 
         border: 4px solid #DF7426;
@@ -104,7 +104,7 @@
         flex-direction: column;
         gap: 1.5rem;
         width: 100%;
-        padding: 3rem;
+        padding: 4rem;
     }
 
     .form-group-profile-section {
@@ -115,29 +115,26 @@
     }
 
     .form-label-profile-section {
-        font-size: 14px;
-        font-weight: 600;
-        color: #555;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
+        font-size: 16px;
+        font-weight: bold;
+        color: gray;
         margin-top: 1rem;
     }
 
     .form-input-profile-section {
         width: 100%;
-        padding: 12px;
+        padding: 10px;
         font-size: 16px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        outline: none;
-        transition: all 0.3s ease;
-        background: #f7f7f7;
-        color: #333;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        color: #555;
+        background-color: #FFFFFF;
     }
 
     .form-input-profile-section:focus {
-        border-color: #f49028;
-        box-shadow: 0 0 10px rgba(244, 144, 40, 0.3);
+        border-color: #DF7426;
+        outline: none;
+        box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
     }
 
     .submit-btn-profile-section {
@@ -217,54 +214,54 @@
 
 
     .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.224); /* Semi-transparent background */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999; /* Ensure it appears above all other elements */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.224); 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
     }
 
     .popup {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 200px;
-    width: 400px;
-    background-color: #f7e5d5;
-    border-radius: 20px;
-    border: 2px solid rgb(168, 161, 158);
-    box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
-    padding: 20px;
-    text-align: center;
-    font-size: 18px;
-    font-weight: lighter;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        width: 400px;
+        background-color: #e2e4e6;
+        border-radius: 20px;
+        border: 1px solid rgb(168, 161, 158);
+        box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+        padding: 20px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: lighter;
     }
 
     .popup p{
-    color: rgb(97, 97, 97);
+        color: rgb(77, 76, 76);
     }
 
     .continue-button{
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #DF7426;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer; 
-    width: 200px;
-    box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
-    margin-top: 20px;
+        padding: 7px 5px;
+        font-size: 16px;
+        background-color:#DF7426;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer; 
+        width: 150px;
+        box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+        margin-top: 30px;
     }
 
     .continue-button:hover {
-    background-color: #BC5F1C;
+        background-color: #d87d20;
     }
 
     .valid-id-container-profile-section {
@@ -279,3 +276,15 @@
     width: 600px;
     height: 300px;
     }
+
+    .warning-icon-popup{
+        width: 35px;
+        height: 35px;
+        margin-bottom: 10px;
+      }
+      
+      .successful-icon-popup{
+        width: 40px;
+        height: 40px;
+        margin-bottom: 10px;
+      }
