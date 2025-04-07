@@ -12,6 +12,8 @@ import { request } from "http";
 
 
 export default function Action() {
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const user = useAuth().user; // Get the current user from the context
   const searchParam = useSearchParams();
   const docType = searchParam.get("doc");
@@ -224,7 +226,9 @@ const handleFileChange = (
           !clearanceInput.validIDjpg &&
           !clearanceInput.letterjpg
         ) {
-          alert("Please upload one of the following documents: Barangay ID, Valid ID, or Endorsement Letter");
+         
+          setErrorMessage("Please upload one of the following documents: Barangay ID, Valid ID, or Endorsement Letter");
+          setShowErrorPopup(true);
           return;
         }
     
@@ -1667,6 +1671,16 @@ const handleFileChange = (
 
         </form>
       </div>
+s
+      {showErrorPopup && (
+                <div className="popup-overlay-services">
+                    <div className="popup-services">
+                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
+                        <p>{errorMessage}</p>
+                        <button onClick={() => setShowErrorPopup(false)} className="continue-button">Continue</button>
+                    </div>
+                </div>
+            )}
 
     </main>
 

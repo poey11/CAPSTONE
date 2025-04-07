@@ -74,7 +74,7 @@ const RegisterForm: React.FC = () => {
       e.preventDefault();
     
       if (resident.password !== confirmPassword) {
-        setErrorPopup({ show: true, message: "Passwords do not match!" });
+        setErrorPopup({ show: true, message: "Make sure passwords match." });
         setConfirmPassword("");
         return;
       }
@@ -115,15 +115,23 @@ const RegisterForm: React.FC = () => {
         setTimeout(() => {
           setShowPopup(false);
           router.push("/resident/login");
-        }, 3000);
-      } catch (error: any) {
-        setErrorPopup({ show: true, message: "Register failed! " + error.message });
+        }, 2000);
+    } catch (error: any) {
+        let errorMessage = "Register failed!";
+    
+        if (error.code === "auth/email-already-in-use") {
+            errorMessage = "Email already in use.";
+        } else if (error.code === "auth/weak-password") {
+            errorMessage = "Password should be at least 6 characters.";
+        }
+    
+        setErrorPopup({ show: true, message: errorMessage });
     
         // Cleanup in case of error
         if (docRef) await deleteDoc(docRef);
         if (storageRef) await deleteObject(storageRef);
         if (user) await user.delete();
-      }
+    }
     };
     
 
@@ -172,6 +180,7 @@ const RegisterForm: React.FC = () => {
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
+                        <img src="/Images/successful.png" alt="warning icon" className="successful-icon-popup" />
                         <p>Registration Successful!</p>
                         <p>Redirecting to Login Page...</p>
                     </div>
@@ -180,8 +189,9 @@ const RegisterForm: React.FC = () => {
             {errorPopup.show && (
                 <div className="popup-overlay error">
                     <div className="popup">
+                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
                         <p>{errorPopup.message}</p>
-                        <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+                        <button onClick={() => setErrorPopup({ show: false, message: "" })} className="close-button">Close</button>
                     </div>
                 </div>
             )}
