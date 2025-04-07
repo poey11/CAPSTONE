@@ -1671,7 +1671,6 @@ const handleFileChange = (
 
         </form>
       </div>
-s
       {showErrorPopup && (
                 <div className="popup-overlay-services">
                     <div className="popup-services">
