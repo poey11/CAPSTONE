@@ -2,9 +2,10 @@
 import "@/CSS/ResidentModule/addresident.css";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { db } from "../../../../../db/firebase";
+import { db, storage } from "../../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Link from "next/link";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface JobSeeker {
   dateApplied: string;
@@ -15,6 +16,7 @@ interface JobSeeker {
   dateOfBirth: string;
   sex: string;
   remarks: string;
+  fileURL: string;
 }
 
 export default function EditFirstTimeJobSeeker() {
@@ -22,6 +24,8 @@ export default function EditFirstTimeJobSeeker() {
   const router = useRouter();
   const id = searchParams.get("id");
 
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<JobSeeker | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -82,6 +86,30 @@ export default function EditFirstTimeJobSeeker() {
     setFormData((prevData) => prevData ? { ...prevData, [name]: value } : null);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
+      e.target.value = "";
+    }
+  };
+
+  const handleFileDelete = () => {
+    setFile(null);
+    setPreview(null); // ✅ Ensure it's undefined
+    setFormData((prev) => {
+      if (!prev) return prev; 
+    
+      return {
+        ...prev,
+        fileURL: "", 
+      } as JobSeeker;
+    });
+      };
+
+
+
   const handleSaveClick = async () => {
     setShowSavePopup(true);
   } 
@@ -107,11 +135,22 @@ export default function EditFirstTimeJobSeeker() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!id || !formData) return;
-
+  
     setLoading(true);
     try {
+      let updatedData: Partial<JobSeeker> = { ...formData };
+  
+      // ✅ Upload the file if there's a new one selected
+      if (file) {
+        const fileRef = ref(storage, `jobseekers/${id}/${file.name}`);
+        await uploadBytes(fileRef, file);
+        const downloadURL = await getDownloadURL(fileRef);
+  
+        updatedData.fileURL = downloadURL;
+      }
+  
       const docRef = doc(db, "JobSeekerList", id);
-      await updateDoc(docRef, { ...formData } as Partial<JobSeeker>);
+      await updateDoc(docRef, updatedData);
     } catch (err) {
       console.error(err);
       setError("Failed to update job seeker");
@@ -202,7 +241,53 @@ export default function EditFirstTimeJobSeeker() {
                 </div>
               </div>
             </div>
-          </form>
+              {/* Right Side - File Upload */}
+              <div className="add-resident-section-2-right-side">  
+                {/* File Upload Section Paayos na lang dito mapapasok yung new image*/}
+                <div className="file-upload-container">  
+                  <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
+                  <input 
+                    id="file-upload" 
+                    type="file" 
+                    className="file-upload-input" 
+                    accept=".jpg,.jpeg,.png" 
+                    onChange={handleFileChange} 
+                  />
+
+                  {/* Current Image Section */}
+                  {formData.fileURL && (
+                    <div className="file-name-image-display">
+                      <span className="section-title">Current Image</span>
+                      <div className="file-name-image-display-indiv">
+                        <img src={formData.fileURL} alt="Current Resident Image" style={{ width: "100px", height: "100px" }} />
+                        <div className="delete-container">
+                          <button type="button" onClick={handleFileDelete} className="delete-button">
+                            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* New Image Section (Only if a file is uploaded) */}
+                  {file && (
+                    <div className="file-name-image-display">
+                      <span className="section-title">New Image</span>
+                      <div className="file-name-image-display-indiv">
+                        <img src={preview || ""} alt="New Resident Image" style={{ width: "100px", height: "100px" }} />
+                        <span>{file.name}</span>
+                        <div className="delete-container">
+                          <button type="button" onClick={handleFileDelete} className="delete-button">
+                            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            </form>
         ) : (
           <p>Loading...</p>
         )}
