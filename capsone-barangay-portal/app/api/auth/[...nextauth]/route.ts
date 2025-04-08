@@ -45,6 +45,7 @@ import { JWT } from "next-auth/jwt";
                 loginStatus: userData.firstTimelogin,
                 fullName: `${userData.firstName} ${userData.lastName}`,
                 department: userData.department,
+                profileImage: userData.profileImage,
             };
           
         }
@@ -60,6 +61,7 @@ import { JWT } from "next-auth/jwt";
                 loginStatus: token.loginStatus,
                 fullName: token.fullName,
                 department: token.department,
+                profileImage: token.profileImage
 
             }
             return session;
@@ -74,6 +76,7 @@ import { JWT } from "next-auth/jwt";
                 token.loginStatus = user.loginStatus;
                 token.fullName = user.fullName;
                 token.department = user.department
+                token.profileImage = user.profileImage
 
             } else if (token.id) {
                 // Fetch updated user data from Firestore
@@ -83,6 +86,7 @@ import { JWT } from "next-auth/jwt";
                     token.loginStatus = userData.firstTimelogin; // Ensure session gets updated
                     token.fullName = `${userData.firstName} ${userData.lastName}`;
                     token.department = userData.department
+                    token.profileImage = userData.profileImage
                 }
             }
             return token;
