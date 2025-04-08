@@ -24,6 +24,7 @@ export default function SettingsPageResident() {
         email: "",
         sex: "",
         status: "",
+        address: "",
         userIcon: "",
         upload: "",
     });
@@ -58,6 +59,7 @@ export default function SettingsPageResident() {
                 status: data.status || "",
                 userIcon: data.userIcon || "",
                 upload: data.upload || "",
+                address: data.address || "",
               });
     
               setPreview(data.userIcon)
@@ -178,6 +180,7 @@ export default function SettingsPageResident() {
             phone: resident.phone,
             sex: resident.sex,
             userIcon: resident.userIcon,
+            address: resident.address,
             upload: resident.upload,
           });
       
@@ -306,7 +309,7 @@ export default function SettingsPageResident() {
                             />
                         </div>
 
-                        <div className="form-group-profile-section">
+                        <div className="form-sgroup-profile-section">
                             <label htmlFor="last_name" className="form-label-profile-section">Last Name: </label>
                             <input 
                                 id="last_name" 
@@ -371,6 +374,22 @@ export default function SettingsPageResident() {
                                 disabled 
                             />
                         </div>
+
+                        <div className="form-group-profile-section">
+                            <label htmlFor="address" className="form-label-profile-section">Address:</label>
+                            <input 
+                                id="address" 
+                                name="address"
+                                value={resident.address ||  "N/A"}  
+                                onChange={handleChange} 
+                                className="form-input-profile-section" 
+                                required 
+                                disabled 
+                            />
+                        </div>
+
+
+
                         
                         <div className="form-group-profile-section">
                             <label htmlFor="password" className="form-label-profile-section">New Password:</label>
