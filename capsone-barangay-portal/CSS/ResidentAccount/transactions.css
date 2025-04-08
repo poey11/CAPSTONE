@@ -50,22 +50,6 @@
 }
   
 
-
-.transactions-history-transactions {
-    width: 90%;
-    padding: 2rem;
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 16px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    overflow-x: auto;
-    height: 70%;
-    align-self: center;
-    margin-bottom: 3rem;
-    margin-top: 3rem;
-      
-}
-
 .table-section-transactions {
     flex: 1; 
     display: flex; 
@@ -158,7 +142,71 @@
   align-self: center;
 }
 
+.resident-module-filter{
+  padding: 8px;
+  width: 200px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  color: rgba(0, 0, 0, 0.4);
+  text-align: center;
+}
 
+.resident-module-filter:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+}
+
+.resident-module-filter option {
+  color: rgba(0, 0, 0, 0.4); 
+}
+
+.filter-section-transactions{
+  margin-top: 50px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.filter-section-transactions p{
+  margin-top: 15px;
+  color: rgb(106, 106, 106);
+}
+
+.filter-section-transactions-inner{
+  width: 570px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  padding-top: 10px;
+}
+
+.filter-section-transactions-type{
+  display: flex;
+  gap: 10;
+}
+
+.transactions-history-transactions {
+  width: 90%;
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  overflow-x: auto;
+  height: 80%;
+  align-self: center;
+  margin-bottom: 3rem;
+  margin-top: 2rem;
+    
+}
 
 
 

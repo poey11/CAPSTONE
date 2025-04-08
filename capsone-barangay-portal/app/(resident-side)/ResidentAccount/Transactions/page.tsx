@@ -13,6 +13,8 @@ export default function Transactions() {
     const { user } = useAuth();
     const [transactionData, setTransactionData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [filterType, setFilterType] = useState<string>("All");
+    const [filterStatus, setFilterStatus] = useState<string>("All");
     const currentUser = user?.uid;
 
     useEffect(() => {
@@ -66,6 +68,12 @@ export default function Transactions() {
         }   
     };
 
+    const filteredTransactions = transactionData.filter((item) => {
+        const matchesType = filterType === "All" || item.type === filterType;
+        const matchesStatus = filterStatus === "All" || item.status === filterStatus;
+        return matchesType && matchesStatus;
+    });
+
     
 
     return (
@@ -75,11 +83,38 @@ export default function Transactions() {
                 <p>TRANSACTIONS</p>
             </div>
 
+            <div className="filter-section-transactions">
+                <div className="filter-section-transactions-inner">
+
+                    <div className="filter-section-transactions-type">
+                        <p>Type:</p>
+                        <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="resident-module-filter">
+                            <option value="All">All</option>
+                            <option value="IncidentReport">Incident Report</option>
+                            <option value="ServiceRequest">Document Request</option>
+                     </select>
+                    </div>
+                    
+               
+                    <div className="filter-section-transactions-type">
+                        <p>Status:</p>
+                        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="resident-module-filter">
+                            <option value="All">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Resolved">Resolved</option>
+                            <option value="Declined">Declined</option>
+                            {/* Add more status options if needed */}
+                        </select>
+                    </div>
+               </div>
+            </div>
+
             <div className="transactions-history-transactions">
                 <div className="table-section-transactions">
                     {loading ? (
                         <p>Loading...</p>
-                    ) : transactionData.length === 0 ? (
+                    ) : filteredTransactions.length === 0 ? (
                         <div className="no-transactions">
                             <p>No transactions found.</p>
                         </div>
@@ -96,7 +131,7 @@ export default function Transactions() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {transactionData.map((item) => (
+                                {filteredTransactions.map((item) => (
                                     <tr key={item.id} onClick={() => handleTransactionClick(item)}>
                                         <td>{item.dateFiled || item.requestDate || "N/A"}</td>
                                         <td>{item.type === "IncidentReport" ? "Incident Report" : "Document Request"}</td>
