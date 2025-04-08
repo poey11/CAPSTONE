@@ -1,21 +1,25 @@
 "use client"
-import React,{useState, useEffect, ChangeEvent} from "react";
+import React,{useState, ChangeEvent, useEffect} from "react";
 import {db} from "../../../../db/firebase";
-import {collection, getDocs, onSnapshot, query, where} from "firebase/firestore";
+import {collection, getDocs, addDoc, query, where} from "firebase/firestore";
 import "@/CSS/User&Roles/AddBarangayUser.css";
 import { useRouter } from "next/navigation";
+import { hash } from "bcryptjs";
+import { useSession } from "next-auth/react";
+
+interface BarangayUser{
+    id?: string;
+    userId: string;
+    position:string;
+    password:string;
+    role: string;
+}
 
 
 export default function AddBarangayUser() {     
 
-    interface BarangayUser{
-        id?: string;
-        userId: string;
-        position:string;
-        password:string;
-        role: string;
-    }
-    
+   const user = useSession().data?.user;
+    const userRole = user?.position;
     const [users, setUsers] = useState<BarangayUser>({
         userId:"",
         position:"",
@@ -32,7 +36,21 @@ export default function AddBarangayUser() {
     const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+
+    
+
+    useEffect(() => {
+        if(userRole !== "Admin" && userRole !== "Assistant Secretary") {
+            router.push("/dashboard/admin");
+            return;
+        }
+        setLoading(false);
+    }, []);
+
+    if (loading) return <p>Loading...</p>;
+   
 
 
 
@@ -126,22 +144,24 @@ export default function AddBarangayUser() {
             console.log(users);
             
             try{
-                const respone = await fetch('/api/barangayRegister', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
+                 const userCollection = collection(db, "BarangayUsers");
+                   
+                    // ✅ Hash the password
+                    const passwordHash = await hash( users.password, 12);
+                
+                    // ✅ Store user in Firestore
+                    const docRef = await addDoc(userCollection, {
                         userid: users.userId,
-                        password: users.password,
+                        password: passwordHash,
                         role: users.role,
                         position: users.position,
-                        createdBy: "Assistant Secretary"
-                    })
-                });
-                const data = await respone.json();
-    
-    
+                        //createdBy: "Assistant Secretary",
+                        createdAt:  new Date().toISOString().replace(/T.*/, ''),
+                        firstTimelogin: true,
+                    });
+            
+                    console.log("Barangay account created successfully", docRef.id);
+
                 setUsers({
                     userId:"",
                     position:"",

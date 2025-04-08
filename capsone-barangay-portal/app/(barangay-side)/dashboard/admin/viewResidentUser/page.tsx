@@ -6,6 +6,7 @@ import { db } from "../../../../db/firebase";
 import { useRouter } from "next/navigation";
 import { doc, getDoc, updateDoc, collection, setDoc} from "firebase/firestore";
 import { useSession } from "next-auth/react";
+import { label } from "framer-motion/m";
 
 
 export default function ViewUser() {
@@ -65,6 +66,7 @@ export default function ViewUser() {
         { label: "Contact Number", key: "phone" },
         { label: "Sex", key: "sex" },
         { label: "Email", key: "email" },
+        {label: "Date Of Birth", key: "dateOfBirth" },
         { label: "Address", key: "address" },
         { label: "Created At", key: "createdAt" },
         { label: "Role", key: "role" },

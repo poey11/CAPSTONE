@@ -7,6 +7,8 @@ import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection, doc, getDoc} from "firebase/firestore";
 import { db,storage, auth } from "@/app/db/firebase";
 import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
+import {isPastDate,isToday,isPastOrCurrentTime} from "@/app/helpers/helpers";
+import {getLocalDateString} from "@/app/helpers/helpers";
 
 
 
@@ -14,6 +16,8 @@ const incidentForm:React.FC = () => {
   const router = useRouter();
   const {user} = useAuth();
   const currentUser = user?.uid || "Guest";
+  const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+  const [minDate, setMinDate] = useState<string>("");
   const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
   const [incidentReport, setIncidentReport] = useState<any>({
       firstname: "",
@@ -26,6 +30,7 @@ const incidentForm:React.FC = () => {
       time: "",
       address: "",
       file: null,
+      area:"",
       reportID: "",
       department: "",
       status: "Pending",
@@ -72,11 +77,18 @@ const incidentForm:React.FC = () => {
     }
     fetchCaseNumber();
   },[currentUser])
-  const currentDate = new Date().toISOString().split("T")[0].replace(/-/g, "");
+
+  useEffect(() => {
+    const today = new Date();
+    const formattedDate = getLocalDateString(today);
+    setMinDate(formattedDate);
+  }, []);
+ 
 
   const getCaseNumber = async () => {
       let number = await getSpecificCountofCollection("IncidentReports", "reportID", currentUser);
       const formattedNumber = number !== undefined ? String(number + 1).padStart(4, "0") : "0000";
+      let currentDate = minDate.replace(/-/g, "")
 
       const caseValue =`${currentDate} - ${formattedNumber}` ;
       console.log("Generated Case Number:", caseValue);
@@ -98,6 +110,7 @@ const incidentForm:React.FC = () => {
         dateFiled: "",
         time: "",
         address: "",
+        area: "",
         file: null,
         reportID: "",
         department: "",
@@ -181,7 +194,6 @@ const incidentForm:React.FC = () => {
           incidentID: incidentID,
         });
     
-       // alert("Incident Report Submitted!");
     
       } catch (e: any) {
         console.log("Error uploading report:", e);
@@ -190,10 +202,31 @@ const incidentForm:React.FC = () => {
     
 
 
+
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault(); 
       const form = event.target as HTMLFormElement;
       if (form.checkValidity()) {
+        const dateFiled = incidentReport.dateFiled;
+        const timeFiled = incidentReport.time;
+        
+        const dateIsPast = isPastDate(dateFiled);
+        const dateIsToday = isToday(dateFiled);
+        const timeIsPastOrNow = isPastOrCurrentTime(timeFiled);
+        
+        const isInvalid =
+       !dateIsPast && // not in the past
+      (!dateIsToday || !timeIsPastOrNow); // if not today, it's future — or if today but time is still in future
+
+
+        if (isInvalid) {
+          setErrorPopup({
+              show: true,
+              message: "Invalid Date/Time. Please select a past or current date and time.",
+          });
+          return;
+        }
+
         let filename = "";
         let storageRef = null;
         if(incidentReport.file){
@@ -215,6 +248,7 @@ const incidentForm:React.FC = () => {
             dateFiled: incidentReport.dateFiled,
             time: incidentReport.time,
             address: incidentReport.address,
+            area: incidentReport.area,
             file: filename,
             department: "Online",
             reportID: currentUser, 
@@ -234,6 +268,7 @@ const incidentForm:React.FC = () => {
             dateFiled: incidentReport.dateFiled,
             time: incidentReport.time,
             address: incidentReport.address,
+            area: incidentReport.area,
             file: filename,
             department: "Online",
             reportID: currentUser, 
@@ -256,8 +291,19 @@ const incidentForm:React.FC = () => {
     return(
       <main className="main-container-incident-report">
 
-        <div className="headerpic-report">
-          <p>FILE AN INCIDENT</p>
+    
+        {errorPopup.show && (
+              <div className="popup-overlay error">
+                  <div className="popup">
+                      <p>{errorPopup.message}</p>
+                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+                  </div>
+              </div>
+        )}
+
+
+        <div className="Page-incident-report">
+          <p>File an Incident Report</p>
         </div>
 
        
@@ -385,6 +431,8 @@ const incidentForm:React.FC = () => {
                 name="dateFiled"
                 className="form-input-incident-report"
                 required
+                max={minDate}
+                onKeyDown={(e) => e.preventDefault()} // Prevent manual input
                 placeholder="Enter Date of Incident"
                 value={incidentReport.dateFiled}
                 onChange={handleFormChange}
@@ -423,6 +471,28 @@ const incidentForm:React.FC = () => {
                 onChange={handleFormChange}
               />
             </div>
+
+            <div className="form-group-incident-report">
+              <label htmlFor="address" className="form-label-incident-report">
+                Area of Incident <span className="required">*</span>
+                </label>
+
+              <select
+                id="area"
+                name="area"
+                className="form-input-incident-report"
+                required
+                value={incidentReport.area}
+                onChange={handleFormChange}>
+
+                <option value="" disabled>Select Area</option>
+                <option value="South Fairview">South Fairview</option>
+                <option value="West Fairview">West Fairview</option>
+                <option value="East Fairview">East Fairview</option>
+              </select>
+            </div>
+
+
         
             <div className="signature/printedname-container">
               <label className="form-label-incident-report">Upload Proof of Incident (If Applicable)</label>

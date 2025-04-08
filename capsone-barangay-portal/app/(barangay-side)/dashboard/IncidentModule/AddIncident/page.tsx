@@ -6,6 +6,8 @@ import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
 import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
+import {isPastDate,isToday,isPastOrCurrentTime, getLocalDateString} from "@/app/helpers/helpers";
+import { useSession } from "next-auth/react";
 
  interface userProps{
   fname: string;
@@ -21,6 +23,8 @@ import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
 
 export default function AddIncident() {
   const router = useRouter();
+  const user = useSession().data?.user;
+  const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
 
   const searchParam = useSearchParams();
   const departmentId = searchParam.get("departmentId");
@@ -59,8 +63,8 @@ export default function AddIncident() {
   });
 
   const [deskStaff, setdeskStaff] = useState<any>({
-    fname: "",
-    lname: "",
+    fname: user?.fullName.split(" ")[0] || "",
+    lname: user?.fullName.split(" ")[1] || "",
   })
 
   
@@ -75,13 +79,14 @@ export default function AddIncident() {
     fetchCaseNumber();
   }, [departmentId]); // Runs when `departmentId` changes
 
-  const currentDate = new Date().toISOString().split("T")[0].replace(/-/g, "");
+  const currentDate = getLocalDateString(new Date());
+
   const getCaseNumber = async () => {
     if (departmentId) {
       let number = await getSpecificCountofCollection("IncidentReports", "department", departmentId);
       const formattedNumber = number !== undefined ? String(number + 1).padStart(4, "0") : "0000";
-
-      const caseValue =`${departmentId} - ${currentDate} - ${formattedNumber}` ;
+      const date = currentDate.split("T")[0].replace(/-/g, "");
+      const caseValue =`${departmentId} - ${date} - ${formattedNumber}` ;
       console.log("Generated Case Number:", caseValue); // ✅ Logs the correct value
       return caseValue; // ✅ Ensure the function returns the computed value
     }
@@ -201,7 +206,32 @@ export default function AddIncident() {
     event.preventDefault(); 
     const form = event.target as HTMLFormElement;
     if (form.checkValidity()) {
-      
+      const dateFiled = reportInfo.dateFiled;
+      const dateReceived = reportInfo.dateReceived;
+      const timeFiled = reportInfo.timeFiled;
+      const timeReceived = reportInfo.timeReceived;
+
+      const dateIsFiledToday= isToday(dateFiled);
+      const timeIsFiledPastOrNow = isPastOrCurrentTime(timeFiled);
+      const dateFiledIsPast = isPastDate(dateFiled);
+
+      const isInvalid = !dateFiledIsPast &&(!dateIsFiledToday || !timeIsFiledPastOrNow);
+      if (isInvalid) {
+        setErrorPopup({ show: true, message: "Date and/or Time in Filed Section is Invalid." });
+        return;
+      }
+
+      const dateIsReceivedToday = isToday(dateReceived);
+      const timeIsRecievedPastOrNow = isPastOrCurrentTime(timeReceived);
+      const dateReceivedIsPast = isPastDate(dateReceived);
+      const isInvalidReceived = !dateReceivedIsPast &&(!dateIsReceivedToday || !timeIsRecievedPastOrNow);
+      if (isInvalidReceived) {
+        setErrorPopup({ show: true, message: "Date and/or Time in Received Section is Invalid." });
+        return;
+      }
+
+
+
       handleUpload().then(() => {
         deleteForm();
         router.back();
@@ -303,6 +333,16 @@ export default function AddIncident() {
 
   return (
     <main className="main-container-add">
+      
+      {errorPopup.show && (
+              <div className="popup-overlay error">
+                  <div className="popup">
+                      <p>{errorPopup.message}</p>
+                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+                  </div>
+              </div>
+        )}
+
         <div className="main-content-add">
 
         <button type="button" className="back-button-add" onClick={handleBack}></button>
@@ -526,7 +566,7 @@ export default function AddIncident() {
 
 
               <div className="section-3-add">
-                <p className="title">Other Information</p>
+                <p className="title-add">Other Information</p>
                 
                 <div className="bars-add">
                 {departmentId === "GAD" ? 
@@ -561,13 +601,13 @@ export default function AddIncident() {
 
                     <div className="input-group-add">
                         <p>Date Filed</p>
-                        <input type="date" className="search-bar-add" placeholder="Enter Date" id="dateFiled" name="dateFiled" 
+                        <input type="date" className="search-bar-add" max={currentDate} id="dateFiled" name="dateFiled" 
                         value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
                     </div>
 
                     <div className="input-group-add">
                         <p>Time Filed</p>
-                        <input type="time" className="search-bar-add" placeholder="Enter Time" id="timeFiled" name="timeFiled" 
+                        <input type="time" className="search-bar-add" id="timeFiled" name="timeFiled" 
                         value = {reportInfo.timeFiled} onChange={handleFormChange} required />
                     </div>
 
@@ -617,7 +657,7 @@ export default function AddIncident() {
                     className="search-bar-add" 
                     placeholder="Enter Desk Officer First Name" 
                     id="staff"
-                    required
+                    disabled
                     name="fname"
                     value = {deskStaff.fname} onChange={handleFormChange}
                     />
@@ -633,7 +673,7 @@ export default function AddIncident() {
                     className="search-bar-add" 
                     placeholder="Enter Desk Officer Last Name" 
                     id="staff"
-                    required
+                    disabled
                     name="lname"
                     value = {deskStaff.lname} onChange={handleFormChange}
                     />
@@ -642,13 +682,13 @@ export default function AddIncident() {
                             
                   <div className="input-group-add">
                         <p>Date Received</p>
-                        <input type="date" className="search-bar-add" placeholder="Enter Date" id="dateReceived" name="dateReceived" 
+                        <input type="date" className="search-bar-add" max={currentDate}  id="dateReceived" name="dateReceived" 
                         value = {reportInfo.dateReceived} onChange={handleFormChange} required/>
                     </div>
 
                     <div className="input-group-add">
                         <p>Time Received</p>
-                        <input type="time" className="search-bar-add" placeholder="Enter Time" id="timeReceived" name="timeReceived" 
+                        <input type="time" className="search-bar-add" id="timeReceived" name="timeReceived" 
                         value = {reportInfo.timeReceived} onChange={handleFormChange} required />
                     </div>
 

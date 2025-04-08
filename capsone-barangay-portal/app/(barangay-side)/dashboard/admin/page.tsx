@@ -1,7 +1,7 @@
 "use client"
-import React,{useState, useEffect, ChangeEvent} from "react";
+import React,{useState, useEffect} from "react";
 import {db} from "../../../db/firebase";
-import {collection, getDocs, onSnapshot, deleteDoc, doc, updateDoc, setDoc, query, where} from "firebase/firestore";
+import {collection, onSnapshot, deleteDoc, doc, updateDoc, setDoc, query, where} from "firebase/firestore";
 import "@/CSS/User&Roles/User&Roles.css";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -19,14 +19,6 @@ interface ResidentUser {
     email: string;
     status:string;
   }
-  
-interface BarangayUser{
-    id?: string;
-    userId: string;
-    position:string,
-    password:string;
-    role: string;
-}
 
 interface dbBarangayUser{
     id: string;
@@ -47,16 +39,10 @@ interface dbBarangayUser{
 const admin = () => {
 
     const { data: session } = useSession();
-    const userRole = session?.user?.role;
     const userPosition = session?.user?.position;
     const isAuthorized = ["Assistant Secretary"].includes(userPosition || "");
 
-    const [users, setUsers] = useState<BarangayUser>({
-        userId:"",
-        position:"",
-        password:"",
-        role:"Barangay Official"
-    });
+   
     const [barangayUsers, setBarangayUsers] = useState<dbBarangayUser[]>([]);
     const [residentUsers, setResidentUsers] = useState<ResidentUser[]>([]);
     const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
@@ -237,12 +223,10 @@ const admin = () => {
         <main className="user-roles-module-main-container">
             <div className="user-roles-module-section-1">
                 <h1>Admin Module</h1>
-                {isAuthorized ? (
+                {isAuthorized &&(
             <Link href="/dashboard/admin/addBarangayUser">
               <button className="add-announcement-btn" onClick={handleAddBarangayUserClick}>Add New Barangay User</button>
             </Link>
-          ) : (
-            <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Barangay User</button>
           )}
             </div>
 
