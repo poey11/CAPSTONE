@@ -6,6 +6,7 @@ import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
 import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
+import {isPastDate,isToday,isPastOrCurrentTime} from "@/app/helpers/helpers";
 
  interface userProps{
   fname: string;
@@ -21,6 +22,7 @@ import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
 
 export default function AddIncident() {
   const router = useRouter();
+  const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
 
   const searchParam = useSearchParams();
   const departmentId = searchParam.get("departmentId");
@@ -201,7 +203,14 @@ export default function AddIncident() {
     event.preventDefault(); 
     const form = event.target as HTMLFormElement;
     if (form.checkValidity()) {
+      const dateFiled = new Date(reportInfo.dateFiled);
+      const dateReceived = new Date(reportInfo.dateReceived);
+      const timeFiled = reportInfo.timeFiled;
+      const timeReceived = reportInfo.timeReceived;
+
       
+
+
       handleUpload().then(() => {
         deleteForm();
         router.back();
@@ -303,6 +312,16 @@ export default function AddIncident() {
 
   return (
     <main className="main-container-add">
+      
+      {errorPopup.show && (
+              <div className="popup-overlay error">
+                  <div className="popup">
+                      <p>{errorPopup.message}</p>
+                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+                  </div>
+              </div>
+        )}
+
         <div className="main-content-add">
 
         <button type="button" className="back-button-add" onClick={handleBack}></button>
@@ -526,7 +545,7 @@ export default function AddIncident() {
 
 
               <div className="section-3-add">
-                <p className="title">Other Information</p>
+                <p className="title-add">Other Information</p>
                 
                 <div className="bars-add">
                 {departmentId === "GAD" ? 

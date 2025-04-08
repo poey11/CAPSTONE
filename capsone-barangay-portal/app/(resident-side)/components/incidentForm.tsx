@@ -4,10 +4,11 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/authContext";
 import { ref, uploadBytes } from "firebase/storage";
-import { addDoc, collection, updateDoc} from "firebase/firestore";
+import { addDoc, collection} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
 import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
 import {isPastDate,isToday,isPastOrCurrentTime} from "@/app/helpers/helpers";
+import {getLocalDateString} from "@/app/helpers/helpers";
 
 
 
@@ -16,7 +17,7 @@ const incidentForm:React.FC = () => {
   const {user} = useAuth();
   const currentUser = user?.uid || "Guest";
   const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
-
+  const [minDate, setMinDate] = useState<string>("");
   const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
   const [incidentReport, setIncidentReport] = useState<any>({
       firstname: "",
@@ -39,11 +40,19 @@ const incidentForm:React.FC = () => {
     }
     fetchCaseNumber();
   },[currentUser])
-  const currentDate = new Date().toISOString().split("T")[0].replace(/-/g, "");
+  //const currentDate = new Date().toISOString().split("T")[0].replace(/-/g, "");
+
+  useEffect(() => {
+    const today = new Date();
+    const formattedDate = getLocalDateString(today);
+    setMinDate(formattedDate);
+  }, []);
+ 
 
   const getCaseNumber = async () => {
       let number = await getSpecificCountofCollection("IncidentReports", "reportID", currentUser);
       const formattedNumber = number !== undefined ? String(number + 1).padStart(4, "0") : "0000";
+      let currentDate = minDate.replace(/-/g, "")
 
       const caseValue =`${currentDate} - ${formattedNumber}` ;
       console.log("Generated Case Number:", caseValue);
@@ -238,7 +247,7 @@ const incidentForm:React.FC = () => {
       <main className="main-container-incident-report">
 
     
-          {errorPopup.show && (
+        {errorPopup.show && (
               <div className="popup-overlay error">
                   <div className="popup">
                       <p>{errorPopup.message}</p>
@@ -332,6 +341,8 @@ const incidentForm:React.FC = () => {
                 name="dateFiled"
                 className="form-input-incident-report"
                 required
+                max={minDate}
+                onKeyDown={(e) => e.preventDefault()} // Prevent manual input
                 placeholder="Enter Date of Incident"
                 value={incidentReport.dateFiled}
                 onChange={handleFormChange}

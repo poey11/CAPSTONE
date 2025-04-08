@@ -1,4 +1,10 @@
 
+const getLocalDateString = (d: Date) =>{
+    return d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
+}
+
 
 const isPastDate = (date: string) => {
     const getLocalDateString = (d: Date) =>
@@ -49,4 +55,4 @@ const isPastOrCurrentTime = (time: string) => {
 
 
 
-export {isPastDate,isToday,isPastOrCurrentTime,isFutureDate }
+export {isPastDate,isToday,isPastOrCurrentTime,isFutureDate,getLocalDateString }

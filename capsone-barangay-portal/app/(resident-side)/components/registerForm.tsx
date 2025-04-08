@@ -7,7 +7,6 @@ import { useState, ChangeEvent } from "react";
 import { useRouter } from 'next/navigation';
 import ReCAPTCHA from "react-google-recaptcha";
 import "@/CSS/Components/registerform.css";
-import {isPastDate} from "@/app/helpers/helpers";
 
 interface Resident {
     sex: string;
@@ -30,6 +29,7 @@ const RegisterForm: React.FC = () => {
     const router = useRouter();
     const captchaSiteKey = process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY || "";
     const [captchaToken, setCaptchaToken] = useState<string>("");
+    const today = new Date().toISOString().split("T")[0]; 
     const [isTermChecked, setIsTermChecked] = useState<boolean>(false);
     const [confirmPassword, setConfirmPassword] = useState<string>("");
     const [showPopup, setShowPopup] = useState(false);
@@ -76,11 +76,7 @@ const RegisterForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
     
-      const isValidDate = isPastDate(resident.dateOfBirth);
-      if (!isValidDate) {
-        setErrorPopup({ show: true, message: "Invalid Birthdate. Please select a date of birth that matches with in your valid ID." });
-        return;
-    }
+
 
       if (resident.password !== confirmPassword) {
         setErrorPopup({ show: true, message: "Passwords do not match!" });
@@ -214,6 +210,8 @@ const RegisterForm: React.FC = () => {
             type="date" name="dateOfBirth" 
             className="form-input-register-form " 
             placeholder="Enter Email"
+            max={today}
+            onKeyDown={(e) => e.preventDefault()} // Prevent manual input
             required />
             </div>
 

@@ -7,6 +7,7 @@ import { addDoc, collection, doc, } from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/navigation";
+import {getLocalDateString} from "@/app/helpers/helpers";
 
 
 
@@ -79,6 +80,7 @@ const [files7, setFiles7] = useState<{ name: string, preview: string | undefined
 const [files8, setFiles8] = useState<{ name: string, preview: string | undefined }[]>([]);
 
 const [files9, setFiles9] = useState<{ name: string, preview: string | undefined }[]>([]);
+// const minDate = new Date().toISOString().split("T")[0]; 
 
 const [minDate, setMinDate] = useState<string>("");
 useEffect(() => {
@@ -91,10 +93,11 @@ useEffect(() => {
 }, [user]); // Runs when `user` changes
 
 useEffect(() => {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1); // Set to tomorrow
-  setMinDate(tomorrow.toISOString().split('T')[0]); // Format as YYYY-MM-DD
-
+ 
+  const tomorrow = getLocalDateString(new Date());
+  const tomorrowDate = new Date(tomorrow);
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1); // Add one day to the current date
+  setMinDate(getLocalDateString(tomorrowDate)); // Set the minimum date to tomorrow
 },[])
 
 
