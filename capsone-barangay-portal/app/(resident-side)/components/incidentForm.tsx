@@ -9,6 +9,7 @@ import { db,storage } from "@/app/db/firebase";
 import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
 import {isPastDate,isToday,isPastOrCurrentTime} from "@/app/helpers/helpers";
 import {getLocalDateString} from "@/app/helpers/helpers";
+import { area } from "framer-motion/m";
 
 
 
@@ -28,6 +29,7 @@ const incidentForm:React.FC = () => {
       time: "",
       address: "",
       file: null,
+      area:"",
       reportID: "",
       department: "",
       status: "Pending",
@@ -40,7 +42,6 @@ const incidentForm:React.FC = () => {
     }
     fetchCaseNumber();
   },[currentUser])
-  //const currentDate = new Date().toISOString().split("T")[0].replace(/-/g, "");
 
   useEffect(() => {
     const today = new Date();
@@ -73,6 +74,7 @@ const incidentForm:React.FC = () => {
         dateFiled: "",
         time: "",
         address: "",
+        area: "",
         file: null,
         reportID: "",
         department: "",
@@ -171,6 +173,7 @@ const incidentForm:React.FC = () => {
       if (form.checkValidity()) {
         const dateFiled = incidentReport.dateFiled;
         const timeFiled = incidentReport.time;
+        
         const dateIsPast = isPastDate(dateFiled);
         const dateIsToday = isToday(dateFiled);
         const timeIsPastOrNow = isPastOrCurrentTime(timeFiled);
@@ -206,6 +209,7 @@ const incidentForm:React.FC = () => {
             dateFiled: incidentReport.dateFiled,
             time: incidentReport.time,
             address: incidentReport.address,
+            area: incidentReport.area,
             file: filename,
             department: "Online",
             reportID: currentUser, 
@@ -224,6 +228,7 @@ const incidentForm:React.FC = () => {
             dateFiled: incidentReport.dateFiled,
             time: incidentReport.time,
             address: incidentReport.address,
+            area: incidentReport.area,
             file: filename,
             department: "Online",
             reportID: currentUser, 
@@ -381,6 +386,28 @@ const incidentForm:React.FC = () => {
                 onChange={handleFormChange}
               />
             </div>
+
+            <div className="form-group-incident-report">
+              <label htmlFor="address" className="form-label-incident-report">
+                Area of Incident <span className="required">*</span>
+                </label>
+
+              <select
+                id="area"
+                name="area"
+                className="form-input-incident-report"
+                required
+                value={incidentReport.area}
+                onChange={handleFormChange}>
+
+                <option value="" disabled>Select Area</option>
+                <option value="South Fairview">South Fairview</option>
+                <option value="West Fairview">West Fairview</option>
+                <option value="East Fairview">East Fairview</option>
+              </select>
+            </div>
+
+
         
             <div className="signature/printedname-container">
               <label className="form-label-incident-report">Upload Proof of Incident (If Applicable)</label>
