@@ -36,12 +36,33 @@ export default function AddFirstTimeJobSeeker() {
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    const { name, value, type } = e.target;
+    const newValue: any = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+  
+    if (name === "dateOfBirth") {
+      const birthDate = new Date(value);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      const dayDiff = today.getDate() - birthDate.getDate();
+  
+      if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+        age--; // Birthday hasn't happened yet this year
+      }
+  
+      setFormData((prevData) => ({
+        ...prevData,
+        dateOfBirth: value,
+        age: age,
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: newValue,
+      }));
+    }
   };
+  
 
   // Format Date of Birth into Separate Parts
   const formatDateParts = (dateString: string) => {
