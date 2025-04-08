@@ -28,7 +28,9 @@ interface User {
   name: string;
   role: string;
   position: string;
+  profileImage?: string;
 }
+
 
 export default function TopMenu() {
   const [notifications, setNotifications] = useState<BarangayNotification[]>([]);
@@ -46,6 +48,7 @@ export default function TopMenu() {
     name: session?.user?.fullName || "User",
     role: session?.user?.position || session?.user?.role || "User",
     position: session?.user?.position || "User",
+    profileImage: session?.user?.profileImage,
   };
   
 
@@ -197,9 +200,16 @@ export default function TopMenu() {
           )}
         </div>
 
+       
         <section className="icon-section">
-          <img src="/images/user.png" alt="User Icon" className="userIcon" />
-        </section>
+            {currentUser?.profileImage ? (
+              <img src={currentUser.profileImage} alt="User Icon" className="header-usericon" />
+            ) : (
+              <img src="/images/user.png" alt="Default User" className="header-usericon" />
+            )}
+          </section>
+
+       
         <section className="user-section">
           <h1>{currentUser.name}</h1>
           <p>{currentUser.role}</p>
