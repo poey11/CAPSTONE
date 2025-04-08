@@ -113,7 +113,7 @@ const RegisterForm: React.FC = () => {
         await setDoc(docRef, {
           ...resident,
           upload: fileDownloadURL, // Save the file URL instead of the file object
-          createdAt: new Date().toISOString(),
+          createdAt: today,
         });
     
         await sendEmailVerification(user);
@@ -270,6 +270,18 @@ const RegisterForm: React.FC = () => {
                     placeholder="Enter Phone Number"
                     required />
                     </div>
+
+                    <div className="form-group-register-form">
+                    <label htmlFor="email" className="form-label-register-form" >Date Of Birth:<span className="required">*</span> </label>
+                    <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
+                    type="date" name="dateOfBirth" 
+                    className="form-input-register-form " 
+                    placeholder="Enter Email"
+                    max={today}
+                    onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                    required />
+                    </div>
+
 
 
                     <div className="form-group-register-form">
