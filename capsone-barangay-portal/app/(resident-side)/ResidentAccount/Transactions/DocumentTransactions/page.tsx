@@ -35,7 +35,7 @@ export default function DocumentTransactionsDetails() {
 
     const [transactionData, setTransactionData] = useState<BarangayCertificate | null>(null);
     const [loading, setLoading] = useState(true);
-    const [fileURL, setFileURL] = useState<string | null>(null);
+    const [fileURLs, setFileURLs] = useState<{ field: string; url: string }[]>([]);
 
     useEffect(() => {
         if (!referenceId) return;
@@ -53,29 +53,32 @@ export default function DocumentTransactionsDetails() {
                 const storage = getStorage();
                 const fileFields = ['signaturejpg', 'barangayIDjpg', 'validIDjpg', 'endorsementLetter'] as const;
 
+                const urls: { field: string; url: string }[] = [];
+
                 for (const field of fileFields) {
-                    const fileData = data[field];
-                  
-                    if (typeof fileData === "string" && (fileData as string).trim() !== "") {
-                      const fileName = fileData as string;
-                      console.log(`Fetching file from: ServiceRequests/${fileName}`);
-                      const fileRef = ref(storage, `ServiceRequests/${fileName}`);
-                      const url = await getDownloadURL(fileRef);
-                      setFileURL(url);
-                      break;
-                    }
-                  
-                    if (Array.isArray(fileData) && fileData.length > 0) {
-                      const validFile = fileData.find((file) => typeof file === "string" && file.trim() !== "");
-                      if (validFile) {
-                        console.log(`Fetching file from: ServiceRequests/${validFile}`);
-                        const fileRef = ref(storage, `ServiceRequests/${validFile}`);
+                    const fileData = data[field as keyof BarangayCertificate];
+
+                    // Handle string (single file)
+                    if (typeof fileData === "string" && fileData.trim() !== "") {
+                        const fileRef = ref(storage, `ServiceRequests/${fileData}`);
                         const url = await getDownloadURL(fileRef);
-                        setFileURL(url);
-                        break;
-                      }
+                        urls.push({ field, url });
                     }
-                  }
+
+                    // Handle array of files
+                    if (Array.isArray(fileData)) {
+                        for (const file of fileData as string[]) {
+                            if (typeof file === "string" && file.trim() !== "") {
+                                const fileRef = ref(storage, `ServiceRequests/${file}`);
+                                const url = await getDownloadURL(fileRef);
+                                urls.push({ field, url });
+                            }
+                        }
+                    }
+                }
+
+                // Update the fileURLs state after fetching all URLs
+                setFileURLs(urls);
             } else {
               console.error("No such document!");
               setTransactionData(null);
@@ -109,7 +112,7 @@ export default function DocumentTransactionsDetails() {
       ];
 
     return (
-    <main className="incident-transaction-container">
+        <main className="incident-transaction-container">
         <div className="headerpic-specific-transactions">
             <p>TRANSACTIONS</p>
         </div>
@@ -131,23 +134,95 @@ export default function DocumentTransactionsDetails() {
                 </div>
             ))}
 
-            {fileURL && (
-                <div className="details-section">
-                    <div className="title">
-                    <p>Uploaded File</p>
-                    </div>
-                    <div className="description">
-                    <a href={fileURL} target="_blank" rel="noopener noreferrer">
-                        View File
-                    </a>
-                    <div style={{ marginTop: "0.5rem" }}>
-                        <img src={fileURL} alt="Uploaded File" style={{ maxWidth: "300px", maxHeight: "300px" }} />
-                    </div>
-                    </div>
+            <div className="details-section">
+                <div className="title">
+                    <p>Signature</p>
                 </div>
-            )}
-        </div>
+                <div className="description">
+                    {fileURLs.filter(({ field }) => field === "signaturejpg").length > 0 ? (
+                            fileURLs.filter(({ field }) => field === "signaturejpg").map(({ url }, index) => (
+                                <div key={index} style={{ marginBottom: "1rem" }}>
+                                    <a href={url} target="_blank" rel="noopener noreferrer">
+                                        View File
+                                    </a>
+                                    <div style={{ marginTop: "0.5rem" }}>
+                                        <img src={url} alt="Signature - Uploaded File" style={{ maxWidth: "300px", maxHeight: "300px" }} />
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p>N/A</p>
+                        )}
+                </div>
+            </div>
 
+            <div className="details-section">
+                <div className="title">
+                    <p>Barangay ID</p>
+                </div>
+                <div className="description">
+                    {fileURLs.filter(({ field }) => field === "barangayIDjpg").length > 0 ? (
+                            fileURLs.filter(({ field }) => field === "barangayIDjpg").map(({ url }, index) => (
+                                <div key={index} style={{ marginBottom: "1rem" }}>
+                                    <a href={url} target="_blank" rel="noopener noreferrer">
+                                        View File
+                                    </a>
+                                    <div style={{ marginTop: "0.5rem" }}>
+                                        <img src={url} alt="Barangay ID - Uploaded File" style={{ maxWidth: "300px", maxHeight: "300px" }} />
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p>N/A</p>
+                        )}
+                </div>
+            </div>
+
+            <div className="details-section">
+                <div className="title">
+                    <p>Valid ID</p>
+                </div>
+                <div className="description">
+                    {fileURLs.filter(({ field }) => field === "validIDjpg").length > 0 ? (
+                            fileURLs.filter(({ field }) => field === "validIDjpg").map(({ url }, index) => (
+                                <div key={index} style={{ marginBottom: "1rem" }}>
+                                    <a href={url} target="_blank" rel="noopener noreferrer">
+                                        View File
+                                    </a>
+                                    <div style={{ marginTop: "0.5rem" }}>
+                                        <img src={url} alt="Valid ID - Uploaded File" style={{ maxWidth: "300px", maxHeight: "300px" }} />
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p>N/A</p>
+                        )}
+                </div>
+            </div>
+
+            <div className="details-section">
+                <div className="title">
+                    <p>Endorsement Letter</p>
+                </div>
+                <div className="description">
+                    {fileURLs.filter(({ field }) => field === "endorsementLetter").length > 0 ? (
+                            fileURLs.filter(({ field }) => field === "endorsementLetter").map(({ url }, index) => (
+                                <div key={index} style={{ marginBottom: "1rem" }}>
+                                    <a href={url} target="_blank" rel="noopener noreferrer">
+                                        View File
+                                    </a>
+                                    <div style={{ marginTop: "0.5rem" }}>
+                                        <img src={url} alt="Endorsement Letter - Uploaded File" style={{ maxWidth: "300px", maxHeight: "300px" }} />
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p>N/A</p>
+                        )}
+                </div>
+            </div>
+
+        </div>
     </main>
 
     )
