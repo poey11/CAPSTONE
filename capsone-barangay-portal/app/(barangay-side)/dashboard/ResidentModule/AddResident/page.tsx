@@ -6,6 +6,8 @@ import { db, storage } from "../../../../db/firebase";
 import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+
 
 
 export default function AddResident() {
@@ -32,6 +34,8 @@ export default function AddResident() {
     isSoloParent: false,
   });
 
+
+  const { data: session } = useSession();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -171,6 +175,7 @@ const confirmSubmit = async () => {
         residentNumber: newResidentNumber,
         createdAt: serverTimestamp(),
         fileURL,
+        createdBy: session?.user?.position || "Unknown",
       });
   
     
@@ -230,7 +235,7 @@ const confirmSubmit = async () => {
 
                 <div className="fields-section">
                   <p>Middle Name</p>
-                  <input type="text" className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} required />
+                  <input type="text" className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} />
                 </div>
 
                 <div className="fields-section">
@@ -251,7 +256,7 @@ const confirmSubmit = async () => {
 
                 <div className="fields-section">
                   <p>Place of Birth <span className="required">*</span></p>
-                  <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} required />
+                  <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} />
                 </div>
                 
                 <div className="fields-section">
@@ -261,7 +266,7 @@ const confirmSubmit = async () => {
 
                 <div className="fields-section">
                   <p>Age <span className="required">*</span></p>
-                  <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
+                  <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} readOnly />
                 </div>
                 
                 <div className="fields-section">

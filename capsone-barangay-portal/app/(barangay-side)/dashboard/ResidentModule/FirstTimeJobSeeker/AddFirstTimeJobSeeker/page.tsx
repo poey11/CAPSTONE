@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { db } from "../../../../../db/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 export default function AddFirstTimeJobSeeker() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function AddFirstTimeJobSeeker() {
     remarks: "",
   });
 
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -149,6 +151,7 @@ export default function AddFirstTimeJobSeeker() {
         yearOfBirth,
         dateApplied: formattedDateApplied, // Stored as YYYY-MM-DD
         createdAt: serverTimestamp(),
+        createdBy: session?.user?.position || "Unknown",
       });
 
     } catch (err) {
@@ -222,7 +225,7 @@ export default function AddFirstTimeJobSeeker() {
 
               <div className="fields-section">
                 <p>Age <span className="required">*</span></p>
-                <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
+                <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} readOnly />
               </div>
                 
               <div className="fields-section">

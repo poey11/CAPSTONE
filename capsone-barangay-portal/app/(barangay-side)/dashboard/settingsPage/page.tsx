@@ -6,6 +6,8 @@ import { useSession } from "next-auth/react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import "@/CSS/SettingsPage/settingsPage.css";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
 
 export default function SettingsPage() {
     const router = useRouter();
@@ -67,14 +69,37 @@ export default function SettingsPage() {
     };
 
     
-
-    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            setSelectedImage(imageUrl);
+        if (file && userId) {
+            const storage = getStorage();
+            const storageRef = ref(storage, `profileImages/${userId}_${file.name}`);
+            
+            try {
+                // Upload the image
+                await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(storageRef);
+                
+                // Update Firestore profileImage field with new URL
+                const userRef = doc(db, "BarangayUsers", userId);
+                await updateDoc(userRef, {
+                    profileImage: downloadURL,
+                });
+    
+                // Update local state for instant UI feedback
+                setSelectedImage(downloadURL);
+                setUserData((prev) => ({
+                    ...prev,
+                    profileImage: downloadURL,
+                }));
+    
+            } catch (err) {
+                console.error("Image upload failed", err);
+                setError("Failed to upload image. Please try again.");
+            }
         }
     };
+    
 
     const [preview, setPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);

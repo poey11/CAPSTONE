@@ -5,6 +5,8 @@ import { getFirestore, collection, query, where, getDocs, QueryDocumentSnapshot,
 import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
+import { useSession } from "next-auth/react";
+
 
 interface FileData {
   name: string;
@@ -12,6 +14,12 @@ interface FileData {
 }
 
 const ReportsPage = () => {
+
+  // rbac
+
+  const { data: session } = useSession();
+
+
   const [loadingKasambahay, setLoadingKasambahay] = useState(false); 
   const [loadingJobSeeker, setLoadingJobSeeker] = useState(false);    
   const [loadingMasterResident, setLoadingMasterResident] = useState(false);    
@@ -808,10 +816,37 @@ const ReportsPage = () => {
               required
             >
               <option value="">Select Module...</option>
-              <option value="Resident Module">Resident Module</option>
-              <option value="Incident Module">Incident Module</option>
-              <option value="Services Module">Services Module</option>
-              <option value="Programs Module">Programs Module</option>
+                  {session?.user?.role === "Barangay Official" &&
+                    (
+                      session?.user?.position === "Secretary" ||
+                      session?.user?.position === "Assistant Secretary" ||
+                      session?.user?.position === "Punong Barangay"
+                    ) && (
+                      <option value="Resident Module">Resident Module</option>
+                  )}
+
+                  {session?.user?.role === "Barangay Official" &&
+                    (
+                      session?.user?.position === "LT Staff" ||
+                      session?.user?.position === "Assistant Secretary" ||
+                      session?.user?.position === "Secretary" ||
+                      session?.user?.position === "Punong Barangay"
+                    ) && (
+                      <option value="Incident Module">Incident Module</option>
+                  )}
+
+                  {session?.user?.role === "Barangay Official" &&
+                    (
+                      session?.user?.position === "Secretary" ||
+                      session?.user?.position === "Punong Barangay" ||
+                      session?.user?.position === "Assistant Secretary" ||
+                      session?.user?.position === "Admin Staff"
+                    ) && (
+                      <option value="Services Module">Services Module</option>
+                  )}
+                  {session?.user?.role === "Barangay Official" && (
+                      <option value="Programs Module">Programs Module</option>
+                  )}
             </select>
           </div>
 
@@ -844,8 +879,26 @@ const ReportsPage = () => {
             <>
               <button className="report-button">Summary of Incidents</button>
               <button className="report-button">Incident Status Summary</button>
+          
+          {session?.user?.department === "Lupon" && (
+            <>
+              <button className="report-button">Lupon Settled Report</button>
+              <button className="report-button">Lupon Pending Report</button>
             </>
           )}
+          {session?.user?.department === "VAWC" && (
+            <>
+              <button className="report-button">Monthly VAWC Report</button>
+            </>
+          )}
+          {session?.user?.department === "GAD" || session?.user?.department === "BCPC"  && (
+            <>
+              <button className="report-button">GADRCO Quarterly Monitoring Report</button>
+            </>
+          )}
+
+        </>
+      )}
 
           {selectedModule === "Services Module" && (
             <>

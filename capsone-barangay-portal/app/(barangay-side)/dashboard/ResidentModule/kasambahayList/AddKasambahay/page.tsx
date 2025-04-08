@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { db } from "../../../../../db/firebase";
 import { collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+
 
 export default function AddKasambahay() {
   const router = useRouter();
@@ -31,6 +33,7 @@ export default function AddKasambahay() {
     createdAt:"",
   });
 
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -185,6 +188,7 @@ export default function AddKasambahay() {
         ...formData,
         registrationControlNumber: latestNumber,
         createdAt: currentDate,
+        createdBy: session?.user?.position || "Unknown",
       });
 
     } catch (err) {
@@ -268,8 +272,7 @@ export default function AddKasambahay() {
                     value={formData.age}
                     onChange={handleChange}
                     required
-                    min="1"
-                    max="120"
+                    readOnly
                   />
               </div>
 
