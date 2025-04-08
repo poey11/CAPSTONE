@@ -20,15 +20,18 @@ export default function SettingsPageResident() {
     const [resident, setResident] = useState({
         first_name: "",
         last_name: "",
+        middle_name: "",
         phone: "",
         email: "",
         sex: "",
         status: "",
+        address: "",
         userIcon: "",
         upload: "",
     });
 
     const [showPopup, setShowPopup] = useState(false);
+    const [errorPopup, setErrorPopup] = useState({ show: false, message: "" });
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [message, setMessage] = useState("");
@@ -51,12 +54,14 @@ export default function SettingsPageResident() {
               setResident({
                 first_name: data.first_name || "",
                 last_name: data.last_name || "",
+                middle_name: data.middle_name || "",
                 phone: data.phone || "",
                 email: data.email || "",
                 sex: data.sex || "",
                 status: data.status || "",
                 userIcon: data.userIcon || "",
                 upload: data.upload || "",
+                address: data.address || "",
               });
     
               setPreview(data.userIcon)
@@ -72,23 +77,26 @@ export default function SettingsPageResident() {
         window.location.href = "/dashboard";
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setResident((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
 
-        if (name === "password") {
-            setPassword(value);
-            setResident((prevData) => ({ ...prevData, password: value })); // formData.password
-         } else if (name === "confirmPassword") {
-            setConfirmPassword(value);
-         } else {
-            setResident((prevData) => ({ ...prevData, [name]: value }));
-        }
-
-    };
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+          const { name, value } = e.target;
+          setResident((prevData) => ({
+              ...prevData,
+              [name]: value,
+          }));
+  
+          if (name === "password") {
+              setPassword(value);
+              setResident((prevData) => ({ ...prevData, password: value })); // formData.password
+           
+           } else if (name === "confirmPassword") {
+              setConfirmPassword(value);
+           } 
+           else {
+              setResident((prevData) => ({ ...prevData, [name]: value }));
+          }
+  
+      };
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files?.[0];
@@ -123,20 +131,19 @@ export default function SettingsPageResident() {
         e.preventDefault();
         setLoading(true);
         setMessage("");
+        setErrorPopup({ show: false, message: "" });
       
         try {
           const user = auth.currentUser;
           if (!user) {
-            setMessage("User session expired. Please log in again.");
-            setShowPopup(true);
+            setErrorPopup({ show: true, message: "User session expired. Please log in again." });
             setLoading(false);
             return;
           }
       
           if (password || confirmPassword) {
             if (password !== confirmPassword) {
-              setMessage("Passwords do not match!");
-              setShowPopup(true);
+              setErrorPopup({ show: true, message: "Passwords do not match." });
               setLoading(false);
               return;
             }
@@ -146,8 +153,8 @@ export default function SettingsPageResident() {
               setMessage("Password updated successfully!");
               setShowPopup(true);
             } catch (error: any) {
-              setMessage(`Failed to update password: ${error.message}`);
-              setShowPopup(true);
+            /*error message*/
+              setErrorPopup({ show: true, message: `Failed to update password: Password should be at least 6 characters.` });
               setLoading(false);
               return;
             }
@@ -164,22 +171,27 @@ export default function SettingsPageResident() {
                 const timeStamp = Date.now().toString();
                 const fileExtension = validIDFile.name.split('.').pop();
                 const fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtension}`;
-            const downloadURL = await uploadImageToStorage(validIDFile, `ResidentUsers/valid_id_image/${fileName}`);
-            resident.upload = downloadURL;
+                const downloadURL = await uploadImageToStorage(validIDFile, `ResidentUsers/valid_id_image/${fileName}`);
+                resident.upload = downloadURL;
             }
       
           const docRef = doc(db, "ResidentUsers", residentId!);
           await updateDoc(docRef, {
+            first_name: resident.first_name,
+            last_name: resident.last_name,
+            middle_name: resident.middle_name,
             phone: resident.phone,
+            sex: resident.sex,
             userIcon: resident.userIcon,
+            address: resident.address,
+            upload: resident.upload,
           });
       
           setMessage("Profile updated successfully!");
           setShowPopup(true);
           router.push("/ResidentAccount/Profile");
         } catch (err: any) {
-          setMessage("Failed to update profile. Please try again. " + err.message);
-          setShowPopup(true);
+            setErrorPopup({ show: true, message: "Failed to update profile. Please try again. " + err.message });
         }
       
         setLoading(false);
@@ -301,6 +313,18 @@ export default function SettingsPageResident() {
                         </div>
 
                         <div className="form-group-profile-section">
+                            <label htmlFor="first_name" className="form-label-profile-section">Middle Name: </label>
+                            <input 
+                                id="middle_name" 
+                                name="middle_name"
+                                value={resident.middle_name ||  "N/A"} 
+                                onChange={handleChange} 
+                                className="form-input-profile-section" 
+                                required
+                            />
+                        </div>
+
+                        <div className="form-sgroup-profile-section">
                             <label htmlFor="last_name" className="form-label-profile-section">Last Name: </label>
                             <input 
                                 id="last_name" 
@@ -311,17 +335,22 @@ export default function SettingsPageResident() {
                             />
                         </div>
 
+                    
                         <div className="form-group-profile-section">
                             <label htmlFor="sex" className="form-label-profile-section">Sex:</label>
-                            <input 
-                                id="sex" 
+                            <select
+                                id="sex"
                                 name="sex"
-                                value={resident.sex ||  "N/A"}  
-                                onChange={handleChange} 
-                                className="form-input-profile-section" 
-                                required 
-                            />
+                                value={resident.sex || "N/A"}
+                                onChange={handleChange}
+                                className="form-input-profile-section"
+                                required
+                            >
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
                         </div>
+
 
                         <div className="form-group-profile-section">
                             <label htmlFor="email" className="form-label-profile-section">Email:</label>
@@ -360,6 +389,22 @@ export default function SettingsPageResident() {
                                 disabled 
                             />
                         </div>
+
+                        <div className="form-group-profile-section">
+                            <label htmlFor="address" className="form-label-profile-section">Address:</label>
+                            <input 
+                                id="address" 
+                                name="address"
+                                value={resident.address ||  "N/A"}  
+                                onChange={handleChange} 
+                                className="form-input-profile-section" 
+                                required 
+                                disabled 
+                            />
+                        </div>
+
+
+
                         
                         <div className="form-group-profile-section">
                             <label htmlFor="password" className="form-label-profile-section">New Password:</label>
@@ -405,8 +450,19 @@ export default function SettingsPageResident() {
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
+                        <img src="/Images/successful.png" alt="warning icon" className="successful-icon-popup" />
                         <p>{message}</p>
                         <button onClick={() => setShowPopup(false)} className="continue-button">Continue</button>
+                    </div>
+                </div>
+            )}
+
+            {errorPopup.show && (
+                <div className="popup-overlay error">
+                    <div className="popup">
+                    <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
+                    <p>{errorPopup.message}</p>
+                    <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button"> Continue </button>
                     </div>
                 </div>
             )}

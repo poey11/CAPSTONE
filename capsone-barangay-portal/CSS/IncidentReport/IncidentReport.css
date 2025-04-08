@@ -119,6 +119,7 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     color: #555;
+    
   }
 
   .resident-module-filter {
@@ -129,6 +130,12 @@
     border-radius: 4px;
     color: #555;
     margin-bottom: 1rem;
+  }
+
+  .resident-module-filter:focus {
+    border-color: #DF7426;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
 
 

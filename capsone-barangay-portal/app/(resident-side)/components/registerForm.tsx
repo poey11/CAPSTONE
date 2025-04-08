@@ -12,6 +12,7 @@ interface Resident {
     sex: string;
     first_name: string;
     last_name: string;
+    middle_name: string;
     email: string;
     phone: string;
     address: string;
@@ -37,6 +38,7 @@ const RegisterForm: React.FC = () => {
         sex: "",
         first_name: "",
         last_name: "",
+        middle_name: "",
         email: "",
         phone: "",
         address: "",
@@ -74,7 +76,7 @@ const RegisterForm: React.FC = () => {
       e.preventDefault();
     
       if (resident.password !== confirmPassword) {
-        setErrorPopup({ show: true, message: "Passwords do not match!" });
+        setErrorPopup({ show: true, message: "Make sure passwords match." });
         setConfirmPassword("");
         return;
       }
@@ -115,15 +117,23 @@ const RegisterForm: React.FC = () => {
         setTimeout(() => {
           setShowPopup(false);
           router.push("/resident/login");
-        }, 3000);
-      } catch (error: any) {
-        setErrorPopup({ show: true, message: "Register failed! " + error.message });
+        }, 2000);
+    } catch (error: any) {
+        let errorMessage = "Register failed!";
+    
+        if (error.code === "auth/email-already-in-use") {
+            errorMessage = "Email already in use.";
+        } else if (error.code === "auth/weak-password") {
+            errorMessage = "Password should be at least 6 characters.";
+        }
+    
+        setErrorPopup({ show: true, message: errorMessage });
     
         // Cleanup in case of error
         if (docRef) await deleteDoc(docRef);
         if (storageRef) await deleteObject(storageRef);
         if (user) await user.delete();
-      }
+    }
     };
     
 
@@ -172,6 +182,7 @@ const RegisterForm: React.FC = () => {
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
+                        <img src="/Images/successful.png" alt="warning icon" className="successful-icon-popup" />
                         <p>Registration Successful!</p>
                         <p>Redirecting to Login Page...</p>
                     </div>
@@ -180,8 +191,9 @@ const RegisterForm: React.FC = () => {
             {errorPopup.show && (
                 <div className="popup-overlay error">
                     <div className="popup">
+                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
                         <p>{errorPopup.message}</p>
-                        <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+                        <button onClick={() => setErrorPopup({ show: false, message: "" })} className="close-button">Close</button>
                     </div>
                 </div>
             )}
@@ -199,30 +211,40 @@ const RegisterForm: React.FC = () => {
                         <label htmlFor="sex" className="form-label-register-form">Sex:<span className="required">*</span></label>
                         <select value={resident.sex} onChange={handleChange} id="sex" name="sex" className="form-input-register-form" required>
                             <option value="" disabled>Select a Sex</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
                         </select>
                     </div>
 
                     <div className="form-group-register-form">
-                    <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
-                    <input value={resident.first_name} onChange={handleChange} id="first_name" 
-                    type="text" name="first_name" 
-                    className="form-input-register-form "
-                    placeholder= "Enter Name"
-                    required />
+                        <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
+                        <input value={resident.first_name} onChange={handleChange} id="first_name" 
+                        type="text" name="first_name" 
+                        className="form-input-register-form "
+                        placeholder= "Enter First Name"
+                        required />
 
                     </div>
 
                     <div className="form-group-register-form">
-                    <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
-                    
+                        <label htmlFor="middle_name" className="form-label-register-form">Middle Name:<span className="required">*</span> </label>
+                        <input value={resident.middle_name} onChange={handleChange} id="middle_name" 
+                        type="text" name="middle_name" 
+                        className="form-input-register-form "
+                        placeholder= "Enter Middle Name"
+                        required />
 
-                    <input value={resident.last_name} onChange={handleChange} id="last_name" 
-                    type="text" name="last_name" 
-                    className="form-input-register-form " 
-                    placeholder="Enter Last Name"
-                    required/>
+                    </div>
+
+                    <div className="form-group-register-form">
+                        <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
+                        
+
+                        <input value={resident.last_name} onChange={handleChange} id="last_name" 
+                        type="text" name="last_name" 
+                        className="form-input-register-form " 
+                        placeholder="Enter Last Name"
+                        required/>
 
                     </div>
 

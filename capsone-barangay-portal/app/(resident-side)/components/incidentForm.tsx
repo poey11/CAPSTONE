@@ -4,8 +4,8 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/authContext";
 import { ref, uploadBytes } from "firebase/storage";
-import { addDoc, collection, updateDoc} from "firebase/firestore";
-import { db,storage } from "@/app/db/firebase";
+import { addDoc, collection, doc, getDoc} from "firebase/firestore";
+import { db,storage, auth } from "@/app/db/firebase";
 import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
 
 
@@ -17,6 +17,7 @@ const incidentForm:React.FC = () => {
   const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
   const [incidentReport, setIncidentReport] = useState<any>({
       firstname: "",
+      middlename: "",
       lastname: "",
       contactNos: "",
       concerns: "",
@@ -29,6 +30,40 @@ const incidentForm:React.FC = () => {
       department: "",
       status: "Pending",
   });
+
+  const [firstname, setFirstName] = useState("");
+  const [middlename, setMiddleName] = useState("");
+  const [lastname, setLastName] = useState("");
+  const [contactNos, setContact] = useState("");
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const docRef = doc(db, "ResidentUsers", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setFirstName(data.first_name || "");
+          setMiddleName(data.middle_name || "");
+          setLastName(data.last_name || "");
+          setContact(data.phone || "");
+          
+          // Set firstName in the clearanceInput state when user data is fetched
+          setIncidentReport((prev: any) => ({
+            ...prev,
+            firstname: data.first_name || "",
+            middlename: data.middle_name || "",
+            lastname: data.last_name || "",
+            contactNos: data.phone || "",
+          }));
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const [caseNumber, setCaseNumber] = useState("");
   useEffect(() => {
     const fetchCaseNumber = async () => {
@@ -56,6 +91,7 @@ const incidentForm:React.FC = () => {
       }
       setIncidentReport({
         firstname: "",
+        middlename: "",
         lastname: "",
         contactNos: "",
         concerns: "",
@@ -172,6 +208,7 @@ const incidentForm:React.FC = () => {
         if(currentUser === "Guest"){
           const toAdd = [{
             firstname: incidentReport.firstname,
+            middlename: incidentReport.middlename,
             lastname: incidentReport.lastname,
             contactNos: incidentReport.contactNos,
             concerns: concernValue,  // Updated this line
@@ -190,6 +227,7 @@ const incidentForm:React.FC = () => {
           const toAdd = [{
             caseNumber: caseNumber,
             firstname: incidentReport.firstname,
+            middlename: incidentReport.middlename,
             lastname: incidentReport.lastname,
             contactNos: incidentReport.contactNos,
             concerns: concernValue,  // Updated this line
@@ -244,12 +282,31 @@ const incidentForm:React.FC = () => {
                 onChange={handleFormChange}
               />
             </div>
+
+            <div className="form-group-incident-report">
+
+              <label htmlFor="middlename" className="form-label-incident-report">
+                Middle Name<span className="required">*</span>
+              </label>
+
+              
+                <input
+                  type="text"
+                  id="middlename"
+                  name="middlename"
+                  className="form-input-incident-report"
+                  required
+                  placeholder="Enter Middle Name"
+                  value={incidentReport.middlename}
+                  onChange={handleFormChange}
+                />
+            </div>
         
             <div className="form-group-incident-report">
 
-            <label htmlFor="lastname" className="form-label-incident-report">
-              Last Name<span className="required">*</span>
-            </label>
+              <label htmlFor="lastname" className="form-label-incident-report">
+                Last Name<span className="required">*</span>
+              </label>
 
              
               <input
