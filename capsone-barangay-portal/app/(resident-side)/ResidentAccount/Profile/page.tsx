@@ -50,21 +50,22 @@ export default function SettingsPageResident() {
             const docSnap = await getDoc(docRef);
     
             if (docSnap.exists()) {
-              const data = docSnap.data();
               setResident({
-                first_name: data.first_name || "",
-                last_name: data.last_name || "",
-                middle_name: data.middle_name || "",
-                phone: data.phone || "",
-                email: data.email || "",
-                sex: data.sex || "",
-                status: data.status || "",
-                userIcon: data.userIcon || "",
-                upload: data.upload || "",
-                address: data.address || "",
+               
+                first_name: docSnap.data().first_name || "N/A",
+                last_name: docSnap.data().last_name || "N/A",
+                middle_name: docSnap.data().middle_name || "N/A",
+                phone: docSnap.data().phone || "N/A",
+                email: docSnap.data().email || "N/A",
+                sex: docSnap.data().sex  || "N/A",
+                status: docSnap.data().status || "N/A",
+                userIcon: docSnap.data().userIcon ||  "N/A",
+                upload: docSnap.data().upload || "N/A",
+                address: docSnap.data().address || "N/A",
+
               });
     
-              setPreview(data.userIcon)
+              setPreview(docSnap.data().userIcon)
             }
           };
     
@@ -248,8 +249,8 @@ export default function SettingsPageResident() {
                     </div>
 
                     <div className="name-section">
-                    <p className="name">{resident.first_name || "N/A"}</p>
-                    <p className="name">{resident.last_name || "N/A"}</p>
+                    <p className="name">{resident.first_name}</p>
+                    <p className="name">{resident.last_name}</p>
                     </div>
 
                     <div className="transactions-link">
@@ -305,7 +306,7 @@ export default function SettingsPageResident() {
                             <input 
                                 id="first_name" 
                                 name="first_name"
-                                value={resident.first_name ||  "N/A"} 
+                                value={resident.first_name} 
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required
@@ -317,7 +318,7 @@ export default function SettingsPageResident() {
                             <input 
                                 id="middle_name" 
                                 name="middle_name"
-                                value={resident.middle_name ||  "N/A"} 
+                                value={resident.middle_name} 
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required
@@ -329,7 +330,7 @@ export default function SettingsPageResident() {
                             <input 
                                 id="last_name" 
                                 name="last_name"
-                                value={resident.last_name ||  "N/A"} 
+                                value={resident.last_name} 
                                 onChange={handleChange} 
                                 className="form-input-profile-section"
                             />
@@ -341,7 +342,7 @@ export default function SettingsPageResident() {
                             <select
                                 id="sex"
                                 name="sex"
-                                value={resident.sex || "N/A"}
+                                value={resident.sex}
                                 onChange={handleChange}
                                 className="form-input-profile-section"
                                 required
@@ -357,7 +358,7 @@ export default function SettingsPageResident() {
                             <input 
                                 id="email" 
                                 name="email"
-                                value={resident.email ||  "N/A"} 
+                                value={resident.email} 
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required 
@@ -370,7 +371,7 @@ export default function SettingsPageResident() {
                             <input 
                                 id="phone" 
                                 name="phone"
-                                value={resident.phone ||  "N/A"} 
+                                value={resident.phone} 
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
 
@@ -382,7 +383,7 @@ export default function SettingsPageResident() {
                             <input 
                                 id="status" 
                                 name="status"
-                                value={resident.status ||  "N/A"}  
+                                value={resident.status}  
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required 
@@ -395,11 +396,10 @@ export default function SettingsPageResident() {
                             <input 
                                 id="address" 
                                 name="address"
-                                value={resident.address ||  "N/A"}  
+                                value={resident.address}  
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required 
-                                disabled 
                             />
                         </div>
 
