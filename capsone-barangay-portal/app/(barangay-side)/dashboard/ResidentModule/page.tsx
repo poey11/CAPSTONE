@@ -13,7 +13,7 @@ export default function ResidentModule() {
   const { data: session } = useSession();
   const userRole = session?.user?.role;
   const userPosition = session?.user?.position;
-  const isAuthorized = ["Secretary", "Punong Barangay", "Assistant Secretary"].includes(userPosition || "");
+  const isAuthorized = ["Secretary", "Assistant Secretary"].includes(userPosition || "");
 
 
   const [residents, setResidents] = useState<any[]>([]);

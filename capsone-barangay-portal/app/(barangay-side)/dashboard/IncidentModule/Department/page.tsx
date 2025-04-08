@@ -10,6 +10,7 @@ const statusOptions = ["Pending", "In Progress", "Resolved", "Settled", "Archive
 export default function Department() {
   const { data: session } = useSession();
   const userDepartment = session?.user?.department;
+  const userPosition = session?.user?.position;
   const userRole = session?.user?.role;
 
   
@@ -23,7 +24,12 @@ export default function Department() {
   const searchParam = useSearchParams();
   const departmentId = searchParam.get("id");
 
-  const isAuthorized = userDepartment === departmentId || userRole === "LT Staff";
+  const isAuthorized =
+  userDepartment === departmentId ||
+  (
+    (userPosition === "LT Staff" || userPosition === "Assistant Secretary") &&
+    userRole === "Barangay Official"
+  );
 
 
   useEffect(() => {
