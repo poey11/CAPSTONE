@@ -39,4 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-Icon
+
+
+#ignore offending files for windows
+*.log
+
+# Ignore all .DS_Store files
+.DS_Store
