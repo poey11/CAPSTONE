@@ -18,32 +18,55 @@ export default function Transactions() {
     useEffect(() => {
         if (!currentUser) return;
 
-        const fetchIncidentReports = async () => {
+        const fetchData = async () => {
             setLoading(true);
             try {
-                const reportsRef = collection(db, "IncidentReports");
-                const q = query(reportsRef, where("reportID", "==", currentUser));
-                const querySnapshot = await getDocs(q);
-
-                const fetchedReports = querySnapshot.docs.map((doc) => ({
+                
+                const incidentRef = collection(db, "IncidentReports");
+                const incidentQuery = query(incidentRef, where("reportID", "==", currentUser));
+                const incidentSnapshot = await getDocs(incidentQuery);
+                const incidents = incidentSnapshot.docs.map((doc) => ({
                     id: doc.id,
+                    type: "IncidentReport",
                     ...doc.data(),
                 }));
-
-                setTransactionData(fetchedReports);
+    
+                
+                const serviceRef = collection(db, "ServiceRequests");
+                const serviceQuery = query(serviceRef, where("accID", "==", currentUser));
+                const serviceSnapshot = await getDocs(serviceQuery);
+                const services = serviceSnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    type: "ServiceRequest",
+                    ...doc.data(),
+                }));
+    
+                const combined = [...incidents, ...services].sort((a, b) => {
+                    const dateA = new Date((a as any).dateFiled || (a as any).requestDate || 0);
+                    const dateB = new Date((b as any).dateFiled || (b as any).requestDate || 0);
+                    return dateB.getTime() - dateA.getTime(); // Latest first
+                });
+    
+                setTransactionData(combined);
             } catch (error) {
-                console.error("Error fetching IncidentReports:", error);
+                console.error("Error fetching transactions:", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchIncidentReports();
+        fetchData();
     }, [currentUser]);
 
     const handleTransactionClick = (transaction: any) => {
-        router.push(`/ResidentAccount/Transactions/IncidentTransactions?id=${transaction.id}`);
+        if (transaction.type === "IncidentReport") {
+            router.push(`/ResidentAccount/Transactions/IncidentTransactions?id=${transaction.id}`);
+        } else if (transaction.type === "ServiceRequest") {
+            router.push(`/ResidentAccount/Transactions/ServiceTransactions?id=${transaction.id}`);
+        }   
     };
+
+    
 
     return (
         <main className="main-container-transactions">
@@ -65,22 +88,24 @@ export default function Transactions() {
                             <thead>
                                 <tr>
                                     <th>Date</th>
+                                    <th>Type</th>
                                     <th>Reference ID</th>
-                                    <th>Department</th>
-                                    <th>Concern</th>
+                                    <th>Details</th>
+                                    <th>Purpose</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {transactionData.map((report) => (
-                                    <tr key={report.id} onClick={() => handleTransactionClick(report)}>
-                                        <td>{report.dateFiled || "N/A"}</td>
-                                        <td>{report.caseNumber || "N/A"}</td>
-                                        <td>{report.department || "N/A"}</td>
-                                        <td>{report.concerns || "N/A"}</td>
+                                {transactionData.map((item) => (
+                                    <tr key={item.id} onClick={() => handleTransactionClick(item)}>
+                                        <td>{item.dateFiled || item.requestDate || "N/A"}</td>
+                                        <td>{item.type === "IncidentReport" ? "Incident Report" : "Document Request"}</td>
+                                        <td>{item.caseNumber || "N/A"}</td>
+                                        <td>{item.concerns || item.docType || "N/A"}</td>
+                                        <td>{item.purpose || "N/A"}</td>
                                         <td>
-                                            <span className={`status-dropdown-transactions ${report.status?.toLowerCase() || ""}`}>
-                                                {report.status || "N/A"}
+                                            <span className={`status-dropdown-transactions ${item.status?.toLowerCase() || ""}`}>
+                                                {item.status || "N/A"}
                                             </span>
                                         </td>
                                     </tr>
