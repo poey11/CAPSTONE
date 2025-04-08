@@ -20,6 +20,7 @@ export default function SettingsPageResident() {
     const [resident, setResident] = useState({
         first_name: "",
         last_name: "",
+        middle_name: "",
         phone: "",
         email: "",
         sex: "",
@@ -53,6 +54,7 @@ export default function SettingsPageResident() {
               setResident({
                 first_name: data.first_name || "",
                 last_name: data.last_name || "",
+                middle_name: data.middle_name || "",
                 phone: data.phone || "",
                 email: data.email || "",
                 sex: data.sex || "",
@@ -177,6 +179,7 @@ export default function SettingsPageResident() {
           await updateDoc(docRef, {
             first_name: resident.first_name,
             last_name: resident.last_name,
+            middle_name: resident.middle_name,
             phone: resident.phone,
             sex: resident.sex,
             userIcon: resident.userIcon,
@@ -303,6 +306,18 @@ export default function SettingsPageResident() {
                                 id="first_name" 
                                 name="first_name"
                                 value={resident.first_name ||  "N/A"} 
+                                onChange={handleChange} 
+                                className="form-input-profile-section" 
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group-profile-section">
+                            <label htmlFor="first_name" className="form-label-profile-section">Middle Name: </label>
+                            <input 
+                                id="middle_name" 
+                                name="middle_name"
+                                value={resident.middle_name ||  "N/A"} 
                                 onChange={handleChange} 
                                 className="form-input-profile-section" 
                                 required
