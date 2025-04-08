@@ -74,11 +74,9 @@ const Menu = () => {
   }, []);
 
   useEffect(() => {
-    console.log("User email:", user?.email);
-
     const fetchResidentData = async () => {
-      if (residentId) { // Ensure residentId is not null
-        const userDocRef = doc(db, "ResidentUsers", residentId);
+      if (user?.uid) {
+        const userDocRef = doc(db, "ResidentUsers", user.uid);
         const userDocSnap = await getDoc(userDocRef);
         
         if (userDocSnap.exists()) {
@@ -90,14 +88,11 @@ const Menu = () => {
         }
       }
     };
-
-    fetchResidentData();
-  }, [residentId, resident]);
-
-
   
-
-
+    fetchResidentData();
+  }, [user]);
+  
+  
 
   const [isOpen, setIsOpen] = useState(false);
   const [filter, setFilter] = useState("all");
