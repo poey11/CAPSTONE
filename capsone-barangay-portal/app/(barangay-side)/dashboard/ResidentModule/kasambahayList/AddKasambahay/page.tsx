@@ -70,15 +70,38 @@ export default function AddKasambahay() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+  
     // Convert specific fields to numbers
     const numericFields = ["educationalAttainment", "natureOfWork", "employmentArrangement", "salary"];
-    
-    setFormData({
-      ...formData,
-      [name]: numericFields.includes(name) ? Number(value) : type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
-    });
+  
+    if (name === "dateOfBirth") {
+      const birthDate = new Date(value);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      const dayDiff = today.getDate() - birthDate.getDate();
+  
+      if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+        age--; // Adjust if birthday hasn't happened yet this year
+      }
+  
+      setFormData({
+        ...formData,
+        dateOfBirth: value,
+        age: age,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: numericFields.includes(name)
+          ? Number(value)
+          : type === "checkbox"
+          ? (e.target as HTMLInputElement).checked
+          : value,
+      });
+    }
   };
+  
   
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
