@@ -64,7 +64,7 @@ export default function Transactions() {
         if (transaction.type === "IncidentReport") {
             router.push(`/ResidentAccount/Transactions/IncidentTransactions?id=${transaction.id}`);
         } else if (transaction.type === "ServiceRequest") {
-            router.push(`/ResidentAccount/Transactions/ServiceTransactions?id=${transaction.id}`);
+            router.push(`/ResidentAccount/Transactions/DocumentTransactions?id=${transaction.id}`);
         }   
     };
 
@@ -101,9 +101,9 @@ export default function Transactions() {
                         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="resident-module-filter">
                             <option value="All">All</option>
                             <option value="Pending">Pending</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Resolved">Resolved</option>
-                            <option value="Declined">Declined</option>
+                            <option value="Acknowledged">Acknowledged</option>
+                            <option value="Pick-Up">Pick-Up</option>
+                            <option value="Completed">Completed</option>
                             {/* Add more status options if needed */}
                         </select>
                     </div>
