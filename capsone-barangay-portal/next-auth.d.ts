@@ -11,6 +11,7 @@ declare module "next-auth" {
       loginStatus: boolean;
       fullName: string;
       department: string;
+      profileImage: string;
     };
   }
 
@@ -22,7 +23,7 @@ declare module "next-auth" {
     loginStatus: boolean;
     fullName: string;
     department: string;
-
+    profileImage: string;
   }
 }
 
@@ -35,6 +36,6 @@ declare module "next-auth/jwt" {
     loginStatus: boolean;
     fullName: string;
     department: string;
-
+    profileImage: string;
   }
 }

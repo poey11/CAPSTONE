@@ -10,7 +10,7 @@ import { auth, db, storage } from "@/app/db/firebase"; // Ensure 'auth' is impor
 
 
 
-// need to fix yung pag gitna ng profile image section
+// I will send you a code can you check why is the first name and last name updating instanly in the account-profile-section when im changing it in the edit section but im not yet clicking the submit button yet
 
 export default function SettingsPageResident() {
     const router = useRouter();
@@ -30,6 +30,9 @@ export default function SettingsPageResident() {
         upload: "",
     });
 
+    const [formData, setFormData] = useState({ ...resident });
+
+
     const [showPopup, setShowPopup] = useState(false);
     const [errorPopup, setErrorPopup] = useState({ show: false, message: "" });
     const [password, setPassword] = useState("");
@@ -48,30 +51,30 @@ export default function SettingsPageResident() {
           const fetchResidentData = async () => {
             const docRef = doc(db, "ResidentUsers", residentId);
             const docSnap = await getDoc(docRef);
-    
+      
             if (docSnap.exists()) {
-              const data = docSnap.data();
-              setResident({
-                first_name: data.first_name || "",
-                last_name: data.last_name || "",
-                middle_name: data.middle_name || "",
-                phone: data.phone || "",
-                email: data.email || "",
-                sex: data.sex || "",
-                status: data.status || "",
-                userIcon: data.userIcon || "",
-                upload: data.upload || "",
-                address: data.address || "",
-              });
-    
-              setPreview(data.userIcon)
+              const data = {
+                first_name: docSnap.data().first_name || "N/A",
+                last_name: docSnap.data().last_name || "N/A",
+                middle_name: docSnap.data().middle_name || "N/A",
+                phone: docSnap.data().phone || "N/A",
+                email: docSnap.data().email || "N/A",
+                sex: docSnap.data().sex  || "N/A",
+                status: docSnap.data().status || "N/A",
+                userIcon: docSnap.data().userIcon ||  "N/A",
+                upload: docSnap.data().upload || "N/A",
+                address: docSnap.data().address || "N/A",
+              };
+              setResident(data);
+              setFormData(data);
+              setPreview(data.userIcon);
             }
           };
-    
+      
           fetchResidentData();
         }
       }, [residentId]);
-    
+      
 
     const handleBack = () => {
         window.location.href = "/dashboard";
@@ -177,15 +180,18 @@ export default function SettingsPageResident() {
       
           const docRef = doc(db, "ResidentUsers", residentId!);
           await updateDoc(docRef, {
-            first_name: resident.first_name,
-            last_name: resident.last_name,
-            middle_name: resident.middle_name,
-            phone: resident.phone,
-            sex: resident.sex,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            middle_name: formData.middle_name,
+            phone: formData.phone,
+            sex: formData.sex,
             userIcon: resident.userIcon,
-            address: resident.address,
+            address: formData.address,
             upload: resident.upload,
           });
+          
+          setResident({ ...resident, ...formData });
+          
       
           setMessage("Profile updated successfully!");
           setShowPopup(true);
@@ -248,8 +254,8 @@ export default function SettingsPageResident() {
                     </div>
 
                     <div className="name-section">
-                    <p className="name">{resident.first_name || "N/A"}</p>
-                    <p className="name">{resident.last_name || "N/A"}</p>
+                    <p className="name">{resident.first_name}</p>
+                    <p className="name">{resident.last_name}</p>
                     </div>
 
                     <div className="transactions-link">
@@ -300,108 +306,104 @@ export default function SettingsPageResident() {
 
                     <div className="edit-section-profile">
                       <form onSubmit={handleSubmit}>
-                        <div className="form-group-profile-section">
-                            <label htmlFor="first_name" className="form-label-profile-section">First Name: </label>
-                            <input 
-                                id="first_name" 
-                                name="first_name"
-                                value={resident.first_name ||  "N/A"} 
-                                onChange={handleChange} 
-                                className="form-input-profile-section" 
-                                required
-                            />
-                        </div>
+                      <div className="form-group-profile-section">
+                        <label htmlFor="first_name" className="form-label-profile-section">First Name:</label>
+                        <input 
+                            id="first_name" 
+                            name="first_name"
+                            value={formData.first_name} 
+                            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                            className="form-input-profile-section" 
+                            required
+                        />
+                    </div>
 
-                        <div className="form-group-profile-section">
-                            <label htmlFor="first_name" className="form-label-profile-section">Middle Name: </label>
-                            <input 
-                                id="middle_name" 
-                                name="middle_name"
-                                value={resident.middle_name ||  "N/A"} 
-                                onChange={handleChange} 
-                                className="form-input-profile-section" 
-                                required
-                            />
-                        </div>
+                    <div className="form-group-profile-section">
+                        <label htmlFor="middle_name" className="form-label-profile-section">Middle Name:</label>
+                        <input 
+                            id="middle_name" 
+                            name="middle_name"
+                            value={formData.middle_name} 
+                            onChange={(e) => setFormData({ ...formData, middle_name: e.target.value })}
+                            className="form-input-profile-section" 
+                            required
+                        />
+                    </div>
 
-                        <div className="form-sgroup-profile-section">
-                            <label htmlFor="last_name" className="form-label-profile-section">Last Name: </label>
-                            <input 
-                                id="last_name" 
-                                name="last_name"
-                                value={resident.last_name ||  "N/A"} 
-                                onChange={handleChange} 
-                                className="form-input-profile-section"
-                            />
-                        </div>
+                    <div className="form-sgroup-profile-section">
+                        <label htmlFor="last_name" className="form-label-profile-section">Last Name:</label>
+                        <input 
+                            id="last_name" 
+                            name="last_name"
+                            value={formData.last_name} 
+                            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                            className="form-input-profile-section"
+                        />
+                    </div>
 
-                    
-                        <div className="form-group-profile-section">
-                            <label htmlFor="sex" className="form-label-profile-section">Sex:</label>
-                            <select
-                                id="sex"
-                                name="sex"
-                                value={resident.sex || "N/A"}
-                                onChange={handleChange}
-                                className="form-input-profile-section"
-                                required
-                            >
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
-                        </div>
+                    <div className="form-group-profile-section">
+                        <label htmlFor="sex" className="form-label-profile-section">Sex:</label>
+                        <select
+                            id="sex"
+                            name="sex"
+                            value={formData.sex}
+                            onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
+                            className="form-input-profile-section"
+                            required
+                        >
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
 
+                    <div className="form-group-profile-section">
+                        <label htmlFor="email" className="form-label-profile-section">Email:</label>
+                        <input 
+                            id="email" 
+                            name="email"
+                            value={formData.email} 
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            className="form-input-profile-section" 
+                            required 
+                            disabled
+                        />
+                    </div>
 
-                        <div className="form-group-profile-section">
-                            <label htmlFor="email" className="form-label-profile-section">Email:</label>
-                            <input 
-                                id="email" 
-                                name="email"
-                                value={resident.email ||  "N/A"} 
-                                onChange={handleChange} 
-                                className="form-input-profile-section" 
-                                required 
-                                disabled
-                            />
-                        </div>
+                    <div className="form-group-profile-section">
+                        <label htmlFor="phone" className="form-label-profile-section">Phone:</label>
+                        <input 
+                            id="phone" 
+                            name="phone"
+                            value={formData.phone} 
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            className="form-input-profile-section" 
+                        />
+                    </div>
 
-                        <div className="form-group-profile-section">
-                            <label htmlFor="phone" className="form-label-profile-section">Phone:</label>
-                            <input 
-                                id="phone" 
-                                name="phone"
-                                value={resident.phone ||  "N/A"} 
-                                onChange={handleChange} 
-                                className="form-input-profile-section" 
+                    <div className="form-group-profile-section">
+                        <label htmlFor="status" className="form-label-profile-section">Status:</label>
+                        <input 
+                            id="status" 
+                            name="status"
+                            value={formData.status}  
+                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                            className="form-input-profile-section" 
+                            required 
+                            disabled 
+                        />
+                    </div>
 
-                            />
-                        </div>
-
-                        <div className="form-group-profile-section">
-                            <label htmlFor="status" className="form-label-profile-section">Status:</label>
-                            <input 
-                                id="status" 
-                                name="status"
-                                value={resident.status ||  "N/A"}  
-                                onChange={handleChange} 
-                                className="form-input-profile-section" 
-                                required 
-                                disabled 
-                            />
-                        </div>
-
-                        <div className="form-group-profile-section">
-                            <label htmlFor="address" className="form-label-profile-section">Address:</label>
-                            <input 
-                                id="address" 
-                                name="address"
-                                value={resident.address ||  "N/A"}  
-                                onChange={handleChange} 
-                                className="form-input-profile-section" 
-                                required 
-                                disabled 
-                            />
-                        </div>
+                    <div className="form-group-profile-section">
+                        <label htmlFor="address" className="form-label-profile-section">Address:</label>
+                        <input 
+                            id="address" 
+                            name="address"
+                            value={formData.address}  
+                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                            className="form-input-profile-section" 
+                            required 
+                        />
+                    </div>
 
 
 
