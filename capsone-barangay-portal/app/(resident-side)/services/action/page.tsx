@@ -278,6 +278,7 @@ const handleFileChange = (
           status: "Pending",
           accID: clearanceInput.accountId,
           docType: docType,
+          purpose: clearanceInput.purpose,
           firstName: clearanceInput.firstName,
           middleName: clearanceInput.middleName,
           lastName: clearanceInput.lastName,
