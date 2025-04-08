@@ -1,8 +1,7 @@
 "use client";
-import Link from 'next/link';
 import { useState } from "react";
 import { auth } from '../../db/firebase';
-import { signInWithEmailAndPassword,signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword,signOut, sendPasswordResetEmail } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import {signIn} from 'next-auth/react';
 import { doc, getDoc } from "firebase/firestore";
@@ -22,7 +21,6 @@ const rLoginForm:React.FC = () => {
     const handleRegister = () => {
       router.push("/register");
     };
-
     const [resident, setResident] = useState<User>({
         email: "",
         password: "",
@@ -36,6 +34,24 @@ const rLoginForm:React.FC = () => {
 
      // Handle form submission
     
+    const handleForgotPassword = async () => {
+        try {
+            await sendPasswordResetEmail(auth, resident.email);
+            setErrorMessage("Password reset email sent. Please check your inbox.");
+            setShowErrorPopup(true);
+            resident.email = "";
+        } catch (error: string | any) {
+            if(resident.email === ""){
+                setErrorMessage("Please enter your email address.");
+            }
+            else{
+                setErrorMessage("Invalid email. Please try again.");
+            }
+            setShowErrorPopup(true);
+        }
+
+    }
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
        const { name, value, type } = e.target;
          if(type === "checkbox"){
@@ -89,7 +105,7 @@ const rLoginForm:React.FC = () => {
                 redirect: false,
             });
             
-            setErrorMessage("Invalid user credentials.");
+            setErrorMessage("Invalid email or password. Please try again.");
             setShowErrorPopup(true);
            
         }
@@ -171,8 +187,8 @@ const rLoginForm:React.FC = () => {
                         </div>
 
                         <div className="section2-resident">
-                            <button className="section2options-resident">Forgot Password</button>
-                            <button className="section2options-resident" onClick={handleRegister}>Create an Account</button>
+                            <button type="button" className="section2options-resident" onClick={handleForgotPassword}>Forgot Password</button>
+                            <button type="button"className="section2options-resident" onClick={handleRegister}>Create an Account</button>
                         </div>
 
                         <div className="section3-resident">

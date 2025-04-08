@@ -83,7 +83,6 @@ export default function EditLuponIncident() {
         investigateImage: "",
       }
     });
-    let status = toUpdate.status;
 
     // for dialogue meeting section
 
@@ -139,7 +138,7 @@ export default function EditLuponIncident() {
       const [hearingDetailsSecond, setHearingDetailsSecond] = useState<HearingDetails>({} as HearingDetails);
       const [hearingDetailsThird, setHearingDetailsThird] = useState<HearingDetails>({} as HearingDetails);
       
-      const [hearingDetails, setHearingDetails] = useState<HearingDetails>({} as HearingDetails);
+      const [hearingDetails, setHearingDetails] = useState<HearingDetails>({} as HearingDetails) || null;
       
       useEffect(() => {
         if (nosHearings === 'First') {
@@ -885,6 +884,7 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
                       value={toUpdate.fname}
                       name="fname"
                       id="fname"
+                      disabled
                       onChange={handleFormChange}
                       />
 
@@ -901,6 +901,7 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
                       value={toUpdate.lname}
                       name="lname"
                       id="lname"
+                      disabled
                       onChange={handleFormChange}
                       />
 
@@ -934,6 +935,7 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
 
                   {showInvestigatedDetails&& (   
                     <div className="bars-edit">
+                      {/* revised this. the investigator will be the sitio/kagawads or the lf staffs. will discuss with grpmates */}
                         <div className="input-group-edit">
                             <p>Investigator Full Name (FN SN)</p>
                             <input type="text" className="search-bar-edit" 

@@ -1,12 +1,10 @@
 "use client";
 
+import "@/CSS/barangaySide/topMenu.css";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../context/authContext";
-import "@/CSS/barangaySide/topMenu.css";
-
 import { db } from "../../db/firebase";
 import { collection, query, where, onSnapshot, updateDoc, doc, orderBy } from "firebase/firestore";
 import { usePathname } from "next/navigation";

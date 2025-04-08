@@ -7,7 +7,7 @@ import { addDoc, collection, doc, getDoc} from "firebase/firestore";
 import { db, storage, auth } from "@/app/db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/navigation";
-import { request } from "http";
+import {getLocalDateString} from "@/app/helpers/helpers";
 
 
 
@@ -123,7 +123,9 @@ const [files7, setFiles7] = useState<{ name: string, preview: string | undefined
 const [files8, setFiles8] = useState<{ name: string, preview: string | undefined }[]>([]);
 
 const [files9, setFiles9] = useState<{ name: string, preview: string | undefined }[]>([]);
+// const minDate = new Date().toISOString().split("T")[0]; 
 
+const [minDate, setMinDate] = useState<string>("");
 useEffect(() => {
   if (user) {
     setClearanceInput((prev: any) => ({
@@ -132,6 +134,14 @@ useEffect(() => {
     }));
   }
 }, [user]); // Runs when `user` changes
+
+useEffect(() => {
+ 
+  const tomorrow = getLocalDateString(new Date());
+  const tomorrowDate = new Date(tomorrow);
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1); // Add one day to the current date
+  setMinDate(getLocalDateString(tomorrowDate)); // Set the minimum date to tomorrow
+},[])
 
 
 const handleFileChange = (
@@ -473,6 +483,8 @@ const handleFileChange = (
               <input 
                 type="date" 
                 id="dateOfResidency" 
+                min={minDate} // Set minimum date to tomorrow
+                onKeyDown={(e) => e.preventDefault()} // Prevent manual input
                 name="appointmentDate" 
                 value={clearanceInput.appointmentDate||""}
                 onChange={handleChange}

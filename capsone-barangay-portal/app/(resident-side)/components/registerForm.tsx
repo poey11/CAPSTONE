@@ -16,6 +16,7 @@ interface Resident {
     email: string;
     phone: string;
     address: string;
+    dateOfBirth: string;
     password: string;
     upload: File | null;
 }
@@ -29,6 +30,7 @@ const RegisterForm: React.FC = () => {
     const router = useRouter();
     const captchaSiteKey = process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY || "";
     const [captchaToken, setCaptchaToken] = useState<string>("");
+    const today = new Date().toISOString().split("T")[0]; 
     const [isTermChecked, setIsTermChecked] = useState<boolean>(false);
     const [confirmPassword, setConfirmPassword] = useState<string>("");
     const [showPopup, setShowPopup] = useState(false);
@@ -43,6 +45,7 @@ const RegisterForm: React.FC = () => {
         phone: "",
         address: "",
         password: "",
+        dateOfBirth: "",
         role: "Resident",
         upload: null,
         status: "Unverified"
@@ -75,6 +78,8 @@ const RegisterForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
     
+
+
       if (resident.password !== confirmPassword) {
         setErrorPopup({ show: true, message: "Make sure passwords match." });
         setConfirmPassword("");
@@ -136,7 +141,7 @@ const RegisterForm: React.FC = () => {
     }
     };
     
-
+    
     const handleCheckBox = (e: ChangeEvent<HTMLInputElement>) => {
         setIsTermChecked(e.target.checked);
     };
