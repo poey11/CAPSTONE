@@ -211,8 +211,8 @@ const RegisterForm: React.FC = () => {
                         <label htmlFor="sex" className="form-label-register-form">Sex:<span className="required">*</span></label>
                         <select value={resident.sex} onChange={handleChange} id="sex" name="sex" className="form-input-register-form" required>
                             <option value="" disabled>Select a Sex</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
                         </select>
                     </div>
 
