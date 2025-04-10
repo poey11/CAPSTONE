@@ -71,16 +71,27 @@ export default function Department() {
 const [showCount, setShowCount] = useState<number>(0);
 const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 const [selectedStatus, setSelectedStatus] = useState<string>("");
+const [caseNumberSearch, setCaseNumberSearch] = useState("");
 
 
 useEffect(() => {
   let filtered = [...incidentData];
 
-  // Filter by status if one is selected
+  // Filter by status
   if (selectedStatus) {
     filtered = filtered.filter(
-      (incident) => incident.status?.toLowerCase().trim() === selectedStatus.toLowerCase()
+      (incident) =>
+        incident.status?.toLowerCase().trim() === selectedStatus.toLowerCase()
     );
+  }
+
+  // Filter by case number segment
+  if (caseNumberSearch) {
+    filtered = filtered.filter((incident) => {
+      const segments = incident.caseNumber?.split(" - ");
+      const lastSegment = segments?.[2]?.trim();
+      return lastSegment?.includes(caseNumberSearch.trim());
+    });
   }
 
   // Sort
@@ -90,13 +101,13 @@ useEffect(() => {
     return sortOrder === "asc" ? numA - numB : numB - numA;
   });
 
-  // Limit count if selected
+  // Limit
   if (showCount) {
     filtered = filtered.slice(0, showCount);
   }
 
   setFilteredIncidents(filtered);
-}, [incidentData, selectedStatus, showCount, sortOrder]);
+}, [incidentData, selectedStatus, showCount, sortOrder, caseNumberSearch]);
 
 
   // Pagination logic
@@ -134,7 +145,16 @@ useEffect(() => {
       </div>
 
       <div className="section-2-departments">
-        <input type="text" className="search-bar-departments" placeholder="Enter Incident Case" />
+      <input
+          type="text"
+          className="search-bar-departments"
+          placeholder="Enter Case Number (e.g. 0001)"
+          value={caseNumberSearch}
+          onChange={(e) => setCaseNumberSearch(e.target.value)}
+        />
+
+
+
         <select
           className="featuredStatus-departments"
           value={selectedStatus}
