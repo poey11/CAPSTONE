@@ -158,7 +158,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id}) => {
                 )}
                 {(hearingDetails.length < hearingIndex) && (
                   <span className="text-red-500 ml-4">
-                    {hearingDetails.length}{hearingIndex}In order to fill up the current Hearing Section, you must fill up the previous Hearing
+                  In order to fill up the current Hearing Section, you must fill up the previous Hearing
                   </span>
                 )}
             </div>
