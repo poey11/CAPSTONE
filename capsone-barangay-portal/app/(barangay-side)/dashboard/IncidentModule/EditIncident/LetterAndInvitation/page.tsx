@@ -44,8 +44,8 @@ export default function GenerateDialougeLetter() {
           });
         }
     }, []);
-    let nosHearing = userInfo?.nosHearing || 0;
-
+    let nosHearing = userInfo?.nosHearing;
+    
     useEffect(() => {
         if (userInfo) {
             setOtherInfo((prev) => ({
@@ -64,7 +64,7 @@ export default function GenerateDialougeLetter() {
         }
     }, [userInfo]);
   
-   
+   console.log(nosHearing + " " +userInfo?.nosHearing);
 
     const handleAddLupon = () => {
       router.back();
@@ -271,6 +271,7 @@ export default function GenerateDialougeLetter() {
     
     }
     const handleUpdate = async (listofUpdates:any) => {
+        //revise this part
         try {
             if(!docId) throw new Error("Document ID is undefined");
 
@@ -306,8 +307,7 @@ export default function GenerateDialougeLetter() {
 
             const docRef = doc(db, "IncidentReports", docId);
             const updates = {
-                isHearing: true,
-                nosHearing: nosHearing++
+                nosHearing: nosHearing+1,
             };
             await updateDoc(docRef, updates);
         }
@@ -321,20 +321,20 @@ export default function GenerateDialougeLetter() {
         const action = e.nativeEvent.submitter.name;
         if (action === "print") {
             if(actionId === "summon"){
-                printSummon().then(() => {
-                    const updates = [{field:"nosHearing",value:nosHearing},{field:"summonFiled",value:otherInfo.DateFiled}];
-                    handleIsHearing();
-                    handleUpdate(updates);
-                    clearForm();
-                });
+                handleIsHearing();
+                // printSummon().then(() => {
+                //     const updates = [{field:"nosHearing",value:nosHearing},{field:"summonFiled",value:otherInfo.DateFiled}];
+                //     //handleUpdate(updates);
+                //     clearForm();
+                // });
             }
             else{
-                printDialouge().then(() => {
-                    const updates = [{field:"dialogueFiled",value:otherInfo.DateFiled},{field:"isDialogue",value:true}];
-                    handleIsDialogue();
-                    handleUpdate(updates);
-                    clearForm();
-                });
+                handleIsDialogue();
+                // printDialouge().then(() => {
+                    //     const updates = [{field:"dialogueFiled",value:otherInfo.DateFiled},{field:"isDialogue",value:true}];
+                    //     //handleUpdate(updates);
+                    //clearForm();
+                // });
             }
         } else if (action === "sendSMS") {
             sendSMSForDialogue();
@@ -547,7 +547,7 @@ export default function GenerateDialougeLetter() {
                         </div>
                     </div>
                     <div className="section-4">
-                        <button className="letter-announcement-btn" type="submit" name="print" >Print</button>
+                        {nosHearing < 3  && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                         <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button>
                     </div>
             </div>

@@ -885,7 +885,10 @@ const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
       </div>
       </form>
         <Dialogue id={docId || ""}/>
-        <Hearing/>
+        {Array.from({ length: reportData.nosHearing }, (_, i) => (
+          <Hearing key={i} hearingIndex={i} id={docId||""}/>
+        ))}
+
      </main>
       )}
     </>

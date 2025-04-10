@@ -443,7 +443,6 @@ input:checked + .slider:before {
 
 .input-group-edit p {
   color: grey;
-  font-weight: bold;
   font-size: 1rem;
   padding: 1rem;
 }

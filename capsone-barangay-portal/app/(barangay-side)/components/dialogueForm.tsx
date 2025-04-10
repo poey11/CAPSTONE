@@ -1,7 +1,7 @@
 
 import { db } from "@/app/db/firebase";
 import { getLocalDateString } from "@/app/helpers/helpers";
-import { doc, onSnapshot,collection, addDoc, setDoc } from "firebase/firestore";
+import { doc, onSnapshot,collection, setDoc } from "firebase/firestore";
 import { useState,useEffect } from "react";
 
 
@@ -27,7 +27,6 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
     const [existingData, setExistingData] = useState(false);
     const [isDialogue, setIsDialogue] = useState(false);
     const today = getLocalDateString(new Date());
-    const [isHearing, setIsHearing] = useState(false);
     const [details, setDetails] = useState<DialogueDetails>({
         date: "",
         forField: "",
@@ -101,8 +100,10 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
                 partyA: details.partyA,
                 partyB: details.partyB,
                 hearingOfficer: details.hearingOfficer,
+                filled:true,
             });
             console.log("Document written with ID: ", docRef.id);
+        
             forceRerender();
         } catch (error:any) {
             console.error("Error saving data:", error.message);
@@ -115,8 +116,7 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
                 <div className="title-section-edit">
                   <button type="button" className={showDialogueContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
                   <h1>Dialogue Meeting</h1>
-                {(!isDialogue && <span className="text-red-500 ml-4">In order to create a Dialogue Meeting, you must generate a Dialogue Letter first</span>
-)}
+                {(!isDialogue && <span className="text-red-500 ml-4">In order to create a Dialogue Meeting, you must generate a Dialogue Letter first</span>)}
                 </div>
           
             <hr/>
@@ -224,23 +224,23 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
                                     required={!existingData}
                                     rows={10}/>
                               </div>
-                              <div className="fields-section-edit resize-none">
+                              <div className="fields-section-edit">
                                     <p>Hearing Officer</p>
                                     <input type="text" 
                                     name="hearingOfficer"
                                     id="hearingOfficer"
                                     value={details.hearingOfficer||""}
                                     onChange={handleChange}
-                                    className="description-edit" 
-                                    onFocus={existingData ? (e => e.target.blur()):(() => {}) }
+                                    className="search-bar-edit" 
+                                    disabled={existingData ? true : false}
                                     required={!existingData}
                                     placeholder="Enter Hearing Officer"/>
                               </div>
 
                           </div>
                           <div className="flex justify-center items-center mt-10">
-                                {existingData ? (<></> ):
-                                (<button type="submit" className="action-view-edit" disabled>Save</button>)}
+                                {!existingData && (<button type="submit" className="action-view-edit">Save</button>)}
+                                
                                  
                           </div>
                         </form>
