@@ -184,57 +184,51 @@ useEffect(() => {
       </div>
 
       <div className="main-section-departments">
-        <table>
-          <thead>
-            <tr>
-              <th>Case #</th>
-              <th>Date & Time of the Incident</th>
-              <th>Nature of Complaint</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentIncidents.map((incident, index) => (
-              <tr key={index}>
-                <td>{incident.caseNumber}</td>
-                <td>{incident.dateFiled} {incident.timeFiled}</td>
-                <td>{incident.nature}</td>
-                <td>
-                  <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
-                    {incident.status}
-                  </span>
-                </td>
-                <td>
-                  <div className="actions-departments-main">
-                      <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}>View</button>
-                    {isAuthorized && (
-                      <>
-                        <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}>Edit</button>
-                        <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDelete(incident.id); }}>Delete</button>
-                      </>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="redirection-section-departments">
-        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {getPageNumbers().map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === 'number' && paginate(number)}
-            className={currentPage === number ? "active" : ""}
-          >
-            {number}
-          </button>
+  {currentIncidents.length === 0 ? (
+    <div className="no-result-card">
+       <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+      <p className="no-results-department">No Results Found</p>
+    </div>
+  ) : (
+    <table>
+      <thead>
+        <tr>
+          <th>Case #</th>
+          <th>Date & Time of the Incident</th>
+          <th>Nature of Complaint</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {currentIncidents.map((incident, index) => (
+          <tr key={index}>
+            <td>{incident.caseNumber}</td>
+            <td>{incident.dateFiled} {incident.timeFiled}</td>
+            <td>{incident.nature}</td>
+            <td>
+              <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
+                {incident.status}
+              </span>
+            </td>
+            <td>
+              <div className="actions-departments-main">
+                <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}>View</button>
+                {isAuthorized && (
+                  <>
+                    <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}>Edit</button>
+                    <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDelete(incident.id); }}>Delete</button>
+                  </>
+                )}
+              </div>
+            </td>
+          </tr>
         ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-      </div>
+      </tbody>
+    </table>
+  )}
+</div>
+
     </main>
   );
 }
