@@ -3,7 +3,7 @@ import "@/CSS/IncidentModule/Letters.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import {  useEffect,useState } from "react";
 import { getSpecificDocument } from "@/app/helpers/firestorehelper";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
 import { getLocalDateString, getLocalDateTimeString,isPastDate, isToday, isFutureDate } from "@/app/helpers/helpers";
@@ -34,9 +34,21 @@ export default function GenerateDialougeLetter() {
     const router = useRouter();
     const today = getLocalDateString(new Date());
     const todayWithTime = getLocalDateTimeString(new Date(new Date().setDate(new Date().getDate() + 1)));
-
+    const [isDialogue, setIsDialogue] = useState(false);
     
-
+    useEffect(() => {
+        if(!docId) return;
+        const docRef = doc(db, "IncidentReports", docId);
+        const unsubscribe = onSnapshot(docRef, (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                setIsDialogue(data.isDialogue); 
+            } else {
+                console.log("No such document!");
+            }
+        });
+        return () => unsubscribe(); 
+    },[])
     useEffect(() => {
         if (docId) {
           getSpecificDocument("IncidentReports", docId, setUserInfo).then(() => {
@@ -547,7 +559,8 @@ export default function GenerateDialougeLetter() {
                         </div>
                     </div>
                     <div className="section-4">
-                        {nosHearing < 3  && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
+                        {(nosHearing < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
+                        {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                         <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button>
                     </div>
             </div>
