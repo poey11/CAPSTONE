@@ -49,6 +49,7 @@ interface BarangayDocument {
     precinctNumber?: string;
     emergencyDetails?: EmergencyDetails;
 
+    typeofbldg?: string;
     copyOfPropertyTitle?: string[];
     estimatedCapital?: string;
     homeAddress?: string;
@@ -218,7 +219,13 @@ export default function DocumentTransactionsDetails() {
                 { label: "Construction Activity", key: "typeofconstruction" },
                 { label: "Project Location", key: "projectLocation" },
                 { label: "Project Title", key: "projectName" },
-                { label: "Type of Building", key: "typeofbldg" }
+                {
+                    label: "Type of Building",
+                    key:
+                      transactionData.typeofbldg === "Others"
+                        ? "othersTypeofbldg"
+                        : "typeofbldg",
+                  },
               ]
             : []),
 

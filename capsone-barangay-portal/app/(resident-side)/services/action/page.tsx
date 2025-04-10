@@ -40,6 +40,7 @@ export default function Action() {
     contact: "",
     typeofconstruction: "",
     typeofbldg:"",
+    othersTypeofbldg:"",
     projectName:"",
     citizenship: "",
     educationalAttainment: "",
@@ -352,8 +353,6 @@ const handleFileChange = (
           dtiRegistration: filenames.dtiRegistration,
           isCCTV: filenames.isCCTV,
           signaturejpg: filenames.signaturejpg,
-          barangayIDjpg: filenames.barangayIDjpg,
-          validIDjpg: filenames.validIDjpg,
           endorsementLetter: filenames.letterjpg,
         };
         console.log(clearanceVars, storageRefs);
@@ -380,11 +379,15 @@ const handleFileChange = (
           contact: clearanceInput.contact,
           homeAddress: clearanceInput.address,
           copyOfPropertyTitle: filenames.copyOfPropertyTitle,
-          dtiRegistration: filenames.dtiRegistration,
-          isCCTV: filenames.isCCTV,
           signaturejpg: filenames.signaturejpg,
           endorsementLetter: filenames.letterjpg,
+          othersTypeofbldg: ""
         };
+
+        // ✅ Add othersTypeofbldg if typeofbldg is "Others"
+        if (clearanceInput.typeofbldg === "Others") {
+          clearanceVars.othersTypeofbldg = clearanceInput.othersTypeofbldg;
+        }
         console.log(clearanceVars, storageRefs);
         handleReportUpload(clearanceVars, storageRefs);
       }
@@ -747,17 +750,38 @@ const handleFileChange = (
             </div>
 
             <div className="form-group">
-              <label htmlFor="buildingtype" className="form-label">Type of Building<span className="required">*</span></label>
-              <input 
-                type="text"  
-                id="buildingtype"  
-                name="typeofbldg"  
-                className="form-input"  
+              <label htmlFor="buildingtype" className="form-label">
+                Type of Building<span className="required">*</span>
+              </label>
+              <select
+                id="buildingtype"
+                name="typeofbldg"
+                className="form-input"
                 value={clearanceInput.typeofbldg}
                 onChange={handleChange}
-                required 
-                placeholder="Enter Type of Building"  
+                required
+              >
+                <option value="" disabled>Select Type of Building</option>
+                <option value="Residential">Residential</option>
+                <option value="Commercial">Commercial</option>
+                <option value="Institutional">Institutional</option>
+                <option value="Industrial">Industrial</option>
+                <option value="Mixed-Use">Mixed-Use</option>
+                <option value="Others">Others</option>
+              </select>
+
+              {clearanceInput.typeofbldg === "Others" && (
+              <input
+                type="text"
+                id="othersTypeofbldg"
+                name="othersTypeofbldg"
+                className="form-input-others"
+                placeholder="Enter Type of Building"
+                value={clearanceInput.othersTypeofbldg}
+                onChange={handleChange}
+                required
               />
+            )}
             </div>
             
               </>)
@@ -1210,7 +1234,7 @@ const handleFileChange = (
                 <input
                   id="file-upload6"
                   type="file"
-                  required={(docType === "Temporary Business Permit" || docType === "Business Permit" || docType === "Construction Permit")}
+                  required={(docType === "Temporary Business Permit" || docType === "Business Permit")}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleFileChange(e, setFiles6, 'dtiRegistration');
                   }} 
