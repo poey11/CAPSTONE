@@ -30,9 +30,13 @@ interface KasambahayFormData {
   philhealthMember: boolean;
   pagibigMember: boolean;
   fileURL: string;
+  updatedBy: string;
 }
 
 export default function EditKasambahay() {
+
+  const { data: session } = useSession();
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const kasambahayId = searchParams.get("id"); 
@@ -58,6 +62,8 @@ export default function EditKasambahay() {
     philhealthMember: false,
     pagibigMember: false,
     fileURL: "",
+    updatedBy: "",
+
   });
 
   const [file, setFile] = useState<File | null>(null);
@@ -122,6 +128,7 @@ export default function EditKasambahay() {
             philhealthMember: docSnap.data().philhealthMember ?? false,
             pagibigMember: docSnap.data().pagibigMember ?? false,
             fileURL: docSnap.data().fileURL || "",
+            updatedBy: docSnap.data().updatedBy || "",
           };
 
           setFormData(data);
@@ -254,6 +261,7 @@ export default function EditKasambahay() {
         philhealthMember: formData.philhealthMember,
         pagibigMember: formData.pagibigMember,
         fileURL,
+        updatedBy: session?.user?.position,
       });
       
     } catch (err) {

@@ -8,6 +8,9 @@ import { useSession } from "next-auth/react";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 export default function EditResident() {
+
+  const { data: session } = useSession();
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const residentId = searchParams.get("id");
@@ -33,6 +36,7 @@ export default function EditResident() {
     isSeniorCitizen: false,
     isSoloParent: false,
     fileURL: "",
+    updatedBy: "",
   });
 
   const [file, setFile] = useState<File | null>(null);
@@ -99,6 +103,7 @@ export default function EditResident() {
             isSeniorCitizen: docSnap.data().isSeniorCitizen || false,
             isSoloParent: docSnap.data().isSoloParent || false,
             fileURL: docSnap.data().fileURL || "",
+            updatedBy: docSnap.data().updatedBy || "",
           };
 
           setFormData(data);
@@ -194,6 +199,7 @@ export default function EditResident() {
       await updateDoc(docRef, {
         ...formData,
         fileURL,
+        updatedBy: session?.user?.position,
       });
 
     } catch (err) {

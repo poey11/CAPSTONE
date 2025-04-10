@@ -18,9 +18,13 @@ interface JobSeeker {
   sex: string;
   remarks: string;
   fileURL: string;
+  updatedBy: string;
 }
 
 export default function EditFirstTimeJobSeeker() {
+
+  const { data: session } = useSession();
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = searchParams.get("id");
@@ -162,7 +166,11 @@ export default function EditFirstTimeJobSeeker() {
     try {
       let updatedData: Partial<JobSeeker> = { ...formData };
   
-      // ✅ Upload the file if there's a new one selected
+      if (session?.user?.position) {
+        updatedData.updatedBy = session.user.position;
+      }
+
+      // Upload the file if there's a new one selected
       if (file) {
         const fileRef = ref(storage, `JobSeekerFiles/${file.name}`);
         await uploadBytes(fileRef, file);
