@@ -2,9 +2,10 @@
 import "@/CSS/ResidentModule/addresident.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "../../../../../db/firebase";
+import { db, storage } from "../../../../../db/firebase";
 import { collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useSession } from "next-auth/react";
 
 
@@ -168,35 +169,44 @@ export default function AddKasambahay() {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+  
     try {
+      let fileURL = "";
+      if (file) {
+        const storageRef = ref(storage, `KasambahayFiles/${file.name}`);
+        await uploadBytes(storageRef, file);
+        fileURL = await getDownloadURL(storageRef);
+      }
+  
       // Ensure the latest registration number is assigned
       const kasambahayCollection = collection(db, "KasambahayList");
       const q = query(kasambahayCollection, orderBy("registrationControlNumber", "desc"), limit(1));
       const querySnapshot = await getDocs(q);
-
+  
       let latestNumber = 1;
       if (!querySnapshot.empty) {
         const latestEntry = querySnapshot.docs[0].data();
         latestNumber = latestEntry.registrationControlNumber + 1;
       }
-
+  
       const currentDate = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
-
-
+  
       await addDoc(kasambahayCollection, {
         ...formData,
         registrationControlNumber: latestNumber,
         createdAt: currentDate,
+        fileURL,
         createdBy: session?.user?.position || "Unknown",
       });
-
+  
     } catch (err) {
       setError("Failed to add kasambahay");
       console.error(err);
     }
+  
     setLoading(false);
   };
+  
 
   const handleBack = () => {
     router.push("/dashboard/ResidentModule/kasambahayList");
