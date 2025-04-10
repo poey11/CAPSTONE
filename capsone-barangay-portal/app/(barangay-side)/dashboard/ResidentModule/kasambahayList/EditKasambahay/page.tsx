@@ -212,7 +212,7 @@ export default function EditKasambahay() {
   
       //  If new file is selected, upload to Firebase Storage
       if (file) {
-        const storageRef = ref(storage, `KasambahayFiles/${kasambahayId}/${file.name}`);
+        const storageRef = ref(storage, `KasambahayFiles/${file.name}`);
         await uploadBytes(storageRef, file);
         fileURL = await getDownloadURL(storageRef);
       }
