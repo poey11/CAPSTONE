@@ -494,7 +494,10 @@ flex-direction: column;
 align-self: center;
 width: 90%;
 border: 2px solid  #ddd;
-padding: 5rem;
+padding-left: 5rem;
+padding-right: 5rem;
+padding-top: 5rem;
+padding-bottom: 2rem;
 height: auto;
 margin: auto;
 background-color: #f4f2f2;
@@ -590,9 +593,13 @@ padding-top: 1rem;
   align-self: center;
   width: 90%;
   border: 2px solid  #ddd;
-  padding: 5rem;
+  padding-top: 5rem;
+  padding-left: 5rem;
+  padding-right: 5rem;
+  padding-bottom: 2rem;
   height: auto;
   margin: auto;
+  margin-top: 3rem;
   background-color: #f4f2f2;
 }
 

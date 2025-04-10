@@ -302,10 +302,6 @@ const incidentForm:React.FC = () => {
         )}
 
 
-        <div className="Page-incident-report">
-          <p>File an Incident Report</p>
-        </div>
-
        
 
         <div className="register-section-incident-report">

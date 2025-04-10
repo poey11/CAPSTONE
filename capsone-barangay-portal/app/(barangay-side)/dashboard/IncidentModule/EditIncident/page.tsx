@@ -1091,13 +1091,7 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
 </div>
            
         </form>
-
-        
-        
-
-
-
-     
+{/*      
          <div className="dialouge-meeting-section-edit">
               
                  <div className="title-section-edit">
@@ -1308,10 +1302,124 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
 
  
  
-     </div>
+     </div> */}
  
-    
- 
+        
+      
+<div className="dialouge-meeting-section-edit">
+              
+              <div className="title-section-edit">
+                  <button type="button" className={showDialogueContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
+                  <h1>Dialogue Meeting</h1>
+              </div>
+          
+              <hr/>
+          
+              {showDialogueContent && (
+                  <>
+                      <div className="section-2-dialouge-edit">
+                          <p>Complainant's Information</p>
+                          <div className="bars-edit">
+                              <div className="input-group-edit">
+                                  <p>Date</p>
+                                  <input type="date" className="search-bar-edit" placeholder="Enter Date" />
+                              </div>
+                              <div className="input-group-edit">
+                                  <p>For</p>
+                                  <input type="text" className="search-bar-edit" placeholder="Enter For" />
+                              </div>
+                              <div className="input-group-edit">
+                                  <p>Time</p>
+                                  <input type="time" className="search-bar-edit" placeholder="Enter Time" />
+                              </div>
+                          </div>
+                      </div>
+          
+                      <div className="section-3-dialouge-edit">
+                          <div className="fields-section-edit">
+                              <p>Minutes of Dialogue</p>
+                              <textarea className="description-edit" placeholder="Enter Minutes of Dialogue" rows={13}></textarea>
+                          </div>
+                      </div>
+          
+                      <div className="section-4-dialouge-edit">
+                          <div className="fields-section-edit">
+                              <p>Remarks</p>
+                              <textarea className="description-edit" placeholder="Enter Remarks" rows={10}></textarea>
+                          </div>
+                          <div className="fields-section-edit">
+                              <p>Parties</p>
+                              <textarea className="description-edit" placeholder="Enter Parties" rows={10}></textarea>
+                          </div>
+                          
+                      </div>
+                      <div className="flex justify-center items-center mt-10">
+                            <button type="submit" className="action-view-edit">Save</button>   
+                      </div>
+                      
+                  </>
+              )}
+          </div>
+          
+          
+          <div className="hearing-section-edit">
+                   
+                       <div className="title-section-edit">
+                            <button type="button" className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={toggleHearingContent}></button>
+                          
+                           <h1>Hearing Section</h1>
+                       </div>
+          
+                       <hr/>
+          
+          
+                       {showHearingContent && (
+                               <>
+                                   <div className="section-2-dialouge-edit">
+                                       <p>Complainant's Information</p>
+                                       <div className="bars-edit">
+                                           <div className="input-group-edit">
+                                               <p>Date</p>
+                                               <input type="date" className="search-bar-edit" placeholder="Enter Date" />
+                                           </div>
+                                           <div className="input-group-edit">
+                                               <p>For</p>
+                                               <input type="text" className="search-bar-edit" placeholder="Enter For" />
+                                           </div>
+                                           <div className="input-group-edit">
+                                               <p>Time</p>
+                                               <input type="time" className="search-bar-edit" placeholder="Enter Time" />
+                                           </div>
+                                       </div>
+                                   </div>
+           
+                                   <div className="section-3-dialouge-edit">
+                                       <div className="fields-section-edit">
+                                           <p>Minutes of Hearing</p>
+                                           <textarea className="description-edit" placeholder="Enter Minutes of Hearing" rows={13}></textarea>
+                                       </div>
+                                   </div>
+           
+                                   <div className="section-4-dialouge-edit">
+                                       <div className="fields-section-edit">
+                                           <p>Remarks</p>
+                                           <textarea className="description-edit" placeholder="Enter Remarks" rows={10}></textarea>
+                                       </div>
+                                       <div className="fields-section-edit">
+                                           <p>Parties</p>
+                                           <textarea className="description-edit" placeholder="Enter Parties" rows={10}></textarea>
+                                       </div>
+                                   </div>
+                                   <div className="flex justify-center items-center mt-10">
+                                     <button type="submit" className="action-view-edit">Save</button>   
+                                  </div>
+                               </>
+                           )}
+               </div>
+
+
+
+
      </main>
       )}
     </>
