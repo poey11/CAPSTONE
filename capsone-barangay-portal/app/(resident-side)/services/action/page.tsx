@@ -123,6 +123,7 @@ const [files7, setFiles7] = useState<{ name: string, preview: string | undefined
 const [files8, setFiles8] = useState<{ name: string, preview: string | undefined }[]>([]);
 
 const [files9, setFiles9] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files10, setFiles10] = useState<{ name: string, preview: string | undefined }[]>([]);
 
 useEffect(() => {
   if (user) {
@@ -372,8 +373,6 @@ const handleFileChange = (
           dtiRegistration: filenames.dtiRegistration,
           isCCTV: filenames.isCCTV,
           signaturejpg: filenames.signaturejpg,
-          barangayIDjpg: filenames.barangayIDjpg,
-          validIDjpg: filenames.validIDjpg,
           endorsementLetter: filenames.letterjpg,
         };
         console.log(clearanceVars, storageRefs);
@@ -603,7 +602,7 @@ const handleFileChange = (
                     value={clearanceInput.businessLocation}
                     onChange={handleChange}
                     required 
-                    placeholder="Enter Home Address"  
+                    placeholder="Enter Business Location"  
                   />
                 </div>
               </>
@@ -745,7 +744,7 @@ const handleFileChange = (
                 value={clearanceInput.typeofbldg}
                 onChange={handleChange}
                 required 
-                placeholder="Enter Business Nature"  
+                placeholder="Enter Type of Building"  
               />
             </div>
             
@@ -830,7 +829,7 @@ const handleFileChange = (
                 value={clearanceInput.projectName}
                 onChange={handleChange}
                 required 
-                placeholder="Enter Business Nature"  
+                placeholder="Enter Project Title"  
               />
             </div>
               </>
@@ -1111,12 +1110,12 @@ const handleFileChange = (
 
           <br/>
           <h1 className="form-requirements-title">Requirements</h1>
-          
 
-          {(docType ==="Temporary Business Permit"||docType ==="Business Permit" || docType === "Construction Permit") &&(
-          // WILL Have to fix this part
-          <>
-            <div className="signature-printedname-container">
+          {(docType ==="Temporary Business Permit" || docType ==="Business Permit" || docType === "Construction Permit") &&(
+        
+        <>
+
+        <div className="signature-printedname-container">
             <h1 className="form-label">Certified True Copy of Title of the Property/Contract of Lease<span className="required">*</span></h1>
 
             <div className="file-upload-container">
@@ -1180,7 +1179,17 @@ const handleFileChange = (
 
           
           <br/>
+        </>
+          )}
 
+          
+
+          {(docType ==="Temporary Business Permit"||docType ==="Business Permit") &&(
+          // WILL Have to fix this part
+          <>
+            
+
+        
           <div className="barangayID-container">
             <h1 className="form-label">Certified True Copy of DTI Registration<span className="required">*</span></h1>
 
@@ -1447,28 +1456,28 @@ const handleFileChange = (
 
 
 
-          <div className="endorsementletter-container">
+          <div className="barangayID-container">
             <h1 className="form-label">Approved Building/Construction Plan<span className="required">*</span></h1>
+
             <div className="file-upload-container">
-              <label htmlFor="file-upload9"  className="upload-link">Click to Upload File</label>
+              <label htmlFor="file-upload10"  className="upload-link">Click to Upload File</label>
                 <input
-                  id="file-upload9"
+                  id="file-upload10"
                   type="file"
                   required
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleFileChange(e, setFiles8, 'approvedBldgPlan');
+                    handleFileChange(e, setFiles10, 'approvedBldgPlan');
                   }}
                   accept=".jpg,.jpeg,.png"
-
                   style={{ display: "none" }}
                 />
 
               <div className="uploadedFiles-container">
                 {/* Display the file names with image previews */}
-                {files9.length > 0 && (
+                {files8.length > 0 && (
                   <div className="file-name-image-display">
                     <ul>
-                      {files9.map((file, index) => (
+                      {files10.map((file, index) => (
                         <div className="file-name-image-display-indiv" key={index}>
                           <li> 
                               {/* Display the image preview */}
@@ -1486,7 +1495,7 @@ const handleFileChange = (
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('file-upload9', setFiles9)}
+                                  onClick={() => handleFileDelete('file-upload10',setFiles10)}
                                   className="delete-button"
                                 >
                                   <img
@@ -1512,6 +1521,10 @@ const handleFileChange = (
           
           </>):(<>
           
+
+            {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction Permit") &&(
+        
+          <>
             <div className="barangayID-container">
             <h1 className="form-label"> Barangay ID</h1>
 
@@ -1637,6 +1650,8 @@ const handleFileChange = (
               </div>
             </div>
           </div>
+        </>
+        )}
           
           
           </>)}

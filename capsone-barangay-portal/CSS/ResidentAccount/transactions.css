@@ -403,6 +403,7 @@
     cursor: pointer;
     background-color: transparent; 
     transition: transform 0.3s ease;
+    filter: brightness(0) invert(1);
   }
   
  
@@ -487,6 +488,23 @@
 
   }
 
+
+  .document-requirements-container{
+    width: 50%;
+    text-align: center;
+  }
+
   
+  .requirements-image{
+    width: 100%;
+  }
   
-  
+
+  .view-file-link{
+    margin-top: 10px;
+    display: inline-block;
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
