@@ -61,12 +61,19 @@ export default function AddIncident() {
     nosofFemaleChildren: "",
     file: null,
   });
-
   const [deskStaff, setdeskStaff] = useState<any>({
-    fname: user?.fullName.split(" ")[0] || "",
-    lname: user?.fullName.split(" ")[1] || "",
+    fname: "",
+    lname: "",
   })
 
+  useEffect(() => {
+    if(!user) return;
+    setdeskStaff({
+      fname: user.fullName.split(" ")[0],
+      lname: user.fullName.split(" ")[1],
+    })
+  },[user]);
+ 
   
 
   // ✅ Fetch and set the case number when the component mounts
@@ -114,7 +121,7 @@ export default function AddIncident() {
   }
   };
 
-  const handleFileDeleteContainer1 = (fileName: string) => {
+  const handleFileDeleteContainer1 = () => {
     setFilesContainer1([]);
 
     // Reset file input
@@ -134,7 +141,6 @@ export default function AddIncident() {
             const storageRef = ref(storage, `IncidentReports/${filename}`);
             await uploadBytes(storageRef, reportInfo.file);
         }
-
         // Prepare the incident report data
         const reportData: Record<string, any> = {
             caseNumber: reportInfo.caseNumber,
@@ -149,8 +155,13 @@ export default function AddIncident() {
             timeReceived: reportInfo.timeReceived,
             file: filename,
             department: departmentId,
-            nosofMaleChildren: reportInfo.nosofMaleChildren,
-            nosofFemaleChildren: reportInfo.nosofFemaleChildren,
+            staffId: user?.id,
+            isDialogue: false,
+            isHearing: false,
+            ...(departmentId === "GAD" && { 
+              nosofMaleChildren: reportInfo.nosofMaleChildren,
+              nosofFemaleChildren: reportInfo.nosofFemaleChildren,
+            }),
             complainant: {
                 fname: complainant.fname,
                 lname: complainant.lname,
@@ -287,9 +298,8 @@ export default function AddIncident() {
 
   
   const deleteForm = () => {
-    
+    handleFileDeleteContainer1();
     setReportInfo({
-        caseNumber: "",
         dateFiled: "",
         timeFiled: "",
         location: "",
@@ -310,10 +320,6 @@ export default function AddIncident() {
         civilStatus: "",
         address: "",
       });
-      setdeskStaff({
-        fname: "",
-        lname: "",
-      });
       setRespondent({
         fname: "",
         lname: "",
@@ -323,7 +329,6 @@ export default function AddIncident() {
         civilStatus: "",
         address: "",
       });
-
   }
 
   const handleBack = () => {
@@ -426,16 +431,21 @@ export default function AddIncident() {
                     />
 
                     <p>Civil Status</p>
-                    <input 
-                    type="text" 
-                    className="search-bar-add" 
-                    placeholder="Enter Civil Status" 
-                    value={complainant.civilStatus}
+                 
+                    <select   className="search-bar-add"    
+                    value={complainant.civilStatus} 
                     name="civilStatus"
                     id="complainant"
-                    required
                     onChange={handleFormChange}
-                    />
+                    required>
+                      <option value="" disabled>Choose A Civil Status</option>
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Widowed">Widowed</option>
+                      <option value="Separated">Separated</option>
+                      <option value="Divorced">Divorced</option>
+                      
+                    </select>
 
                     <p>Address</p>
 
@@ -522,16 +532,21 @@ export default function AddIncident() {
                     />
 
                     <p>Civil Status</p>
-                    <input 
-                    type="text" 
-                    id="respondent"
-                    className="search-bar-add" 
-                    placeholder="Enter Civil Status" 
-                    value={respondent.civilStatus}
+
+                    <select   className="search-bar-add"    
+                    value={respondent.civilStatus} 
                     name="civilStatus"
-                    required
+                    id="respondent"
                     onChange={handleFormChange}
-                    />
+                    required>
+                      <option value="" disabled>Choose A Civil Status</option>
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Widowed">Widowed</option>
+                      <option value="Separated">Separated</option>
+                      <option value="Divorced">Divorced</option>
+                      
+                    </select>
 
                     <p>Address</p>
 
@@ -758,7 +773,7 @@ export default function AddIncident() {
                                 <div className="delete-container-add">
                                   <button
                                     type="button"
-                                    onClick={() => handleFileDeleteContainer1(file.name)}
+                                    onClick={() => handleFileDeleteContainer1()}
                                     className="delete-button-add"
                                   >
                                     <img

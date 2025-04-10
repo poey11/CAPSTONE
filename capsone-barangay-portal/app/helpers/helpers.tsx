@@ -52,7 +52,16 @@ const isPastOrCurrentTime = (time: string) => {
     return inputTotalMinutes <= nowTotalMinutes;
 };
 
+const getLocalTimeString = (d: Date) => {
+    return String(d.getHours()).padStart(2, '0') + ':' +
+        String(d.getMinutes()).padStart(2, '0');
+}
+
+const getLocalDateTimeString = (d: Date) => {
+    return getLocalDateString(d) + ' ' + getLocalTimeString(d);
+}
 
 
-
-export {isPastDate,isToday,isPastOrCurrentTime,isFutureDate,getLocalDateString }
+export {isPastDate,isToday,isPastOrCurrentTime,
+    getLocalTimeString,getLocalDateTimeString,
+    isFutureDate,getLocalDateString }

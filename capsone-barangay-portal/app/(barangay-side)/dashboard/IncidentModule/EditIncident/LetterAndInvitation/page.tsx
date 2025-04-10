@@ -6,7 +6,7 @@ import { getSpecificDocument } from "@/app/helpers/firestorehelper";
 import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
-
+import { getLocalDateString, getLocalDateTimeString,isPastDate, isToday, isFutureDate } from "@/app/helpers/helpers";
 
 export default function GenerateDialougeLetter() {
     const user = useSession().data?.user;
@@ -32,16 +32,19 @@ export default function GenerateDialougeLetter() {
     });
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-    let nosHearing = userInfo?.nosHearing || "";
+    const today = getLocalDateString(new Date());
+    const todayWithTime = getLocalDateTimeString(new Date(new Date().setDate(new Date().getDate() + 1)));
+
+    
 
     useEffect(() => {
-        
         if (docId) {
           getSpecificDocument("IncidentReports", docId, setUserInfo).then(() => {
             setLoading(false);
           });
         }
     }, []);
+    let nosHearing = userInfo?.nosHearing || 0;
 
     useEffect(() => {
         if (userInfo) {
@@ -67,23 +70,10 @@ export default function GenerateDialougeLetter() {
       router.back();
     };
     
-    const handleUpdate = async (listofUpdates:any) => {
-        try {
-            if(!docId) throw new Error("Document ID is undefined");
-
-            const docRef = doc(db, "IncidentReports", docId);
-            const updates = listofUpdates.reduce((acc: { [key: string]: any }, update: { field: string | number; value: any; }) => {
-                acc[update.field] = update.value;
-                return acc;
-            }, {});
-
-            await updateDoc(docRef, updates);
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
+ 
     const sendSMSForDialogue = async () => {
+     //dont forget to add respondent contact number
+
       try{
         const response = await fetch("/api/clickSendApi", {
             method: "POST",
@@ -108,6 +98,7 @@ export default function GenerateDialougeLetter() {
     }
 
     const sendSMSForSummons = async () => {
+        //dont forget to add respondent contact number
         try{
           const response = await fetch("/api/clickSendApi", {
               method: "POST",
@@ -226,15 +217,15 @@ export default function GenerateDialougeLetter() {
         const issueMonth = monthNames[issueMonthIndex];
         const issueYear = dayToday.split("T")[0].split("-")[0];
         
-        
-        if(nosHearing === null || nosHearing === undefined || nosHearing === ""){ 
-            nosHearing = "First";
+        let nosHearingB ="";
+        if(nosHearing == 0 ){ 
+            nosHearingB = "First";
         }
-        else if (nosHearing === "First"){
-            nosHearing = "Second";
+        else if (nosHearing == 1){
+            nosHearingB = "Second";
         }
-        else if (nosHearing === "Second"){
-            nosHearing = "Third";
+        else if (nosHearing == 2){
+            nosHearingB = "Third";
         }
        
         
@@ -252,7 +243,7 @@ export default function GenerateDialougeLetter() {
                     "Text2":otherInfo.complainant.address,
                     "Text3":otherInfo.respondent.fname,
                     "Text4":otherInfo.respondent.address,
-                    "Text5":nosHearing,//make it dynamic
+                    "Text5":nosHearingB,//make it dynamic
                     "Text6": `${month} ${day}, ${year}`,//Month Day, Year
                     "Text7":day,//Day
                     "Text8":`${month} ${year}`,//MonthYear
@@ -273,12 +264,57 @@ export default function GenerateDialougeLetter() {
         a.download = "SummonLetter.pdf";
         a.click();
         window.URL.revokeObjectURL(url);
-``       }
+       }
        catch(e:any){
         console.log()
        } 
     
-}
+    }
+    const handleUpdate = async (listofUpdates:any) => {
+        try {
+            if(!docId) throw new Error("Document ID is undefined");
+
+            const docRef = doc(db, "IncidentReports", docId);
+            const updates = listofUpdates.reduce((acc: { [key: string]: any }, update: { field: string | number; value: any; }) => {
+                acc[update.field] = update.value;
+                return acc;
+            }, {});
+
+            await updateDoc(docRef, updates);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const handleIsDialogue = async () => {
+        try {
+            if(!docId) throw new Error("Document ID is undefined");
+
+            const docRef = doc(db, "IncidentReports", docId);
+            const updates = {
+                isDialogue: true,
+            };
+            await updateDoc(docRef, updates);
+        }
+        catch (error: string|any) {
+            console.error(error);
+        }
+    }
+    const handleIsHearing = async () => {
+        try {
+            if(!docId) throw new Error("Document ID is undefined");
+
+            const docRef = doc(db, "IncidentReports", docId);
+            const updates = {
+                isHearing: true,
+                nosHearing: nosHearing++
+            };
+            await updateDoc(docRef, updates);
+        }
+        catch (error: string|any) {
+            console.error(error);
+        }
+    }
 
     const onSubmit = (e: any) => {
         e.preventDefault();
@@ -287,6 +323,7 @@ export default function GenerateDialougeLetter() {
             if(actionId === "summon"){
                 printSummon().then(() => {
                     const updates = [{field:"nosHearing",value:nosHearing},{field:"summonFiled",value:otherInfo.DateFiled}];
+                    handleIsHearing();
                     handleUpdate(updates);
                     clearForm();
                 });
@@ -294,6 +331,7 @@ export default function GenerateDialougeLetter() {
             else{
                 printDialouge().then(() => {
                     const updates = [{field:"dialogueFiled",value:otherInfo.DateFiled},{field:"isDialogue",value:true}];
+                    handleIsDialogue();
                     handleUpdate(updates);
                     clearForm();
                 });
@@ -459,6 +497,8 @@ export default function GenerateDialougeLetter() {
                             value={otherInfo.DateOfDelivery}
                             id="DateOfDelivery"
                             name="DateOfDelivery"
+                            min={today}
+                            onKeyDown={(e) => e.preventDefault()}
                             onChange={handleChange}
                             required
                             />
@@ -468,9 +508,11 @@ export default function GenerateDialougeLetter() {
                             <p>Date and Time of Meeting</p>
                             <input type="datetime-local" className="search-bar" placeholder="Enter Date of Meeting" 
                             value={otherInfo.DateOfMeeting}
+                            onKeyDown={(e) => e.preventDefault()}
                             id="DateOfMeeting"
                             name="DateOfMeeting"
                             onChange={handleChange}
+                            min={todayWithTime}
                             required
                             />
                             
@@ -480,6 +522,7 @@ export default function GenerateDialougeLetter() {
 
                     <div className="bars">
                         <div className="input-group">
+                            {/* change into drop box */}
                             <p>Delivered By</p>
                             <input type="text" className="search-bar" placeholder="Enter Name of Lupon Staff" 
                             value={otherInfo.LuponStaff}
@@ -494,8 +537,10 @@ export default function GenerateDialougeLetter() {
                             <p>Date Filed</p>
                             <input type="date" className="search-bar" placeholder="Choose hearing number" 
                             value={otherInfo.DateFiled}
+                            max={today}
                             id="DateFiled"
                             name="DateFiled"
+                            onKeyDown={(e) => e.preventDefault()}
                             onChange={handleChange}
                             required
                             />

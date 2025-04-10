@@ -1,3 +1,4 @@
+import { getLocalDateString } from "@/app/helpers/helpers";
 import { useState } from "react";
 
 
@@ -10,19 +11,29 @@ interface HearingFormProps {
     remarks?: string;
     parties?: string;
     nosHearing?: number;
+    isHearing?: boolean;
 }
-
-const HearingForm: React.FC<HearingFormProps> = ({date,forField,time,minutesOfHearing,remarks,parties, nosHearing}) => {
+const HearingForm: React.FC<HearingFormProps> = ({date,forField,time,minutesOfHearing,remarks,parties, nosHearing, isHearing}) => {
     const [showHearingContent, setShowHearingContent] = useState(false); // Initially hidden
     const toggleHearingContent = () => setShowHearingContent(prev => !prev);
+    const today = getLocalDateString(new Date());
     const [details, setDetails] = useState({
-        date: date || "",
-        forField: forField || "",
-        time: time || "",
-        minutesOfHearing: minutesOfHearing || "",
-        remarks: remarks || "",
-        parties: parties || "",
+        date: "",
+        forField: "",
+        time: "",
+        minutesOfHearing: "",
+        remarks: "",
+        partyA: "",
+        partyB: "",
+        hearingOfficer: "",
     }); 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setDetails(prevDetails => ({
+            ...prevDetails,
+            [name]: value,
+        }));
+    }
     let nos ="";
     switch (nosHearing) {
         case 0:
@@ -49,60 +60,111 @@ const HearingForm: React.FC<HearingFormProps> = ({date,forField,time,minutesOfHe
             <hr/>
             {showHearingContent && (
                 <>
-                  <form>
-                    <div className="section-2-dialouge-edit">
-                        <p>Complainant's Information</p>
-                        <div className="bars-edit">
-                            <div className="input-group-edit">
+                <form>
+                  <div className="section-2-dialouge-edit">
+                      <p>Complainant's Information</p>
+                      <div className="bars-edit">
+                          <div className="input-group-edit">
                                 <p>Date</p>
-                                <input type="date" className="search-bar-edit" placeholder="Enter Date" />
-                            </div>
-                            <div className="input-group-edit">
+                                <input type="date" 
+                                className="search-bar-edit"
+                                max={today} 
+                                onKeyDown={(e => e.preventDefault())}
+                                name="date"
+                                id="date"
+                                value={details.date||""}
+                                onChange={handleChange}
+                                />
+                          </div>
+                          <div className="input-group-edit">
                                 <p>For</p>
-                                <input type="text" className="search-bar-edit" placeholder="Enter For" />
-                            </div>
-                            <div className="input-group-edit">
+                                <input type="text" 
+                                className="search-bar-edit" 
+                                name="forField"
+                                id="forField"
+                                value={details.forField||""}
+                                onChange={handleChange}
+                                placeholder="Enter For" />
+                          </div>
+                          <div className="input-group-edit">
                                 <p>Time</p>
-                                <input type="time" className="search-bar-edit" placeholder="Enter Time" />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="section-3-dialouge-edit">
-                        <div className="fields-section-edit">
+                                <input type="time" 
+                                className="search-bar-edit" 
+                                name="time"
+                                id="time"
+                                value={details.time||""}
+                                onChange={handleChange}
+                                placeholder="Enter Time" />
+                          </div>
+                      </div>
+                  </div>
+        
+                  <div className="section-3-dialouge-edit">
+                      <div className="fields-section-edit">
                             <p>Minutes of Hearing</p>
-                            <textarea className="description-edit" placeholder="Enter Minutes of Hearing" rows={13}></textarea>
-                        </div>
-                    </div>
-                    <div className="section-4-dialouge-edit">
-                        <div className="fields-section-edit">
+                            <textarea className="description-edit" 
+                            placeholder="Enter Minutes of Hearing" 
+                            name="minutesOfHearing"
+                            id="minutesOfHearing"
+                            value={details.minutesOfHearing||""}
+                            onChange={handleChange}
+                            rows={13}/>
+                      </div>
+                  </div>
+        
+                  <div className="section-4-dialouge-edit">
+                      <div className="fields-section-edit">
                             <p>Party A</p>
-                            <textarea className="description-edit" placeholder="Enter Remarks" rows={10}></textarea>
-                        </div>
-                        <div className="fields-section-edit">
+                            <textarea className="description-edit" 
+                            placeholder="Enter Party A" 
+                            name="partyA"
+                            id="partyA"
+                            value={details.partyA||""}
+                            onChange={handleChange}
+                            rows={10}/>
+                      </div>
+                      <div className="fields-section-edit">
                             <p>Party B</p>
-                            <textarea className="description-edit" placeholder="Enter Parties" rows={10}></textarea>
-                        </div>
-                    </div>
+                            <textarea className="description-edit" 
+                            placeholder="Enter Party"
+                            id="partyB"
+                            name="partyB"
+                            value={details.partyB||""}
+                            onChange={handleChange}
+                            rows={10}/>
+                      </div>
 
-                    <div className="section-4-dialouge-edit">
-                        <div className="fields-section-edit">
+                  </div>
+                  <div className="section-4-dialouge-edit">
+                      <div className="fields-section-edit">
                             <p>Remarks</p>
-                            <textarea className="description-edit" placeholder="Enter Remarks" rows={10}></textarea>
-                        </div>
-                        <div className="fields-section-edit">
+                            <textarea className="description-edit" 
+                            name="remarks"
+                            id="remarks"
+                            value={details.remarks||""}
+                            onChange={handleChange}
+                            placeholder="Enter Remarks" 
+                            rows={10}/>
+                      </div>
+                      <div className="fields-section-edit">
                             <p>Hearing Officer</p>
-                            <input type="text" className="description-edit" placeholder=""/>
-                        </div>
+                            <input type="text" 
+                            name="hearingOfficer"
+                            id="hearingOfficer"
+                            value={details.hearingOfficer||""}
+                            onChange={handleChange}
+                            className="description-edit" 
+                            placeholder="Enter Hearing Officer"/>
+                      </div>
 
-                    </div>
-
-                    <div className="flex justify-center items-center mt-10">
-                      <button type="submit" className="action-view-edit">Save</button>   
-                   </div>
-                  </form>
-                </>
-                )}
-                </div>
+                  </div>
+                  <div className="flex justify-center items-center mt-10">
+                        <button type="submit" className="action-view-edit">Save</button>   
+                  </div>
+                </form>
+            </>
+            )}
+            </div>
 
 
         </>
