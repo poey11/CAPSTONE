@@ -70,22 +70,6 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id}) => {
         return () => unsubscribe();
     }, [id]);
 
-
-
-    useEffect(() => { 
-        const docRef = doc(db, "IncidentReports", id, "DialogueMeeting", id);
-        const unsubscribe = onSnapshot(docRef, (doc) => {
-            if (doc.exists()) {
-                const data = doc.data();
-                setIsDialogue(data.filled || false); 
-            } else {
-                console.log("No such document!");
-            }
-        });
-        return () => unsubscribe(); 
-    }, [])
-
-
     const [filled, setFilled] = useState(false);
     useEffect(() => {
         let j = hearingIndex;
@@ -97,6 +81,18 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id}) => {
         }
       }, [hearingDetails] );
 
+      useEffect(() => { 
+        const docRef = doc(db, "IncidentReports", id, "DialogueMeeting", id);
+        const unsubscribe = onSnapshot(docRef, (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                setIsDialogue(data.filled || false); 
+            } else {
+                console.log("No such document!");
+            }
+        });
+        return () => unsubscribe(); 
+    }, [])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
