@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getAllSpecificDocument, deleteDocument } from "@/app/helpers/firestorehelper";
 import { useSession } from "next-auth/react";
 
-const statusOptions = ["Pending", "In Progress", "Resolved", "Settled", "Archived"];
+const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
 
 export default function Department() {
   const { data: session } = useSession();
@@ -65,6 +65,40 @@ export default function Department() {
     }
   };
 
+
+//FILTERS LOGIC
+
+const [showCount, setShowCount] = useState<number>(0);
+const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+const [selectedStatus, setSelectedStatus] = useState<string>("");
+
+
+useEffect(() => {
+  let filtered = [...incidentData];
+
+  // Filter by status if one is selected
+  if (selectedStatus) {
+    filtered = filtered.filter(
+      (incident) => incident.status?.toLowerCase().trim() === selectedStatus.toLowerCase()
+    );
+  }
+
+  // Sort
+  filtered.sort((a, b) => {
+    const numA = parseInt(a.residentNumber, 10) || 0;
+    const numB = parseInt(b.residentNumber, 10) || 0;
+    return sortOrder === "asc" ? numA - numB : numB - numA;
+  });
+
+  // Limit count if selected
+  if (showCount) {
+    filtered = filtered.slice(0, showCount);
+  }
+
+  setFilteredIncidents(filtered);
+}, [incidentData, selectedStatus, showCount, sortOrder]);
+
+
   // Pagination logic
   const indexOfLastIncident = currentPage * incidentsPerPage;
   const indexOfFirstIncident = indexOfLastIncident - incidentsPerPage;
@@ -101,17 +135,32 @@ export default function Department() {
 
       <div className="section-2-departments">
         <input type="text" className="search-bar-departments" placeholder="Enter Incident Case" />
-        <select className="featuredStatus-departments" defaultValue="">
-          <option value="" disabled>Status</option>
+        <select
+          className="featuredStatus-departments"
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+        >
+          <option value="">All Statuses</option>
           {statusOptions.map((status) => (
-            <option key={status} value={status}>{status}</option>
+            <option key={status} value={status}>
+              {status}
+            </option>
           ))}
         </select>
-        <select className="featuredStatus-departments" defaultValue="">
-          <option value="" disabled>Show...</option>
+
+
+        <select
+          className="featuredStatus-departments"
+          value={showCount}
+          onChange={(e) => setShowCount(Number(e.target.value))}
+        >
+          <option value="0">Show All</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
+          <option value="10">Show 15</option>
         </select>
+
+
       </div>
 
       <div className="main-section-departments">
