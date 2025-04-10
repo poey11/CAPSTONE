@@ -57,6 +57,8 @@ export default function ViewResident() {
     { label: "PWD", key: "isPWD", isBoolean: true },
     { label: "Senior Citizen", key: "isSeniorCitizen", isBoolean: true },
     { label: "Solo Parent", key: "isSoloParent", isBoolean: true },
+    { label: "Created By", key: "createdBy" },
+    { label: "Updated By", key: "updatedBy" },
   ];
 
   const handleBack = () => {

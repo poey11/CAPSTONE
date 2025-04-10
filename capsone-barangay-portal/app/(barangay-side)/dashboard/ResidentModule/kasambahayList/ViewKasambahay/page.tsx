@@ -59,6 +59,8 @@ export default function ViewKasambahay() {
     { label: "Pag-IBIG Member", key: "pagibigMember", isBoolean: true },
     { label: "Employer Name", key: "employerName" },
     { label: "Employer Address", key: "employerAddress" },
+    { label: "Created By", key: "createdBy" },
+    { label: "Updated By", key: "updatedBy" },
   ];
 
   const handleBack = () => {
