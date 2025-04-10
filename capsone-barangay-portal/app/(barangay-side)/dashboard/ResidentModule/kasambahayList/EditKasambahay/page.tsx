@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { db, storage } from "../../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Link from "next/link";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useSession } from "next-auth/react";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 
 interface KasambahayFormData {
@@ -64,7 +65,7 @@ export default function EditKasambahay() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [originalData, setOriginalData] = useState({ ...formData });
+  const [originalData, setOriginalData] = useState<KasambahayFormData>({ ...formData });
 
   const [showDiscardPopup, setShowDiscardPopup] = useState(false);
   const [showSavePopup, setShowSavePopup] = useState(false); 
@@ -148,18 +149,32 @@ export default function EditKasambahay() {
     }
   };
 
-  const handleFileDelete = () => {
-    setFile(null);
-    setPreview(null); // ✅ Ensure it's undefined
-    setFormData((prev) => {
-      if (!prev) return prev; 
-    
-      return {
+  const handleFileDelete = async () => {
+    if (!formData.fileURL) return;
+  
+    try {
+      // Create a reference to the file in Firebase Storage
+      const fileRef = ref(storage, formData.fileURL);
+  
+      // Delete the file from Firebase Storage
+      await deleteObject(fileRef);
+  
+      // Clear the local state
+      setFile(null);
+      setPreview(null); // Ensure it's undefined
+  
+      // Reset fileURL in formData
+      setFormData((prev) => ({
         ...prev,
-        fileURL: "", 
-      } as KasambahayFormData;
-    });
-      };
+        fileURL: "",
+      }));
+  
+      console.log("File deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
+  };
+  
 
 
 

@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { db, storage } from "../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useSession } from "next-auth/react";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 export default function EditResident() {
   const router = useRouter();
@@ -137,10 +138,21 @@ export default function EditResident() {
     }
   };
 
-  const handleFileDelete = () => {
-    setFile(null);
-    setPreview(null); // ✅ Ensure it's undefined
-    setFormData((prev) => ({ ...prev, fileURL: "" }));  };
+  const handleFileDelete = async () => {
+    if (formData.fileURL) {
+      try {
+        const storageRef = ref(storage, formData.fileURL); // Get the reference of the file in Firebase Storage
+        await deleteObject(storageRef); // Delete the file from Firebase Storage
+        console.log("File deleted successfully from storage");
+      } catch (err) {
+        console.error("Error deleting file from storage:", err);
+      }
+    }
+  
+    setFile(null); // Reset the file input
+    setPreview(null); // Reset the preview
+    setFormData((prev) => ({ ...prev, fileURL: "" })); // Reset the file URL in the form data
+  };
 
 
   const handleSaveClick = async () => {
