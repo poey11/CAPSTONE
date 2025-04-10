@@ -543,7 +543,7 @@ const toggleHearingContent = () => setShowHearingContent(prev => !prev);
                   id="status"
                   className={`status-dropdown-edit ${toUpdate.status?.toLowerCase() || reportData.status?.toLowerCase() || "pending"}`}
                   name="status"
-                  value={toUpdate.status ?? reportData.status ?? "pending"}  // changed to small p
+                  value={toUpdate.status ?? reportData.status ?? "pending"}  // changed to small
                   onChange={handleFormChange}               
                 >
                   <option value="pending">Pending</option>

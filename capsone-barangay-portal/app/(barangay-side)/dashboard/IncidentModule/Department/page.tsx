@@ -229,6 +229,22 @@ useEffect(() => {
   )}
 </div>
 
+
+
+<div className="redirection-section-departments">
+        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+        {getPageNumbers().map((number, index) => (
+          <button
+            key={index}
+            onClick={() => typeof number === 'number' && paginate(number)}
+            className={currentPage === number ? "active" : ""}
+          >
+            {number}
+          </button>
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+      </div>
+
     </main>
   );
 }
