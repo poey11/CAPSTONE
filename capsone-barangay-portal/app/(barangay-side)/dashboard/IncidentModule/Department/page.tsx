@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getAllSpecificDocument, deleteDocument } from "@/app/helpers/firestorehelper";
 import { useSession } from "next-auth/react";
 
-const statusOptions = ["Pending", "In Progress", "Resolved", "Settled", "Archived"];
+const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
 
 export default function Department() {
   const { data: session } = useSession();
@@ -65,6 +65,51 @@ export default function Department() {
     }
   };
 
+
+//FILTERS LOGIC
+
+const [showCount, setShowCount] = useState<number>(0);
+const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+const [selectedStatus, setSelectedStatus] = useState<string>("");
+const [caseNumberSearch, setCaseNumberSearch] = useState("");
+
+
+useEffect(() => {
+  let filtered = [...incidentData];
+
+  // Filter by status
+  if (selectedStatus) {
+    filtered = filtered.filter(
+      (incident) =>
+        incident.status?.toLowerCase().trim() === selectedStatus.toLowerCase()
+    );
+  }
+
+  // Filter by case number segment
+  if (caseNumberSearch) {
+    filtered = filtered.filter((incident) => {
+      const segments = incident.caseNumber?.split(" - ");
+      const lastSegment = segments?.[2]?.trim();
+      return lastSegment?.includes(caseNumberSearch.trim());
+    });
+  }
+
+  // Sort
+  filtered.sort((a, b) => {
+    const numA = parseInt(a.residentNumber, 10) || 0;
+    const numB = parseInt(b.residentNumber, 10) || 0;
+    return sortOrder === "asc" ? numA - numB : numB - numA;
+  });
+
+  // Limit
+  if (showCount) {
+    filtered = filtered.slice(0, showCount);
+  }
+
+  setFilteredIncidents(filtered);
+}, [incidentData, selectedStatus, showCount, sortOrder, caseNumberSearch]);
+
+
   // Pagination logic
   const indexOfLastIncident = currentPage * incidentsPerPage;
   const indexOfFirstIncident = indexOfLastIncident - incidentsPerPage;
@@ -100,60 +145,93 @@ export default function Department() {
       </div>
 
       <div className="section-2-departments">
-        <input type="text" className="search-bar-departments" placeholder="Enter Incident Case" />
-        <select className="featuredStatus-departments" defaultValue="">
-          <option value="" disabled>Status</option>
+      <input
+          type="text"
+          className="search-bar-departments"
+          placeholder="Enter Case Number (e.g. 0001)"
+          value={caseNumberSearch}
+          onChange={(e) => setCaseNumberSearch(e.target.value)}
+        />
+
+
+
+        <select
+          className="featuredStatus-departments"
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+        >
+          <option value="">All Statuses</option>
           {statusOptions.map((status) => (
-            <option key={status} value={status}>{status}</option>
+            <option key={status} value={status}>
+              {status}
+            </option>
           ))}
         </select>
-        <select className="featuredStatus-departments" defaultValue="">
-          <option value="" disabled>Show...</option>
+
+
+        <select
+          className="featuredStatus-departments"
+          value={showCount}
+          onChange={(e) => setShowCount(Number(e.target.value))}
+        >
+          <option value="0">Show All</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
+          <option value="10">Show 15</option>
         </select>
+
+
       </div>
 
       <div className="main-section-departments">
-        <table>
-          <thead>
-            <tr>
-              <th>Case #</th>
-              <th>Date & Time of the Incident</th>
-              <th>Nature of Complaint</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentIncidents.map((incident, index) => (
-              <tr key={index}>
-                <td>{incident.caseNumber}</td>
-                <td>{incident.dateFiled} {incident.timeFiled}</td>
-                <td>{incident.nature}</td>
-                <td>
-                  <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
-                    {incident.status}
-                  </span>
-                </td>
-                <td>
-                  <div className="actions-departments-main">
-                      <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}>View</button>
-                    {isAuthorized && (
-                      <>
-                        <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}>Edit</button>
-                        <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDelete(incident.id); }}>Delete</button>
-                      </>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+  {currentIncidents.length === 0 ? (
+    <div className="no-result-card">
+       <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+      <p className="no-results-department">No Results Found</p>
+    </div>
+  ) : (
+    <table>
+      <thead>
+        <tr>
+          <th>Case #</th>
+          <th>Date & Time of the Incident</th>
+          <th>Nature of Complaint</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {currentIncidents.map((incident, index) => (
+          <tr key={index}>
+            <td>{incident.caseNumber}</td>
+            <td>{incident.dateFiled} {incident.timeFiled}</td>
+            <td>{incident.nature}</td>
+            <td>
+              <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
+                {incident.status}
+              </span>
+            </td>
+            <td>
+              <div className="actions-departments-main">
+                <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}>View</button>
+                {isAuthorized && (
+                  <>
+                    <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}>Edit</button>
+                    <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDelete(incident.id); }}>Delete</button>
+                  </>
+                )}
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+</div>
 
-      <div className="redirection-section-departments">
+
+
+<div className="redirection-section-departments">
         <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
         {getPageNumbers().map((number, index) => (
           <button
@@ -166,6 +244,7 @@ export default function Department() {
         ))}
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
+
     </main>
   );
 }

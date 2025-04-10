@@ -368,46 +368,46 @@ export default function EditKasambahay() {
                 <p>Educational Attainment</p>
                 <select name="educationalAttainment" className="add-resident-input-field" value={formData.educationalAttainment} onChange={handleChange} required>
                   <option value="" disabled>Choose Educational Attainment</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="7">7</option>
-                  <option value="8">8</option>
+                  <option value="1">Elem Under Grad</option>
+                    <option value="2">Elem Grad</option>
+                    <option value="3">HS Grad</option>
+                    <option value="4">HS Under Grad</option>
+                    <option value="5">COL Grad</option>
+                    <option value="6">COL Under Grad</option>
+                    <option value="7">Educational</option>
+                    <option value="8">Vocational</option>
                 </select>
               </div>
 
               <div className="fields-section">
                 <p>Nature of Work</p>
                 <select name="natureOfWork" className="add-resident-input-field" value={formData.natureOfWork} onChange={handleChange} required>
-                  <option value="" disabled>Choose Nature of Work</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
+                <option value="" disabled>Choose Nature of Work</option>
+                  <option value="1">Gen. House Help (All Around)</option>
+                  <option value="2">YAYA</option>
+                  <option value="3">COOK</option>
+                  <option value="4">Gardener</option>
+                  <option value="5">Laundry Person</option>
+                  <option value="6">Others</option>
                 </select>
               </div>
 
               <div className="fields-section">
                 <p>Employment Arrangement</p>
                 <select name="employmentArrangement" className="add-resident-input-field" value={formData.employmentArrangement} onChange={handleChange} required>
-                  <option value="" disabled>Choose Employment Arrangement</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
+                   <option value="" disabled>Choose Employment Arrangement</option>
+                   <option value="1">Live - IN</option>
+                   <option value="2">Live - OUT</option>
                 </select>
               </div>
             
               <div className="fields-section">
                 <p>Range of Salary</p>
                 <select name="salary" className="add-resident-input-field" value={formData.salary} onChange={handleChange} required>
-                <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
+                <option value="1">₱1,500 - ₱1,999</option>
+                  <option value="2">₱2,000 - ₱2,499</option>
+                  <option value="3">₱2,500 - ₱4,999</option>
+                  <option value="4">₱5,000 and Above</option>
                 </select>
               </div>
 
@@ -450,9 +450,7 @@ export default function EditKasambahay() {
               </div>
 
             </div>
-          </div>
-              {/* Right Side - Checkboxes & File Upload */}
-              <div className="add-resident-section-2-right-side">  
+
                 {/* File Upload Section Paayos na lang dito mapapasok yung new image*/}
                 <div className="file-upload-container">  
                   <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
