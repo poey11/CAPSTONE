@@ -2,9 +2,10 @@
 import "@/CSS/ResidentModule/addresident.css";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "../../../../../db/firebase";
+import { db, storage } from "../../../../../db/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useSession } from "next-auth/react";
 
 export default function AddFirstTimeJobSeeker() {
@@ -135,31 +136,43 @@ export default function AddFirstTimeJobSeeker() {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+  
     try {
+      let fileURL = "";
+      if (file) {
+        const storageRef = ref(storage, `JobSeekerFiles/${file.name}`);
+        await uploadBytes(storageRef, file);
+        fileURL = await getDownloadURL(storageRef);
+      }
+  
       // Extract Month, Day, and Year from Date of Birth
       const { monthOfBirth, dayOfBirth, yearOfBirth } = formatDateParts(formData.dateOfBirth);
-
+  
       // Ensure dateApplied is stored as YYYY-MM-DD in Firestore
-      const formattedDateApplied = formData.dateApplied ? new Date(formData.dateApplied).toISOString().split("T")[0] : "";
-
+      const formattedDateApplied = formData.dateApplied
+        ? new Date(formData.dateApplied).toISOString().split("T")[0]
+        : "";
+  
       // Save to Firestore
       await addDoc(collection(db, "JobSeekerList"), {
         ...formData,
         monthOfBirth,
         dayOfBirth,
         yearOfBirth,
-        dateApplied: formattedDateApplied, // Stored as YYYY-MM-DD
+        dateApplied: formattedDateApplied,
+        fileURL,
         createdAt: serverTimestamp(),
         createdBy: session?.user?.position || "Unknown",
       });
-
+  
     } catch (err) {
       setError("Failed to add job seeker");
       console.error(err);
     }
+  
     setLoading(false);
   };
+  
 
   // Handle back navigation
   const handleBack = () => {

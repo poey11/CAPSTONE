@@ -5,7 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { db, storage } from "../../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Link from "next/link";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useSession } from "next-auth/react";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 interface JobSeeker {
   dateApplied: string;
@@ -17,9 +18,13 @@ interface JobSeeker {
   sex: string;
   remarks: string;
   fileURL: string;
+  updatedBy: string;
 }
 
 export default function EditFirstTimeJobSeeker() {
+
+  const { data: session } = useSession();
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = searchParams.get("id");
@@ -86,27 +91,48 @@ export default function EditFirstTimeJobSeeker() {
     setFormData((prevData) => prevData ? { ...prevData, [name]: value } : null);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFile = e.target.files[0];
+  
+      // If there is an old file, delete it before uploading the new one
+      if (formData?.fileURL) {
+        const oldFileRef = ref(storage, formData.fileURL); // Get the reference of the old file
+        try {
+          await deleteObject(oldFileRef); // Delete the old file from Firebase Storage
+          console.log("Old file deleted successfully");
+        } catch (err) {
+          console.error("Failed to delete the old file:", err);
+        }
+      }
+  
       setFile(selectedFile);
       setPreview(URL.createObjectURL(selectedFile));
       e.target.value = "";
     }
   };
+  
 
-  const handleFileDelete = () => {
+  const handleFileDelete = async () => {
+    if (formData?.fileURL) {
+      // Delete the file from Firebase Storage
+      const fileRef = ref(storage, formData.fileURL); // Get the reference to the file using its URL
+      try {
+        await deleteObject(fileRef); // Delete the file from Firebase Storage
+        console.log("File deleted successfully");
+  
+        // Update Firestore to remove the fileURL field
+        setFormData((prev) => {
+          if (!prev) return prev;
+          return { ...prev, fileURL: "" } as JobSeeker;
+        });
+      } catch (err) {
+        console.error("Failed to delete file:", err);
+      }
+    }
     setFile(null);
-    setPreview(null); // ✅ Ensure it's undefined
-    setFormData((prev) => {
-      if (!prev) return prev; 
-    
-      return {
-        ...prev,
-        fileURL: "", 
-      } as JobSeeker;
-    });
-      };
+    setPreview(null);
+  };
 
 
 
@@ -140,9 +166,13 @@ export default function EditFirstTimeJobSeeker() {
     try {
       let updatedData: Partial<JobSeeker> = { ...formData };
   
-      // ✅ Upload the file if there's a new one selected
+      if (session?.user?.position) {
+        updatedData.updatedBy = session.user.position;
+      }
+
+      // Upload the file if there's a new one selected
       if (file) {
-        const fileRef = ref(storage, `jobseekers/${id}/${file.name}`);
+        const fileRef = ref(storage, `JobSeekerFiles/${file.name}`);
         await uploadBytes(fileRef, file);
         const downloadURL = await getDownloadURL(fileRef);
   

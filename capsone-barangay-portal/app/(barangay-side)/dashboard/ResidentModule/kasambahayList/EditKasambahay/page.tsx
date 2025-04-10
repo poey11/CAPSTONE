@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { db, storage } from "../../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Link from "next/link";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useSession } from "next-auth/react";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 
 interface KasambahayFormData {
@@ -29,9 +30,13 @@ interface KasambahayFormData {
   philhealthMember: boolean;
   pagibigMember: boolean;
   fileURL: string;
+  updatedBy: string;
 }
 
 export default function EditKasambahay() {
+
+  const { data: session } = useSession();
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const kasambahayId = searchParams.get("id"); 
@@ -57,6 +62,8 @@ export default function EditKasambahay() {
     philhealthMember: false,
     pagibigMember: false,
     fileURL: "",
+    updatedBy: "",
+
   });
 
   const [file, setFile] = useState<File | null>(null);
@@ -64,7 +71,7 @@ export default function EditKasambahay() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [originalData, setOriginalData] = useState({ ...formData });
+  const [originalData, setOriginalData] = useState<KasambahayFormData>({ ...formData });
 
   const [showDiscardPopup, setShowDiscardPopup] = useState(false);
   const [showSavePopup, setShowSavePopup] = useState(false); 
@@ -121,6 +128,7 @@ export default function EditKasambahay() {
             philhealthMember: docSnap.data().philhealthMember ?? false,
             pagibigMember: docSnap.data().pagibigMember ?? false,
             fileURL: docSnap.data().fileURL || "",
+            updatedBy: docSnap.data().updatedBy || "",
           };
 
           setFormData(data);
@@ -148,18 +156,32 @@ export default function EditKasambahay() {
     }
   };
 
-  const handleFileDelete = () => {
-    setFile(null);
-    setPreview(null); // ✅ Ensure it's undefined
-    setFormData((prev) => {
-      if (!prev) return prev; 
-    
-      return {
+  const handleFileDelete = async () => {
+    if (!formData.fileURL) return;
+  
+    try {
+      // Create a reference to the file in Firebase Storage
+      const fileRef = ref(storage, formData.fileURL);
+  
+      // Delete the file from Firebase Storage
+      await deleteObject(fileRef);
+  
+      // Clear the local state
+      setFile(null);
+      setPreview(null); // Ensure it's undefined
+  
+      // Reset fileURL in formData
+      setFormData((prev) => ({
         ...prev,
-        fileURL: "", 
-      } as KasambahayFormData;
-    });
-      };
+        fileURL: "",
+      }));
+  
+      console.log("File deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
+  };
+  
 
 
 
@@ -212,7 +234,7 @@ export default function EditKasambahay() {
   
       //  If new file is selected, upload to Firebase Storage
       if (file) {
-        const storageRef = ref(storage, `KasambahayFiles/${kasambahayId}/${file.name}`);
+        const storageRef = ref(storage, `KasambahayFiles/${file.name}`);
         await uploadBytes(storageRef, file);
         fileURL = await getDownloadURL(storageRef);
       }
@@ -239,6 +261,7 @@ export default function EditKasambahay() {
         philhealthMember: formData.philhealthMember,
         pagibigMember: formData.pagibigMember,
         fileURL,
+        updatedBy: session?.user?.position,
       });
       
     } catch (err) {
