@@ -217,74 +217,84 @@ export default function registeredVotersModule() {
       </div>
 
       <div className="resident-module-main-section">
-        {loading && <p>Loading voters...</p>}
-        {error && <p className="error">{error}</p>}
-
-        {!loading && !error && (
-          <table>
-            <thead>
-              <tr>
-                <th>
-                  Voter  Number
-                  <button
-                    onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                    className="sort-button"
-                  >
-                    {sortOrder === "asc" ? "▲" : "▼"}
-                  </button>
-                </th>                
-                <th>Full Name</th>                
-                <th>Home Address</th>
-                <th>Precinct Number</th>
-                <th>Creation At</th>
-
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentResidents.map((resident) => (
-                <tr key={resident.id}>
-                  <td>{resident.voterNumber}</td>
-                  <td>{resident.fullName}</td>
-                  <td>{resident.homeAddress}</td>
-                  <td>{resident.precinctNumber}</td>
-                  <td>{resident.createdAt}</td>
-                  <td>
-                    <div className="residentmodule-actions">
-                      <button className="residentmodule-action-view" onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}>View</button>
-                  {isAuthorized ? (
-                    <>
-                      <button 
-                        className="residentmodule-action-edit" 
-                        onClick={() => handleEditClick(resident.id)}
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        className="residentmodule-action-delete" 
-                        onClick={() => handleDeleteClick(resident.id, resident.voterNumber)}
-                      >
-                        Delete
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
-                        Edit
-                      </button>
-                      <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
-                        Delete
-                      </button>
-                    </>
-                  )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+  {loading ? (
+    <p>Loading voters...</p>
+  ) : error ? (
+    <p className="error">{error}</p>
+  ) : currentResidents.length === 0 ? (
+    <div className="no-result-card">
+      <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+      <p className="no-results-department">No Results Found</p>
+    </div>
+  ) : (
+    <table>
+      <thead>
+        <tr>
+          <th>
+            Voter Number
+            <button
+              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+              className="sort-button"
+            >
+              {sortOrder === "asc" ? "▲" : "▼"}
+            </button>
+          </th>                
+          <th>Full Name</th>                
+          <th>Home Address</th>
+          <th>Precinct Number</th>
+          <th>Creation At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {currentResidents.map((resident) => (
+          <tr key={resident.id}>
+            <td>{resident.voterNumber}</td>
+            <td>{resident.fullName}</td>
+            <td>{resident.homeAddress}</td>
+            <td>{resident.precinctNumber}</td>
+            <td>{resident.createdAt}</td>
+            <td>
+              <div className="residentmodule-actions">
+                <button
+                  className="residentmodule-action-view"
+                  onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}
+                >
+                  View
+                </button>
+                {isAuthorized ? (
+                  <>
+                    <button 
+                      className="residentmodule-action-edit" 
+                      onClick={() => handleEditClick(resident.id)}
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      className="residentmodule-action-delete" 
+                      onClick={() => handleDeleteClick(resident.id, resident.voterNumber)}
+                    >
+                      Delete
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
+                      Edit
+                    </button>
+                    <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
+                      Delete
+                    </button>
+                  </>
+                )}
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+</div>
 
     
       <div className="redirection-section">

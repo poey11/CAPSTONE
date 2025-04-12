@@ -209,208 +209,221 @@ export default function ResidentModule() {
 
   return (
     <main className="resident-module-main-container">
-      <div className="resident-module-section-1">
-        <h1>Main Residents</h1>
-          {isAuthorized ? (
-            <Link href="/dashboard/ResidentModule/AddResident">
-              <button className="add-announcement-btn" onClick={handleAddResidentClick}>Add New Resident</button>
-            </Link>
-          ) : (
-            <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Resident</button>
-          )}
-      </div>
-
-      <div className="resident-module-section-2">
-        <input
-          type="text"
-          className="resident-module-filter"
-          placeholder="Search by Name"
-          value={searchName}
-          onChange={(e) => setSearchName(e.target.value)}
-        />
-        <input
-          type="text"
-          className="resident-module-filter"
-          placeholder="Search by Address"
-          value={searchAddress}
-          onChange={(e) => setSearchAddress(e.target.value)}
-        />
-
-        <input
-          type="text"
-          className="resident-module-filter"
-          placeholder="Search by Occupation"
-          value={searchOccupation}
-          onChange={(e) => setSearchOccupation(e.target.value)}
-        />
-
-        <select className="resident-module-filter" value={residentType} onChange={handleResidentTypeChange}>
-          <option value="">Resident Type</option>
-          <option value="senior-citizen">Senior Citizen</option>
-          <option value="student">Student</option>
-          <option value="pwd">PWD</option>
-          <option value="solo-parent">Solo Parent</option>
-        </select>
-
-        <select
-          className="resident-module-filter"
-          value={showCount}
-          onChange={(e) => setShowCount(Number(e.target.value))}
-        >
-          <option value="0">Show All</option>
-          <option value="5">Show 5</option>
-          <option value="10">Show 10</option>
-        </select>
-      </div>
-
-      <div className="resident-module-main-section">
-        {loading && <p>Loading residents...</p>}
-        {error && <p className="error">{error}</p>}
-
-        {!loading && !error && (
-          <table>
-            <thead>
-              <tr>
-                <th>
-                  Resident Number
-                  <button
-                    onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                    className="sort-button"
-                  >
-                    {sortOrder === "asc" ? "▲" : "▼"}
-                  </button>
-                </th>
-                <th>Full Name</th>
-                <th>Address</th>
-                <th>General Location</th>
-                <th>Date of Birth</th>
-                <th>Place of Birth</th>
-                <th>Age</th>
-                <th>Sex</th>
-                <th>Civil Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-          {currentResidents.map((resident) => {
-            const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
-
-            return (
-              <tr key={resident.id}>
-                <td>{resident.residentNumber}</td>
-                <td>{fullName}</td>
-                <td>{resident.address}</td>
-                <td>{resident.generalLocation}</td>
-                <td>{resident.dateOfBirth}</td>
-                <td>{resident.placeOfBirth}</td>
-                <td>{resident.age}</td>
-                <td>{resident.sex}</td>
-                <td>{resident.civilStatus}</td>
-                <td>
-                  <div className="residentmodule-actions">
-                    <button
-                      className="residentmodule-action-view"
-                      onClick={() =>
-                        router.push(
-                          `/dashboard/ResidentModule/ViewResident?id=${resident.id}`
-                        )
-                      }
-                    >
-                      View
-                    </button>
-                    {isAuthorized ? (
-                      <>
-                        <button
-                          className="residentmodule-action-edit"
-                          onClick={() => handleEditClick(resident.id)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="residentmodule-action-delete"
-                          onClick={() =>
-                            handleDeleteClick(resident.id, resident.residentNumber)
-                          }
-                        >
-                          Delete
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          className="residentmodule-action-edit opacity-0 cursor-not-allowed"
-                          disabled
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="residentmodule-action-delete opacity-0 cursor-not-allowed"
-                          disabled
-                        >
-                          Delete
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-
-          </table>
-        )}
-      </div>
-
-      <div className="redirection-section">
-        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {getPageNumbers().map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === 'number' && paginate(number)}
-            className={currentPage === number ? "active" : ""}
-          >
-            {number}
-          </button>
-        ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-      </div>
-
-
-
-      {showDeletePopup && (
-                        <div className="confirmation-popup-overlay-module">
-                            <div className="confirmation-popup-module">
-                            <p>Are you sure you want to delete this Resident Record?</p>
-                            <h2>Resident Number: {selectedResidentNumber}</h2>
-                                <div className="yesno-container-module">
-                                    <button onClick={() => setShowDeletePopup(false)} className="no-button-module">No</button>
-                                    <button onClick={confirmDelete} className="yes-button-module">Yes</button>
-                                </div> 
-                            </div>
-                        </div>
+    <div className="resident-module-section-1">
+      <h1>Main Residents</h1>
+      {isAuthorized ? (
+        <Link href="/dashboard/ResidentModule/AddResident">
+          <button className="add-announcement-btn" onClick={handleAddResidentClick}>Add New Resident</button>
+        </Link>
+      ) : (
+        <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Resident</button>
       )}
+    </div>
+  
+    <div className="resident-module-section-2">
+      <input
+        type="text"
+        className="resident-module-filter"
+        placeholder="Search by Name"
+        value={searchName}
+        onChange={(e) => setSearchName(e.target.value)}
+      />
+      <input
+        type="text"
+        className="resident-module-filter"
+        placeholder="Search by Address"
+        value={searchAddress}
+        onChange={(e) => setSearchAddress(e.target.value)}
+      />
+      <input
+        type="text"
+        className="resident-module-filter"
+        placeholder="Search by Occupation"
+        value={searchOccupation}
+        onChange={(e) => setSearchOccupation(e.target.value)}
+      />
+  
+      <select className="resident-module-filter" value={residentType} onChange={handleResidentTypeChange}>
+        <option value="">Resident Type</option>
+        <option value="senior-citizen">Senior Citizen</option>
+        <option value="student">Student</option>
+        <option value="pwd">PWD</option>
+        <option value="solo-parent">Solo Parent</option>
+      </select>
+  
+      <select
+        className="resident-module-filter"
+        value={showCount}
+        onChange={(e) => setShowCount(Number(e.target.value))}
+      >
+        <option value="0">Show All</option>
+        <option value="5">Show 5</option>
+        <option value="10">Show 10</option>
+      </select>
 
-
-      {showPopup && (
-                <div className={`popup-overlay-module show`}>
-                    <div className="popup-module">
-                        <p>{popupMessage}</p>
-                    </div>
-                </div>
-      )}
-
-      {showAlertPopup && (
-                        <div className="confirmation-popup-overlay-module">
-                            <div className="confirmation-popup-module">
-                                <p>{popupMessage}</p>
-                                <div className="yesno-container-module">
-                                    <button onClick={() => setshowAlertPopup(false)} className="no-button-module">Continue</button>
-                                </div> 
-                            </div>
-                        </div>
-       )}  
       
-    </main>
+      <select
+        className="resident-module-filter"
+        value={showCount}
+        onChange={(e) => setShowCount(Number(e.target.value))}
+      >
+        <option value="0">Show All</option>
+        <option value="5">Show 5</option>
+        <option value="10">Show 10</option>
+      </select>
+
+    </div>
+  
+    <div className="resident-module-main-section">
+  
+    {loading ? (
+      <p>Loading residents...</p>
+    ) : currentResidents.length === 0 ? (
+      <div className="no-result-card">
+        <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+        <p className="no-results-department">No Results Found</p>
+      </div>
+        
+      ) : (
+        <>
+          {!loading && !error && (
+            <table>
+              <thead>
+                <tr>
+                  <th>
+                    Resident Number
+                    <button
+                      onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                      className="sort-button"
+                    >
+                      {sortOrder === "asc" ? "▲" : "▼"}
+                    </button>
+                  </th>
+                  <th>Full Name</th>
+                  <th>Address</th>
+                  <th>General Location</th>
+                  <th>Date of Birth</th>
+                  <th>Occupation</th>
+                 
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentResidents.map((resident) => {
+                  const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
+                  return (
+                    <tr key={resident.id}>
+                      <td>{resident.residentNumber}</td>
+                      <td>{fullName}</td>
+                      <td>{resident.address}</td>
+                      <td>{resident.generalLocation}</td>
+                      <td>{resident.dateOfBirth}</td>
+                      <td>{resident.occupation}</td>
+                
+                     
+                      <td>
+                        <div className="residentmodule-actions">
+                          <button
+                            className="residentmodule-action-view"
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/ResidentModule/ViewResident?id=${resident.id}`
+                              )
+                            }
+                          >
+                            View
+                          </button>
+                          {isAuthorized ? (
+                            <>
+                              <button
+                                className="residentmodule-action-edit"
+                                onClick={() => handleEditClick(resident.id)}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                className="residentmodule-action-delete"
+                                onClick={() =>
+                                  handleDeleteClick(resident.id, resident.residentNumber)
+                                }
+                              >
+                                Delete
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                className="residentmodule-action-edit opacity-0 cursor-not-allowed"
+                                disabled
+                              >
+                                Edit
+                              </button>
+                              <button
+                                className="residentmodule-action-delete opacity-0 cursor-not-allowed"
+                                disabled
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </>
+      )}
+    </div>
+  
+    <div className="redirection-section">
+      <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+      {getPageNumbers().map((number, index) => (
+        <button
+          key={index}
+          onClick={() => typeof number === 'number' && paginate(number)}
+          className={currentPage === number ? "active" : ""}
+        >
+          {number}
+        </button>
+      ))}
+      <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+    </div>
+  
+    {showDeletePopup && (
+      <div className="confirmation-popup-overlay-module">
+        <div className="confirmation-popup-module">
+          <p>Are you sure you want to delete this Resident Record?</p>
+          <h2>Resident Number: {selectedResidentNumber}</h2>
+          <div className="yesno-container-module">
+            <button onClick={() => setShowDeletePopup(false)} className="no-button-module">No</button>
+            <button onClick={confirmDelete} className="yes-button-module">Yes</button>
+          </div> 
+        </div>
+      </div>
+    )}
+  
+    {showPopup && (
+      <div className={`popup-overlay-module show`}>
+        <div className="popup-module">
+          <p>{popupMessage}</p>
+        </div>
+      </div>
+    )}
+  
+    {showAlertPopup && (
+      <div className="confirmation-popup-overlay-module">
+        <div className="confirmation-popup-module">
+          <p>{popupMessage}</p>
+          <div className="yesno-container-module">
+            <button onClick={() => setshowAlertPopup(false)} className="no-button-module">Continue</button>
+          </div> 
+        </div>
+      </div>
+    )}
+  </main>
+  
   );
 }
