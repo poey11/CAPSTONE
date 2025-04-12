@@ -213,6 +213,24 @@ const handleFileChange = (
     
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+
+    // Handle birthday and compute age
+    if (name === "birthday") {
+      const birthDate = new Date(value);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        birthday: value,
+        age: age.toString(), // Ensure it's string if your input expects string
+      }));
+      return;
+    }
   
     setClearanceInput((prev: any) => {
       const keys = name.split(".");
@@ -650,6 +668,7 @@ const handleFileChange = (
                   onChange={handleChange}
                   className="form-input" 
                   required 
+                  max={new Date().toISOString().split("T")[0]}
                 />
              </div>
 
@@ -677,6 +696,7 @@ const handleFileChange = (
                 value={clearanceInput.birthday}
                 onChange={handleChange}
                 required 
+                max={new Date().toISOString().split("T")[0]}
               />
             </div>
             
@@ -796,10 +816,10 @@ const handleFileChange = (
                 value={clearanceInput.age}
                 onChange={handleChange}
                 required 
-                min="1"  // Minimum age (you can adjust this as needed)
-                max="150"  // Maximum age (you can adjust this as needed)
+                min="1"  
+                max="150"  
                 placeholder="Enter Age"  
-                step="1"  // Ensures only whole numbers can be entered
+                step="1" 
               />
             </div>
 
@@ -1086,14 +1106,19 @@ const handleFileChange = (
                   type="tel"  
                   id="emergencyDetails.contactNumber"  
                   value={clearanceInput.emergencyDetails.contactNumber}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    const input = e.target.value;
+                    // Only allow digits and limit to 11 characters
+                    if (/^\d{0,11}$/.test(input)) {
+                      handleChange(e);
+                    }
+                  }}
                   name="emergencyDetails.contactNumber"  
                   className="form-input" 
-                  required 
-                  placeholder="Enter Contact Number"  
-                  maxLength={11}  // Restrict the input to 10 characters as a number
-                  pattern="^[0-9]{10}$"  // Regular expression to enforce a 10-digit number format
-                  title="Please enter a valid 10-digit contact number"  // Tooltip for invalid input
+                  required
+                  maxLength={11}  
+                  pattern="^[0-9]{11}$" 
+                  placeholder="Please enter a valid 11-digit contact number" 
                 />
               </div>
             </>
