@@ -224,83 +224,106 @@ export default function KasambahayListModule() {
       </div>
 
       <div className="resident-module-main-section">
-        {loading && <p>Loading residents...</p>}
-        {error && <p className="error">{error}</p>}
+  {loading ? (
+    <p>Loading residents...</p>
+  ) : error ? (
+    <p className="error">{error}</p>
+  ) : currentResidents.length === 0 ? (
+    <div className="no-result-card">
+      <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+      <p className="no-results-department">No Results Found</p>
+    </div>
+  ) : (
+    <table>
+    <thead>
+      <tr>
+        <th>
+          Registration Control Number
+          <button
+            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+            className="sort-button"
+          >
+            {sortOrder === "asc" ? "▲" : "▼"}
+          </button>
+        </th>
+        <th>Full Name</th>
+        <th>Home Address</th>
+        <th>Date of Birth</th>
+        <th>Place of Birth</th>
+        <th>Sex</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {currentResidents.map((resident) => {
+        const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
+        return (
+          <tr key={resident.id}>
+            <td>{resident.registrationControlNumber}</td>
+            <td>{fullName}</td>
+            <td>{resident.homeAddress}</td>
+            <td>{resident.dateOfBirth}</td>
+            <td>{resident.placeOfBirth}</td>
+            <td>{resident.sex}</td>
 
-        {!loading && !error && (
-          <table>
-            <thead>
-              <tr>
-                <th>
-                  Registration Control Number
-                  <button
-                    onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                    className="sort-button"
-                  >
-                    {sortOrder === "asc" ? "▲" : "▼"}
-                  </button>
-                </th>                
-                <th>Last Name</th>                
-                <th>First Name</th>
-                <th>Middle Name</th>
-                <th>Home Address</th>
-                <th>Date of Birth</th>
-                <th>Place of Birth</th>
-                <th>Sex</th>
-                <th>Age</th>
-                <th>Created At</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentResidents.map((resident) => (
-                <tr key={resident.id}>
-                  <td>{resident.registrationControlNumber}</td>
-                  <td>{resident.lastName}</td>
-                  <td>{resident.firstName}</td>
-                  <td>{resident.middleName || "N/A"}</td>
-                  <td>{resident.homeAddress}</td>
-                  <td>{resident.dateOfBirth}</td>
-                  <td>{resident.placeOfBirth}</td>
-                  <td>{resident.sex}</td>
-                  <td>{resident.age}</td>
-                  <td>{resident.createdAt}</td>
-                  <td>
-                    <div className="residentmodule-actions">
-                      <button className="residentmodule-action-view" onClick={() => router.push(`/dashboard/ResidentModule/kasambahayList/ViewKasambahay?id=${resident.id}`)}>View</button>
-                      {isAuthorized ? (
-                    <>
-                      <button 
-                        className="residentmodule-action-edit" 
-                        onClick={() => handleEditClick(resident.id)}
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        className="residentmodule-action-delete" 
-                        onClick={() => handleDeleteClick(resident.id, resident.registrationControlNumber)}
-                      >
-                        Delete
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
-                        Edit
-                      </button>
-                      <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
-                        Delete
-                      </button>
-                    </>
-                  )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+            <td>
+              <div className="residentmodule-actions">
+                <button
+                  className="residentmodule-action-view"
+                  onClick={() =>
+                    router.push(
+                      `/dashboard/ResidentModule/kasambahayList/ViewKasambahay?id=${resident.id}`
+                    )
+                  }
+                >
+                  View
+                </button>
+                {isAuthorized ? (
+                  <>
+                    <button
+                      className="residentmodule-action-edit"
+                      onClick={() => handleEditClick(resident.id)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="residentmodule-action-delete"
+                      onClick={() =>
+                        handleDeleteClick(
+                          resident.id,
+                          resident.registrationControlNumber
+                        )
+                      }
+                    >
+                      Delete
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="residentmodule-action-edit opacity-0 cursor-not-allowed"
+                      disabled
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="residentmodule-action-delete opacity-0 cursor-not-allowed"
+                      disabled
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
+              </div>
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+  
+  )}
+</div>
 
     
       <div className="redirection-section">

@@ -61,6 +61,7 @@ export default function ViewKasambahay() {
     { label: "Employer Address", key: "employerAddress" },
     { label: "Created By", key: "createdBy" },
     { label: "Updated By", key: "updatedBy" },
+    { label: "Created At", key: "createdAt"},
   ];
 
   const handleBack = () => {
