@@ -31,7 +31,7 @@ export default function ServicesNotification() {
                 details you provided.
             </p>
             
-        <Link href="/services">
+        <Link href="/">
             <button type="submit" className="back-button-incident-notification-services">Back to Home</button>
         </Link>
             
