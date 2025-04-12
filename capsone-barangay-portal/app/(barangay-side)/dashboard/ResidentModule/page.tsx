@@ -333,39 +333,40 @@ export default function ResidentModule() {
                           >
                             View
                           </button>
-                          {isAuthorized ? (
-                            <>
-                              <button
-                                className="residentmodule-action-edit"
-                                onClick={() => handleEditClick(resident.id)}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                className="residentmodule-action-delete"
-                                onClick={() =>
-                                  handleDeleteClick(resident.id, resident.residentNumber)
-                                }
-                              >
-                                Delete
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <button
-                                className="residentmodule-action-edit opacity-0 cursor-not-allowed"
-                                disabled
-                              >
-                                Edit
-                              </button>
-                              <button
-                                className="residentmodule-action-delete opacity-0 cursor-not-allowed"
-                                disabled
-                              >
-                                Delete
-                              </button>
-                            </>
-                          )}
+                          {!isAuthorized ? (
+                          <>
+                            <button
+                              className="residentmodule-action-edit hidden"
+                              aria-hidden="true"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="residentmodule-action-delete hidden"
+                              aria-hidden="true"
+                            >
+                              Delete
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="residentmodule-action-edit"
+                              onClick={() => handleEditClick(resident.id)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="residentmodule-action-delete"
+                              onClick={() =>
+                                handleDeleteClick(resident.id, resident.residentNumber)
+                              }
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
+
                         </div>
                       </td>
                     </tr>

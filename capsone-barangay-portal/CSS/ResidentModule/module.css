@@ -399,3 +399,7 @@
     color: #e7594e;
   }
   
+  /* Optional, improves layout when only view is shown */
+.center-view-only {
+  justify-content: center;
+}
