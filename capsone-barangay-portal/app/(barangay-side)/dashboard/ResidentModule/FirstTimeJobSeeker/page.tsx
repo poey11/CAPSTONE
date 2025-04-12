@@ -232,77 +232,87 @@ export default function JobSeekerListModule() {
     </div>
   ) : (
     <table>
-      <thead>
-        <tr>
-          <th>
-            Date Applied
-            <button
-              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              className="sort-button"
-            >
-              {sortOrder === "asc" ? "▲" : "▼"}
-            </button>
-          </th>
-          <th>First Name</th>
-          <th>Middle Name</th>
-          <th>Last Name</th>
-          <th>Date of Birth</th>
-          <th>Age</th>
-          <th>Sex</th>
-          <th>Remarks</th>
-          <th>Actions</th>
+  <thead>
+    <tr>
+      <th>
+        Date Applied
+        <button
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+          className="sort-button"
+        >
+          {sortOrder === "asc" ? "▲" : "▼"}
+        </button>
+      </th>
+      <th>Full Name</th>
+      <th>Date of Birth</th>
+      <th>Age</th>
+      <th>Sex</th>
+      <th>Remarks</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredJobSeekers.map((seeker) => {
+      const fullName = `${seeker.lastName || ""}, ${seeker.firstName || ""} ${seeker.middleName || ""}`.trim();
+      return (
+        <tr key={seeker.id}>
+          <td>{formatDateToMMDDYYYY(seeker.dateApplied)}</td>
+          <td>{fullName}</td>
+          <td>{seeker.dateOfBirth}</td>
+          <td>{seeker.age}</td>
+          <td>{seeker.sex}</td>
+          <td>{seeker.remarks}</td>
+          <td>
+            <div className="residentmodule-actions">
+              <button
+                className="residentmodule-action-view"
+                onClick={() =>
+                  router.push(
+                    `/dashboard/ResidentModule/FirstTimeJobSeeker/ViewFirstTimeJobSeeker?id=${seeker.id}`
+                  )
+                }
+              >
+                View
+              </button>
+              {isAuthorized ? (
+                <>
+                  <button
+                    className="residentmodule-action-edit"
+                    onClick={() => handleEditClick(seeker.id)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="residentmodule-action-delete"
+                    onClick={() => handleDeleteClick(seeker.id)}
+                  >
+                    Delete
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="residentmodule-action-edit opacity-0 cursor-not-allowed"
+                    disabled
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="residentmodule-action-delete opacity-0 cursor-not-allowed"
+                    disabled
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
+            </div>
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        {filteredJobSeekers.map((seeker) => (
-          <tr key={seeker.id}>
-            <td>{formatDateToMMDDYYYY(seeker.dateApplied)}</td>
-            <td>{seeker.firstName}</td>
-            <td>{seeker.middleName}</td>
-            <td>{seeker.lastName}</td>
-            <td>{seeker.dateOfBirth}</td>
-            <td>{seeker.age}</td>
-            <td>{seeker.sex}</td>
-            <td>{seeker.remarks}</td>
-            <td>
-              <div className="residentmodule-actions">
-                <button
-                  className="residentmodule-action-view"
-                  onClick={() => router.push(`/dashboard/ResidentModule/FirstTimeJobSeeker/ViewFirstTimeJobSeeker?id=${seeker.id}`)}
-                >
-                  View
-                </button>
-                {isAuthorized ? (
-                  <>
-                    <button 
-                      className="residentmodule-action-edit" 
-                      onClick={() => handleEditClick(seeker.id)}
-                    >
-                      Edit
-                    </button>
-                    <button 
-                      className="residentmodule-action-delete" 
-                      onClick={() => handleDeleteClick(seeker.id)}
-                    >
-                      Delete
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
-                      Edit
-                    </button>
-                    <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
-                      Delete
-                    </button>
-                  </>
-                )}
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+      );
+    })}
+  </tbody>
+</table>
+
   )}
 </div>
 
