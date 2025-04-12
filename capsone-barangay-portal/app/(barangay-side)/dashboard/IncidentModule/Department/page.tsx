@@ -34,16 +34,22 @@ export default function Department() {
 
   useEffect(() => {
     if (departmentId) {
-      const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", departmentId, (data) => {
-        setIncidentData(data);
-        setFilteredIncidents(data); // Update filteredIncidents when data is fetched
-      });
-
-      return () => {
-        if (unsubscribe) {
-          unsubscribe();
-        }
-      };
+      try {
+        const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", departmentId, (data) => {
+          setIncidentData(data);
+          setFilteredIncidents(data); // Update filteredIncidents when data is fetched
+        });
+  
+        return () => {
+          if (unsubscribe) {
+            unsubscribe();
+          }
+        };
+      } catch (error) {
+        console.error("Error fetching incident data:", error);
+        
+      }
+    
     }
   }, [departmentId]);
 
@@ -101,13 +107,13 @@ export default function Department() {
 
       <div className="section-2-departments">
         <input type="text" className="search-bar-departments" placeholder="Enter Incident Case" />
-        <select className="featuredStatus-departments" defaultValue="">
+        <select className="featuredStatus-departments">
           <option value="" disabled>Status</option>
           {statusOptions.map((status) => (
             <option key={status} value={status}>{status}</option>
           ))}
         </select>
-        <select className="featuredStatus-departments" defaultValue="">
+        <select className="featuredStatus-departments">
           <option value="" disabled>Show...</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>

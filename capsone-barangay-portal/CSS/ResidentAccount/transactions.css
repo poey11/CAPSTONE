@@ -442,3 +442,49 @@
   
   
   
+.status-badge-view {
+  color: white;                
+  display: inline-block;        
+  text-transform: capitalize;   
+  text-align: center;    
+
+  border: none;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+  width: 100px;
+
+}
+
+.status-section-view {
+display: flex;
+margin-left: 40%; 
+}
+
+
+  
+.Pending {
+  background-color: #d4d64f;
+  color: white;
+
+  
+}
+
+.Resolved {
+  background-color: #66c47a;
+  color: white;
+  
+}
+
+.Settled {
+  background-color: #1e5128;
+  color: white;
+
+}
+
+.Archived {
+  background-color: #5d74e8ee;
+  color: white;
+
+}

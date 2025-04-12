@@ -5,9 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
-import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
+import {getAllSpecificDocument} from "@/app/helpers/firestorehelper";
 import {isPastDate,isToday,isPastOrCurrentTime, getLocalDateString} from "@/app/helpers/helpers";
 import { useSession } from "next-auth/react";
+import {customAlphabet} from "nanoid";
 
  interface userProps{
   fname: string;
@@ -74,30 +75,51 @@ export default function AddIncident() {
     })
   },[user]);
  
-  
-
-  // ✅ Fetch and set the case number when the component mounts
-  useEffect(() => {
-    const fetchCaseNumber = async () => {
-      const caseNum = await getCaseNumber();
-      setReportInfo((prev: any) => ({ ...prev, caseNumber: caseNum }));
-    };
-
-    fetchCaseNumber();
-  }, [departmentId]); // Runs when `departmentId` changes
 
   const currentDate = getLocalDateString(new Date());
 
-  const getCaseNumber = async () => {
-    if (departmentId) {
-      let number = await getSpecificCountofCollection("IncidentReports", "department", departmentId);
-      const formattedNumber = number !== undefined ? String(number + 1).padStart(4, "0") : "0000";
-      const date = currentDate.split("T")[0].replace(/-/g, "");
-      const caseValue =`${departmentId} - ${date} - ${formattedNumber}` ;
-      console.log("Generated Case Number:", caseValue); // ✅ Logs the correct value
-      return caseValue; // ✅ Ensure the function returns the computed value
+  const [reportCollection, setReportCollection] = useState<any[]>([]);
+ 
+  useEffect(() => {
+    if (!departmentId) return; 
+    try {
+      const unsubscribe =  getAllSpecificDocument("IncidentReports", "department", "==", departmentId,  setReportCollection);
+      return () => {
+        if (unsubscribe) {
+          unsubscribe(); 
+        }
+      }
+    } catch (error) {
+       setReportCollection([]);
     }
-  };
+   
+  }, [departmentId]);
+
+  useEffect(() => { 
+    const getCaseNumber = () => {
+      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const randomIdString = customAlphabet(alphabet, 6);
+      const randomId = randomIdString();
+      let id ="";
+      let formattedNumber ="";
+      if(departmentId === "Lupon") id = "LPN";
+      if(reportCollection.length < 1) {
+         formattedNumber = String(1).padStart(4, "0");
+      }
+      else{
+        const lastestReport = reportCollection[0].caseNumber.split(" - ");
+        const lastCaseNumber = parseInt(lastestReport[lastestReport.length - 1]);
+        formattedNumber = String(lastCaseNumber+1).padStart(4, "0");
+      }
+      const caseValue =`${id} - ${randomId} - ${formattedNumber}` ;
+      setReportInfo((prev: any) => ({ ...prev, caseNumber: caseValue }));
+      return;
+
+
+    }
+      getCaseNumber();
+  },[reportCollection])
+  
 
 
   
@@ -158,6 +180,7 @@ export default function AddIncident() {
             staffId: user?.id,
             isDialogue: false,
             nosHearing:0,
+            createdAt: new Date(),
             ...(departmentId === "GAD" && { 
               nosofMaleChildren: reportInfo.nosofMaleChildren,
               nosofFemaleChildren: reportInfo.nosofFemaleChildren,
@@ -244,7 +267,7 @@ export default function AddIncident() {
 
 
       handleUpload().then(() => {
-        deleteForm();
+        //deleteForm();
         router.back();
       })
     } else {

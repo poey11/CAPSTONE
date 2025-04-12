@@ -304,17 +304,6 @@ const toggleInvestigatedDetails = () => setShowInvestigatedDetails(prev => !prev
 const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
 
 
-
-
-
-
-
-
-  
-
-
-
-
   return (
     <>
       {loading ? (       <p></p> ) : (

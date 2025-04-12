@@ -6,10 +6,9 @@ import { useAuth } from "@/app/context/authContext";
 import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection, doc, getDoc} from "firebase/firestore";
 import { db,storage, auth } from "@/app/db/firebase";
-import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
-import {isPastDate,isToday,isPastOrCurrentTime} from "@/app/helpers/helpers";
-import {getLocalDateString} from "@/app/helpers/helpers";
-
+import { getAllSpecificDocument } from "@/app/helpers/firestorehelper";
+import {isPastDate,isToday,isPastOrCurrentTime,getLocalDateString} from "@/app/helpers/helpers";
+import {customAlphabet} from "nanoid";
 
 
 const incidentForm:React.FC = () => {
@@ -17,29 +16,27 @@ const incidentForm:React.FC = () => {
   const {user} = useAuth();
   const currentUser = user?.uid || "Guest";
   const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
-  const [minDate, setMinDate] = useState<string>("");
+  const minDate = getLocalDateString(new Date());
   const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
   const [incidentReport, setIncidentReport] = useState<any>({
-      firstname: "",
-      middlename: "",
-      lastname: "",
-      contactNos: "",
-      concerns: "",
-      otherConcern: "", 
-      dateFiled: "",
-      time: "",
-      address: "",
-      file: null,
-      area:"",
-      reportID: "",
-      department: "",
-      status: "Pending",
+    caseNumber: "",
+    firstname: "",
+    middlename: "",
+    lastname: "",
+    contactNos: "",
+    concerns: "",
+    otherConcern: "", 
+    dateFiled: "",
+    time: "",
+    address: "",
+    file: null,
+    area:"",
+    reportID: "",
+    department: "",
+    status: "Pending",
+    addInfo:"",
   });
 
-  const [firstname, setFirstName] = useState("");
-  const [middlename, setMiddleName] = useState("");
-  const [lastname, setLastName] = useState("");
-  const [contactNos, setContact] = useState("");
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -49,12 +46,6 @@ const incidentForm:React.FC = () => {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setFirstName(data.first_name || "");
-          setMiddleName(data.middle_name || "");
-          setLastName(data.last_name || "");
-          setContact(data.phone || "");
-          
-          // Set firstName in the clearanceInput state when user data is fetched
           setIncidentReport((prev: any) => ({
             ...prev,
             firstname: data.first_name || "",
@@ -68,40 +59,54 @@ const incidentForm:React.FC = () => {
 
     fetchUserData();
   }, []);
-
-  const [caseNumber, setCaseNumber] = useState("");
+  const [onlineReportCollection, setOnlineReportCollection] = useState<any[]>([]);
   useEffect(() => {
-    const fetchCaseNumber = async () => {
-      const caseNumber = await getCaseNumber();
-      setCaseNumber(caseNumber);
-    }
-    fetchCaseNumber();
-  },[currentUser])
-
-  useEffect(() => {
-    const today = new Date();
-    const formattedDate = getLocalDateString(today);
-    setMinDate(formattedDate);
-  }, []);
- 
-
-  const getCaseNumber = async () => {
-      let number = await getSpecificCountofCollection("IncidentReports", "reportID", currentUser);
-      const formattedNumber = number !== undefined ? String(number + 1).padStart(4, "0") : "0000";
-      let currentDate = minDate.replace(/-/g, "")
-
-      const caseValue =`${currentDate} - ${formattedNumber}` ;
-      console.log("Generated Case Number:", caseValue);
-      return caseValue; 
-    
-  };
-    const clearForm = () => {
-      if(filesContainer1.length > 0){
-        if(filesContainer1[0].name){  
-          handleFileDeleteContainer1(filesContainer1[0].name);
+    try {
+      const unsubscribe =  getAllSpecificDocument("IncidentReports", "department", "==", "Online",  setOnlineReportCollection);
+      return () => {
+        if (unsubscribe) {
+          unsubscribe(); 
         }
       }
+    } catch (error) {
+      setOnlineReportCollection([]);
+    }
+   
+  }, []);
+  
+  useEffect(() => {
+    const getCaseNumber = () => {
+      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const randomId = customAlphabet(alphabet, 6);
+      const randomIdString = randomId();
+      let formattedNumber = ""
+      if(onlineReportCollection.length < 1){
+        formattedNumber = String(1).padStart(4, "0");
+      }
+      else{
+        const lastReport = onlineReportCollection[0].caseNumber.split("-");
+        const number = parseInt(lastReport[lastReport.length - 1]);
+        formattedNumber = String(number+1).padStart(4, "0");
+      }
+      const user = currentUser !== "Guest"
+      ? currentUser.substring(0, 6).toUpperCase()
+      : "GUEST";  
+      const caseValue =`${user} - ${randomIdString} - ${formattedNumber}` ;
+      console.log("Generated Case Number:", caseValue);
+      setIncidentReport((prev: any) => ({
+        ...prev,
+        caseNumber: caseValue, // ex : "ABCDEF - ABCDEF - 0001" or "GUEST - ABCDEF - 0001"
+      }));
+    };
+
+    getCaseNumber();
+  },[user, onlineReportCollection]);
+
+  
+    const clearForm = () => {
+      handleFileDeleteContainer1();
       setIncidentReport({
+        caseNumber: "",
         firstname: "",
         middlename: "",
         lastname: "",
@@ -116,7 +121,7 @@ const incidentForm:React.FC = () => {
         department: "",
         status: "Pending",
       });
-      setCaseNumber("");
+      
     }
 
     const handleFormChange = (e:ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -155,7 +160,7 @@ const incidentForm:React.FC = () => {
     };
 
     // Handle file deletion for container 1
-    const handleFileDeleteContainer1 = (fileName: string) => {
+    const handleFileDeleteContainer1 = () => {
       setFilesContainer1([]);
   
       // Reset file input
@@ -238,46 +243,28 @@ const incidentForm:React.FC = () => {
 
         const concernValue = incidentReport.concerns === "Other" ? incidentReport.otherConcern : incidentReport.concerns;
         console.log(currentUser);
-        if(currentUser === "Guest"){
-          const toAdd = [{
-            firstname: incidentReport.firstname,
-            middlename: incidentReport.middlename,
-            lastname: incidentReport.lastname,
-            contactNos: incidentReport.contactNos,
-            concerns: concernValue,  // Updated this line
-            dateFiled: incidentReport.dateFiled,
-            time: incidentReport.time,
-            address: incidentReport.address,
-            area: incidentReport.area,
-            file: filename,
-            department: "Online",
-            reportID: currentUser, 
-            status: incidentReport.status,
-            isFiled: false,
-          }];
-          handleReportUpload(toAdd, storageRef)
-        }else{
-          
-          const toAdd = [{
-            caseNumber: caseNumber,
-            firstname: incidentReport.firstname,
-            middlename: incidentReport.middlename,
-            lastname: incidentReport.lastname,
-            contactNos: incidentReport.contactNos,
-            concerns: concernValue,  // Updated this line
-            dateFiled: incidentReport.dateFiled,
-            time: incidentReport.time,
-            address: incidentReport.address,
-            area: incidentReport.area,
-            file: filename,
-            department: "Online",
-            reportID: currentUser, 
-            status: incidentReport.status,
-            isFiled: false,
-          }];
-          console.log(toAdd);
-          handleReportUpload(toAdd, storageRef);
-        }
+        
+        const toAdd = [{
+          ...(currentUser !== "Guest" && { reportID: currentUser }), // Include reportID only if currentUser is not Guest
+          caseNumber: incidentReport.caseNumber,
+          firstname: incidentReport.firstname,
+          middlename: incidentReport.middlename,
+          lastname: incidentReport.lastname,
+          contactNos: incidentReport.contactNos,
+          concerns: concernValue,  
+          dateFiled: incidentReport.dateFiled,
+          time: incidentReport.time,
+          address: incidentReport.address,
+          area: incidentReport.area,
+          file: filename,
+          department: "Online",
+          status: incidentReport.status,
+          isFiled: false,
+          addInfo: incidentReport.addInfo,
+          createdAt: new Date(),
+        }];
+        console.log(toAdd);
+        handleReportUpload(toAdd, storageRef);
         clearForm(); // Clear the form after submission
         router.push('/IncidentReport/Notification'); 
       } else {
@@ -488,7 +475,22 @@ const incidentForm:React.FC = () => {
               </select>
             </div>
 
-
+            <div className="form-group-incident-report">
+              <label htmlFor="addInfo" className="form-label-incident-report">
+               Additional Information/Remarks Regarding the Concern<span className="required">*</span>
+              </label>
+              <textarea 
+                id="addInfo"
+                name="addInfo"
+                className="form-input-incident-report resize-none"
+                required
+                placeholder="Enter Additonal Information/Remarks"
+                value={incidentReport.addInfo}
+                onChange={handleFormChange}
+                rows={4} cols={50}
+              
+              />
+            </div>
         
             <div className="signature/printedname-container">
               <label className="form-label-incident-report">Upload Proof of Incident (If Applicable)</label>
@@ -525,7 +527,7 @@ const incidentForm:React.FC = () => {
                               <div className="delete-container-incident-report">
                                 <button
                                   type="button"
-                                  onClick={() => handleFileDeleteContainer1(file.name)}
+                                  onClick={() => handleFileDeleteContainer1()}
                                   className="delete-button-incident-report"
                                 >
                                   <img
