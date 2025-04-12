@@ -59,7 +59,7 @@ export default function ViewResident() {
     { label: "Solo Parent", key: "isSoloParent", isBoolean: true },
     { label: "Created By", key: "createdBy" },
     { label: "Updated By", key: "updatedBy" },
-    { label: "Created At", key: "createdat" },
+    { label: "Created At", key: "createdAt" },
     
   ];
 
