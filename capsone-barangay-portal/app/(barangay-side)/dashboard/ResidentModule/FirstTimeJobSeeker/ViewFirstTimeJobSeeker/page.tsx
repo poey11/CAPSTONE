@@ -50,6 +50,7 @@ export default function ViewFirstTimeJobSeeker() {
     { label: "Remarks", key: "remarks" },
     { label: "Created By", key: "createdBy" },
     { label: "Updated By", key: "updatedBy" },  
+    { label: "Created At", key: "createdat"}, 
   ];
 
   const handleBack = () => {

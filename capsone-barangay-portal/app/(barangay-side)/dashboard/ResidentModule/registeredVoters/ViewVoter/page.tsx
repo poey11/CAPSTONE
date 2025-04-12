@@ -44,6 +44,7 @@ export default function ViewVoter() {
     { label: "Full Name", key: "fullName" },
     { label: "Home Address", key: "homeAddress" },
     { label: "Precinct Number", key: "precinctNumber" },
+    { label: "Created At", key: "createdAt"}
   ];
 
   const handleBack = () => {
