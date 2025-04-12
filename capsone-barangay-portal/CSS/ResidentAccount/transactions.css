@@ -413,6 +413,7 @@
     border-bottom: 1px solid #ddd;
     padding: 1.5rem;
     transition: background 0.3s ease;
+    justify-content: center;
   }
   
   .details-section:hover {
@@ -433,6 +434,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     text-align: center;
+    
   }
   
   .description {
