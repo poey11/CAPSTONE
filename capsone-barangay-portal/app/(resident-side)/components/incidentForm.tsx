@@ -377,9 +377,17 @@ const incidentForm:React.FC = () => {
                 name="contactNos"
                 className="form-input-incident-report"
                 required
-                placeholder="Enter Your Contact Number"
                 value={incidentReport.contactNos}
-                onChange={handleFormChange}
+                onChange={(e) => {
+                  const input = e.target.value;
+                  // Only allow digits and limit to 11 characters
+                  if (/^\d{0,11}$/.test(input)) {
+                    handleFormChange(e);
+                  }
+                }}
+                maxLength={11}  
+                pattern="^[0-9]{11}$" 
+                placeholder="Please enter a valid 11-digit contact number" 
               />
             </div>
             <div className="form-group-incident-report">
