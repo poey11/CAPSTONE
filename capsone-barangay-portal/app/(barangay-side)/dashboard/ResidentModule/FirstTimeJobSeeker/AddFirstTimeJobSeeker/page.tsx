@@ -152,6 +152,8 @@ export default function AddFirstTimeJobSeeker() {
       const formattedDateApplied = formData.dateApplied
         ? new Date(formData.dateApplied).toISOString().split("T")[0]
         : "";
+
+      const currentDate = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
   
       // Save to Firestore
       await addDoc(collection(db, "JobSeekerList"), {
@@ -161,7 +163,7 @@ export default function AddFirstTimeJobSeeker() {
         yearOfBirth,
         dateApplied: formattedDateApplied,
         fileURL,
-        createdAt: serverTimestamp(),
+        createdAt: currentDate,
         createdBy: session?.user?.position || "Unknown",
       });
   
@@ -210,39 +212,39 @@ export default function AddFirstTimeJobSeeker() {
           <div className="add-resident-section-2-left-side">
             <div className="fields-container">
               <div className="fields-section">
-                <p>Last Name <span className="required">*</span></p>
+                <p>Last Name<span className="required">*</span></p>
                 <input type="text" className="add-resident-input-field" placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
               </div>
 
               <div className="fields-section">
-                <p>First Name <span className="required">*</span></p>
+                <p>First Name<span className="required">*</span></p>
                 <input type="text" className="add-resident-input-field" placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
               </div>
 
               <div className="fields-section">
-                <p>Middle Name <span className="required">*</span></p>
+                <p>Middle Name</p>
                 <input type="text" className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} required />
               </div>
 
               <div className="fields-section">
-                <p>Date Applied <span className="required">*</span></p>
+                <p>Date Applied<span className="required">*</span></p>
                 <input type="date" className="add-resident-input-field" name="dateApplied" value={formData.dateApplied} onChange={handleChange} required />
               </div>
                 
 
               <div className="fields-section">
-                <p>Date of Birth <span className="required">*</span></p>
+                <p>Date of Birth<span className="required">*</span></p>
                 <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
               </div>
 
 
               <div className="fields-section">
-                <p>Age <span className="required">*</span></p>
+                <p>Age<span className="required">*</span></p>
                 <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} readOnly />
               </div>
                 
               <div className="fields-section">
-                <p>Sex <span className="required">*</span></p>
+                <p>Sex<span className="required">*</span></p>
                 <select name="sex" className="add-resident-input-field" value={formData.sex} onChange={handleChange} required>
                   <option value="" disabled>Choose Gender</option>
                   <option value="M">Male</option>

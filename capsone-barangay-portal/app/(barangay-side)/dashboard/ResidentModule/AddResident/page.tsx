@@ -168,12 +168,14 @@ const confirmSubmit = async () => {
         const lastResident = querySnapshot.docs[0].data();
         newResidentNumber = lastResident.residentNumber + 1;
       }
+
+      const currentDate = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
   
       // Add the new resident with an incremented residentNumber
       await addDoc(residentsRef, {
         ...formData,
         residentNumber: newResidentNumber,
-        createdAt: serverTimestamp(),
+        createdAt: currentDate,
         fileURL,
         createdBy: session?.user?.position || "Unknown",
       });
@@ -224,14 +226,14 @@ const confirmSubmit = async () => {
             {/* Left Side - Resident Form */}
             <div className="add-resident-section-2-left-side">
               <div className="fields-container">
-                <div className="fields-section">
-                  <p>First Name <span className="required">*</span></p>
-                  <input type="text" className="add-resident-input-field" placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
-                </div>
-
-                <div className="fields-section">
-                  <p>Last Name <span className="required">*</span></p>
+              <div className="fields-section">
+                  <p>Last Name<span className="required">*</span></p>
                   <input type="text" className="add-resident-input-field" placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                </div>
+                                
+                <div className="fields-section">
+                  <p>First Name<span className="required">*</span></p>
+                  <input type="text" className="add-resident-input-field" placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
                 </div>
 
                 <div className="fields-section">
@@ -240,12 +242,12 @@ const confirmSubmit = async () => {
                 </div>
 
                 <div className="fields-section">
-                  <p>Address <span className="required">*</span></p>
+                  <p>Address<span className="required">*</span></p>
                   <input type="text" className="add-resident-input-field" placeholder="Enter Address" name="address" value={formData.address} onChange={handleChange} required />
                 </div>
 
                 <div className="fields-section">
-                  <p>Location <span className="required">*</span></p>
+                  <p>Location<span className="required">*</span></p>
                   <select name="generalLocation" className="add-resident-input-field" value={formData.generalLocation} onChange={handleChange} required>
                     <option value="" disabled>Choose Part of Fairview</option>
                     <option value="East Fairview">East Fairview</option>
@@ -256,22 +258,22 @@ const confirmSubmit = async () => {
 
 
                 <div className="fields-section">
-                  <p>Place of Birth <span className="required">*</span></p>
+                  <p>Place of Birth</p>
                   <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} />
                 </div>
                 
                 <div className="fields-section">
-                  <p>Date of Birth <span className="required">*</span></p>
+                  <p>Date of Birth<span className="required">*</span></p>
                   <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
                 </div>
 
                 <div className="fields-section">
-                  <p>Age <span className="required">*</span></p>
+                  <p>Age<span className="required">*</span></p>
                   <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} readOnly />
                 </div>
                 
                 <div className="fields-section">
-                  <p>Sex <span className="required">*</span></p>
+                  <p>Sex<span className="required">*</span></p>
                   <select name="sex" className="add-resident-input-field" value={formData.sex} onChange={handleChange} required>
                     <option value="" disabled>Choose Gender</option>
                     <option value="Male">Male</option>
@@ -281,7 +283,7 @@ const confirmSubmit = async () => {
                 
 
                 <div className="fields-section">
-                  <p>Civil Status <span className="required">*</span></p>
+                  <p>Civil Status<span className="required">*</span></p>
                   <select name="civilStatus" className="add-resident-input-field" value={formData.civilStatus} onChange={handleChange} required>
                     <option value="" disabled>Choose Civil Status</option>
                     <option value="Single">Single</option>
@@ -298,7 +300,7 @@ const confirmSubmit = async () => {
                 </div>
                 
                 <div className="fields-section">
-                  <p>Contact Number <span className="required">*</span></p>
+                  <p>Contact Number<span className="required">*</span></p>
                   <input type="tel" className="add-resident-input-field" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
                 </div>
 
