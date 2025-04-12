@@ -48,7 +48,7 @@ interface BarangayDocument {
     occupation?: string;
     precinctNumber?: string;
     emergencyDetails?: EmergencyDetails;
-
+    educationalAttainment?: string;
     typeofbldg?: string;
     copyOfPropertyTitle?: string[];
     estimatedCapital?: string;
@@ -68,6 +68,29 @@ export default function DocumentTransactionsDetails() {
     const [transactionData, setTransactionData] = useState<BarangayDocument | null>(null);
     const [loading, setLoading] = useState(true);
     const [fileURLs, setFileURLs] = useState<{ field: string; url: string }[]>([]);
+
+    const getEducationalAttainmentLabel = (value: string | undefined) => {
+        switch (value) {
+            case "1":
+                return "Elem Under Grad";
+            case "2":
+                return "Elem Grad";
+            case "3":
+                return "HS Grad";
+            case "4":
+                return "HS Under Grad";
+            case "5":
+                return "COL Grad";
+            case "6":
+                return "COL Under Grad";
+            case "7":
+                return "Educational";
+            case "8":
+                return "Vocational";
+            default:
+                return "N/A"; // Default value if no match
+        }
+    };
 
     useEffect(() => {
         if (!referenceId) return;
@@ -253,8 +276,8 @@ export default function DocumentTransactionsDetails() {
                                 </div>
                                 <div className="description">
                                     <p>
-                                        {"format" in field && typeof field.format === "function"
-                                            ? field.format((transactionData as Record<string, any>)[field.key] || "N/A")
+                                        {field.key === "educationalAttainment"
+                                            ? getEducationalAttainmentLabel((transactionData as Record<string, any>)[field.key])
                                             : (transactionData as Record<string, any>)[field.key] || "N/A"}
                                     </p>
                                 </div>

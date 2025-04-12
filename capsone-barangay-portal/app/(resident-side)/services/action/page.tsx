@@ -1094,18 +1094,27 @@ const handleFileChange = (
             </>
           ):docType==="First Time Jobseeker" &&(
             <>
+
               <div className="form-group">
-                <label htmlFor="educattainment" className="form-label">Educational Attainment<span className="required">*</span></label>
-                <input 
-                  type="text"  
-                  id="educattainment"  
-                  name="educationalAttainment"  
-                  className="form-input"  
+                <label htmlFor="educationalAttainment" className="form-label">Educational Attainment<span className="required">*</span></label>
+                <select 
+                  name="educationalAttainment" 
+                  id="educationalAttainment"  
+                  className="form-input" 
                   value={clearanceInput.educationalAttainment}
-                  onChange={handleChange}
-                  required 
-                  placeholder="Enter Educational Attainment"  
-                />
+                  onChange={handleChange} 
+                  required
+                >
+                  <option value="" disabled>Choose educational attainment</option>
+                  <option value="1">Elem Under Grad</option>
+                  <option value="2">Elem Grad</option>
+                  <option value="3">HS Grad</option>
+                  <option value="4">HS Under Grad</option>
+                  <option value="5">COL Grad</option>
+                  <option value="6">COL Under Grad</option>
+                  <option value="7">Educational</option>
+                  <option value="8">Vocational</option>
+                </select>
               </div>
 
             <div className="form-group">
