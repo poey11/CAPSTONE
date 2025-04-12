@@ -260,6 +260,18 @@ export default function ResidentModule() {
         <option value="5">Show 5</option>
         <option value="10">Show 10</option>
       </select>
+
+      
+      <select
+        className="resident-module-filter"
+        value={showCount}
+        onChange={(e) => setShowCount(Number(e.target.value))}
+      >
+        <option value="0">Show All</option>
+        <option value="5">Show 5</option>
+        <option value="10">Show 10</option>
+      </select>
+
     </div>
   
     <div className="resident-module-main-section">
@@ -291,10 +303,8 @@ export default function ResidentModule() {
                   <th>Address</th>
                   <th>General Location</th>
                   <th>Date of Birth</th>
-                  <th>Place of Birth</th>
-                  <th>Age</th>
-                  <th>Sex</th>
-                  <th>Civil Status</th>
+                  <th>Occupation</th>
+                 
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -308,10 +318,9 @@ export default function ResidentModule() {
                       <td>{resident.address}</td>
                       <td>{resident.generalLocation}</td>
                       <td>{resident.dateOfBirth}</td>
-                      <td>{resident.placeOfBirth}</td>
-                      <td>{resident.age}</td>
-                      <td>{resident.sex}</td>
-                      <td>{resident.civilStatus}</td>
+                      <td>{resident.occupation}</td>
+                
+                     
                       <td>
                         <div className="residentmodule-actions">
                           <button
