@@ -959,11 +959,16 @@ const handleFileChange = (
                 className="form-input" 
                 required 
                 value={clearanceInput.contact}
-                onChange={handleChange}
-                placeholder="Enter Contact Number"  
-                maxLength={10}  // Restrict the input to 10 characters as a number
-                pattern="^[0-9]{10}$"  // Regular expression to enforce a 10-digit number format
-                title="Please enter a valid 10-digit contact number"  // Tooltip for invalid input
+                onChange={(e) => {
+                  const input = e.target.value;
+                  // Only allow digits and limit to 11 characters
+                  if (/^\d{0,11}$/.test(input)) {
+                    handleChange(e);
+                  }
+                }}
+                maxLength={11}  
+                pattern="^[0-9]{11}$" 
+                placeholder="Please enter a valid 11-digit contact number" 
               />
             </div>
 
@@ -1086,7 +1091,7 @@ const handleFileChange = (
                   className="form-input" 
                   required 
                   placeholder="Enter Contact Number"  
-                  maxLength={10}  // Restrict the input to 10 characters as a number
+                  maxLength={11}  // Restrict the input to 10 characters as a number
                   pattern="^[0-9]{10}$"  // Regular expression to enforce a 10-digit number format
                   title="Please enter a valid 10-digit contact number"  // Tooltip for invalid input
                 />

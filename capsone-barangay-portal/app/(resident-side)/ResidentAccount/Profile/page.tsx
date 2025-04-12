@@ -375,8 +375,16 @@ export default function SettingsPageResident() {
                             id="phone" 
                             name="phone"
                             value={formData.phone} 
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            onChange={(e) => {
+                                const input = e.target.value;
+                                // Only allow digits and limit to 11 characters
+                                if (/^\d{0,11}$/.test(input)) {
+                                  setFormData({ ...formData, phone: input });
+                                }
+                              }}
                             className="form-input-profile-section" 
+                            maxLength={11}  
+                            pattern="^[0-9]{11}$" 
                         />
                     </div>
 
