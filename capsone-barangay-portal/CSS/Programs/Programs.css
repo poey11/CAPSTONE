@@ -18,12 +18,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('/images/brgyheaderpic.jpg');
+  background-image: url('/images/brgyheaderpic.JPG');
   background-size: cover;
   background-position: 50% 60%;
   background-repeat: no-repeat;
-  filter: blur(1.2px); /* Adjust the blur intensity */
-  z-index: 1; /* Place the blurred background below the text */
+  filter: blur(1.2px); 
+  z-index: 1;
 }
 
 .headerpic-programs::after {
@@ -33,13 +33,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.173); /* Dark overlay */
-  z-index: 2; /* Ensure it overlays the background */
+  background-color: rgba(0, 0, 0, 0.150); 
+  z-index: 2; 
 }
 
 .headerpic-programs > * {
   position: relative;
-  z-index: 3; /* Ensure text is above the overlays */
+  z-index: 3; 
 }
 
   .TitlePage-programs {
