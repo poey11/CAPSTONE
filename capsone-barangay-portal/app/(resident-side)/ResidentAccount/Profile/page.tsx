@@ -162,6 +162,13 @@ export default function SettingsPageResident() {
               return;
             }
           }
+
+        const phoneRegex = /^09\d{9}$/;
+        if (!phoneRegex.test(formData.phone)) {
+        setErrorPopup({ show: true, message: "Invalid contact number. Format should be: 0917XXXXXXX" });
+        setLoading(false);
+        return;
+        }
       
             // Upload profile picture if it exists
             if (profileFile) {
