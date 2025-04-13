@@ -205,6 +205,16 @@ const incidentForm:React.FC = () => {
 
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault(); 
+
+      // Validate contact number: should be 11 digits and start with "09"
+      if (!/^09\d{9}$/.test(incidentReport.contactNos)) {
+        setErrorPopup({
+          show: true,
+          message: "Invalid contact number. Format should be: 0917XXXXXXX",
+        });
+        return;
+      }
+
       const form = event.target as HTMLFormElement;
       if (form.checkValidity()) {
         const dateFiled = incidentReport.dateFiled;
@@ -293,10 +303,11 @@ const incidentForm:React.FC = () => {
 
     
         {errorPopup.show && (
-              <div className="popup-overlay error">
-                  <div className="popup">
-                      <p>{errorPopup.message}</p>
-                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+              <div className="popup-overlay-fileincident error">
+                  <div className="popup-fileincident">
+                    <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
+                    <p>{errorPopup.message}</p>
+                    <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
                   </div>
               </div>
         )}
