@@ -199,7 +199,7 @@ const Menu = () => {
           <div className="navbar-indiv-container">
               <div className="dropdown-Container">
               <Link href="/">
-                <p className="dropdown-item" onClick={toggleLoginOptionsOff}>Home</p>
+                <p className="dropdown-item-resident" onClick={toggleLoginOptionsOff}>Home</p>
               </Link>
                 
               </div>
@@ -210,7 +210,7 @@ const Menu = () => {
             <div className="navbar-indiv-container">
               <div className="dropdown-Container">
               <Link href="/aboutus">
-                <p className="dropdown-item" onClick={toggleLoginOptionsOff}>About Us</p>
+                <p className="dropdown-item-resident" onClick={toggleLoginOptionsOff}>About Us</p>
               </Link>
                 
               </div>
@@ -220,7 +220,7 @@ const Menu = () => {
             <div className="dropdown-Container">
               
                 <div className="menu-section-container">
-                  <p className="dropdown-item">Services</p>
+                  <p className="dropdown-item-resident">Services</p>
                   <img src="/images/down-arrow.png" className="dropdown-icon"/>
                 </div>
     
@@ -242,7 +242,7 @@ const Menu = () => {
               <div className="navbar-indiv-container">
               <div className="dropdown-Container">
               <Link href="/Announcements">
-                <p className="dropdown-item" onClick={toggleLoginOptionsOff}>News</p>
+                <p className="dropdown-item-resident" onClick={toggleLoginOptionsOff}>News</p>
               </Link>
                 
               </div>
@@ -250,18 +250,18 @@ const Menu = () => {
 
               <div className="dropdown-Container">
                 <div className="menu-section-container">
-                  <p className="dropdown-item">Officials</p>
+                  <p className="dropdown-item-resident">Officials</p>
                   <img src="/images/down-arrow.png" className="dropdown-icon"/>
                 </div>
               <div className="Dropdown">
                 <Link href="/OfficialsPage">
-                  <p className="dropdown-item">Barangay Officials</p>
+                  <p className="dropdown-item-resident">Barangay Officials</p>
                 </Link>
                 <Link href="/OfficialsPage/HOAOfficersPage">
-                  <p className="dropdown-item">HOA Officers</p>
+                  <p className="dropdown-item-resident">HOA Officers</p>
                 </Link>
                 <Link href="/OfficialsPage/SitioOfficersPage">
-                  <p className="dropdown-item">Sitio Officers</p>
+                  <p className="dropdown-item-resident">Sitio Officers</p>
                 </Link>
               </div>
             </div>
@@ -329,13 +329,13 @@ const Menu = () => {
                   
                   <div className="Dropdown">
                     <Link href={`/ResidentAccount/Profile?id=${user?.uid}`}>
-                      <p className="dropdown-item">Profile</p>
+                      <p className="dropdown-item-resident">Profile</p>
                     </Link>
 
                     <Link
                       href={"/ResidentAccount/Transactions"}
                     >
-                      <p className="dropdown-item">Transactions</p>
+                      <p className="dropdown-item-resident">Transactions</p>
                     </Link>
 
 
@@ -343,7 +343,7 @@ const Menu = () => {
                       href={"/"}
                       onClick={handleLogout}
                     >
-                      <p className="dropdown-item">Logout</p>
+                      <p className="dropdown-item-resident">Logout</p>
                     </Link>
 
                   </div>

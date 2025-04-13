@@ -14,16 +14,18 @@
   flex-direction: column;
 }
 
-.dropdown-item {
+.dropdown-item-resident {
   cursor: pointer;
   text-decoration: none;
-  transition: color 0.5s ease-in-out;
+  transition: color 0.5s background 0.2s ease-in-out;
   font-weight: normal;
   font-size: 16px;
   border-radius: 10px;
+  padding: 0.75rem 1rem;
+  text-align: center;
 }
 
-.dropdown-item:hover {  
+.dropdown-item-resident:hover {  
   color: #294c6b;
   background-color: #82b0d8;
   box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
