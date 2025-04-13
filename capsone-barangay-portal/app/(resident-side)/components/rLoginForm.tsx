@@ -121,18 +121,18 @@ const rLoginForm:React.FC = () => {
 
         <div className="login-container-resident">
             {showPopup && (
-                <div className="popup-overlay">
-                    <div className="popup">
+                <div className="popup-overlay-login">
+                    <div className="popup-login">
                     <img src="/Images/successful.png" alt="warning icon" className="successful-icon-popup" />
-                        <p>Welcome, {firstName} {lastName}!</p>
+                        <h1>Welcome, {firstName} {lastName}!</h1>
                         <br/>
                         <p>Redirecting to the Home Page...</p>
                     </div>
                 </div>
             )}
             {showVerifyPopup && (
-                <div className="popup-overlay">
-                    <div className="popup">
+                <div className="popup-overlay-login">
+                    <div className="popup-login">
                         <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
                         <p>Please verify your email first.</p>
                         <button onClick={() => setShowVerifyPopup(false)} className="continue-button">Continue</button>
@@ -140,8 +140,8 @@ const rLoginForm:React.FC = () => {
                 </div>
             )}
             {showErrorPopup && (
-                <div className="popup-overlay">
-                    <div className="popup">
+                <div className="popup-overlay-login">
+                    <div className="popup-login">
                         <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
                         <p>{errorMessage}</p>
                         <button onClick={() => setShowErrorPopup(false)} className="continue-button">Continue</button>
