@@ -253,6 +253,14 @@ const handleFileChange = (
     // Handle form submission
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
+
+      const contactPattern = /^0917\d{7}$/;
+      if (!contactPattern.test(clearanceInput.contact)) {
+        setErrorMessage("Invalid contact number. Format should be: 0917XXXXXXX");
+        setShowErrorPopup(true);
+        return;
+      }
+
       console.log(clearanceInput);
     
       // List all file-related keys in an array for easier maintenance
