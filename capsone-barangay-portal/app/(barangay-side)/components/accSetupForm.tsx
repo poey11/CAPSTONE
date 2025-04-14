@@ -120,25 +120,26 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
 
                 <div className="accSetup-main-form">
                     <form onSubmit={handleSubmit} className="accSetup-form">
-                        <label htmlFor="fName">First Name:</label>
+                        <label htmlFor="fName">First Name: 
+                            <span className="required">*</span></label>
                         <input onChange={handleChange} value={user.fName} id="fName" type="text" name="fName" required />
 
-                        <label htmlFor="lName">Last Name:</label>
+                        <label htmlFor="lName">Last Name:<span className="required">*</span></label>
                         <input onChange={handleChange} value={user.lName} id="lName" type="text" name="lName" required />
-                         <label htmlFor="sex">Sex:</label>
+                         <label htmlFor="sex">Sex:<span className="required">*</span></label>
                         <select value={user.sex} onChange={handleChange} id="sex" name="sex" required>
                             <option value="" disabled>Select a Sex</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                         </select>
 
-                        <label htmlFor="bday">Birth date:</label>
+                        <label htmlFor="bday">Birth date:<span className="required">*</span></label>
                         <input onChange={handleChange} value={user.bday} id="bday" type="date" name="bday" required />
 
-                        <label htmlFor="address">Address:</label>
+                        <label htmlFor="address">Address:<span className="required">*</span></label>
                         <input onChange={handleChange} value={user.address} id="address" type="text" name="address" required />
 
-                        <label htmlFor="phone">Cellphone / Telephone #:</label>
+                        <label htmlFor="phone">Cellphone / Telephone #:<span className="required">*</span></label>
                         <input onChange={handleChange} value={user.phone} id="phone" type="text" name="phone" required />
 
                         {/* Display position but don't allow editing */}
@@ -148,7 +149,7 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                         {/* Conditionally show department dropdown if position is LF Staff */}
                         {position === "LF Staff" && (
                             <>
-                                <label htmlFor="department">Department:</label>
+                                <label htmlFor="department">Department: <span className="required">*</span></label>
                                 <select value={user.department} onChange={handleChange} id="department" name="department" required>
                                     <option value="" disabled>Select a Department</option>
                                     <option value="GAD">GAD</option>
@@ -159,10 +160,10 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                             </>
                         )}
 
-                        <label htmlFor="password">New Password:</label>
+                        <label htmlFor="password">New Password:<span className="required">*</span></label>
                         <input onChange={handleChange} value={user.password} id="password" type="password" name="password" required />
 
-                        <label htmlFor="confirmPassword">Confirm Password:</label>
+                        <label htmlFor="confirmPassword">Confirm Password:<span className="required">*</span></label>
                         <input onChange={handleChange} value={user.confirmPassword} id="confirmPassword" type="password" name="confirmPassword" required />
 
                         {error && <p className="error-message">{error}</p>}
