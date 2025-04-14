@@ -168,7 +168,10 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
 
                         {error && <p className="error-message">{error}</p>}
 
-                        <button type="submit">Submit</button>
+                    <div className="form-group button-container">
+                        <button type="submit" className="submit-button" >Submit</button>
+                    </div>
+
                     </form>
                 </div>
             </div>
