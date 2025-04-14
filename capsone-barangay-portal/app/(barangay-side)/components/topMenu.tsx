@@ -220,18 +220,31 @@ export default function TopMenu() {
             className="menuIcon"
             onClick={toggleDropdown}
           />
-          {isDropdownOpen && (
-            <div className="dropdown show">
-              <ul>
-                <li className="module" onClick={() => router.push(`/dashboard/settingsPage?id=${session?.user?.id}`)}>
-                  Settings
-                </li>
-                <li onClick={() => signOut({ callbackUrl: "/" })} className="module">
-                  Log Out
-                </li>
-              </ul>
-            </div>
-          )}
+         {isDropdownOpen && (
+          <div className="dropdown show">
+            <ul>
+              <li
+                className="module"
+                onClick={() => {
+                  setDropdownOpen(false); // CLOSE THE DROPDOWN
+                  router.push(`/dashboard/settingsPage?id=${session?.user?.id}`);
+                }}
+              >
+                Settings
+              </li>
+              <li
+                className="module"
+                onClick={() => {
+                  setDropdownOpen(false); // CLOSE THE DROPDOWN
+                  signOut({ callbackUrl: "/" });
+                }}
+              >
+                Log Out
+              </li>
+            </ul>
+          </div>
+        )}
+
         </section>
       </div>
     </div>

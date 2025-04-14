@@ -162,6 +162,13 @@ export default function SettingsPageResident() {
               return;
             }
           }
+
+        const phoneRegex = /^09\d{9}$/;
+        if (!phoneRegex.test(formData.phone)) {
+        setErrorPopup({ show: true, message: "Invalid contact number. Format should be: 0917XXXXXXX" });
+        setLoading(false);
+        return;
+        }
       
             // Upload profile picture if it exists
             if (profileFile) {
@@ -263,42 +270,6 @@ export default function SettingsPageResident() {
                         View Transactions
                     </a>
                     </div>
-
-                                    {/* Show Valid ID section only if status is "Rejected" */}
-                {resident.status === "Rejected" && (
-                <div className="account-profile-section">
-                    <div className="icon-container-profile-section">
-                    {preview2 ? (
-                        <img
-                        src={preview2}
-                        alt="User Valid ID"
-                        className="valid-id-container-profile-section"
-                        />
-                    ) : resident.upload ? (
-                        <img
-                        src={resident.upload}
-                        alt="User Valid ID"
-                        className="valid-id-container-profile-section"
-                        />
-                    ) : (
-                        <p>No Valid ID</p>
-                    )}
-                    <input
-                        type="file"
-                        accept="image/*"
-                        id="validIdUpload"
-                        style={{ display: "none" }}
-                        onChange={handleValidIDChange}
-                    />
-                    <button
-                        className="upload-btn-profile-section"
-                        onClick={() => document.getElementById("validIdUpload")?.click()}
-                    >
-                        Update Valid ID
-                    </button>
-                    </div>
-                </div>
-                )}
                 </div>
 
 
@@ -375,8 +346,16 @@ export default function SettingsPageResident() {
                             id="phone" 
                             name="phone"
                             value={formData.phone} 
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            onChange={(e) => {
+                                const input = e.target.value;
+                                // Only allow digits and limit to 11 characters
+                                if (/^\d{0,11}$/.test(input)) {
+                                  setFormData({ ...formData, phone: input });
+                                }
+                              }}
                             className="form-input-profile-section" 
+                            maxLength={11}  
+                            pattern="^[0-9]{11}$" 
                         />
                     </div>
 
@@ -430,6 +409,48 @@ export default function SettingsPageResident() {
                             />
                         </div>
 
+                        {formData.status === "Rejected" && (
+                            <div className="valid-id-section-profile">
+                                <h3 className="valid-id-header">Your previous ID was rejected</h3>
+                                <p className="valid-id-subtext">Please upload a new Valid ID for review.</p>
+                                
+                                <div className="valid-id-content">
+                                {preview2 ? (
+                                    <img
+                                    src={preview2}
+                                    alt="User Valid ID"
+                                    className="valid-id-preview"
+                                    />
+                                ) : resident.upload ? (
+                                    <img
+                                    src={resident.upload}
+                                    alt="User Valid ID"
+                                    className="valid-id-preview"
+                                    />
+                                ) : (
+                                    <p className="no-valid-id-text">No Valid ID uploaded</p>
+                                )}
+
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    id="validIdUpload"
+                                    style={{ display: "none" }}
+                                    onChange={handleValidIDChange}
+                                />
+
+                            <button
+                                type="button"
+                                className="upload-btn-profile-section"
+                                onClick={() => document.getElementById("validIdUpload")?.click()}
+                            >
+                                Update Profile Image
+                            </button>
+
+                                    </div>
+                            </div>
+                            )}
+
 
                         
                         <div className="submit-section-resident-account">
@@ -443,6 +464,8 @@ export default function SettingsPageResident() {
                        
 
                         </form>
+
+
                     </div>
                 </div>
 
