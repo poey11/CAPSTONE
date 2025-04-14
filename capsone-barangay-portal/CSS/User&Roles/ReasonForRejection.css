@@ -266,3 +266,24 @@
   .no-button:hover {
     background-color:  #c2352b; 
   } 
+
+  .successful-icon-popup{
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+  }
+
+  .input-field-reasonforreject{
+    padding: 8px;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: rgba(0, 0, 0, 0.4);
+    height: 40px;
+}
+
+.input-field-reasonforreject option {
+    color: rgba(0, 0, 0, 0.4); 
+}

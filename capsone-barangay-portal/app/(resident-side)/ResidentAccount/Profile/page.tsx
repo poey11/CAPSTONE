@@ -272,7 +272,7 @@ export default function SettingsPageResident() {
                     </div>
 
                                     {/* Show Valid ID section only if status is "Rejected" */}
-                {resident.status === "Rejected" && (
+                {resident.status === "Resubmission" && (
                 <div className="account-profile-section">
                     <div className="icon-container-profile-section">
                     {preview2 ? (
