@@ -53,6 +53,7 @@ export default function ViewResident() {
     { label: "Email Address", key: "emailAddress" },
     { label: "Precinct Number", key: "precinctNumber" },
     { label: "General Location", key: "generalLocation" },
+    { label: "Cluster", key: "cluster" },
     { label: "Student", key: "isStudent", isBoolean: true },
     { label: "PWD", key: "isPWD", isBoolean: true },
     { label: "Senior Citizen", key: "isSeniorCitizen", isBoolean: true },
@@ -60,7 +61,6 @@ export default function ViewResident() {
     { label: "Created By", key: "createdBy" },
     { label: "Updated By", key: "updatedBy" },
     { label: "Created At", key: "createdAt" },
-    
   ];
 
   const handleBack = () => {

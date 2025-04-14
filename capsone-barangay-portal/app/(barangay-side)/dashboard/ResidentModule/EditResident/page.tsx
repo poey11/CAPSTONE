@@ -31,6 +31,7 @@ export default function EditResident() {
     emailAddress: "",
     precinctNumber: "",
     generalLocation: "",
+    cluster: "",
     isStudent: false,
     isPWD: false,
     isSeniorCitizen: false,
@@ -38,6 +39,49 @@ export default function EditResident() {
     fileURL: "",
     updatedBy: "",
   });
+
+  const clusterOptions: Record<string, string[]> = {
+    "East Fairview": [
+      "United Fairlane",
+      "Sapamanai",
+      "Sitio Kislap"
+    ],
+    "West Fairview": [
+      "Q Bagwis MN Residents Civic Society Assn. Inc.",
+      "Iris St.",
+      "Mustang",
+      "Sitio Narcissus HOA",
+      "Lupang Biyaya HOA",
+      "Sitio Basilio 2",
+      "Falcon Home Owners Association",
+      "Ivory Executive Homes",
+      "Upper Lilac Chestnut",
+      "Sitio Lotus",
+      "Tulip Roses",
+      "Q Sweety Home Livelihood Assn. Inc.",
+      "QC Veloso Comp. Inc. Opel",
+      "Rhoda Sikap Assn.",
+      "Magnolia",
+      "Roses",
+      "Sto. Niño",
+      "Tulip",
+      "LST",
+      "Ulna",
+      "Hillman, Hunter, Dart",
+      "Verbena I",
+      "BBCHAI",
+      "Sitio Urlina"
+    ],
+    "South Fairview": [
+      "Arnai",
+      "Buick Ext.",
+      "Baslio 1",
+      "Sitio Regalado",
+      "Sitio Tibagan",
+      "Consul",
+      "Lower Malibu"
+    ]
+  };
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -98,6 +142,7 @@ export default function EditResident() {
             emailAddress: docSnap.data().emailAddress || "",
             precinctNumber: docSnap.data().precinctNumber || "",
             generalLocation: docSnap.data().generalLocation || "",
+            cluster: docSnap.data().cluster || "",
             isStudent: docSnap.data().isStudent || false,
             isPWD: docSnap.data().isPWD || false,
             isSeniorCitizen: docSnap.data().isSeniorCitizen || false,
@@ -115,23 +160,40 @@ export default function EditResident() {
     }
   }, [residentId]);
 
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    let newValue: any = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
-
-    if (name === "age") {
-      const ageValue = parseInt(value, 10) || 0;
-      setFormData((prevData) => ({
-        ...prevData,
-        age: ageValue,
-        isSeniorCitizen: ageValue >= 60,
-      }));
-    } else {
-      setFormData((prevData) => ({
+    const newValue = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+  
+    
+    setFormData((prevData) => {
+      let updatedData = {
         ...prevData,
         [name]: newValue,
-      }));
-    }
+      };
+  
+      if (name === "dateOfBirth" && typeof newValue === 'string') {
+        const age = calculateAge(newValue);
+        updatedData.age = age;
+        updatedData.isSeniorCitizen = age >= 60;
+      }
+
+      if (name === "generalLocation") {
+        updatedData.cluster = ""; // Reset cluster if location changes
+      }
+  
+      return updatedData;
+    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -282,7 +344,27 @@ export default function EditResident() {
                       <option value="South Fairview">South Fairview</option>
                     </select>
                   </div>
-                  
+
+                    {formData.generalLocation && (
+                      <div className="fields-section">
+                        <p>Cluster</p>
+                        <select
+                          name="cluster"
+                          className="add-resident-input-field"
+                          value={formData.cluster}
+                          onChange={handleChange}
+                          required
+                        >
+                          <option value="" disabled>Choose Cluster</option>
+                          {clusterOptions[formData.generalLocation].map((cluster) => (
+                            <option key={cluster} value={cluster}>
+                              {cluster}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
     
                   <div className="fields-section">
                     <p>Place of Birth</p>
@@ -296,7 +378,7 @@ export default function EditResident() {
 
                   <div className="fields-section">
                     <p>Age</p>
-                    <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
+                    <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" readOnly/>
                   </div>
                 
     

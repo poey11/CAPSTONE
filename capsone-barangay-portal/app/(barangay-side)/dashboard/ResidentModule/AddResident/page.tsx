@@ -28,12 +28,55 @@ export default function AddResident() {
     emailAddress: "",
     precinctNumber: "",
     generalLocation: "",
+    cluster: "",
     isStudent: false,
     isPWD: false,
     isSeniorCitizen: false,
     isSoloParent: false,
   });
 
+  const clusterOptions: Record<string, string[]> = {
+    "East Fairview": [
+      "United Fairlane",
+      "Sapamanai",
+      "Sitio Kislap"
+    ],
+    "West Fairview": [
+      "Q Bagwis MN Residents Civic Society Assn. Inc.",
+      "Iris St.",
+      "Mustang",
+      "Sitio Narcissus HOA",
+      "Lupang Biyaya HOA",
+      "Sitio Basilio 2",
+      "Falcon Home Owners Association",
+      "Ivory Executive Homes",
+      "Upper Lilac Chestnut",
+      "Sitio Lotus",
+      "Tulip Roses",
+      "Q Sweety Home Livelihood Assn. Inc.",
+      "QC Veloso Comp. Inc. Opel",
+      "Rhoda Sikap Assn.",
+      "Magnolia",
+      "Roses",
+      "Sto. Niño",
+      "Tulip",
+      "LST",
+      "Ulna",
+      "Hillman, Hunter, Dart",
+      "Verbena I",
+      "BBCHAI",
+      "Sitio Urlina"
+    ],
+    "South Fairview": [
+      "Arnai",
+      "Buick Ext.",
+      "Baslio 1",
+      "Sitio Regalado",
+      "Sitio Tibagan",
+      "Consul",
+      "Lower Malibu"
+    ]
+  };
 
   const { data: session } = useSession();
   const [file, setFile] = useState<File | null>(null);
@@ -248,13 +291,40 @@ const confirmSubmit = async () => {
 
                 <div className="fields-section">
                   <p>Location<span className="required">*</span></p>
-                  <select name="generalLocation" className="add-resident-input-field" value={formData.generalLocation} onChange={handleChange} required>
+                  <select
+                    name="generalLocation"
+                    className="add-resident-input-field"
+                    value={formData.generalLocation}
+                    onChange={handleChange}
+                    required
+                  >
                     <option value="" disabled>Choose Part of Fairview</option>
                     <option value="East Fairview">East Fairview</option>
                     <option value="West Fairview">West Fairview</option>
                     <option value="South Fairview">South Fairview</option>
                   </select>
                 </div>
+
+                {formData.generalLocation && (
+                  <div className="fields-section">
+                    <p>Cluster/Section<span className="required">*</span></p>
+                    <select
+                      name="cluster"
+                      className="add-resident-input-field"
+                      value={formData.cluster || ""}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="" disabled>Choose Cluster/Section</option>
+                      {clusterOptions[formData.generalLocation].map((option, index) => (
+                        <option key={index} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
 
 
                 <div className="fields-section">
