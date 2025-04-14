@@ -276,7 +276,25 @@ export default function SettingsPage() {
                                             <option value="Female">Female</option>
                                         </select>
                                     </div>
-                                </div>
+
+
+                                    {userData.position === "LF Staff" && (
+
+                                        <>
+                                        <div className="fields-section-settings">
+                                        <p>Department</p>
+                                        <input
+                                        id="department"
+                                        name="department"
+                                        type="text" 
+                                        className="input-field-settings"
+                                        value={userData.department} 
+                                        readOnly 
+                                        onChange={handleChange} />
+                                        </div>
+                                        </>
+                                        )}
+                                    </div>
                             </div>
                             <div className="section-right-settings">
                                 <div className="fields-section-settings">
@@ -307,27 +325,6 @@ export default function SettingsPage() {
                                 </div>
 
 
-
-                            </div>
-
-                            <div className="">
-
-                            {userData.position === "LF Staff" && (
-
-                                <>
-                                <div className="fields-section-settings">
-                                <p>Department</p>
-                                <input
-                                id="department"
-                                name="department"
-                                type="text" 
-                                className="input-field-settings"
-                                value={userData.department} 
-                                readOnly 
-                                onChange={handleChange} />
-                                </div>
-                                </>
-                                )}
 
                             </div>
                 
