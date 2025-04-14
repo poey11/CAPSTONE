@@ -24,6 +24,7 @@ export default function SettingsPage() {
         phone: "",
         profileImage: "",
         position:"",
+        department: "",
     });
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -46,6 +47,7 @@ export default function SettingsPage() {
                     phone: docSnap.data().phone || "",
                     position: docSnap.data().position || "",
                     profileImage: docSnap.data().profileImage || "/images/user.png",
+                    department: docSnap.data().department || "",
                 });
 
                 setPreview(docSnap.data().fileURL || null);
@@ -307,6 +309,28 @@ export default function SettingsPage() {
 
 
                             </div>
+
+                            <div className="">
+
+                            {userData.position === "LF Staff" && (
+
+                                <>
+                                <div className="fields-section-settings">
+                                <p>Department</p>
+                                <input
+                                id="department"
+                                name="department"
+                                type="text" 
+                                className="input-field-settings"
+                                value={userData.department} 
+                                readOnly 
+                                onChange={handleChange} />
+                                </div>
+                                </>
+                                )}
+
+                            </div>
+                
                         </div>
                     </div>
 
