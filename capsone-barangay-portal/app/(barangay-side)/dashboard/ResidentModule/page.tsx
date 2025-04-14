@@ -26,6 +26,8 @@ export default function ResidentModule() {
   const [searchName, setSearchName] = useState<string>("");
   const [searchAddress, setSearchAddress] = useState<string>("");
   const [searchOccupation, setSearchOccupation] = useState<string>("");
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
+
  
   const [showCount, setShowCount] = useState<number>(0);
   const router = useRouter(); 
@@ -97,6 +99,13 @@ export default function ResidentModule() {
       });
     }
 
+    if (selectedLocation) {
+      filtered = filtered.filter((resident) =>
+        resident.generalLocation?.toLowerCase().includes(selectedLocation.toLowerCase())
+      );
+    }
+    
+
     filtered.sort((a, b) => {
       const numA = parseInt(a.residentNumber, 10) || 0;
       const numB = parseInt(b.residentNumber, 10) || 0;
@@ -112,7 +121,7 @@ export default function ResidentModule() {
     }
 
     setFilteredResidents(filtered);
-  }, [searchName, searchAddress, searchOccupation, residentType, showCount, residents, sortOrder]);
+  }, [searchName, searchAddress, searchOccupation, residentType, showCount, residents, sortOrder, selectedLocation]);
 
 
   const handleDeleteClick = async (id: string, residentNumber: string) => {
@@ -263,14 +272,16 @@ export default function ResidentModule() {
 
       
       <select
-        className="resident-module-filter"
-        value={showCount}
-        onChange={(e) => setShowCount(Number(e.target.value))}
-      >
-        <option value="0">Show All</option>
-        <option value="5">Show 5</option>
-        <option value="10">Show 10</option>
-      </select>
+      className="resident-module-filter"
+      value={selectedLocation}
+      onChange={(e) => setSelectedLocation(e.target.value)}
+    >
+      <option value="">Location</option>
+      <option value="East Fairview">East Fairview</option>
+      <option value="West Fairview">West Fairview</option>
+      <option value="South Fairview">South Fairview</option>
+    </select>
+
 
     </div>
   
@@ -333,39 +344,40 @@ export default function ResidentModule() {
                           >
                             View
                           </button>
-                          {isAuthorized ? (
-                            <>
-                              <button
-                                className="residentmodule-action-edit"
-                                onClick={() => handleEditClick(resident.id)}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                className="residentmodule-action-delete"
-                                onClick={() =>
-                                  handleDeleteClick(resident.id, resident.residentNumber)
-                                }
-                              >
-                                Delete
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <button
-                                className="residentmodule-action-edit opacity-0 cursor-not-allowed"
-                                disabled
-                              >
-                                Edit
-                              </button>
-                              <button
-                                className="residentmodule-action-delete opacity-0 cursor-not-allowed"
-                                disabled
-                              >
-                                Delete
-                              </button>
-                            </>
-                          )}
+                          {!isAuthorized ? (
+                          <>
+                            <button
+                              className="residentmodule-action-edit hidden"
+                              aria-hidden="true"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="residentmodule-action-delete hidden"
+                              aria-hidden="true"
+                            >
+                              Delete
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="residentmodule-action-edit"
+                              onClick={() => handleEditClick(resident.id)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="residentmodule-action-delete"
+                              onClick={() =>
+                                handleDeleteClick(resident.id, resident.residentNumber)
+                              }
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
+
                         </div>
                       </td>
                     </tr>

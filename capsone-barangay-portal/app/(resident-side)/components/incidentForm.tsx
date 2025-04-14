@@ -205,6 +205,16 @@ const incidentForm:React.FC = () => {
 
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault(); 
+
+      // Validate contact number: should be 11 digits and start with "09"
+      if (!/^09\d{9}$/.test(incidentReport.contactNos)) {
+        setErrorPopup({
+          show: true,
+          message: "Invalid contact number. Format should be: 0917XXXXXXX",
+        });
+        return;
+      }
+
       const form = event.target as HTMLFormElement;
       if (form.checkValidity()) {
         const dateFiled = incidentReport.dateFiled;
@@ -293,10 +303,11 @@ const incidentForm:React.FC = () => {
 
     
         {errorPopup.show && (
-              <div className="popup-overlay error">
-                  <div className="popup">
-                      <p>{errorPopup.message}</p>
-                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+              <div className="popup-overlay-fileincident error">
+                  <div className="popup-fileincident">
+                    <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
+                    <p>{errorPopup.message}</p>
+                    <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
                   </div>
               </div>
         )}
@@ -377,9 +388,17 @@ const incidentForm:React.FC = () => {
                 name="contactNos"
                 className="form-input-incident-report"
                 required
-                placeholder="Enter Your Contact Number"
                 value={incidentReport.contactNos}
-                onChange={handleFormChange}
+                onChange={(e) => {
+                  const input = e.target.value;
+                  // Only allow digits and limit to 11 characters
+                  if (/^\d{0,11}$/.test(input)) {
+                    handleFormChange(e);
+                  }
+                }}
+                maxLength={11}  
+                pattern="^[0-9]{11}$" 
+                placeholder="Please enter a valid 11-digit contact number" 
               />
             </div>
             <div className="form-group-incident-report">
