@@ -445,7 +445,7 @@ export default function SettingsPageResident() {
                             />
                         </div>
 
-                        {formData.status === "Rejected" && (
+                        {formData.status === "Resubmission" && (
                             <div className="valid-id-section-profile">
                                 <h3 className="valid-id-header">Your previous ID was rejected</h3>
                                 <p className="valid-id-subtext">Please upload a new Valid ID for review.</p>
