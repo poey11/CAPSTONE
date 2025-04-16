@@ -214,7 +214,37 @@ export default function ViewUser() {
                             <p>No ID uploaded</p>
                         )}
                     </div>
+
+                
+
                 </div>
+
+                {ResidentUserData.reupload && (
+                        <div className="viewresident-details-section">
+                            <div className="viewresident-title">
+                                <p>Reupload Valid ID</p>
+                            </div>
+
+                            <div className="viewresident-description">
+                                <div className="resident-id-container">
+                                    <img
+                                        src={ResidentUserData.reupload}
+                                        alt="Resident's Valid ID"
+                                        className="resident-id-image"
+                                    />
+                                    <a
+                                        href={ResidentUserData.reupload}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="view-image-link"
+                                    >
+                                        View Image
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
             </div>
 
             {showAcceptPopup && (
