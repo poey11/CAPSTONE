@@ -224,7 +224,7 @@ export default function TopMenu() {
           <div className="dropdown show">
             <ul>
               <li
-                className="module"
+                className="options-topmenu"
                 onClick={() => {
                   setDropdownOpen(false); // CLOSE THE DROPDOWN
                   router.push(`/dashboard/settingsPage?id=${session?.user?.id}`);
@@ -233,7 +233,7 @@ export default function TopMenu() {
                 Settings
               </li>
               <li
-                className="module"
+                className="options-topmenu"
                 onClick={() => {
                   setDropdownOpen(false); // CLOSE THE DROPDOWN
                   signOut({ callbackUrl: "/" });
