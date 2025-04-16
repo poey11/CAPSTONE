@@ -485,3 +485,8 @@
 .status-badge.resubmission {
   background-color: #e47f22;    
 }
+
+.highlighted-row {
+  background-color: #e0ffe0 !important;
+  transition: background-color 0.5s ease;
+}

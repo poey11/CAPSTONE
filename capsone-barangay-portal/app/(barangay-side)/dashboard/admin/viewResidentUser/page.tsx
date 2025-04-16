@@ -66,7 +66,7 @@ export default function ViewUser() {
         { label: "Contact Number", key: "phone" },
         { label: "Sex", key: "sex" },
         { label: "Email", key: "email" },
-        {label: "Date Of Birth", key: "dateOfBirth" },
+        {label: "Date of Birth", key: "dateOfBirth" },
         { label: "Address", key: "address" },
         { label: "Created At", key: "createdAt" },
         { label: "Role", key: "role" },
@@ -106,7 +106,8 @@ export default function ViewUser() {
                 // Hide the popup after 3 seconds
                 setTimeout(() => {
                     setShowPopup(false);
-                    router.push("/dashboard/admin");
+                    //router.push("/dashboard/admin");
+                    router.push(`/dashboard/admin?highlight=${selectedUserId}`);
                 }, 3000);
             } catch (error) {
                 console.error("Error updating user status:", error);
@@ -233,6 +234,7 @@ export default function ViewUser() {
             {showPopup && (
                 <div className={`popup-overlay show`}>
                     <div className="popup">
+                    <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                         <p>{popupMessage}</p>
                     </div>
                 </div>

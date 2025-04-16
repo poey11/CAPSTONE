@@ -128,7 +128,7 @@ export default function AddBarangayUser() {
         // Hide the popup after 3 seconds
         setTimeout(() => {
           setShowPopup(false);
-          router.push("/dashboard/admin");
+          router.push(`/dashboard/admin?highlight=${users.userId}`);
         }, 3000);
       
         // Create a fake event and call handleSubmit
@@ -245,7 +245,7 @@ export default function AddBarangayUser() {
                                 />
                             </div>
                         </div>
-                        <div className="actions-section">
+                        <div className="actions-section-addbrgyuser">
                             <button onClick={GenerateID} className="generateUserID">Generate User ID</button>
                         </div>
                         
@@ -258,6 +258,7 @@ export default function AddBarangayUser() {
             {showSubmitPopup && (
                         <div className="addbrgyuser-confirmation-popup-overlay">
                             <div className="addbrgyuser-confirmation-popup">
+                                <img src="/Images/question.png" alt="warning icon" className="clarify-icon-popup" />
                                 <p>Are you sure you want to submit?</p>
                                 <div className="addbrgyuser-yesno-container">
                                     <button onClick={() => setShowSubmitPopup(false)} className="addbrgyuser-no-button">No</button>
@@ -270,6 +271,7 @@ export default function AddBarangayUser() {
         {showPopup && (
                 <div className={`addbrgyuser-popup-overlay show`}>
                     <div className="addbrgyuser-popup">
+                        <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                         <p>{popupMessage}</p>
                     </div>
                 </div>
@@ -278,6 +280,7 @@ export default function AddBarangayUser() {
         {showErrorPopup && (
                 <div className={`addbrgyuser-error-popup-overlay show`}>
                     <div className="addbrgyuser-popup">
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                         <p>{popupErrorMessage}</p>
                     </div>
                 </div>
