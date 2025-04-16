@@ -467,7 +467,7 @@
     display: inline-block;        
     text-transform: capitalize;   
     text-align: center;    
-    width: 100px;       
+    width: 105px;       
 }
 
 .status-badge.unverified {
@@ -479,5 +479,9 @@
 }
 
 .status-badge.rejected {
-  background-color: #f79233;    
+  background-color: #f73333;    
+}
+
+.status-badge.resubmission {
+  background-color: #e47f22;    
 }

@@ -309,3 +309,10 @@ margin-top: 20px;
 .no-button:hover {
   background-color:  #c2352b; 
 } 
+
+
+.successful-icon-popup{
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}

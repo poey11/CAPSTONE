@@ -32,12 +32,12 @@ const BMenu: React.FC = () => {
             />
         </div>
         <div className="dropdown-container">
-          <Link href="/dashboard/ReportsModule" className="dropdown-item">Generate Report</Link>
+          <Link href="/dashboard/ReportsModule" className="dropdown-item-brgy">Generate Report</Link>
         </div>
       </div>
 
         
-        <Link href="/dashboard/admin" className="module">User and Roles</Link>
+        <Link href="/dashboard/admin" className="module-title">User and Roles</Link>
 
         {/* Resident Management */}
         <div className="dropdown-wrapper"
@@ -56,10 +56,10 @@ const BMenu: React.FC = () => {
 
 
           <div className="dropdown-container">
-            <Link href="/dashboard/ResidentModule" className="dropdown-item">Main Residents</Link>
-            <Link href="/dashboard/ResidentModule/registeredVoters" className="dropdown-item">Registered Voters</Link>
-            <Link href="/dashboard/ResidentModule/kasambahayList" className="dropdown-item">Kasambahay Master List</Link>
-            <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker" className="dropdown-item">First-Time Job Seekers List</Link>
+            <Link href="/dashboard/ResidentModule" className="dropdown-item-brgy">Main Residents</Link>
+            <Link href="/dashboard/ResidentModule/registeredVoters" className="dropdown-item-brgy">Registered Voters</Link>
+            <Link href="/dashboard/ResidentModule/kasambahayList" className="dropdown-item-brgy">Kasambahay Master List</Link>
+            <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker" className="dropdown-item-brgy">First-Time Job Seekers List</Link>
 
           </div>
         </div>
@@ -80,8 +80,8 @@ const BMenu: React.FC = () => {
         </div>
           
           <div className="dropdown-container">
-            <Link href="/dashboard/OfficialsModule" className="dropdown-item">Officials</Link>
-            <Link href="/dashboard/OfficialsModule/SitioHoaOfficers" className="dropdown-item">Sitio/HOA Officers</Link>
+            <Link href="/dashboard/OfficialsModule" className="dropdown-item-brgy">Officials</Link>
+            <Link href="/dashboard/OfficialsModule/SitioHoaOfficers" className="dropdown-item-brgy">Sitio/HOA Officers</Link>
           </div>
         </div>
 
@@ -103,9 +103,9 @@ const BMenu: React.FC = () => {
         </div>
 
           <div className="dropdown-container">
-            <Link href="/dashboard/ServicesModule/InBarangayRequests" className="dropdown-item">In Barangay Requests</Link>
-            <Link href="/dashboard/ServicesModule/OnlineRequests" className="dropdown-item">Online Requests</Link>
-            <Link href="/dashboard/ServicesModule/Appointments" className="dropdown-item">Appointments</Link>
+            <Link href="/dashboard/ServicesModule/InBarangayRequests" className="dropdown-item-brgy">In Barangay Requests</Link>
+            <Link href="/dashboard/ServicesModule/OnlineRequests" className="dropdown-item-brgy">Online Requests</Link>
+            <Link href="/dashboard/ServicesModule/Appointments" className="dropdown-item-brgy">Appointments</Link>
           </div>
         </div>
 
@@ -124,15 +124,15 @@ const BMenu: React.FC = () => {
             />
         </div>
         <div className="dropdown-container">
-          <Link href="/dashboard/IncidentModule/Department?id=Lupon" className="dropdown-item">Lupon</Link>
-          <Link href="/dashboard/IncidentModule/Department?id=GAD" className="dropdown-item">GAD</Link>
-          <Link href="/dashboard/IncidentModule/Department?id=BCPC" className="dropdown-item">BCPC</Link>
-          <Link href="/dashboard/IncidentModule/Department?id=VAWC" className="dropdown-item">VAWC</Link>
-          <Link href="/dashboard/IncidentModule/OnlineReports" className="dropdown-item">Online Requests</Link>
+          <Link href="/dashboard/IncidentModule/Department?id=Lupon" className="dropdown-item-brgy">Lupon</Link>
+          <Link href="/dashboard/IncidentModule/Department?id=GAD" className="dropdown-item-brgy">GAD</Link>
+          <Link href="/dashboard/IncidentModule/Department?id=BCPC" className="dropdown-item-brgy">BCPC</Link>
+          <Link href="/dashboard/IncidentModule/Department?id=VAWC" className="dropdown-item-brgy">VAWC</Link>
+          <Link href="/dashboard/IncidentModule/OnlineReports" className="dropdown-item-brgy">Online Requests</Link>
         </div>
       </div>
 
-        <Link href="/dashboard/announcements" className="module">Announcements</Link>
+        <Link href="/dashboard/announcements" className="module-title">Announcements</Link>
 
 
 {/* For CAP2 */}
@@ -152,8 +152,8 @@ const BMenu: React.FC = () => {
                 />
             </div>
             <div className="dropdown-container">
-            <Link href="/dashboard/ProgramsModule" className="dropdown-item">Volunteer Programs</Link>
-            <Link href="/dashboard/ProgramsModule/ProgramResponses" className="dropdown-item">Program Responses</Link>
+            <Link href="/dashboard/ProgramsModule" className="dropdown-item-brgy">Volunteer Programs</Link>
+            <Link href="/dashboard/ProgramsModule/ProgramResponses" className="dropdown-item-brgy">Program Responses</Link>
             </div>
         </div> */}
 
@@ -172,8 +172,8 @@ const BMenu: React.FC = () => {
                 />
             </div>
             <div className="dropdown-container">
-            <Link href="/dashboard/EventsModule" className="dropdown-item">Events List</Link>
-            <Link href="/dashboard/EventsModule/EventResponses" className="dropdown-item">Event Responses</Link>
+            <Link href="/dashboard/EventsModule" className="dropdown-item-brgy">Events List</Link>
+            <Link href="/dashboard/EventsModule/EventResponses" className="dropdown-item-brgy">Event Responses</Link>
             </div>
         </div>   */}
 

@@ -177,7 +177,7 @@ export default function ViewUser() {
                 ))}
 
                 
-                {ResidentUserData.status === "Rejected" && (
+                {ResidentUserData.status === "Resubmission" && (
                     <div className="viewresident-details-section">
                         <div className="viewresident-title">
                             <p>Reason for Rejection</p>
@@ -220,6 +220,7 @@ export default function ViewUser() {
             {showAcceptPopup && (
                         <div className="confirmation-popup-overlay">
                             <div className="confirmation-popup">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to accept this user?</p>
                                 <div className="yesno-container">
                                     <button onClick={() => setShowAcceptPopup(false)} className="no-button">No</button>

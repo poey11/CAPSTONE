@@ -270,6 +270,42 @@ export default function SettingsPageResident() {
                         View Transactions
                     </a>
                     </div>
+
+                                    {/* Show Valid ID section only if status is "Rejected" */}
+                {resident.status === "Resubmission" && (
+                <div className="account-profile-section">
+                    <div className="icon-container-profile-section">
+                    {preview2 ? (
+                        <img
+                        src={preview2}
+                        alt="User Valid ID"
+                        className="valid-id-container-profile-section"
+                        />
+                    ) : resident.upload ? (
+                        <img
+                        src={resident.upload}
+                        alt="User Valid ID"
+                        className="valid-id-container-profile-section"
+                        />
+                    ) : (
+                        <p>No Valid ID</p>
+                    )}
+                    <input
+                        type="file"
+                        accept="image/*"
+                        id="validIdUpload"
+                        style={{ display: "none" }}
+                        onChange={handleValidIDChange}
+                    />
+                    <button
+                        className="upload-btn-profile-section"
+                        onClick={() => document.getElementById("validIdUpload")?.click()}
+                    >
+                        Update Valid ID
+                    </button>
+                    </div>
+                </div>
+                )}
                 </div>
 
 
