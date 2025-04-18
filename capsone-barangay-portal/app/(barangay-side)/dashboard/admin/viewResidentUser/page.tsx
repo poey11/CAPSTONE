@@ -74,7 +74,11 @@ export default function ViewUser() {
     ];
 
     const handleBack = () => {
-        window.location.href = "/dashboard/admin/ResidentUsers";
+        if (ResidentUserData?.status === "Verified") {
+            window.location.href = "/dashboard/admin/ResidentUsers";
+        } else {
+            window.location.href = "/dashboard/admin/PendingResidentUsers";
+        }
     };
 
     const handleAcceptClick = (userId: string) => {
@@ -107,7 +111,7 @@ export default function ViewUser() {
                 setTimeout(() => {
                     setShowPopup(false);
                     //router.push("/dashboard/admin");
-                    router.push(`/dashboard/admin?highlight=${selectedUserId}`);
+                    router.push(`/dashboard/admin/ResidentUsers?highlight=${selectedUserId}`);
                 }, 3000);
             } catch (error) {
                 console.error("Error updating user status:", error);
@@ -121,7 +125,11 @@ export default function ViewUser() {
     return (
         <main className="viewresident-main-container">
             <div className="viewresident-page-title-section-1">
-                <h1>Resident Users</h1>
+                <h1>
+                    {ResidentUserData?.status === "Verified"
+                        ? "Resident Users"
+                        : "Pending Resident Users"}
+                </h1>
             </div>
 
             <div className="viewresident-main-content">

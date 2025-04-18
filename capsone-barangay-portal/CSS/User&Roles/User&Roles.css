@@ -1,5 +1,6 @@
 .barangayusers-page-main-container,
-.residentusers-page-main-container{
+.residentusers-page-main-container,
+.pendingresidentusers-page-main-container{
   width: 100%;
   height: 100vh;
   background-color: #f9f9f9;
@@ -9,7 +10,8 @@
 }
 
 .barangayusers-page-section-2,
-.residentusers-page-section-2{
+.residentusers-page-section-2,
+.pendingresidentusers-page-section-2{
   display: flex;
   gap: 20px;
   padding: 0;
@@ -17,7 +19,8 @@
 }
 
 .barangayusers-page-filter,
-.residentusers-page-filter{
+.residentusers-page-filter,
+.pendingresidentusers-page-filter{
   padding: 8px;
   width: 100%;
   max-width: 400px;
@@ -29,19 +32,22 @@
 }
 
 .barangayusers-page-filter:focus,
-.residentusers-page-filter:focus {
+.residentusers-page-filter:focus,
+.pendingresidentusers-page-filter:focus {
   border-color: #f49028;
   outline: none;
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
 
 .barangayusers-page-filter option,
-.residentusers-page-filter option  {
+.residentusers-page-filter option,
+.pendingresidentusers-page-filter option  {
   color: rgba(0, 0, 0, 0.4); 
 }
 
 .barangayusers-page-main-section,
-.residentusers-page-main-section {
+.residentusers-page-main-section,
+.pendingresidentusers-page-main-section {
   flex: 1; 
   display: flex; 
   flex-direction: column;
@@ -56,20 +62,23 @@
 }
 
 .barangayusers-page-main-section table,
-.residentusers-page-main-section table {
+.residentusers-page-main-section table,
+.pendingresidentusers-page-main-section table {
   width: 100%; /* Ensures the table spans the full width */
   border-collapse: collapse; /* Removes unnecessary spacing between table cells */
 }
 
 .barangayusers-page-main-section tbody tr:hover,
-.residentusers-page-main-section tbody tr:hover {
+.residentusers-page-main-section tbody tr:hover,
+.pendingresidentusers-page-main-section tbody tr:hover {
   background-color: #e0e0e0; 
   cursor: pointer; 
   transition: background-color 0.2s ease; 
 }
 
 .barangayusers-page-main-section td,
-.residentusers-page-main-section td {
+.residentusers-page-main-section td,
+.pendingresidentusers-page-main-section td {
   padding: 1rem; 
   text-align: center; 
   border-bottom: 2px solid #ddd;
@@ -78,7 +87,8 @@
 }
 
 .barangayusers-page-main-section th,
-.residentusers-page-main-section th {
+.residentusers-page-main-section th,
+.pendingresidentusers-page-main-section th {
   padding: 1rem; 
   text-align: left; 
   border-bottom: 2px solid #ddd;
@@ -88,7 +98,8 @@
 }
 
 .barangayusers-page-main-section thead,
-.residentusers-page-main-section thead {
+.residentusers-page-main-section thead,
+.pendingresidentusers-page-main-section thead {
   position: sticky;
   top: 0;
   background-color: rgb(232, 228, 228); /* Ensures it's visible when scrolled */

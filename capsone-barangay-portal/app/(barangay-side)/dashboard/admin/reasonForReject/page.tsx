@@ -33,7 +33,7 @@ export default function reasonForRejection() {
 
 
     const handleBack = () => {
-        router.push("/dashboard/admin");
+        router.push(`/dashboard/admin/viewResidentUser?id=${userId}`);
     };
 
     const handleSubmitClick = async () => {
@@ -90,7 +90,7 @@ export default function reasonForRejection() {
     
                 setTimeout(() => {
                     setShowPopup(false);
-                    router.push(`/dashboard/admin?highlight=${userId}`);
+                    router.push(`/dashboard/admin/PendingResidentUsers?highlight=${userId}`);
                 }, 3000);
             } else {
                 console.error("User document does not exist.");
@@ -105,7 +105,7 @@ export default function reasonForRejection() {
     return (
     <main className="reasonforrejection-main-container">
         <div className="reasonforrejection-section-1">
-            <h1>Reject Resident User</h1>
+            <h1>Pending Resident User</h1>
         </div>
 
         <div className="reasonforrejection-main-section">
