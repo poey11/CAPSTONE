@@ -44,7 +44,7 @@ const BMenu: React.FC = () => {
         >
 
           <div className="dropdown-button">
-            <Link href="/dashboard/admin">User and Roles</Link>
+            <Link href="/dashboard/admin/BarangayUsers">User and Roles</Link>
             <img 
                 src={hoveredDropdown === "user&roles" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
                 alt="Menu Icon" 
