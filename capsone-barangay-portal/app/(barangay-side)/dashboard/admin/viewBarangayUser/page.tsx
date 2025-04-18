@@ -60,14 +60,14 @@ export default function ViewUser() {
     }
 
     const handleBack = () => {
-        window.location.href = "/dashboard/admin";
+        window.location.href = "/dashboard/admin/BarangayUsers";
     };
 
     return (
 
         <main className="viewresident-main-container">
             <div className="viewresident-page-title-section-1">
-                <h1>Admin Module</h1>
+                <h1>Barangay Users</h1>
             </div>
 
 

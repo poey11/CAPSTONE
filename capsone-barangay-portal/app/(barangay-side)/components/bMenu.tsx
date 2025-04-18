@@ -37,7 +37,29 @@ const BMenu: React.FC = () => {
       </div>
 
         
-        <Link href="/dashboard/admin" className="module-title">User and Roles</Link>
+        {/* User & Roles */}
+        <div className="dropdown-wrapper"
+          onMouseEnter={() => setHoveredDropdown("user&roles")}
+          onMouseLeave={() => setHoveredDropdown(null)}
+        >
+
+          <div className="dropdown-button">
+            <Link href="/dashboard/admin">User and Roles</Link>
+            <img 
+                src={hoveredDropdown === "user&roles" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+                alt="Menu Icon" 
+                className="arrow" 
+              />
+          </div>
+
+          <div className="dropdown-container">
+            <Link href="/dashboard/admin/BarangayUsers" className="dropdown-item-brgy">Barangay Users</Link>
+            <Link href="/dashboard/admin/PendingResidentUsers" className="dropdown-item-brgy">Pending Resident Users</Link>
+            <Link href="/dashboard/admin/ResidentUsers" className="dropdown-item-brgy">Resident Users</Link>
+            
+
+          </div>
+        </div>
 
         {/* Resident Management */}
         <div className="dropdown-wrapper"

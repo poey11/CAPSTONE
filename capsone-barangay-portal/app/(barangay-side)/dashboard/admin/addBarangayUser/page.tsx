@@ -43,7 +43,7 @@ export default function AddBarangayUser() {
 
     useEffect(() => {
         if(userRole !== "Admin" && userRole !== "Assistant Secretary") {
-            router.push("/dashboard/admin");
+            router.push("/dashboard/admin/BarangayUsers");
             return;
         }
         setLoading(false);
@@ -55,7 +55,7 @@ export default function AddBarangayUser() {
 
 
     const handleBack = () => {
-        window.location.href = "/dashboard/admin";
+        window.location.href = "/dashboard/admin/BarangayUsers";
     };
 
     const GenerateID = async (e: any) => {
@@ -128,7 +128,7 @@ export default function AddBarangayUser() {
         // Hide the popup after 3 seconds
         setTimeout(() => {
           setShowPopup(false);
-          router.push(`/dashboard/admin?highlight=${users.userId}`);
+          router.push(`/dashboard/admin/BarangayUsers?highlight=${users.userId}`);
         }, 3000);
       
         // Create a fake event and call handleSubmit
