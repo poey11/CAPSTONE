@@ -74,7 +74,7 @@ export default function ViewUser() {
     ];
 
     const handleBack = () => {
-        window.location.href = "/dashboard/admin";
+        window.location.href = "/dashboard/admin/ResidentUsers";
     };
 
     const handleAcceptClick = (userId: string) => {
@@ -117,12 +117,11 @@ export default function ViewUser() {
             }
         };
 
-    
 
     return (
         <main className="viewresident-main-container">
             <div className="viewresident-page-title-section-1">
-                <h1>Admin Module</h1>
+                <h1>Resident Users</h1>
             </div>
 
             <div className="viewresident-main-content">
