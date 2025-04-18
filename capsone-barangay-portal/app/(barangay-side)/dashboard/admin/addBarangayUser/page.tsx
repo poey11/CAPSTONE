@@ -180,7 +180,7 @@ export default function AddBarangayUser() {
 
         <main className="add-barangayuser-main-container">
             <div className="add-barangayuser-page-title-section-1">
-                <h1>Add New Barangay User</h1>
+                <h1>Barangay Users</h1>
             </div>
 
             <div className="add-barangayuser-main-content">

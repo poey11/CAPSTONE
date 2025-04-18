@@ -105,7 +105,7 @@ export default function reasonForRejection() {
     return (
     <main className="reasonforrejection-main-container">
         <div className="reasonforrejection-section-1">
-            <h1>Pending Resident User</h1>
+            <h1>Pending Resident Users</h1>
         </div>
 
         <div className="reasonforrejection-main-section">
