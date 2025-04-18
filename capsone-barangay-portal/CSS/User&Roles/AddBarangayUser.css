@@ -196,7 +196,7 @@
     font-weight: bold;
 }
 
-.actions-section {
+.actions-section-addbrgyuser {
     display: flex;
     justify-content: center;
     gap: 0.5rem; /* Space between action buttons */
@@ -357,4 +357,14 @@
     color: red;
     margin-left: 5px;
   }
+
+  .icon-alert {
+    width: 27px;
+    height: 27px;
+  }
   
+  .clarify-icon-popup {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+  }

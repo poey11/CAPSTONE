@@ -26,13 +26,14 @@ export default function reasonForRejection() {
     const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
-    const [rejectionReason, setRejectionReason] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
     const [selectedReason, setSelectedReason] = useState("");
     const [otherReason, setOtherReason] = useState("");
 
 
     const handleBack = () => {
-        router.push("/dashboard/admin");
+        router.push(`/dashboard/admin/viewResidentUser?id=${userId}`);
     };
 
     const handleSubmitClick = async () => {
@@ -48,10 +49,10 @@ export default function reasonForRejection() {
         const finalReason = selectedReason === "others" ? otherReason.trim() : selectedReason;
 
         if (!finalReason) {
-            setPopupMessage("Please select a reason before submitting.");
+            setPopupErrorMessage("Please select a reason before submitting.");
             setShowSubmitPopup(false);
-            setShowPopup(true);
-            setTimeout(() => setShowPopup(false), 3000);
+            setShowErrorPopup(true);
+            setTimeout(() => setShowErrorPopup(false), 3000);
             return;
         }
       
@@ -89,7 +90,7 @@ export default function reasonForRejection() {
     
                 setTimeout(() => {
                     setShowPopup(false);
-                    router.push("/dashboard/admin");
+                    router.push(`/dashboard/admin/PendingResidentUsers?highlight=${userId}`);
                 }, 3000);
             } else {
                 console.error("User document does not exist.");
@@ -104,7 +105,7 @@ export default function reasonForRejection() {
     return (
     <main className="reasonforrejection-main-container">
         <div className="reasonforrejection-section-1">
-            <h1>Reject Resident User</h1>
+            <h1>Pending Resident User</h1>
         </div>
 
         <div className="reasonforrejection-main-section">
@@ -167,7 +168,7 @@ export default function reasonForRejection() {
         {showSubmitPopup && (
                         <div className="confirmation-popup-overlay">
                             <div className="confirmation-popup">
-                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                                <img src="/Images/question.png" alt="warning icon" className="clarify-icon-popup" />
                                 <p>Are you sure you want to submit?</p>
                                 <div className="yesno-container">
                                     <button onClick={() => setShowSubmitPopup(false)} className="no-button">No</button>
@@ -180,7 +181,17 @@ export default function reasonForRejection() {
         {showPopup && (
                 <div className={`popup-overlay show`}>
                     <div className="popup">
+                        <img src={"/Images/check.png"} alt="popup icon" className="icon-alert" />
                         <p>{popupMessage}</p>
+                    </div>
+                </div>
+        )}
+
+        {showErrorPopup && (
+                <div className={`error-popup-overlay show`}>
+                    <div className="popup">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                        <p>{popupErrorMessage}</p>
                     </div>
                 </div>
         )}
