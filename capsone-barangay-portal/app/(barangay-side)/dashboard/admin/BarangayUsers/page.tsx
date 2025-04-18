@@ -38,21 +38,17 @@ const BarangayUsers = () => {
        
         const [barangayUsers, setBarangayUsers] = useState<dbBarangayUser[]>([]);
         const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
-        const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
         const [selectedBarangayUserId, setSelectedBarangayUserId] = useState<string | null>(null);
     
         const [showPopup, setShowPopup] = useState(false);
         const [popupMessage, setPopupMessage] = useState("");
         const [showDeletePopup, setShowDeletePopup] = useState(false);
-        const [showAcceptPopup, setShowAcceptPopup] = useState(false); 
         const [showAlertPopup, setshowAlertPopup] = useState(false); 
         const [loading, setLoading] = useState(true);
         const [error, setError] = useState<string | null>(null);
     
         const router = useRouter();
-       
-        const [showPendingResidentTableContent, setShowPendingResidentTableContent] = useState(true); 
-        const [showResidentTableContent, setShowResidentTableContent] = useState(false); 
+
         const [showBarangayTableContent, setShowBarangayTableContent] = useState(false);
     
         const searchParams = useSearchParams();
