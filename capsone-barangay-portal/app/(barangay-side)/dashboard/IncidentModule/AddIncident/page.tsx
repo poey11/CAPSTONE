@@ -5,9 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
-import {getSpecificCountofCollection} from "@/app/helpers/firestorehelper";
-import {isPastDate,isToday,isPastOrCurrentTime, getLocalDateString} from "@/app/helpers/helpers";
+import {getAllSpecificDocument} from "@/app/helpers/firestorehelper";
+import {isPastDate,isToday,isPastOrCurrentTime, getLocalDateString, isValidPhilippineMobileNumber} from "@/app/helpers/helpers";
 import { useSession } from "next-auth/react";
+import {customAlphabet} from "nanoid";
 
  interface userProps{
   fname: string;
@@ -61,36 +62,68 @@ export default function AddIncident() {
     nosofFemaleChildren: "",
     file: null,
   });
-
   const [deskStaff, setdeskStaff] = useState<any>({
-    fname: user?.fullName.split(" ")[0] || "",
-    lname: user?.fullName.split(" ")[1] || "",
+    fname: "",
+    lname: "",
   })
 
-  
-
-  // ✅ Fetch and set the case number when the component mounts
   useEffect(() => {
-    const fetchCaseNumber = async () => {
-      const caseNum = await getCaseNumber();
-      setReportInfo((prev: any) => ({ ...prev, caseNumber: caseNum }));
-    };
-
-    fetchCaseNumber();
-  }, [departmentId]); // Runs when `departmentId` changes
+    if(!user) return;
+    setdeskStaff({
+      fname: user.fullName.split(" ")[0],
+      lname: user.fullName.split(" ")[1],
+    })
+  },[user]);
+ 
 
   const currentDate = getLocalDateString(new Date());
 
-  const getCaseNumber = async () => {
-    if (departmentId) {
-      let number = await getSpecificCountofCollection("IncidentReports", "department", departmentId);
-      const formattedNumber = number !== undefined ? String(number + 1).padStart(4, "0") : "0000";
-      const date = currentDate.split("T")[0].replace(/-/g, "");
-      const caseValue =`${departmentId} - ${date} - ${formattedNumber}` ;
-      console.log("Generated Case Number:", caseValue); // ✅ Logs the correct value
-      return caseValue; // ✅ Ensure the function returns the computed value
+  const [reportCollection, setReportCollection] = useState<any[]>([]);
+ 
+  useEffect(() => {
+    if (!departmentId) return; 
+    try {
+      const unsubscribe =  getAllSpecificDocument("IncidentReports", "department", "==", departmentId,  setReportCollection);
+      return () => {
+        if (unsubscribe) {
+          unsubscribe(); 
+        }
+      }
+    } catch (error) {
+       setReportCollection([]);
     }
-  };
+   
+  }, [departmentId]);
+
+  useEffect(() => { 
+    const getCaseNumber = () => {
+      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const randomIdString = customAlphabet(alphabet, 6);
+      const randomId = randomIdString();
+      let id ="";
+      let formattedNumber ="";
+      if(departmentId === "Lupon") id = "LPN";
+      else if(departmentId === "GAD") id = "GAD";
+      else if(departmentId === "BCPC") id = "BCPC";
+      else if(departmentId === "VAWC") id = "VAWC";
+
+      if(reportCollection.length < 1) {
+         formattedNumber = String(1).padStart(4, "0");
+      }
+      else{
+        const lastestReport = reportCollection[0].caseNumber.split(" - ");
+        const lastCaseNumber = parseInt(lastestReport[lastestReport.length - 1]);
+        formattedNumber = String(lastCaseNumber+1).padStart(4, "0");
+      }
+      const caseValue =`${id} - ${randomId} - ${formattedNumber}` ;
+      setReportInfo((prev: any) => ({ ...prev, caseNumber: caseValue }));
+      return;
+
+
+    }
+      getCaseNumber();
+  },[reportCollection])
+  
 
 
   
@@ -114,7 +147,7 @@ export default function AddIncident() {
   }
   };
 
-  const handleFileDeleteContainer1 = (fileName: string) => {
+  const handleFileDeleteContainer1 = () => {
     setFilesContainer1([]);
 
     // Reset file input
@@ -134,7 +167,6 @@ export default function AddIncident() {
             const storageRef = ref(storage, `IncidentReports/${filename}`);
             await uploadBytes(storageRef, reportInfo.file);
         }
-
         // Prepare the incident report data
         const reportData: Record<string, any> = {
             caseNumber: reportInfo.caseNumber,
@@ -149,8 +181,14 @@ export default function AddIncident() {
             timeReceived: reportInfo.timeReceived,
             file: filename,
             department: departmentId,
-            nosofMaleChildren: reportInfo.nosofMaleChildren,
-            nosofFemaleChildren: reportInfo.nosofFemaleChildren,
+            staffId: user?.id,
+            isDialogue: false,
+            nosHearing:1,
+            createdAt: new Date(),
+            ...(departmentId === "GAD" && { 
+              nosofMaleChildren: reportInfo.nosofMaleChildren,
+              nosofFemaleChildren: reportInfo.nosofFemaleChildren,
+            }),
             complainant: {
                 fname: complainant.fname,
                 lname: complainant.lname,
@@ -204,8 +242,13 @@ export default function AddIncident() {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault(); 
+  
     const form = event.target as HTMLFormElement;
     if (form.checkValidity()) {
+      if(!isValidPhilippineMobileNumber(complainant.contact)|| !isValidPhilippineMobileNumber(respondent.contact)){
+        setErrorPopup({ show: true, message: "Invalid Contact Number." });
+        return;
+      }
       const dateFiled = reportInfo.dateFiled;
       const dateReceived = reportInfo.dateReceived;
       const timeFiled = reportInfo.timeFiled;
@@ -233,7 +276,7 @@ export default function AddIncident() {
 
 
       handleUpload().then(() => {
-        deleteForm();
+        //deleteForm();
         router.back();
       })
     } else {
@@ -287,9 +330,8 @@ export default function AddIncident() {
 
   
   const deleteForm = () => {
-    
+    handleFileDeleteContainer1();
     setReportInfo({
-        caseNumber: "",
         dateFiled: "",
         timeFiled: "",
         location: "",
@@ -310,10 +352,6 @@ export default function AddIncident() {
         civilStatus: "",
         address: "",
       });
-      setdeskStaff({
-        fname: "",
-        lname: "",
-      });
       setRespondent({
         fname: "",
         lname: "",
@@ -323,7 +361,6 @@ export default function AddIncident() {
         civilStatus: "",
         address: "",
       });
-
   }
 
   const handleBack = () => {
@@ -426,16 +463,21 @@ export default function AddIncident() {
                     />
 
                     <p>Civil Status</p>
-                    <input 
-                    type="text" 
-                    className="search-bar-add" 
-                    placeholder="Enter Civil Status" 
-                    value={complainant.civilStatus}
+                 
+                    <select   className="search-bar-add"    
+                    value={complainant.civilStatus} 
                     name="civilStatus"
                     id="complainant"
-                    required
                     onChange={handleFormChange}
-                    />
+                    required>
+                      <option value="" disabled>Choose A Civil Status</option>
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Widowed">Widowed</option>
+                      <option value="Separated">Separated</option>
+                      <option value="Divorced">Divorced</option>
+                      
+                    </select>
 
                     <p>Address</p>
 
@@ -522,16 +564,21 @@ export default function AddIncident() {
                     />
 
                     <p>Civil Status</p>
-                    <input 
-                    type="text" 
-                    id="respondent"
-                    className="search-bar-add" 
-                    placeholder="Enter Civil Status" 
-                    value={respondent.civilStatus}
+
+                    <select   className="search-bar-add"    
+                    value={respondent.civilStatus} 
                     name="civilStatus"
-                    required
+                    id="respondent"
                     onChange={handleFormChange}
-                    />
+                    required>
+                      <option value="" disabled>Choose A Civil Status</option>
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Widowed">Widowed</option>
+                      <option value="Separated">Separated</option>
+                      <option value="Divorced">Divorced</option>
+                      
+                    </select>
 
                     <p>Address</p>
 
@@ -758,7 +805,7 @@ export default function AddIncident() {
                                 <div className="delete-container-add">
                                   <button
                                     type="button"
-                                    onClick={() => handleFileDeleteContainer1(file.name)}
+                                    onClick={() => handleFileDeleteContainer1()}
                                     className="delete-button-add"
                                   >
                                     <img

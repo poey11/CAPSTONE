@@ -59,10 +59,10 @@ body {
 .dropdown {
     position: absolute;
     top: 40px; /* Adjust as needed */
-    left: -140px; /* Moves it to the leftmost part of the screen */
+    left: -180px; /* Moves it to the leftmost part of the screen */
     background-color: #f9f9f9;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-    min-width: 160px;
+    min-width: 200px;
     z-index: 1000;
     padding: 5px 0;
     display: none; /* Hide dropdown by default */
@@ -88,10 +88,11 @@ body {
 }
 
 .dropdown li:hover {
-    background-color: #e56723;
+  background-color: #c3c2c2;
+  color: rgb(255, 255, 255);
 }
 
-.module {
+.options-topmenu {
     padding: 1rem;
     color: grey;
     font-size: 16px;
@@ -102,12 +103,12 @@ body {
     transition: background 0.2s ease-in-out;
   }
   
-  .module:hover {
-    background-color: #D9D9D9;
+  .options-topmenu:hover {
+    background-color: #c3c2c2;
     color: rgb(255, 255, 255);
   }
   
-  .module:not(:last-child) {
+  .options-topmenu:not(:last-child) {
     margin-bottom: 0.50rem;
   }
 

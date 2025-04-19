@@ -52,7 +52,23 @@ const isPastOrCurrentTime = (time: string) => {
     return inputTotalMinutes <= nowTotalMinutes;
 };
 
+const getLocalTimeString = (d: Date) => {
+    return String(d.getHours()).padStart(2, '0') + ':' +
+        String(d.getMinutes()).padStart(2, '0');
+}
+
+const getLocalDateTimeString = (d: Date) => {
+    return getLocalDateString(d) + ' ' + getLocalTimeString(d);
+}
 
 
+const isValidPhilippineMobileNumber = (number: string) => {
+    const regex = /^(09|\+639|639)\d{9}$/;
+    return regex.test(number);
+  };
+  
 
-export {isPastDate,isToday,isPastOrCurrentTime,isFutureDate,getLocalDateString }
+export {isPastDate,isToday,isPastOrCurrentTime,
+    getLocalTimeString,getLocalDateTimeString,
+    isValidPhilippineMobileNumber,
+    isFutureDate,getLocalDateString }

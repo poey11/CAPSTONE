@@ -10,7 +10,7 @@ import { auth, db, storage } from "@/app/db/firebase"; // Ensure 'auth' is impor
 
 
 
-// I will send you a code can you check why is the first name and last name updating instanly in the account-profile-section when im changing it in the edit section but im not yet clicking the submit button yet
+
 
 export default function SettingsPageResident() {
     const router = useRouter();
@@ -28,6 +28,7 @@ export default function SettingsPageResident() {
         address: "",
         userIcon: "",
         upload: "",
+        reupload: "",
     });
 
     const [formData, setFormData] = useState({ ...resident });
@@ -44,6 +45,8 @@ export default function SettingsPageResident() {
     const [loading, setLoading] = useState(false);
     const [profileFile, setProfileFile] = useState<File | null>(null);
     const [validIDFile, setValidIDFile] = useState<File | null>(null); 
+    const [reuploadDone, setReuploadDone] = useState(false);
+
   
 
     useEffect(() => {
@@ -63,10 +66,11 @@ export default function SettingsPageResident() {
                 status: docSnap.data().status || "N/A",
                 userIcon: docSnap.data().userIcon ||  "N/A",
                 upload: docSnap.data().upload || "N/A",
+                reupload: docSnap.data().reupload || "N/A",                
                 address: docSnap.data().address || "N/A",
               };
               setResident(data);
-              setFormData(data);
+              setFormData(data);    
               setPreview(data.userIcon);
             }
           };
@@ -116,12 +120,18 @@ export default function SettingsPageResident() {
       };
 
       const handleValidIDChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (formData.status === "Resubmission" && reuploadDone) {
+            alert("You have already reuploaded your valid ID. Further uploads are disabled.");
+            return;
+        }
+    
         const selectedFile = event.target.files?.[0];
         if (selectedFile) {
-          setValidIDFile(selectedFile);
-          setPreview2(URL.createObjectURL(selectedFile)); // Show preview before upload
+            setValidIDFile(selectedFile);
+            setPreview2(URL.createObjectURL(selectedFile));
         }
-      };
+    };
+    
       
       const uploadValidIDToStorage = async (file: File) => {
         const storageRef = ref(storage, `validIDs/${residentId}`);
@@ -176,15 +186,21 @@ export default function SettingsPageResident() {
                 resident.userIcon = downloadURL;
                 }
     
-            // Upload valid ID if status is "Rejected" and file exists
-            if (validIDFile && resident.status === "Rejected") {
-                const timeStamp = Date.now().toString();
-                const fileExtension = validIDFile.name.split('.').pop();
-                const fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtension}`;
-                const downloadURL = await uploadImageToStorage(validIDFile, `ResidentUsers/valid_id_image/${fileName}`);
-                resident.upload = downloadURL;
-            }
-      
+                if (validIDFile) {
+                    const timeStamp = Date.now().toString();
+                    const fileExtension = validIDFile.name.split('.').pop();
+                    const fileName = `valid_id_${resident.first_name}_${resident.last_name}_${timeStamp}.${fileExtension}`;
+                    const downloadURL = await uploadImageToStorage(validIDFile, `ResidentUsers/valid_id_image/${fileName}`);
+                
+                    if (formData.status === "Rejected") {
+                        resident.upload = downloadURL;
+                    } else if (formData.status === "Resubmission") {
+                        resident.reupload = downloadURL;
+                        setReuploadDone(true); // <- set flag after successful upload
+                    }
+                }
+                
+  
           const docRef = doc(db, "ResidentUsers", residentId!);
           await updateDoc(docRef, {
             first_name: formData.first_name,
@@ -195,6 +211,7 @@ export default function SettingsPageResident() {
             userIcon: resident.userIcon,
             address: formData.address,
             upload: resident.upload,
+            reupload: resident.reupload, // <-- ADD THIS
           });
           
           setResident({ ...resident, ...formData });
@@ -408,12 +425,13 @@ export default function SettingsPageResident() {
                                 onChange={handleChange}
                             />
                         </div>
-
-                        {formData.status === "Rejected" && (
+                        {formData.status === "Resubmission" && (!resident.reupload || resident.reupload === "N/A") && (
                             <div className="valid-id-section-profile">
-                                <h3 className="valid-id-header">Your previous ID was rejected</h3>
-                                <p className="valid-id-subtext">Please upload a new Valid ID for review.</p>
-                                
+                                <h3 className="valid-id-header">ID Rejected — Please Resubmit</h3>
+                                <p className="valid-id-subtext">
+                                    Your previously submitted valid ID did not meet the requirements. Kindly upload a new, clear image for review.
+                                </p>
+
                                 <div className="valid-id-content">
                                 {preview2 ? (
                                     <img
@@ -431,26 +449,26 @@ export default function SettingsPageResident() {
                                     <p className="no-valid-id-text">No Valid ID uploaded</p>
                                 )}
 
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    id="validIdUpload"
-                                    style={{ display: "none" }}
-                                    onChange={handleValidIDChange}
-                                />
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        id="validIdUpload"
+                                        style={{ display: "none" }}
+                                        onChange={handleValidIDChange}
+                                    />
 
-                            <button
-                                type="button"
-                                className="upload-btn-profile-section"
-                                onClick={() => document.getElementById("validIdUpload")?.click()}
-                            >
-                                Update Profile Image
-                            </button>
-
-                                    </div>
+                                    <button
+                                        type="button"
+                                        className="upload-btn-profile-section"
+                                        onClick={() => document.getElementById("validIdUpload")?.click()}
+                                    >
+                                        Upload New Valid ID
+                                    </button>
+                                </div>
                             </div>
-                            )}
+                        )}
 
+                      
 
                         
                         <div className="submit-section-resident-account">

@@ -66,7 +66,7 @@ export default function EditBarangayAccount() {
 
 
     const handleBack = () => {
-        router.push("/dashboard/admin");
+        router.push("/dashboard/admin/BarangayUsers");
     };
 
     const [originalData, setOriginalData] = useState({ ...formData });
@@ -232,7 +232,7 @@ export default function EditBarangayAccount() {
 
         <main className="editbrgyacc-main-container">
             <div className="editbrgyacc-page-title-section-1">
-                <h1>Admin Module</h1>
+                <h1>Barangay Users</h1>
             </div>
 
             <div className="editbrgyacc-main-content">

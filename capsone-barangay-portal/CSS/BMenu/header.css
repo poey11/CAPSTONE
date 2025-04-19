@@ -39,11 +39,11 @@
 
 
 
-.module:hover {
+.module-title:hover {
   background-color: #D9D9D9;
 }
 
-.module:not(:last-child) {
+.module-title:not(:last-child) {
   margin-bottom: 0.50rem;
 }
 
@@ -60,7 +60,7 @@
   align-items: center; 
   padding: 1rem;
   color: grey;
-  font-size: 1rem;
+  font-size: 17px;
   font-weight: bold;
   text-align: center; 
   width: 100%;
@@ -72,16 +72,16 @@
 }
 
 
-.module {
+
+.module-title {
+  font-size: 17px;
   padding: 1rem;
   color: grey;
-  font-size: 15px;
   font-weight: bold;
   text-align: center;
   width: 100%;
   cursor: pointer;
   position: relative;
-
 }
 
 .dropdown-button a {
@@ -118,18 +118,18 @@
 }
 
 
-.dropdown-item {
+.dropdown-item-brgy {
   padding: 0.75rem 1rem;
   text-align: center;
   color: grey;
-  font-size: 0.95rem;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: background 0.2s ease-in-out;
  
 }
 
-.dropdown-item:hover {
-  background-color: #D9D9D9;
-  color: white;
+.dropdown-item-brgy:hover {
+  background-color: #c3c2c2;
+  color: rgb(255, 255, 255);
 }

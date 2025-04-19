@@ -122,17 +122,13 @@ margin-top: 3rem;
  
   }
 
-  .status-badge-view {
-          
-        
-          
+.status-badge-view {
     color: white;                
     display: inline-block;        
     text-transform: capitalize;   
     text-align: center;    
 
     border: none;
-    cursor: pointer;
     padding: 8px 12px;
     font-size: 13px;
     border-radius: 5px;
@@ -142,8 +138,8 @@ margin-top: 3rem;
 
 .status-section-view {
   display: flex;
-    align-items: center;
-    gap: 20px;
+  align-items: center;
+  gap: 20px;
 }
 
 .viewincident-content-section1-left-view {
