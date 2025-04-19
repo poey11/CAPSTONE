@@ -261,6 +261,7 @@ const incidentForm:React.FC = () => {
           middlename: incidentReport.middlename,
           lastname: incidentReport.lastname,
           contactNos: incidentReport.contactNos,
+          type: "IncidentReport",
           concerns: concernValue,  
           dateFiled: incidentReport.dateFiled,
           time: incidentReport.time,
