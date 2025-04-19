@@ -96,15 +96,10 @@ const getSpecificDocument = async (mainCollection: string, id: string, setData:(
     }
 }
 
-const getAllSpecificSubDocument = async (mainCollection: string, id: string, subCollection:string, setData:(data: any[])=> void) => {
+const getAllSpecificSubDocument = (mainCollection: string, id: string, subCollection:string, setData:(data: any[])=> void) => {
     try{
         const docRef = doc(db, mainCollection, id);
         const subDocRef = collection(docRef, subCollection);
-        const subDocSnap = await getDocs(subDocRef);
-        if (subDocSnap.empty) {  
-            console.log("No matching document."); 
-            return;
-        }
         const unsubscribe = onSnapshot(subDocRef, (snapshot) => {
         const reports:any[] = snapshot.docs.map((doc) => ({
             id: doc.id,

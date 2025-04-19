@@ -2,7 +2,7 @@
 import "@/CSS/IncidentModule/Letters.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import {  useEffect,useState } from "react";
-import { addDoc,collection,doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { addDoc,collection,doc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
 import { getLocalDateString, getLocalDateTimeString } from "@/app/helpers/helpers";
@@ -36,8 +36,30 @@ export default function GenerateDialougeLetter() {
     const today = getLocalDateString(new Date());
     const todayWithTime = getLocalDateTimeString(new Date(new Date().setDate(new Date().getDate() + 1)));
     const [isDialogue, setIsDialogue] = useState(false);
+    const [data, setData] = useState<any>(null);
 
+    useEffect(() => {
+        if(!docId) return;
+        try {
 
+            const docRef = doc(db, "IncidentReports", docId);
+            const subDocRef = collection(docRef, "GeneratedLetters");
+            const q = query(subDocRef, where("letterType", "==", actionId), orderBy("createdAt", "desc"));
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+            const reports:any[] = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+
+            setData(reports);
+            });
+            return unsubscribe;
+
+        } catch (error) {
+            
+        }        
+    
+    },[])
 
     useEffect(() => {
         if(!docId) return;
@@ -89,7 +111,6 @@ export default function GenerateDialougeLetter() {
         }
     }, [userInfo]);
   
-   console.log(nosHearing + " " +nosOfGeneration);
 
     const handleAddLupon = () => {
       router.back();
@@ -310,7 +331,7 @@ export default function GenerateDialougeLetter() {
             
             await addDoc(docRefB, {
                 ...otherInfo,
-                dateCreated: new Date(),
+                createdAt: new Date(),
                 createdBy: user?.fullName,
                 letterType: actionId,
                 complainant: {
@@ -351,7 +372,7 @@ export default function GenerateDialougeLetter() {
             
             await addDoc(docRefB, {
                 ...otherInfo,
-                dateCreated: new Date(),
+                createdAt: new Date(),
                 createdBy: user?.fullName,
                 letterType: actionId,
                 complainant: {
@@ -620,10 +641,17 @@ export default function GenerateDialougeLetter() {
            </form>
 
         </div> 
-
-
-        <Template/>
-    
+       {data && data.length > 0 && (
+          <>
+            {Array.from({ length: data.length }, (_, i) => (
+              <Template key={i} index={i} complainant={data[i].complainant} 
+              respondent={data[i].respondent} DateFiled={data[i].DateFiled}
+              DateOfDelivery={data[i].DateOfDelivery} DateOfMeeting={data[i].DateTimeOfMeeting}
+              LuponStaff={data[i].LuponStaff} />
+            ))}
+          </>
+        )}
+       
     </main>
   );
 }

@@ -3,8 +3,8 @@ import { useState } from "react";
 import "@/CSS/IncidentModule/Letters.css";
 
 
-
 interface OtherInfo {
+    index: number;
     complainant: {
         fname: string;
         address: string;
@@ -21,32 +21,37 @@ interface OtherInfo {
     DateFiled: string;
 }
 
-const letterTemplate: React.FC = () => {
+const letterTemplate: React.FC<OtherInfo> = ({ 
+    index,
+    complainant,
+    respondent,
+    DateFiled,
+    DateOfDelivery,
+    DateOfMeeting,
+    LuponStaff}) => {
     const searchParam = useSearchParams();
     const docId = searchParam.get("id")?.split("?")[0];
     const actionId = searchParam.get("id")?.split("?")[1].split("=")[1];
-    const [otherInfo, setOtherInfo] = useState<OtherInfo>({
-        complainant: {
-            fname: "",
-            address: "",
-            contact: ""
-        },
-        respondent: {
-            fname: "",
-            address: "",
-            contact: ""
-        },
-        DateOfDelivery: "",
-        DateOfMeeting: "",
-        LuponStaff: "",
-        DateFiled: ""
-    });
+    let nos ="";
+    switch (index) {
+        case 0:
+            nos = "Third";
+            break;
+        case 1:
+            nos = "Second";
+            break;
+        case 2:
+            nos = "First";
+            break;
+        default:
+            break;
+    }
 
     return (
         <main className="main-container">
             <div className="main-content">
             <div className="section-1">
-                {actionId === "summon" ? <p className="NewOfficial">Past Generated Summon Letter</p> : <p className="NewOfficial">Past Generated Dialouge Letter</p>}
+                {actionId === "summon" ? <p className="NewOfficial">{nos} Summon Letter</p> : <p className="NewOfficial">Past Generated Dialouge Letter</p>}
             
             </div>
 
@@ -60,8 +65,8 @@ const letterTemplate: React.FC = () => {
                     <input 
                         type="text" 
                         className="search-bar" 
-                        placeholder={otherInfo.complainant.fname}
-                        value={otherInfo.complainant.fname}
+                        placeholder={complainant.fname}
+                        value={complainant.fname}
                         id="complainant.fname"
                         name="complainant.fname"
                         disabled
@@ -72,8 +77,8 @@ const letterTemplate: React.FC = () => {
                     <input 
                     type="text" 
                     className="search-bar" 
-                    placeholder= {otherInfo.complainant.address}
-                    value={otherInfo.complainant.address}
+                    placeholder= {complainant.address}
+                    value={complainant.address}
                     id="complainant.address"
                     name="complainant.address"
                     disabled
@@ -84,8 +89,8 @@ const letterTemplate: React.FC = () => {
                     <input 
                     type="text" 
                     className="search-bar" 
-                    placeholder= {otherInfo.complainant.contact}
-                    value={otherInfo.complainant.contact}
+                    placeholder= {complainant.contact}
+                    value={complainant.contact}
                     id="complainant.contact"
                     name="complainant.contact"
                     disabled
@@ -102,8 +107,8 @@ const letterTemplate: React.FC = () => {
                     <input 
                     type="text" 
                     className="search-bar" 
-                    placeholder={otherInfo.respondent.fname}
-                    value={otherInfo.respondent.fname}
+                    placeholder={respondent.fname}
+                    value={respondent.fname}
                     id="respondent.fname"
                     name="respondent.fname"
                     disabled
@@ -114,8 +119,8 @@ const letterTemplate: React.FC = () => {
                     <input 
                     type="text" 
                     className="search-bar" 
-                    placeholder= {otherInfo.respondent.address}
-                    value={otherInfo.respondent.address}
+                    placeholder= {respondent.address}
+                    value={respondent.address}
                     id="respondent.address"
                     name="respondent.address"
                     disabled
@@ -127,8 +132,8 @@ const letterTemplate: React.FC = () => {
                     <input 
                     type="text" 
                     className="search-bar" 
-                    placeholder= {otherInfo.respondent.contact}
-                    value={otherInfo.respondent.contact}
+                    placeholder= {respondent.contact}
+                    value={respondent.contact}
                     id="respondent.contact"
                     name="respondent.contact"
                     disabled
@@ -144,7 +149,7 @@ const letterTemplate: React.FC = () => {
                         <div className="input-group">
                             <p>Date of Delivery</p>
                             <input type="text" className="search-bar" placeholder="Enter Date of Delivery" 
-                            value={otherInfo.DateOfDelivery}
+                            value={DateOfDelivery}
                             id="DateOfDelivery"
                             name="DateOfDelivery"
                             disabled
@@ -154,7 +159,7 @@ const letterTemplate: React.FC = () => {
                         <div className="input-group">
                             <p>Date and Time of Meeting</p>
                             <input  type="text" className="search-bar" placeholder="Enter Date of Meeting" 
-                            value={otherInfo.DateOfMeeting}
+                            value={DateOfMeeting}
                             id="DateOfMeeting"
                             name="DateOfMeeting"
                             disabled
@@ -169,7 +174,7 @@ const letterTemplate: React.FC = () => {
                             {/* change into drop box */}
                             <p>Delivered By</p>
                             <input type="text" className="search-bar" placeholder="Enter Name of Lupon Staff" 
-                            value={otherInfo.LuponStaff}
+                            value={LuponStaff}
                             id="LuponStaff"
                             name="LuponStaff"
                             disabled
@@ -179,7 +184,7 @@ const letterTemplate: React.FC = () => {
                         <div className="input-group">
                             <p>Date Filed</p>
                             <input  type="text" className="search-bar" placeholder="Choose hearing number" 
-                            value={otherInfo.DateFiled}
+                            value={DateFiled}
                             id="DateFiled"
                             name="DateFiled"
                             disabled

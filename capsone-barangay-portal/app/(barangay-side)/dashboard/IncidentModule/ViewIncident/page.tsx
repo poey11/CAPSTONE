@@ -1,8 +1,11 @@
 "use client"
 import "@/CSS/IncidentModule/ViewIncident.css";
 import { useRouter,useSearchParams  } from "next/navigation"; // Use 'next/navigation' in Next.js 13+ (App Router)
-import {  useEffect, useState } from "react";
-import { getSpecificDocument, generateDownloadLink } from "@/app/helpers/firestorehelper";
+import {   useEffect, useState } from "react";
+import { getSpecificDocument,getAllSpecificSubDocument, generateDownloadLink } from "@/app/helpers/firestorehelper";
+import { collection, doc, getDoc, onSnapshot, orderBy, query } from "firebase/firestore";
+import { db } from "@/app/db/firebase";
+import { dialog, label } from "framer-motion/m";
 
 export default  function ViewLupon() {
   const router = useRouter();
@@ -11,8 +14,47 @@ export default  function ViewLupon() {
   const [reportData, setReportData] = useState<any>();
   const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
   const [investgatedImageUrl, setInvestigatedImageUrl] = useState<string | null>(null);
- 
+  const [hearingData, setHearingData] = useState<any[]>([]);
+  const [dialogueData, setDialogueData] = useState<any>(null);
   
+
+  useEffect(() => {
+    if(!docId)return;
+    const fetchHearingAndDialogue = async () => {
+      const docRef = doc(db, "IncidentReports", docId, "DialogueMeeting", docId);
+
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            console.log("Document data:", docSnap.data());
+            return setDialogueData(docSnap.data());
+        } else {
+            console.log("No such document!");
+        }
+    };
+    fetchHearingAndDialogue();
+  },[])
+  console.log("Dialogue Data", dialogueData);
+
+  useEffect(() => {
+    if(!docId)return;
+      const docRef = doc(db, "IncidentReports", docId);
+      const subDocRef = collection(docRef, "SummonsMeeting");
+      const subDocQuery = query(subDocRef, orderBy("createdAt", "asc"));
+      const unsubscribe = onSnapshot(subDocQuery, (snapshot) => {
+      const reports:any[] = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+      }));
+
+      setHearingData(reports);
+      });
+      return unsubscribe;
+    
+    
+
+  },[]);
+  console.log("Hearing Data", hearingData);
 
   useEffect(() => {
     if(docId){
@@ -86,7 +128,46 @@ export default  function ViewLupon() {
     image: investgatedImageUrl || "No Image Available"
   };
   
+  const dialogueFormData = !dialogueData || dialogueData === "" ? {
+    cfname: "No Complainant Assigned",
+    rfname: "No Respondent Assigned",
+    partyA: "No Party A Assigned",
+    partyB: "No Party B Assigned",
+    dialogueMeetingDateTime: "Not Yet Investigated",
+    remarks: "No Remarks Available",
+    minutesOfDialogue: "No Minutes Available",
+    firstHearingOfficer: "No First Hearing Officer Assigned",
+    secondHearingOfficer: "No Second Hearing Officer Assigned",
+    thirdHearingOfficer: "No Third Hearing Officer Assigned"
+  }: {
+    cfname: dialogueData?.complainant.firstName +" "+ dialogueData?.complainant.middleName+ " " + dialogueData?.complainant.lastName || "No Complainant Assigned",
+    rfname: dialogueData?.respondent.firstName +" "+ dialogueData?.respondent.middleName+ " " + dialogueData?.respondent.lastName || "No Respondent Assigned",
+    partyA: dialogueData?.partyA || "No Party A Assigned",
+    partyB: dialogueData?.partyB || "No Party B Assigned",
+    dialogueMeetingDateTime: dialogueData?.dialogueMeetingDateTime || "Not Yet Investigated",
+    remarks: dialogueData?.remarks || "No Remarks Available",
+    minutesOfDialogue: dialogueData?.minutesOfDialogue || "No Minutes Available",
+    firstHearingOfficer: dialogueData?.firstHearingOfficer || "No First Hearing Officer Assigned",
+    secondHearingOfficer: dialogueData?.secondHearingOfficer || "No Second Hearing Officer Assigned",
+    thirdHearingOfficer: dialogueData?.thirdHearingOfficer || "No Third Hearing Officer Assigned"
+  }
 
+
+
+  const hearingFormDataA =  (item: any) =>  ({
+    cfname: item.complainant.firstName +" "+ item.complainant.middleName+ " " + item.complainant.lastName || "No Complainant Assigned",
+    rfname: item.respondent.firstName +" "+ item.respondent.middleName+ " " + item.respondent.lastName || "No Respondent Assigned",
+    partyA: item.partyA || "No Party A Assigned",
+    partyB: item.partyB || "No Party B Assigned",
+    hearingMeetingDateTime: item.hearingMeetingDateTime || "Not Yet Investigated",
+    remarks: item.remarks || "No Remarks Available",
+    minutesOfCaseProceedings: item.minutesOfCaseProceedings || "No Minutes Available",
+    firstHearingOfficer: item.firstHearingOfficer || "No First Hearing Officer Assigned",
+    secondHearingOfficer: item.secondHearingOfficer || "No Second Hearing Officer Assigned",
+    thirdHearingOfficer: item.thirdHearingOfficer || "No Third Hearing Officer Assigned"
+  })
+
+  
   const complainantsFields = [
     {label: "Name", key: "name" },
     {label: "Civil Status", key: "civilStatus"},
@@ -124,6 +205,45 @@ export default  function ViewLupon() {
     { label: "Nature of Facts", key: "concern" },
     { label: "Image", key: "image" },
   ];
+
+  const dialogueFields = [
+    { label: "Complainant Name", key: "cfname" },
+  
+    { label: "Respondent Name", key: "rfname" },
+   
+    { label: "Party A", key: "partyA" },
+    { label: "Party B", key: "partyB" },
+    
+    {label: "Dialogue Meeting Date and Time", key: "dialogueMeetingDateTime"},
+
+    { label: "Remarks", key: "remarks" },
+
+    {label:"Minutes Of Dialogue", key: "minutesOfDialogue"},
+
+    {label:"First Hearing Officer", key: "firstHearingOfficer"},
+    {label:"Second Hearing Officer", key: "secondHearingOfficer"},
+    {label:"Third Hearing Officer", key: "thirdHearingOfficer"},
+  ]
+
+  const hearingFields = [
+    { label: "Complainant Name", key: "cfname" },
+  
+    { label: "Respondent Name", key: "rfname" },
+   
+    { label: "Party A", key: "partyA" },
+    { label: "Party B", key: "partyB" },
+    
+    {label: "Hearing Meeting Date and Time", key: "hearingMeetingDateTime"},
+
+    { label: "Remarks", key: "remarks" },
+
+    {label:"Minutes Of Case Proceedings", key: "minutesOfCaseProceedings"},
+
+    {label:"First Hearing Officer", key: "firstHearingOfficer"},
+    {label:"Second Hearing Officer", key: "secondHearingOfficer"},
+    {label:"Third Hearing Officer", key: "thirdHearingOfficer"},
+  ];
+
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -291,6 +411,55 @@ export default  function ViewLupon() {
        ))}
       </div>
         
+      {dialogueData && (
+        <div className="main-content-view">
+          <div className="section-1-view">
+            <h1>Dialogue Details</h1>
+          </div>
+
+          {dialogueFields.map((field) => (
+            <div className="details-section-view" key={field.key}>
+              <div className="title-view">
+                <p>{field.label}</p>
+              </div>
+              <div className="description-view">
+                <p>{dialogueFormData[field.key as keyof typeof dialogueFormData]}</p>
+              </div>
+            </div>
+         ))}
+        </div>
+      )}
+     
+     {hearingData.length > 0 && hearingData.map((item, index) => {
+        const hearingFormData = hearingFormDataA(item);
+
+        // Human-readable hearing label
+        const hearingLabels = ["First Hearing", "Second Hearing", "Third Hearing"];
+        const hearingTitle = hearingLabels[index] || `Hearing #${index + 1}`;
+
+        return (
+          <div className="main-content-view" key={index}>
+            <div className="section-1-view">
+              <h1>{hearingTitle}</h1>
+            </div>
+        
+            {hearingFields.map((field) => (
+              <div className="details-section-view" key={field.key}>
+                <div className="title-view">
+                  <p>{field.label}</p>
+                </div>
+                <div className="description-view">
+                  <p>{hearingFormData[field.key as keyof typeof hearingFormData]}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        );    
+      })}
+
+        
+
+      
 
     </main>
   );

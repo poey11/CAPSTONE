@@ -153,6 +153,7 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
                 thirdHearingOfficer: details.thirdHearingOfficer,
                 dialogueMeetingDateTime: details.dialogueMeetingDateTime,
                 filled:true,
+                createdAt: new Date(),
             });
             console.log("Document written with ID: ", docRef.id);
         } catch (error:any) {

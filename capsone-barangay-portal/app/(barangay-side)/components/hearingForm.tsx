@@ -175,10 +175,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
         if(nosOfGeneration <= hearingIndex) return;
         setShowHearingContent(prev => !prev);
     };
-    console.log("Hearing Details:", hearingDetails.length);
-    console.log("NosofGeneration", nosOfGeneration);
-    console.log("hearingIndex", hearingIndex);
-    console.log("nosHearing", hearing)
+    
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -207,6 +204,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                 nos: nos,
                 filled: true,
                 hearingMeetingDateTime: details.hearingMeetingDateTime,
+                createdAt: new Date(),
             });
             console.log("Document written with ID: ", docRef.id);
             
@@ -226,12 +224,12 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                 <div className="title-section-edit">
                     <button type="button" className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
                 <h1>{nos} Hearing Section</h1>
-                {((hearingIndex === 0 || nosOfGeneration <= hearingIndex) && !dialogue) && (
+                {((hearingIndex === 0) && !dialogue) && (
                     <span className="text-red-500 ml-4">
                         In order to fill up the current Hearing Section, you must fill up the Dialogue Letter and/or also generate a Summons Letter
                     </span>
                 )}
-                {(hearingDetails.length < hearingIndex || nosOfGeneration <= hearingIndex ) && (
+                {(hearingDetails.length < hearingIndex ) && (
                   <span className="text-red-500 ml-4">
                   In order to fill up the current Hearing Section, you must fill up the previous Hearing and/or also generate a Summons Letter
                   </span>
