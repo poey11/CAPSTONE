@@ -128,9 +128,9 @@ export default function AddKasambahay() {
 
 
   const handleSubmitClick = async () => {
-    const { lastName, firstName, homeAddress, placeOfBirth, dateOfBirth, age, sex, civilStatus, educationalAttainment, natureOfWork, employmentArrangement, salary, employerName, employerAddress} = formData;
+    const { lastName, firstName, homeAddress, dateOfBirth, age, sex, civilStatus, educationalAttainment, natureOfWork, employmentArrangement, salary, employerName, employerAddress} = formData;
   
-    if (!lastName || !firstName ||!homeAddress || !placeOfBirth ||!dateOfBirth || !age || !sex || !civilStatus || !educationalAttainment || !natureOfWork || !employmentArrangement || !salary || !employerName || !employerAddress) {
+    if (!lastName || !firstName ||!homeAddress ||!dateOfBirth || !age || !sex || !civilStatus || !educationalAttainment || !natureOfWork || !employmentArrangement || !salary || !employerName || !employerAddress) {
 
       setPopupErrorMessage("Please fill up all required fields.");
       setShowErrorPopup(true);
@@ -393,9 +393,6 @@ export default function AddKasambahay() {
                   </label>
                 </div>
             </div>
-          </div>
-            {/* Right Side - Checkboxes & File Upload */}
-            <div className="add-resident-section-2-right-side">
               {/* File Upload Section */}
               <div className="file-upload-container">
                 <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
