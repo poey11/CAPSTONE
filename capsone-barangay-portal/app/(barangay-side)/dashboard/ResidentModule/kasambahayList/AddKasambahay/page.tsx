@@ -269,7 +269,7 @@ export default function AddKasambahay() {
 
               <div className="fields-section">
                 <p>Date of Birth<span className="required">*</span></p>
-                <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
+                <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} max={new Date().toISOString().split("T")[0]} required />
               </div>
                 
               <div className="fields-section">

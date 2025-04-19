@@ -91,6 +91,14 @@ export default function AddResident() {
     } else if (name === "dateOfBirth") {
       const birthDate = new Date(value);
       const today = new Date();
+
+      if (birthDate > today) {
+        setPopupErrorMessage("Date of birth cannot be in the future.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
+
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
       const dayDiff = today.getDate() - birthDate.getDate();
@@ -98,7 +106,13 @@ export default function AddResident() {
       if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
         age--; // adjust if birthday hasn't happened yet this year
       }
-  
+      
+      if (age < 0) {
+        setPopupErrorMessage("Invalid age calculated. Please check the birth date.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
       setFormData((prevData) => ({
         ...prevData,
         dateOfBirth: value,
@@ -321,7 +335,7 @@ const confirmSubmit = async () => {
                 
                 <div className="fields-section">
                   <p>Date of Birth<span className="required">*</span></p>
-                  <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
+                  <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} max={new Date().toISOString().split("T")[0]} required />
                 </div>
 
                 <div className="fields-section">
