@@ -31,6 +31,7 @@ export default function EditResident() {
     emailAddress: "",
     precinctNumber: "",
     generalLocation: "",
+    cluster: "",
     isStudent: false,
     isPWD: false,
     isSeniorCitizen: false,
@@ -38,6 +39,37 @@ export default function EditResident() {
     fileURL: "",
     updatedBy: "",
   });
+
+  const clusterOptions: Record<string, string[]> = {
+    "East Fairview": [
+      "Rina",
+      "SAMAFA",
+      "SAMAPLI",
+      "SITIO KISLAP",
+      "EFHAI",
+    ],
+    "West Fairview": [
+      "AUSTIN",
+      "BASILIO 1",
+      "DARISNAI",
+      "MUSTANG BENZ",
+      "ULNA",
+      "UNITED FAIRLANE",
+      "URLINA",
+      "VERBENA 1",
+      "WEST FAIRVEW HOA",
+      "TULIP RESIDENCES HOA",
+
+    ],
+    "South Fairview": [
+      "AKAP",
+      "ARNAI",
+      "F.L.N.A",
+      "FEWRANO",
+      "UPPER CORVETTE HOA",
+    ]
+  };
+
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -98,6 +130,7 @@ export default function EditResident() {
             emailAddress: docSnap.data().emailAddress || "",
             precinctNumber: docSnap.data().precinctNumber || "",
             generalLocation: docSnap.data().generalLocation || "",
+            cluster: docSnap.data().cluster || "",
             isStudent: docSnap.data().isStudent || false,
             isPWD: docSnap.data().isPWD || false,
             isSeniorCitizen: docSnap.data().isSeniorCitizen || false,
@@ -115,23 +148,40 @@ export default function EditResident() {
     }
   }, [residentId]);
 
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    let newValue: any = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
-
-    if (name === "age") {
-      const ageValue = parseInt(value, 10) || 0;
-      setFormData((prevData) => ({
-        ...prevData,
-        age: ageValue,
-        isSeniorCitizen: ageValue >= 60,
-      }));
-    } else {
-      setFormData((prevData) => ({
+    const newValue = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+  
+    
+    setFormData((prevData) => {
+      let updatedData = {
         ...prevData,
         [name]: newValue,
-      }));
-    }
+      };
+  
+      if (name === "dateOfBirth" && typeof newValue === 'string') {
+        const age = calculateAge(newValue);
+        updatedData.age = age;
+        updatedData.isSeniorCitizen = age >= 60;
+      }
+
+      if (name === "generalLocation") {
+        updatedData.cluster = ""; // Reset cluster if location changes
+      }
+  
+      return updatedData;
+    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -254,12 +304,12 @@ export default function EditResident() {
                   </div>
 
                   <div className="fields-section">
-                    <p>First Name</p>
+                    <p>First Name<span className="required">*</span></p>
                     <input type="text" className="add-resident-input-field" placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
                   </div>
 
                   <div className="fields-section">
-                    <p>Last Name</p>
+                    <p>Last Name<span className="required">*</span></p>
                     <input type="text" className="add-resident-input-field" placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
                   </div>
 
@@ -269,12 +319,12 @@ export default function EditResident() {
                   </div>
 
                   <div className="fields-section">
-                    <p>Address</p>
+                    <p>Address<span className="required">*</span></p>
                     <input type="text" className="add-resident-input-field" placeholder="Enter Address" name="address" value={formData.address} onChange={handleChange} required />
                   </div>
                   
                   <div className="fields-section">
-                    <p>Location</p>
+                    <p>Location<span className="required">*</span></p>
                     <select name="generalLocation" className="add-resident-input-field" value={formData.generalLocation} onChange={handleChange} required>
                       <option value="" disabled>Choose Part of Fairview</option>
                       <option value="East Fairview">East Fairview</option>
@@ -282,7 +332,27 @@ export default function EditResident() {
                       <option value="South Fairview">South Fairview</option>
                     </select>
                   </div>
-                  
+
+                    {formData.generalLocation && (
+                      <div className="fields-section">
+                        <p>Cluster<span className="required">*</span></p>
+                        <select
+                          name="cluster"
+                          className="add-resident-input-field"
+                          value={formData.cluster}
+                          onChange={handleChange}
+                          required
+                        >
+                          <option value="" disabled>Choose HOA/Sitio</option>
+                          {clusterOptions[formData.generalLocation].map((cluster) => (
+                            <option key={cluster} value={cluster}>
+                              {cluster}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
     
                   <div className="fields-section">
                     <p>Place of Birth</p>
@@ -290,18 +360,18 @@ export default function EditResident() {
                   </div>
                   
                   <div className="fields-section">
-                    <p>Date of Birth</p>
+                    <p>Date of Birth<span className="required">*</span></p>
                     <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
                   </div>
 
                   <div className="fields-section">
                     <p>Age</p>
-                    <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" />
+                    <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} required min="1" max="120" readOnly/>
                   </div>
                 
     
                   <div className="fields-section">
-                    <p>Sex</p>
+                    <p>Sex<span className="required">*</span></p>
                     <select name="sex" className="add-resident-input-field" value={formData.sex} onChange={handleChange} required>
                       <option value="" disabled>Choose Gender</option>
                       <option value="Male">Male</option>
@@ -310,7 +380,7 @@ export default function EditResident() {
                   </div>
                   
                   <div className="fields-section">
-                    <p>Civil Status</p>
+                    <p>Civil Status<span className="required">*</span></p>
                     <select name="civilStatus" className="add-resident-input-field" value={formData.civilStatus} onChange={handleChange} required>
                       <option value="" disabled>Choose Civil Status</option>
                       <option value="Single">Single</option>
@@ -329,7 +399,7 @@ export default function EditResident() {
                   
     
                   <div className="fields-section">
-                    <p>Contact Number</p>
+                    <p>Contact Number<span className="required">*</span></p>
                     <input type="tel" className="add-resident-input-field" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
                   </div>
                   
