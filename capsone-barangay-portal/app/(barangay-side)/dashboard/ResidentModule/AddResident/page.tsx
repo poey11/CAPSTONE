@@ -37,46 +37,31 @@ export default function AddResident() {
 
   const clusterOptions: Record<string, string[]> = {
     "East Fairview": [
+      "Rina",
+      "SAMAFA",
+      "SAMAPLI",
+      "SITIO KISLAP",
       "EFHAI",
-      "EFHNAI",
-      "Rabosna HOA",
-      "Sapamanai HOA",
-      "Top Jade",
-      "UEHAI",
-      "Sunny Villas HOA",
-      "Sirnai HOA",
     ],
     "West Fairview": [
-      "Achievers HOA",
-      "Bistekville HOA",
-      "Brescia Subd. HOA",
-      "Country Home HOA",
-      "Cuidad Verde HOA",
-      "Dait HOA",
-      "De Vega HOA",
-      "Falcon HOA",
-      "Hunter-Hillman HOA",
-      "Ivory Executive Villege",
-      "Lupang Biyaya HOA",
-      "Orchid Villas HOA",
-      "Pitimini HOA",
-      "Ulna",
-      "Urlina",
-      "Pontiac HOA",
-      "Primavera Homes",
-      "Sto. Niño Village",
-      "Villa Orion HOA",
-      "West Fairview HOA",
-      "Tulip Residences HOA",
+      "AUSTIN",
+      "BASILIO 1",
+      "DARISNAI",
+      "MUSTANG BENZ",
+      "ULNA",
+      "UNITED FAIRLANE",
+      "URLINA",
+      "VERBENA 1",
+      "WEST FAIRVEW HOA",
+      "TULIP RESIDENCES HOA",
+
     ],
     "South Fairview": [
-      "BBCHAI HOA",
-      "BELCHA",
-      "Buick HOA",
-      "Colt HOA",
-      "Samaka Village",
-      "Upper Corvette HOA",
-      "Windsor HOA"
+      "AKAP",
+      "ARNAI",
+      "F.L.N.A",
+      "FEWRANO",
+      "UPPER CORVETTE HOA",
     ]
   };
 
@@ -151,11 +136,11 @@ export default function AddResident() {
 
   const handleSubmitClick = async () => {
     const { 
-      firstName, lastName, address, generalLocation, placeOfBirth, dateOfBirth, 
+      firstName, lastName, address, generalLocation, dateOfBirth, 
       age, sex, civilStatus, contactNumber 
   } = formData;
   
-    if (!firstName || !lastName || !address || !generalLocation || !placeOfBirth || !dateOfBirth || !age || !sex || !civilStatus || !contactNumber) {
+    if (!firstName || !lastName || !address || !generalLocation || !dateOfBirth || !age || !sex || !civilStatus || !contactNumber) {
 
       setPopupErrorMessage("Please fill up all required fields.");
       setShowErrorPopup(true);
@@ -317,7 +302,7 @@ const confirmSubmit = async () => {
                       onChange={handleChange}
                       required
                     >
-                      <option value="" disabled>Choose Cluster/Section</option>
+                      <option value="" disabled>Choose HOA/Sitio</option>
                       {clusterOptions[formData.generalLocation].map((option, index) => (
                         <option key={index} value={option}>
                           {option}

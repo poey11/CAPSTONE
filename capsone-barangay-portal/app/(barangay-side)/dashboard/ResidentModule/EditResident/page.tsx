@@ -42,48 +42,34 @@ export default function EditResident() {
 
   const clusterOptions: Record<string, string[]> = {
     "East Fairview": [
+      "Rina",
+      "SAMAFA",
+      "SAMAPLI",
+      "SITIO KISLAP",
       "EFHAI",
-      "EFHNAI",
-      "Rabosna HOA",
-      "Sapamanai HOA",
-      "Top Jade",
-      "UEHAI",
-      "Sunny Villas HOA",
-      "Sirnai HOA",
     ],
     "West Fairview": [
-      "Achievers HOA",
-      "Bistekville HOA",
-      "Brescia Subd. HOA",
-      "Country Home HOA",
-      "Cuidad Verde HOA",
-      "Dait HOA",
-      "De Vega HOA",
-      "Falcon HOA",
-      "Hunter-Hillman HOA",
-      "Ivory Executive Villege",
-      "Lupang Biyaya HOA",
-      "Orchid Villas HOA",
-      "Pitimini HOA",
-      "Ulna",
-      "Urlina",
-      "Pontiac HOA",
-      "Primavera Homes",
-      "Sto. Niño Village",
-      "Villa Orion HOA",
-      "West Fairview HOA",
-      "Tulip Residences HOA",
+      "AUSTIN",
+      "BASILIO 1",
+      "DARISNAI",
+      "MUSTANG BENZ",
+      "ULNA",
+      "UNITED FAIRLANE",
+      "URLINA",
+      "VERBENA 1",
+      "WEST FAIRVEW HOA",
+      "TULIP RESIDENCES HOA",
+
     ],
     "South Fairview": [
-      "BBCHAI HOA",
-      "BELCHA",
-      "Buick HOA",
-      "Colt HOA",
-      "Samaka Village",
-      "Upper Corvette HOA",
-      "Windsor HOA"
+      "AKAP",
+      "ARNAI",
+      "F.L.N.A",
+      "FEWRANO",
+      "UPPER CORVETTE HOA",
     ]
   };
+
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -318,12 +304,12 @@ export default function EditResident() {
                   </div>
 
                   <div className="fields-section">
-                    <p>First Name</p>
+                    <p>First Name<span className="required">*</span></p>
                     <input type="text" className="add-resident-input-field" placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
                   </div>
 
                   <div className="fields-section">
-                    <p>Last Name</p>
+                    <p>Last Name<span className="required">*</span></p>
                     <input type="text" className="add-resident-input-field" placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
                   </div>
 
@@ -333,12 +319,12 @@ export default function EditResident() {
                   </div>
 
                   <div className="fields-section">
-                    <p>Address</p>
+                    <p>Address<span className="required">*</span></p>
                     <input type="text" className="add-resident-input-field" placeholder="Enter Address" name="address" value={formData.address} onChange={handleChange} required />
                   </div>
                   
                   <div className="fields-section">
-                    <p>Location</p>
+                    <p>Location<span className="required">*</span></p>
                     <select name="generalLocation" className="add-resident-input-field" value={formData.generalLocation} onChange={handleChange} required>
                       <option value="" disabled>Choose Part of Fairview</option>
                       <option value="East Fairview">East Fairview</option>
@@ -349,7 +335,7 @@ export default function EditResident() {
 
                     {formData.generalLocation && (
                       <div className="fields-section">
-                        <p>Cluster</p>
+                        <p>Cluster<span className="required">*</span></p>
                         <select
                           name="cluster"
                           className="add-resident-input-field"
@@ -357,7 +343,7 @@ export default function EditResident() {
                           onChange={handleChange}
                           required
                         >
-                          <option value="" disabled>Choose Cluster</option>
+                          <option value="" disabled>Choose HOA/Sitio</option>
                           {clusterOptions[formData.generalLocation].map((cluster) => (
                             <option key={cluster} value={cluster}>
                               {cluster}
@@ -374,7 +360,7 @@ export default function EditResident() {
                   </div>
                   
                   <div className="fields-section">
-                    <p>Date of Birth</p>
+                    <p>Date of Birth<span className="required">*</span></p>
                     <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
                   </div>
 
@@ -385,7 +371,7 @@ export default function EditResident() {
                 
     
                   <div className="fields-section">
-                    <p>Sex</p>
+                    <p>Sex<span className="required">*</span></p>
                     <select name="sex" className="add-resident-input-field" value={formData.sex} onChange={handleChange} required>
                       <option value="" disabled>Choose Gender</option>
                       <option value="Male">Male</option>
@@ -394,7 +380,7 @@ export default function EditResident() {
                   </div>
                   
                   <div className="fields-section">
-                    <p>Civil Status</p>
+                    <p>Civil Status<span className="required">*</span></p>
                     <select name="civilStatus" className="add-resident-input-field" value={formData.civilStatus} onChange={handleChange} required>
                       <option value="" disabled>Choose Civil Status</option>
                       <option value="Single">Single</option>
@@ -413,7 +399,7 @@ export default function EditResident() {
                   
     
                   <div className="fields-section">
-                    <p>Contact Number</p>
+                    <p>Contact Number<span className="required">*</span></p>
                     <input type="tel" className="add-resident-input-field" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
                   </div>
                   
