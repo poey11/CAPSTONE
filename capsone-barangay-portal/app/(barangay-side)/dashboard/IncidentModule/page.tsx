@@ -14,11 +14,12 @@ export default function MainPageIncident() {
   const [incidentData, setIncidentData] = useState<any[]>([])
   useEffect(() => {
       const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "!=", "Online", setIncidentData);
-        return () => {
+      return () => {
         if (unsubscribe) {
           unsubscribe(); 
         }
-    }  }, []);
+      }  
+  }, []);
 
 
 
@@ -75,7 +76,7 @@ export default function MainPageIncident() {
 
     
       <div className="titlesection-all-department">
-             <p className="title-all-department"> Most Recent Incidents (Click to View)</p>
+             <p className="title-all-department"> Most Recent Incidents</p>
         </div>
      
       <div className="main-section-all-department">
@@ -94,7 +95,7 @@ export default function MainPageIncident() {
           </thead>
           <tbody>
             {incidentData.map((incident, index) => (
-            <tr key={index} onClick={() => handleView(incident.id)} className="clickable-row">
+            <tr key={index} onClick={() => handleView(incident.id)} className="clickable-row cursor-pointer hover:bg-gray-200">
                 <td>{incident.caseNumber}</td>
                 <td>{incident.department}</td>
                 <td>{incident.dateFiled} {incident.timeFiled}</td>

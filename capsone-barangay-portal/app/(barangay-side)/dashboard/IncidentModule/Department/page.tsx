@@ -34,16 +34,22 @@ export default function Department() {
 
   useEffect(() => {
     if (departmentId) {
-      const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", departmentId, (data) => {
-        setIncidentData(data);
-        setFilteredIncidents(data); // Update filteredIncidents when data is fetched
-      });
-
-      return () => {
-        if (unsubscribe) {
-          unsubscribe();
-        }
-      };
+      try {
+        const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", departmentId, (data) => {
+          setIncidentData(data);
+          setFilteredIncidents(data); // Update filteredIncidents when data is fetched
+        });
+  
+        return () => {
+          if (unsubscribe) {
+            unsubscribe();
+          }
+        };
+      } catch (error) {
+        console.error("Error fetching incident data:", error);
+        
+      }
+    
     }
   }, [departmentId]);
 
@@ -145,36 +151,17 @@ useEffect(() => {
       </div>
 
       <div className="section-2-departments">
-      <input
-          type="text"
-          className="search-bar-departments"
-          placeholder="Enter Case Number (e.g. 0001)"
-          value={caseNumberSearch}
-          onChange={(e) => setCaseNumberSearch(e.target.value)}
-        />
-
-
-
-        <select
-          className="featuredStatus-departments"
-          value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
-        >
-          <option value="">All Statuses</option>
+        <input type="text" className="search-bar-departments" placeholder="Enter Incident Case" />
+        <select className="featuredStatus-departments">
+          <option value="" disabled>Status</option>
           {statusOptions.map((status) => (
             <option key={status} value={status}>
               {status}
             </option>
           ))}
         </select>
-
-
-        <select
-          className="featuredStatus-departments"
-          value={showCount}
-          onChange={(e) => setShowCount(Number(e.target.value))}
-        >
-          <option value="0">Show All</option>
+        <select className="featuredStatus-departments">
+          <option value="" disabled>Show...</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
           <option value="10">Show 15</option>

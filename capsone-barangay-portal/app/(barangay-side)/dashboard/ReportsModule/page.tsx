@@ -1415,10 +1415,10 @@ const ReportsPage = () => {
 
     </div>
 
-<h2 className="report-title">Upload A File</h2>  
+<h2 className="report-title">Upload a File</h2>  
 
 <div className="upload-section">
-      <div className="upload-container">
+      <div className="upload-container-brgyside">
           <input 
               type="file" 
               onChange={handleFileUpload} 

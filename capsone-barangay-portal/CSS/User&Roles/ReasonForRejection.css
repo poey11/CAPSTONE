@@ -12,7 +12,7 @@
 }
 
 .reasonforrejection-section-1 h1{
-    font-size: 20px;
+    font-size: 2rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
 }
@@ -160,13 +160,13 @@
     }
   }
 
-.popup-overlay {
+.popup-overlay,
+.error-popup-overlay {
     position: fixed;
     top: 13%;
     right: -3px;
-    background: #777575;
     color: white;
-    width: 350px;
+    width: 410px;
     height: 50px;
     border-radius: 5px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -177,7 +177,16 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-left: 10px solid #403f3e;
+  }
+
+  .popup-overlay {
+    background: #757775;
+    border-left: 15px solid #403f3e;
+  }
+
+  .error-popup-overlay {
+    background: #cc3434;
+    border-left: 15px solid #8a0f0f;
   }
 
   .popup{
@@ -186,12 +195,20 @@
     justify-content: center;
     gap: 20px;
   }
+
+  .popup p {
+    margin: 0;
+    text-align: left;
   
-  .popup-overlay.show {
+  }
+  
+  .popup-overlay.show,
+  .error-popup-overlay.show {
     animation: slideIn 0.5s ease-out;
   }
   
-  .popup-overlay.hide {
+  .popup-overlay.hide,
+  .error-popup-overlay.hide {
     animation: slideOut 0.5s ease-out;
   }
 
@@ -266,3 +283,30 @@
   .no-button:hover {
     background-color:  #c2352b; 
   } 
+
+  .clarify-icon-popup{
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+  }
+
+  .input-field-reasonforreject{
+    padding: 8px;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: rgba(0, 0, 0, 0.4);
+    height: 40px;
+}
+
+
+.input-field-reasonforreject option {
+    color: rgba(0, 0, 0, 0.4); 
+}
+
+.icon-alert {
+  width: 27px;
+  height: 27px;
+}

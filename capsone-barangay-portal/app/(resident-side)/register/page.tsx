@@ -10,7 +10,6 @@ export default function Register() {
  
   
     return (
-      /*will add captcha later */
      
         <RegisterForm />
      

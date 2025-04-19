@@ -6,6 +6,7 @@ import "@/CSS/User&Roles/User&Roles.css";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from 'next/navigation';
 
 interface ResidentUser {
     id: string;
@@ -57,6 +58,16 @@ const admin = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const router = useRouter();
+   
+    const [showPendingResidentTableContent, setShowPendingResidentTableContent] = useState(true); 
+    const [showResidentTableContent, setShowResidentTableContent] = useState(false); 
+    const [showBarangayTableContent, setShowBarangayTableContent] = useState(false);
+
+    const searchParams = useSearchParams();
+    const highlightUserId = searchParams.get("highlight");
+    const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
 
     const handleAddBarangayUserClick = () => {
   
@@ -89,6 +100,48 @@ const admin = () => {
           router.refresh(); // Refresh the page
         }
       };
+
+
+
+    useEffect(() => {
+        if (highlightUserId) {
+            setHighlightedId(highlightUserId);
+    
+            const scrollAndHighlight = () => {
+                const targetElement = document.querySelector(`tr.highlighted-row`);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+            };
+    
+            const isInPending = residentUsers.some(
+                (user) => user.id === highlightUserId && user.status !== "Verified" && user.status !== "Rejected"
+            );
+            const isInVerified = residentUsers.some(
+                (user) => user.id === highlightUserId && user.status === "Verified"
+            );
+            const isInBarangay = barangayUsers.some(
+                (user) => user.userid === highlightUserId
+            );
+    
+            // Expand the correct section
+            if (isInVerified && !showResidentTableContent) {
+                setShowResidentTableContent(true);
+                setTimeout(scrollAndHighlight, 200); // wait for DOM update
+            } else if (isInBarangay && !showBarangayTableContent) {
+                setShowBarangayTableContent(true);
+                setTimeout(scrollAndHighlight, 200);
+            } else {
+                setTimeout(scrollAndHighlight, 200);
+            }
+    
+            const timeoutId = setTimeout(() => {
+                setHighlightedId(null);
+            }, 5000);
+    
+            return () => clearTimeout(timeoutId);
+        }
+    }, [highlightUserId, residentUsers, barangayUsers]);
 
     useEffect(()=>{
        
@@ -196,12 +249,7 @@ const admin = () => {
     };
 
 
-    const router = useRouter();
-   
-
-    const [showPendingResidentTableContent, setShowPendingResidentTableContent] = useState(true); 
-    const [showResidentTableContent, setShowResidentTableContent] = useState(false); 
-    const [showBarangayTableContent, setShowBarangayTableContent] = useState(false);
+    
 
     const handleToggleClickPendingResidentTable = () => {
         setShowPendingResidentTableContent(prevState => !prevState);
@@ -236,7 +284,7 @@ const admin = () => {
 
                     <div className="resident-users-topsection">
                         <button type="button" 
-                                className={showResidentTableContent ? "user-role-minus-button" : "user-role-plus-button"} 
+                                className={showPendingResidentTableContent ? "user-role-minus-button" : "user-role-plus-button"} 
                                 onClick={handleToggleClickPendingResidentTable}>
                         </button>
                         <h1>Pending Resident Users Table</h1>
@@ -267,7 +315,10 @@ const admin = () => {
 
                                     <tbody>
                                         {residentUsers.filter(user => user.status !== "Verified" && user.status !== "Rejected").map((user) => (
-                                            <tr key={user.id}>
+                                            <tr
+                                                key={user.id}
+                                                className={highlightedId === user.id ? "highlighted-row" : ""}
+                                            >
                                             <td>{user.first_name} {user.last_name}</td>
                                             <td>{user.address}</td>
                                             <td>{user.phone}</td>
@@ -347,7 +398,10 @@ const admin = () => {
 
                                     <tbody>
                                         {residentUsers.filter(user => user.status === "Verified").map((user) => (
-                                            <tr key={user.id}>
+                                            <tr
+                                                key={user.id}
+                                                className={highlightedId === user.id ? "highlighted-row" : ""}
+                                            >
                                             <td>{user.first_name} {user.last_name}</td>
                                             <td>{user.address}</td>
                                             <td>{user.phone}</td>
@@ -417,7 +471,9 @@ const admin = () => {
 
                                     <tbody>
                                         {barangayUsers.map((user) => (
-                                            <tr key={user.id}>
+                                            <tr key={user.id}
+                                                className={highlightedId === user.userid ? "highlighted-row" : ""}
+                                            >
                                             <td>{user.userid}</td>
                                             <td>{user.firstName} {user.lastName}</td>
                                             <td>{user.sex}</td>

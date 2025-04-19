@@ -18,12 +18,14 @@ interface IncidentReport {
   caseNumber?: string;
   firstname?: string;
   lastname?: string;
+  middlename?: string;
   department?: string;
   concerns?: string;
   address?: string;
   status?: string;
   file?: string;
   respondent?: Respondent;
+  time?: string;
 }
 
 export default function IncidentTransactionsDetails() {
@@ -66,7 +68,19 @@ export default function IncidentTransactionsDetails() {
     };
 
     fetchTransactionDetails();
+    
   }, [referenceId]);
+
+  const [extendedData, setExtendedData] = useState<any>({});
+  useEffect(() => {
+    if(!transactionData) return;
+    setExtendedData({
+      ...transactionData,
+      fullName: `${transactionData.firstname || ""} ${transactionData.middlename || ""} ${transactionData.lastname || ""}`,
+      caseNumber: `${transactionData.caseNumber?.split(" - ")[1] || ""} - ${transactionData.caseNumber?.split(" - ")[2] || ""}`,
+      dateTime: `${transactionData.dateFiled || "N/A"} ${transactionData.time || ""}`,
+    });
+  }, [transactionData]);
 
   const handleBack = () => {
     router.push("/ResidentAccount/Transactions");
@@ -76,18 +90,12 @@ export default function IncidentTransactionsDetails() {
   if (!transactionData) return <p>Incident report not found.</p>;
 
   const incidentFields = [
-    { label: "Date of Incident", key: "dateFiled" },
     { label: "ID", key: "caseNumber" },
-    { label: "First Name", key: "firstname" },
-    { label: "Last Name", key: "lastname" },
-    {
-      label: "Type",
-      key: "department",
-      format: (value: string) => (value === "Online" ? "Online Incident" : value),
-    },
-    { label: "Concern", key: "concerns" },
+    { label: "Date and Time of Incident", key: "dateTime" },
+    { label: "Name", key: "fullName" },
     { label: "Location", key: "address" },
-    { label: "Status", key: "status" },
+    { label: "Concern", key: "concerns" },
+    { label: "Additional Information", key: "addInfo" },
   ];
 
   const respondentFields = [
@@ -120,6 +128,9 @@ export default function IncidentTransactionsDetails() {
         <div className="incident-content-section-1">
           <button type="button" className="back-button" onClick={handleBack}></button>
           <p>Online Incident Report Details</p>
+          <div className="status-section-view">
+            <p className={`status-badge-view ${transactionData.status}`}>{transactionData.status|| "N/A"}</p> 
+          </div>
         </div>
 
         {incidentFields.map((field) => (
@@ -128,7 +139,7 @@ export default function IncidentTransactionsDetails() {
               <p>{field.label}</p>
             </div>
             <div className="description">
-              <p>{field.format ? field.format((transactionData as Record<string, any>)[field.key] || "N/A") : (transactionData as Record<string, any>)[field.key] || "N/A"}</p>
+              <p>{(extendedData as Record<string, any>)[field.key] || "N/A"}</p>
             </div>
           </div>
         ))}
