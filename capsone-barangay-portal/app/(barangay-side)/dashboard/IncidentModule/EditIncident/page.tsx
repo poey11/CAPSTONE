@@ -184,10 +184,7 @@ export default function EditLuponIncident() {
     
     const HandleEditDoc = async () => {
       
-      if(!isValidPhilippineMobileNumber(toUpdate.complainant.contact) || !isValidPhilippineMobileNumber(toUpdate.respondent.contact)){
-        setErrorPopup({ show: true, message: "Invalid Contact Number" });
-        return;
-      } 
+      
       if (docId) {
         const docRef = doc(db, "IncidentReports", docId);
     
@@ -238,6 +235,10 @@ export default function EditLuponIncident() {
         const form = event.target as HTMLFormElement;
         console.log(toUpdate);  
         if (form.checkValidity()) {
+          if(!isValidPhilippineMobileNumber(toUpdate.complainant.contact) || !isValidPhilippineMobileNumber(toUpdate.respondent.contact)){
+            setErrorPopup({ show: true, message: "Invalid Contact Number" });
+            return;
+          } 
           HandleEditDoc().then(() => {
             alert("Successfully Updated")
             handleBack();
