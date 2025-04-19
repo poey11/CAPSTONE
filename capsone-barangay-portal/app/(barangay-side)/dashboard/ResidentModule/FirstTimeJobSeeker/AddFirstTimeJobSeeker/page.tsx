@@ -95,9 +95,9 @@ export default function AddFirstTimeJobSeeker() {
 
 
   const handleSubmitClick = async () => {
-    const { lastName, firstName, middleName, dateApplied, dateOfBirth, age, sex } = formData;
+    const { lastName, firstName, dateApplied, dateOfBirth, age, sex } = formData;
   
-    if (!lastName || !firstName || !middleName || !dateApplied || !dateOfBirth || !age || !sex) {
+    if (!lastName || !firstName || !dateApplied || !dateOfBirth || !age || !sex) {
 
       setPopupErrorMessage("Please fill up all required fields.");
       setShowErrorPopup(true);
@@ -223,7 +223,7 @@ export default function AddFirstTimeJobSeeker() {
 
               <div className="fields-section">
                 <p>Middle Name</p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} required />
+                <input type="text" className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} />
               </div>
 
               <div className="fields-section">
