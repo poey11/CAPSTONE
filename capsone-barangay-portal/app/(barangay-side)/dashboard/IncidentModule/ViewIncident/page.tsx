@@ -434,7 +434,7 @@ export default  function ViewLupon() {
         const hearingFormData = hearingFormDataA(item);
 
         // Human-readable hearing label
-        const hearingLabels = ["First Hearing", "Second Hearing", "Third Hearing"];
+        const hearingLabels = ["First Hearing Details", "Second Hearing Details", "Third Hearing Details"];
         const hearingTitle = hearingLabels[index] || `Hearing #${index + 1}`;
 
         return (

@@ -103,6 +103,10 @@ export default function AddIncident() {
       let id ="";
       let formattedNumber ="";
       if(departmentId === "Lupon") id = "LPN";
+      else if(departmentId === "GAD") id = "GAD";
+      else if(departmentId === "BCPC") id = "BCPC";
+      else if(departmentId === "VAWC") id = "VAWC";
+
       if(reportCollection.length < 1) {
          formattedNumber = String(1).padStart(4, "0");
       }
