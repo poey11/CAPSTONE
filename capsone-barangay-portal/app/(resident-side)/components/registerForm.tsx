@@ -5,6 +5,7 @@ import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, sendEmailVerification, signOut } from "firebase/auth";
 import { useState, ChangeEvent } from "react";
 import { useRouter } from 'next/navigation';
+import  {isValidPhilippineMobileNumber} from "@/app/helpers/helpers";
 import ReCAPTCHA from "react-google-recaptcha";
 import "@/CSS/Components/registerform.css";
 
@@ -78,7 +79,10 @@ const RegisterForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
     
-
+        if(!isValidPhilippineMobileNumber(resident.phone)) {
+            setErrorPopup({ show: true, message: "Invalid phone number format. Please enter a valid Philippine mobile number." });
+            return;
+        }
 
       if (resident.password !== confirmPassword) {
         setErrorPopup({ show: true, message: "Make sure passwords match." });
