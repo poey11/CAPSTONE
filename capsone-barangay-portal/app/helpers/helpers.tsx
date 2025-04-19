@@ -62,6 +62,13 @@ const getLocalDateTimeString = (d: Date) => {
 }
 
 
+const isValidPhilippineMobileNumber = (number: string) => {
+    const regex = /^(09|\+639|639)\d{9}$/;
+    return regex.test(number);
+  };
+  
+
 export {isPastDate,isToday,isPastOrCurrentTime,
     getLocalTimeString,getLocalDateTimeString,
+    isValidPhilippineMobileNumber,
     isFutureDate,getLocalDateString }

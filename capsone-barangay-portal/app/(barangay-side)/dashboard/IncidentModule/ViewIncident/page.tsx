@@ -147,7 +147,7 @@ export default  function ViewLupon() {
 
   return (
     <main className="main-container-view">
-
+      {/* should also include hearing and dialogue info*/}
           
 
      

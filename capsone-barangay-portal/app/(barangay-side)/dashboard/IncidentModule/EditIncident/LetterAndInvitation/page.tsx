@@ -2,11 +2,11 @@
 import "@/CSS/IncidentModule/Letters.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import {  useEffect,useState } from "react";
-import { getSpecificDocument } from "@/app/helpers/firestorehelper";
-import { addDoc, collection, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { addDoc,collection,doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
-import { getLocalDateString, getLocalDateTimeString,isPastDate, isToday, isFutureDate } from "@/app/helpers/helpers";
+import { getLocalDateString, getLocalDateTimeString } from "@/app/helpers/helpers";
+import Template from "@/app/(barangay-side)/components/letterTemplate";
 
 export default function GenerateDialougeLetter() {
     const user = useSession().data?.user;
@@ -14,9 +14,10 @@ export default function GenerateDialougeLetter() {
     const docId = searchParam.get("id")?.split("?")[0];
     const actionId = searchParam.get("id")?.split("?")[1].split("=")[1];
     const [userInfo, setUserInfo] = useState<any | null>(null);
+    const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
     const [otherInfo, setOtherInfo] = useState({
         DateOfDelivery: "",
-        DateOfMeeting: "",
+        DateTimeOfMeeting: "",
         LuponStaff: "",
         DateFiled: "",
         complainant:{
@@ -35,7 +36,9 @@ export default function GenerateDialougeLetter() {
     const today = getLocalDateString(new Date());
     const todayWithTime = getLocalDateTimeString(new Date(new Date().setDate(new Date().getDate() + 1)));
     const [isDialogue, setIsDialogue] = useState(false);
-    
+
+
+
     useEffect(() => {
         if(!docId) return;
         const docRef = doc(db, "IncidentReports", docId);
@@ -50,13 +53,23 @@ export default function GenerateDialougeLetter() {
         return () => unsubscribe(); 
     },[])
     useEffect(() => {
-        if (docId) {
-          getSpecificDocument("IncidentReports", docId, setUserInfo).then(() => {
-            setLoading(false);
-          });
+        if(!docId) return;
+        const docRef = doc(db, "IncidentReports", docId);
+        const unsubscribe = onSnapshot(docRef, (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                setUserInfo(data);
+                setLoading(false);
+            } else {
+                console.log("No such document!");
+            }
         }
+        );
+        return () => unsubscribe();
+
     }, []);
     let nosHearing = userInfo?.nosHearing;
+    let nosOfGeneration = userInfo?.nosOfGeneration || 0; 
     
     useEffect(() => {
         if (userInfo) {
@@ -76,7 +89,7 @@ export default function GenerateDialougeLetter() {
         }
     }, [userInfo]);
   
-   console.log(nosHearing + " " +userInfo?.nosHearing);
+   console.log(nosHearing + " " +nosOfGeneration);
 
     const handleAddLupon = () => {
       router.back();
@@ -135,12 +148,12 @@ export default function GenerateDialougeLetter() {
   
 
     const printDialouge = async () => {
-        const day = otherInfo.DateOfMeeting.split("T")[0].split("-")[2];    
+        const day = otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[2];    
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const monthIndex = parseInt(otherInfo.DateOfMeeting.split("T")[0].split("-")[1], 10) - 1;
+        const monthIndex = parseInt(otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[1], 10) - 1;
         const month = monthNames[monthIndex];
-        const year = otherInfo.DateOfMeeting.split("T")[0].split("-")[0];
-        const time24 = otherInfo.DateOfMeeting.split("T")[1];
+        const year = otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[0];
+        const time24 = otherInfo.DateTimeOfMeeting.split("T")[1];
 
          // Convert 24-hour time to 12-hour format
         const [hourStr, minuteStr] = time24.split(":");
@@ -202,12 +215,12 @@ export default function GenerateDialougeLetter() {
         }
     }
     const printSummon = async () => {
-        const day = otherInfo.DateOfMeeting.split("T")[0].split("-")[2];
+        const day = otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[2];
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const monthIndex = parseInt(otherInfo.DateOfMeeting.split("T")[0].split("-")[1], 10) - 1;
+        const monthIndex = parseInt(otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[1], 10) - 1;
         const month = monthNames[monthIndex];
-        const year = otherInfo.DateOfMeeting.split("T")[0].split("-")[0];
-        const time24 = otherInfo.DateOfMeeting.split("T")[1];
+        const year = otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[0];
+        const time24 = otherInfo.DateTimeOfMeeting.split("T")[1];
         const [hourStr, minuteStr] = time24.split(":");
         let hour = parseInt(hourStr, 10);
         const minute = minuteStr;
@@ -282,22 +295,7 @@ export default function GenerateDialougeLetter() {
        } 
     
     }
-    const handleUpdate = async (listofUpdates:any) => {
-        //revise this part
-        try {
-            if(!docId) throw new Error("Document ID is undefined");
-
-            const docRef = doc(db, "IncidentReports", docId);
-            const updates = listofUpdates.reduce((acc: { [key: string]: any }, update: { field: string | number; value: any; }) => {
-                acc[update.field] = update.value;
-                return acc;
-            }, {});
-
-            await updateDoc(docRef, updates);
-        } catch (error) {
-            console.error(error);
-        }
-    }
+    
 
     const handleIsDialogue = async () => {
         try {
@@ -308,6 +306,30 @@ export default function GenerateDialougeLetter() {
                 isDialogue: true,
             };
             await updateDoc(docRef, updates);
+            const docRefB = (collection(db, "IncidentReports", docId, "GeneratedLetters"))
+            
+            await addDoc(docRefB, {
+                ...otherInfo,
+                dateCreated: new Date(),
+                createdBy: user?.fullName,
+                letterType: actionId,
+                complainant: {
+                    ...otherInfo.complainant,
+                    fname: otherInfo.complainant.fname,
+                    address: otherInfo.complainant.address,
+                    contact: otherInfo.complainant.contact,
+                },
+                respondent: {
+                    ...otherInfo.respondent,
+                    fname: otherInfo.respondent.fname,
+                    address: otherInfo.respondent.address,
+                    contact: otherInfo.respondent.contact,
+                },
+                DateOfDelivery: otherInfo.DateOfDelivery,
+                DateTimeOfMeeting: otherInfo.DateTimeOfMeeting,
+                LuponStaff: otherInfo.LuponStaff,
+                DateFiled: otherInfo.DateFiled,                
+            });
         }
         catch (error: string|any) {
             console.error(error);
@@ -319,35 +341,64 @@ export default function GenerateDialougeLetter() {
 
             const docRef = doc(db, "IncidentReports", docId);
             const updates = {
-                nosHearing: nosHearing+1,
+
+                ...(nosHearing !=3 && {nosHearing: nosHearing+1}),
+                nosOfGeneration: nosOfGeneration+1,
             };
             await updateDoc(docRef, updates);
+
+            const docRefB = (collection(db, "IncidentReports", docId, "GeneratedLetters"))
+            
+            await addDoc(docRefB, {
+                ...otherInfo,
+                dateCreated: new Date(),
+                createdBy: user?.fullName,
+                letterType: actionId,
+                complainant: {
+                    ...otherInfo.complainant,
+                    fname: otherInfo.complainant.fname,
+                    address: otherInfo.complainant.address,
+                    contact: otherInfo.complainant.contact,
+                },
+                respondent: {
+                    ...otherInfo.respondent,
+                    fname: otherInfo.respondent.fname,
+                    address: otherInfo.respondent.address,
+                    contact: otherInfo.respondent.contact,
+                },
+                DateOfDelivery: otherInfo.DateOfDelivery,
+                DateTimeOfMeeting: otherInfo.DateTimeOfMeeting,
+                LuponStaff: otherInfo.LuponStaff,
+                DateFiled: otherInfo.DateFiled,                
+            });
+
         }
         catch (error: string|any) {
             console.error(error);
         }
     }
-
+    const meeting = getLocalDateString(new Date(otherInfo.DateTimeOfMeeting.split("T")[0]));
+    const delivery = getLocalDateString(new Date(otherInfo.DateOfDelivery));
     const onSubmit = (e: any) => {
         e.preventDefault();
         const action = e.nativeEvent.submitter.name;
+        
+        if(delivery > meeting){
+            setErrorPopup({ show: true, message: "Date of Delivery must be earlier than Date of Meeting" });
+            return;
+        }
+
+
         if (action === "print") {
             if(actionId === "summon"){
                 handleIsHearing();
-                // printSummon().then(() => {
-                //     const updates = [{field:"nosHearing",value:nosHearing},{field:"summonFiled",value:otherInfo.DateFiled}];
-                //     //handleUpdate(updates);
-                //     clearForm();
-                // });
+                // printSummon()
             }
             else{
                 handleIsDialogue();
-                // printDialouge().then(() => {
-                    //     const updates = [{field:"dialogueFiled",value:otherInfo.DateFiled},{field:"isDialogue",value:true}];
-                    //     //handleUpdate(updates);
-                    //clearForm();
-                // });
+                // printDialouge()
             }
+            clearForm();
         } else if (action === "sendSMS") {
             sendSMSForDialogue();
             sendSMSForSummons();
@@ -379,7 +430,7 @@ export default function GenerateDialougeLetter() {
     const clearForm = () => {
         setOtherInfo({
             DateOfDelivery: "",
-            DateOfMeeting: "",
+            DateTimeOfMeeting: "",
             LuponStaff: "",
             DateFiled: "",
             complainant:{
@@ -398,13 +449,15 @@ export default function GenerateDialougeLetter() {
 
   return (
     <main className="main-container">
-
-
-        
+        {errorPopup.show && (
+              <div className="popup-overlay error">
+                  <div className="popup">
+                      <p>{errorPopup.message}</p>
+                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+                  </div>
+              </div>
+        )}
         <div className="main-content">
-            
-         
-
             <div className="section-1">
                 <button type="button" className="back-button" onClick={handleAddLupon}></button>
                 {actionId === "summon" ? <p className="NewOfficial">Summon Letter</p> : <p className="NewOfficial">Dialouge Letter</p>}
@@ -519,10 +572,10 @@ export default function GenerateDialougeLetter() {
                         <div className="input-group">
                             <p>Date and Time of Meeting</p>
                             <input type="datetime-local" className="search-bar" placeholder="Enter Date of Meeting" 
-                            value={otherInfo.DateOfMeeting}
+                            value={otherInfo.DateTimeOfMeeting}
                             onKeyDown={(e) => e.preventDefault()}
-                            id="DateOfMeeting"
-                            name="DateOfMeeting"
+                            id="DateTimeOfMeeting"
+                            name="DateTimeOfMeeting"
                             onChange={handleChange}
                             min={todayWithTime}
                             required
@@ -559,7 +612,7 @@ export default function GenerateDialougeLetter() {
                         </div>
                     </div>
                     <div className="section-4">
-                        {(nosHearing < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
+                        {(nosOfGeneration < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                         {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                         <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button>
                     </div>
@@ -568,8 +621,8 @@ export default function GenerateDialougeLetter() {
 
         </div> 
 
-    
 
+        <Template/>
     
     </main>
   );

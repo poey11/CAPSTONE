@@ -6,7 +6,7 @@ import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
 import {getAllSpecificDocument} from "@/app/helpers/firestorehelper";
-import {isPastDate,isToday,isPastOrCurrentTime, getLocalDateString} from "@/app/helpers/helpers";
+import {isPastDate,isToday,isPastOrCurrentTime, getLocalDateString, isValidPhilippineMobileNumber} from "@/app/helpers/helpers";
 import { useSession } from "next-auth/react";
 import {customAlphabet} from "nanoid";
 
@@ -179,7 +179,7 @@ export default function AddIncident() {
             department: departmentId,
             staffId: user?.id,
             isDialogue: false,
-            nosHearing:0,
+            nosHearing:1,
             createdAt: new Date(),
             ...(departmentId === "GAD" && { 
               nosofMaleChildren: reportInfo.nosofMaleChildren,
@@ -238,8 +238,13 @@ export default function AddIncident() {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault(); 
+  
     const form = event.target as HTMLFormElement;
     if (form.checkValidity()) {
+      if(!isValidPhilippineMobileNumber(complainant.contact)|| !isValidPhilippineMobileNumber(respondent.contact)){
+        setErrorPopup({ show: true, message: "Invalid Contact Number." });
+        return;
+      }
       const dateFiled = reportInfo.dateFiled;
       const dateReceived = reportInfo.dateReceived;
       const timeFiled = reportInfo.timeFiled;

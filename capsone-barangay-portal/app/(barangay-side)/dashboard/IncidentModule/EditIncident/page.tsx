@@ -3,8 +3,9 @@ import "@/CSS/IncidentModule/EditIncident.css";
 import { ChangeEvent,useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/firestorehelper";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, updateDoc} from "firebase/firestore";
 import { db } from "../../../../db/firebase";
+import { getLocalDateTimeString,isValidPhilippineMobileNumber } from "@/app/helpers/helpers";
 import React from "react";
 import Dialogue from "@/app/(barangay-side)/components/dialogueForm"
 import Hearing from "@/app/(barangay-side)/components/hearingForm";
@@ -14,6 +15,7 @@ import Hearing from "@/app/(barangay-side)/components/hearingForm";
 
 export default function EditLuponIncident() {
     /* do the partial edit/modify of info of the incident.*/
+    const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
     const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
     const [loading , setLoading] = useState(true);
     const router = useRouter();
@@ -21,6 +23,7 @@ export default function EditLuponIncident() {
     const docId = searchParam.get("id");
     const [reportData, setReportData] = useState<any>();
     const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
+    const today = getLocalDateTimeString(new Date());
     const [toUpdate, setToUpdate] = useState<any|null>({
       complainant: {
         fname: "",
@@ -48,9 +51,8 @@ export default function EditLuponIncident() {
       nosofMaleChildren: "",
       nosofFemaleChildren: "",
       investigator: {
-        fullname: "",
-        dateInvestigated:"",
-        timeInvestigated: "",
+        accAssigned: "",
+        dateTimeInvestigated: "",
         investigationReport: "",
         investigateImage: "",
       }
@@ -181,6 +183,11 @@ export default function EditLuponIncident() {
     };
     
     const HandleEditDoc = async () => {
+      
+      if(!isValidPhilippineMobileNumber(toUpdate.complainant.contact) || !isValidPhilippineMobileNumber(toUpdate.respondent.contact)){
+        setErrorPopup({ show: true, message: "Invalid Contact Number" });
+        return;
+      } 
       if (docId) {
         const docRef = doc(db, "IncidentReports", docId);
     
@@ -209,9 +216,8 @@ export default function EditLuponIncident() {
             contact: mergeData(reportData.respondent?.contact, toUpdate.respondent?.contact),
           },
           investigator: {
-            fullname: mergeData(reportData.investigator?.fullname, toUpdate.investigator?.fullname),
-            dateInvestigated: mergeData(reportData.investigator?.dateInvestigated, toUpdate.investigator?.dateInvestigated),
-            timeInvestigated: mergeData(reportData.investigator?.timeInvestigated, toUpdate.investigator?.timeInvestigated),
+            accAssigned: mergeData(reportData.investigator?.accAssigned, toUpdate.investigator?.accAssigned),
+            dateTimeInvestigated: mergeData(reportData.investigator?.dateTimeInvestigated, toUpdate.investigator?.dateTimeInvestigated),
             investigationReport: mergeData(reportData.investigator?.investigationReport, toUpdate.investigator?.investigationReport),
             investigateImage: mergeData(reportData.investigator?.investigateImage, toUpdate.investigator?.investigateImage),
           },
@@ -222,7 +228,7 @@ export default function EditLuponIncident() {
           nosofFemaleChildren: mergeData(reportData.nosofFemaleChildren, toUpdate.nosofFemaleChildren),
           nosofMaleChildren: mergeData(reportData.nosofMaleChildren, toUpdate.nosofMaleChildren),
         });
-    
+       
         await updateDoc(docRef, cleanedData);
       }
     };
@@ -283,9 +289,8 @@ export default function EditLuponIncident() {
           nosofFemaleChildren: "",
           nosofMaleChildren: "",
           investigator: {
-            fullname: "",
-            dateInvestigated: "",
-            timeInvestigated: "",
+            accAssigned: "",
+            dateTimeInvestigated: "",
             investigationReport: "",
             investigateImage: "",
           },
@@ -293,25 +298,35 @@ export default function EditLuponIncident() {
     }
 
 
- const [showRecordDetails, setShowRecordDetails] = useState(false);
-const [showComplainantDetails, setShowComplainantDetails] = useState(false);
-const [showInvestigatedDetails, setShowInvestigatedDetails] = useState(false);
-const [showOtherDetails, setShowOtherDetails] = useState(false);
+  const [showRecordDetails, setShowRecordDetails] = useState(false);
+  const [showComplainantDetails, setShowComplainantDetails] = useState(false);
+  const [showInvestigatedDetails, setShowInvestigatedDetails] = useState(false);
+  const [showOtherDetails, setShowOtherDetails] = useState(false);
 
-const toggleRecordDetails = () => setShowRecordDetails(prev => !prev);
-const toggleComplainantDetails = () => setShowComplainantDetails(prev => !prev);
-const toggleInvestigatedDetails = () => setShowInvestigatedDetails(prev => !prev);
-const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
+  const toggleRecordDetails = () => setShowRecordDetails(prev => !prev);
+  const toggleComplainantDetails = () => setShowComplainantDetails(prev => !prev);
+  const toggleInvestigatedDetails = () => setShowInvestigatedDetails(prev => !prev);
+  const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
+ 
 
 
   return (
     <>
       {loading ? (       <p></p> ) : (
         <main className="main-container-edit">
-        
+          {errorPopup.show && (
+              <div className="popup-overlay error">
+                  <div className="popup">
+                      <p>{errorPopup.message}</p>
+                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+                  </div>
+              </div>
+        )}
           <div className="letters-content-edit">
                <button className="letter-announcement-btn-edit" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialogue Letter</button>
-               <button className="letter-announcement-btn-edit" name="summon" onClick={handleGenerateLetterAndInvitation}>Generate Summon Letter</button>
+
+                {(reportData.isDialogue) ? (<button className="letter-announcement-btn-edit" name="summon" onClick={handleGenerateLetterAndInvitation}>Generate Summon Letter</button>)
+                :(<><button className="letter-announcement-btn-edit" name="summon" onClick={() => setErrorPopup({ show: true, message: "Generate A Dialogue Letter First"})}>Generate Summon Letter</button></>)}
               
                <select
                   id="status"
@@ -720,51 +735,34 @@ const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
                     <div className="bars-edit">
                       {/* revised this. the investigator will be the sitio/kagawads or the lf staffs. will discuss with grpmates */}
                         <div className="input-group-edit">
-                            <p>Investigator Full Name (FN SN)</p>
+                            <p>Investigator Assigned</p>
                             <input type="text" className="search-bar-edit" 
-                            placeholder={reportData?.investigator?.fullname ?? "Enter Full Name"}
-                            value={toUpdate?.investigator.fullname}
-                            name="investigator.fullname"
-                            id="investigator.fullname"
+                            placeholder={reportData?.investigator?.accAssigned ?? "Enter Full Name"}
+                            value={toUpdate?.investigator.accAssigned}
+                            name="investigator.accAssigned"
+                            id="investigator.accAssigned"
                             onChange={handleFormChange}
                             />
                         </div>
 
                         <div className="input-group-edit">
-                            <p>Date Investigated</p>
-                            <input type="date" className="search-bar-edit" 
-                              value={toUpdate?.investigator?.dateInvestigated || reportData?.investigator?.dateInvestigated || ""}
-                              name="investigator.dateInvestigated"
-                              id="investigator.dateInvestigated"
+                            <p>Date and Time Investigated</p>
+                            <input type="datetime-local" className="search-bar-edit" 
+                              value={toUpdate?.investigator?.dateTimeInvestigated || reportData?.investigator?.dateTimeInvestigated || ""}
+                              name="investigator.dateTimeInvestigated"
+                              id="investigator.dateTimeInvestigated"
                               onChange={handleFormChange} 
-                  
+                              max={today} 
                               />
                         </div>
-                        <div className="input-group-edit">
-                            <p>Time Investigated</p>
-                            <input type="time" className="search-bar-edit" 
-                            value={toUpdate?.investigator?.timeInvestigated || reportData?.investigator?.timeInvestigated  || ""} 
-                            name="investigator.timeInvestigated"
-                            id="investigator.timeInvestigated"
-                            onChange={handleFormChange}  
-                            />
-                           
-                        </div>
+                        
                     </div>
 
                   )}
 
-
-
     
                </div>
                
-
-             
-               
-              
-               
-                     
                      
                <div className="section-4-edit">
 
@@ -789,6 +787,7 @@ const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
         <div className="section-4-left-side-edit">
           <div className="fields-section-edit">
             <p>Investigation Report</p>
+            {/* only the assigned investiagtor should be able to edit this */}
             <textarea
               className="description-edit resize-none"
               placeholder="Enter Investigation Report"
@@ -873,9 +872,9 @@ const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
      )}
       </div>
       </form>
-        <Dialogue id={docId || ""}/>
+        <Dialogue  id={docId || ""}/>
         {Array.from({ length: reportData.nosHearing }, (_, i) => (
-          <Hearing key={i} hearingIndex={i} id={docId||""}/>
+          <Hearing key={i}  hearingIndex={i} nosOfGeneration={reportData?.nosOfGeneration} id={docId||""}/>
         ))}
 
      </main>

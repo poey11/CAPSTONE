@@ -1,35 +1,45 @@
-import { getLocalDateString } from "@/app/helpers/helpers";
-import { useEffect, useState } from "react";
-import { collection, addDoc, doc, onSnapshot } from "firebase/firestore";
+import {  useEffect, useState } from "react";
+import { collection, addDoc, doc, onSnapshot,updateDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
-import {getAllSpecificSubDocument} from "@/app/helpers/firestorehelper";
+import { useSession } from "next-auth/react";
+import {getLocalDateTimeString} from "@/app/helpers/helpers";
 
 interface HearingFormProps {
     hearingIndex: number;
     id: string;
+    nosOfGeneration: number;
 }
 
 interface HearingDetails {
     nosHearing: number;
     nos: string;
-    date: string;
-    forField: string;
-    time: string;
     minutesOfCaseProceedings: string;
     remarks: string;
     partyA: string;
     partyB: string;
-    hearingOfficer: string;
+    firstHearingOfficer: string;
+    secondHearingOfficer: string;
+    thirdHearingOfficer: string;
     filled: boolean;
+    complainant:{
+        firstName: string;
+        middleName: string;
+         lastName: string;
+     },
+     respondent:{
+         firstName: string;
+         middleName: string;
+          lastName: string;
+     },
+    hearingMeetingDateTime: string;
 }
 
 
-const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id}) => {
+const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGeneration}) => {
+    const user = useSession().data?.user;
     const [showHearingContent, setShowHearingContent] = useState(false); // Initially hidden
-    const [rerender, setRerender] = useState(0);
     const [hearingDetails, setHearingDetails] = useState<HearingDetails[]>([]);
-    const today = getLocalDateString(new Date());
-    const [submissionComplete, setSubmissionComplete] = useState(false);
+    const today = getLocalDateTimeString(new Date());
 
     let nos ="";
     switch (hearingIndex) {
@@ -49,15 +59,25 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id}) => {
     const [details, setDetails] = useState<HearingDetails>({
         nosHearing: hearingIndex,
         nos: nos,
-        date: "",
-        forField: "",
-        time: "",
+        complainant:{
+            firstName: "",
+            middleName: "",
+             lastName:"",
+        },
+        respondent:{
+            firstName: "",
+            middleName: "",
+             lastName:"",
+        },
         minutesOfCaseProceedings: "",
         remarks: "",
         partyA: "",
         partyB: "",
-        hearingOfficer: "",
+        firstHearingOfficer:  "",
+        secondHearingOfficer: "",
+        thirdHearingOfficer: "",
         filled:false,
+        hearingMeetingDateTime: "",
     }); 
     
     useEffect(() => { 
@@ -69,6 +89,14 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id}) => {
     
         return () => unsubscribe();
     }, [id]);
+
+    useEffect(() => {
+        setDetails(prevDetails => ({
+            ...prevDetails,
+            firstHearingOfficer: user?.fullName || ""
+        }));
+            
+    },[user])
 
     const [filled, setFilled] = useState(false);
     useEffect(() => {
@@ -94,67 +122,118 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id}) => {
         return () => unsubscribe(); 
     }, [])
 
+    const [hearing, setHearing] = useState(0);
+    useEffect(() => {
+        const docRef = doc(db, "IncidentReports", id);
+        const unsubscribe = onSnapshot(docRef, (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                setHearing(data.nosHearing || 0); 
+            } else {
+                console.log("No such document!");
+            }
+        });
+        return () => unsubscribe();
+
+    },[])
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setDetails(prevDetails => ({
-            ...prevDetails,
-            [name]: value,
-        }));
-    }
-    const forceRerender = () => {
-        setRerender(prev => prev + 1); // Changing state = triggers rerender
+        const keys = name.split(".");
+    
+        setDetails(prevDetails => {
+            if (keys.length === 2) {
+                const [parentKey, childKey] = keys;
+    
+                // Ensure the parent is a valid object
+                const parent = prevDetails[parentKey as keyof HearingDetails];
+    
+                if (typeof parent === "object" && parent !== null) {
+                    return {
+                        ...prevDetails,
+                        [parentKey]: {
+                            ...(parent as Record<string, any>),
+                            [childKey]: value,
+                        },
+                    };
+                }
+            }
+    
+            // Fallback for top-level keys
+            return {
+                ...prevDetails,
+                [name]: value,
+            };
+        });
     };
+    
+    
+  
     const handleToggleClick = () => {
         if(hearingDetails.length < hearingIndex) return;
-        else if(hearingIndex === 0 && !dialogue) return;
+        if(hearingIndex === 0 && !dialogue) return;
+        if(nosOfGeneration <= hearingIndex) return;
         setShowHearingContent(prev => !prev);
     };
+    console.log("Hearing Details:", hearingDetails.length);
+    console.log("NosofGeneration", nosOfGeneration);
+    console.log("hearingIndex", hearingIndex);
+    console.log("nosHearing", hearing)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
             const docRef = collection(db, "IncidentReports", id, "SummonsMeeting");
             await addDoc(docRef, {
-                date: details.date,
-                forField: details.forField,
-                time: details.time,
+                complainant: {
+                    firstName: details.complainant.firstName,
+                    middleName: details.complainant.middleName,
+                    lastName: details.complainant.lastName,
+                   
+                },
+                respondent: {
+                    firstName: details.respondent.firstName,
+                    middleName: details.respondent.middleName,
+                    lastName: details.respondent.lastName,
+                },
                 minutesOfCaseProceedings: details.minutesOfCaseProceedings,
                 remarks: details.remarks,
                 partyA: details.partyA,
                 partyB: details.partyB,
-                hearingOfficer: details.hearingOfficer,
+                firstHearingOfficer: details.firstHearingOfficer,
+                secondHearingOfficer: details.secondHearingOfficer,
+                thirdHearingOfficer: details.thirdHearingOfficer,
                 nosHearing: hearingIndex,
                 nos: nos,
                 filled: true,
+                hearingMeetingDateTime: details.hearingMeetingDateTime,
             });
             console.log("Document written with ID: ", docRef.id);
-        
-            setSubmissionComplete(true);  // Track submission success
+            
+            const UpdateRef = doc(db, "IncidentReports", id,);
+            await updateDoc(UpdateRef, {
+                ...(hearing !=3   && { nosHearing: hearing + 1 })
+            });
         } catch (error:any) {
             console.error("Error saving data:", error.message);
         }
         console.log("Form submitted:", details);
     }
-    useEffect(() => {
-        if (submissionComplete) {
-          forceRerender();
-          setSubmissionComplete(false); // Reset after rerender
-        }
-      }, [submissionComplete]);
+  
     return (
         <>
             <div className="hearing-section-edit">    
                 <div className="title-section-edit">
                     <button type="button" className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
                 <h1>{nos} Hearing Section</h1>
-                {(hearingIndex === 0 && !dialogue) && (
+                {((hearingIndex === 0 || nosOfGeneration <= hearingIndex) && !dialogue) && (
                     <span className="text-red-500 ml-4">
-                        In order to fill up the current Hearing Section, you must fill up the Dialogue Meeting
+                        In order to fill up the current Hearing Section, you must fill up the Dialogue Letter and/or also generate a Summons Letter
                     </span>
                 )}
-                {(hearingDetails.length < hearingIndex) && (
+                {(hearingDetails.length < hearingIndex || nosOfGeneration <= hearingIndex ) && (
                   <span className="text-red-500 ml-4">
-                  In order to fill up the current Hearing Section, you must fill up the previous Hearing
+                  In order to fill up the current Hearing Section, you must fill up the previous Hearing and/or also generate a Summons Letter
                   </span>
                 )}
             </div>
@@ -163,50 +242,109 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id}) => {
                 <>
                 <form onSubmit={handleSubmit}>
                   <div className="section-2-dialouge-edit">
-                      <p>Complainant's Information</p>
-                      <div className="bars-edit">
-                          <div className="input-group-edit">
-                                <p>Date</p>
-                                <input type="date" 
-                                className="search-bar-edit"
+                  <p>Hearing  Information</p>
+                    <div className="bars-edit">
+                        <div className="input-group-edit">
+                                <p>Hearing Meeting Date and Time</p>
+                                <input type="datetime-local" 
+                                className="search-bar-edit" 
+                                name="hearingMeetingDateTime"
+                                id="hearingMeetingDateTime"
+                                value={details.hearingMeetingDateTime||""}
+                                disabled={filled ? true : false}
+                                required={!filled}
+                                onChange={handleChange}
                                 max={today} 
                                 onKeyDown={(e => e.preventDefault())}
-                                name="date"
-                                id="date"
-                                value={details.date||""}
-                                onChange={handleChange}
-                                disabled={filled ? true : false}
-                                required={!filled}
-                                />
+                            />
+                        </div>
+                    </div>  
+                  <p>Complainant's Information</p>
+                              <div className="bars-edit">
+                                  <div className="input-group-edit">
+                                        <p>First Name</p>
+                                        <input type="text" 
+                                        className="search-bar-edit" 
+                                        name="complainant.firstName"
+                                        id="complainant.firstName"
+                                        value={details.complainant.firstName||""}
+                                        onChange={handleChange}
+                                        disabled={filled ? true : false}
+                                        required={!filled}
+                                        placeholder="Enter First Name" />
+                                  </div>
+                                  <div className="input-group-edit">
+                                        <p>Middle Name</p>
+                                        <input type="text" 
+                                        className="search-bar-edit" 
+                                        name="complainant.middleName"
+                                        id="complainant.middleName"
+                                        value={details.complainant.middleName||""}
+                                        onChange={handleChange}
+                                        disabled={filled ? true : false}
+                                        required={!filled}
+                                        placeholder="Enter Middle Name"
+                                        />
+                                  </div>
+                                  <div className="input-group-edit">
+                                        <p>Last Name</p>
+                                        <input type="text" 
+                                        className="search-bar-edit" 
+                                        name="complainant.lastName"
+                                        id="complainant.lastName"
+                                        value={details.complainant.lastName||""}
+                                        onChange={handleChange}
+                                        disabled={filled ? true : false}
+                                        required={!filled}
+                                        placeholder="Enter Last Name"
+                                        />
+                                  </div>
+                              </div>
                           </div>
-                          <div className="input-group-edit">
-                                <p>For</p>
-                                <input type="text" 
-                                className="search-bar-edit" 
-                                name="forField"
-                                id="forField"
-                                value={details.forField||""}
-                                onChange={handleChange}
-                                placeholder="Enter For" 
-                                disabled={filled ? true : false}
-                                required={!filled}
-                                />
+
+                          <div className="section-2-dialouge-edit">
+                              <p>Respondents' Information</p>
+                              <div className="bars-edit">
+                                <div className="input-group-edit">
+                                        <p>First Name</p>
+                                        <input type="text" 
+                                        className="search-bar-edit" 
+                                        name="respondent.firstName"
+                                        id="respondent.firstName"
+                                        value={details.respondent.firstName||""}
+                                        onChange={handleChange}
+                                        disabled={filled ? true : false}
+                                        required={!filled}
+                                        placeholder="Enter First Name" />
+                                  </div>
+                                  <div className="input-group-edit">
+                                        <p>Middle Name</p>
+                                        <input type="text" 
+                                        className="search-bar-edit" 
+                                        name="respondent.middleName"
+                                        id="respondent.middleName"
+                                        value={details.respondent.middleName||""}
+                                        onChange={handleChange}
+                                        disabled={filled ? true : false}
+                                        required={!filled}
+                                        placeholder="Enter Middle Name"
+                                        />
+                                  </div>
+                                  <div className="input-group-edit">
+                                        <p>Last Name</p>
+                                        <input type="text" 
+                                        className="search-bar-edit" 
+                                        name="respondent.lastName"
+                                        id="respondent.lastName"
+                                        value={details.respondent.lastName||""}
+                                        onChange={handleChange}
+                                        disabled={filled ? true : false}
+                                        required={!filled}
+                                        placeholder="Enter Last Name"
+                                        />
+                                  </div>
+                              </div>
                           </div>
-                          <div className="input-group-edit">
-                                <p>Time</p>
-                                <input type="time" 
-                                className="search-bar-edit" 
-                                name="time"
-                                id="time"
-                                value={details.time||""}
-                                onChange={handleChange}
-                                placeholder="Enter Time" 
-                                disabled={filled ? true : false}
-                                required={!filled}
-                                />
-                          </div>
-                      </div>
-                  </div>
         
                   <div className="section-3-dialouge-edit">
                       <div className="fields-section-edit">
@@ -265,16 +403,37 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id}) => {
                             required={!filled}/>
                       </div>
                       <div className="fields-section-edit">
-                            <p>Hearing Officer</p>
+                            <p>First Hearing Officer</p>
                             <input type="text" 
-                            name="hearingOfficer"
-                            id="hearingOfficer"
-                            value={details.hearingOfficer||""}
+                            name="firstHearingOfficer"
+                            id="firstHearingOfficer"
+                            value={details.firstHearingOfficer||""}
+                            onChange={handleChange}
+                            className="search-bar-edit" 
+                            placeholder="Enter Hearing Officer"
+                            disabled
+                            />
+
+                            <p>Second Hearing Officer</p>
+                            <input type="text" 
+                            name="secondHearingOfficer"
+                            id="secondHearingOfficer"
+                            value={details.secondHearingOfficer||""}
                             onChange={handleChange}
                             className="search-bar-edit" 
                             placeholder="Enter Hearing Officer"
                             disabled={filled ? true : false}
-                            required={!filled}
+                            />
+
+                            <p>Third Hearing Officer</p>
+                            <input type="text" 
+                            name="thirdHearingOfficer"
+                            id="thirdHearingOfficer"
+                            value={details.thirdHearingOfficer||""}
+                            onChange={handleChange}
+                            className="search-bar-edit" 
+                            placeholder="Enter Hearing Officer"
+                            disabled={filled ? true : false}
                             />
                       </div>
 
