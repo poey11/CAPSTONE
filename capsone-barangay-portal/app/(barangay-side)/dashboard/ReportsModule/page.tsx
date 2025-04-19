@@ -629,72 +629,108 @@ const ReportsPage = () => {
   };
   
   // residents per general location
-
-  const handleGenerateEastResidentPDF = () =>
-    handleGenerateResidentPDFByLocation("East Fairview", setLoadingEastResident);
-
-  const handleGenerateWestResidentPDF = () =>
-    handleGenerateResidentPDFByLocation("West Fairview", setLoadingWestResident);
-
-  const handleGenerateSouthResidentPDF = () =>
-    handleGenerateResidentPDFByLocation("South Fairview", setLoadingSouthResident);
-
-
+  // east fairview
+  const generateEastResidentListReport = async () => {
+    setLoadingEastResident(true);
+    try {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const reportTitle = `RECORD OF BARANGAY INHABITANTS ${year} - EAST FAIRVIEW`;
   
-    const generateResidentListReportByLocation = async (
-      location: string,
-      setLoadingFn: React.Dispatch<React.SetStateAction<boolean>>
-    ) => {
-      setLoadingFn(true);
-      try {
-        const currentDate = new Date();
-        const year = currentDate.getFullYear();
-        const reportTitle = `RECORD OF BARANGAY INHABITANTS ${year} - ${location.toUpperCase()}`;
-    
-        const residentRef = collection(db, "Residents");
-        const q = query(residentRef);
-        const querySnapshot = await getDocs(q);
-    
-        let residents = querySnapshot.docs
-          .map((doc) => doc.data())
-          .filter((resident) => resident.generalLocation === location);
-    
-        if (residents.length === 0) {
-          alert(`No residents found in ${location}.`);
-          return;
-        }
-    
-        residents.sort((a, b) => {
-          const nameCompare = (a.lastName || "").localeCompare(b.lastName || "");
-          if (nameCompare !== 0) return nameCompare;
-          return (a.address || "").localeCompare(b.address || "");
+      const residentRef = collection(db, "Residents");
+      const q = query(residentRef);
+      const querySnapshot = await getDocs(q);
+  
+      let residents = querySnapshot.docs.map((doc) => doc.data());
+  
+      const addressGroups = {
+        "RINA": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("Rina")
+        ),
+        "SAMAFA": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("SAMAFA")
+        ),
+        "SAMAPLI": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("SAMAPLI")
+        ),
+        "SITIO KISLAP": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("SITIO KISLAP")
+        ),
+        "EFHAI": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("EFHAI")
+        ),
+      };
+  
+      const filteredGroups = Object.entries(addressGroups).filter(([key, value]) => value.length > 0);
+  
+      if (filteredGroups.length === 0) {
+        alert("No residents found.");
+        setLoadingEastResident(false);
+        return;
+      }
+  
+      const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+  
+      worksheet.getCell("A1").value = reportTitle;
+  
+      let insertionRow = 3;
+      let count = 1;
+  
+      for (const [group, members] of filteredGroups) {
+        // Sort by lastName, then by firstName
+        members.sort((a, b) => {
+          const lastA = (a.lastName || "").trim().toUpperCase();
+          const lastB = (b.lastName || "").trim().toUpperCase();
+          const firstA = (a.firstName || "").trim().toUpperCase();
+          const firstB = (b.firstName || "").trim().toUpperCase();
+  
+          if (lastA === lastB) {
+            return firstA.localeCompare(firstB);
+          }
+          return lastA.localeCompare(lastB);
         });
-    
-        const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
-        const url = await getDownloadURL(templateRef);
-        const response = await fetch(url);
-        const arrayBuffer = await response.arrayBuffer();
-    
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.load(arrayBuffer);
-        const worksheet = workbook.worksheets[0];
-    
-        worksheet.getCell("A1").value = reportTitle;
-    
-        const dataStartRow = 3;
-        let insertionRow = dataStartRow;
-    
-        residents.forEach((resident, index) => {
+  
+        worksheet.mergeCells(insertionRow, 1, insertionRow, 12);
+        const headerRow = worksheet.getRow(insertionRow);
+        const headerCell = headerRow.getCell(1);
+  
+        headerCell.value = group;
+        headerCell.font = {
+          name: "Times New Roman",
+          size: 14,
+          bold: true
+        };
+        headerCell.alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true
+        };
+        headerCell.border = {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        };
+  
+        headerRow.height = 25;
+        headerRow.commit();
+        insertionRow++;
+  
+        members.forEach((resident) => {
           const row = worksheet.getRow(insertionRow);
           row.height = 55;
-
-
-          const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
-
-    
+          const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`;
+  
           const cells = [
-            (index + 1).toString(),
-            fullName,
+            count,
+            fullName.trim(),
             resident.address || "",
             resident.dateOfBirth || "",
             resident.placeOfBirth || "",
@@ -706,7 +742,7 @@ const ReportsPage = () => {
             resident.emailAddress || "",
             resident.precinctNumber || "",
           ];
-    
+  
           cells.forEach((value, index) => {
             const cell = row.getCell(index + 1);
             cell.value = value;
@@ -719,47 +755,54 @@ const ReportsPage = () => {
               right: { style: "medium", color: { argb: "000000" } },
             };
           });
-    
+  
           row.commit();
           insertionRow++;
+          count++;
         });
-    
+  
         const totalRow = worksheet.getRow(insertionRow);
         worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
-        totalRow.getCell(1).value = `TOTAL: ${residents.length}`;
+        totalRow.getCell(1).value = `TOTAL: ${members.length}`;
         totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
-        totalRow.getCell(1).font = { name: "Times New Roman", size: 10 };
+        totalRow.getCell(1).font = { name: "Times New Roman", size: 12, italic: true, bold: true };
+        totalRow.getCell(1).border = {
+          bottom: { style: "medium", color: { argb: "000000" } },
+          left: { style: "medium", color: { argb: "000000" } },
+          right: { style: "medium", color: { argb: "000000" } },
+        };
         totalRow.commit();
-    
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-    
-        const fileName = `Inhabitant_Record_${location.replace(" ", "")}_${year}.xlsx`;
-        const storageRef = ref(storage, `GeneratedReports/${fileName}`);
-        await uploadBytes(storageRef, blob);
-    
-        const fileUrl = await getDownloadURL(storageRef);
-    
-        alert(`${location} Masterlist generated successfully. Please wait for the downloadable file!`);
-        return fileUrl;
-      } catch (error) {
-        console.error("Error generating report:", error);
-        alert("Failed to generate Resident Masterlist Report.");
-      } finally {
-        setLoadingFn(false);
+  
+        insertionRow++;
       }
-    };
-
-  const handleGenerateResidentPDFByLocation = async (
-    location: string,
-    setLoadingFn: React.Dispatch<React.SetStateAction<boolean>>
-  ) => {
-    setLoadingFn(true);
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const fileName = `Inhabitant_Record_EastFairview_${year}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+  
+      alert("Resident List for East Fairview generated successfully. Please wait for the downloadable file!");
+  
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating report:", error);
+      alert("Failed to generate East Fairview Resident Report.");
+    } finally {
+      setLoadingEastResident(false);
+    }
+  };  
+  
+  const handleGenerateEastResidentPDF = async () => {
+    setLoadingEastResident(true);
     try {
-      const fileUrl = await generateResidentListReportByLocation(location, setLoadingFn);
-      if (!fileUrl) return;
+      const fileUrl = await generateEastResidentListReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -770,19 +813,432 @@ const ReportsPage = () => {
       if (!response.ok) throw new Error("Failed to convert to PDF");
   
       const blob = await response.blob();
-      const year = new Date().getFullYear();
-      saveAs(blob, `Inhabitant_Record_${location.replace(" ", "")}_${year}.pdf`);
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
   
-      alert(`${location} PDF report generated successfully!`);
+      saveAs(blob, `Inhabitant_Record_EastFairview_${year}.pdf`);
+  
+      alert("Resident Report (East Fairview) successfully converted to PDF!");
     } catch (error) {
-      console.error("PDF Error:", error);
+      console.error("Error:", error);
       alert("Failed to generate PDF.");
     } finally {
-      setLoadingFn(false);
+    setLoadingEastResident(false);
     }
   };
+
+  const generateWestResidentListReport = async () => {
+    setLoadingWestResident(true);
+    try {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const reportTitle = `RECORD OF BARANGAY INHABITANTS ${year} - WEST FAIRVIEW`;
+  
+      const residentRef = collection(db, "Residents");
+      const q = query(residentRef);
+      const querySnapshot = await getDocs(q);
+  
+      let residents = querySnapshot.docs.map((doc) => doc.data());
+  
+      const addressGroups = {
+        "AUSTIN": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("AUSTIN")
+        ),
+        "BASILIO 1": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("BASILIO 1")
+        ),
+        "DARISNAI": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("DARISNAI")
+        ),
+        "MUSTANG BENZ": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("MUSTANG BENZ")
+        ),
+        "ULNA": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("ULNA")
+        ),
+        "UNITED FAIRLANE": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("UNITED FAIRLANE")
+        ),
+        "URLINA": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("URLINA")
+        ),
+        "VERBENA 1": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("VERBENA 1")
+        ),
+        "WEST FAIRVIEW HOA": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("WEST FAIRVIEW HOA")
+        ),
+        "TULIP RESIDENCES HOA": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("TULIP RESIDENCES HOA")
+        ),
+      };
+  
+      const filteredGroups = Object.entries(addressGroups).filter(([key, value]) => value.length > 0);
+  
+      if (filteredGroups.length === 0) {
+        alert("No residents found.");
+        setLoadingWestResident(false);
+        return;
+      }
+  
+      const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+  
+      worksheet.getCell("A1").value = reportTitle;
+  
+      let insertionRow = 3;
+      let count = 1;
+  
+      for (const [group, members] of filteredGroups) {
+        // Sort by lastName, then by firstName
+        members.sort((a, b) => {
+          const lastA = (a.lastName || "").trim().toUpperCase();
+          const lastB = (b.lastName || "").trim().toUpperCase();
+          const firstA = (a.firstName || "").trim().toUpperCase();
+          const firstB = (b.firstName || "").trim().toUpperCase();
+  
+          if (lastA === lastB) {
+            return firstA.localeCompare(firstB);
+          }
+          return lastA.localeCompare(lastB);
+        });
+  
+        worksheet.mergeCells(insertionRow, 1, insertionRow, 12);
+        const headerRow = worksheet.getRow(insertionRow);
+        const headerCell = headerRow.getCell(1);
+  
+        headerCell.value = group;
+        headerCell.font = {
+          name: "Times New Roman",
+          size: 14,
+          bold: true
+        };
+        headerCell.alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true
+        };
+        headerCell.border = {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        };
+  
+        headerRow.height = 25;
+        headerRow.commit();
+        insertionRow++;
+  
+        members.forEach((resident) => {
+          const row = worksheet.getRow(insertionRow);
+          row.height = 55;
+          const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`;
+  
+          const cells = [
+            count,
+            fullName.trim(),
+            resident.address || "",
+            resident.dateOfBirth || "",
+            resident.placeOfBirth || "",
+            resident.age || "",
+            resident.sex || "",
+            resident.civilStatus || "",
+            resident.occupation || "",
+            resident.contactNumber || "",
+            resident.emailAddress || "",
+            resident.precinctNumber || "",
+          ];
+  
+          cells.forEach((value, index) => {
+            const cell = row.getCell(index + 1);
+            cell.value = value;
+            cell.font = { name: "Calibri", size: 12 };
+            cell.alignment = { horizontal: "center", wrapText: true };
+            cell.border = {
+              top: { style: "medium", color: { argb: "000000" } },
+              bottom: { style: "medium", color: { argb: "000000" } },
+              left: { style: "medium", color: { argb: "000000" } },
+              right: { style: "medium", color: { argb: "000000" } },
+            };
+          });
+  
+          row.commit();
+          insertionRow++;
+          count++;
+        });
+  
+        const totalRow = worksheet.getRow(insertionRow);
+        worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
+        totalRow.getCell(1).value = `TOTAL: ${members.length}`;
+        totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
+        totalRow.getCell(1).font = { name: "Times New Roman", size: 12, italic: true, bold: true };
+        totalRow.getCell(1).border = {
+          bottom: { style: "medium", color: { argb: "000000" } },
+          left: { style: "medium", color: { argb: "000000" } },
+          right: { style: "medium", color: { argb: "000000" } },
+        };
+        totalRow.commit();
+  
+        insertionRow++;
+      }
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const fileName = `Inhabitant_Record_WestFairview_${year}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+  
+      alert("Resident List for West Fairview generated successfully. Please wait for the downloadable file!");
+  
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating report:", error);
+      alert("Failed to generate West Fairview Resident Report.");
+    } finally {
+      setLoadingWestResident(false);
+    }
+  };  
+
+  const handleGenerateWestResidentPDF = async () => {
+    setLoadingWestResident(true);
+    try {
+      const fileUrl = await generateWestResidentListReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+  
+      saveAs(blob, `Inhabitant_Record_WestFairview_${year}.pdf`);
+  
+      alert("Resident Report (West Fairview) successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingWestResident(false);
+    }
+  };
+
+
+  const generateSouthResidentListReport = async () => {
+    setLoadingSouthResident(true);
+    try {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const reportTitle = `RECORD OF BARANGAY INHABITANTS ${year} - South FAIRVIEW`;
+  
+      const residentRef = collection(db, "Residents");
+      const q = query(residentRef);
+      const querySnapshot = await getDocs(q);
+  
+      let residents = querySnapshot.docs.map((doc) => doc.data());
+  
+      const addressGroups = {
+        "AKAP": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("AKAP")
+        ),
+        "ARNAI": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("ARNAI")
+        ),
+        "F.L.N.A": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("F.L.N.A")
+        ),
+        "FEWRANO": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("FEWRANO")
+        ),
+        "UPPER CORVETTE HOA": residents.filter((resident) =>
+          resident.cluster && resident.cluster.includes("UPPER CORVETTE HOA")
+        ),
+      };
+  
+      const filteredGroups = Object.entries(addressGroups).filter(([key, value]) => value.length > 0);
+  
+      if (filteredGroups.length === 0) {
+        alert("No residents found.");
+        setLoadingSouthResident(false);
+        return;
+      }
+  
+      const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+  
+      worksheet.getCell("A1").value = reportTitle;
+  
+      let insertionRow = 3;
+      let count = 1;
+  
+      for (const [group, members] of filteredGroups) {
+        // Sort by lastName, then by firstName
+        members.sort((a, b) => {
+          const lastA = (a.lastName || "").trim().toUpperCase();
+          const lastB = (b.lastName || "").trim().toUpperCase();
+          const firstA = (a.firstName || "").trim().toUpperCase();
+          const firstB = (b.firstName || "").trim().toUpperCase();
+  
+          if (lastA === lastB) {
+            return firstA.localeCompare(firstB);
+          }
+          return lastA.localeCompare(lastB);
+        });
+  
+        worksheet.mergeCells(insertionRow, 1, insertionRow, 12);
+        const headerRow = worksheet.getRow(insertionRow);
+        const headerCell = headerRow.getCell(1);
+  
+        headerCell.value = group;
+        headerCell.font = {
+          name: "Times New Roman",
+          size: 14,
+          bold: true
+        };
+        headerCell.alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true
+        };
+        headerCell.border = {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        };
+  
+        headerRow.height = 25;
+        headerRow.commit();
+        insertionRow++;
+  
+        members.forEach((resident) => {
+          const row = worksheet.getRow(insertionRow);
+          row.height = 55;
+          const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`;
+  
+          const cells = [
+            count,
+            fullName.trim(),
+            resident.address || "",
+            resident.dateOfBirth || "",
+            resident.placeOfBirth || "",
+            resident.age || "",
+            resident.sex || "",
+            resident.civilStatus || "",
+            resident.occupation || "",
+            resident.contactNumber || "",
+            resident.emailAddress || "",
+            resident.precinctNumber || "",
+          ];
+  
+          cells.forEach((value, index) => {
+            const cell = row.getCell(index + 1);
+            cell.value = value;
+            cell.font = { name: "Calibri", size: 12 };
+            cell.alignment = { horizontal: "center", wrapText: true };
+            cell.border = {
+              top: { style: "medium", color: { argb: "000000" } },
+              bottom: { style: "medium", color: { argb: "000000" } },
+              left: { style: "medium", color: { argb: "000000" } },
+              right: { style: "medium", color: { argb: "000000" } },
+            };
+          });
+  
+          row.commit();
+          insertionRow++;
+          count++;
+        });
+  
+        const totalRow = worksheet.getRow(insertionRow);
+        worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
+        totalRow.getCell(1).value = `TOTAL: ${members.length}`;
+        totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
+        totalRow.getCell(1).font = { name: "Times New Roman", size: 12, italic: true, bold: true };
+        totalRow.getCell(1).border = {
+          bottom: { style: "medium", color: { argb: "000000" } },
+          left: { style: "medium", color: { argb: "000000" } },
+          right: { style: "medium", color: { argb: "000000" } },
+        };
+        totalRow.commit();
+  
+        insertionRow++;
+      }
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const fileName = `Inhabitant_Record_SouthFairview_${year}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+  
+      alert("Resident List for South Fairview generated successfully. Please wait for the downloadable file!");
+  
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating report:", error);
+      alert("Failed to generate South Fairview Resident Report.");
+    } finally {
+      setLoadingSouthResident(false);
+    }
+  };  
   
   
+  const handleGenerateSouthResidentPDF = async () => {
+    setLoadingSouthResident(true);
+    try {
+      const fileUrl = await generateSouthResidentListReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+  
+      saveAs(blob, `Inhabitant_Record_SouthFairview_${year}.pdf`);
+  
+      alert("Resident Report (South Fairview) successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingSouthResident(false);
+    }
+  };
+
+
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedName = e.target.value;
     const file = files.find((f) => f.name.replace(".docx", "") === selectedName) || null;
