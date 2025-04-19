@@ -82,7 +82,9 @@ export default function EditResident() {
   const [showSavePopup, setShowSavePopup] = useState(false); 
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
-
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
+  
   const handleDiscardClick = async () => {
     setShowDiscardPopup(true);
   }
@@ -158,24 +160,45 @@ export default function EditResident() {
     }
     return age;
   };
-
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const newValue = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
   
-    
+    if (name === "dateOfBirth" && typeof newValue === 'string') {
+      const birthDate = new Date(newValue);
+      const today = new Date();
+  
+      if (birthDate > today) {
+        setPopupErrorMessage("Date of birth cannot be in the future.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
+  
+      const age = calculateAge(newValue);
+      if (age < 0) {
+        setPopupErrorMessage("Invalid age calculated. Please check the birth date.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
+  
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: newValue,
+        age: age,
+        isSeniorCitizen: age >= 60,
+      }));
+      return;
+    }
+  
     setFormData((prevData) => {
       let updatedData = {
         ...prevData,
         [name]: newValue,
       };
   
-      if (name === "dateOfBirth" && typeof newValue === 'string') {
-        const age = calculateAge(newValue);
-        updatedData.age = age;
-        updatedData.isSeniorCitizen = age >= 60;
-      }
-
       if (name === "generalLocation") {
         updatedData.cluster = ""; // Reset cluster if location changes
       }
@@ -183,6 +206,7 @@ export default function EditResident() {
       return updatedData;
     });
   };
+  
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -361,7 +385,7 @@ export default function EditResident() {
                   
                   <div className="fields-section">
                     <p>Date of Birth<span className="required">*</span></p>
-                    <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
+                    <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} max={new Date().toISOString().split("T")[0]} required />
                   </div>
 
                   <div className="fields-section">
@@ -523,6 +547,13 @@ export default function EditResident() {
                 <div className={`popup-overlay-add show`}>
                     <div className="popup-add">
                         <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+        {showErrorPopup && (
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
+                        <p>{popupErrorMessage}</p>
                     </div>
                 </div>
                 )}
