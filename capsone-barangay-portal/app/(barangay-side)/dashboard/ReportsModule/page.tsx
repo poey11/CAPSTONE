@@ -510,9 +510,20 @@ const ReportsPage = () => {
       }
   
       residents.sort((a, b) => {
-        const nameCompare = (a.lastName || "").localeCompare(b.lastName || "");
-        if (nameCompare !== 0) return nameCompare;
-        return (a.address || "").localeCompare(b.address || "");
+        const lastA = (a.lastName || "").trim().toUpperCase();
+        const lastB = (b.lastName || "").trim().toUpperCase();
+        const firstA = (a.firstName || "").trim().toUpperCase();
+        const firstB = (b.firstName || "").trim().toUpperCase();
+        const addressA = (a.address || "").trim().toUpperCase();
+        const addressB = (b.address || "").trim().toUpperCase();
+      
+        if (lastA === lastB) {
+          if (firstA === firstB) {
+            return addressA.localeCompare(addressB);
+          }
+          return firstA.localeCompare(firstB);
+        }
+        return lastA.localeCompare(lastB);
       });
 
       const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
