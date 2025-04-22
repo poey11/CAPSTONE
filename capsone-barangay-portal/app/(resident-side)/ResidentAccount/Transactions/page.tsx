@@ -134,7 +134,11 @@ export default function Transactions() {
                                     <tr key={item.id} onClick={() => handleTransactionClick(item)}>
                                         <td>{item.dateFiled || item.requestDate || "N/A"}</td>
                                         <td>{item.type === "IncidentReport" ? "Incident Report" : "Document Request"}</td>
-                                        <td>{item.caseNumber || "N/A"}</td>
+                                        <td>
+                                            {item.caseNumber && item.caseNumber.split(" - ").length >= 3
+                                                ? `${item.caseNumber.split(" - ")[1]} - ${item.caseNumber.split(" - ")[2]}`
+                                                : "N/A"}
+                                        </td>
                                         <td>{item.concerns || item.docType || "N/A"}</td>
                                         <td>{item.purpose || "N/A"}</td>
                                         <td>
