@@ -19,14 +19,45 @@ export default function Transactions() {
 
     useEffect(() => {
         if (!currentUser) return;
-        const unsubscribe = getAllSpecificDocument("IncidentReports", "reportID", "==", currentUser, setTransactionData);
-        return () => {
-            if (unsubscribe) {
-                unsubscribe();
-            }
-            setLoading(false);
-        }
 
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                
+                const incidentRef = collection(db, "IncidentReports");
+                const incidentQuery = query(incidentRef, where("reportID", "==", currentUser));
+                const incidentSnapshot = await getDocs(incidentQuery);
+                const incidents = incidentSnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    type: "IncidentReport",
+                    ...doc.data(),
+                }));
+    
+                
+                const serviceRef = collection(db, "ServiceRequests");
+                const serviceQuery = query(serviceRef, where("accID", "==", currentUser));
+                const serviceSnapshot = await getDocs(serviceQuery);
+                const services = serviceSnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    type: "ServiceRequest",
+                    ...doc.data(),
+                }));
+    
+                const combined = [...incidents, ...services].sort((a, b) => {
+                    const dateA = new Date((a as any).dateFiled || (a as any).requestDate || 0);
+                    const dateB = new Date((b as any).dateFiled || (b as any).requestDate || 0);
+                    return dateB.getTime() - dateA.getTime(); // Latest first
+                });
+    
+                setTransactionData(combined);
+            } catch (error) {
+                console.error("Error fetching transactions:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
     }, [currentUser]);
 
     const handleTransactionClick = (transaction: any) => {
@@ -73,7 +104,6 @@ export default function Transactions() {
                             <option value="Acknowledged">Acknowledged</option>
                             <option value="Pick-Up">Pick-Up</option>
                             <option value="Completed">Completed</option>
-                            {/* Add more status options if needed */}
                         </select>
                     </div>
                </div>
@@ -91,21 +121,29 @@ export default function Transactions() {
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Reference ID</th>
                                     <th>Date</th>
-                                    <th>Concern</th>
+                                    <th>Type</th>
+                                    <th>Reference ID</th>
+                                    <th>Details</th>
+                                    <th>Purpose</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {transactionData.map((report) => (
-                                    <tr key={report.id} onClick={() => handleTransactionClick(report)}>
-                                        <td>{`${report.caseNumber.split(" - ")[1]} - ${report.caseNumber.split(" - ")[2]}` || "N/A"}</td>
-                                        <td>{report.dateFiled || "N/A"}</td>
-                                        <td>{report.concerns || "N/A"}</td>
+                                {filteredTransactions.map((item) => (
+                                    <tr key={item.id} onClick={() => handleTransactionClick(item)}>
+                                        <td>{item.dateFiled || item.requestDate || "N/A"}</td>
+                                        <td>{item.type === "IncidentReport" ? "Incident Report" : "Document Request"}</td>
                                         <td>
-                                            <span className={`status-dropdown-transactions ${report.status?.toLowerCase() || ""}`}>
-                                                {report.status || "N/A"}
+                                            {item.caseNumber && item.caseNumber.split(" - ").length >= 3
+                                                ? `${item.caseNumber.split(" - ")[1]} - ${item.caseNumber.split(" - ")[2]}`
+                                                : "N/A"}
+                                        </td>
+                                        <td>{item.concerns || item.docType || "N/A"}</td>
+                                        <td>{item.purpose || "N/A"}</td>
+                                        <td>
+                                            <span className={`status-dropdown-transactions ${item.status?.toLowerCase() || ""}`}>
+                                                {item.status || "N/A"}
                                             </span>
                                         </td>
                                     </tr>
