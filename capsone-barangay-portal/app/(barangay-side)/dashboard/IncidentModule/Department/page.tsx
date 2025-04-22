@@ -151,17 +151,36 @@ useEffect(() => {
       </div>
 
       <div className="section-2-departments">
-        <input type="text" className="search-bar-departments" placeholder="Enter Incident Case" />
-        <select className="featuredStatus-departments">
-          <option value="" disabled>Status</option>
+      <input
+          type="text"
+          className="search-bar-departments"
+          placeholder="Enter Case Number (e.g. 0001)"
+          value={caseNumberSearch}
+          onChange={(e) => setCaseNumberSearch(e.target.value)}
+        />
+
+
+
+        <select
+          className="featuredStatus-departments"
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+        >
+          <option value="">All Statuses</option>
           {statusOptions.map((status) => (
             <option key={status} value={status}>
               {status}
             </option>
           ))}
         </select>
-        <select className="featuredStatus-departments">
-          <option value="" disabled>Show...</option>
+
+
+        <select
+          className="featuredStatus-departments"
+          value={showCount}
+          onChange={(e) => setShowCount(Number(e.target.value))}
+        >
+          <option value="0">Show All</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
           <option value="10">Show 15</option>
