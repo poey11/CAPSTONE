@@ -167,7 +167,12 @@ export default function SettingsPageResident() {
               setShowPopup(true);
             } catch (error: any) {
             /*error message*/
-              setErrorPopup({ show: true, message: `Failed to update password: Password should be at least 6 characters.` });
+              /*setErrorPopup({ show: true, message: `Failed to update password: Password should be at least 6 characters.` });*/
+              setErrorPopup({
+                show: true,
+                message: `Failed to update password: ${error.message.replace(/^Firebase:\s*/, "")}`,
+              });
+
               setLoading(false);
               return;
             }
