@@ -210,50 +210,54 @@ export default function OnlineReports() {
       </div>
 
       <div className="main-section">
-        <table>
-          <thead>
-            <tr>
-            <th>Filed</th>
-              <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
-                Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
-              </th>
-              <th>Complainant's First Name</th>
-              <th>Complainant's Last Name</th>
-              <th>Date Filed</th>
-              <th>Concern</th>
-              <th>Status</th>
-              <th>Actions</th>
+  {currentIncidents.length === 0 ? (
+    <div className="no-result-card">
+      <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+      <p className="no-results-department">No Results Found</p>
+    </div>
+  ) : (
+    <table>
+      <thead>
+        <tr>
+          <th>Filed</th>
+          <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
+            Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
+          </th>
+          <th>Complainant's Full Name</th>
+          <th>Date Filed</th>
+          <th>Concern</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {currentIncidents.map((incident, index) => {
+          const fullName = `${incident.lastname || ""}, ${incident.firstname || ""}`.trim();
+          return (
+            <tr key={index}>
+              <td>{incident.isFiled === true ? "Filed" : "Not Yet Filed"}</td>
+              <td>{incident.caseNumber || "N/A"}</td>
+              <td>{fullName}</td>
+              <td>{incident.dateFiled}</td>
+              <td>{incident.concerns}</td>
+              <td>
+                <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
+                  {incident.status}
+                </span>
+              </td>
+              <td>
+                <div className="actions">
+                  <button className="action-edit" onClick={() => handleViewOnlineReport(incident.id)}>Edit</button>
+                </div>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {currentIncidents.map((incident, index) => (
-              <tr key={index}>
-                <td>{incident.isFiled === true ? "Filed" : "Not Yet Filed"}</td>
-                <td>{incident.caseNumber || "N/A"}</td>
-                <td>{incident.firstname}</td>
-                <td>{incident.lastname}</td>
-                <td>{incident.dateFiled}</td>
-                <td>{incident.concerns}</td>
-                <td>
-                  <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
-                    {incident.status}
-                  </span>
-                </td>
-                <td>
-                  <div className="actions">
-                    <button className="action-edit" onClick={() => handleViewOnlineReport(incident.id)}>Edit</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {filteredData.length === 0 && (
-              <tr>
-                <td colSpan={7} style={{ textAlign: "center" }}>No records found</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          );
+        })}
+      </tbody>
+    </table>
+  )}
+</div>
+
 
       <div className="redirection-section-online">
         <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
