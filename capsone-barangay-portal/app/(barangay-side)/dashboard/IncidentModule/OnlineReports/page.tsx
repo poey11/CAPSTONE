@@ -14,6 +14,8 @@ export default function OnlineReports() {
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+  const [caseNumberSearch, setCaseNumberSearch] = useState("");
+  const [showCount, setShowCount] = useState<number>(0);
 
   useEffect(() => {
     const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", "Online", setIncidentData);
@@ -28,12 +30,14 @@ export default function OnlineReports() {
   useEffect(() => {
     let data = [...incidentData];
   
-    if (searchQuery) {
-      data = data.filter(
-        (incident) =>
-          typeof incident.caseNumber === "string" && incident.caseNumber.includes(searchQuery)
-      );
-    }
+    // Filter by case number segment
+  if (caseNumberSearch) {
+    data = data.filter((incident) => {
+      const segments = incident.caseNumber?.split(" - ");
+      const lastSegment = segments?.[2]?.trim();
+      return lastSegment?.includes(caseNumberSearch.trim());
+    });
+  }
 
     if (searchNameQuery) {
       const query = searchNameQuery.toLowerCase();
@@ -63,7 +67,7 @@ export default function OnlineReports() {
     });
   
     setFilteredData(data);
-  }, [incidentData, searchQuery, searchNameQuery, selectedStatus]);
+  }, [incidentData, searchQuery, searchNameQuery, selectedStatus, caseNumberSearch]);
   
   const sortData = (data: any[]) => {
     return [...data].sort((a, b) => {
@@ -112,9 +116,14 @@ export default function OnlineReports() {
     if (selectedStatus !== "All") {
       data = data.filter((incident) => incident.status === selectedStatus);
     }
+
+      // Limit
+  if (showCount) {
+    data = data.slice(0, showCount);
+  }
   
     setFilteredData(sortData(data));
-  }, [incidentData, searchQuery, searchNameQuery, selectedStatus, sortOrder]);
+  }, [incidentData, searchQuery, searchNameQuery, selectedStatus, sortOrder, showCount]);
   
   
 
@@ -166,9 +175,9 @@ export default function OnlineReports() {
         <input
           type="text"
           className="search-bar"
-          placeholder="Enter Incident Case Number"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Enter Case Number (e.g. 0001)"
+          value={caseNumberSearch}
+          onChange={(e) => setCaseNumberSearch(e.target.value)}
         />
         <input
           type="text"
@@ -186,11 +195,18 @@ export default function OnlineReports() {
             <option key={status} value={status}>{status}</option>
           ))}
         </select>
-        <select className="featuredStatus" defaultValue="">
-          <option value="" disabled>Show...</option>
+    
+        <select
+          className="featuredStatus"
+          value={showCount}
+          onChange={(e) => setShowCount(Number(e.target.value))}
+        >
+          <option value="0">Show All</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
+          <option value="10">Show 15</option>
         </select>
+
       </div>
 
       <div className="main-section">
