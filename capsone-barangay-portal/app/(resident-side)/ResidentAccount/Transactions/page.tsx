@@ -104,7 +104,6 @@ export default function Transactions() {
                             <option value="Acknowledged">Acknowledged</option>
                             <option value="Pick-Up">Pick-Up</option>
                             <option value="Completed">Completed</option>
-                            {/* Add more status options if needed */}
                         </select>
                     </div>
                </div>
@@ -131,7 +130,7 @@ export default function Transactions() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {transactionData.map((item) => (
+                                {filteredTransactions.map((item) => (
                                     <tr key={item.id} onClick={() => handleTransactionClick(item)}>
                                         <td>{item.dateFiled || item.requestDate || "N/A"}</td>
                                         <td>{item.type === "IncidentReport" ? "Incident Report" : "Document Request"}</td>
