@@ -440,11 +440,9 @@ useEffect(() => {
 
       <div className="metric-card">
         <div className="card-left-side">
-          <Link href="/dashboard/admin">
-            <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+            <p className="title">
               Total Homepage Visits:
             </p>
-          </Link>
           <p className="count">{siteVisits}</p>
         </div>
       </div>
@@ -556,7 +554,7 @@ useEffect(() => {
 
         <div className="metric-card">
           <div className="card-left-side">
-            <Link href="/dashboard/ResidentModule">
+            <Link href="/dashboard/ServicesModule/InBarangayRequests">
               <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
                 {documentRequestsStatusChart.title}
               </p>
@@ -589,7 +587,10 @@ useEffect(() => {
 
           <div className="metric-card">
             <div className="card-left-side">
-              <p className="title">Document Requests Breakdown</p>
+            <Link href="/dashboard/ServicesModule/InBarangayRequests">
+            <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                Document Requests Breakdown</p>
+              </Link>
             </div>
             <div className="card-right-side">
               <ResponsiveContainer width="100%" height={300}>
@@ -618,7 +619,7 @@ useEffect(() => {
 
          <div className="metric-card">
           <div className="card-left-side">
-            <Link href="/dashboard/IncidentReportsModule">
+            <Link href="/dashboard/IncidentModule">
               <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
                 {incidentReportsByDepartmentChart.title}
               </p>
@@ -652,7 +653,7 @@ useEffect(() => {
 
         <div className="metric-card">
           <div className="card-left-side">
-            <Link href="/dashboard/IncidentReportsModule">
+            <Link href="/dashboard/IncidentModule">
               <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
                 {totalIncidentReportsChart.title}
               </p>
@@ -684,7 +685,7 @@ useEffect(() => {
 
       </div> 
 
-      <Link href="/dashboard/InBarangayRequests">
+      <Link href="/dashboard/ServicesModule/InBarangayRequests">
         <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
           Weekly Barangay Requests Chart
         </p>
