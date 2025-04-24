@@ -31,7 +31,6 @@ const BarangayUsers = () => {
     const { data: session } = useSession();
     const userPosition = session?.user?.position;
     const isAuthorized = ["Assistant Secretary"].includes(userPosition || "");
-    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); 
     const [barangayUsers, setBarangayUsers] = useState<dbBarangayUser[]>([]);
     const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
     const [selectedBarangayUserId, setSelectedBarangayUserId] = useState<string | null>(null);
@@ -220,18 +219,7 @@ const BarangayUsers = () => {
                         <table>
                             <thead>
                                 <tr>
-                                    <th>
-                                        User ID
-                                        {/*
-                                            Also need to implement
-                                        */}
-                                        <button
-                                            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                                            className="sort-button"
-                                        >
-                                            {sortOrder === "asc" ? "▲" : "▼"}
-                                        </button>
-                                    </th>
+                                    <th>User ID</th>
                                     <th>Official Name</th>
                                     <th>Sex</th>
                                     <th>Birth Date</th>
