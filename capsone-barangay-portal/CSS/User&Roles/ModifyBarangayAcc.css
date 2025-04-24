@@ -167,13 +167,24 @@
     border: 1px solid #ccc;
     border-radius: 5px;
     color: rgba(0, 0, 0, 0.4);
-    padding-right: 40px;
+
+}
+
+.editbrgyacc-input-field-dropdown{
+  padding: 8px;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  height: 41px;
+  border-radius: 5px;
+  color: rgba(0, 0, 0, 0.4);
 }
 
 .editbrgyacc-input-field:disabled {
-    background-color: white; /* or match the other input fields */
+    background-color: white;
     color: rgba(0, 0, 0, 0.4);
-    opacity: 1; /* Override the default lower opacity */
+    opacity: 1;
 }
 
 
@@ -418,3 +429,145 @@
     overflow: hidden;
     height: auto;
 }
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+
+
+
+.popup-overlay-add,
+.error-popup-overlay-add{
+    position: fixed;
+    top: 13%;
+    right: -3px;
+    color: white;
+    width: 350px;
+    height: 50px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    text-align: center;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .popup-overlay-add{
+    background: #8fa98d;
+    border-left: 10px solid #403f3e;
+  }
+
+  .error-popup-overlay-add{
+    background: #cc3434;
+    border-left: 10px solid #8a0f0f;
+  }
+
+.popup-add{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.popup-overlay-add.show,
+.error-popup-overlay-add.show {
+  animation: slideIn 0.5s ease-out;
+}
+
+.popup-overlay-add.hide,
+.error-popup-overlay-add.hide {
+  animation: slideOut 0.5s ease-out;
+}
+
+
+.confirmation-popup-overlay-add {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.076); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+}
+
+.confirmation-popup-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  width: 400px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+  left: 43%; /* Adjust the value */
+}
+
+.confirmation-popup-add p{
+  color: rgb(97, 97, 97);
+}
+
+.yesno-container-add{
+  display: flex;
+  gap: 20px;
+}
+
+.yes-button-add,
+.no-button-add{
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 150px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+}
+
+.yes-button-add {
+  background-color: #4caf50; 
+}
+
+.yes-button-add:hover {
+  background-color: #3d8c40; 
+} 
+
+.no-button-add {
+  background-color: #f44336;
+}
+
+.no-button-add:hover {
+  background-color:  #c2352b; 
+} 

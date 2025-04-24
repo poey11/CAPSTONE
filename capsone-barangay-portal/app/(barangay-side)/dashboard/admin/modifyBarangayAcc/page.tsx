@@ -71,7 +71,8 @@ export default function EditBarangayAccount() {
 
     const [originalData, setOriginalData] = useState({ ...formData });
 
-    const [showPassword, setShowPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [showDiscardPopup, setShowDiscardPopup] = useState(false);
     const [showSavePopup, setShowSavePopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
@@ -129,7 +130,7 @@ export default function EditBarangayAccount() {
             // Hide the popup after 3 seconds
             setTimeout(() => {
                 setShowPopup(false);
-                router.push("/dashboard/admin");
+                router.push(`/dashboard/admin/BarangayUsers?highlight=${userId}`);
             }, 3000);
     
              // Create a fake event and call handleSubmit
@@ -248,17 +249,10 @@ export default function EditBarangayAccount() {
                     <div className="action-btn-section">
                         {isAuthorized ? (
                             <>
-                            <button 
-                                className="discard-btn" 
-                                onClick={() => handleDiscardClick}
-                            >
-                                Discard
-                            </button>
-                            <button 
-                                className="save-btn" 
-                                onClick={() => handleSaveClick}
-                            >
-                                Save
+                            <button className="discard-btn" onClick={handleDiscardClick}>Discard</button>
+                            <button className="save-btn" onClick={handleSaveClick} disabled={loading}>
+                        
+                            {loading ? "Saving..." : "Save"}
                             </button>
                             </>
                         ) : (
@@ -348,7 +342,7 @@ export default function EditBarangayAccount() {
 
                                         <select
                                             name="position"
-                                            className="editbrgyacc-input-field"
+                                            className="editbrgyacc-input-field-dropdown"
                                             required
                                             value={formData.position}
                                             onChange={handleChange}
@@ -373,7 +367,7 @@ export default function EditBarangayAccount() {
                                                 name="department" 
                                                 value={formData.department} 
                                                 onChange={handleChange}
-                                                className="editbrgyacc-input-field"
+                                                className="editbrgyacc-input-field-dropdown"
                                                 required
                                             >
                                                 <option value="">Select a Department</option>
@@ -401,7 +395,7 @@ export default function EditBarangayAccount() {
                                         <p>Sex</p>
                                         <select
                                             name="gender"
-                                            className="editbrgyacc-input-field"
+                                            className="editbrgyacc-input-field-dropdown"
                                             required
                                             value={formData.sex}
                                             onChange={handleChange}
@@ -518,7 +512,7 @@ export default function EditBarangayAccount() {
                                                     <p>New Password</p>
                                                     <div className="relative">
                                                         <input
-                                                            type={showPassword ? "text" : "password"}
+                                                            type={showNewPassword ? "text" : "password"}
                                                             className="editbrgyacc-input-field"
                                                             onChange={handleChange}
                                                             name="password"
@@ -526,9 +520,9 @@ export default function EditBarangayAccount() {
                                                         <button
                                                             type="button"
                                                             className="toggle-password-btn"
-                                                            onClick={() => setShowPassword(!showPassword)}
+                                                            onClick={() => setShowNewPassword(!showNewPassword)}
                                                         >
-                                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                            {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -537,7 +531,7 @@ export default function EditBarangayAccount() {
                                                     <p>Confirm Password</p>
                                                     <div className="relative">
                                                         <input
-                                                            type={showPassword ? "text" : "password"}
+                                                            type={showConfirmPassword ? "text" : "password"}
                                                             className="editbrgyacc-input-field"
                                                             onChange={handleChange}
                                                             name="confirmPassword"
@@ -545,9 +539,9 @@ export default function EditBarangayAccount() {
                                                         <button
                                                             type="button"
                                                             className="toggle-password-btn"
-                                                            onClick={() => setShowPassword(!showPassword)}
+                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                         >
-                                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -565,12 +559,12 @@ export default function EditBarangayAccount() {
 
 
             {showDiscardPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-add">
+                            <div className="confirmation-popup-add">
                                 <p>Are you sure you want to discard the changes?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> 
+                                <div className="yesno-container-add">
+                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">No</button>
+                                    <button onClick={confirmDiscard} className="yes-button-add">Yes</button> 
                                 </div> 
                             </div>
                         </div>

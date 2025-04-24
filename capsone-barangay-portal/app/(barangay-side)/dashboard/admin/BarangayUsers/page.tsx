@@ -247,7 +247,7 @@ const BarangayUsers = () => {
                             <tbody>
                                 {barangayUsers.map((user) => (
                                     <tr key={user.id}
-                                        className={highlightedId === user.userid ? "highlighted-row" : ""}
+                                        className={highlightedId === user.id ? "highlighted-row" : ""}
                                     >
                                     <td>{user.userid}</td>
                                     <td>{user.firstName} {user.lastName}</td>
