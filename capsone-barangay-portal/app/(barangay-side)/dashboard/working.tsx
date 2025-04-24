@@ -4,7 +4,19 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { db } from "@/app/db/firebase";
 import { doc, collection, getDoc, getDocs, query, where, Timestamp } from "firebase/firestore";
-import {PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid} from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid
+} from "recharts";
 
 export default function Dashboard() {
 
@@ -40,12 +52,7 @@ export default function Dashboard() {
 
   // for document requests
   const [documentRequestsCount, setdocumentRequestsCount] = useState(0);
-  const [documentRequestsByWeek, setdocumentRequestsByWeek] = useState<
-  {
-    monthWeek: string;
-    [key: string]: string | number;
-  }[]
->([]);
+  const [documentRequestsByWeek, setdocumentRequestsByWeek] = useState<{ monthWeek: string; count: number }[]>([]);
   const [documentRequestPendingCount, setdocumentRequestPendingCount] = useState(0);
   const [documentRequestCompletedCount, setdocumentRequestCompletedCount] = useState(0);
   const [documentRequestPickUpCount, setdocumentRequestPickUpCount] = useState(0);
@@ -57,18 +64,12 @@ export default function Dashboard() {
   const [barangayClearanceCount, setBarangayClearanceCount] = useState(0);
   const [barangayCertificateCount, setBarangayCertificateCount] = useState(0);
 
-  const documentRequestsTypeData: { name: string; value: number }[] = [
-    { name: "First Time Jobseeker", value: firstTimeJobSeekersCount },
-    { name: "Barangay Clearance", value: barangayClearanceCount },
-    { name: "Barangay Indigency", value: barangayIndigencyCount },
-    { name: "Barangay ID", value: barangayIDCount },
-    { name: "Barangay Permit", value: barangayPermitsCount },
-    { name: "Barangay Certificate", value: barangayCertificateCount },
-  ];
-  
-  const COLORS: string[] = ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#F44336", "#00BCD4"];
-  
-
+  // for charts that can be toggled
+  const [currentChartBoxOne, setCurrentChartBoxOne] = useState(0);
+  const [currentChartBoxThree, setCurrentChartBoxThree] = useState(0);
+  const [currentChartBoxFour, setCurrentChartBoxFour] = useState(0);
+  const [currentChartBoxFive, setCurrentChartBoxFive] = useState(0);
+  const [currentChartBoxSix, setCurrentChartBoxSix] = useState(0);
 []>([]);
   
 
@@ -114,9 +115,7 @@ useEffect(() => {
         else if (documentType === "Barangay Clearance") clearance++;
         else if (documentType === "Barangay Indigency") indigency++;
         else if (documentType === "Barangay ID") barangayID++;
-        else if (documentType === "Business Permit") permit++;
-        else if (documentType === "Temporary Business Permit") permit++;
-        else if (documentType === "Construction Permit") permit++;
+        else if (documentType === "Barangay Permit") permit++;
         else if (documentType === "Barangay Certificate") certificate++;
       });
 
@@ -127,59 +126,7 @@ useEffect(() => {
       setBarangayClearanceCount(clearance);
       setBarangayCertificateCount(certificate)
 
-      let documentPending = 0,
-      documentPickUp = 0,
-      documentCompleted = 0;
-
-      documentRequestsSnapshots.docs.forEach((doc) => {
-        const documentStatus = doc.data().status;
-        if (documentStatus === "Pending") documentPending++;
-        else if (documentStatus === "Pick-Up") documentPickUp++;
-        else if (documentStatus === "Completed") documentCompleted++;
-      });
-
-      setdocumentRequestPendingCount(documentPending);
-      setdocumentRequestPickUpCount(documentPickUp);
-      setdocumentRequestCompletedCount(documentCompleted);
-
-      // for document requests stacked bar chart
-
-      const DocumentRequestsWeeklyCounts: Record<string, { [key: string]: number }> = {};
-
-      documentRequestsSnapshots.docs.forEach((doc) => {
-        const data = doc.data();
-        const requestDate = new Date(data.requestDate?.toDate?.() || data.requestDate);
-        const docType = data.docType;
-
-        const startOfWeek = new Date(requestDate);
-        startOfWeek.setDate(requestDate.getDate() - ((requestDate.getDay() + 6) % 7)); // Monday start
-        startOfWeek.setHours(0, 0, 0, 0);
-
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-        const documentRequestsWeekLabel = `${startOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${endOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
-
-        if (!DocumentRequestsWeeklyCounts[documentRequestsWeekLabel]) {
-            DocumentRequestsWeeklyCounts[documentRequestsWeekLabel] = {};
-        }
-
-        DocumentRequestsWeeklyCounts[documentRequestsWeekLabel][docType] = (DocumentRequestsWeeklyCounts[documentRequestsWeekLabel][docType] || 0) + 1;
-      });
-
-      // Flatten into array for recharts
-      const documentRequestFormattedWeeklyData = Object.entries(DocumentRequestsWeeklyCounts).map(([week, types]) => ({
-        monthWeek: week,
-        ...types,
-      }));
-
-      documentRequestFormattedWeeklyData.sort((a, b) => new Date(a.monthWeek.split(" - ")[0]).getTime() - new Date(b.monthWeek.split(" - ")[0]).getTime());
-
-      setdocumentRequestsByWeek(documentRequestFormattedWeeklyData);
-
-
-
-
+      
 
         // for residents pie charts
         const residentUsersSnapshot = await getDocs(collection(db, "ResidentUsers"));
@@ -360,18 +307,35 @@ useEffect(() => {
     colors: ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"],
   };
 
-  const documentRequestsStatusChart = {
-    title: "Statuses of Document Requests",
-    count: documentRequestsCount,
-    data: [
-      { name: "Pending", value: documentRequestPendingCount },
-      { name: "For Pick-Up", value: documentRequestPickUpCount },
-      { name: "Completed", value: documentRequestCompletedCount },
-    ],
-    colors: ["#4CAF50", "#2196F3", "#FF9800"],
-  };
 
 
+  const chartsBoxFour = [
+    {
+      title: "Document Requests Total by Type:",
+      count: documentRequestsCount,
+      data: [
+        { name: "Barangay IDs", value: barangayIDCount },
+        { name: "Barangay Certificates", value: barangayCertificateCount },
+        { name: "Barangay Clearances", value: barangayClearanceCount },
+        { name: "Barangay Indigencies", value: barangayIndigencyCount },
+        { name: "Barangay Permits", value: barangayPermitsCount },
+        { name: "First-Time Job Seekers", value: firstTimeJobSeekersCount },
+      ],
+      colors: ["#4CAF50", "#2196F3", "#FF9800", "#F44336", "#9C27B0", "#FFEB3B"]
+    },
+    {
+      title: "Document Requests Status:",
+      count: documentRequestsCount,
+      data: [
+        { name: "Senior Citizens", value: seniorCitizensCount },
+        { name: "PWD", value: pwdCount },
+        { name: "Solo Parents", value: soloParentCount },
+        { name: "Minors", value: minorsCount },
+        { name: "Adults", value: adultsCount },
+      ],
+      colors: ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"],
+    },
+  ];
 
   const incidentReportsByDepartmentChart = {
     title: "Incident Reports Total by Department",
@@ -387,7 +351,7 @@ useEffect(() => {
   };
   
   const totalIncidentReportsChart = {
-    title: "Incident Reports Statuses:",
+    title: "Total Incident Reports:",
     count: incidentReportsCount,
     data: [
       { name: "Pending", value: pendingIncidentReportsCount },
@@ -398,6 +362,19 @@ useEffect(() => {
     colors: ["#FF9800", "#03A9F4", "#4CAF50", "#9E9E9E"]
   };
   
+
+
+
+  // for toggles per box
+  // const toggleChartBoxThree = () => {
+  //   setCurrentChartBoxThree((prev) => (prev + 1) % chartsBoxThree.length);
+  // };
+  const toggleChartBoxFour = () => {
+    setCurrentChartBoxFour((prev) => (prev + 1) % chartsBoxFour.length);
+  };
+  // const toggleChartBoxFive = () => {
+  //   setCurrentChartBoxFive((prev) => (prev + 1) % chartsBoxFive.length);
+  // };
 
   const residentData = [
     { name: "Resident Users", value: residentUsersCount },
@@ -556,65 +533,55 @@ useEffect(() => {
 
         <div className="metric-card">
           <div className="card-left-side">
-            <Link href="/dashboard/ResidentModule">
+            <Link href="/dashboard/ServicesModule/InBarangayRequests">
               <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                {documentRequestsStatusChart.title}
+                Weekly Statuses of Requested Documents and Total Requested Documents
               </p>
             </Link>
-            <p className="count">{documentRequestsStatusChart.count}</p>
+            <p className="count">{documentRequestsCount}</p>
           </div>
 
           <div className="card-right-side">
-            <ResponsiveContainer width={300} height={300}>
-              <BarChart
-                data={documentRequestsStatusChart.data}
-                layout="vertical"
-                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-              >
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={incidentReportsByWeek}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis type="category" dataKey="name" />
+                <XAxis dataKey="monthWeek" />
+                <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="value" name="Number of Documents">
-                  {documentRequestsStatusChart.data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={documentRequestsStatusChart.colors[index % documentRequestsStatusChart.colors.length]} />
-                  ))}
-                </Bar>
+                <Bar dataKey="count" fill="#4CAF50" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
 
-          <div className="metric-card">
+         <div className="metric-card">
+          {/* need to change this to the document requests table count */}
             <div className="card-left-side">
-              <p className="title">Document Requests Breakdown</p>
+                <Link href="/dashboard/ServicesModule/OnlineRequests">
+                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                  Weekly Requested Documents and Total Requested Documents (To be implemented)
+                  </p>
+                </Link>
+                  <p className="count">{incidentReportsCount}</p>
             </div>
+
             <div className="card-right-side">
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={documentRequestsTypeData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    label
-                  >
-                    {documentRequestsTypeData.map((entry: { name: string; value: number }, index: number) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              
+          <ResponsiveContainer width={300} height={300}>
+            <PieChart>
+              <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                {verificationData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={VERIFICATION_COLORS[index % VERIFICATION_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
             </div>
-          </div>
+         </div>
 
          <div className="metric-card">
           <div className="card-left-side">
@@ -672,7 +639,7 @@ useEffect(() => {
                 <YAxis type="category" dataKey="name" />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="value" name="Number of Incidents">
+                <Bar dataKey="value">
                   {totalIncidentReportsChart.data.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={totalIncidentReportsChart.colors[index % totalIncidentReportsChart.colors.length]} />
                   ))}
@@ -683,40 +650,6 @@ useEffect(() => {
         </div>
 
       </div> 
-
-      <Link href="/dashboard/InBarangayRequests">
-        <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
-          Weekly Barangay Requests Chart
-        </p>
-      </Link>
-      <div className="heatmap-container">
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={documentRequestsByWeek}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="monthWeek" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="First Time Jobseeker" stackId="a" fill="#4CAF50" />
-            <Bar dataKey="Barangay Clearance" stackId="a" fill="#2196F3" />
-            <Bar dataKey="Barangay Indigency" stackId="a" fill="#FF9800" />
-            <Bar dataKey="Barangay ID" stackId="a" fill="#9C27B0" />
-            <Bar dataKey="Barangay Certificate" stackId="a" fill="#00BCD4" />
-
-            {/* Dynamically render all "Permit" related bars */}
-            {Object.keys(documentRequestsByWeek[0] || {})
-              .filter((key) => key.includes("Permit"))
-              .map((key, index) => (
-                <Bar
-                  key={key}
-                  dataKey={key}
-                  stackId="a"
-                  fill="#F44336"
-                />
-              ))}
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
 
       <Link href="/dashboard/IncidentModule">
         <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
