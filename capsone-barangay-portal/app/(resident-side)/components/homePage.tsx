@@ -1,7 +1,11 @@
 "use client";
 import "@/CSS/HomePage/HomePage.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from 'next/link';
+import { db } from '@/app/db/firebase'  ;
+import {doc, setDoc, getDoc, updateDoc, increment} from "firebase/firestore";
+// @ts-ignore
+import Cookies from 'js-cookie';
 
 const homePage:React.FC = () => {    
     const facilities = [
@@ -38,6 +42,54 @@ const homePage:React.FC = () => {
     ];
 
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [siteVisits, setSiteVisits] = useState(0);
+
+    // Fetch the site visit count from Firestore
+    const fetchSiteVisitCount = async () => {
+        const docRef = doc(db, 'SiteVisits', 'homepageVisit');
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            setSiteVisits(docSnap.data().homepageCount);
+        } else {
+            // If document does not exist, initialize with a count of 0
+            setSiteVisits(0);
+            await setDoc(docRef, { homepageCount: 0 });  // Create document with initial value
+        }
+    };
+
+    // Increment the site visit count in Firestore
+    const incrementSiteVisitCount = async () => {
+        const docRef = doc(db, 'SiteVisits', 'homepageVisit');
+        await updateDoc(docRef, {
+            homepageCount: increment(1),
+        });
+    };
+
+    useEffect(() => {
+      const checkAndTrackVisit = async () => {
+        const lastVisit = Cookies.get("homepageVisit"); // Returns string or undefined
+        const now = Date.now(); // Current timestamp in ms
+        const THIRTY_MINUTES = 30 * 60 * 1000;
+    
+        if (!lastVisit || now - parseInt(lastVisit) > THIRTY_MINUTES) {
+          try {
+            await incrementSiteVisitCount(); // Only increment if 30 mins passed
+            Cookies.set("homepageVisit", now.toString(), {
+              expires: 1 / 48, // ~30 minutes
+              path: "/",
+            });
+          } catch (error) {
+            console.error("Failed to increment visit count:", error);
+          }
+        }
+    
+        await fetchSiteVisitCount(); // Still fetch the current count to display it
+      };
+    
+      checkAndTrackVisit();
+    }, []);
+    
 
     const nextSlide = () => {
         setCurrentSlide((prev) =>

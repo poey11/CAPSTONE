@@ -3,22 +3,13 @@ import "@/CSS/DashboardModule/dashboard.css";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { db } from "@/app/db/firebase";
-import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid
-} from "recharts";
+import { doc, collection, getDoc, getDocs, query, where, Timestamp } from "firebase/firestore";
+import {PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid} from "recharts";
 
 export default function Dashboard() {
+
+  const [siteVisits, setSiteVisits] = useState<number>(0);
+
   // for residents and users
   const [residentUsersCount, setResidentUsersCount] = useState(0);
   const [residentsCount, setResidentsCount] = useState(0);
@@ -49,6 +40,15 @@ export default function Dashboard() {
 
   // for document requests
   const [documentRequestsCount, setdocumentRequestsCount] = useState(0);
+  const [documentRequestsByWeek, setdocumentRequestsByWeek] = useState<
+  {
+    monthWeek: string;
+    [key: string]: string | number;
+  }[]
+>([]);
+  const [documentRequestPendingCount, setdocumentRequestPendingCount] = useState(0);
+  const [documentRequestCompletedCount, setdocumentRequestCompletedCount] = useState(0);
+  const [documentRequestPickUpCount, setdocumentRequestPickUpCount] = useState(0);
 
   const [firstTimeJobSeekersCount, setFirstTimeJobSeekersCount] = useState(0);
   const [barangayPermitsCount, setBarangayPermitsCount] = useState(0);
@@ -57,21 +57,48 @@ export default function Dashboard() {
   const [barangayClearanceCount, setBarangayClearanceCount] = useState(0);
   const [barangayCertificateCount, setBarangayCertificateCount] = useState(0);
 
-  // for charts that can be toggled
-  const [currentChartBoxOne, setCurrentChartBoxOne] = useState(0);
-  const [currentChartBoxThree, setCurrentChartBoxThree] = useState(0);
-  const [currentChartBoxFour, setCurrentChartBoxFour] = useState(0);
-  const [currentChartBoxFive, setCurrentChartBoxFive] = useState(0);
-  const [currentChartBoxSix, setCurrentChartBoxSix] = useState(0);
+  const documentRequestsTypeData: { name: string; value: number }[] = [
+    { name: "First Time Jobseeker", value: firstTimeJobSeekersCount },
+    { name: "Barangay Clearance", value: barangayClearanceCount },
+    { name: "Barangay Indigency", value: barangayIndigencyCount },
+    { name: "Barangay ID", value: barangayIDCount },
+    { name: "Barangay Permit", value: barangayPermitsCount },
+    { name: "Barangay Certificate", value: barangayCertificateCount },
+  ];
+  
+  const COLORS: string[] = ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#F44336", "#00BCD4"];
+  
+
 []>([]);
   
+
+// site visits
+
+useEffect(() => {
+  const fetchSiteVisits = async () => {
+    try {
+      const docRef = doc(db, "SiteVisits", "homepageVisit");
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setSiteVisits(data.homepageCount ?? 0);
+      } else {
+        setSiteVisits(0);
+      }
+    } catch (error) {
+      console.error("Error fetching site visits:", error);
+    }
+  };
+
+  fetchSiteVisits();
+}, []);
 
   useEffect(() => {
     const fetchCounts = async () => {
       try {
 
-        // change this to documentRequests table
-        const documentRequestsSnapshots = await getDocs(collection(db, "ResidentUsers"));
+        const documentRequestsSnapshots = await getDocs(collection(db, "ServiceRequests"));
         setdocumentRequestsCount(documentRequestsSnapshots.size);
 
         let firsttimejobseeker = 0,
@@ -82,12 +109,14 @@ export default function Dashboard() {
         permit = 0;
 
     documentRequestsSnapshots.docs.forEach((doc) => {
-        const documentType = doc.data().documentType;
+        const documentType = doc.data().docType;
         if (documentType === "First Time Jobseeker") firsttimejobseeker++;
         else if (documentType === "Barangay Clearance") clearance++;
         else if (documentType === "Barangay Indigency") indigency++;
         else if (documentType === "Barangay ID") barangayID++;
-        else if (documentType === "Barangay Permit") permit++;
+        else if (documentType === "Business Permit") permit++;
+        else if (documentType === "Temporary Business Permit") permit++;
+        else if (documentType === "Construction Permit") permit++;
         else if (documentType === "Barangay Certificate") certificate++;
       });
 
@@ -97,6 +126,60 @@ export default function Dashboard() {
       setBarangayIDCount(barangayID);
       setBarangayClearanceCount(clearance);
       setBarangayCertificateCount(certificate)
+
+      let documentPending = 0,
+      documentPickUp = 0,
+      documentCompleted = 0;
+
+      documentRequestsSnapshots.docs.forEach((doc) => {
+        const documentStatus = doc.data().status;
+        if (documentStatus === "Pending") documentPending++;
+        else if (documentStatus === "Pick-Up") documentPickUp++;
+        else if (documentStatus === "Completed") documentCompleted++;
+      });
+
+      setdocumentRequestPendingCount(documentPending);
+      setdocumentRequestPickUpCount(documentPickUp);
+      setdocumentRequestCompletedCount(documentCompleted);
+
+      // for document requests stacked bar chart
+
+      const DocumentRequestsWeeklyCounts: Record<string, { [key: string]: number }> = {};
+
+      documentRequestsSnapshots.docs.forEach((doc) => {
+        const data = doc.data();
+        const requestDate = new Date(data.requestDate?.toDate?.() || data.requestDate);
+        const docType = data.docType;
+
+        const startOfWeek = new Date(requestDate);
+        startOfWeek.setDate(requestDate.getDate() - ((requestDate.getDay() + 6) % 7)); // Monday start
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+        const documentRequestsWeekLabel = `${startOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${endOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+
+        if (!DocumentRequestsWeeklyCounts[documentRequestsWeekLabel]) {
+            DocumentRequestsWeeklyCounts[documentRequestsWeekLabel] = {};
+        }
+
+        DocumentRequestsWeeklyCounts[documentRequestsWeekLabel][docType] = (DocumentRequestsWeeklyCounts[documentRequestsWeekLabel][docType] || 0) + 1;
+      });
+
+      // Flatten into array for recharts
+      const documentRequestFormattedWeeklyData = Object.entries(DocumentRequestsWeeklyCounts).map(([week, types]) => ({
+        monthWeek: week,
+        ...types,
+      }));
+
+      documentRequestFormattedWeeklyData.sort((a, b) => new Date(a.monthWeek.split(" - ")[0]).getTime() - new Date(b.monthWeek.split(" - ")[0]).getTime());
+
+      setdocumentRequestsByWeek(documentRequestFormattedWeeklyData);
+
+
+
+
 
         // for residents pie charts
         const residentUsersSnapshot = await getDocs(collection(db, "ResidentUsers"));
@@ -197,7 +280,7 @@ export default function Dashboard() {
                sevenDaysAgo.setDate(today.getDate() - 7);
        
 
-        // for incident report graph chart
+        // for incident report graph weekly chart
         const incidentReportsData = incidentReportsSnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
@@ -219,7 +302,7 @@ export default function Dashboard() {
 
         incidentReportsData.sort((a, b) => new Date(a.dateFiled).getTime() - new Date(b.dateFiled).getTime());
 
-        const weeklyCounts: Record<string, number> = {};
+        const incidentweeklyCounts: Record<string, number> = {};
 
         incidentReportsData.forEach((report) => {
           const reportDate = new Date(report.dateFiled);
@@ -235,12 +318,12 @@ export default function Dashboard() {
             endOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
           }`;
 
-          weeklyCounts[weekLabel] = (weeklyCounts[weekLabel] || 0) + 1;
+          incidentweeklyCounts[weekLabel] = (incidentweeklyCounts[weekLabel] || 0) + 1;
         });
 
-        const formattedWeeklyData = Object.keys(weeklyCounts).map((week) => ({
+        const formattedWeeklyData = Object.keys(incidentweeklyCounts).map((week) => ({
           monthWeek: week, 
-          count: weeklyCounts[week],
+          count: incidentweeklyCounts[week],
         })).sort((a, b) => new Date(a.monthWeek.split(" - ")[0]).getTime() - new Date(b.monthWeek.split(" - ")[0]).getTime());
 
         setIncidentReportsByWeek(formattedWeeklyData);
@@ -252,104 +335,69 @@ export default function Dashboard() {
     fetchCounts();
   }, []);
 
-  const chartsBoxOne = [
-    {
-      title: "Barangay Population:",
-      count: residentsCount,
-      data: [
-        { name: "East Fairview", value: eastResidentsCount },
-        { name: "West Fairview", value: westResidentsCount },
-        { name: "South Fairview", value: southResidentsCount },
-      ],
-      colors: ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"],
-    },
-    {
-      title: "Barangay Demographics:",
-      count: residentsCount,
-      data: [
-        { name: "Senior Citizens", value: seniorCitizensCount },
-        { name: "PWD", value: pwdCount },
-        { name: "Solo Parents", value: soloParentCount },
-        { name: "Minors", value: minorsCount },
-        { name: "Adults", value: adultsCount },
-      ],
-      colors: ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"],
-    },
-  ];
-
-
-  const chartsBoxFour = [
-    {
-      title: "Document Requests Total by Type:",
-      count: documentRequestsCount,
-      data: [
-        { name: "Barangay IDs", value: barangayIDCount },
-        { name: "Barangay Certificates", value: barangayCertificateCount },
-        { name: "Barangay Clearances", value: barangayClearanceCount },
-        { name: "Barangay Indigencies", value: barangayIndigencyCount },
-        { name: "Barangay Permits", value: barangayPermitsCount },
-        { name: "First-Time Job Seekers", value: firstTimeJobSeekersCount },
-      ],
-      colors: ["#4CAF50", "#2196F3", "#FF9800", "#F44336", "#9C27B0", "#FFEB3B"]
-    },
-    {
-      title: "Document Requests Status:",
-      count: documentRequestsCount,
-      data: [
-        { name: "Senior Citizens", value: seniorCitizensCount },
-        { name: "PWD", value: pwdCount },
-        { name: "Solo Parents", value: soloParentCount },
-        { name: "Minors", value: minorsCount },
-        { name: "Adults", value: adultsCount },
-      ],
-      colors: ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"],
-    },
-  ];
-
-  const chartsBoxSix = [
-    {
-      title: "Incident Reports Total by Department",
-      count: incidentReportsCount,
-      data: [
-        { name: "GAD", value: GADReportsCount },
-        { name: "BCPC", value: BCPCReportsCount },
-        { name: "VAWC", value: VAWCReportsCount },
-        { name: "Lupon", value: LuponReportsCount },
-        { name: "Online", value: OnlineReportsCount },
-      ],
-      colors: ["#E91E63", "#8E44AD", "#3498DB", "#27AE60", "#F39C12"]
-    },    
-    {
-        title: "Total Incident Reports:",
-        count: incidentReportsCount,
-        data: [
-          { name: "Pending", value: pendingIncidentReportsCount },
-          { name: "Settled", value: settledIncidentReportsCount },
-          { name: "Resolved", value: resolvedIncidentReportsCount },
-          { name: "Archived", value: archivedIncidentReportsCount },
-        ],
-        colors: ["#FF9800", "#03A9F4", "#4CAF50", "#9E9E9E"],
-      },
-  ];
-
-
-
-  // for toggles per box
-  const toggleChartBoxOne = () => {
-    setCurrentChartBoxOne((prev) => (prev + 1) % chartsBoxOne.length);
+  
+  const barangayPopulationChart = {
+    title: "Barangay Population:",
+    count: residentsCount,
+    data: [
+      { name: "East Fairview", value: eastResidentsCount },
+      { name: "West Fairview", value: westResidentsCount },
+      { name: "South Fairview", value: southResidentsCount },
+    ],
+    colors: ["#4CAF50", "#2196F3", "#FF9800"],
   };
-  // const toggleChartBoxThree = () => {
-  //   setCurrentChartBoxThree((prev) => (prev + 1) % chartsBoxThree.length);
-  // };
-  const toggleChartBoxFour = () => {
-    setCurrentChartBoxFour((prev) => (prev + 1) % chartsBoxFour.length);
+  
+  const barangayDemographicsChart = {
+    title: "Barangay Demographics:",
+    count: residentsCount,
+    data: [
+      { name: "Senior Citizens", value: seniorCitizensCount },
+      { name: "PWD", value: pwdCount },
+      { name: "Solo Parents", value: soloParentCount },
+      { name: "Minors", value: minorsCount },
+      { name: "Adults", value: adultsCount },
+    ],
+    colors: ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"],
   };
-  // const toggleChartBoxFive = () => {
-  //   setCurrentChartBoxFive((prev) => (prev + 1) % chartsBoxFive.length);
-  // };
-  const toggleChartBoxSix = () => {
-    setCurrentChartBoxSix((prev) => (prev + 1) % chartsBoxSix.length);
+
+  const documentRequestsStatusChart = {
+    title: "Statuses of Document Requests",
+    count: documentRequestsCount,
+    data: [
+      { name: "Pending", value: documentRequestPendingCount },
+      { name: "For Pick-Up", value: documentRequestPickUpCount },
+      { name: "Completed", value: documentRequestCompletedCount },
+    ],
+    colors: ["#4CAF50", "#2196F3", "#FF9800"],
   };
+
+
+
+  const incidentReportsByDepartmentChart = {
+    title: "Incident Reports Total by Department",
+    count: incidentReportsCount,
+    data: [
+      { name: "GAD", value: GADReportsCount },
+      { name: "BCPC", value: BCPCReportsCount },
+      { name: "VAWC", value: VAWCReportsCount },
+      { name: "Lupon", value: LuponReportsCount },
+      { name: "Online", value: OnlineReportsCount },
+    ],
+    colors: ["#E91E63", "#8E44AD", "#3498DB", "#27AE60", "#F39C12"]
+  };
+  
+  const totalIncidentReportsChart = {
+    title: "Incident Reports Statuses:",
+    count: incidentReportsCount,
+    data: [
+      { name: "Pending", value: pendingIncidentReportsCount },
+      { name: "Settled", value: settledIncidentReportsCount },
+      { name: "Resolved", value: resolvedIncidentReportsCount },
+      { name: "Archived", value: archivedIncidentReportsCount },
+    ],
+    colors: ["#FF9800", "#03A9F4", "#4CAF50", "#9E9E9E"]
+  };
+  
 
   const residentData = [
     { name: "Resident Users", value: residentUsersCount },
@@ -379,31 +427,87 @@ export default function Dashboard() {
   return (
     <main className="main-container">
       <p className="dashboard">Summaries</p>
+      <div className="metric-card">
+        <div className="card-left-side">
+          <Link href="/dashboard/admin">
+            <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+              Total Registered Users:
+            </p>
+          </Link>
+          <p className="count">{residentUsersCount}</p>
+        </div>
+      </div>
+
+      <div className="metric-card">
+        <div className="card-left-side">
+          <Link href="/dashboard/admin">
+            <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+              Total Homepage Visits:
+            </p>
+          </Link>
+          <p className="count">{siteVisits}</p>
+        </div>
+      </div>
+
         <div className="summaries-section">
 
         <div className="metric-card">
           <div className="card-left-side">
             <Link href="/dashboard/ResidentModule">
               <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                {chartsBoxOne[currentChartBoxOne].title}
+                {barangayPopulationChart.title}
               </p>
             </Link>
-            <p className="count">{chartsBoxOne[currentChartBoxOne].count}</p>
+            <p className="count">{barangayPopulationChart.count}</p>
+          </div>
+
+          <div className="card-right-side">
+            <ResponsiveContainer width={300} height={300}>
+              <BarChart
+                data={barangayPopulationChart.data}
+                layout="vertical"
+                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis type="category" dataKey="name" />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" name="Number of Residents">
+                  {barangayPopulationChart.data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={barangayPopulationChart.colors[index % barangayPopulationChart.colors.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="metric-card">
+          <div className="card-left-side">
+            <Link href="/dashboard/ResidentModule">
+              <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                {barangayDemographicsChart.title}
+              </p>
+            </Link>
+            <p className="count">{barangayDemographicsChart.count}</p>
           </div>
 
           <div className="card-right-side">
             <ResponsiveContainer width={300} height={300}>
               <PieChart>
                 <Pie
-                  data={chartsBoxOne[currentChartBoxOne].data}
+                  data={barangayDemographicsChart.data}
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
                   cy="50%"
                   outerRadius={100}
+                  innerRadius={50}
+                  label
                 >
-                  {chartsBoxOne[currentChartBoxOne].data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={chartsBoxOne[currentChartBoxOne].colors[index % chartsBoxOne[currentChartBoxOne].colors.length]} />
+                  {barangayDemographicsChart.data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={barangayDemographicsChart.colors[index % barangayDemographicsChart.colors.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -411,36 +515,7 @@ export default function Dashboard() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-
-          <div className="chart-controls">
-              <button className="action-next" onClick={toggleChartBoxOne}>Switch</button>
-            </div>
         </div>
-          
-          <div className="metric-card">
-            <div className="card-left-side">
-            <Link href="/dashboard/admin">
-                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                    2. Total Registered Resident Users:
-                  </p>
-                </Link>
-                  <p className="count">{residentUsersCount}</p>
-            </div>
-
-            <div className="card-right-side">
-          <ResponsiveContainer width={300} height={300}>
-            <PieChart>
-              <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                {verificationData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={VERIFICATION_COLORS[index % VERIFICATION_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-            </div>
-          </div>
 
         <div className="metric-card">
           <div className="card-left-side">
@@ -479,81 +554,93 @@ export default function Dashboard() {
           </div>
         </div>
 
-          <div className="metric-card">
-              <div className="card-left-side">
-                <Link href="/dashboard/ServicesModule/InBarangayRequests">
-                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                  Weekly Statuses of Requested Documents and Total statuses of Requested Documents( to be implemented):
-                  </p>
-                </Link>
-                <p className="count">{residentsCount}</p>
-              </div>
+        <div className="metric-card">
+          <div className="card-left-side">
+            <Link href="/dashboard/ResidentModule">
+              <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                {documentRequestsStatusChart.title}
+              </p>
+            </Link>
+            <p className="count">{documentRequestsStatusChart.count}</p>
+          </div>
 
           <div className="card-right-side">
-          <ResponsiveContainer width={300} height={300}>
-            <PieChart>
-              <Pie data={residentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                {verificationData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={VERIFICATION_COLORS[index % VERIFICATION_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+            <ResponsiveContainer width={300} height={300}>
+              <BarChart
+                data={documentRequestsStatusChart.data}
+                layout="vertical"
+                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis type="category" dataKey="name" />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" name="Number of Documents">
+                  {documentRequestsStatusChart.data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={documentRequestsStatusChart.colors[index % documentRequestsStatusChart.colors.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+
+          <div className="metric-card">
+            <div className="card-left-side">
+              <p className="title">Document Requests Breakdown</p>
+            </div>
+            <div className="card-right-side">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={documentRequestsTypeData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    label
+                  >
+                    {documentRequestsTypeData.map((entry: { name: string; value: number }, index: number) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
          <div className="metric-card">
-          {/* need to change this to the document requests table count */}
-            <div className="card-left-side">
-                <Link href="/dashboard/ServicesModule/OnlineRequests">
-                  <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                  Weekly Requested Documents and Total Requested Documents (To be implemented)
-                  </p>
-                </Link>
-                  <p className="count">{incidentReportsCount}</p>
-            </div>
-
-            <div className="card-right-side">
-              
-          <ResponsiveContainer width={300} height={300}>
-            <PieChart>
-              <Pie data={verificationData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                {verificationData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={VERIFICATION_COLORS[index % VERIFICATION_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-            </div>
-         </div>
-
-         <div className="metric-card">
           <div className="card-left-side">
-            <Link href="/dashboard/IncidentModule">
+            <Link href="/dashboard/IncidentReportsModule">
               <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                {chartsBoxSix[currentChartBoxSix].title}
+                {incidentReportsByDepartmentChart.title}
               </p>
             </Link>
-            <p className="count">{chartsBoxSix[currentChartBoxSix].count}</p>
+            <p className="count">{incidentReportsByDepartmentChart.count}</p>
           </div>
 
           <div className="card-right-side">
             <ResponsiveContainer width={300} height={300}>
               <PieChart>
                 <Pie
-                  data={chartsBoxSix[currentChartBoxSix].data}
+                  data={incidentReportsByDepartmentChart.data}
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
                   cy="50%"
                   outerRadius={100}
+                  innerRadius={50} // doughnut style
+                  label
                 >
-                  {chartsBoxSix[currentChartBoxSix].data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={chartsBoxSix[currentChartBoxSix].colors[index % chartsBoxSix[currentChartBoxSix].colors.length]} />
+                  {incidentReportsByDepartmentChart.data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={incidentReportsByDepartmentChart.colors[index % incidentReportsByDepartmentChart.colors.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -561,11 +648,75 @@ export default function Dashboard() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="chart-controls">
-              <button className="action-next" onClick={toggleChartBoxSix}>Switch</button>
-            </div>
         </div>
+
+        <div className="metric-card">
+          <div className="card-left-side">
+            <Link href="/dashboard/IncidentReportsModule">
+              <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                {totalIncidentReportsChart.title}
+              </p>
+            </Link>
+            <p className="count">{totalIncidentReportsChart.count}</p>
+          </div>
+
+          <div className="card-right-side">
+            <ResponsiveContainer width={300} height={300}>
+              <BarChart
+                data={totalIncidentReportsChart.data}
+                layout="vertical"
+                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis type="category" dataKey="name" />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" name="Number of Incidents">
+                  {totalIncidentReportsChart.data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={totalIncidentReportsChart.colors[index % totalIncidentReportsChart.colors.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
       </div> 
+
+      <Link href="/dashboard/InBarangayRequests">
+        <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
+          Weekly Barangay Requests Chart
+        </p>
+      </Link>
+      <div className="heatmap-container">
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={documentRequestsByWeek}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="monthWeek" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="First Time Jobseeker" stackId="a" fill="#4CAF50" />
+            <Bar dataKey="Barangay Clearance" stackId="a" fill="#2196F3" />
+            <Bar dataKey="Barangay Indigency" stackId="a" fill="#FF9800" />
+            <Bar dataKey="Barangay ID" stackId="a" fill="#9C27B0" />
+            <Bar dataKey="Barangay Certificate" stackId="a" fill="#00BCD4" />
+
+            {/* Dynamically render all "Permit" related bars */}
+            {Object.keys(documentRequestsByWeek[0] || {})
+              .filter((key) => key.includes("Permit"))
+              .map((key, index) => (
+                <Bar
+                  key={key}
+                  dataKey={key}
+                  stackId="a"
+                  fill="#F44336"
+                />
+              ))}
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
       <Link href="/dashboard/IncidentModule">
         <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
