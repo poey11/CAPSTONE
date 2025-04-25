@@ -107,39 +107,53 @@ export default function EditBarangayAccount() {
         setShowSavePopup(true);
     }
 
+
     const confirmSave = async () => {
-
-        if (password !== confirmPassword) {
-            setPopupErrorMessage("Confirm password must match New password.");
-            setShowErrorPopup(true);
-
-            setShowSavePopup(false);
-
-            // Hide the popup after 3 seconds
-            setTimeout(() => {
-                setShowErrorPopup(false);
-            }, 3000);
-
-
-            return;  // Stop execution here if passwords do not match
-        }if (password === confirmPassword){
-            setShowSavePopup(false);
-            setPopupMessage("Changes saved successfully!");
-            setShowPopup(true);
+        if (password) {
+            if (password.length < 6) {
+                setPopupErrorMessage("Password should be at least 6 characters.");
+                setShowErrorPopup(true);
+                setShowSavePopup(false);
     
-            // Hide the popup after 3 seconds
-            setTimeout(() => {
-                setShowPopup(false);
-                router.push(`/dashboard/admin/BarangayUsers?highlight=${userId}`);
-            }, 3000);
+                setTimeout(() => setShowErrorPopup(false), 3000);
+                return;
+            }
     
-             // Create a fake event and call handleSubmit
-            const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-            await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+            if (password !== confirmPassword) {
+                setPopupErrorMessage("Confirm password must match New password.");
+                setShowErrorPopup(true);
+                setShowSavePopup(false);
+    
+                setTimeout(() => setShowErrorPopup(false), 3000);
+                return;
+            }
         }
-
+    
+        const contactPattern = /^0917\d{7}$/;
+        if (!contactPattern.test(formData.phone)) {
+            setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+            setShowErrorPopup(true);
+            setShowSavePopup(false);
+    
+            setTimeout(() => setShowErrorPopup(false), 3000);
+            return;
+        }
+    
         
+        setShowSavePopup(false);
+        setPopupMessage("Changes saved successfully!");
+        setShowPopup(true);
+    
+        setTimeout(() => {
+            setShowPopup(false);
+            router.push(`/dashboard/admin/BarangayUsers?highlight=${userId}`);
+        }, 3000);
+    
+        const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+        await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
     };
+    
+
 
     
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -151,7 +165,7 @@ export default function EditBarangayAccount() {
           const docRef = doc(db, "BarangayUsers", userId);
           let updatedData: Partial<BarangayUser> = { ...formData };
 
-          if (password) { // ✅ Only hash if user provided a new password
+          if (password) { 
             updatedData.password = await hash(password, 12);
         }
             await updateDoc(docRef, updatedData);
@@ -324,11 +338,17 @@ export default function EditBarangayAccount() {
                                             name="phone"
                                             className="editbrgyacc-input-field"
                                             placeholder="Enter Contact Number"
-                                            maxLength={10}
-                                            pattern="^[0-9]{10}$"
-                                            title="Please enter a valid 10-digit contact number"
+                                            maxLength={11}
+                                            pattern="^[0-9]{11}$" 
+                                            title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX "
                                             value={formData.phone}
-                                            onChange={handleChange}
+                                            onChange={(e) => {
+                                                const input = e.target.value;
+                                                // Only allow digits and limit to 11 characters
+                                                if (/^\d{0,11}$/.test(input)) {
+                                                  handleChange(e);
+                                                }
+                                            }}
                                         />
                                     </div>  
                                 </div>
@@ -387,6 +407,7 @@ export default function EditBarangayAccount() {
                                             name="birthDate"
                                             value={formData.birthDate}
                                             onChange={handleChange}
+                                            max={new Date().toISOString().split("T")[0]}
                                         />
                                     </div>
 
