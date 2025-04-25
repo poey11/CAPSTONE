@@ -119,61 +119,42 @@ export default function AddBarangayUser() {
         setShowSubmitPopup(true);
     };
 
-    const confirmSubmit = async () => {
+
+      const confirmSubmit = async () => {
         setShowSubmitPopup(false);
-      
+        
+        const passwordHash = await hash(users.password, 12);
+        const docRef = await addDoc(collection(db, "BarangayUsers"), {
+          userid: users.userId,
+          password: passwordHash,
+          role: users.role,
+          position: users.position,
+          createdAt: new Date().toISOString().split("T")[0],
+          firstTimelogin: true,
+        });
+    
         setPopupMessage("Barangay User created successfully!");
         setShowPopup(true);
-      
-        // Hide the popup after 3 seconds
+    
         setTimeout(() => {
           setShowPopup(false);
-          router.push(`/dashboard/admin/BarangayUsers?highlight=${users.userId}`);
+          
+          router.push(`/dashboard/admin/BarangayUsers?highlight=${docRef.id}`);
         }, 3000);
-      
-        // Create a fake event and call handleSubmit
-        const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-        await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+    
+        
+        setUsers({ userId: "", position: "", password: "", role: "Barangay Official" });
       };
 
 
-    const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
-            e.preventDefault();
-        
-            
-            console.log(users);
-            
-            try{
-                 const userCollection = collection(db, "BarangayUsers");
-                   
-                    // ✅ Hash the password
-                    const passwordHash = await hash( users.password, 12);
-                
-                    // ✅ Store user in Firestore
-                    const docRef = await addDoc(userCollection, {
-                        userid: users.userId,
-                        password: passwordHash,
-                        role: users.role,
-                        position: users.position,
-                        //createdBy: "Assistant Secretary",
-                        createdAt:  new Date().toISOString().replace(/T.*/, ''),
-                        firstTimelogin: true,
-                    });
-            
-                    console.log("Barangay account created successfully", docRef.id);
-
-                setUsers({
-                    userId:"",
-                    position:"",
-                    password:"",
-                    role:"Barangay Official"
-                })
-            }
-            catch(error: string | any){
-                console.log(error.message);
-            }
-            
-       }
+      const handleSubmit = () => {
+        if (!users.userId || !users.password) {
+          setPopupErrorMessage("Please fill up all required fields.");
+          setShowErrorPopup(true);
+          return setTimeout(() => setShowErrorPopup(false), 3000);
+        }
+        setShowSubmitPopup(true);
+      };
     
 
     return (

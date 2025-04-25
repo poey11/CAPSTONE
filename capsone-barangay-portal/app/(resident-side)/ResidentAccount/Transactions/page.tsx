@@ -104,6 +104,7 @@ export default function Transactions() {
                             <option value="Acknowledged">Acknowledged</option>
                             <option value="Pick-Up">Pick-Up</option>
                             <option value="Completed">Completed</option>
+                            <option value="Rejected">Rejected</option>
                         </select>
                     </div>
                </div>

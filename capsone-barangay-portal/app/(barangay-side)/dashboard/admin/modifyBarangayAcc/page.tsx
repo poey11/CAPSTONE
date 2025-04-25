@@ -71,7 +71,8 @@ export default function EditBarangayAccount() {
 
     const [originalData, setOriginalData] = useState({ ...formData });
 
-    const [showPassword, setShowPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [showDiscardPopup, setShowDiscardPopup] = useState(false);
     const [showSavePopup, setShowSavePopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
@@ -106,39 +107,52 @@ export default function EditBarangayAccount() {
         setShowSavePopup(true);
     }
 
+
     const confirmSave = async () => {
-
-        if (password !== confirmPassword) {
-            setPopupErrorMessage("Confirm password must match New password.");
-            setShowErrorPopup(true);
-
-            setShowSavePopup(false);
-
-            // Hide the popup after 3 seconds
-            setTimeout(() => {
-                setShowErrorPopup(false);
-            }, 3000);
-
-
-            return;  // Stop execution here if passwords do not match
-        }if (password === confirmPassword){
-            setShowSavePopup(false);
-            setPopupMessage("Changes saved successfully!");
-            setShowPopup(true);
+        if (password) {
+            if (password.length < 6) {
+                setPopupErrorMessage("Password should be at least 6 characters.");
+                setShowErrorPopup(true);
+                setShowSavePopup(false);
     
-            // Hide the popup after 3 seconds
-            setTimeout(() => {
-                setShowPopup(false);
-                router.push("/dashboard/admin");
-            }, 3000);
+                setTimeout(() => setShowErrorPopup(false), 3000);
+                return;
+            }
     
-             // Create a fake event and call handleSubmit
-            const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-            await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+            if (password !== confirmPassword) {
+                setPopupErrorMessage("Confirm password must match New password.");
+                setShowErrorPopup(true);
+                setShowSavePopup(false);
+    
+                setTimeout(() => setShowErrorPopup(false), 3000);
+                return;
+            }
         }
-
+    
+        const contactPattern = /^0917\d{7}$/;
+        if (!contactPattern.test(formData.phone)) {
+            setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+            setShowErrorPopup(true);
+            setShowSavePopup(false);
+    
+            setTimeout(() => setShowErrorPopup(false), 3000);
+            return;
+        }
+    
         
+        setShowSavePopup(false);
+        setPopupMessage("Changes saved successfully!");
+        setShowPopup(true);
+    
+        setTimeout(() => {
+            setShowPopup(false);
+            router.push(`/dashboard/admin/BarangayUsers?highlight=${userId}`);
+        }, 3000);
+    
+        const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+        await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
     };
+    
 
 
     
@@ -151,7 +165,7 @@ export default function EditBarangayAccount() {
           const docRef = doc(db, "BarangayUsers", userId);
           let updatedData: Partial<BarangayUser> = { ...formData };
 
-          if (password) { // ✅ Only hash if user provided a new password
+          if (password) { 
             updatedData.password = await hash(password, 12);
         }
             await updateDoc(docRef, updatedData);
@@ -248,17 +262,10 @@ export default function EditBarangayAccount() {
                     <div className="action-btn-section">
                         {isAuthorized ? (
                             <>
-                            <button 
-                                className="discard-btn" 
-                                onClick={() => handleDiscardClick}
-                            >
-                                Discard
-                            </button>
-                            <button 
-                                className="save-btn" 
-                                onClick={() => handleSaveClick}
-                            >
-                                Save
+                            <button className="discard-btn" onClick={handleDiscardClick}>Discard</button>
+                            <button className="save-btn" onClick={handleSaveClick} disabled={loading}>
+                        
+                            {loading ? "Saving..." : "Save"}
                             </button>
                             </>
                         ) : (
@@ -331,11 +338,17 @@ export default function EditBarangayAccount() {
                                             name="phone"
                                             className="editbrgyacc-input-field"
                                             placeholder="Enter Contact Number"
-                                            maxLength={10}
-                                            pattern="^[0-9]{10}$"
-                                            title="Please enter a valid 10-digit contact number"
+                                            maxLength={11}
+                                            pattern="^[0-9]{11}$" 
+                                            title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX "
                                             value={formData.phone}
-                                            onChange={handleChange}
+                                            onChange={(e) => {
+                                                const input = e.target.value;
+                                                // Only allow digits and limit to 11 characters
+                                                if (/^\d{0,11}$/.test(input)) {
+                                                  handleChange(e);
+                                                }
+                                            }}
                                         />
                                     </div>  
                                 </div>
@@ -348,7 +361,7 @@ export default function EditBarangayAccount() {
 
                                         <select
                                             name="position"
-                                            className="editbrgyacc-input-field"
+                                            className="editbrgyacc-input-field-dropdown"
                                             required
                                             value={formData.position}
                                             onChange={handleChange}
@@ -373,7 +386,7 @@ export default function EditBarangayAccount() {
                                                 name="department" 
                                                 value={formData.department} 
                                                 onChange={handleChange}
-                                                className="editbrgyacc-input-field"
+                                                className="editbrgyacc-input-field-dropdown"
                                                 required
                                             >
                                                 <option value="">Select a Department</option>
@@ -394,6 +407,7 @@ export default function EditBarangayAccount() {
                                             name="birthDate"
                                             value={formData.birthDate}
                                             onChange={handleChange}
+                                            max={new Date().toISOString().split("T")[0]}
                                         />
                                     </div>
 
@@ -401,7 +415,7 @@ export default function EditBarangayAccount() {
                                         <p>Sex</p>
                                         <select
                                             name="gender"
-                                            className="editbrgyacc-input-field"
+                                            className="editbrgyacc-input-field-dropdown"
                                             required
                                             value={formData.sex}
                                             onChange={handleChange}
@@ -518,7 +532,7 @@ export default function EditBarangayAccount() {
                                                     <p>New Password</p>
                                                     <div className="relative">
                                                         <input
-                                                            type={showPassword ? "text" : "password"}
+                                                            type={showNewPassword ? "text" : "password"}
                                                             className="editbrgyacc-input-field"
                                                             onChange={handleChange}
                                                             name="password"
@@ -526,9 +540,9 @@ export default function EditBarangayAccount() {
                                                         <button
                                                             type="button"
                                                             className="toggle-password-btn"
-                                                            onClick={() => setShowPassword(!showPassword)}
+                                                            onClick={() => setShowNewPassword(!showNewPassword)}
                                                         >
-                                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                            {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -537,7 +551,7 @@ export default function EditBarangayAccount() {
                                                     <p>Confirm Password</p>
                                                     <div className="relative">
                                                         <input
-                                                            type={showPassword ? "text" : "password"}
+                                                            type={showConfirmPassword ? "text" : "password"}
                                                             className="editbrgyacc-input-field"
                                                             onChange={handleChange}
                                                             name="confirmPassword"
@@ -545,9 +559,9 @@ export default function EditBarangayAccount() {
                                                         <button
                                                             type="button"
                                                             className="toggle-password-btn"
-                                                            onClick={() => setShowPassword(!showPassword)}
+                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                         >
-                                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -565,12 +579,13 @@ export default function EditBarangayAccount() {
 
 
             {showDiscardPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-add">
+                            <div className="confirmation-popup-add">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to discard the changes?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> 
+                                <div className="yesno-container-add">
+                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">No</button>
+                                    <button onClick={confirmDiscard} className="yes-button-add">Yes</button> 
                                 </div> 
                             </div>
                         </div>
@@ -579,6 +594,7 @@ export default function EditBarangayAccount() {
           {showSavePopup && (
                         <div className="confirmation-popup-overlay">
                             <div className="confirmation-popup">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to save the changes?</p>
                                 <div className="yesno-container">
                                     <button onClick={() => setShowSavePopup(false)} className="no-button">No</button> 
@@ -592,14 +608,16 @@ export default function EditBarangayAccount() {
           {showPopup && (
                 <div className={`popup-overlay show`}>
                     <div className="popup">
+                        <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                         <p>{popupMessage}</p>
                     </div>
                 </div>
                 )}
 
-{showErrorPopup && (
+            {showErrorPopup && (
                 <div className={`error-popup-overlay show`}>
                     <div className="popup">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                         <p>{popupErrorMessage}</p>
                     </div>
                 </div>

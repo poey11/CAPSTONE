@@ -55,17 +55,13 @@ const ResidentUsers = () => {
             );
                     
             
-            // Expand the correct section
-            if (isInVerified && !showResidentTableContent) {
-                setShowResidentTableContent(true);
-                setTimeout(scrollAndHighlight, 200); // wait for DOM update
-            } else {
-                setTimeout(scrollAndHighlight, 200);
-            }
+            
+            setTimeout(scrollAndHighlight, 200);
+            
             
             const timeoutId = setTimeout(() => {
                 setHighlightedId(null);
-            }, 5000);
+            }, 2000);
             
             return () => clearTimeout(timeoutId);
         }
