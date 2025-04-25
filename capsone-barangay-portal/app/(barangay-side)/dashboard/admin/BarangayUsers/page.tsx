@@ -251,12 +251,12 @@ useEffect(() => {
           <div className="barangayusers-page-section-2">
 
           <input
-  type="text"
-  className="barangayusers-page-filter"
-  placeholder="Search by User ID"
-  value={userIdSearch}
-  onChange={(e) => setUserIdSearch(e.target.value)}
-/>
+            type="text"
+            className="barangayusers-page-filter"
+            placeholder="Search by User ID"
+            value={userIdSearch}
+            onChange={(e) => setUserIdSearch(e.target.value)}
+            />
 
 
 
@@ -294,7 +294,7 @@ useEffect(() => {
                 </div>
 
 
-                <div className="barangayusers-page-main-section">
+<div className="barangayusers-page-main-section">
   <>
    
     {currentUser.length === 0 ? (
