@@ -32,6 +32,7 @@ const BarangayUsers = () => {
     const userPosition = session?.user?.position;
     const isAuthorized = ["Assistant Secretary"].includes(userPosition || "");
     const [barangayUsers, setBarangayUsers] = useState<dbBarangayUser[]>([]);
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); 
     const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
     const [selectedBarangayUserId, setSelectedBarangayUserId] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
@@ -364,85 +365,6 @@ useEffect(() => {
     )}
   </>
 </div>
-            <div className="barangayusers-page-main-section">
-                <>
-                    {loading && <p>Loading residents...</p>}
-                    {error && <p className="error">{error}</p>}
-
-                    {!loading && !error && (
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>User ID</th>
-                                    <th>Official Name</th>
-                                    <th>Sex</th>
-                                    <th>Birth Date</th>
-                                    <th>Address</th>
-                                    <th>Phone</th>
-                                    <th>Position</th>
-                                    <th>Created By</th>
-                                    <th>Created At</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {barangayUsers.map((user) => (
-                                    <tr key={user.id}
-                                        className={highlightedId === user.id ? "highlighted-row" : ""}
-                                    >
-                                    <td>{user.userid}</td>
-                                    <td>{user.firstName} {user.lastName}</td>
-                                    <td>{user.sex}</td>
-                                    <td>{user.birthDate}</td>
-                                    <td>{user.address}</td>
-                                    <td>{user.phone}</td>
-                                    <td>{user.position}</td>
-                                    <td>{user.createdBy}</td>
-                                    <td>{user.createdAt}</td>
-                                    <td>
-                                    <div className="admin-actions">
-                                        <button 
-                                            className="admin-action-view"
-                                            onClick={() => router.push(`/dashboard/admin/viewBarangayUser?id=${user.id}`)}
-                                        >
-                                            View
-                                        </button>
-                                        {isAuthorized ? (
-                                            <>
-                                                <button 
-                                                    className="admin-action-edit" 
-                                                    onClick={() => handleEditBarangayUserClick(user.id)}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button 
-                                                    className="admin-action-delete" 
-                                                    onClick={() => handleDeleteBarangayUserClick(user.id)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
-                                                    Edit
-                                                </button>
-                                                <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
-                                                    Delete
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
-                                    </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </>
-            </div>
-
 
             {showDeletePopup && (
                 <div className="user-roles-confirmation-popup-overlay">
