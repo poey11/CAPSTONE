@@ -263,7 +263,13 @@ export default function DocumentTransactionsDetails() {
         <div className="incident-content">
             <div className="incident-content-section-1">
                 <button type="button" className="back-button" onClick={handleBack}></button>
-                <p>Online Document Request Details</p>
+                <h1>Online Document Request</h1>
+                <div className="status-container">
+                    <p className={`status-dropdown-transactions ${transactionData.status?.toLowerCase() || ""}`}>
+                    {transactionData.status || "N/A"}
+                    </p> 
+                </div>
+
             </div>
 
             {barangayDocumentFields
@@ -385,7 +391,7 @@ export default function DocumentTransactionsDetails() {
 
         <div className="incident-content">
             <div className="incident-content-section-1">
-              <p>Requirements</p>
+              <h1>Requirements</h1>
             </div>
 
 

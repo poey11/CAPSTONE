@@ -295,8 +295,9 @@
     border: none;
     cursor: pointer;
     text-align: center;
-    min-width: 120px; /* Set a fixed width or min-width */
-    display: inline-block; /* Ensure uniform width */
+    min-width: 120px;
+    display: inline-block;
+    margin-left: auto;
   }
   
   .pending {
@@ -307,15 +308,7 @@
   }
 
   .acknowledged {
-    background-color: #4fd69e;
-    color: white;
-    font-size: 15px;
-    
-  }
-
-  
-  .resolved {
-    background-color: #66c47a;
+    background-color: #d69e4f;
     color: white;
     font-size: 15px;
     
@@ -327,20 +320,14 @@
     font-size: 15px;
   }
 
-  .approved {
-    background-color: #66c47a;
-    color: white;
-    font-size: 15px;
-  }
-
   .pick-up{
-    background-color: #66a8c4;
+    background-color: #66bec4;
     color: white;
     font-size: 15px;
   }
 
   .completed{
-    background-color: #d8b471;
+    background-color: #66c47a;
     color: white;
     font-size: 15px;
   }
@@ -382,15 +369,16 @@
     color: white;
     font-size: 1.5rem;
     font-weight: bold;
-    text-transform: uppercase;
     letter-spacing: 1px;
   }
   
-  .incident-content-section-1 p {
+  .incident-content-section-1 h1 {
     margin-left: 1rem;
+    text-transform: uppercase;
   }
-  .emergency-content-section-1 p {
+  .emergency-content-section-1 h1 {
     margin-left: 1rem;
+    text-transform: uppercase;
   }
   
   .back-button {
@@ -510,50 +498,7 @@
     cursor: pointer;
   }
 
-  
-.status-badge-view {
-  color: white;                
-  display: inline-block;        
-  text-transform: capitalize;   
-  text-align: center;    
 
-  border: none;
-  padding: 8px 12px;
-  font-size: 13px;
-  border-radius: 5px;
-  transition: background-color 0.2s ease;
-  width: 100px;
-
-}
-
-.status-section-view {
-display: flex;
-margin-left: 40%; 
-}
-
-
-  
-.Pending {
-  background-color: #d4d64f;
-  color: white;
-
-  
-}
-
-.Resolved {
-  background-color: #66c47a;
-  color: white;
-  
-}
-
-.Settled {
-  background-color: #1e5128;
-  color: white;
-
-}
-
-.Archived {
-  background-color: #5d74e8ee;
-  color: white;
-
+.status-container{
+  margin-left: 30%; 
 }

@@ -127,9 +127,11 @@ export default function IncidentTransactionsDetails() {
       <div className="incident-content">
         <div className="incident-content-section-1">
           <button type="button" className="back-button" onClick={handleBack}></button>
-          <p>Online Incident Report Details</p>
-          <div className="status-section-view">
-            <p className={`status-badge-view ${transactionData.status}`}>{transactionData.status|| "N/A"}</p> 
+          <h1>Online Incident Report</h1>
+          <div className="status-container">
+            <p className={`status-dropdown-transactions ${transactionData.status?.toLowerCase() || ""}`}>
+              {transactionData.status || "N/A"}
+            </p> 
           </div>
         </div>
 
