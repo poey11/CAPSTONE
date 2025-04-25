@@ -323,57 +323,44 @@ useEffect(() => {
             <th>Actions</th>
           </tr>
         </thead>
-
         <tbody>
-          {currentUser.map((user) => (
+        {currentUser.map((user) => (
             <tr
-              key={user.id}
-              className={highlightedId === user.userid ? "highlighted-row" : ""}
+            key={user.id}
+            className={highlightedId === user.userid ? "highlighted-row" : ""}
             >
-              <td>{user.userid}</td>
-              <td>{user.firstName} {user.lastName}</td>
-              <td>{user.sex}</td>
-              <td>{user.address}</td>
-              <td>{user.phone}</td>
-              <td>{user.position}</td>
-              <td>
+            <td>{user.userid}</td>
+            <td>{user.firstName} {user.lastName}</td>
+            <td>{user.sex}</td>
+            <td>{user.address}</td>
+            <td>{user.phone}</td>
+            <td>{user.position}</td>
+            <td>
                 <div className="admin-actions">
-                  <button
-                    className="admin-action-view"
-                    onClick={() => router.push(`/dashboard/admin/viewBarangayUser?id=${user.id}`)}
-                  >
-                    View
-                  </button>
-                  {isAuthorized ? (
+                <button className="admin-action-view" onClick={(e) => { e.stopPropagation(); }}>View</button>
+
+                {isAuthorized && (
                     <>
-                      <button
+                    <button
                         className="admin-action-edit"
                         onClick={() => handleEditBarangayUserClick(user.id)}
-                      >
+                    >
                         Edit
-                      </button>
-                      <button
+                    </button>
+                    <button
                         className="admin-action-delete"
                         onClick={() => handleDeleteBarangayUserClick(user.id)}
-                      >
+                    >
                         Delete
-                      </button>
+                    </button>
                     </>
-                  ) : (
-                    <>
-                      <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
-                        Edit
-                      </button>
-                      <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
-                        Delete
-                      </button>
-                    </>
-                  )}
+                )}
                 </div>
-              </td>
+            </td>
             </tr>
-          ))}
+        ))}
         </tbody>
+
       </table>
     )}
   </>
