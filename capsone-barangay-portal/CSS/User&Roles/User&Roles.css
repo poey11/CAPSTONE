@@ -672,3 +672,39 @@
   background-color: #0056b3;
   font-weight: bold;
 }
+
+
+
+
+
+  
+.no-result-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  border: 2px solid #f3c3bf;
+  width: 500px;
+  border-radius: 1rem;
+  background-color: #fff;
+  margin-top: 5rem;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.03);
+  align-self: center;
+}
+
+
+
+
+.no-result-icon {
+  width: 46px;
+  height: 46px;
+  margin-bottom: 0.5rem;
+  opacity: 0.75;
+}
+
+.no-results-department {
+  font-weight: bold;
+  font-size: 1.25rem;
+  color: #e7594e;
+}

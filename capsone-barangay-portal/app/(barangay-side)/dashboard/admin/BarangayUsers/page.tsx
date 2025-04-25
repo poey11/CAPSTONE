@@ -168,8 +168,8 @@ const BarangayUsers = () => {
     // Pagination logic
     const indexOfLastUser = currentPage * UserPerPage;
     const indexOfFirstUser = indexOfLastUser - UserPerPage;
-    const currentUser = barangayUsers.slice(indexOfFirstUser, indexOfLastUser);
-    const totalPages = Math.ceil(barangayUsers.length / UserPerPage);
+    const currentUser = filteredUser.slice(indexOfFirstUser, indexOfLastUser);
+    const totalPages = Math.ceil(filteredUser.length / UserPerPage);
     
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
   const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
@@ -197,34 +197,42 @@ const BarangayUsers = () => {
 const [positionSearch, setPositionSearch] = useState("");
 const [positionDropdown, setPositionDropdown] = useState("");
 const [showCount, setShowCount] = useState(0);
-const [filteredUsers, setFilteredUsers] = useState(barangayUsers); // Initial value from your data
+const [userIdSearch, setUserIdSearch] = useState("");
+
+
 
 useEffect(() => {
-  let filtered = [...barangayUsers];
-
-  // Filter by name (partial match)
-  if (nameSearch.trim()) {
-    filtered = filtered.filter((user) =>
-      user.firstName?.toLowerCase().includes(nameSearch.toLowerCase())
-    );
-  }
-
- 
-  // Filter by position dropdown
-  if (positionDropdown) {
-    filtered = filtered.filter(
-      (user) => user.position === positionDropdown
-    );
-  }
-
-  // Limit the number of results
-  if (showCount > 0) {
-    filtered = filtered.slice(0, showCount);
-  }
-
-  setFilteredUsers(filtered);
-}, [nameSearch, positionSearch, positionDropdown, showCount, barangayUsers]);
-
+    let filtered = [...barangayUsers];
+  
+    // Filter by name (partial match)
+    if (nameSearch.trim()) {
+      filtered = filtered.filter((user) =>
+        user.firstName?.toLowerCase().includes(nameSearch.toLowerCase())
+      );
+    }
+  
+    // Filter by User ID (partial match)
+    if (userIdSearch.trim()) {
+      filtered = filtered.filter((user) =>
+        user.userid?.toLowerCase().includes(userIdSearch.toLowerCase())
+      );
+    }
+  
+    // Filter by position dropdown
+    if (positionDropdown) {
+      filtered = filtered.filter(
+        (user) => user.position === positionDropdown
+      );
+    }
+  
+    // Limit the number of results
+    if (showCount > 0) {
+      filtered = filtered.slice(0, showCount);
+    }
+  
+    setFilteredUser(filtered);
+  }, [nameSearch, userIdSearch, positionDropdown, showCount, barangayUsers]);
+  
  
     return (
         <main className="barangayusers-page-main-container">
@@ -241,6 +249,17 @@ useEffect(() => {
                 Will Add Functionality of the Filters
             */}
           <div className="barangayusers-page-section-2">
+
+          <input
+  type="text"
+  className="barangayusers-page-filter"
+  placeholder="Search by User ID"
+  value={userIdSearch}
+  onChange={(e) => setUserIdSearch(e.target.value)}
+/>
+
+
+
                 <input
                     type="text"
                     className="barangayusers-page-filter"
@@ -275,95 +294,90 @@ useEffect(() => {
                 </div>
 
 
-            <div className="barangayusers-page-main-section">
-                <>
-                    {loading && <p>Loading residents...</p>}
-                    {error && <p className="error">{error}</p>}
+                <div className="barangayusers-page-main-section">
+  <>
+   
+    {currentUser.length === 0 ? (
+      <div className="no-result-card">
+        <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+        <p className="no-results-department">No Results Found</p>
+      </div>
+    ) : (
+      <table>
+        <thead>
+          <tr>
+            <th>
+              User ID
+              <button
+                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                className="sort-button"
+              >
+                {sortOrder === "asc" ? "▲" : "▼"}
+              </button>
+            </th>
+            <th>Official Name</th>
+            <th>Sex</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Position</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
 
-                    {!loading && !error && (
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>
-                                        User ID
-                                        {/*
-                                            Also need to implement
-                                        */}
-                                        <button
-                                            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                                            className="sort-button"
-                                        >
-                                            {sortOrder === "asc" ? "▲" : "▼"}
-                                        </button>
-                                    </th>
-                                    <th>Official Name</th>
-                                    <th>Sex</th>
-                                    <th>Birth Date</th>
-                                    <th>Address</th>
-                                    <th>Phone</th>
-                                    <th>Position</th>
-                                    <th>Created By</th>
-                                    <th>Created At</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {currentUser.map((user) => (
-                                    <tr key={user.id}
-                                        className={highlightedId === user.userid ? "highlighted-row" : ""}
-                                    >
-                                    <td>{user.userid}</td>
-                                    <td>{user.firstName} {user.lastName}</td>
-                                    <td>{user.sex}</td>
-                                    <td>{user.birthDate}</td>
-                                    <td>{user.address}</td>
-                                    <td>{user.phone}</td>
-                                    <td>{user.position}</td>
-                                    <td>{user.createdBy}</td>
-                                    <td>{user.createdAt}</td>
-                                    <td>
-                                    <div className="admin-actions">
-                                        <button 
-                                            className="admin-action-view"
-                                            onClick={() => router.push(`/dashboard/admin/viewBarangayUser?id=${user.id}`)}
-                                        >
-                                            View
-                                        </button>
-                                        {isAuthorized ? (
-                                            <>
-                                                <button 
-                                                    className="admin-action-edit" 
-                                                    onClick={() => handleEditBarangayUserClick(user.id)}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button 
-                                                    className="admin-action-delete" 
-                                                    onClick={() => handleDeleteBarangayUserClick(user.id)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
-                                                    Edit
-                                                </button>
-                                                <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
-                                                    Delete
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
-                                    </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </>
-            </div>
+        <tbody>
+          {currentUser.map((user) => (
+            <tr
+              key={user.id}
+              className={highlightedId === user.userid ? "highlighted-row" : ""}
+            >
+              <td>{user.userid}</td>
+              <td>{user.firstName} {user.lastName}</td>
+              <td>{user.sex}</td>
+              <td>{user.address}</td>
+              <td>{user.phone}</td>
+              <td>{user.position}</td>
+              <td>
+                <div className="admin-actions">
+                  <button
+                    className="admin-action-view"
+                    onClick={() => router.push(`/dashboard/admin/viewBarangayUser?id=${user.id}`)}
+                  >
+                    View
+                  </button>
+                  {isAuthorized ? (
+                    <>
+                      <button
+                        className="admin-action-edit"
+                        onClick={() => handleEditBarangayUserClick(user.id)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="admin-action-delete"
+                        onClick={() => handleDeleteBarangayUserClick(user.id)}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
+                        Edit
+                      </button>
+                      <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
+                        Delete
+                      </button>
+                    </>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </>
+</div>
 
 
             {showDeletePopup && (
