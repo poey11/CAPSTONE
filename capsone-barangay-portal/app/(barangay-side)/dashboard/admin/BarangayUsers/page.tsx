@@ -159,6 +159,80 @@ const BarangayUsers = () => {
         }
     };
 
+    const [filteredUser, setFilteredUser] = useState<any[]>([]); // Ensure this is populated
+    const [currentPage, setCurrentPage] = useState(1);
+    const UserPerPage = 10; // Can be changed
+    
+
+    // Pagination logic
+    const indexOfLastUser = currentPage * UserPerPage;
+    const indexOfFirstUser = indexOfLastUser - UserPerPage;
+    const currentUser = filteredUser.slice(indexOfFirstUser, indexOfLastUser);
+    const totalPages = Math.ceil(filteredUser.length / UserPerPage);
+    
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+  const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+
+  const getPageNumbers = () => {
+    const pageNumbersToShow: (number | string)[] = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pageNumbersToShow.push(i);
+      } else if (
+        (i === currentPage - 2 || i === currentPage + 2) &&
+        pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
+      ) {
+        pageNumbersToShow.push("...");
+      }
+    }
+    return pageNumbersToShow;
+  };
+
+
+  //FILTERS LOGIC
+  
+  const [nameSearch, setNameSearch] = useState("");
+const [positionSearch, setPositionSearch] = useState("");
+const [positionDropdown, setPositionDropdown] = useState("");
+const [showCount, setShowCount] = useState(0);
+const [userIdSearch, setUserIdSearch] = useState("");
+
+
+
+useEffect(() => {
+    let filtered = [...barangayUsers];
+  
+    // Filter by name (partial match)
+    if (nameSearch.trim()) {
+      filtered = filtered.filter((user) =>
+        user.firstName?.toLowerCase().includes(nameSearch.toLowerCase())
+      );
+    }
+  
+    // Filter by User ID (partial match)
+    if (userIdSearch.trim()) {
+      filtered = filtered.filter((user) =>
+        user.userid?.toLowerCase().includes(userIdSearch.toLowerCase())
+      );
+    }
+  
+    // Filter by position dropdown
+    if (positionDropdown) {
+      filtered = filtered.filter(
+        (user) => user.position === positionDropdown
+      );
+    }
+  
+    // Limit the number of results
+    if (showCount > 0) {
+      filtered = filtered.slice(0, showCount);
+    }
+  
+    setFilteredUser(filtered);
+  }, [nameSearch, userIdSearch, positionDropdown, showCount, barangayUsers]);
+  
+ 
     return (
         <main className="barangayusers-page-main-container">
             <div className="user-roles-module-section-1">
@@ -173,43 +247,123 @@ const BarangayUsers = () => {
             {/* 
                 Will Add Functionality of the Filters
             */}
-            <div className="barangayusers-page-section-2">
-                <input
-                    type="text"
-                    className="barangayusers-page-filter"
-                    placeholder="Search by Name"
-                />
+          <div className="barangayusers-page-section-2">
+
+          <input
+            type="text"
+            className="barangayusers-page-filter"
+            placeholder="Search by User ID"
+            value={userIdSearch}
+            onChange={(e) => setUserIdSearch(e.target.value)}
+            />
+
+
 
                 <input
                     type="text"
                     className="barangayusers-page-filter"
-                    placeholder="Search by Position"
+                    placeholder="Search by Name"
+                    value={nameSearch}
+                    onChange={(e) => setNameSearch(e.target.value)}
                 />
-                
-                <select className="barangayusers-page-filter">
+
+           
+                <select
+                    className="barangayusers-page-filter"
+                    value={positionDropdown}
+                    onChange={(e) => setPositionDropdown(e.target.value)}
+                >
                     <option value="">Position</option>
                     <option value="Punong Barangay">Punong Barangay</option>
                     <option value="Secretary">Secretary</option>
                     <option value="Assistant Secretary">Asst Secretary</option>
                     <option value="Admin Staff">Admin Staff</option>
                     <option value="LF Staff">LF Staff</option>
-                </select> 
-
-                <input
-                    type="text"
-                    className="barangayusers-page-filter"
-                    placeholder="Search by Address"
-                />
+                </select>
 
                 <select
                     className="barangayusers-page-filter"
+                    value={showCount}
+                    onChange={(e) => setShowCount(Number(e.target.value))}
                 >
                     <option value="0">Show All</option>
                     <option value="5">Show 5</option>
                     <option value="10">Show 10</option>
                 </select>
-            </div>
+                </div>
 
+
+<div className="barangayusers-page-main-section">
+  <>
+   
+    {currentUser.length === 0 ? (
+      <div className="no-result-card">
+        <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+        <p className="no-results-department">No Results Found</p>
+      </div>
+    ) : (
+      <table>
+        <thead>
+          <tr>
+            <th>
+              User ID
+              <button
+                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                className="sort-button"
+              >
+                {sortOrder === "asc" ? "▲" : "▼"}
+              </button>
+            </th>
+            <th>Official Name</th>
+            <th>Sex</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Position</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        {currentUser.map((user) => (
+            <tr
+            key={user.id}
+            className={highlightedId === user.userid ? "highlighted-row" : ""}
+            >
+            <td>{user.userid}</td>
+            <td>{user.firstName} {user.lastName}</td>
+            <td>{user.sex}</td>
+            <td>{user.address}</td>
+            <td>{user.phone}</td>
+            <td>{user.position}</td>
+            <td>
+                <div className="admin-actions">
+                <button className="admin-action-view" onClick={(e) => { e.stopPropagation(); }}>View</button>
+
+                {isAuthorized && (
+                    <>
+                    <button
+                        className="admin-action-edit"
+                        onClick={() => handleEditBarangayUserClick(user.id)}
+                    >
+                        Edit
+                    </button>
+                    <button
+                        className="admin-action-delete"
+                        onClick={() => handleDeleteBarangayUserClick(user.id)}
+                    >
+                        Delete
+                    </button>
+                    </>
+                )}
+                </div>
+            </td>
+            </tr>
+        ))}
+        </tbody>
+
+      </table>
+    )}
+  </>
+</div>
             <div className="barangayusers-page-main-section">
                 <>
                     {loading && <p>Loading residents...</p>}
@@ -323,6 +477,22 @@ const BarangayUsers = () => {
                     </div>
                 </div>
             )}
+
+        
+    <div className="redirection-section-users">
+        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+        {getPageNumbers().map((number, index) => (
+          <button
+            key={index}
+            onClick={() => typeof number === 'number' && paginate(number)}
+            className={currentPage === number ? "active" : ""}
+          >
+            {number}
+          </button>
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+    </div>
+
         </main>
     );
 }
