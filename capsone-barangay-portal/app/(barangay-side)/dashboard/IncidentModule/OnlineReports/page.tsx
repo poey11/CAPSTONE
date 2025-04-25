@@ -14,6 +14,8 @@ export default function OnlineReports() {
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+  const [caseNumberSearch, setCaseNumberSearch] = useState("");
+  const [showCount, setShowCount] = useState<number>(0);
 
   useEffect(() => {
     const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", "Online", setIncidentData);
@@ -28,12 +30,14 @@ export default function OnlineReports() {
   useEffect(() => {
     let data = [...incidentData];
   
-    if (searchQuery) {
-      data = data.filter(
-        (incident) =>
-          typeof incident.caseNumber === "string" && incident.caseNumber.includes(searchQuery)
-      );
-    }
+    // Filter by case number segment
+  if (caseNumberSearch) {
+    data = data.filter((incident) => {
+      const segments = incident.caseNumber?.split(" - ");
+      const lastSegment = segments?.[2]?.trim();
+      return lastSegment?.includes(caseNumberSearch.trim());
+    });
+  }
 
     if (searchNameQuery) {
       const query = searchNameQuery.toLowerCase();
@@ -63,7 +67,7 @@ export default function OnlineReports() {
     });
   
     setFilteredData(data);
-  }, [incidentData, searchQuery, searchNameQuery, selectedStatus]);
+  }, [incidentData, searchQuery, searchNameQuery, selectedStatus, caseNumberSearch]);
   
   const sortData = (data: any[]) => {
     return [...data].sort((a, b) => {
@@ -112,9 +116,14 @@ export default function OnlineReports() {
     if (selectedStatus !== "All") {
       data = data.filter((incident) => incident.status === selectedStatus);
     }
+
+      // Limit
+  if (showCount) {
+    data = data.slice(0, showCount);
+  }
   
     setFilteredData(sortData(data));
-  }, [incidentData, searchQuery, searchNameQuery, selectedStatus, sortOrder]);
+  }, [incidentData, searchQuery, searchNameQuery, selectedStatus, sortOrder, showCount]);
   
   
 
@@ -166,9 +175,9 @@ export default function OnlineReports() {
         <input
           type="text"
           className="search-bar"
-          placeholder="Enter Incident Case Number"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Enter Case Number (e.g. 0001)"
+          value={caseNumberSearch}
+          onChange={(e) => setCaseNumberSearch(e.target.value)}
         />
         <input
           type="text"
@@ -186,58 +195,69 @@ export default function OnlineReports() {
             <option key={status} value={status}>{status}</option>
           ))}
         </select>
-        <select className="featuredStatus" defaultValue="">
-          <option value="" disabled>Show...</option>
+    
+        <select
+          className="featuredStatus"
+          value={showCount}
+          onChange={(e) => setShowCount(Number(e.target.value))}
+        >
+          <option value="0">Show All</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
+          <option value="10">Show 15</option>
         </select>
+
       </div>
 
       <div className="main-section">
-        <table>
-          <thead>
-            <tr>
-            <th>Filed</th>
-              <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
-                Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
-              </th>
-              <th>Complainant's First Name</th>
-              <th>Complainant's Last Name</th>
-              <th>Date Filed</th>
-              <th>Concern</th>
-              <th>Status</th>
-              <th>Actions</th>
+  {currentIncidents.length === 0 ? (
+    <div className="no-result-card">
+      <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+      <p className="no-results-department">No Results Found</p>
+    </div>
+  ) : (
+    <table>
+      <thead>
+        <tr>
+          <th>Filed</th>
+          <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
+            Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
+          </th>
+          <th>Complainant's Full Name</th>
+          <th>Date Filed</th>
+          <th>Concern</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {currentIncidents.map((incident, index) => {
+          const fullName = `${incident.lastname || ""}, ${incident.firstname || ""}`.trim();
+          return (
+            <tr key={index}>
+              <td>{incident.isFiled === true ? "Filed" : "Not Yet Filed"}</td>
+              <td>{incident.caseNumber || "N/A"}</td>
+              <td>{fullName}</td>
+              <td>{incident.dateFiled}</td>
+              <td>{incident.concerns}</td>
+              <td>
+                <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
+                  {incident.status}
+                </span>
+              </td>
+              <td>
+                <div className="actions">
+                  <button className="action-edit" onClick={() => handleViewOnlineReport(incident.id)}>Edit</button>
+                </div>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {currentIncidents.map((incident, index) => (
-              <tr key={index}>
-                <td>{incident.isFiled === true ? "Filed" : "Not Yet Filed"}</td>
-                <td>{incident.caseNumber || "N/A"}</td>
-                <td>{incident.firstname}</td>
-                <td>{incident.lastname}</td>
-                <td>{incident.dateFiled}</td>
-                <td>{incident.concerns}</td>
-                <td>
-                  <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
-                    {incident.status}
-                  </span>
-                </td>
-                <td>
-                  <div className="actions">
-                    <button className="action-edit" onClick={() => handleViewOnlineReport(incident.id)}>Edit</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {filteredData.length === 0 && (
-              <tr>
-                <td colSpan={7} style={{ textAlign: "center" }}>No records found</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          );
+        })}
+      </tbody>
+    </table>
+  )}
+</div>
+
 
       <div className="redirection-section-online">
         <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
