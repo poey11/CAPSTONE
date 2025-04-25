@@ -121,7 +121,7 @@ const BarangayUsers = () => {
             };
         
             const isInBarangay = barangayUsers.some(
-                (user) => user.userid === highlightUserId
+                (user) => user.id === highlightUserId
             );
             
             if (isInBarangay && !showBarangayTableContent) {
