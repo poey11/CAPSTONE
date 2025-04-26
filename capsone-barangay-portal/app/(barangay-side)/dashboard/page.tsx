@@ -3,11 +3,11 @@ import "@/CSS/DashboardModule/dashboard.css";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { db } from "@/app/db/firebase";
-import { doc, collection, getDoc, getDocs, query, where, Timestamp } from "firebase/firestore";
-import {PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid} from "recharts";
+import { doc, collection, getDoc, getDocs, query, where } from "firebase/firestore";
+import {Area, AreaChart, PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 
 export default function Dashboard() {
-
+// for number of siteVisits 
   const [siteVisits, setSiteVisits] = useState<number>(0);
 
   // for residents and users
@@ -20,7 +20,7 @@ export default function Dashboard() {
 
   // for incidents
   const [incidentReportsCount, setIncidentReportsCount] = useState(0);
-  const [incidentReportsByWeek, setIncidentReportsByWeek] = useState<{ monthWeek: string; count: number }[]>([]);
+  const [incidentReportsByMonth, setIncidentReportsByMonth] = useState<{ month: string; VAWC: number; GAD: number; Lupon: number; BCPC: number; Online: number }[]>([]);
   const [pendingIncidentReportsCount, setPendingIncidentReportsCount] = useState(0);
   const [settledIncidentReportsCount, setSettledIncidentReportsCount] = useState(0);
   const [archivedIncidentReportsCount, setArchivedIncidentReportsCount] = useState(0);
@@ -275,58 +275,54 @@ useEffect(() => {
              setLuponReportsCount(lupon);
              setOnlineReportsCount(online);
        
-               const today = new Date();
-               const sevenDaysAgo = new Date();
-               sevenDaysAgo.setDate(today.getDate() - 7);
-       
-
-        // for incident report graph weekly chart
+        // Process reports data
         const incidentReportsData = incidentReportsSnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
             reportID: data.reportID,
-            caseNumber: data.caseNumber,
-            concern: data.concern,
-            dateFiled: data.dateFiled,
-            dateReceived: data.dateReceived,
             department: data.department,
-            file: data.file,
-            location: data.location,
-            nature: data.nature,
-            receivedBy: data.receivedBy,
-            status: data.status,
-            timeFiled:  data.timeFiled,
-            timeReceived: data.timeReceived,
+            dateFiled: data.dateFiled,
           };
         });
 
+        // Sort reports by date
         incidentReportsData.sort((a, b) => new Date(a.dateFiled).getTime() - new Date(b.dateFiled).getTime());
 
-        const incidentweeklyCounts: Record<string, number> = {};
+        // Group by month
+        const incidentMonthlyCounts: Record<string, Record<string, number>> = {};
 
         incidentReportsData.forEach((report) => {
           const reportDate = new Date(report.dateFiled);
 
-          const startOfWeek = new Date(reportDate);
-          startOfWeek.setDate(reportDate.getDate() - ((reportDate.getDay() + 6) % 7)); // Adjust to Monday start
-          startOfWeek.setHours(0, 0, 0, 0);
+          // Create month key as 'MMM yyyy' format
+          const monthKey = reportDate.toLocaleDateString("en-US", { year: "numeric", month: "short" });
 
-          const endOfWeek = new Date(startOfWeek);
-          endOfWeek.setDate(startOfWeek.getDate() + 6);
+          // Initialize the department counts for this month if they don't exist
+          if (!incidentMonthlyCounts[monthKey]) {
+            incidentMonthlyCounts[monthKey] = {
+              VAWC: 0,
+              GAD: 0,
+              Lupon: 0,
+              BCPC: 0,
+              Online: 0,
+            };
+          }
 
-          const weekLabel = `${startOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${
-            endOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-          }`;
-
-          incidentweeklyCounts[weekLabel] = (incidentweeklyCounts[weekLabel] || 0) + 1;
+          // Increment the count for the department
+          incidentMonthlyCounts[monthKey][report.department] += 1;
         });
 
-        const formattedWeeklyData = Object.keys(incidentweeklyCounts).map((week) => ({
-          monthWeek: week, 
-          count: incidentweeklyCounts[week],
-        })).sort((a, b) => new Date(a.monthWeek.split(" - ")[0]).getTime() - new Date(b.monthWeek.split(" - ")[0]).getTime());
-
-        setIncidentReportsByWeek(formattedWeeklyData);
+        const formattedMonthlyData = Object.keys(incidentMonthlyCounts).map((month) => ({
+            month,
+            VAWC: incidentMonthlyCounts[month].VAWC || 0,
+            GAD: incidentMonthlyCounts[month].GAD || 0,
+            Lupon: incidentMonthlyCounts[month].Lupon || 0,
+            BCPC: incidentMonthlyCounts[month].BCPC || 0,
+            Online: incidentMonthlyCounts[month].Online || 0,
+          })).sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+          
+          setIncidentReportsByMonth(formattedMonthlyData);
+          
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       }
@@ -361,7 +357,7 @@ useEffect(() => {
   };
 
   const documentRequestsStatusChart = {
-    title: "Statuses of Document Requests",
+    title: "Statuses of Online Document Requests",
     count: documentRequestsCount,
     data: [
       { name: "Pending", value: documentRequestPendingCount },
@@ -387,7 +383,7 @@ useEffect(() => {
   };
   
   const totalIncidentReportsChart = {
-    title: "Incident Reports Statuses:",
+    title: "Statuses of In-Barangay Incident Reports:",
     count: incidentReportsCount,
     data: [
       { name: "Pending", value: pendingIncidentReportsCount },
@@ -398,17 +394,6 @@ useEffect(() => {
     colors: ["#FF9800", "#03A9F4", "#4CAF50", "#9E9E9E"]
   };
   
-
-  const residentData = [
-    { name: "Resident Users", value: residentUsersCount },
-    { name: "Non-Users", value: Math.max(residentsCount - residentUsersCount, 0) },
-  ];
-
-  const verificationData = [
-    { name: "Verified Residents", value: verifiedResidentsCount },
-    { name: "Unverified Residents", value: Math.max(residentUsersCount - verifiedResidentsCount, 0) },
-  ];
-
   const barangayDemographics = [
     { name: "Senior Citizens", value: seniorCitizensCount },
     { name: "PWD", value: pwdCount },
@@ -419,10 +404,7 @@ useEffect(() => {
 
   // colors for each dashboard
 
-  const DEMOGRAPHICS_COLORS = ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"];
-  const VERIFICATION_COLORS = ["#2196F3", "#F3B50B"];
-  
-  
+  const DEMOGRAPHICS_COLORS = ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"];  
 
   return (
     <main className="main-container">
@@ -721,19 +703,23 @@ useEffect(() => {
 
       <Link href="/dashboard/IncidentModule">
         <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
-          Weekly Incident Reports Chart
+          Monthly Incident Reports Chart
         </p>
       </Link>
       <div className="heatmap-container">
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={incidentReportsByWeek} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <AreaChart data={incidentReportsByMonth} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="monthWeek" textAnchor="end" /> 
+            <XAxis dataKey="month" />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="count" fill="#B3EBF2" name="Weekly Total" />
-          </BarChart>
+            <Area type="monotone" dataKey="VAWC" stroke="#8884d8" fill="#8884d8" />
+            <Area type="monotone" dataKey="GAD" stroke="#82ca9d" fill="#82ca9d" />
+            <Area type="monotone" dataKey="Lupon" stroke="#ffc658" fill="#ffc658" />
+            <Area type="monotone" dataKey="BCPC" stroke="#ff7300" fill="#ff7300" />
+            <Area type="monotone" dataKey="Online" stroke="#ff0000" fill="#ff0000" />
+          </AreaChart>
         </ResponsiveContainer>
       </div>
 
