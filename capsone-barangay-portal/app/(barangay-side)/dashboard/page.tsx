@@ -21,10 +21,18 @@ export default function Dashboard() {
   // for incidents
   const [incidentReportsCount, setIncidentReportsCount] = useState(0);
   const [incidentReportsByMonth, setIncidentReportsByMonth] = useState<{ month: string; VAWC: number; GAD: number; Lupon: number; BCPC: number; Online: number }[]>([]);
+  
+  // for in barangay incidents
   const [pendingIncidentReportsCount, setPendingIncidentReportsCount] = useState(0);
   const [settledIncidentReportsCount, setSettledIncidentReportsCount] = useState(0);
   const [archivedIncidentReportsCount, setArchivedIncidentReportsCount] = useState(0);
   const [resolvedIncidentReportsCount, setResolvedIncidentReportsCount] = useState(0);
+
+  // for online incidents
+  const [onlineIncidentReportsPendingCount, setOnlineIncidentReportsPendingCount] = useState(0);
+  const [onlineIncidentReportsAcknowledgedCount, setOnlineIncidentReportsAcknowledgedCount] = useState(0);
+  
+  // generel incident count
   const [BCPCReportsCount, setBCPCReportsCount] = useState(0);
   const [GADReportsCount, setGADReportsCount] = useState(0);
   const [VAWCReportsCount, setVAWCReportsCount] = useState(0);
@@ -46,9 +54,18 @@ export default function Dashboard() {
     [key: string]: string | number;
   }[]
 >([]);
-  const [documentRequestPendingCount, setdocumentRequestPendingCount] = useState(0);
+
+// for online document request
+  const [documentRequestOnlinePendingCount, setdocumentRequestOnlinePendingCount] = useState(0);
+  const [documentRequestOnlineCompletedCount, setdocumentRequestOnlineCompletedCount] = useState(0);
+  const [documentRequestOnlinePickUpCount, setdocumentRequestOnlinePickUpCount] = useState(0);
+
+
+  // for in barangay document request 
+  const [documentRequestNewCount, setdocumentRequestNewCount] = useState(0);
+  const [documentRequestInProgressCount, setdocumentRequestInProgressCount] = useState(0);
   const [documentRequestCompletedCount, setdocumentRequestCompletedCount] = useState(0);
-  const [documentRequestPickUpCount, setdocumentRequestPickUpCount] = useState(0);
+
 
   const [firstTimeJobSeekersCount, setFirstTimeJobSeekersCount] = useState(0);
   const [barangayPermitsCount, setBarangayPermitsCount] = useState(0);
@@ -138,9 +155,9 @@ useEffect(() => {
         else if (documentStatus === "Completed") documentCompleted++;
       });
 
-      setdocumentRequestPendingCount(documentPending);
-      setdocumentRequestPickUpCount(documentPickUp);
-      setdocumentRequestCompletedCount(documentCompleted);
+      setdocumentRequestOnlinePendingCount(documentPending);
+      setdocumentRequestOnlinePickUpCount(documentPickUp);
+      setdocumentRequestOnlineCompletedCount(documentCompleted);
 
       // for document requests stacked bar chart
 
@@ -360,9 +377,9 @@ useEffect(() => {
     title: "Statuses of Online Document Requests",
     count: documentRequestsCount,
     data: [
-      { name: "Pending", value: documentRequestPendingCount },
-      { name: "For Pick-Up", value: documentRequestPickUpCount },
-      { name: "Completed", value: documentRequestCompletedCount },
+      { name: "Pending", value: documentRequestOnlinePendingCount },
+      { name: "For Pick-Up", value: documentRequestOnlinePickUpCount },
+      { name: "Completed", value: documentRequestOnlineCompletedCount },
     ],
     colors: ["#4CAF50", "#2196F3", "#FF9800"],
   };
