@@ -997,6 +997,7 @@ const handleFileChange = (
                 maxLength={11}  
                 pattern="^[0-9]{11}$" 
                 placeholder="Please enter a valid 11-digit contact number" 
+                 title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX"
               />
             </div>
 
@@ -1126,7 +1127,8 @@ const handleFileChange = (
                   required
                   maxLength={11}  
                   pattern="^[0-9]{11}$" 
-                  placeholder="Please enter a valid 11-digit contact number" 
+                  placeholder="Please enter a valid 11-digit contact number"
+                  title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX"
                 />
               </div>
             </>
