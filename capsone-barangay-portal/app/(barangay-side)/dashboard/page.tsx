@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [verifiedResidentsCount, setVerifiedResidentsCount] = useState(0);
 
   // for incidents
+  const [selectedIncidentType, setSelectedIncidentType] = useState<'inBarangay' | 'online'>('inBarangay');
   const [incidentReportsCount, setIncidentReportsCount] = useState(0);
   const [incidentReportsByMonth, setIncidentReportsByMonth] = useState<{ month: string; VAWC: number; GAD: number; Lupon: number; BCPC: number; Online: number }[]>([]);
   
@@ -47,6 +48,7 @@ export default function Dashboard() {
   const [adultsCount, setAdultsCount] = useState(0);
 
   // for document requests
+  const [selectedRequestType, setSelectedRequestType] = useState<'inBarangay' | 'online'>('inBarangay');
   const [documentRequestsCount, setdocumentRequestsCount] = useState(0);
   const [documentRequestsByWeek, setdocumentRequestsByWeek] = useState<
   {
@@ -59,6 +61,7 @@ export default function Dashboard() {
   const [documentRequestOnlinePendingCount, setdocumentRequestOnlinePendingCount] = useState(0);
   const [documentRequestOnlineCompletedCount, setdocumentRequestOnlineCompletedCount] = useState(0);
   const [documentRequestOnlinePickUpCount, setdocumentRequestOnlinePickUpCount] = useState(0);
+  const [documentRequestOnlineRejectedCount, setdocumentRequestOnlineRejectedCount] = useState(0);
 
 
   // for in barangay document request 
@@ -144,20 +147,40 @@ useEffect(() => {
       setBarangayClearanceCount(clearance);
       setBarangayCertificateCount(certificate)
 
-      let documentPending = 0,
-      documentPickUp = 0,
+
+      let documentOnlinePending = 0,
+      documentOnlinePickUp = 0,
+      documentOnlineCompleted = 0,
+      documentOnlineRejected = 0,
+      documentNew = 0,
+      documentInProgress = 0,
       documentCompleted = 0;
 
       documentRequestsSnapshots.docs.forEach((doc) => {
-        const documentStatus = doc.data().status;
-        if (documentStatus === "Pending") documentPending++;
-        else if (documentStatus === "Pick-Up") documentPickUp++;
-        else if (documentStatus === "Completed") documentCompleted++;
-      });
+        const data = doc.data();
+        const documentStatus = data.status;
+        const accID = data.accID;
+      
+        if (accID) { // if accID exists then online request
+          if (documentStatus === "Pending") documentOnlinePending++;
+          else if (documentStatus === "Pick-Up") documentOnlinePickUp++;
+          else if (documentStatus === "Completed") documentOnlineCompleted++;
+          else if (documentStatus === "Rejected") documentOnlineRejected++;
+        } else {
+            // If accID does NOT exist then in-barangay
+            if (documentStatus === "Pending") documentNew++;
+            else if (documentStatus === "Pick-Up") documentInProgress++;
+            else if (documentStatus === "Completed") documentCompleted++;
+          }
+        });
 
-      setdocumentRequestOnlinePendingCount(documentPending);
-      setdocumentRequestOnlinePickUpCount(documentPickUp);
-      setdocumentRequestOnlineCompletedCount(documentCompleted);
+      setdocumentRequestOnlinePendingCount(documentOnlinePending);
+      setdocumentRequestOnlinePickUpCount(documentOnlinePickUp);
+      setdocumentRequestOnlineCompletedCount(documentOnlineCompleted);
+      setdocumentRequestOnlineRejectedCount(documentOnlineRejected);
+      setdocumentRequestNewCount(documentNew);
+      setdocumentRequestInProgressCount(documentInProgress);
+      setdocumentRequestCompletedCount(documentCompleted);
 
       // for document requests stacked bar chart
 
@@ -194,10 +217,7 @@ useEffect(() => {
 
       setdocumentRequestsByWeek(documentRequestFormattedWeeklyData);
 
-
-
-
-
+      
         // for residents pie charts
         const residentUsersSnapshot = await getDocs(collection(db, "ResidentUsers"));
         setResidentUsersCount(residentUsersSnapshot.size);
@@ -249,101 +269,115 @@ useEffect(() => {
 
 
 
-               // for incident report pie charts
-               const incidentReportsSnapshot = await getDocs(collection(db, "IncidentReports"));
-               setIncidentReportsCount(incidentReportsSnapshot.size);
-       
-               let pending = 0,
-               settled = 0,
-               archived = 0,
-               resolved = 0;
-       
-               incidentReportsSnapshot.docs.forEach((doc) => {
-                 const status = doc.data().status;
-                 if (status === "Pending") pending++;
-                 else if (status === "Settled") settled++;
-                 else if (status === "Archived") archived++;
-                 else if (status === "Resolved") resolved++;
-               });
-         
-               setPendingIncidentReportsCount(pending);
-               setSettledIncidentReportsCount(settled);
-               setArchivedIncidentReportsCount(archived);
-               setResolvedIncidentReportsCount(resolved);
-       
-               let online = 0,
-               gad = 0,
-               bcpc = 0,
-               vawc = 0,
-               lupon = 0;
-       
-           incidentReportsSnapshot.docs.forEach((doc) => {
-               const department = doc.data().department;
-               if (department === "GAD") gad++;
-               else if (department === "BCPC") bcpc++;
-               else if (department === "VAWC") vawc++;
-               else if (department === "Lupon") lupon++;
-               else if (department === "Online") online++;
-             });
-       
-             setBCPCReportsCount(bcpc);
-             setGADReportsCount(gad);
-             setVAWCReportsCount(vawc);
-             setLuponReportsCount(lupon);
-             setOnlineReportsCount(online);
-       
-        // Process reports data
-        const incidentReportsData = incidentReportsSnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            reportID: data.reportID,
-            department: data.department,
-            dateFiled: data.dateFiled,
-          };
+          // for incident report pie charts
+          const incidentReportsSnapshot = await getDocs(collection(db, "IncidentReports"));
+          setIncidentReportsCount(incidentReportsSnapshot.size);
+  
+          let pending = 0,
+          settled = 0,
+          archived = 0,
+          resolved = 0,
+          onlinePending = 0,
+          onlineAcknowledged = 0;
+      
+      incidentReportsSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const status = data.status;
+        const department = data.department;
+      
+        if (department === "Online") {
+          // ONLINE INCIDENT REPORTS
+          if (status === "Pending") onlinePending++;
+          else if (status === "Acknowledged") onlineAcknowledged++;
+        } else {
+          // IN-BARANGAY INCIDENT REPORTS
+          if (status === "Pending") pending++;
+          else if (status === "Settled") settled++;
+          else if (status === "Archived") archived++;
+          else if (status === "Resolved") resolved++;
+        }
+      });
+      
+      setPendingIncidentReportsCount(pending);
+      setSettledIncidentReportsCount(settled);
+      setArchivedIncidentReportsCount(archived);
+      setResolvedIncidentReportsCount(resolved);
+      setOnlineIncidentReportsPendingCount(onlinePending);
+      setOnlineIncidentReportsAcknowledgedCount(onlineAcknowledged);
+  
+          let online = 0,
+          gad = 0,
+          bcpc = 0,
+          vawc = 0,
+          lupon = 0;
+  
+      incidentReportsSnapshot.docs.forEach((doc) => {
+          const department = doc.data().department;
+          if (department === "GAD") gad++;
+          else if (department === "BCPC") bcpc++;
+          else if (department === "VAWC") vawc++;
+          else if (department === "Lupon") lupon++;
+          else if (department === "Online") online++;
         });
-
-        // Sort reports by date
-        incidentReportsData.sort((a, b) => new Date(a.dateFiled).getTime() - new Date(b.dateFiled).getTime());
-
-        // Group by month
-        const incidentMonthlyCounts: Record<string, Record<string, number>> = {};
-
-        incidentReportsData.forEach((report) => {
-          const reportDate = new Date(report.dateFiled);
-
-          // Create month key as 'MMM yyyy' format
-          const monthKey = reportDate.toLocaleDateString("en-US", { year: "numeric", month: "short" });
-
-          // Initialize the department counts for this month if they don't exist
-          if (!incidentMonthlyCounts[monthKey]) {
-            incidentMonthlyCounts[monthKey] = {
-              VAWC: 0,
-              GAD: 0,
-              Lupon: 0,
-              BCPC: 0,
-              Online: 0,
-            };
-          }
-
-          // Increment the count for the department
-          incidentMonthlyCounts[monthKey][report.department] += 1;
-        });
-
-        const formattedMonthlyData = Object.keys(incidentMonthlyCounts).map((month) => ({
-            month,
-            VAWC: incidentMonthlyCounts[month].VAWC || 0,
-            GAD: incidentMonthlyCounts[month].GAD || 0,
-            Lupon: incidentMonthlyCounts[month].Lupon || 0,
-            BCPC: incidentMonthlyCounts[month].BCPC || 0,
-            Online: incidentMonthlyCounts[month].Online || 0,
-          })).sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
-          
-          setIncidentReportsByMonth(formattedMonthlyData);
-          
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      }
+  
+        setBCPCReportsCount(bcpc);
+        setGADReportsCount(gad);
+        setVAWCReportsCount(vawc);
+        setLuponReportsCount(lupon);
+        setOnlineReportsCount(online);
+  
+  // Process reports data
+  const incidentReportsData = incidentReportsSnapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      reportID: data.reportID,
+      department: data.department,
+      dateFiled: data.dateFiled,
     };
+  });
+
+  // Sort reports by date
+  incidentReportsData.sort((a, b) => new Date(a.dateFiled).getTime() - new Date(b.dateFiled).getTime());
+
+  // Group by month
+  const incidentMonthlyCounts: Record<string, Record<string, number>> = {};
+
+  incidentReportsData.forEach((report) => {
+    const reportDate = new Date(report.dateFiled);
+
+    // Create month key as 'MMM yyyy' format
+    const monthKey = reportDate.toLocaleDateString("en-US", { year: "numeric", month: "short" });
+
+    // Initialize the department counts for this month if they don't exist
+    if (!incidentMonthlyCounts[monthKey]) {
+      incidentMonthlyCounts[monthKey] = {
+        VAWC: 0,
+        GAD: 0,
+        Lupon: 0,
+        BCPC: 0,
+        Online: 0,
+      };
+    }
+
+    // Increment the count for the department
+    incidentMonthlyCounts[monthKey][report.department] += 1;
+  });
+
+  const formattedMonthlyData = Object.keys(incidentMonthlyCounts).map((month) => ({
+      month,
+      VAWC: incidentMonthlyCounts[month].VAWC || 0,
+      GAD: incidentMonthlyCounts[month].GAD || 0,
+      Lupon: incidentMonthlyCounts[month].Lupon || 0,
+      BCPC: incidentMonthlyCounts[month].BCPC || 0,
+      Online: incidentMonthlyCounts[month].Online || 0,
+    })).sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+    
+    setIncidentReportsByMonth(formattedMonthlyData);
+    
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    }
+  };
 
     fetchCounts();
   }, []);
@@ -374,18 +408,31 @@ useEffect(() => {
   };
 
   const documentRequestsStatusChart = {
-    title: "Statuses of Online Document Requests",
-    count: documentRequestsCount,
-    data: [
-      { name: "Pending", value: documentRequestOnlinePendingCount },
-      { name: "For Pick-Up", value: documentRequestOnlinePickUpCount },
-      { name: "Completed", value: documentRequestOnlineCompletedCount },
-    ],
+    title: selectedRequestType === 'online' 
+      ? "Statuses of Online Document Requests" 
+      : "Statuses of In-Barangay Document Requests",
+    
+    // Dynamic count based on request type
+    count: selectedRequestType === 'online'
+      ? documentRequestOnlinePendingCount + documentRequestOnlinePickUpCount + documentRequestOnlineCompletedCount + documentRequestOnlineRejectedCount
+      : documentRequestNewCount + documentRequestInProgressCount + documentRequestCompletedCount,
+  
+    data: selectedRequestType === 'online'
+      ? [
+          { name: "Pending", value: documentRequestOnlinePendingCount },
+          { name: "For Pick-Up", value: documentRequestOnlinePickUpCount },
+          { name: "Completed", value: documentRequestOnlineCompletedCount },
+          { name: "Rejected", value: documentRequestOnlineRejectedCount},
+        ]
+      : [
+          { name: "New", value: documentRequestNewCount },
+          { name: "In Progress", value: documentRequestInProgressCount },
+          { name: "Completed", value: documentRequestCompletedCount },
+        ],
+    
     colors: ["#4CAF50", "#2196F3", "#FF9800"],
   };
-
-
-
+  
   const incidentReportsByDepartmentChart = {
     title: "Incident Reports Total by Department",
     count: incidentReportsCount,
@@ -399,18 +446,27 @@ useEffect(() => {
     colors: ["#E91E63", "#8E44AD", "#3498DB", "#27AE60", "#F39C12"]
   };
   
-  const totalIncidentReportsChart = {
-    title: "Statuses of In-Barangay Incident Reports:",
-    count: incidentReportsCount,
-    data: [
-      { name: "Pending", value: pendingIncidentReportsCount },
-      { name: "Settled", value: settledIncidentReportsCount },
-      { name: "Resolved", value: resolvedIncidentReportsCount },
-      { name: "Archived", value: archivedIncidentReportsCount },
-    ],
-    colors: ["#FF9800", "#03A9F4", "#4CAF50", "#9E9E9E"]
-  };
-  
+  const totalIncidentReportsChart = selectedIncidentType === 'inBarangay'
+  ? {
+      title: "Statuses of In-Barangay Incident Reports",
+      count: pendingIncidentReportsCount + settledIncidentReportsCount + resolvedIncidentReportsCount + archivedIncidentReportsCount,
+      data: [
+        { name: "Pending", value: pendingIncidentReportsCount },
+        { name: "Settled", value: settledIncidentReportsCount },
+        { name: "Resolved", value: resolvedIncidentReportsCount },
+        { name: "Archived", value: archivedIncidentReportsCount },
+      ],
+      colors: ["#FF9800", "#03A9F4", "#4CAF50", "#9E9E9E"],
+    }
+  : {
+      title: "Statuses of Online Incident Reports",
+      count: onlineIncidentReportsPendingCount + onlineIncidentReportsAcknowledgedCount,
+      data: [
+        { name: "Pending", value: onlineIncidentReportsPendingCount },
+        { name: "Acknowledged", value: onlineIncidentReportsAcknowledgedCount },
+      ],
+      colors: ["#FF9800", "#03A9F4"],
+    };
   const barangayDemographics = [
     { name: "Senior Citizens", value: seniorCitizensCount },
     { name: "PWD", value: pwdCount },
@@ -551,38 +607,47 @@ useEffect(() => {
           </div>
         </div>
 
-        <div className="metric-card">
-          <div className="card-left-side">
-            <Link href="/dashboard/ServicesModule/InBarangayRequests">
-              <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                {documentRequestsStatusChart.title}
-              </p>
-            </Link>
-            <p className="count">{documentRequestsStatusChart.count}</p>
-          </div>
+    <div className="metric-card">
+      <div className="card-left-side">
+        <Link href={selectedRequestType === 'online' ? "/dashboard/ServicesModule/OnlineRequests" : "/dashboard/ServicesModule/InBarangayRequests"}>
+          <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+            {documentRequestsStatusChart.title}
+          </p>
+        </Link>
+        <p className="count">{documentRequestsStatusChart.count}</p>
 
-          <div className="card-right-side">
-            <ResponsiveContainer width={300} height={300}>
-              <BarChart
-                data={documentRequestsStatusChart.data}
-                layout="vertical"
-                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis type="category" dataKey="name" />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="value" name="Number of Documents">
-                  {documentRequestsStatusChart.data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={documentRequestsStatusChart.colors[index % documentRequestsStatusChart.colors.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+          <button 
+            onClick={() => setSelectedRequestType(prev => prev === 'online' ? 'inBarangay' : 'online')}
+            className="action-next"
+          >
+            Switch
+          </button>
+      </div>
 
+      <div className="card-right-side">
+        <ResponsiveContainer width={300} height={300}>
+          <BarChart
+            data={documentRequestsStatusChart.data}
+            layout="vertical"
+            margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis type="number" />
+            <YAxis type="category" dataKey="name" />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="value" name="Number of Documents">
+              {documentRequestsStatusChart.data.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={documentRequestsStatusChart.colors[index % documentRequestsStatusChart.colors.length]} 
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
 
           <div className="metric-card">
             <div className="card-left-side">
@@ -652,12 +717,19 @@ useEffect(() => {
 
         <div className="metric-card">
           <div className="card-left-side">
-            <Link href="/dashboard/IncidentModule">
-              <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                {totalIncidentReportsChart.title}
-              </p>
-            </Link>
+        <Link href={selectedIncidentType === 'inBarangay' ? "/dashboard/IncidentModule/InBarangayReports" : "/dashboard/IncidentModule/OnlineReports"}>
+          <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+            {totalIncidentReportsChart.title}
+          </p>
+        </Link>
             <p className="count">{totalIncidentReportsChart.count}</p>
+
+              <button 
+                onClick={() => setSelectedIncidentType(prev => prev === 'inBarangay' ? 'online' : 'inBarangay')}
+                className="action-next"
+              >
+                Switch
+              </button>
           </div>
 
           <div className="card-right-side">
@@ -674,13 +746,17 @@ useEffect(() => {
                 <Legend />
                 <Bar dataKey="value" name="Number of Incidents">
                   {totalIncidentReportsChart.data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={totalIncidentReportsChart.colors[index % totalIncidentReportsChart.colors.length]} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={totalIncidentReportsChart.colors[index % totalIncidentReportsChart.colors.length]} 
+                    />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
+
+          </div>
 
       </div> 
 
