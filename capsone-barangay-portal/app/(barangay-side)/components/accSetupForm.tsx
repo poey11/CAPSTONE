@@ -154,7 +154,7 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                                     <option value="" disabled>Select a Department</option>
                                     <option value="GAD">GAD</option>
                                     <option value="BCPC">BCPC</option>
-                                    <option value="LUPON">LUPON</option>
+                                    <option value="Lupon">LUPON</option>
                                     <option value="VAWC">VAWC</option>
                                 </select>
                             </>
