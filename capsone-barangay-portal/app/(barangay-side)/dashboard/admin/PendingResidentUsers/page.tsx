@@ -27,47 +27,55 @@ const PendingResidentUsers = () => {
     const userPosition = session?.user?.position;
     const isAuthorized = ["Assistant Secretary"].includes(userPosition || "");
     const [residentUsers, setResidentUsers] = useState<ResidentUser[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const [showResidentTableContent, setShowResidentTableContent] = useState(false); 
     const searchParams = useSearchParams();
     const highlightUserId = searchParams.get("highlight");
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    
+    const [filteredUser, setFilteredUser] = useState<any[]>([]); // Ensure this is populated
+    const [currentPage, setCurrentPage] = useState(1);
+     const UserPerPage = 10; // Can be changed
 
     useEffect(() => {
-        if (highlightUserId) {
-            setHighlightedId(highlightUserId);
-                
-            const scrollAndHighlight = () => {
-                const targetElement = document.querySelector(`tr.highlighted-row`);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+            if (highlightUserId && residentUsers.length > 0) {
+                setHighlightedId(highlightUserId);
+            
+            
+                const userIndex = filteredUser.findIndex(user => user.id === highlightUserId);
+            
+                if (userIndex !== -1) {
+                    const newPage = Math.floor(userIndex / UserPerPage) + 1;
+            
+                    if (currentPage !== newPage) {
+                        setCurrentPage(newPage);
+                    }
+            
+                    
+                    setTimeout(() => {
+                        const targetElement = document.querySelector(`tr.highlighted-row`);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }
+                    }, 500);
+    
+        
+                    const timeoutId = setTimeout(() => {
+                        setHighlightedId(null);
+    
+                        const params = new URLSearchParams(window.location.search);
+                        params.delete("highlight");
+                        const newUrl = `${window.location.pathname}?${params.toString()}`;
+                        router.replace(newUrl, { scroll: false });
+                    }, 3000);
+    
+                    return () => clearTimeout(timeoutId);
                 }
-            };
-                
-            const isInPending = residentUsers.some(
-                (user) => user.id === highlightUserId && user.status !== "Verified" && user.status !== "Rejected"
-            );
-            const isInVerified = residentUsers.some(
-                (user) => user.id === highlightUserId && user.status === "Verified"
-            );
-                            
-            // Expand the correct section
-            if (isInVerified && !showResidentTableContent) {
-                setShowResidentTableContent(true);
-                setTimeout(scrollAndHighlight, 200); // wait for DOM update
-            } else {
-                setTimeout(scrollAndHighlight, 200);
             }
-                
-            const timeoutId = setTimeout(() => {
-                setHighlightedId(null);
-            }, 5000);
-                
-            return () => clearTimeout(timeoutId);
-        }
-    }, [highlightUserId, residentUsers]);
+        }, [highlightUserId, residentUsers, filteredUser, currentPage]);
+      
     
     useEffect(()=>{               
         const fetchUsers = async() => {
@@ -107,9 +115,7 @@ const PendingResidentUsers = () => {
     
 
  
-        const [filteredUser, setFilteredUser] = useState<any[]>([]); // Ensure this is populated
-        const [currentPage, setCurrentPage] = useState(1);
-        const UserPerPage = 10; // Can be changed
+        
         
     
         // Pagination logic
@@ -181,9 +187,7 @@ const PendingResidentUsers = () => {
                 <h1>Pending Resident Users</h1>
             </div>
 
-            {/* 
-                Will Add Functionality of the Filters
-            */}
+            
                <div className="residentusers-page-section-2">
                 <input
                     type="text"

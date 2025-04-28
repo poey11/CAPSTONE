@@ -99,6 +99,7 @@ export default function ViewInBarangayRequest() {
                     >
                         <option value="new">New</option>
                         <option value="in-progress">In Progress</option>
+                        <option value="claiming">Claiming</option>
                         <option value="completed">Completed</option>
                     </select>
 

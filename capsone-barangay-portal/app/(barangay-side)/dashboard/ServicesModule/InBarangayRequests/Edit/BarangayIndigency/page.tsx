@@ -216,6 +216,7 @@ export default function EditInBarangayRequest() {
                                     >
                                         <option value="New">New</option>
                                         <option value="In Progress">In Progress</option>
+                                        <option value="Claiming">Claiming</option>
                                         <option value="Completed">Completed</option>
                                         
                                     </select>
