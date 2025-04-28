@@ -368,7 +368,7 @@ const incidentForm:React.FC = () => {
 
             <div className="form-group-incident-report">
               <label htmlFor="contactNos" className="form-label-incident-report">
-                Cellphone Number<span className="required">*</span>
+                Phone Number<span className="required">*</span>
                 </label>
               <input
                 type="text"
