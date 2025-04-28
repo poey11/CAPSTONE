@@ -39,13 +39,13 @@ const BarangayUsers = () => {
     const [popupMessage, setPopupMessage] = useState("");
     const [showDeletePopup, setShowDeletePopup] = useState(false);
     const [showAlertPopup, setshowAlertPopup] = useState(false); 
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const [showBarangayTableContent, setShowBarangayTableContent] = useState(false);
     const searchParams = useSearchParams();
     const highlightUserId = searchParams.get("highlight");
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+  
 
     const handleAddBarangayUserClick = () => {
         if (isAuthorized) {
@@ -109,35 +109,48 @@ const BarangayUsers = () => {
     },[])
 
 
+    const [filteredUser, setFilteredUser] = useState<any[]>([]); 
+    const [currentPage, setCurrentPage] = useState(1);
+    const UserPerPage = 10; 
+
+
     useEffect(() => {
-        if (highlightUserId) {
+        if (highlightUserId && barangayUsers.length > 0) {
             setHighlightedId(highlightUserId);
-            
-            const scrollAndHighlight = () => {
-                const targetElement = document.querySelector(`tr.highlighted-row`);
+        
+        
+            const userIndex = filteredUser.findIndex(user => user.id === highlightUserId);
+        
+            if (userIndex !== -1) {
+                const newPage = Math.floor(userIndex / UserPerPage) + 1;
+        
+                if (currentPage !== newPage) {
+                    setCurrentPage(newPage);
+                }
+        
+                
+                setTimeout(() => {
+                    const targetElement = document.querySelector(`tr.highlighted-row`);
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
-                }
-            };
-        
-            const isInBarangay = barangayUsers.some(
-                (user) => user.id === highlightUserId
-            );
-            
-            if (isInBarangay && !showBarangayTableContent) {
-                setShowBarangayTableContent(true);
-                setTimeout(scrollAndHighlight, 200);
-            } else {
-                setTimeout(scrollAndHighlight, 200);
+                    }
+                }, 500);
+
+    
+                const timeoutId = setTimeout(() => {
+                    setHighlightedId(null);
+
+                    const params = new URLSearchParams(window.location.search);
+                    params.delete("highlight");
+                    const newUrl = `${window.location.pathname}?${params.toString()}`;
+                    router.replace(newUrl, { scroll: false });
+                }, 3000);
+
+                return () => clearTimeout(timeoutId);
             }
-            
-            const timeoutId = setTimeout(() => {
-                setHighlightedId(null);
-            }, 5000);
-            
-            return () => clearTimeout(timeoutId);
         }
-    }, [highlightUserId, barangayUsers]);
+    }, [highlightUserId, barangayUsers, filteredUser, currentPage]);
+  
 
     const confirmDelete = async () => {
         if (deleteUserId) {
@@ -160,9 +173,7 @@ const BarangayUsers = () => {
         }
     };
 
-    const [filteredUser, setFilteredUser] = useState<any[]>([]); // Ensure this is populated
-    const [currentPage, setCurrentPage] = useState(1);
-    const UserPerPage = 10; // Can be changed
+    
     
 
     // Pagination logic
@@ -191,9 +202,9 @@ const BarangayUsers = () => {
   };
 
 
-  //FILTERS LOGIC
+//FILTERS LOGIC
   
-  const [nameSearch, setNameSearch] = useState("");
+const [nameSearch, setNameSearch] = useState("");
 const [positionSearch, setPositionSearch] = useState("");
 const [positionDropdown, setPositionDropdown] = useState("");
 const [showCount, setShowCount] = useState(0);
@@ -245,9 +256,7 @@ useEffect(() => {
                 )}
             </div>
 
-            {/* 
-                Will Add Functionality of the Filters
-            */}
+            
           <div className="barangayusers-page-section-2">
 
           <input
@@ -327,7 +336,7 @@ useEffect(() => {
         {currentUser.map((user) => (
             <tr
             key={user.id}
-            className={highlightedId === user.userid ? "highlighted-row" : ""}
+            className={highlightedId === user.id ? "highlighted-row" : ""}
             >
             <td>{user.userid}</td>
             <td>{user.firstName} {user.lastName}</td>

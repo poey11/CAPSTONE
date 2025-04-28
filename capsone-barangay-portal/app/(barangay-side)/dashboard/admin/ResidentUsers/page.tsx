@@ -113,7 +113,7 @@ const ResidentUsers = () => {
 
          useEffect(() => {
                 const filterUsers = () => {
-                    let filtered = residentUsers.filter(user => user.status !== "Verified" && user.status !== "Rejected");
+                    let filtered = residentUsers.filter(user => user.status === "Verified");
         
                     if (searchTerm) {
                         filtered = filtered.filter(user => 
@@ -144,7 +144,7 @@ const ResidentUsers = () => {
     
 
 
-        const [filteredUser, setFilteredUser] = useState<any[]>([]); // Ensure this is populated
+            const [filteredUser, setFilteredUser] = useState<any[]>([]); // Ensure this is populated
             const [currentPage, setCurrentPage] = useState(1);
             const UserPerPage = 10; // Can be changed
             
@@ -180,9 +180,7 @@ const ResidentUsers = () => {
                 <h1>Resident Users</h1>
             </div>
 
-            {/* 
-                Will Add Functionality of the Filters
-            */}
+            
             <div className="residentusers-page-section-2">
                 <input
                     type="text"
