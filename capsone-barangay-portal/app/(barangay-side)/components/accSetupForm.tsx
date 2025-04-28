@@ -30,6 +30,9 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
     const { data: session, update } = useSession();
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const today = new Date().toISOString().split("T")[0]; 
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
     const [user, setUser] = useState<AccountSetupProps>({
         fName: '',
@@ -85,8 +88,27 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
             return;
         }
 
-        if (user.password !== user.confirmPassword) {
-            setError("Passwords do not match!");
+        if (user.password) {
+            if (user.password.length < 6) {
+                setPopupErrorMessage("Password should be at least 6 characters.");
+                setShowErrorPopup(true);
+                setTimeout(() => { setShowErrorPopup(false); }, 3000);
+                return;
+            }
+    
+            if (user.password !== user.confirmPassword) {
+                setPopupErrorMessage("Confirm password must match New password.");
+                setShowErrorPopup(true);
+                setTimeout(() => { setShowErrorPopup(false); }, 3000);
+                return;
+            }
+        }
+
+        // Validate contact number: should be 11 digits and start with "09"
+        if (!/^09\d{9}$/.test(user.phone)) {
+            setPopupErrorMessage( "Invalid contact number. Format: 0917XXXXXXX");
+            setShowErrorPopup(true);
+            setTimeout(() => { setShowErrorPopup(false); }, 3000);
             return;
         }
 
@@ -152,8 +174,8 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                         </div>
                         
                         <div className="form-group-accsetup-form">
-                            <label htmlFor="bday">Birth date:<span className="required">*</span></label>
-                            <input onChange={handleChange} value={user.bday} id="bday" type="date" name="bday" className="form-input-accsetup-form" required />
+                            <label htmlFor="bday">Birthday:<span className="required">*</span></label>
+                            <input onChange={handleChange} value={user.bday} id="bday" type="date" name="bday" max={today} onKeyDown={(e) => e.preventDefault()} className="form-input-accsetup-form" required />
                         </div>
                             
                         <div className="form-group-accsetup-form">
@@ -163,7 +185,15 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                         
                         <div className="form-group-accsetup-form">
                             <label htmlFor="phone">Phone Number:<span className="required">*</span></label>
-                            <input onChange={handleChange} value={user.phone} id="phone" type="text" name="phone" placeholder="Enter Phone Number" className="form-input-accsetup-form" required />
+                            <input value={user.phone} id="phone" type="text" name="phone" placeholder="Enter Phone Number" className="form-input-accsetup-form" required 
+                                onChange={(e) => {
+                                    const input = e.target.value;
+                                    // Only allow digits and limit to 11 characters
+                                    if (/^\d{0,11}$/.test(input)) {
+                                    handleChange(e);
+                                    }
+                                }}
+                            />
                         </div>
                             
                         {/* Display position but don't allow editing */}
@@ -176,7 +206,7 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                         <div className="form-group-accsetup-form">
                             {position === "LF Staff" && (
                                     <>
-                                        <label htmlFor="department">Department: <span className="required">*</span></label>
+                                        <label htmlFor="department">Department:<span className="required">*</span></label>
                                         <select value={user.department} onChange={handleChange} id="department" name="department" className="form-input-accsetup-form" required>
                                             <option value="" disabled>Select a Department</option>
                                             <option value="GAD">GAD</option>
@@ -218,8 +248,6 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                         </div>
                         
 
-                        {error && <p className="error-message">{error}</p>}
-
                         <div className="form-group button-container">
                             <button type="submit" className="submit-button" >Submit</button>
                         </div>
@@ -227,6 +255,16 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                     </form>
                 </div>
             </div>
+            
+
+        {showErrorPopup && (
+                <div className={`accsetup-error-popup-overlay show`}>
+                    <div className="accsetup-popup">
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                        <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
         </main>
     );
 };
