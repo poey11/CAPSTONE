@@ -1,10 +1,11 @@
 "use client";
 import { useState } from "react";
 import { auth } from '../../db/firebase';
-import { signInWithEmailAndPassword,signOut, sendPasswordResetEmail } from 'firebase/auth';
+import { signInWithEmailAndPassword,signOut, sendPasswordResetEmail, fetchSignInMethodsForEmail} from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import {signIn} from 'next-auth/react';
-import { doc, getDoc } from "firebase/firestore";
+import { FirebaseError } from "firebase/app"; 
+import { collection, query, where, getDocs, deleteDoc, doc, getDoc } from "firebase/firestore";
 import { db } from '../../db/firebase';
 
 interface User {
@@ -68,6 +69,8 @@ const rLoginForm:React.FC = () => {
         }
     }
     
+
+    
     const handleLogin = async(e: React.FormEvent<HTMLFormElement>) => {    
         e.preventDefault();
         try{
@@ -81,6 +84,8 @@ const rLoginForm:React.FC = () => {
     
                 if (userDocSnap.exists()) {
                     const userData = userDocSnap.data();
+                    const status = userData.status;
+
                     setFirstName(userData.first_name || "");
                     setLastName(userData.last_name || "");
                 }
@@ -99,24 +104,100 @@ const rLoginForm:React.FC = () => {
             
             
         } catch (error: string | any) {
-            const result = await signIn("credentials", {
+            const result = await signIn("credentials", { 
                 userid: resident.email,
                 password: resident.password,
                 redirect: false,
             });
             
-            setErrorMessage("Invalid email or password. Please try again.");
+            setErrorMessage("Login failed. Please try again.");
             setShowErrorPopup(true);
            
-        }
-     
-       
-            
-       
+        }  
     }
+        
     
 
 
+
+
+    /*
+        Something wrong with the error messages. Palagi dinidisplay "Account does not exist"
+
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+    
+        try {
+            // Try to sign in with email and password
+            const userCredentials = await signInWithEmailAndPassword(auth, resident.email, resident.password);
+            const user = userCredentials.user;
+    
+            // Check if email is verified
+            if (!user.emailVerified) {
+                await signOut(auth);
+                setShowVerifyPopup(true);
+                return;
+            }
+    
+            // Check Firestore doc
+            const userDocRef = doc(db, "ResidentUsers", user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+    
+            if (!userDocSnap.exists()) {
+                await signOut(auth);
+                setErrorMessage("Account does not exist.");
+                setShowErrorPopup(true);
+                return;
+            }
+    
+            // Load user info
+            const userData = userDocSnap.data();
+            setFirstName(userData.first_name || "");
+            setLastName(userData.last_name || "");
+    
+            // Success popup
+            setShowPopup(true);
+            setTimeout(() => {
+                setShowPopup(false);
+                router.push("/");
+            }, 2000);
+    
+        }catch (error: any) {
+            console.error("Login error:", error.code); // Optional: Keep this for debugging
+        
+            if (error.code === "auth/user-not-found") {
+                setErrorMessage("Account does not exist.");
+            } else if (
+                error.code === "auth/wrong-password" || 
+                error.code === "auth/invalid-credential"
+            ) {
+                // Now check if the email exists
+                try {
+                    const methods = await fetchSignInMethodsForEmail(auth, resident.email);
+                    if (methods.length === 0) {
+                        setErrorMessage("Account does not exist.");
+                    } else {
+                        setErrorMessage("Incorrect password. Please try again.");
+                    }
+                } catch {
+                    setErrorMessage("Login failed. Please try again.");
+                }
+            } else if (error.code === "auth/invalid-email") {
+                setErrorMessage("Invalid email format.");
+            } else {
+                setErrorMessage("Login failed. Please try again.");
+            }
+        
+            setShowErrorPopup(true);
+        }
+    };*/
+    
+    
+
+
+    
+
+    
     return (   
 
         <div className="login-container-resident">

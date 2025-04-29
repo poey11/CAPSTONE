@@ -4,7 +4,8 @@ import { useRouter, useSearchParams} from "next/navigation";
 import type { Metadata } from "next";
 import { useState } from "react";
 import { db } from '@/app/db/firebase';
-import { doc, updateDoc, collection, setDoc , getDoc} from "firebase/firestore";
+import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { doc, updateDoc, collection, setDoc , getDoc, deleteDoc} from "firebase/firestore";
 import "@/CSS/User&Roles/ReasonForRejection.css";
 
 
@@ -72,6 +73,25 @@ export default function reasonForRejection() {
                     resubmissionCount: newCount,
                     status: newStatus,
                 });
+
+                if (newStatus === "Rejected") {
+                    try {
+                        const auth = getAuth();
+                        const rejectedEmail = data.email;
+                        const rejectedPassword = data.password;
+    
+                        const userCredentials = await signInWithEmailAndPassword(auth, rejectedEmail, rejectedPassword);
+                        const rejectedUser = userCredentials.user;
+    
+                        await deleteDoc(docRef);
+                        await rejectedUser.delete();
+                        await signOut(auth);
+    
+                        console.log("Deleted rejected user's Auth and Firestore account.");
+                    } catch (deletionError) {
+                        console.error("Error deleting rejected user:", deletionError);
+                    }
+                }
     
                 const notificationRef = doc(collection(db, "Notifications"));
                 await setDoc(notificationRef, {
