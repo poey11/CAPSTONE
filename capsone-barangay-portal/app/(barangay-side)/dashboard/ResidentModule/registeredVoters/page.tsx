@@ -83,6 +83,8 @@ export default function registeredVotersModule() {
       filtered = filtered.slice(0, showCount);
     }
 
+    setCurrentPage(1);
+
     setFilteredResidents(filtered);
   }, [searchName, searchAddress, showCount, residents, sortOrder]);
 

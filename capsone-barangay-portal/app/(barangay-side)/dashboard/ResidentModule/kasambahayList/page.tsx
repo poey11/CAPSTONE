@@ -88,6 +88,8 @@ export default function KasambahayListModule() {
       filtered = filtered.slice(0, showCount);
     }
 
+    setCurrentPage(1);
+
     setFilteredResidents(filtered);
   }, [searchName, searchAddress, showCount, residents, sortOrder]);
 

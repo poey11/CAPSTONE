@@ -27,7 +27,7 @@ export default function Department() {
   const isAuthorized =
   userDepartment === departmentId ||
   (
-    (userPosition === "LT Staff" || userPosition === "Assistant Secretary") &&
+    (userPosition === "LT Staff") &&
     userRole === "Barangay Official"
   );
 
@@ -111,6 +111,8 @@ useEffect(() => {
   if (showCount) {
     filtered = filtered.slice(0, showCount);
   }
+  
+  setCurrentPage(1);
 
   setFilteredIncidents(filtered);
 }, [incidentData, selectedStatus, showCount, sortOrder, caseNumberSearch]);

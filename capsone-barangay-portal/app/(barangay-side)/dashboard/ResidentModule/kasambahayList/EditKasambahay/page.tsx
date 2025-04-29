@@ -77,6 +77,8 @@ export default function EditKasambahay() {
   const [showSavePopup, setShowSavePopup] = useState(false); 
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
   const handleDiscardClick = async () => {
     setShowDiscardPopup(true);
@@ -200,6 +202,23 @@ export default function EditKasambahay() {
   };
   
   const handleSaveClick = async () => {
+
+    const { lastName, firstName, homeAddress, dateOfBirth, age, sex, civilStatus, educationalAttainment, natureOfWork, employmentArrangement, salary, employerName, employerAddress} = formData;
+  
+    if (!lastName || !firstName ||!homeAddress ||!dateOfBirth || !age || !sex || !civilStatus || !educationalAttainment || !natureOfWork || !employmentArrangement || !salary || !employerName || !employerAddress) {
+
+      setPopupErrorMessage("Please fill up all required fields.");
+      setShowErrorPopup(true);
+  
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowErrorPopup(false);
+      
+    }, 3000);
+    
+      return;
+    }
+
     setShowSavePopup(true);
   } 
 
@@ -528,6 +547,13 @@ export default function EditKasambahay() {
                 <div className={`popup-overlay-add show`}>
                     <div className="popup-add">
                         <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+           {showErrorPopup && (
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
+                        <p>{popupErrorMessage}</p>
                     </div>
                 </div>
                 )}
