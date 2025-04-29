@@ -368,7 +368,7 @@ const incidentForm:React.FC = () => {
 
             <div className="form-group-incident-report">
               <label htmlFor="contactNos" className="form-label-incident-report">
-                Cellphone Number<span className="required">*</span>
+                Phone Number<span className="required">*</span>
                 </label>
               <input
                 type="text"
@@ -387,6 +387,7 @@ const incidentForm:React.FC = () => {
                 maxLength={11}  
                 pattern="^[0-9]{11}$" 
                 placeholder="Please enter a valid 11-digit contact number" 
+                title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX"
               />
             </div>
             <div className="form-group-incident-report">
@@ -396,7 +397,7 @@ const incidentForm:React.FC = () => {
             <select
               id="concerns"
               name="concerns"
-              className="resident-module-filter"
+              className="form-input-incident-report"
               value={incidentReport.concerns}
               onChange={handleFormChange}
               required

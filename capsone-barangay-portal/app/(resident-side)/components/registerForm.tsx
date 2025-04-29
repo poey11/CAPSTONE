@@ -267,7 +267,7 @@ const RegisterForm: React.FC = () => {
                     </div>
 
                     <div className="form-group-register-form">
-                    <label htmlFor="phone" className="form-label-register-form" >Phone:<span className="required">*</span> </label>
+                    <label htmlFor="phone" className="form-label-register-form" >Phone Number:<span className="required">*</span> </label>
                     <input  value={resident.phone} onChange={handleChange} id="phone" 
                     type="tel" name="phone"
                     className="form-input-register-form " 

@@ -116,9 +116,8 @@ export default function ResidentModule() {
       filtered = filtered.slice(0, showCount);
     }
 
-    if (showCount) {
-      filtered = filtered.slice(0, showCount);
-    }
+    setCurrentPage(1);
+  
 
     setFilteredResidents(filtered);
   }, [searchName, searchAddress, searchOccupation, residentType, showCount, residents, sortOrder, selectedLocation]);

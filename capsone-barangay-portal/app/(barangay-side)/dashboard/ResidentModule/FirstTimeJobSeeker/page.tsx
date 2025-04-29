@@ -79,10 +79,8 @@ export default function JobSeekerListModule() {
       filtered = filtered.slice(0, showCount);
     }
 
-    if (showCount) {
-      filtered = filtered.slice(0, showCount);
-    }
-
+    setCurrentPage(1);
+    
     setFilteredJobSeekers(filtered);
   }, [searchName, jobSeekers, sortOrder,showCount]);
 

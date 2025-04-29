@@ -167,7 +167,12 @@ export default function SettingsPageResident() {
               setShowPopup(true);
             } catch (error: any) {
             /*error message*/
-              setErrorPopup({ show: true, message: `Failed to update password: Password should be at least 6 characters.` });
+              /*setErrorPopup({ show: true, message: `Failed to update password: Password should be at least 6 characters.` });*/
+              setErrorPopup({
+                show: true,
+                message: `Failed to update password: ${error.message.replace(/^Firebase:\s*/, "")}`,
+              });
+
               setLoading(false);
               return;
             }
@@ -373,6 +378,7 @@ export default function SettingsPageResident() {
                             className="form-input-profile-section" 
                             maxLength={11}  
                             pattern="^[0-9]{11}$" 
+                            title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX "
                         />
                     </div>
 
@@ -381,10 +387,12 @@ export default function SettingsPageResident() {
                         <input 
                             id="status" 
                             name="status"
-                            value={formData.status}  
-                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                            value={
+                                formData.status === "Rejected" || formData.status === "Resubmission"
+                                    ? "Unverified"
+                                    : formData.status
+                            }
                             className="form-input-profile-section" 
-                            required 
                             disabled 
                         />
                     </div>
@@ -411,6 +419,7 @@ export default function SettingsPageResident() {
                                 name="password"
                                 className="form-input-profile-section" 
                                 type="password"
+                                title="Please enter a password with a minimum of 6 characters"
                                 onChange={handleChange}
                             />
                         </div>
@@ -422,6 +431,7 @@ export default function SettingsPageResident() {
                                 name="confirmPassword"
                                 className="form-input-profile-section" 
                                 type="password"
+                                title="Please enter a password with a minimum of 6 characters"
                                 onChange={handleChange}
                             />
                         </div>

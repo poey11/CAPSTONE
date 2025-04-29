@@ -27,47 +27,55 @@ const PendingResidentUsers = () => {
     const userPosition = session?.user?.position;
     const isAuthorized = ["Assistant Secretary"].includes(userPosition || "");
     const [residentUsers, setResidentUsers] = useState<ResidentUser[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const [showResidentTableContent, setShowResidentTableContent] = useState(false); 
     const searchParams = useSearchParams();
     const highlightUserId = searchParams.get("highlight");
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    
+    const [filteredUser, setFilteredUser] = useState<any[]>([]); // Ensure this is populated
+    const [currentPage, setCurrentPage] = useState(1);
+     const UserPerPage = 10; // Can be changed
 
     useEffect(() => {
-        if (highlightUserId) {
-            setHighlightedId(highlightUserId);
-                
-            const scrollAndHighlight = () => {
-                const targetElement = document.querySelector(`tr.highlighted-row`);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+            if (highlightUserId && residentUsers.length > 0) {
+                setHighlightedId(highlightUserId);
+            
+            
+                const userIndex = filteredUser.findIndex(user => user.id === highlightUserId);
+            
+                if (userIndex !== -1) {
+                    const newPage = Math.floor(userIndex / UserPerPage) + 1;
+            
+                    if (currentPage !== newPage) {
+                        setCurrentPage(newPage);
+                    }
+            
+                    
+                    setTimeout(() => {
+                        const targetElement = document.querySelector(`tr.highlighted-row`);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }
+                    }, 500);
+    
+        
+                    const timeoutId = setTimeout(() => {
+                        setHighlightedId(null);
+    
+                        const params = new URLSearchParams(window.location.search);
+                        params.delete("highlight");
+                        const newUrl = `${window.location.pathname}?${params.toString()}`;
+                        router.replace(newUrl, { scroll: false });
+                    }, 3000);
+    
+                    return () => clearTimeout(timeoutId);
                 }
-            };
-                
-            const isInPending = residentUsers.some(
-                (user) => user.id === highlightUserId && user.status !== "Verified" && user.status !== "Rejected"
-            );
-            const isInVerified = residentUsers.some(
-                (user) => user.id === highlightUserId && user.status === "Verified"
-            );
-                            
-            // Expand the correct section
-            if (isInVerified && !showResidentTableContent) {
-                setShowResidentTableContent(true);
-                setTimeout(scrollAndHighlight, 200); // wait for DOM update
-            } else {
-                setTimeout(scrollAndHighlight, 200);
             }
-                
-            const timeoutId = setTimeout(() => {
-                setHighlightedId(null);
-            }, 5000);
-                
-            return () => clearTimeout(timeoutId);
-        }
-    }, [highlightUserId, residentUsers]);
+        }, [highlightUserId, residentUsers, filteredUser, currentPage]);
+      
     
     useEffect(()=>{               
         const fetchUsers = async() => {
@@ -98,7 +106,79 @@ const PendingResidentUsers = () => {
         }
         fetchUsers();           
     },[])
+
+
+    useEffect(() => {
+        const pendingOnly = residentUsers.filter(user => user.status !== "Verified" && user.status !== "Rejected");
+        setFilteredUser(pendingOnly);
+    }, [residentUsers]);
     
+
+ 
+        
+        
+    
+        // Pagination logic
+        const indexOfLastUser = currentPage * UserPerPage;
+        const indexOfFirstUser = indexOfLastUser - UserPerPage;
+        const currentUser = filteredUser.slice(indexOfFirstUser, indexOfLastUser);
+        const totalPages = Math.ceil(filteredUser.length / UserPerPage);
+        
+      const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+      const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+      const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+    
+      const getPageNumbers = () => {
+        const pageNumbersToShow: (number | string)[] = [];
+        for (let i = 1; i <= totalPages; i++) {
+          if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            pageNumbersToShow.push(i);
+          } else if (
+            (i === currentPage - 2 || i === currentPage + 2) &&
+            pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
+          ) {
+            pageNumbersToShow.push("...");
+          }
+        }
+        return pageNumbersToShow;
+      };
+    
+
+ 
+      const [searchTerm, setSearchTerm] = useState<string>('');
+      const [sexFilter, setSexFilter] = useState<string>('');
+      const [statusFilter, setStatusFilter] = useState<string>('');
+      const [showCount, setShowCount] = useState(0);
+
+      useEffect(() => {
+        const filterUsers = () => {
+            let filtered = residentUsers.filter(user => user.status !== "Verified" && user.status !== "Rejected");
+
+            if (searchTerm) {
+                filtered = filtered.filter(user => 
+                    user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                    user.last_name.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }
+
+            if (sexFilter) {
+                filtered = filtered.filter(user => user.sex === sexFilter);
+            }
+
+            if (statusFilter) {
+                filtered = filtered.filter(user => user.status === statusFilter);
+            }
+
+             // Limit the number of results
+            if (showCount > 0) {
+                filtered = filtered.slice(0, showCount);
+            }
+
+            setFilteredUser(filtered);
+        };
+
+        filterUsers();
+    }, [residentUsers, searchTerm, sexFilter, statusFilter, showCount]);
 
 
     return(
@@ -107,38 +187,42 @@ const PendingResidentUsers = () => {
                 <h1>Pending Resident Users</h1>
             </div>
 
-            {/* 
-                Will Add Functionality of the Filters
-            */}
-            <div className="residentusers-page-section-2">
+            
+               <div className="residentusers-page-section-2">
                 <input
                     type="text"
                     className="residentusers-page-filter"
                     placeholder="Search by Name"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                 />
-
-                <select className="residentusers-page-filter">
-                    <option value="">Sex</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select> 
-
-                <input
-                    type="text"
-                    className="residentusers-page-filter"
-                    placeholder="Search by Address"
-                />
-
-                <select className="residentusers-page-filter">
-                    <option value="">Status</option>
-                    <option value="Unverified">Unverified</option>
-                    <option value="Resubmission">Resubmission</option>
-                </select> 
 
                 <select
                     className="residentusers-page-filter"
+                    value={sexFilter}
+                    onChange={(e) => setSexFilter(e.target.value)}
                 >
-                    <option value="0">Show All</option>
+                    <option value="">Sex</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+
+                <select
+                    className="residentusers-page-filter"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                    <option value="">Status</option>
+                    <option value="Unverified">Unverified</option>
+                    <option value="Resubmission">Resubmission</option>
+                </select>
+
+                <select
+                    className="residentusers-page-filter"
+                    value={showCount}
+                    onChange={(e) => setShowCount(Number(e.target.value))}
+                >
+               <option value="0">Show All</option>
                     <option value="5">Show 5</option>
                     <option value="10">Show 10</option>
                 </select>
@@ -147,10 +231,14 @@ const PendingResidentUsers = () => {
             <div className="residentusers-page-main-section">
                 <>
 
-                    {loading && <p>Loading residents...</p>}
-                    {error && <p className="error">{error}</p>}
+          
+                    {currentUser.length === 0 ? (
 
-                    {!loading && !error && (
+                        <div className="no-result-card">
+                        <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+                        <p className="no-results-department">No Results Found</p>
+                        </div>
+                        ) : (
                         <table>
                             <thead>
                                 <tr>
@@ -166,7 +254,8 @@ const PendingResidentUsers = () => {
                             </thead>
 
                             <tbody>
-                                {residentUsers.filter(user => user.status !== "Verified" && user.status !== "Rejected").map((user) => (
+                            {currentUser.map((user) => (
+
                                     <tr
                                         key={user.id}
                                         className={highlightedId === user.id ? "highlighted-row" : ""}
@@ -187,7 +276,7 @@ const PendingResidentUsers = () => {
                                             <button 
                                                 className="admin-action-view"
                                                 onClick={() => router.push(`/dashboard/admin/viewResidentUser?id=${user.id}`)}
-                                            >
+                                            >   
                                                 View
                                             </button>
                                          </div>
@@ -199,6 +288,21 @@ const PendingResidentUsers = () => {
                     )}
                 </>
             </div>
+
+        <div className="redirection-section-users">
+            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+            {getPageNumbers().map((number, index) => (
+            <button
+                key={index}
+                onClick={() => typeof number === 'number' && paginate(number)}
+                className={currentPage === number ? "active" : ""}
+            >
+                {number}
+            </button>
+            ))}
+            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+        </div>
+
         </main>
     );
 }

@@ -151,25 +151,37 @@ export default function AddResident() {
   const handleSubmitClick = async () => {
     const { 
       firstName, lastName, address, generalLocation, dateOfBirth, 
-      age, sex, civilStatus, contactNumber 
+      age, sex, civilStatus, contactNumber,  emailAddress
   } = formData;
   
     if (!firstName || !lastName || !address || !generalLocation || !dateOfBirth || !age || !sex || !civilStatus || !contactNumber) {
-
       setPopupErrorMessage("Please fill up all required fields.");
       setShowErrorPopup(true);
-  
-    // Hide the popup after 3 seconds
-    setTimeout(() => {
-      setShowErrorPopup(false);
-      
-    }, 3000);
-    
+      setTimeout(() => setShowErrorPopup(false), 3000);
       return;
     }
-  
+    
+    // Phone number validation logic
+    const phoneRegex = /^09\d{9}$/;
+    if (!phoneRegex.test(contactNumber)) {
+      setPopupErrorMessage("Invalid contact number. Format should be: 0917XXXXXXX");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!emailRegex.test(emailAddress)) {
+      setPopupErrorMessage( "Invalid email address. Preferred format: example@domain.com" );
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
+
     setShowSubmitPopup(true);
-  };
+};
+
 
 const confirmSubmit = async () => {
   setShowSubmitPopup(false);
