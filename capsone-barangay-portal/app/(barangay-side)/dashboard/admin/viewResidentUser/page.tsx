@@ -4,10 +4,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "../../../../db/firebase";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, updateDoc, collection, setDoc} from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, setDoc, getDocs } from "firebase/firestore";
 import { useSession } from "next-auth/react";
-import { label } from "framer-motion/m";
-
 
 export default function ViewUser() {
 
@@ -26,13 +24,54 @@ export default function ViewUser() {
 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
-    const [showAcceptPopup, setShowAcceptPopup] = useState(false); 
-    const [showAlertPopup, setshowAlertPopup] = useState(false); 
+    const [showAlertPopup, setshowAlertPopup] = useState(false);
 
-    
+    const [residents, setResidents] = useState<any[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [showResidentsPopup, setShowResidentsPopup] = useState(false);
+    const [linkedResidentName, setLinkedResidentName] = useState<string>("N/A");
+
+
     const handleRejectClick = (userId: string ) => {
         router.push(`/dashboard/admin/reasonForReject?id=${userId}`);
     };
+
+    useEffect(() => {
+        if (!residentUserId) return;
+    
+        const fetchResident = async () => {
+            try {
+                const docRef = doc(db, "ResidentUsers", residentUserId);
+                const docSnap = await getDoc(docRef);
+    
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    setResidentUserData(userData);
+    
+                    // If the user has a linked resident ID, fetch their full name
+                    if (userData.residentID) {
+                        const linkedResidentRef = doc(db, "Residents", userData.residentID);
+                        const linkedResidentSnap = await getDoc(linkedResidentRef);
+    
+                        if (linkedResidentSnap.exists()) {
+                            const linkedResidentData = linkedResidentSnap.data();
+                            const fullName = `${linkedResidentData.firstName || ""} ${linkedResidentData.middleName || ""} ${linkedResidentData.lastName || ""}`.trim();
+                            setLinkedResidentName(fullName);
+                        }
+                    }
+                } else {
+                    console.error("Resident User not found");
+                }
+            } catch (error) {
+                console.error("Error fetching Resident User:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+    
+        fetchResident();
+    }, [residentUserId]);
+    
 
     useEffect(() => {
         if (!residentUserId) return;
@@ -66,11 +105,12 @@ export default function ViewUser() {
         { label: "Contact Number", key: "phone" },
         { label: "Sex", key: "sex" },
         { label: "Email", key: "email" },
-        {label: "Date of Birth", key: "dateOfBirth" },
+        { label: "Date of Birth", key: "dateOfBirth" },
         { label: "Address", key: "address" },
         { label: "Created At", key: "createdAt" },
         { label: "Role", key: "role" },
         { label: "Status", key: "status" },
+        { label: "Linked Resident", key: "residentID" },
     ];
 
     const handleBack = () => {
@@ -81,46 +121,56 @@ export default function ViewUser() {
         }
     };
 
-    const handleAcceptClick = (userId: string) => {
-        setShowAcceptPopup(true);
+    const handleAcceptClick = async (userId: string) => {
         setSelectedUserId(userId);
+        setShowResidentsPopup(true);
+        try {
+            const residentsCollection = collection(db, "Residents");
+            const residentsSnapshot = await getDocs(residentsCollection);
+            const residentsList = residentsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setResidents(residentsList);
+        } catch (error) {
+            console.error("Error fetching residents:", error);
+        }
     };
 
-    const confirmAccept = async () => {
-            if (!selectedUserId) return;
-        
-            try {
-                await updateDoc(doc(db, "ResidentUsers", selectedUserId), {
-                    status: "Verified",
+    const handleResidentSelect = (residentId: string) => {
+        const confirmLink = window.confirm("Are you sure you want to link this resident?");
+        if (confirmLink && selectedUserId) {
+            updateDoc(doc(db, "ResidentUsers", selectedUserId), {
+                residentID: residentId,
+                status: "Verified"
+            })
+            .then(async () => {
+                const notificationRef = doc(collection(db, "Notifications"));
+                await setDoc(notificationRef, {
+                    residentID: selectedUserId,
+                    message: `Your account is now VERIFIED and linked to your resident record.`,
+                    transactionType: "Verification",
+                    timestamp: new Date(),
+                    isRead: false,
                 });
-        
-                setPopupMessage("User accepted successfully!");
+
+                setPopupMessage("User accepted and linked successfully!");
                 setShowPopup(true);
 
-            // Create a notification for the resident
-            const notificationRef = doc(collection(db, "Notifications"));
-            await setDoc(notificationRef, {
-            residentID: selectedUserId, // == user id
-            message: `Your account is now VERIFIED.`,
-            transactionType: "Verification",
-            timestamp: new Date(),
-            isRead: false,
-            });
-                
-                // Hide the popup after 3 seconds
                 setTimeout(() => {
                     setShowPopup(false);
-                    //router.push("/dashboard/admin");
                     router.push(`/dashboard/admin/ResidentUsers?highlight=${selectedUserId}`);
                 }, 3000);
-            } catch (error) {
-                console.error("Error updating user status:", error);
-            } finally {
-                setShowAcceptPopup(false);
+            })
+            .catch(error => {
+                console.error("Error linking resident:", error);
+            })
+            .finally(() => {
+                setShowResidentsPopup(false);
                 setSelectedUserId(null);
-            }
-        };
-
+            });
+        }
+    };
 
     return (
         <main className="viewresident-main-container">
@@ -169,22 +219,35 @@ export default function ViewUser() {
                             </>
                         )}
                         </div>
-                        )}
-                    </div>
+                    )}
+                </div>
 
-                
-                {residentUserFields.map((field) => (
-                    <div className="viewresident-details-section" key={field.key}>
-                        <div className="viewresident-title">
-                            <p>{field.label}</p>
+                    {residentUserFields.map((field) => (
+                        <div className="viewresident-details-section" key={field.key}>
+                            <div className="viewresident-title">
+                                <p>{field.label}</p>
+                            </div>
+                            <div className={`viewresident-description ${field.key === "residentNumber" ? "disabled-field" : ""}`}>
+                                {field.key === "residentID" ? (
+                                    ResidentUserData.residentID ? (
+                                        <a 
+                                            href={`/dashboard/ResidentModule/ViewResident?id=${ResidentUserData.residentID}`} 
+                                            className="linked-resident-link" 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                        >
+                                            {linkedResidentName}
+                                        </a>
+                                    ) : (
+                                        <p>N/A</p>
+                                    )
+                                ) : (
+                                    <p>{ResidentUserData[field.key] ?? "N/A"}</p>
+                                )}
+                            </div>
                         </div>
-                        <div className={`viewresident-description ${field.key === "residentNumber" ? "disabled-field" : ""}`}>
-                            <p>{ResidentUserData[field.key] ?? "N/A"}</p>
-                        </div>
-                    </div>
-                ))}
+                    ))}
 
-                
                 {ResidentUserData.status === "Resubmission" && (
                     <div className="viewresident-details-section">
                         <div className="viewresident-title">
@@ -196,7 +259,6 @@ export default function ViewUser() {
                     </div>
                 )}
 
-                
                 <div className="viewresident-details-section">
                     <div className="viewresident-title">
                         <p>Valid ID</p>
@@ -222,70 +284,112 @@ export default function ViewUser() {
                             <p>No ID uploaded</p>
                         )}
                     </div>
-
-                
-
                 </div>
 
                 {ResidentUserData.reupload && (
-                        <div className="viewresident-details-section">
-                            <div className="viewresident-title">
-                                <p>Reupload Valid ID</p>
-                            </div>
-
-                            <div className="viewresident-description">
-                                <div className="resident-id-container">
-                                    <img
-                                        src={ResidentUserData.reupload}
-                                        alt="Resident's Valid ID"
-                                        className="resident-id-image"
-                                    />
-                                    <a
-                                        href={ResidentUserData.reupload}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="view-image-link"
-                                    >
-                                        View Image
-                                    </a>
-                                </div>
+                    <div className="viewresident-details-section">
+                        <div className="viewresident-title">
+                            <p>Reupload Valid ID</p>
+                        </div>
+                        <div className="viewresident-description">
+                            <div className="resident-id-container">
+                                <img
+                                    src={ResidentUserData.reupload}
+                                    alt="Resident's Reuploaded ID"
+                                    className="resident-id-image"
+                                />
+                                <a
+                                    href={ResidentUserData.reupload}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="view-image-link"
+                                >
+                                    View Image
+                                </a>
                             </div>
                         </div>
-                    )}
-
+                    </div>
+                )}
             </div>
 
-            {showAcceptPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
-                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
-                                <p>Are you sure you want to accept this user?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowAcceptPopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmAccept} className="yes-button">Yes</button>
-                                </div> 
-                            </div>
-                        </div>
-            )}
+            {/* Popup for selecting Residents */}
+            {showResidentsPopup && (
+                <div className="confirmation-popup-overlay">
+                    <div className="resident-table-popup">
+                    <h2>Select Resident to Link</h2>
+                    
+                    {/* Search input remains fixed at the top */}
+                    <div className="resident-search-container">
+                        <input
+                        type="text"
+                        placeholder="Search Resident Name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="resident-search-input"
+                        />
+                    </div>
 
+                    {/* Scrollable table container */}
+                    <div className="resident-table-container">
+                        <table className="resident-table">
+                        <thead>
+                            <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {residents
+                            .filter(resident =>
+                                `${resident.firstName} ${resident.lastName}`
+                                .toLowerCase()
+                                .includes(searchTerm.toLowerCase())
+                            )
+                            .map(resident => (
+                                <tr
+                                key={resident.id}
+                                onClick={() => handleResidentSelect(resident.id)}
+                                className="resident-table-row"
+                                >
+                                <td>{resident.firstName}</td>
+                                <td>{resident.lastName}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                        </table>
+                    </div>
+
+                    <button
+                        onClick={() => setShowResidentsPopup(false)}
+                        className="resident-cancel-button"
+                    >
+                        Cancel
+                    </button>
+                    </div>
+                </div>
+                )}
+
+  
+
+            {/* Success Popup */}
             {showPopup && (
                 <div className={`popup-overlay show`}>
                     <div className="popup">
-                    <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                        <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                         <p>{popupMessage}</p>
                     </div>
                 </div>
             )}
 
             {showAlertPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
-                                <p>{popupMessage}</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setshowAlertPopup(false)} className="no-button">Continue</button>
-                                </div> 
-                            </div>
-                        </div>
+                <div className="confirmation-popup-overlay">
+                    <div className="confirmation-popup">
+                        <p>{popupMessage}</p>
+                        <div className="yesno-container">
+                            <button onClick={() => setshowAlertPopup(false)} className="no-button">Continue</button>
+                        </div> 
+                    </div>
+                </div>
             )}
         </main>
     );
