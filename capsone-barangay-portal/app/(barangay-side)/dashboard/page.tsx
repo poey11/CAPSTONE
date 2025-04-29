@@ -502,6 +502,14 @@ useEffect(() => {
         </div>
       </div>
 
+      <div className="metric-card">
+        <div className="card-left-side">
+            <p className="title">
+              Placeholder for Total Barangay Officials****
+            </p>
+          <p className="count">{siteVisits}</p>
+        </div>
+      </div>
         <div className="summaries-section">
 
         <div className="metric-card">
