@@ -528,346 +528,382 @@ useEffect(() => {
           </div>
         </div>
 
+       
+        <div className="summaries-section">
 
+          <div className="metric-card">
+            <div className="card-left-side">
+              <Link href="/dashboard/ResidentModule">
+                <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                  {barangayPopulationChart.title}
+                </p>
+              </Link>
+              <p className="count">{barangayPopulationChart.count}</p>
+            </div>
+
+            <div className="card-right-side">
+              <ResponsiveContainer width={300} height={300}>
+                <BarChart
+                  data={barangayPopulationChart.data}
+                  layout="vertical"
+                  margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis type="category" dataKey="name" />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="value" name="Number of Residents">
+                    {barangayPopulationChart.data.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={barangayPopulationChart.colors[index % barangayPopulationChart.colors.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="metric-card">
+            <div className="card-left-side">
+              <Link href="/dashboard/ResidentModule">
+                <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                  {barangayDemographicsChart.title}
+                </p>
+              </Link>
+              <p className="count">{barangayDemographicsChart.count}</p>
+            </div>
+
+            <div className="card-right-side">
+              <ResponsiveContainer width={300} height={350}>
+                <PieChart>
+                  <Pie
+                    data={barangayDemographicsChart.data}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    innerRadius={50}
+                    label
+                  >
+                    {barangayDemographicsChart.data.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={barangayDemographicsChart.colors[index % barangayDemographicsChart.colors.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="metric-card">
+
+
+            <div className="card-left-side">
+              <Link href="/dashboard/ServicesModule/Appointments">
+                <p
+                  className="title"
+                  style={{ cursor: "pointer", textDecoration: "underline" }}
+                >
+                    Pending or Completed Appointments(to be implemented):
+                </p>
+              </Link>
+              <p className="count">
+                {residentsCount}
+              </p>
+            </div>
+
+            <div className="card-right-side">
+              <ResponsiveContainer width={300} height={350}>
+                <PieChart>
+                  <Pie
+                    data={barangayDemographics}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                  >
+                    {barangayDemographics.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={DEMOGRAPHICS_COLORS[index % DEMOGRAPHICS_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+
+
+
+          </div> 
+
+          <hr/>
+
+   
         <div className="services-section">
 
-            <div className="services-section-left-side">
+          <div className="services-first-section">
 
-                    <div className="metric-card">
-                    <div className="card-left-side">
-                    <Link href="/dashboard/ServicesModule/InBarangayRequests">
-                    <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                        Document Requests Breakdown</p>
-                      </Link>
+
+                <div className="services-section-left-side">
+
+                        <div className="metric-card">
+                        <div className="card-left-side">
+                        <Link href="/dashboard/ServicesModule/InBarangayRequests">
+                        <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                            Document Requests Breakdown</p>
+                          </Link>
+                        </div>
+                        <div className="card-right-side">
+                          <ResponsiveContainer width={300} height={450}>
+                            <PieChart>
+                              <Pie
+                                data={documentRequestsTypeData}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={100}
+                                fill="#8884d8"
+                                label
+                              >
+                                {documentRequestsTypeData.map((entry: { name: string; value: number }, index: number) => (
+                                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                              </Pie>
+                              <Tooltip />
+                              <Legend />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+
                     </div>
+
+                    <div className="services-section-right-side">
+
+                                      
+                  <div className="metric-card">
+                    <div className="card-left-side">
+                      <Link href={selectedRequestType === 'online' ? "/dashboard/ServicesModule/OnlineRequests" : "/dashboard/ServicesModule/InBarangayRequests"}>
+                        <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                          {documentRequestsStatusChart.title}
+                        </p>
+                      </Link>
+                      <p className="count">{documentRequestsStatusChart.count}</p>
+
+                        <button 
+                          onClick={() => setSelectedRequestType(prev => prev === 'online' ? 'inBarangay' : 'online')}
+                          className="action-next"
+                        >
+                          Switch
+                        </button>
+                    </div>
+
                     <div className="card-right-side">
-                      <ResponsiveContainer width={300} height={450}>
-                        <PieChart>
-                          <Pie
-                            data={documentRequestsTypeData}
-                            dataKey="value"
-                            nameKey="name"
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={100}
-                            fill="#8884d8"
-                            label
-                          >
-                            {documentRequestsTypeData.map((entry: { name: string; value: number }, index: number) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
+                      <ResponsiveContainer width={700} height={300}>
+                        <BarChart
+                          data={documentRequestsStatusChart.data}
+                          layout="vertical"
+                          margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis type="number" />
+                          <YAxis type="category" dataKey="name" />
                           <Tooltip />
                           <Legend />
-                        </PieChart>
+                          <Bar dataKey="value" name="Number of Documents">
+                            {documentRequestsStatusChart.data.map((entry, index) => (
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={documentRequestsStatusChart.colors[index % documentRequestsStatusChart.colors.length]} 
+                              />
+                            ))}
+                          </Bar>
+                        </BarChart>
                       </ResponsiveContainer>
                     </div>
                   </div>
 
+                  
                 </div>
+            </div>
 
-                <div className="services-section-right-side">
+            <div className="services-second-section">
+                      
+                  <Link href="/dashboard/ServicesModule/InBarangayRequests">
+              <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                Weekly Barangay Requests Chart
+              </p>
+            </Link>
+            <div className="heatmap-container">
+              <ResponsiveContainer width={1000} height={300}>
+                <BarChart data={documentRequestsByWeek}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="monthWeek" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="First Time Jobseeker" stackId="a" fill="#4CAF50" />
+                  <Bar dataKey="Barangay Clearance" stackId="a" fill="#2196F3" />
+                  <Bar dataKey="Barangay Indigency" stackId="a" fill="#FF9800" />
+                  <Bar dataKey="Barangay ID" stackId="a" fill="#9C27B0" />
+                  <Bar dataKey="Barangay Certificate" stackId="a" fill="#00BCD4" />
 
-                                  
-              <div className="metric-card">
-                <div className="card-left-side">
-                  <Link href={selectedRequestType === 'online' ? "/dashboard/ServicesModule/OnlineRequests" : "/dashboard/ServicesModule/InBarangayRequests"}>
-                    <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                      {documentRequestsStatusChart.title}
-                    </p>
-                  </Link>
-                  <p className="count">{documentRequestsStatusChart.count}</p>
-
-                    <button 
-                      onClick={() => setSelectedRequestType(prev => prev === 'online' ? 'inBarangay' : 'online')}
-                      className="action-next"
-                    >
-                      Switch
-                    </button>
-                </div>
-
-                <div className="card-right-side">
-                  <ResponsiveContainer width={700} height={300}>
-                    <BarChart
-                      data={documentRequestsStatusChart.data}
-                      layout="vertical"
-                      margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" />
-                      <YAxis type="category" dataKey="name" />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="value" name="Number of Documents">
-                        {documentRequestsStatusChart.data.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={documentRequestsStatusChart.colors[index % documentRequestsStatusChart.colors.length]} 
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
+                  {/* Dynamically render all "Permit" related bars */}
+                  {Object.keys(documentRequestsByWeek[0] || {})
+                    .filter((key) => key.includes("Permit"))
+                    .map((key, index) => (
+                      <Bar
+                        key={key}
+                        dataKey={key}
+                        stackId="a"
+                        fill="#F44336"
+                      />
+                    ))}
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
               
+
             </div>
 
         </div>
 
-        <div className="summaries-section">
 
-        <div className="metric-card">
-          <div className="card-left-side">
-            <Link href="/dashboard/ResidentModule">
-              <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                {barangayPopulationChart.title}
-              </p>
-            </Link>
-            <p className="count">{barangayPopulationChart.count}</p>
-          </div>
+        <hr/>
 
-          <div className="card-right-side">
-            <ResponsiveContainer width={300} height={300}>
-              <BarChart
-                data={barangayPopulationChart.data}
-                layout="vertical"
-                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis type="category" dataKey="name" />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="value" name="Number of Residents">
-                  {barangayPopulationChart.data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={barangayPopulationChart.colors[index % barangayPopulationChart.colors.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
 
-        <div className="metric-card">
-          <div className="card-left-side">
-            <Link href="/dashboard/ResidentModule">
-              <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                {barangayDemographicsChart.title}
-              </p>
-            </Link>
-            <p className="count">{barangayDemographicsChart.count}</p>
-          </div>
+      <div className="services-section">
 
-          <div className="card-right-side">
-            <ResponsiveContainer width={300} height={300}>
-              <PieChart>
-                <Pie
-                  data={barangayDemographicsChart.data}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  innerRadius={50}
-                  label
-                >
-                  {barangayDemographicsChart.data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={barangayDemographicsChart.colors[index % barangayDemographicsChart.colors.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+          <div className="services-first-section">
 
-        <div className="metric-card">
-          
-          <div className="card-left-side">
-            <Link href="/dashboard/ServicesModule/Appointments">
-              <p
-                className="title"
-                style={{ cursor: "pointer", textDecoration: "underline" }}
-              >
-                  Pending or Completed Appointments(to be implemented):
-              </p>
-            </Link>
-            <p className="count">
-              {residentsCount}
-            </p>
-          </div>
 
-          <div className="card-right-side">
-            <ResponsiveContainer width={300} height={300}>
-              <PieChart>
-                <Pie
-                  data={barangayDemographics}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                >
-                  {barangayDemographics.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={DEMOGRAPHICS_COLORS[index % DEMOGRAPHICS_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+                <div className="services-section-left-side">
 
-         <div className="metric-card">
-          <div className="card-left-side">
-            <Link href="/dashboard/IncidentModule">
-              <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                {incidentReportsByDepartmentChart.title}
-              </p>
-            </Link>
-            <p className="count">{incidentReportsByDepartmentChart.count}</p>
-          </div>
+                        <div className="metric-card">
+                  <div className="card-left-side">
+                    <Link href="/dashboard/IncidentModule">
+                      <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                        {incidentReportsByDepartmentChart.title}
+                      </p>
+                    </Link>
+                    <p className="count">{incidentReportsByDepartmentChart.count}</p>
+                  </div>
 
-          <div className="card-right-side">
-            <ResponsiveContainer width={300} height={300}>
-              <PieChart>
-                <Pie
-                  data={incidentReportsByDepartmentChart.data}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  innerRadius={50} // doughnut style
-                  label
-                >
-                  {incidentReportsByDepartmentChart.data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={incidentReportsByDepartmentChart.colors[index % incidentReportsByDepartmentChart.colors.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+                  <div className="card-right-side">
+                    <ResponsiveContainer width={300} height={300}>
+                      <PieChart>
+                        <Pie
+                          data={incidentReportsByDepartmentChart.data}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={100}
+                          innerRadius={50} // doughnut style
+                          label
+                        >
+                          {incidentReportsByDepartmentChart.data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={incidentReportsByDepartmentChart.colors[index % incidentReportsByDepartmentChart.colors.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
 
-        <div className="metric-card">
-          <div className="card-left-side">
-        <Link href={selectedIncidentType === 'inBarangay' ? "/dashboard/IncidentModule/InBarangayReports" : "/dashboard/IncidentModule/OnlineReports"}>
-          <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-            {totalIncidentReportsChart.title}
-          </p>
-        </Link>
-            <p className="count">{totalIncidentReportsChart.count}</p>
 
-              <button 
-                onClick={() => setSelectedIncidentType(prev => prev === 'inBarangay' ? 'online' : 'inBarangay')}
-                className="action-next"
-              >
-                Switch
-              </button>
-          </div>
+                    </div>
 
-          <div className="card-right-side">
-            <ResponsiveContainer width={300} height={300}>
-              <BarChart
-                data={totalIncidentReportsChart.data}
-                layout="vertical"
-                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis type="category" dataKey="name" />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="value" name="Number of Incidents">
-                  {totalIncidentReportsChart.data.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={totalIncidentReportsChart.colors[index % totalIncidentReportsChart.colors.length]} 
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+                    <div className="services-section-right-side">
 
-          </div>
+                      <div className="metric-card">
+                          <div className="card-left-side">
+                        <Link href={selectedIncidentType === 'inBarangay' ? "/dashboard/IncidentModule/InBarangayReports" : "/dashboard/IncidentModule/OnlineReports"}>
+                          <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                            {totalIncidentReportsChart.title}
+                          </p>
+                        </Link>
+                            <p className="count">{totalIncidentReportsChart.count}</p>
 
-      </div> 
+                              <button 
+                                onClick={() => setSelectedIncidentType(prev => prev === 'inBarangay' ? 'online' : 'inBarangay')}
+                                className="action-next"
+                              >
+                                Switch
+                              </button>
+                          </div>
 
-      <Link href="/dashboard/ServicesModule/InBarangayRequests">
-        <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
-          Weekly Barangay Requests Chart
-        </p>
-      </Link>
-      <div className="heatmap-container">
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={documentRequestsByWeek}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="monthWeek" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="First Time Jobseeker" stackId="a" fill="#4CAF50" />
-            <Bar dataKey="Barangay Clearance" stackId="a" fill="#2196F3" />
-            <Bar dataKey="Barangay Indigency" stackId="a" fill="#FF9800" />
-            <Bar dataKey="Barangay ID" stackId="a" fill="#9C27B0" />
-            <Bar dataKey="Barangay Certificate" stackId="a" fill="#00BCD4" />
+                          <div className="card-right-side">
+                            <ResponsiveContainer width={700} height={300}>
+                              <BarChart
+                                data={totalIncidentReportsChart.data}
+                                layout="vertical"
+                                margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis type="number" />
+                                <YAxis type="category" dataKey="name" />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey="value" name="Number of Incidents">
+                                  {totalIncidentReportsChart.data.map((entry, index) => (
+                                    <Cell 
+                                      key={`cell-${index}`} 
+                                      fill={totalIncidentReportsChart.colors[index % totalIncidentReportsChart.colors.length]} 
+                                    />
+                                  ))}
 
-            {/* Dynamically render all "Permit" related bars */}
-            {Object.keys(documentRequestsByWeek[0] || {})
-              .filter((key) => key.includes("Permit"))
-              .map((key, index) => (
-                <Bar
-                  key={key}
-                  dataKey={key}
-                  stackId="a"
-                  fill="#F44336"
-                />
-              ))}
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+                                  posi
+                                </Bar>
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
 
-      <Link href="/dashboard/IncidentModule">
-        <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
-          Monthly Incident Reports Chart
-        </p>
-      </Link>
-      <div className="heatmap-container">
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={incidentReportsByMonth} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Area type="monotone" dataKey="VAWC" stroke="#8884d8" fill="#8884d8" />
-            <Area type="monotone" dataKey="GAD" stroke="#82ca9d" fill="#82ca9d" />
-            <Area type="monotone" dataKey="Lupon" stroke="#ffc658" fill="#ffc658" />
-            <Area type="monotone" dataKey="BCPC" stroke="#ff7300" fill="#ff7300" />
-            <Area type="monotone" dataKey="Online" stroke="#ff0000" fill="#ff0000" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+                          </div>          
 
-{/*
-      <p className="dashboard">Incident Heat Map</p>*/}
 
-          <div className="heatmap-container">
                   
-        
+                </div>
+            </div>
+
+            <div className="services-second-section">
+                      
+             <Link href="/dashboard/IncidentModule">
+                <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                  Monthly Incident Reports Chart
+                </p>
+              </Link>
+              <div className="heatmap-container">
+                <ResponsiveContainer width={1000} height={300}>
+                  <AreaChart data={incidentReportsByMonth} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="VAWC" stroke="#8884d8" fill="#8884d8" />
+                    <Area type="monotone" dataKey="GAD" stroke="#82ca9d" fill="#82ca9d" />
+                    <Area type="monotone" dataKey="Lupon" stroke="#ffc658" fill="#ffc658" />
+                    <Area type="monotone" dataKey="BCPC" stroke="#ff7300" fill="#ff7300" />
+                    <Area type="monotone" dataKey="Online" stroke="#ff0000" fill="#ff0000" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+                      
+
+                    </div>
 
           </div>
-
-     
+        
 
       
     </main>

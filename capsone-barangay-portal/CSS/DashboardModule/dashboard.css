@@ -12,6 +12,8 @@
     font-weight: bold;
     font-size: 2rem;
     padding-left: 2rem;
+    margin-bottom: 1.5rem;
+    margin-top: 1.5rem;
 }
 
 .metric-card {
@@ -24,7 +26,6 @@
     padding: 2rem;
     min-height: 250px;
     background-color: #f4f2f2;
-    margin-top: 1.5rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     width: 100%;
 }
@@ -221,11 +222,26 @@
 /* SERVICES SECTION*/
 .services-section {
   display: flex;
+  flex-direction: column;
   width: 100%;
   padding: 2rem;
   gap: 2rem;
 }
 
+.services-first-section {
+    display: flex;
+    width: 100%;
+    gap: 2rem;
+}
+
+.services-second-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+ 
+}
 .services-section-left-side {
     display: flex;
     width: 30%;
@@ -235,3 +251,14 @@
     display: flex;
     width: 70%;    
 }
+
+.main-container hr {
+    border: none; 
+    border-top: 2px solid rgba(0, 0, 0, 0.20);
+    margin: 50px auto;  /* centers the hr horizontally */
+    width: 70%;
+}
+
+
+
+
