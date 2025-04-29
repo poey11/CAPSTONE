@@ -482,34 +482,52 @@ useEffect(() => {
   return (
     <main className="main-container">
       <p className="dashboard">Summaries</p>
-      <div className="metric-card">
-        <div className="card-left-side">
-          <Link href="/dashboard/admin">
-            <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-              Total Registered Users:
-            </p>
-          </Link>
-          <p className="count">{residentUsersCount}</p>
-        </div>
-      </div>
+      
+      <div className="counts-section">
 
-      <div className="metric-card">
-        <div className="card-left-side">
-            <p className="title">
-              Total Homepage Visits:
-            </p>
-          <p className="count">{siteVisits}</p>
-        </div>
-      </div>
+     
+          <div className="counts-metric-card">
+            <div className="counts-card-left-side">
+              <Link href="/dashboard/admin">
+                <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                  Total Registered Users:
+                </p>
+              </Link>
+              <p className="count">{residentUsersCount}</p>
+            </div>
 
-      <div className="metric-card">
-        <div className="card-left-side">
-            <p className="title">
-              Placeholder for Total Barangay Officials****
-            </p>
-          <p className="count">{siteVisits}</p>
+            <div className="counts-card-right-side">
+                <img src="/images/register.png" alt="Visible Icon" className="counts-icon" />
+            </div>
+          </div>
+
+          <div className="counts-metric-card">
+            <div className="counts-card-left-side">
+                <p className="title">
+                  Total Homepage Visits:
+                </p>
+              <p className="count">{siteVisits}</p>
+            </div>
+
+            <div className="counts-card-right-side">
+                <img src="/images/visible.png" alt="Visible Icon" className="counts-icon" />
+            </div>
+          </div>
+
+          <div className="counts-metric-card">
+            <div className="counts-card-left-side">
+                <p className="title">
+                  Placeholder for Total Barangay Officials****
+                </p>
+              <p className="count">{siteVisits}</p>
+            </div>
+
+            <div className="counts-card-right-side">
+                <img src="/images/avatar.png" alt="Visible Icon" className="counts-icon" />
+            </div>
+          </div>
         </div>
-      </div>
+
         <div className="summaries-section">
 
         <div className="metric-card">
