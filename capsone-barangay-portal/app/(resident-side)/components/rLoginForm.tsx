@@ -4,8 +4,8 @@ import { auth } from '../../db/firebase';
 import { signInWithEmailAndPassword,signOut, sendPasswordResetEmail, fetchSignInMethodsForEmail} from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import {signIn} from 'next-auth/react';
-import { FirebaseError } from "firebase/app"; 
-import { collection, query, where, getDocs, deleteDoc, doc, getDoc } from "firebase/firestore";
+import { Eye, EyeOff } from "lucide-react";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from '../../db/firebase';
 
 interface User {
@@ -18,6 +18,7 @@ const rLoginForm:React.FC = () => {
     const router = useRouter(); 
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleRegister = () => {
       router.push("/register");
@@ -162,7 +163,7 @@ const rLoginForm:React.FC = () => {
                     <form onSubmit={handleLogin}>
                         <div className="section1-resident">
                             <div className="form-group-resident">
-                                <label htmlFor="Email" className="form-label-resident">Email</label>
+                                <label htmlFor="Email" className="form-label-resident">Email:</label>
                                 <input 
                                     onChange={handleChange}
                                     value={resident.email}
@@ -175,16 +176,26 @@ const rLoginForm:React.FC = () => {
                             </div>
 
                             <div className="form-group-resident">
-                                <label htmlFor="password" className="form-label-resident">Password</label>
+                                <label htmlFor="password" className="form-label-resident">Password:</label>
+                                <div className="relative">
                                 <input 
                                     onChange={handleChange}
                                     value={resident.password}
-                                    type="password"  
+                                    type={showPassword ? "text" : "password"}
                                     id="password"  
                                     name="password"  
                                     className="form-input-resident" 
                                     required  
                                 />
+                                <button
+                                                                    type="button"
+                                                                    className="toggle-password-btn"
+                                                                    onClick={() => setShowPassword(!showPassword)}
+                                                                >
+                                                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                                </button>
+
+                                </div>
                             </div>
                         </div>
 
