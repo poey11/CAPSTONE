@@ -98,22 +98,21 @@ export default function AddBarangayUser() {
     }
 
     const handleSubmitClick = async () => {
-        const { 
-          password, userId
-      } = users;
+        const { password, userId } = users;
       
         if (!password || !userId) {
     
-          setPopupErrorMessage("Please fill up all required fields.");
-          setShowErrorPopup(true);
-      
-        // Hide the popup after 3 seconds
-        setTimeout(() => {
-          setShowErrorPopup(false);
-          
-        }, 3000);
-        
-          return;
+            setPopupErrorMessage("Please fill up all required fields.");
+            setShowErrorPopup(true);
+            setTimeout(() => { setShowErrorPopup(false); }, 3000);
+            return;
+        }
+
+        if (password.length < 6) {
+            setPopupErrorMessage("Password must be at least 6 characters.");
+            setShowErrorPopup(true);
+            setTimeout(() => setShowErrorPopup(false), 3000);
+            return;
         }
       
         setShowSubmitPopup(true);

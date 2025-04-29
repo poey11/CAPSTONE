@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { hash } from 'bcryptjs'; 
+import { Eye, EyeOff } from "lucide-react";
 import "@/CSS/BarangayACForm/accSetupForm.css";
 
 interface AccSetupFormProps {
@@ -13,6 +14,7 @@ interface AccSetupFormProps {
 
 interface AccountSetupProps {
     fName: string;
+    mName: string;
     lName: string;
     bday: string;
     address: string;
@@ -26,9 +28,15 @@ interface AccountSetupProps {
 const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
     const router = useRouter();
     const { data: session, update } = useSession();
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const today = new Date().toISOString().split("T")[0]; 
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
     const [user, setUser] = useState<AccountSetupProps>({
         fName: '',
+        mName: '',
         lName: '',
         bday: '',
         address: '',
@@ -80,8 +88,27 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
             return;
         }
 
-        if (user.password !== user.confirmPassword) {
-            setError("Passwords do not match!");
+        if (user.password) {
+            if (user.password.length < 6) {
+                setPopupErrorMessage("Password should be at least 6 characters.");
+                setShowErrorPopup(true);
+                setTimeout(() => { setShowErrorPopup(false); }, 3000);
+                return;
+            }
+    
+            if (user.password !== user.confirmPassword) {
+                setPopupErrorMessage("Confirm password must match New password.");
+                setShowErrorPopup(true);
+                setTimeout(() => { setShowErrorPopup(false); }, 3000);
+                return;
+            }
+        }
+
+        // Validate contact number: should be 11 digits and start with "09"
+        if (!/^09\d{9}$/.test(user.phone)) {
+            setPopupErrorMessage( "Invalid contact number. Format: 0917XXXXXXX");
+            setShowErrorPopup(true);
+            setTimeout(() => { setShowErrorPopup(false); }, 3000);
             return;
         }
 
@@ -91,6 +118,7 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
 
             await updateDoc(docRef, {
                 firstName: user.fName,
+                middleName: user.mName,
                 lastName: user.lName,
                 birthDate: user.bday,
                 address: user.address,
@@ -120,61 +148,123 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
 
                 <div className="accSetup-main-form">
                     <form onSubmit={handleSubmit} className="accSetup-form">
-                        <label htmlFor="fName">First Name: 
-                            <span className="required">*</span></label>
-                        <input onChange={handleChange} value={user.fName} id="fName" type="text" name="fName" required />
 
-                        <label htmlFor="lName">Last Name:<span className="required">*</span></label>
-                        <input onChange={handleChange} value={user.lName} id="lName" type="text" name="lName" required />
-                         <label htmlFor="sex">Sex:<span className="required">*</span></label>
-                        <select value={user.sex} onChange={handleChange} id="sex" name="sex" required>
-                            <option value="" disabled>Select a Sex</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
+                        <div className="form-group-accsetup-form">
+                            <label htmlFor="fName">First Name:<span className="required">*</span></label>
+                            <input onChange={handleChange} value={user.fName} id="fName" type="text" name="fName" placeholder="Enter First Name" className="form-input-accsetup-form" required />
+                        </div>
 
-                        <label htmlFor="bday">Birth date:<span className="required">*</span></label>
-                        <input onChange={handleChange} value={user.bday} id="bday" type="date" name="bday" required />
-
-                        <label htmlFor="address">Address:<span className="required">*</span></label>
-                        <input onChange={handleChange} value={user.address} id="address" type="text" name="address" required />
-
-                        <label htmlFor="phone">Cellphone / Telephone #:<span className="required">*</span></label>
-                        <input onChange={handleChange} value={user.phone} id="phone" type="text" name="phone" required />
-
+                        <div className="form-group-accsetup-form">
+                            <label htmlFor="mName">Middle Name:<span className="required">*</span></label>
+                            <input onChange={handleChange} value={user.mName} id="mName" type="text" name="mName" placeholder="Enter Middle Name" className="form-input-accsetup-form" required />
+                        </div>   
+                        
+                        <div className="form-group-accsetup-form">
+                            <label htmlFor="lName">Last Name:<span className="required">*</span></label>
+                            <input onChange={handleChange} value={user.lName} id="lName" type="text" name="lName" placeholder="Enter Last Name" className="form-input-accsetup-form" required />
+                        </div>      
+                        
+                        <div className="form-group-accsetup-form">
+                            <label htmlFor="sex">Sex:<span className="required">*</span></label>
+                            <select value={user.sex} onChange={handleChange} id="sex" name="sex" className="form-input-accsetup-form" required>
+                                <option value="" disabled>Select a Sex</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        
+                        <div className="form-group-accsetup-form">
+                            <label htmlFor="bday">Birthday:<span className="required">*</span></label>
+                            <input onChange={handleChange} value={user.bday} id="bday" type="date" name="bday" max={today} onKeyDown={(e) => e.preventDefault()} className="form-input-accsetup-form" required />
+                        </div>
+                            
+                        <div className="form-group-accsetup-form">
+                            <label htmlFor="address">Address:<span className="required">*</span></label>
+                            <input onChange={handleChange} value={user.address} id="address" type="text" name="address" placeholder="Enter Address" className="form-input-accsetup-form" required />
+                        </div>     
+                        
+                        <div className="form-group-accsetup-form">
+                            <label htmlFor="phone">Phone Number:<span className="required">*</span></label>
+                            <input value={user.phone} id="phone" type="text" name="phone" placeholder="Enter Phone Number" className="form-input-accsetup-form" required 
+                                onChange={(e) => {
+                                    const input = e.target.value;
+                                    // Only allow digits and limit to 11 characters
+                                    if (/^\d{0,11}$/.test(input)) {
+                                    handleChange(e);
+                                    }
+                                }}
+                            />
+                        </div>
+                            
                         {/* Display position but don't allow editing */}
-                        <label htmlFor="position">Position:</label>
-                        <input id="position" type="text" value={position} readOnly disabled />
+                        <div className="form-group-accsetup-form">
+                            <label htmlFor="position">Position:</label>
+                            <input id="position" type="text" value={position} className="form-input-accsetup-form" readOnly disabled />
+                        </div>  
 
                         {/* Conditionally show department dropdown if position is LF Staff */}
-                        {position === "LF Staff" && (
-                            <>
-                                <label htmlFor="department">Department: <span className="required">*</span></label>
-                                <select value={user.department} onChange={handleChange} id="department" name="department" required>
-                                    <option value="" disabled>Select a Department</option>
-                                    <option value="GAD">GAD</option>
-                                    <option value="BCPC">BCPC</option>
-                                    <option value="Lupon">LUPON</option>
-                                    <option value="VAWC">VAWC</option>
-                                </select>
-                            </>
-                        )}
+                        <div className="form-group-accsetup-form">
+                            {position === "LF Staff" && (
+                                    <>
+                                        <label htmlFor="department">Department:<span className="required">*</span></label>
+                                        <select value={user.department} onChange={handleChange} id="department" name="department" className="form-input-accsetup-form" required>
+                                            <option value="" disabled>Select a Department</option>
+                                            <option value="GAD">GAD</option>
+                                            <option value="BCPC">BCPC</option>
+                                            <option value="Lupon">LUPON</option>
+                                            <option value="VAWC">VAWC</option>
+                                        </select>
+                                    </>
+                                )}
+                        </div>
+                            
+                        <div className="form-group-accsetup-form">
+                            <label htmlFor="password">New Password:<span className="required">*</span></label>
+                            <div className="relative">
+                                <input onChange={handleChange} value={user.password} id="password" type={showNewPassword ? "text" : "password"} name="password" className="form-input-accsetup-form" required />
+                                <button
+                                                            type="button"
+                                                            className="toggle-password-btn"
+                                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                                        >
+                                                            {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                        </button>
+                            </div>
+                            
+                        </div>
+                            
+                        <div className="form-group-accsetup-form">
+                            <label htmlFor="confirmPassword">Confirm Password:<span className="required">*</span></label>
+                            <div className="relative">
+                                <input onChange={handleChange} value={user.confirmPassword} id="confirmPassword" type={showConfirmPassword ? "text" : "password"} name="confirmPassword" className="form-input-accsetup-form" required />
+                                <button
+                                                            type="button"
+                                                            className="toggle-password-btn"
+                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                        >
+                                                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
+                            </div>      
+                        </div>
+                        
 
-                        <label htmlFor="password">New Password:<span className="required">*</span></label>
-                        <input onChange={handleChange} value={user.password} id="password" type="password" name="password" required />
-
-                        <label htmlFor="confirmPassword">Confirm Password:<span className="required">*</span></label>
-                        <input onChange={handleChange} value={user.confirmPassword} id="confirmPassword" type="password" name="confirmPassword" required />
-
-                        {error && <p className="error-message">{error}</p>}
-
-                    <div className="form-group button-container">
-                        <button type="submit" className="submit-button" >Submit</button>
-                    </div>
+                        <div className="form-group button-container">
+                            <button type="submit" className="submit-button" >Submit</button>
+                        </div>
 
                     </form>
                 </div>
             </div>
+            
+
+        {showErrorPopup && (
+                <div className={`accsetup-error-popup-overlay show`}>
+                    <div className="accsetup-popup">
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                        <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
         </main>
     );
 };

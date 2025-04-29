@@ -111,6 +111,8 @@ useEffect(() => {
   if (showCount) {
     filtered = filtered.slice(0, showCount);
   }
+  
+  setCurrentPage(1);
 
   setFilteredIncidents(filtered);
 }, [incidentData, selectedStatus, showCount, sortOrder, caseNumberSearch]);

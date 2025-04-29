@@ -35,6 +35,8 @@ export default function EditVoter() {
   const [showDiscardPopup, setShowDiscardPopup] = useState(false);
   const [showSavePopup, setShowSavePopup] = useState(false); 
   const [showPopup, setShowPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
   const [popupMessage, setPopupMessage] = useState("");
 
 
@@ -102,6 +104,20 @@ export default function EditVoter() {
   };
   
   const handleSaveClick = async () => {
+
+
+    const { 
+    fullName, homeAddress, precinctNumber
+  } = formData;
+
+  if (!fullName || !homeAddress || !precinctNumber) {
+    setPopupErrorMessage("Please fill up all required fields.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+  
+
     setShowSavePopup(true);
   } 
 
@@ -239,6 +255,13 @@ export default function EditVoter() {
                 <div className={`popup-overlay-add show`}>
                     <div className="popup-add">
                         <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+             {showErrorPopup && (
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
+                        <p>{popupErrorMessage}</p>
                     </div>
                 </div>
                 )}

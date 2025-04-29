@@ -269,6 +269,10 @@
     background-color: #4caf50;    
 }
 
+.status-dropdown-viewonlinereq.claiming {
+  background-color: #3196e8;    
+}
+
 .status-dropdown-viewonlinereq.pick-up {
     background-color: #be5cb6;    
 }
