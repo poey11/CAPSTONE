@@ -497,7 +497,7 @@ useEffect(() => {
             </div>
 
             <div className="counts-card-right-side">
-                <img src="/images/register.png" alt="Visible Icon" className="counts-icon" />
+                <img src="/images/register.png" alt="Visible Icon" className="counts-icon-register" />
             </div>
           </div>
 
@@ -510,20 +510,20 @@ useEffect(() => {
             </div>
 
             <div className="counts-card-right-side">
-                <img src="/images/visible.png" alt="Visible Icon" className="counts-icon" />
+                <img src="/images/visible.png" alt="Visible Icon" className="counts-icon-view" />
             </div>
           </div>
 
           <div className="counts-metric-card">
             <div className="counts-card-left-side">
                 <p className="title">
-                  Placeholder for Total Barangay Officials****
+                  Total Barangay Officials
                 </p>
               <p className="count">{siteVisits}</p>
             </div>
 
             <div className="counts-card-right-side">
-                <img src="/images/avatar.png" alt="Visible Icon" className="counts-icon" />
+                <img src="/images/avatar.png" alt="Visible Icon" className="counts-icon-officer" />
             </div>
           </div>
         </div>

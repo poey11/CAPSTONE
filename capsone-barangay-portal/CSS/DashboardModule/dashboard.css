@@ -37,7 +37,8 @@
     border-radius: 1rem;
     border: 2px solid #ddd;
     padding: 2rem;
-    min-height: 250px;
+    height: 180px; /* use fixed height */
+    min-height: 200px;
     background-color: #f4f2f2;
     margin-top: 1.5rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -103,12 +104,29 @@
     width: 40%;
 }
 
-.counts-icon {
+.counts-icon-register {
     width: 70px;
     height: 70px;
     object-fit: contain;
-    filter: grayscale(100%) brightness(0%) invert(50%);
+    filter: invert(47%) sepia(11%) saturate(1843%) hue-rotate(131deg) brightness(94%) contrast(86%);
 }
+
+
+.counts-icon-view {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    filter: invert(33%) sepia(100%) saturate(1135%) hue-rotate(180deg) brightness(94%) contrast(91%);
+}
+
+
+.counts-icon-officer {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    filter: invert(52%) sepia(75%) saturate(341%) hue-rotate(90deg) brightness(93%) contrast(85%);
+}
+
 
 .card-right-side {
     flex: 1; 
