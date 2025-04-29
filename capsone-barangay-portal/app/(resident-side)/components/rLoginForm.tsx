@@ -70,49 +70,53 @@ const rLoginForm:React.FC = () => {
     }
 
 
-        const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+        const handleLogin = async(e: React.FormEvent<HTMLFormElement>) => {    
             e.preventDefault();
-        
-            try {
-                
+            try{
                 const userCredentials = await signInWithEmailAndPassword(auth, resident.email, resident.password);
                 const user = userCredentials.user;
-        
+    
                 if (user.emailVerified) {
+                   
                     const userDocRef = doc(db, "ResidentUsers", user.uid);
                     const userDocSnap = await getDoc(userDocRef);
         
-                    if (!userDocSnap.exists()) {
-                        await signOut(auth);
-                        setErrorMessage("Login failed. Please try again.");
-                        setShowErrorPopup(true);
-                        return;
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data();
+                        setFirstName(userData.first_name || "");
+                        setLastName(userData.last_name || "");
                     }
-        
-                    const userData = userDocSnap.data();
-                    setFirstName(userData.first_name || "");
-                    setLastName(userData.last_name || "");
         
                     setShowPopup(true);
                     setTimeout(() => {
                         setShowPopup(false);
                         router.push("/");
                     }, 2000);
+                    return;
                 } else {
                     await signOut(auth);
                     setShowVerifyPopup(true);
                 }
-            } catch (error: any) {
-                //console.error("Login error:", error.code);
-            
-                // Check if the email exists in Firebase Auth
-                const methods = await fetchSignInMethodsForEmail(auth, resident.email);
-            
+    
+                
+                
+            } catch (error: string | any) {
+                const result = await signIn("credentials", {
+                    userid: resident.email,
+                    password: resident.password,
+                    redirect: false,
+                });
+                
                 // Display a generic error message for both incorrect password and non-existing email
                 setErrorMessage("Login failed. Please try again.");
                 setShowErrorPopup(true);
+               
             }
-        };
+         
+           
+                
+           
+        }
         
     
     return (   
