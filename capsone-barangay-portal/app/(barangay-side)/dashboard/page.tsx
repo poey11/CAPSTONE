@@ -528,6 +528,95 @@ useEffect(() => {
           </div>
         </div>
 
+
+        <div className="services-section">
+
+            <div className="services-section-left-side">
+
+                    <div className="metric-card">
+                    <div className="card-left-side">
+                    <Link href="/dashboard/ServicesModule/InBarangayRequests">
+                    <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                        Document Requests Breakdown</p>
+                      </Link>
+                    </div>
+                    <div className="card-right-side">
+                      <ResponsiveContainer width={300} height={450}>
+                        <PieChart>
+                          <Pie
+                            data={documentRequestsTypeData}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={100}
+                            fill="#8884d8"
+                            label
+                          >
+                            {documentRequestsTypeData.map((entry: { name: string; value: number }, index: number) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div className="services-section-right-side">
+
+                                  
+              <div className="metric-card">
+                <div className="card-left-side">
+                  <Link href={selectedRequestType === 'online' ? "/dashboard/ServicesModule/OnlineRequests" : "/dashboard/ServicesModule/InBarangayRequests"}>
+                    <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                      {documentRequestsStatusChart.title}
+                    </p>
+                  </Link>
+                  <p className="count">{documentRequestsStatusChart.count}</p>
+
+                    <button 
+                      onClick={() => setSelectedRequestType(prev => prev === 'online' ? 'inBarangay' : 'online')}
+                      className="action-next"
+                    >
+                      Switch
+                    </button>
+                </div>
+
+                <div className="card-right-side">
+                  <ResponsiveContainer width={700} height={300}>
+                    <BarChart
+                      data={documentRequestsStatusChart.data}
+                      layout="vertical"
+                      margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis type="category" dataKey="name" />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="value" name="Number of Documents">
+                        {documentRequestsStatusChart.data.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={documentRequestsStatusChart.colors[index % documentRequestsStatusChart.colors.length]} 
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              
+            </div>
+
+        </div>
+
         <div className="summaries-section">
 
         <div className="metric-card">
@@ -597,6 +686,7 @@ useEffect(() => {
         </div>
 
         <div className="metric-card">
+          
           <div className="card-left-side">
             <Link href="/dashboard/ServicesModule/Appointments">
               <p
@@ -632,80 +722,6 @@ useEffect(() => {
             </ResponsiveContainer>
           </div>
         </div>
-
-    <div className="metric-card">
-      <div className="card-left-side">
-        <Link href={selectedRequestType === 'online' ? "/dashboard/ServicesModule/OnlineRequests" : "/dashboard/ServicesModule/InBarangayRequests"}>
-          <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-            {documentRequestsStatusChart.title}
-          </p>
-        </Link>
-        <p className="count">{documentRequestsStatusChart.count}</p>
-
-          <button 
-            onClick={() => setSelectedRequestType(prev => prev === 'online' ? 'inBarangay' : 'online')}
-            className="action-next"
-          >
-            Switch
-          </button>
-      </div>
-
-      <div className="card-right-side">
-        <ResponsiveContainer width={300} height={300}>
-          <BarChart
-            data={documentRequestsStatusChart.data}
-            layout="vertical"
-            margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" />
-            <YAxis type="category" dataKey="name" />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="value" name="Number of Documents">
-              {documentRequestsStatusChart.data.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={documentRequestsStatusChart.colors[index % documentRequestsStatusChart.colors.length]} 
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-
-          <div className="metric-card">
-            <div className="card-left-side">
-            <Link href="/dashboard/ServicesModule/InBarangayRequests">
-            <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                Document Requests Breakdown</p>
-              </Link>
-            </div>
-            <div className="card-right-side">
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={documentRequestsTypeData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    label
-                  >
-                    {documentRequestsTypeData.map((entry: { name: string; value: number }, index: number) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
 
          <div className="metric-card">
           <div className="card-left-side">

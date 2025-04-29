@@ -170,6 +170,7 @@
     padding: 2rem;
 }
 
+
 @media (max-width: 1024px) {
     .summaries-section {
         grid-template-columns: repeat(2, 1fr);
@@ -214,3 +215,23 @@
     background-color: #22689e; /* Green */
 }
 
+
+
+
+/* SERVICES SECTION*/
+.services-section {
+  display: flex;
+  width: 100%;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+.services-section-left-side {
+    display: flex;
+    width: 30%;
+}
+
+.services-section-right-side {
+    display: flex;
+    width: 70%;    
+}
