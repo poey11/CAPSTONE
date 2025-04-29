@@ -329,3 +329,106 @@ margin-top: 20px;
   width: 27px;
   height: 27px;
 }
+
+/* Overlay background for pop-up */
+.confirmation-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4); /* Slight dark overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Ensure it’s on top */
+}
+
+/* Container for the pop-up table */
+.resident-table-popup {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  max-width: 600px;
+  width: 100%;
+  overflow: hidden;
+  max-height: 80vh; /* Allow it to be scrollable within a certain height */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Heading */
+.resident-table-popup h2 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+/* Search input container (fixed at top) */
+.resident-search-container {
+  margin-bottom: 1rem;
+}
+
+/* Search input */
+.resident-search-input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Scrollable container for the table */
+.resident-table-container {
+  overflow-y: auto;
+  flex-grow: 1; /* Allow this part to take up remaining space */
+  max-height: 60vh; /* Limit the max height of the scrollable area */
+}
+
+/* Table styling */
+.resident-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.resident-table th,
+.resident-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.resident-table th {
+  background-color: #f9f9f9;
+  font-weight: 600;
+}
+
+/* Row hover effect */
+.resident-table-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.resident-table-row:hover {
+  background-color: #f1f1f1;
+}
+
+/* Cancel button */
+.resident-cancel-button {
+  display: block;
+  margin: 0 auto;
+  padding: 0.5rem 1.2rem;
+  border: none;
+  background-color: #e74c3c;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.resident-cancel-button:hover {
+  background-color: #c0392b;
+}
