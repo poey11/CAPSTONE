@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Eye, EyeOff } from "lucide-react";
 import "@/CSS/ResidentAccount/profile.css";
 
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
@@ -16,6 +17,8 @@ export default function SettingsPageResident() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const residentId = searchParams.get("id");
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const [resident, setResident] = useState({
         first_name: "",
@@ -414,26 +417,45 @@ export default function SettingsPageResident() {
                         
                         <div className="form-group-profile-section">
                             <label htmlFor="password" className="form-label-profile-section">New Password:</label>
-                            <input 
-                                id="password" 
-                                name="password"
-                                className="form-input-profile-section" 
-                                type="password"
-                                title="Please enter a password with a minimum of 6 characters"
-                                onChange={handleChange}
-                            />
+                            <div className="relative">
+                                <input 
+                                        id="password" 
+                                        name="password"
+                                        className="form-input-profile-section" 
+                                        type={showNewPassword ? "text" : "password"}
+                                        title="Please enter a password with a minimum of 6 characters"
+                                        onChange={handleChange}
+                                    />
+                                    <button
+                                                                    type="button"
+                                                                    className="toggle-password-btn"
+                                                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                                                >
+                                                                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                                </button>
+
+                            </div>
                         </div>
 
                         <div className="form-group-profile-section">
                             <label htmlFor="confirmPassword" className="form-label-profile-section">Confirm Password:</label>
-                            <input 
-                                id="confirmPassword" 
-                                name="confirmPassword"
-                                className="form-input-profile-section" 
-                                type="password"
-                                title="Please enter a password with a minimum of 6 characters"
-                                onChange={handleChange}
-                            />
+                            <div className="relative">
+                                <input 
+                                        id="confirmPassword" 
+                                        name="confirmPassword"
+                                        className="form-input-profile-section" 
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        title="Please enter a password with a minimum of 6 characters"
+                                        onChange={handleChange}
+                                    />
+                                    <button
+                                                                    type="button"
+                                                                    className="toggle-password-btn"
+                                                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                                >
+                                                                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                        </button>
+                            </div>
                         </div>
                         {formData.status === "Resubmission" && (!resident.reupload || resident.reupload === "N/A") && (
                             <div className="valid-id-section-profile">
