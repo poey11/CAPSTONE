@@ -435,7 +435,8 @@ export default function AddKasambahay() {
         {showPopup && (
                 <div className={`popup-overlay-add show`}>
                     <div className="popup-add">
-                        <p>{popupMessage}</p>
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
                     </div>
                 </div>
                 )}
@@ -443,7 +444,8 @@ export default function AddKasambahay() {
         {showErrorPopup && (
                 <div className={`error-popup-overlay-add show`}>
                     <div className="popup-add">
-                        <p>{popupErrorMessage}</p>
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
                     </div>
                 </div>
                 )}
