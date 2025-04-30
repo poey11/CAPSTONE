@@ -279,7 +279,7 @@ const RegisterForm: React.FC = () => {
                     </div>
 
                     <div className="form-group-register-form">
-                        <label htmlFor="email" className="form-label-register-form" >Date Of Birth:<span className="required">*</span> </label>
+                        <label htmlFor="email" className="form-label-register-form" >Date of Birth:<span className="required">*</span> </label>
                         <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
                         type="date" name="dateOfBirth" 
                         className="form-input-register-form " 
