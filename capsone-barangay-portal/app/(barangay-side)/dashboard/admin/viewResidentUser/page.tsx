@@ -100,8 +100,9 @@ export default function ViewUser() {
     if (!residentUserId) return <p>Resident User not found</p>;
 
     const residentUserFields = [
-        { label: "Resident First Name", key: "first_name" },
-        { label: "Resident Last Name", key: "last_name" },
+        { label: "First Name", key: "first_name" },
+        { label: "Middle Name", key: "middle_name" },
+        { label: "Last Name", key: "last_name" },
         { label: "Contact Number", key: "phone" },
         { label: "Sex", key: "sex" },
         { label: "Email", key: "email" },
