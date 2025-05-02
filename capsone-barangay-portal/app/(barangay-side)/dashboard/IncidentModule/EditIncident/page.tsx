@@ -14,8 +14,17 @@ import Hearing from "@/app/(barangay-side)/components/hearingForm";
 
 
 export default function EditLuponIncident() {
-    /* do the partial edit/modify of info of the incident.*/
+   
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
+
+
+
     const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
     const [loading , setLoading] = useState(true);
     const router = useRouter();
@@ -234,13 +243,18 @@ export default function EditLuponIncident() {
         event.preventDefault();
         const form = event.target as HTMLFormElement;
         console.log(toUpdate);  
+
         if (form.checkValidity()) {
           if(!isValidPhilippineMobileNumber(toUpdate.complainant.contact) || !isValidPhilippineMobileNumber(toUpdate.respondent.contact)){
-            setErrorPopup({ show: true, message: "Invalid Contact Number" });
+            setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+            setShowErrorPopup(true);
+            setTimeout(() => setShowErrorPopup(false), 3000);
             return;
           } 
           HandleEditDoc().then(() => {
-            alert("Successfully Updated")
+          //  alert("Successfully Updated")
+            setPopupMessage("Incident Successfully Updated!")
+            setShowPopup(true);
             handleBack();
           }).catch((error) => {
             console.error("Error updating document: ", error);
@@ -308,6 +322,26 @@ export default function EditLuponIncident() {
   const toggleComplainantDetails = () => setShowComplainantDetails(prev => !prev);
   const toggleInvestigatedDetails = () => setShowInvestigatedDetails(prev => !prev);
   const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
+
+
+
+
+  const confirmSubmit = async () => {
+    setShowSubmitPopup(false);
+  
+    setPopupMessage("Incident Record added successfully!");
+    setShowPopup(true);
+  
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+      router.push("/dashboard/IncidentModule");
+    }, 3000);
+  
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+  };
  
 
 
@@ -877,6 +911,40 @@ export default function EditLuponIncident() {
         {Array.from({ length: reportData.nosHearing }, (_, i) => (
           <Hearing key={i}  hearingIndex={i} nosOfGeneration={reportData?.nosOfGeneration} id={docId||""}/>
         ))}
+
+
+
+      {showSubmitPopup && (
+                        <div className="confirmation-popup-overlay-add">
+                            <div className="confirmation-popup-add">
+                                <p>Are you sure you want to submit?</p>
+                                <div className="yesno-container-add">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
+                                    <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+        )}
+        {showPopup && (
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+        {showErrorPopup && (
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
+
+
+
 
      </main>
       )}
