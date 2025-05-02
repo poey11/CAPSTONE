@@ -68,7 +68,7 @@ margin-top: 20px;
     transition: transform 0.2s ease;
   }
 
-  .viewresident-section-1 {
+  .viewresident-section-1-header {
     display: flex;
     border-bottom: 2px solid #ddd;
     width: 100%;
@@ -76,7 +76,7 @@ margin-top: 20px;
     background: #dddbdb95;
   }
 
-  .viewresident-section-1 p {
+  .viewresident-section-1-header p {
     font-weight: bold;
     color: grey;
     margin-left: 1rem;

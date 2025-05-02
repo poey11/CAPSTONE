@@ -66,7 +66,9 @@ export default function reasonForRejection() {
                 const data = docSnap.data();
                 const currentCount = data.resubmissionCount || 0;
                 const newCount = currentCount + 1;
-                const newStatus = newCount >= 2 ? "Rejected" : "Resubmission";
+        
+                // If the reason is "User is not a resident of Barangay Fairview", set the status to "Rejected"
+                const newStatus = selectedReason === "User is not a resident of Barangay Fairview" ? "Rejected" : (newCount >= 2 ? "Rejected" : "Resubmission");
     
                 await updateDoc(docRef, {
                     rejectionReason: finalReason,
@@ -157,6 +159,7 @@ export default function reasonForRejection() {
                 }}
               >
                 <option value="">Select Reason for Rejection</option>
+                <option value="User is not a resident of Barangay Fairview">User is not a resident of Barangay Fairview</option>
                 <option value="ID is blurry or unclear">ID is blurry or unclear</option>
                 <option value="ID is expired">ID is expired</option>
                 <option value="ID does not match the name on the account">ID does not match the name on the account</option>
