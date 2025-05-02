@@ -122,6 +122,46 @@ export default function ViewUser() {
         }
     };
 
+    const handleVerifyClick = async (userId: string) => {
+        setSelectedUserId(userId);
+        try {
+            const residentsCollection = collection(db, "Residents");
+            const residentsSnapshot = await getDocs(residentsCollection);
+            const residentsList = residentsSnapshot.docs.map(doc => {
+                const data = doc.data() as {
+                    firstName: string;
+                    middleName: string;
+                    lastName: string;
+                };
+    
+                return {
+                    id: doc.id,
+                    ...data
+                };
+            });
+    
+            setResidents(residentsList);
+    
+            const matchingResident = residentsList.find(resident =>
+                resident.firstName?.toLowerCase().trim() === ResidentUserData.first_name?.toLowerCase().trim() &&
+                resident.middleName?.toLowerCase().trim() === ResidentUserData.middle_name?.toLowerCase().trim() &&
+                resident.lastName?.toLowerCase().trim() === ResidentUserData.last_name?.toLowerCase().trim()
+            );
+    
+            if (matchingResident) {
+                // Open popup and prefill search term with matched name
+                setSearchTerm(`${matchingResident.firstName} ${matchingResident.middleName} ${matchingResident.lastName}`);
+                setShowResidentsPopup(true);
+            } else {
+                setPopupMessage("No matching resident found in the Resident Database for this user.");
+                setshowAlertPopup(true);
+            }
+    
+        } catch (error) {
+            console.error("Error verifying resident:", error);
+        }
+    };
+
     const handleAcceptClick = async (userId: string) => {
         setSelectedUserId(userId);
         setShowResidentsPopup(true);
@@ -138,6 +178,7 @@ export default function ViewUser() {
         }
     };
 
+    
     const handleResidentSelect = (residentId: string) => {
         const confirmLink = window.confirm("Are you sure you want to link this resident?");
         if (confirmLink && selectedUserId) {
@@ -173,6 +214,8 @@ export default function ViewUser() {
         }
     };
 
+    
+
     return (
         <main className="viewresident-main-container">
             <div className="viewresident-page-title-section-1">
@@ -198,15 +241,9 @@ export default function ViewUser() {
                             <>
                             <button 
                                 className="viewadmin-action-accept" 
-                                onClick={() => handleAcceptClick(residentUserId)}
+                                onClick={() => handleVerifyClick(residentUserId)}
                             >
-                                Accept
-                            </button>
-                            <button 
-                                className="viewadmin-action-reject" 
-                                onClick={() => handleRejectClick(residentUserId)}
-                            >
-                                Reject
+                                Verify
                             </button>
                             </>
                         ) : (
@@ -317,55 +354,219 @@ export default function ViewUser() {
             {showResidentsPopup && (
                 <div className="confirmation-popup-overlay">
                     <div className="resident-table-popup">
-                    <h2>Select Resident to Link</h2>
+    
+                        <h2>
+                            Resident Database Verification
+                        </h2>
+
+                        <h1>
+                            {
+                                residents.filter(resident =>
+                                `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+                                    .toLowerCase()
+                                    .includes(searchTerm.toLowerCase())
+                                ).length > 0
+                                ? `* ${residents.filter(resident =>
+                                    `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+                                        .toLowerCase()
+                                        .includes(searchTerm.toLowerCase())
+                                    ).length} Match *`
+                                : "No matches"
+                            }
+                        </h1>
+               
                     
-                    {/* Search input remains fixed at the top */}
-                    <div className="resident-search-container">
-                        <input
-                        type="text"
-                        placeholder="Search Resident Name..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="resident-search-input"
-                        />
-                    </div>
-
-                    {/* Scrollable table container */}
-                    <div className="resident-table-container">
-                        <table className="resident-table">
-                        <thead>
-                            <tr>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {residents
-                            .filter(resident =>
-                                `${resident.firstName} ${resident.lastName}`
-                                .toLowerCase()
-                                .includes(searchTerm.toLowerCase())
-                            )
-                            .map(resident => (
-                                <tr
-                                key={resident.id}
-                                onClick={() => handleResidentSelect(resident.id)}
-                                className="resident-table-row"
-                                >
-                                <td>{resident.firstName}</td>
-                                <td>{resident.lastName}</td>
+            
+                        <div className="matched-table-container">
+                            <table className="resident-table">
+                            <thead>
+                                <tr>
+                                <th>First Name</th>
+                                <th>Middle Name</th>
+                                <th>Last Name</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                        </table>
-                    </div>
+                            </thead>
+                            <tbody>
+                                {residents
+                                .filter(resident =>
+                                    `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+                                    .toLowerCase()
+                                    .includes(searchTerm.toLowerCase())
+                                )
+                                .map(resident => (
+                                    <tr
+                                    key={resident.id}
+                                    onClick={() => handleResidentSelect(resident.id)}
+                                    className="resident-table-row"
+                                    >
+                                    <td>{resident.firstName}</td>
+                                    <td>{resident.middleName}</td>
+                                    <td>{resident.lastName}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                            </table>
+                        </div>
 
-                    <button
-                        onClick={() => setShowResidentsPopup(false)}
-                        className="resident-cancel-button"
-                    >
-                        Cancel
-                    </button>
+
+
+                        <div className="verification-section">
+
+                            {/* Resident Database */}
+                            <div className="resident-table-container">
+                            {residents
+                                .filter(resident =>
+                                `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+                                    .toLowerCase()
+                                    .includes(searchTerm.toLowerCase())
+                                )
+                                .map(resident => (
+                                <table
+                                    key={resident.id}
+                                    className="resident-table individual-resident-table"
+                                    onClick={() => handleResidentSelect(resident.id)}
+                                >
+                                    <thead>
+                                    <tr>
+                                        <th colSpan={2} className="verification-table-title sticky-table-title">
+                                            Resident Database
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <th>Address</th>
+                                        <td>{resident.address || "N/A"}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Date of Birth</th>
+                                        <td>{resident.dateOfBirth || "N/A"}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Contact Number</th>
+                                        <td>{resident.contactNumber || "N/A"}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Sex</th>
+                                        <td>{resident.sex || "N/A"}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Valid ID</th>
+                                        <td>
+                                            {resident.fileURL ? (
+                                                <div className="resident-id-container">
+                                                    <img
+                                                        src={resident.fileURL}
+                                                        alt="Resident's Valid ID"
+                                                        className="resident-id-image"
+                                                    />
+                                                    <a
+                                                        href={resident.fileURL}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="view-image-link"
+                                                    >
+                                                        View Image
+                                                    </a>
+                                                </div>
+                                            ) : (
+                                                "No ID uploaded"
+                                            )}
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                ))}
+                            </div>
+
+
+                            {/* Resident Users */}
+                            <div className="resident-table-container">
+                            <table
+                                key={ResidentUserData.residentID}
+                                className="resident-table individual-resident-table"
+                                onClick={() => handleResidentSelect(ResidentUserData.residentID)}
+                            >
+                                <thead>
+                                <tr>
+                                    <th colSpan={2} className="verification-table-title">
+                                    Pending Resident User
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <th>Address</th>
+                                    <td>{ResidentUserData.address || "N/A"}</td>
+                                </tr>
+                                <tr>
+                                    <th>Date of Birth</th>
+                                    <td>{ResidentUserData.dateOfBirth || "N/A"}</td>
+                                </tr>
+                                <tr>
+                                    <th>Contact Number</th>
+                                    <td>{ResidentUserData.phone || "N/A"}</td>
+                                </tr>
+                                <tr>
+                                    <th>Sex</th>
+                                    <td>{ResidentUserData.sex || "N/A"}</td>
+                                </tr>
+                                <tr>
+                                    <th>Valid ID</th>
+                                    <td>
+                                    {ResidentUserData.upload ? (
+                                        <div className="resident-id-container">
+                                        <img
+                                            src={ResidentUserData.upload}
+                                            alt="Resident's Valid ID"
+                                            className="resident-id-image"
+                                        />
+                                        <a
+                                            href={ResidentUserData.upload}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="view-image-link"
+                                        >
+                                            View Image
+                                        </a>
+                                        </div>
+                                    ) : (
+                                        "No ID uploaded"
+                                    )}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+                    
+                  
+                        <div className="verification-buttons-section">
+                            <div className="verification-action-buttons">
+                                <button 
+                                            className="viewadmin-action-accept" 
+                                            onClick={() => handleAcceptClick(residentUserId)}
+                                        >
+                                            Accept
+                                </button>
+                        
+                                <button 
+                                            className="viewadmin-action-reject" 
+                                            onClick={() => handleRejectClick(residentUserId)}
+                                        >
+                                            Reject
+                                </button>
+
+                            </div>
+
+                            <button
+                                onClick={() => setShowResidentsPopup(false)}
+                                className="viewadmin-action-cancel"
+                            >
+                                Cancel
+                            </button>
+
+                        </div>
                     </div>
                 </div>
                 )}
