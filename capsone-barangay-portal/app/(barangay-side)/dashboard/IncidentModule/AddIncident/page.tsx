@@ -241,10 +241,10 @@ export default function AddIncident() {
         // Save filtered data to Firestore
         await addDoc(collection(db, "IncidentReports"), filteredData);
 
-      //  alert("Incident Report Submitted!");
+        alert("Incident Report Submitted!");
         
-      setPopupMessage("Incident Record added successfully!");
-      setShowPopup(true);
+    //  setPopupMessage("Incident Record added successfully!");
+    //  setShowPopup(true);
 
     } catch (e: any) {
         console.log(e);
@@ -383,6 +383,24 @@ export default function AddIncident() {
 
   const handleBack = () => {
     router.back();
+  };
+
+
+  const confirmSubmit = async () => {
+    setShowSubmitPopup(false);
+  
+    setPopupMessage("Incident Record added successfully!");
+    setShowPopup(true);
+  
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+      router.push("/dashboard/IncidentModule");
+    }, 3000);
+  
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
   };
 
 
@@ -848,6 +866,18 @@ export default function AddIncident() {
         </form>
 
         </div> 
+
+        {showSubmitPopup && (
+                        <div className="confirmation-popup-overlay-add">
+                            <div className="confirmation-popup-add">
+                                <p>Are you sure you want to submit?</p>
+                                <div className="yesno-container-add">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
+                                    <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+        )}
 
         {showPopup && (
                 <div className={`popup-overlay-add show`}>
