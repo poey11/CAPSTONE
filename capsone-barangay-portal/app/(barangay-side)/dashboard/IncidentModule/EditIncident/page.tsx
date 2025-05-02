@@ -25,6 +25,7 @@ export default function EditLuponIncident() {
 
 
 
+
     const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
     const [loading , setLoading] = useState(true);
     const router = useRouter();
@@ -238,6 +239,8 @@ export default function EditLuponIncident() {
         await updateDoc(docRef, cleanedData);
       }
     };
+
+    /*
     
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -252,17 +255,82 @@ export default function EditLuponIncident() {
             return;
           } 
           HandleEditDoc().then(() => {
-          //  alert("Successfully Updated")
+
             setPopupMessage("Incident Successfully Updated!")
             setShowPopup(true);
-            handleBack();
+        
           }).catch((error) => {
             console.error("Error updating document: ", error);
           }); 
         } else {
           form.reportValidity(); 
         }
+
+        setShowSubmitPopup(true);
     };
+
+    */
+
+    const handleSubmit = (event: React.FormEvent) => {
+      event.preventDefault();
+      const form = event.target as HTMLFormElement;
+    
+      if (form.checkValidity()) {
+        if (!isValidPhilippineMobileNumber(toUpdate.complainant.contact) || 
+            !isValidPhilippineMobileNumber(toUpdate.respondent.contact)) {
+          setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+          return;
+        }
+    
+        setShowSubmitPopup(true); // ✅ Show confirmation only
+      } else {
+        form.reportValidity();
+      }
+    };
+    
+/*
+    const confirmSubmit = async () => {
+      setShowSubmitPopup(false);
+    
+    
+      setPopupMessage("Incident Record added successfully!");
+      setShowPopup(true);
+    
+      // Hide the popup after 3 seconds
+      setTimeout(() => {
+        setShowPopup(false);
+        router.push("/dashboard/IncidentModule");
+      }, 3000);
+    
+      // Create a fake event and call handleSubmit
+      const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+      await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+    };
+
+*/
+
+const confirmSubmit = async () => {
+  setShowSubmitPopup(false);
+
+  try {
+    await HandleEditDoc(); // ✅ Only update when Yes is clicked
+
+    setPopupMessage("Incident Successfully Updated!");
+    setShowPopup(true);
+
+    setTimeout(() => {
+      setShowPopup(false);
+     handleBack();
+    }, 3000);
+  } catch (error) {
+    console.error("Error during confirmation submit:", error);
+    setPopupErrorMessage("Error updating incident. Please try again.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+  }
+};
 
 
     const handleBack = () => {
@@ -326,22 +394,7 @@ export default function EditLuponIncident() {
 
 
 
-  const confirmSubmit = async () => {
-    setShowSubmitPopup(false);
-  
-    setPopupMessage("Incident Record added successfully!");
-    setShowPopup(true);
-  
-    // Hide the popup after 3 seconds
-    setTimeout(() => {
-      setShowPopup(false);
-      router.push("/dashboard/IncidentModule");
-    }, 3000);
-  
-    // Create a fake event and call handleSubmit
-    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
-  };
+ 
  
 
 
@@ -349,14 +402,7 @@ export default function EditLuponIncident() {
     <>
       {loading ? (       <p></p> ) : (
         <main className="main-container-edit">
-          {errorPopup.show && (
-              <div className="popup-overlay error">
-                  <div className="popup">
-                      <p>{errorPopup.message}</p>
-                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
-                  </div>
-              </div>
-        )}
+     
           <div className="letters-content-edit">
                <button className="letter-announcement-btn-edit" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialogue Letter</button>
 
@@ -396,7 +442,7 @@ export default function EditLuponIncident() {
 
             <div className="action-btn-section-edit-incident">
               <button type="button" className="action-delete-edit" onClick={handleDeleteForm}>Delete</button>
-              <button type="submit" className="action-view-edit">Save</button>   
+              <button type="submit" className="action-view-edit" onClick={handleSubmit}>Save</button>   
             </div>
 
           </div>
