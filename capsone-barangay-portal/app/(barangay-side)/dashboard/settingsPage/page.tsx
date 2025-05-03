@@ -80,7 +80,7 @@ export default function SettingsPage() {
         }));
     };
 
-    
+    /*
     const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file && userId) {
@@ -111,7 +111,31 @@ export default function SettingsPage() {
             }
         }
     };
-    
+    */
+
+    const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (file && userId) {
+    const storage = getStorage();
+    const storageRef = ref(storage, `profileImages/${userId}_${file.name}`);
+
+    try {
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+
+      // Set image preview and temp update, but DO NOT save to Firestore yet
+      setSelectedImage(downloadURL);
+      setUserData((prev) => ({
+        ...prev,
+        profileImage: downloadURL,
+      }));
+    } catch (err) {
+      console.error("Image upload failed", err);
+      setError("Failed to upload image. Please try again.");
+    }
+  }
+};
+
 
     const [preview, setPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
