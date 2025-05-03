@@ -14,6 +14,16 @@ export default function SettingsPage() {
 
      const searchParams = useSearchParams();
      const userId = searchParams.get("id")
+
+
+
+     
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
+
      
     const [userData, setUserData] = useState({
         firstName: "",
@@ -110,54 +120,72 @@ export default function SettingsPage() {
    
 
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setShowSubmitPopup(true); // Just show the confirmation popup
+      };
+      
 
-    if (!userId) {
-        setError("User session expired. Please log in again.");
-        setLoading(false);
-        return;
-    }
 
-    const phoneRegex = /^09\d{9}$/;
-    if (!phoneRegex.test(userData.phone)) {
-        setError("Invalid contact number. Format should be: 0917XXXXXXX");
-        setLoading(false);
-        return;
-    }
-
-    try {
-        const docRef = doc(db, "BarangayUsers", userId);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
+      const confirmSubmit = async () => {
+        setShowSubmitPopup(false);
+        setLoading(true);
+        setError("");
+      
+        if (!userId) {
+          setPopupErrorMessage("User session expired. Please log in again.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+          setLoading(false);
+          return;
+        }
+      
+        const phoneRegex = /^09\d{9}$/;
+        if (!phoneRegex.test(userData.phone)) {
+            setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+            setShowErrorPopup(true);
+            setTimeout(() => setShowErrorPopup(false), 3000);
+          setLoading(false);
+          return;
+        }
+      
+        try {
+          const docRef = doc(db, "BarangayUsers", userId);
+          const docSnap = await getDoc(docRef);
+      
+          if (docSnap.exists()) {
             const currentData = docSnap.data();
             const isDataChanged = Object.keys(userData).some((key) => {
-                const newVal = userData[key as keyof typeof userData]?.toString().trim();
-                const currentVal = currentData[key]?.toString().trim();
-                return newVal !== currentVal;
+              const newVal = userData[key as keyof typeof userData]?.toString().trim();
+              const currentVal = currentData[key]?.toString().trim();
+              return newVal !== currentVal;
             });
-
+      
             if (!isDataChanged) {
-                alert("No changes detected.");
-                setLoading(false);
-                return;
+                setPopupErrorMessage("No Changes Detected!");
+                setShowErrorPopup(true);
+                setTimeout(() => setShowErrorPopup(false), 3000);
+              setLoading(false);
+              return;
             }
+          }
+      
+          await updateDoc(docRef, { ...userData });
+          setPopupMessage("Barangay User Updated Successfully!");
+          setShowPopup(true);
+      
+          setTimeout(() => {
+            setShowPopup(false);
+            // router.push("/dashboard/ResidentModule");
+          }, 3000);
+        } catch (err: any) {
+          console.error("Error updating profile:", err);
+          setError("Failed to update profile. Please try again. " + err.message);
         }
-
-        await updateDoc(docRef, { ...userData });
-        alert("Profile updated successfully!");
-      //  router.push("/dashboard");
-    } catch (err: any) {
-        console.error("Error updating profile:", err);
-        setError("Failed to update profile. Please try again. " + err.message);
-    }
-
-    setLoading(false);
-};
-
+      
+        setLoading(false);
+      };
+      
     
 
     return (
@@ -305,8 +333,8 @@ export default function SettingsPage() {
                                     name="phone"
                                     type="tel"
                                     className="input-field-settings"
-                                    maxLength={10}
-                                    title="Please enter a valid 10-digit contact number"
+                                    maxLength={11}
+                                    title="Please enter a valid 11-digit contact number"
                                     value={userData.phone}
                                     onChange={handleChange}
                                     />
@@ -336,6 +364,37 @@ export default function SettingsPage() {
             </form>
                 
             </div>
+
+
+            {showSubmitPopup && (
+                        <div className="confirmation-popup-overlay-add">
+                            <div className="confirmation-popup-add">
+                                <p>Are you sure you want to submit?</p>
+                                <div className="yesno-container-add">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
+                                    <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+        )}
+
+        {showPopup && (
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+        {showErrorPopup && (
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
 
         </main>
     );
