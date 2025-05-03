@@ -3,6 +3,7 @@ import "@/CSS/ResidentModule/viewresident.css";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { db } from "../../../../db/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -12,6 +13,8 @@ export default function ViewResident() {
 
   const [residentData, setResidentData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (!residentId) return;
@@ -64,7 +67,8 @@ export default function ViewResident() {
   ];
 
   const handleBack = () => {
-    window.location.href = "/dashboard/ResidentModule";
+    //window.location.href = "/dashboard/ResidentModule";
+    router.back();
   };
 
   return (
@@ -75,7 +79,7 @@ export default function ViewResident() {
         </div>
 
       <div className="viewresident-main-content">
-        <div className="viewresident-section-1">
+        <div className="viewresident-section-1-header">
           <button onClick={handleBack}>
                 <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
               </button>

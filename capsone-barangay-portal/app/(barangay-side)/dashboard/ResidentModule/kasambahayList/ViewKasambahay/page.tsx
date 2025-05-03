@@ -75,7 +75,7 @@ export default function ViewKasambahay() {
       </div>
 
       <div className="viewresident-main-content">
-        <div className="viewresident-section-1">
+        <div className="viewresident-section-1-header">
           <button onClick={handleBack}>
             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
           </button>

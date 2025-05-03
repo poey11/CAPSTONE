@@ -254,14 +254,16 @@ export default function EditVoter() {
           {showPopup && (
                 <div className={`popup-overlay-add show`}>
                     <div className="popup-add">
-                        <p>{popupMessage}</p>
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
                     </div>
                 </div>
                 )}
              {showErrorPopup && (
                 <div className={`error-popup-overlay-add show`}>
                     <div className="popup-add">
-                        <p>{popupErrorMessage}</p>
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
                     </div>
                 </div>
                 )}

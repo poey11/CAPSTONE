@@ -36,36 +36,47 @@ const ResidentUsers = () => {
     const highlightUserId = searchParams.get("highlight");
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
+
+    const [filteredUser, setFilteredUser] = useState<any[]>([]); // Ensure this is populated
+    const [currentPage, setCurrentPage] = useState(1);
+    const UserPerPage = 10; // Can be changed
+
     useEffect(() => {
-        if (highlightUserId) {
-            setHighlightedId(highlightUserId);
+                if (highlightUserId && residentUsers.length > 0) {
+                    setHighlightedId(highlightUserId);
+                
+                
+                    const userIndex = filteredUser.findIndex(user => user.id === highlightUserId);
+                
+                    if (userIndex !== -1) {
+                        const newPage = Math.floor(userIndex / UserPerPage) + 1;
+                
+                        if (currentPage !== newPage) {
+                            setCurrentPage(newPage);
+                        }
+                
+                        
+                        setTimeout(() => {
+                            const targetElement = document.querySelector(`tr.highlighted-row`);
+                            if (targetElement) {
+                                targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+                            }
+                        }, 500);
+        
             
-            const scrollAndHighlight = () => {
-                const targetElement = document.querySelector(`tr.highlighted-row`);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+                        const timeoutId = setTimeout(() => {
+                            setHighlightedId(null);
+        
+                            const params = new URLSearchParams(window.location.search);
+                            params.delete("highlight");
+                            const newUrl = `${window.location.pathname}?${params.toString()}`;
+                            router.replace(newUrl, { scroll: false });
+                        }, 3000);
+        
+                        return () => clearTimeout(timeoutId);
+                    }
                 }
-            };
-            
-            const isInPending = residentUsers.some(
-                (user) => user.id === highlightUserId && user.status !== "Verified" && user.status !== "Rejected"
-            );
-            const isInVerified = residentUsers.some(
-                (user) => user.id === highlightUserId && user.status === "Verified"
-            );
-                    
-            
-            
-            setTimeout(scrollAndHighlight, 200);
-            
-            
-            const timeoutId = setTimeout(() => {
-                setHighlightedId(null);
-            }, 2000);
-            
-            return () => clearTimeout(timeoutId);
-        }
-    }, [highlightUserId, residentUsers]);
+            }, [highlightUserId, residentUsers, filteredUser, currentPage]);
 
 
     useEffect(()=>{               
@@ -142,11 +153,6 @@ const ResidentUsers = () => {
             }, [residentUsers, searchTerm, sexFilter, statusFilter, showCount]);
         
     
-
-
-            const [filteredUser, setFilteredUser] = useState<any[]>([]); // Ensure this is populated
-            const [currentPage, setCurrentPage] = useState(1);
-            const UserPerPage = 10; // Can be changed
             
         
             // Pagination logic
@@ -251,7 +257,7 @@ const ResidentUsers = () => {
                                         key={user.id}
                                         className={highlightedId === user.id ? "highlighted-row" : ""}
                                     >
-                                    <td>{user.first_name} {user.last_name}</td>
+                                    <td>{user.last_name}, {user.first_name} {user.middle_name}</td>
                                     <td>{user.address}</td>
                                     <td>{user.phone}</td>
                                     <td>{user.sex}</td>

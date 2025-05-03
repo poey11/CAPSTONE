@@ -27,6 +27,7 @@ interface BarangayUser {
     address: string;
     birthDate: string;
     firstName: string;
+    middleName: string;
     lastName: string;
     phone: string;
     sex: string;
@@ -58,6 +59,7 @@ export default function EditBarangayAccount() {
         address: "",
         birthDate: "",
         firstName: "",
+        middleName: "",
         lastName: "",
         phone: "",
         sex: "",
@@ -209,6 +211,7 @@ export default function EditBarangayAccount() {
                         address: docSnap.data().address || "",
                         birthDate: docSnap.data().birthDate || "",
                         firstName: docSnap.data().firstName || "",
+                        middleName: docSnap.data().middleName || "",
                         lastName: docSnap.data().lastName || "",
                         phone: docSnap.data().phone || "",
                         sex: docSnap.data().sex || "",
@@ -319,6 +322,18 @@ export default function EditBarangayAccount() {
                                     </div>
 
                                     <div className="editbrgyacc-fields-section">
+                                        <p>Official Middle Name</p>
+                                        <input
+                                            type="text"
+                                            className="editbrgyacc-input-field"
+                                            placeholder="Official First Name"
+                                            name="middleName"
+                                            value={formData.middleName}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+
+                                    <div className="editbrgyacc-fields-section">
                                         <p>Official Last Name</p>
                                         <input
                                             type="text"
@@ -329,28 +344,6 @@ export default function EditBarangayAccount() {
                                             onChange={handleChange}
                                         />
                                     </div>
-
-                                    <div className="editbrgyacc-fields-section">
-                                        <p>Contact Number</p>
-                                        <input
-                                            type="tel"
-                                            id="phone"
-                                            name="phone"
-                                            className="editbrgyacc-input-field"
-                                            placeholder="Enter Contact Number"
-                                            maxLength={11}
-                                            pattern="^[0-9]{11}$" 
-                                            title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX "
-                                            value={formData.phone}
-                                            onChange={(e) => {
-                                                const input = e.target.value;
-                                                // Only allow digits and limit to 11 characters
-                                                if (/^\d{0,11}$/.test(input)) {
-                                                  handleChange(e);
-                                                }
-                                            }}
-                                        />
-                                    </div>  
                                 </div>
                             </div>
                             <div className="editbrgyacc-section-right">
@@ -425,6 +418,28 @@ export default function EditBarangayAccount() {
                                             <option value="Female">Female</option>
                                         </select>
                                     </div> 
+
+                                    <div className="editbrgyacc-fields-section">
+                                        <p>Contact Number</p>
+                                        <input
+                                            type="tel"
+                                            id="phone"
+                                            name="phone"
+                                            className="editbrgyacc-input-field"
+                                            placeholder="Enter Contact Number"
+                                            maxLength={11}
+                                            pattern="^[0-9]{11}$" 
+                                            title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX "
+                                            value={formData.phone}
+                                            onChange={(e) => {
+                                                const input = e.target.value;
+                                                // Only allow digits and limit to 11 characters
+                                                if (/^\d{0,11}$/.test(input)) {
+                                                  handleChange(e);
+                                                }
+                                            }}
+                                        />
+                                    </div>  
                             
                                 </div>
                             </div>
