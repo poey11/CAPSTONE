@@ -107,56 +107,57 @@ export default function SettingsPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+   
+
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        console.log("Form submitted"); // Debugging log
-    
-        setLoading(true);
-        setError("");
-    
-        if (!userId) {
-            setError("User ID not found.");
-            setLoading(false);
-            return;
-        }
-    
-        if (!/^\d{10}$/.test(userData.phone)) {
-            setError("Please enter a valid 10-digit contact number.");
-            setLoading(false);
-            return;
-        }
-    
-        try {
-            const docRef = doc(db, "BarangayUsers", userId);
-            const docSnap = await getDoc(docRef);
-    
-            if (docSnap.exists()) {
-                const currentData = docSnap.data();
-                const isDataChanged = Object.keys(userData).some(
-                    (key) =>
-                        userData[key as keyof typeof userData]?.toString().trim() !==
-                        currentData[key]?.toString().trim()
-                );
-    
-                if (!isDataChanged) {
-                    alert("No changes detected.");
-                    setLoading(false);
-                    return;
-                }
-            }
-    
-            await updateDoc(docRef, { ...userData });
-    
-            alert("Profile updated successfully!");
-            router.push("/dashboard");
-        } catch (err) {
-            setError("Failed to update user data.");
-            console.error(err);
-        }
-    
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    if (!userId) {
+        setError("User session expired. Please log in again.");
         setLoading(false);
-    };
-    
+        return;
+    }
+
+    const phoneRegex = /^09\d{9}$/;
+    if (!phoneRegex.test(userData.phone)) {
+        setError("Invalid contact number. Format should be: 0917XXXXXXX");
+        setLoading(false);
+        return;
+    }
+
+    try {
+        const docRef = doc(db, "BarangayUsers", userId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const currentData = docSnap.data();
+            const isDataChanged = Object.keys(userData).some((key) => {
+                const newVal = userData[key as keyof typeof userData]?.toString().trim();
+                const currentVal = currentData[key]?.toString().trim();
+                return newVal !== currentVal;
+            });
+
+            if (!isDataChanged) {
+                alert("No changes detected.");
+                setLoading(false);
+                return;
+            }
+        }
+
+        await updateDoc(docRef, { ...userData });
+        alert("Profile updated successfully!");
+      //  router.push("/dashboard");
+    } catch (err: any) {
+        console.error("Error updating profile:", err);
+        setError("Failed to update profile. Please try again. " + err.message);
+    }
+
+    setLoading(false);
+};
+
     
 
     return (
@@ -170,7 +171,7 @@ export default function SettingsPage() {
           
                 <div className="modifyaccsettings-main-section1-settings">
                     <div className="modifyaccsettings-main-section1-left-settings">
-                        <button onClick={handleBack}>
+                        <button onClick={handleBack}>   
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-settings" />
                         </button>
                         <h1>Edit Account Settings</h1>
