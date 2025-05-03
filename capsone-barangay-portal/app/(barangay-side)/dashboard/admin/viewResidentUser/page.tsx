@@ -597,27 +597,50 @@ export default function ViewUser() {
                                     <td>{ResidentUserData.sex || "N/A"}</td>
                                 </tr>
                                 <tr>
-                                    <th>Valid ID</th>
+                                    <th>
+                                        {ResidentUserData.status === "Resubmission" ? "Reupload Valid ID" : "Valid ID"}
+                                    </th>
                                     <td>
-                                    {ResidentUserData.upload ? (
-                                        <div className="resident-id-container">
-                                        <img
-                                            src={ResidentUserData.upload}
-                                            alt="Resident's Valid ID"
-                                            className="resident-id-image"
-                                        />
-                                        <a
-                                            href={ResidentUserData.upload}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="view-image-link"
-                                        >
-                                            View Image
-                                        </a>
-                                        </div>
-                                    ) : (
-                                        "No ID uploaded"
-                                    )}
+                                        {ResidentUserData.status === "Resubmission"
+                                        ? ResidentUserData.reupload
+                                            ? (
+                                            <div className="resident-id-container">
+                                                <img
+                                                src={ResidentUserData.reupload}
+                                                alt="Reuploaded Valid ID"
+                                                className="resident-id-image"
+                                                />
+                                                <a
+                                                href={ResidentUserData.reupload}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="view-image-link"
+                                                >
+                                                View Image
+                                                </a>
+                                            </div>
+                                            )
+                                            : "No reuploaded ID"
+                                        : ResidentUserData.upload
+                                            ? (
+                                            <div className="resident-id-container">
+                                                <img
+                                                src={ResidentUserData.upload}
+                                                alt="Resident's Valid ID"
+                                                className="resident-id-image"
+                                                />
+                                                <a
+                                                href={ResidentUserData.upload}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="view-image-link"
+                                                >
+                                                View Image
+                                                </a>
+                                            </div>
+                                            )
+                                            : "No ID uploaded"
+                                        }
                                     </td>
                                 </tr>
                                 </tbody>
