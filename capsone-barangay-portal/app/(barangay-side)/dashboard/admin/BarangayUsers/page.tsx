@@ -339,7 +339,10 @@ useEffect(() => {
             className={highlightedId === user.id ? "highlighted-row" : ""}
             >
             <td>{user.userid}</td>
-            <td>{user.firstName} {user.lastName}</td>
+            <td>
+                {user.lastName ? `${user.lastName}, ` : ""}
+                {user.firstName} {user.middleName}
+            </td>
             <td>{user.sex}</td>
             <td>{user.address}</td>
             <td>{user.phone}</td>

@@ -139,40 +139,6 @@ margin-top: 20px;
     color: rgba(0, 0, 0, 0.5);
   }
 
-  .action-btn-section{
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .viewadmin-action-accept,
-  .viewadmin-action-reject {   
-    border: none;
-    cursor: pointer;
-    padding: 8px 12px;
-    font-size: 13px;
-    border-radius: 5px;
-    transition: background-color 0.2s ease;
-    width: 100px;
-  }
-
-.viewadmin-action-accept{
-  background-color: #19b035; /* Orange */
-  color: white;
-}
-
-
-.viewadmin-action-accept:hover{
-    background-color: #179f30; /* Orange */
-}
-
-.viewadmin-action-reject{
-    background-color: #f44336; /* Red */
-    color: white;
-}
-.viewadmin-action-reject:hover{
-    background-color: #d73c31; /* Red */
-}
 
 
 @keyframes slideIn {
@@ -198,13 +164,13 @@ margin-top: 20px;
 }
 
 
-.popup-overlay {
+.view-residentuser-popup-overlay {
   position: fixed;
   top: 13%;
   right: -3px;
   background: #777575;
   color: white;
-  width: 350px;
+  width: 400px;
   height: 50px;
   border-radius: 5px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -219,43 +185,43 @@ margin-top: 20px;
 }
 
 
-.popup{
+.view-residentuser-popup{
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
 }
 
-.popup p {
+.view-residentuser-popup p {
   margin: 0;
   text-align: left;
 
 }
 
-.popup-overlay.show {
+.view-residentuser-popup-overlay.show {
   animation: slideIn 0.5s ease-out;
 }
 
-.popup-overlay.hide {
+.view-residentuser-popup-overlay.hide {
   animation: slideOut 0.5s ease-out;
 }
 
 
 
-.confirmation-popup-overlay {
+.view-residentuser-confirmation-popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.076); 
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999; 
+  background: rgba(0, 0, 0, 0.4); /* Slight dark overlay */
 }
 
-.confirmation-popup {
+.view-residentuser-confirmation-popup {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -271,14 +237,14 @@ margin-top: 20px;
   font-size: 18px;
   font-weight: lighter;
   position: fixed;
-  left: 43%; /* Adjust the value */
+  /*left: 43%; /* Adjust the value */
 }
 
-.confirmation-popup p{
+.view-residentuser-confirmation-popup p{
   color: rgb(97, 97, 97);
 }
 
-.confirmation-popup h2{
+.view-residentuser-confirmation-popup h2{
   margin-top: 10px;
   color: #f44336;
   font-size: 15px;
@@ -330,19 +296,7 @@ margin-top: 20px;
   height: 27px;
 }
 
-/* Overlay background for pop-up */
-.confirmation-popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4); /* Slight dark overlay */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999; /* Ensure it’s on top */
-}
+
 
 /* Container for the pop-up table */
 .resident-table-popup {
@@ -350,19 +304,27 @@ margin-top: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   padding: 1.5rem;
-  max-width: 600px;
+  max-width: 1000px;
   width: 100%;
   overflow: hidden;
-  max-height: 80vh; /* Allow it to be scrollable within a certain height */
+  max-height: 90vh; /* Allow it to be scrollable within a certain height */
   display: flex;
   flex-direction: column;
 }
 
 /* Heading */
 .resident-table-popup h2 {
-  margin-bottom: 1rem;
+  margin-top: 1rem;
+  font-size: 1.80rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.resident-table-popup h1 {
+  margin-bottom: 30px;
   font-size: 1.25rem;
   text-align: center;
+  color: #dd3327;
 }
 
 /* Search input container (fixed at top) */
@@ -380,12 +342,13 @@ margin-top: 20px;
   box-sizing: border-box;
 }
 
-/* Scrollable container for the table */
-.resident-table-container {
-  overflow-y: auto;
-  flex-grow: 1; /* Allow this part to take up remaining space */
-  max-height: 60vh; /* Limit the max height of the scrollable area */
+
+.matched-table-container {
+  flex-grow: 1; 
+  max-height: 60vh;
 }
+
+
 
 /* Table styling */
 .resident-table {
@@ -396,13 +359,16 @@ margin-top: 20px;
 
 .resident-table th,
 .resident-table td {
-  padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid #eee;
+  padding: 1.1rem;
+  text-align: center;
+  border-top: 1px solid #e2e2e2;
+  border-bottom: 1px solid#e2e2e2;
+  border-right: 1px solid #e2e2e2;
+  border-left: 1px solid #e2e2e2;
 }
 
 .resident-table th {
-  background-color: #f9f9f9;
+  background-color: #f6f5f5;
   font-weight: 600;
 }
 
@@ -416,19 +382,131 @@ margin-top: 20px;
   background-color: #f1f1f1;
 }
 
-/* Cancel button */
-.resident-cancel-button {
-  display: block;
-  margin: 0 auto;
-  padding: 0.5rem 1.2rem;
-  border: none;
-  background-color: #e74c3c;
-  color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
+
+
+
+.resident-detail-container {
+  margin-top: 2rem;
 }
 
-.resident-cancel-button:hover {
-  background-color: #c0392b;
+.resident-detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.resident-detail-table th,
+.resident-detail-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.resident-detail-table th {
+  background-color: #f7f7f7;
+  width: 180px;
+  font-weight: 600;
+  color: #333;
+}
+
+.resident-detail-table td {
+  color: #555;
+}
+
+.resident-id-image {
+  width: 100%;
+  max-width: 250px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.verification-section {
+  display: flex;
+  gap: 30px;
+  margin-top: 15px;
+  overflow-y: auto;
+  max-height: 40vh; /* Limit the max height of the scrollable area */
+}
+
+.verification-buttons-section{
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.verification-action-buttons{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 30px;
+}
+
+.action-btn-section{
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.viewadmin-action-accept,
+.viewadmin-action-reject,
+.viewadmin-action-cancel {   
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+  width: 100px;
+}
+
+.viewadmin-action-accept{
+background-color: #19b035; 
+color: white;
+}
+
+.viewadmin-action-accept:hover{
+  background-color: #179f30;
+}
+
+.viewadmin-action-reject{
+  background-color: #f44336; 
+  color: white;
+}
+.viewadmin-action-reject:hover{
+  background-color: #d73c31; 
+}
+
+.viewadmin-action-cancel{
+  background-color: #f48f36; 
+  color: white;
+}
+.viewadmin-action-cancel:hover{
+  background-color: #d57c2e; 
+}
+
+.verification-table-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 10px;
+}
+
+.resident-table-container thead{
+
+  position: sticky;
+  top: 0;
+  background-color: rgb(232, 228, 228); /* Ensures it's visible when scrolled */
+  z-index: 10; /* Ensures it stays above other content */
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
+  height: 60px;
+  width: 100%;
+
+}
+
+.resident-table-container {
+  flex-grow: 1; 
+  max-height: 60vh;
 }
