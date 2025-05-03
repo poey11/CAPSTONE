@@ -274,10 +274,17 @@ export default function EditLuponIncident() {
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault();
       const form = event.target as HTMLFormElement;
+      console.log(toUpdate);  //
     
+
+const complainantContact = toUpdate.complainant.contact || reportData?.complainant?.contact || "";
+const respondentContact = toUpdate.respondent.contact || reportData?.respondent?.contact || "";
+
       if (form.checkValidity()) {
-        if (!isValidPhilippineMobileNumber(toUpdate.complainant.contact) || 
-            !isValidPhilippineMobileNumber(toUpdate.respondent.contact)) {
+
+        if (!isValidPhilippineMobileNumber(complainantContact) || 
+            !isValidPhilippineMobileNumber(respondentContact)) {
+
           setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
           setShowErrorPopup(true);
           setTimeout(() => setShowErrorPopup(false), 3000);
@@ -543,7 +550,6 @@ const confirmSubmit = async () => {
                       value={toUpdate.complainant.contact}
                       name="complainant.contact"
                       id="complainant.contact"
-
                       onChange={handleFormChange}
                       />
 
