@@ -6,6 +6,7 @@ import { db } from "../../../../db/firebase";
 import { useRouter } from "next/navigation";
 import { doc, getDoc, updateDoc, collection, setDoc, getDocs } from "firebase/firestore";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function ViewUser() {
 
@@ -208,6 +209,25 @@ export default function ViewUser() {
 
     return (
         <main className="viewresident-main-container">
+            <div className="path-section">
+                <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
+                <h1 className="breadcrumb">
+                    <Link
+                        href={
+                            ResidentUserData?.status === "Verified"
+                            ? "/dashboard/admin/ResidentUsers"
+                            : "/dashboard/admin/PendingResidentUsers"
+                        }
+                    >
+                        {ResidentUserData?.status === "Verified"
+                            ? "Resident Users"
+                            : "Pending Resident Users"}
+                    </Link>
+                    <span className="chevron">/</span>
+                </h1>
+                <h2 className="breadcrumb">Resident User Details<span className="chevron"></span></h2>
+            </div>
+
             <div className="viewresident-page-title-section-1">
                 <h1>
                     {ResidentUserData?.status === "Verified"
@@ -577,27 +597,50 @@ export default function ViewUser() {
                                     <td>{ResidentUserData.sex || "N/A"}</td>
                                 </tr>
                                 <tr>
-                                    <th>Valid ID</th>
+                                    <th>
+                                        {ResidentUserData.status === "Resubmission" ? "Reupload Valid ID" : "Valid ID"}
+                                    </th>
                                     <td>
-                                    {ResidentUserData.upload ? (
-                                        <div className="resident-id-container">
-                                        <img
-                                            src={ResidentUserData.upload}
-                                            alt="Resident's Valid ID"
-                                            className="resident-id-image"
-                                        />
-                                        <a
-                                            href={ResidentUserData.upload}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="view-image-link"
-                                        >
-                                            View Image
-                                        </a>
-                                        </div>
-                                    ) : (
-                                        "No ID uploaded"
-                                    )}
+                                        {ResidentUserData.status === "Resubmission"
+                                        ? ResidentUserData.reupload
+                                            ? (
+                                            <div className="resident-id-container">
+                                                <img
+                                                src={ResidentUserData.reupload}
+                                                alt="Reuploaded Valid ID"
+                                                className="resident-id-image"
+                                                />
+                                                <a
+                                                href={ResidentUserData.reupload}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="view-image-link"
+                                                >
+                                                View Image
+                                                </a>
+                                            </div>
+                                            )
+                                            : "No reuploaded ID"
+                                        : ResidentUserData.upload
+                                            ? (
+                                            <div className="resident-id-container">
+                                                <img
+                                                src={ResidentUserData.upload}
+                                                alt="Resident's Valid ID"
+                                                className="resident-id-image"
+                                                />
+                                                <a
+                                                href={ResidentUserData.upload}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="view-image-link"
+                                                >
+                                                View Image
+                                                </a>
+                                            </div>
+                                            )
+                                            : "No ID uploaded"
+                                        }
                                     </td>
                                 </tr>
                                 </tbody>
