@@ -37,7 +37,7 @@ const PendingResidentUsers = () => {
     
     const [filteredUser, setFilteredUser] = useState<any[]>([]); // Ensure this is populated
     const [currentPage, setCurrentPage] = useState(1);
-     const UserPerPage = 10; // Can be changed
+    const UserPerPage = 10; // Can be changed
 
     useEffect(() => {
             if (highlightUserId && residentUsers.length > 0) {
