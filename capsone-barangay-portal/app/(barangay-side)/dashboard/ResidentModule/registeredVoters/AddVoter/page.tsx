@@ -205,7 +205,8 @@ export default function addVoter() {
         {showPopup && (
                 <div className={`popup-overlay-add show`}>
                     <div className="popup-add">
-                        <p>{popupMessage}</p>
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
                     </div>
                 </div>
                 )}
@@ -213,6 +214,7 @@ export default function addVoter() {
         {showErrorPopup && (
                 <div className={`error-popup-overlay-add show`}>
                     <div className="popup-add">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                         <p>{popupErrorMessage}</p>
                     </div>
                 </div>

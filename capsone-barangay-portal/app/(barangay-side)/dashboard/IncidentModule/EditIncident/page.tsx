@@ -14,8 +14,18 @@ import Hearing from "@/app/(barangay-side)/components/hearingForm";
 
 
 export default function EditLuponIncident() {
-    /* do the partial edit/modify of info of the incident.*/
+   
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
+
+
+
+
     const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
     const [loading , setLoading] = useState(true);
     const router = useRouter();
@@ -229,26 +239,105 @@ export default function EditLuponIncident() {
         await updateDoc(docRef, cleanedData);
       }
     };
+
+    /*
     
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         const form = event.target as HTMLFormElement;
         console.log(toUpdate);  
+
         if (form.checkValidity()) {
           if(!isValidPhilippineMobileNumber(toUpdate.complainant.contact) || !isValidPhilippineMobileNumber(toUpdate.respondent.contact)){
-            setErrorPopup({ show: true, message: "Invalid Contact Number" });
+            setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+            setShowErrorPopup(true);
+            setTimeout(() => setShowErrorPopup(false), 3000);
             return;
           } 
           HandleEditDoc().then(() => {
-            alert("Successfully Updated")
-            handleBack();
+
+            setPopupMessage("Incident Successfully Updated!")
+            setShowPopup(true);
+        
           }).catch((error) => {
             console.error("Error updating document: ", error);
           }); 
         } else {
           form.reportValidity(); 
         }
+
+        setShowSubmitPopup(true);
     };
+
+    */
+
+    const handleSubmit = (event: React.FormEvent) => {
+      event.preventDefault();
+      const form = event.target as HTMLFormElement;
+      console.log(toUpdate);  //
+    
+
+const complainantContact = toUpdate.complainant.contact || reportData?.complainant?.contact || "";
+const respondentContact = toUpdate.respondent.contact || reportData?.respondent?.contact || "";
+
+      if (form.checkValidity()) {
+
+        if (!isValidPhilippineMobileNumber(complainantContact) || 
+            !isValidPhilippineMobileNumber(respondentContact)) {
+
+          setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+          return;
+        }
+    
+        setShowSubmitPopup(true); // ✅ Show confirmation only
+      } else {
+        form.reportValidity();
+      }
+    };
+    
+/*
+    const confirmSubmit = async () => {
+      setShowSubmitPopup(false);
+    
+    
+      setPopupMessage("Incident Record added successfully!");
+      setShowPopup(true);
+    
+      // Hide the popup after 3 seconds
+      setTimeout(() => {
+        setShowPopup(false);
+        router.push("/dashboard/IncidentModule");
+      }, 3000);
+    
+      // Create a fake event and call handleSubmit
+      const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+      await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+    };
+
+*/
+
+const confirmSubmit = async () => {
+  setShowSubmitPopup(false);
+
+  try {
+    await HandleEditDoc(); // ✅ Only update when Yes is clicked
+
+    setPopupMessage("Incident Successfully Updated!");
+    setShowPopup(true);
+
+    setTimeout(() => {
+      setShowPopup(false);
+     handleBack();
+    }, 3000);
+  } catch (error) {
+    console.error("Error during confirmation submit:", error);
+    setPopupErrorMessage("Error updating incident. Please try again.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+  }
+};
 
 
     const handleBack = () => {
@@ -308,6 +397,11 @@ export default function EditLuponIncident() {
   const toggleComplainantDetails = () => setShowComplainantDetails(prev => !prev);
   const toggleInvestigatedDetails = () => setShowInvestigatedDetails(prev => !prev);
   const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
+
+
+
+
+ 
  
 
 
@@ -315,14 +409,7 @@ export default function EditLuponIncident() {
     <>
       {loading ? (       <p></p> ) : (
         <main className="main-container-edit">
-          {errorPopup.show && (
-              <div className="popup-overlay error">
-                  <div className="popup">
-                      <p>{errorPopup.message}</p>
-                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
-                  </div>
-              </div>
-        )}
+     
           <div className="letters-content-edit">
                <button className="letter-announcement-btn-edit" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialogue Letter</button>
 
@@ -362,7 +449,7 @@ export default function EditLuponIncident() {
 
             <div className="action-btn-section-edit-incident">
               <button type="button" className="action-delete-edit" onClick={handleDeleteForm}>Delete</button>
-              <button type="submit" className="action-view-edit">Save</button>   
+              <button type="submit" className="action-view-edit" onClick={handleSubmit}>Save</button>   
             </div>
 
           </div>
@@ -463,7 +550,6 @@ export default function EditLuponIncident() {
                       value={toUpdate.complainant.contact}
                       name="complainant.contact"
                       id="complainant.contact"
-
                       onChange={handleFormChange}
                       />
 
@@ -877,6 +963,40 @@ export default function EditLuponIncident() {
         {Array.from({ length: reportData.nosHearing }, (_, i) => (
           <Hearing key={i}  hearingIndex={i} nosOfGeneration={reportData?.nosOfGeneration} id={docId||""}/>
         ))}
+
+
+
+      {showSubmitPopup && (
+                        <div className="confirmation-popup-overlay-add">
+                            <div className="confirmation-popup-add">
+                                <p>Are you sure you want to submit?</p>
+                                <div className="yesno-container-add">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
+                                    <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+        )}
+        {showPopup && (
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+        {showErrorPopup && (
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
+
+
+
 
      </main>
       )}

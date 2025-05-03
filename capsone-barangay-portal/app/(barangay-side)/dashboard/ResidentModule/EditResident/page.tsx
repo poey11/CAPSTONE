@@ -251,7 +251,7 @@ export default function EditResident() {
     // Phone number validation logic
     const phoneRegex = /^09\d{9}$/;
     if (!phoneRegex.test(contactNumber)) {
-      setPopupErrorMessage("Invalid contact number. Format should be: 0917XXXXXXX");
+      setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
       setShowErrorPopup(true);
       setTimeout(() => setShowErrorPopup(false), 3000);
       return;
@@ -260,7 +260,7 @@ export default function EditResident() {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     if (!emailRegex.test(emailAddress)) {
-      setPopupErrorMessage( "Invalid email address. Preferred format: example@domain.com" );
+      setPopupErrorMessage( "Invalid email address. Format: example@domain.com" );
       setShowErrorPopup(true);
       setTimeout(() => setShowErrorPopup(false), 3000);
       return;
@@ -578,14 +578,16 @@ export default function EditResident() {
           {showPopup && (
                 <div className={`popup-overlay-add show`}>
                     <div className="popup-add">
-                        <p>{popupMessage}</p>
+                    <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                    <p>{popupMessage}</p>
                     </div>
                 </div>
                 )}
         {showErrorPopup && (
                 <div className={`error-popup-overlay-add show`}>
                     <div className="popup-add">
-                        <p>{popupErrorMessage}</p>
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                    <p>{popupErrorMessage}</p>
                     </div>
                 </div>
                 )}
