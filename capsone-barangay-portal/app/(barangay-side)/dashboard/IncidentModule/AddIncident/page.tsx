@@ -241,10 +241,10 @@ export default function AddIncident() {
         // Save filtered data to Firestore
         await addDoc(collection(db, "IncidentReports"), filteredData);
 
-        alert("Incident Report Submitted!");
-        
-    //  setPopupMessage("Incident Record added successfully!");
-    //  setShowPopup(true);
+     //   alert("Incident Report Submitted!");
+
+     //   setShowSubmitPopup(false);
+
 
     } catch (e: any) {
         console.log(e);
@@ -293,15 +293,36 @@ export default function AddIncident() {
       }
 
 
-      handleUpload().then(() => {
-        //deleteForm();
-        router.back();
-      })
+    
+        setShowSubmitPopup(true);
+     
     } else {
      
       form.reportValidity();
     }
   };
+
+  const handleConfirmSubmit = async () => {
+    try {
+      await handleUpload(); // Save to Firestore only when confirmed
+  
+      setPopupMessage("Incident Successfully Submitted!");
+      setShowPopup(true);
+
+  
+      setTimeout(() => {
+        setShowPopup(false);
+        router.back();
+      }, 3000);
+  
+    } catch (error) {
+      console.error("Error saving incident:", error);
+      setPopupErrorMessage("Error saving incident. Please try again.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+    }
+  };
+  
 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type, id } = e.target;
@@ -386,23 +407,6 @@ export default function AddIncident() {
   };
 
 
-  const confirmSubmit = async () => {
-    setShowSubmitPopup(false);
-  
-    setPopupMessage("Incident Record added successfully!");
-    setShowPopup(true);
-  
-    // Hide the popup after 3 seconds
-    setTimeout(() => {
-      setShowPopup(false);
-      router.push("/dashboard/IncidentModule");
-    }, 3000);
-  
-    // Create a fake event and call handleSubmit
-    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
-  };
-
 
   return (
     <main className="main-container-add">
@@ -419,7 +423,7 @@ export default function AddIncident() {
 
                     <div className="actions-add">
                         <button  type="button" onClick={deleteForm} className="action-delete-add">Delete</button>
-                        <button type="submit" className="action-view-add">Save</button>
+                        <button type="submit" className="action-view-add" >Save</button>
                     </div>
                 
              </div>
@@ -873,7 +877,7 @@ export default function AddIncident() {
                                 <p>Are you sure you want to submit?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
-                                    <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
+                                    <button onClick={handleConfirmSubmit} className="yes-button-add">Yes</button> 
                                 </div> 
                             </div>
                         </div>
