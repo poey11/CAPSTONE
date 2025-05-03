@@ -182,6 +182,10 @@ const ResidentUsers = () => {
 
     return(
         <main className="residentusers-page-main-container">
+            <div className="path-section">
+                <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
+                <h2 className="breadcrumb">Resident Users<span className="chevron"></span></h2>
+            </div>
             <div className="user-roles-module-section-1">
                 <h1>Resident Users</h1>
             </div>

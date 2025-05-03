@@ -6,6 +6,7 @@ import { db } from "../../../../db/firebase";
 import { useRouter } from "next/navigation";
 import { doc, getDoc, updateDoc, collection, setDoc, getDocs } from "firebase/firestore";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function ViewUser() {
 
@@ -208,6 +209,25 @@ export default function ViewUser() {
 
     return (
         <main className="viewresident-main-container">
+            <div className="path-section">
+                <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
+                <h1 className="breadcrumb">
+                    <Link
+                        href={
+                            ResidentUserData?.status === "Verified"
+                            ? "/dashboard/admin/ResidentUsers"
+                            : "/dashboard/admin/PendingResidentUsers"
+                        }
+                    >
+                        {ResidentUserData?.status === "Verified"
+                            ? "Resident Users"
+                            : "Pending Resident Users"}
+                    </Link>
+                    <span className="chevron">/</span>
+                </h1>
+                <h2 className="breadcrumb">Resident User Details<span className="chevron"></span></h2>
+            </div>
+
             <div className="viewresident-page-title-section-1">
                 <h1>
                     {ResidentUserData?.status === "Verified"
