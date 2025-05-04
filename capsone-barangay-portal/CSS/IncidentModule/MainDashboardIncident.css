@@ -424,3 +424,12 @@
   width: 27px;
   height: 27px;
 }
+
+
+
+
+
+.highlighted-row {
+  background-color: #bdf8a0ba !important;
+  transition: background-color 0.5s ease;
+}
