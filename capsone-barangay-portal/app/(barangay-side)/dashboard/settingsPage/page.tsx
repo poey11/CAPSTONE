@@ -23,6 +23,8 @@ export default function SettingsPage() {
   const [popupMessage, setPopupMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
 
      
     const [userData, setUserData] = useState({
@@ -146,6 +148,13 @@ export default function SettingsPage() {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+          // Prevent form submit popup if user just clicked Upload Image
+            if (isUploadingImage) {
+                setIsUploadingImage(false); // Reset after click
+                return;
+            }
+
         setShowSubmitPopup(true); // Just show the confirmation popup
       };
       
@@ -259,9 +268,16 @@ export default function SettingsPage() {
                                 style={{ display: "none" }}
                                 onChange={handleImageChange}
                             />
-                            <button className="upload-btn-settings" onClick={() => document.getElementById("fileUpload")?.click()}>
-                                Upload Image
-                            </button>
+                            <button
+                                    type="button"
+                                    className="upload-btn-settings"
+                                    onClick={() => {
+                                        document.getElementById("fileUpload")?.click();
+                                    }}
+                                    >
+                                    Upload Image
+                                    </button>
+
                         </div>
 
                         <div className="main-fields-container-section2-settings">
