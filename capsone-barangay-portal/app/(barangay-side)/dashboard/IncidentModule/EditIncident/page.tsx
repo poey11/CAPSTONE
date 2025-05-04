@@ -9,6 +9,7 @@ import { getLocalDateTimeString,isValidPhilippineMobileNumber } from "@/app/help
 import React from "react";
 import Dialogue from "@/app/(barangay-side)/components/dialogueForm"
 import Hearing from "@/app/(barangay-side)/components/hearingForm";
+import { report } from "process";
 
 
 
@@ -17,11 +18,11 @@ export default function EditLuponIncident() {
    
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
 
-  const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupMessage, setPopupMessage] = useState("");
-  const [showErrorPopup, setShowErrorPopup] = useState(false);
-  const [popupErrorMessage, setPopupErrorMessage] = useState("");
+    const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
 
 
@@ -684,12 +685,23 @@ const confirmSubmit = async () => {
                      
                        <div className="input-group-edit">
                            <p>Nature of Complaint</p>
-                           <input type="text" className="search-bar-edit" 
+                           {reportData?.nature === "Others" ? (<>
+                            <input type="text" className="search-bar-edit" 
+                            placeholder={reportData.specifyNature}
+                            value={toUpdate.nature}
+                            name="nature"
+                            id="nature"
+                            onChange={handleFormChange} disabled/>
+                           </>):(<>
+                            <input type="text" className="search-bar-edit" 
                             placeholder={reportData.nature}
                             value={toUpdate.nature}
                             name="nature"
                             id="nature"
-                            onChange={handleFormChange}/>
+                            onChange={handleFormChange} disabled/>
+                           </>)}
+                            
+
                        </div>
         
                        <div className="input-group-edit">
@@ -699,7 +711,7 @@ const confirmSubmit = async () => {
                            value={toUpdate.location}
                            name="location"
                            id="location"
-                           onChange={handleFormChange}/>
+                           onChange={handleFormChange} disabled/>
                        </div>
 
                        <div className="input-group-edit">
@@ -760,13 +772,13 @@ const confirmSubmit = async () => {
 
                     <div className="input-group-edit">
 
-                      <p>Barangay Desk Officer First Name</p>
+                      <p>Barangay Desk Officer Name</p>
 
                       <input 
                       type="text" 
                       className="search-bar-edit" 
-                      placeholder={reportData.receivedBy.split(" ")[0]} 
-                      value={toUpdate.fname}
+                      placeholder={reportData.receivedBy} 
+                      value={toUpdate.fname||""}
                       name="fname"
                       id="fname"
                       disabled
@@ -775,23 +787,7 @@ const confirmSubmit = async () => {
 
                     </div>
 
-                      <div className="input-group-edit">
-
-                      <p>Barangay Desk Officer Last Name</p>
-
-                      <input 
-                      type="text" 
-                      className="search-bar-edit" 
-                      placeholder={reportData.receivedBy.split(" ")[1]} 
-                      value={toUpdate.lname}
-                      name="lname"
-                      id="lname"
-                      disabled
-                      onChange={handleFormChange}
-                      />
-
-                    </div>
-
+                  
 
                     <div className="input-group-edit">
                           <p>Date & Time Received</p>

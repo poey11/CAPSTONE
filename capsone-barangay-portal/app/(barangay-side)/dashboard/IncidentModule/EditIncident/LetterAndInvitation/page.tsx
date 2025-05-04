@@ -13,13 +13,15 @@ export default function GenerateDialougeLetter() {
     const searchParam = useSearchParams();
     const docId = searchParam.get("id")?.split("?")[0];
     const actionId = searchParam.get("id")?.split("?")[1].split("=")[1];
+    const today = getLocalDateString(new Date());
+
     const [userInfo, setUserInfo] = useState<any | null>(null);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
     const [otherInfo, setOtherInfo] = useState({
         DateOfDelivery: "",
         DateTimeOfMeeting: "",
         LuponStaff: "",
-        DateFiled: "",
+        DateFiled:today ,
         complainant:{
             fname:"",
             address: "",
@@ -33,7 +35,6 @@ export default function GenerateDialougeLetter() {
     });
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-    const today = getLocalDateString(new Date());
     const todayWithTime = getLocalDateTimeString(new Date(new Date().setDate(new Date().getDate() + 1)));
     const [isDialogue, setIsDialogue] = useState(false);
     const [data, setData] = useState<any>(null);
@@ -136,6 +137,23 @@ export default function GenerateDialougeLetter() {
 
         const data = await response.json();
         console.log(data);
+
+
+        const responseB = await fetch("/api/clickSendApi", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                to: otherInfo.respondent.contact,
+                message: `Hello Mr/Ms. ${otherInfo.respondent.fname}, a dialogue invitation will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
+                Please wait for the invitation. Thank you!`
+            })
+        });
+        if (!responseB.ok) throw new Error("Failed to send SMS");
+
+        const dataB = await responseB.json();
+        console.log(dataB);
       }
       catch(err) {
         console.log(err);
@@ -161,6 +179,22 @@ export default function GenerateDialougeLetter() {
   
           const data = await response.json();
           console.log(data);
+
+          const responseB = await fetch("/api/clickSendApi", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                to: otherInfo.complainant.contact,
+                message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, a summons will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
+              Please wait for the invitation. Thank you!`
+            })
+        });
+        if (!responseB.ok) throw new Error("Failed to send SMS");
+
+        const dataB = await responseB.json();
+        console.log(dataB);
         }
         catch(err) {
           console.log(err);
@@ -501,6 +535,7 @@ export default function GenerateDialougeLetter() {
                         id="complainant.fname"
                         name="complainant.fname"
                         onChange={handleChange}
+                        disabled
                     />
 
                     <p>Address</p>
@@ -513,6 +548,7 @@ export default function GenerateDialougeLetter() {
                     id="complainant.address"
                     name="complainant.address"
                     onChange={handleChange}
+                    disabled
                     />
                     
                     <p>Contact Nos</p>
@@ -525,6 +561,7 @@ export default function GenerateDialougeLetter() {
                     id="complainant.contact"
                     name="complainant.contact"
                     onChange={handleChange}
+                    disabled
                     />
 
                 </div>
@@ -543,6 +580,7 @@ export default function GenerateDialougeLetter() {
                     id="respondent.fname"
                     name="respondent.fname"
                     onChange={handleChange}
+                    disabled
                     />
 
                     <p>Address</p>
@@ -555,6 +593,7 @@ export default function GenerateDialougeLetter() {
                     id="respondent.address"
                     name="respondent.address"
                     onChange={handleChange}
+                    disabled
                     />
                 
 
@@ -568,6 +607,7 @@ export default function GenerateDialougeLetter() {
                     id="respondent.contact"
                     name="respondent.contact"
                     onChange={handleChange}
+                    disabled
                     />
                 </div>
             </div>
@@ -592,7 +632,7 @@ export default function GenerateDialougeLetter() {
                         
                         <div className="input-group">
                             <p>Date and Time of Meeting</p>
-                            <input type="datetime-local" className="search-bar" placeholder="Enter Date of Meeting" 
+                            <input type="datetime-local" className="search-bar" 
                             value={otherInfo.DateTimeOfMeeting}
                             onKeyDown={(e) => e.preventDefault()}
                             id="DateTimeOfMeeting"
@@ -621,14 +661,14 @@ export default function GenerateDialougeLetter() {
 
                         <div className="input-group">
                             <p>Date Filed</p>
-                            <input type="date" className="search-bar" placeholder="Choose hearing number" 
+                            <input type="date" className="search-bar" 
                             value={otherInfo.DateFiled}
                             max={today}
                             id="DateFiled"
                             name="DateFiled"
                             onKeyDown={(e) => e.preventDefault()}
                             onChange={handleChange}
-                            required
+                            disabled
                             />
                         </div>
                     </div>

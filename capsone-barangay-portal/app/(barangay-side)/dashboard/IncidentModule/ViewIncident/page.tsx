@@ -105,9 +105,12 @@ export default  function ViewLupon() {
     name: reportData?.receivedBy,
     dateTimeReceived:  reportData?.dateReceived + " " + reportData?.timeReceived,
   };
-
+  let natureC = reportData?.nature;
+  if (natureC === "Others") {
+    natureC = reportData?.specifyNature;
+  }
   const otherinformation = {
-    nature: reportData?.nature,
+    nature: natureC,
     date:  reportData?.dateFiled + " " + reportData?.timeFiled,
     location: reportData?.location,
     concern: reportData?.concern,
