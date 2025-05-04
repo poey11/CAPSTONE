@@ -251,6 +251,14 @@ const confirmSubmit = async () => {
 
   return (
       <main className="add-resident-main-container">
+        <div className="path-section">
+                <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
+                <h1 className="breadcrumb">
+                    <Link href="/dashboard/ResidentModule">Main Residents</Link>
+                    <span className="chevron">/</span>
+                </h1>
+                <h2 className="breadcrumb">Add Resident<span className="chevron"></span></h2>
+          </div>
 
         <div className="addresident-page-title-section-1">
           <h1>Main Residents</h1>
