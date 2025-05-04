@@ -59,6 +59,14 @@ export default function ViewFirstTimeJobSeeker() {
 
   return (
     <main className="viewresident-main-container">
+      <div className="path-section">
+        <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
+        <h1 className="breadcrumb">
+          <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker">First-Time Job Seeker List</Link>
+          <span className="chevron">/</span>
+        </h1>
+        <h2 className="breadcrumb">View First-Time Jobseeker Details<span className="chevron"></span></h2>
+      </div>
 
       <div className="viewresident-page-title-section-1">
       <h1>First-Time Job Seeker List</h1>

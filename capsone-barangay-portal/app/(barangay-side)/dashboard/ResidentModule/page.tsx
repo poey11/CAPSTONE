@@ -217,16 +217,21 @@ export default function ResidentModule() {
 
   return (
     <main className="resident-module-main-container">
-    <div className="resident-module-section-1">
-      <h1>Main Residents</h1>
-      {isAuthorized ? (
-        <Link href="/dashboard/ResidentModule/AddResident">
-          <button className="add-announcement-btn" onClick={handleAddResidentClick}>Add New Resident</button>
-        </Link>
-      ) : (
-        <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Resident</button>
-      )}
-    </div>
+      <div className="path-section">
+          <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
+          <h2 className="breadcrumb">Main Residents<span className="chevron"></span></h2>
+      </div>
+
+      <div className="resident-module-section-1">
+        <h1>Main Residents</h1>
+        {isAuthorized ? (
+          <Link href="/dashboard/ResidentModule/AddResident">
+            <button className="add-announcement-btn" onClick={handleAddResidentClick}>Add New Resident</button>
+          </Link>
+        ) : (
+          <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Resident</button>
+        )}
+      </div>
   
     <div className="resident-module-section-2">
       <input

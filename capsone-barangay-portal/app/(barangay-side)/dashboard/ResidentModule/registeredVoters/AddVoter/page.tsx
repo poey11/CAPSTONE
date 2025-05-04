@@ -140,6 +140,14 @@ export default function addVoter() {
 
   return (
     <main className="add-resident-main-container">
+        <div className="path-section">
+          <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
+          <h1 className="breadcrumb">
+            <Link href="/dashboard/ResidentModule/registeredVoters">Registered Voters</Link>
+            <span className="chevron">/</span>
+          </h1>
+          <h2 className="breadcrumb">Add New Voter<span className="chevron"></span></h2>
+        </div>
 
         <div className="addresident-page-title-section-1">
         <h1>Registered Voters</h1>
