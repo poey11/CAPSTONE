@@ -6,6 +6,7 @@ import { getAllSpecificDocument, deleteDocument } from "@/app/helpers/firestoreh
 import { useSession } from "next-auth/react";
 import { db,storage } from "@/app/db/firebase";
 
+
 const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
 
 export default function Department() {
@@ -29,6 +30,10 @@ export default function Department() {
   const [popupMessage, setPopupMessage] = useState("");
   const [showAlertPopup, setshowAlertPopup] = useState(false); 
 
+ const searchParams = useSearchParams();
+  const highlightUserId = searchParams.get("highlight");
+ const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
 
 
   const router = useRouter();
@@ -41,6 +46,45 @@ export default function Department() {
     (userPosition === "LT Staff") &&
     userRole === "Barangay Official"
   );
+
+
+
+  useEffect(() => {
+  if (highlightUserId && incidentData.length > 0) {
+    setHighlightedId(highlightUserId);
+
+    const incidentIndex = filteredIncidents.findIndex(
+      (incident) => incident.id === highlightUserId
+    );
+
+    if (incidentIndex !== -1) {
+      const newPage = Math.floor(incidentIndex / incidentsPerPage) + 1;
+
+      if (currentPage !== newPage) {
+        setCurrentPage(newPage);
+      }
+
+      setTimeout(() => {
+        const targetElement = document.querySelector(`tr.highlighted-row`);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 500);
+
+      const timeoutId = setTimeout(() => {
+        setHighlightedId(null);
+
+        const params = new URLSearchParams(window.location.search);
+        params.delete("highlight");
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        router.replace(newUrl, { scroll: false });
+      }, 3000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }
+}, [highlightUserId, incidentData, filteredIncidents, currentPage]);
+
 
 
 
@@ -257,7 +301,10 @@ useEffect(() => {
       </thead>
       <tbody>
         {currentIncidents.map((incident, index) => (
-          <tr key={index}>
+         <tr
+          key={incident.id}
+          className={highlightedId === incident.id ? "highlighted-row" : ""}
+        >
             <td>{incident.caseNumber}</td>
             <td>{incident.dateFiled} {incident.timeFiled}</td>
             <td>{incident.nature}</td>

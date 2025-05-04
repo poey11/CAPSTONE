@@ -7,7 +7,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { db, storage } from "../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import "@/CSS/User&Roles/ModifyBarangayAcc.css";
-import { form } from "framer-motion/m";
+import Link from "next/link";
 import { hash } from 'bcryptjs'; 
 import { useSession } from "next-auth/react";
 
@@ -248,6 +248,14 @@ export default function EditBarangayAccount() {
     return (
 
         <main className="editbrgyacc-main-container">
+            <div className="path-section">
+                <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
+                <h1 className="breadcrumb">
+                    <Link href="/dashboard/admin/BarangayUsers">Barangay Users</Link>
+                    <span className="chevron">/</span>
+                </h1>
+                <h2 className="breadcrumb">Edit Barangay User<span className="chevron"></span></h2>
+            </div>
             <div className="editbrgyacc-page-title-section-1">
                 <h1>Barangay Users</h1>
             </div>
@@ -259,7 +267,7 @@ export default function EditBarangayAccount() {
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
                         </button>
 
-                        <h1>Edit Barangay Account</h1>
+                        <h1>Edit Barangay User</h1>
                     </div>
 
                     <div className="action-btn-section">

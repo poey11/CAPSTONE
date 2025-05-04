@@ -7,6 +7,7 @@ import { db } from '@/app/db/firebase';
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, updateDoc, collection, setDoc , getDoc, deleteDoc} from "firebase/firestore";
 import "@/CSS/User&Roles/ReasonForRejection.css";
+import Link from "next/link";
 
 
 
@@ -107,6 +108,19 @@ export default function reasonForRejection() {
     
     return (
     <main className="reasonforrejection-main-container">
+        <div className="path-section">
+                <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
+                <h1 className="breadcrumb">
+                    <Link href="/dashboard/admin/PendingResidentUsers">Pending Resident Users</Link>
+                    <span className="chevron">/</span>
+                </h1>
+                <h1 className="breadcrumb">
+                    <Link href={`/dashboard/admin/viewResidentUser?id=${userId}`}>Resident User Details</Link>
+                    <span className="chevron">/</span>
+                </h1>
+                <h2 className="breadcrumb">Reason For Rejection<span className="chevron"></span></h2>
+            </div>
+
         <div className="reasonforrejection-section-1">
             <h1>Pending Resident Users</h1>
         </div>
