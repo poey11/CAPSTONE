@@ -846,7 +846,7 @@ useEffect(() => {
                           </div>
 
                           <div className="card-right-side">
-                            <ResponsiveContainer width={1500} height={300}>
+                            <ResponsiveContainer width={1500} height={500}>
                               <BarChart
                                 data={totalIncidentReportsChart.data}
                                 layout="vertical"
