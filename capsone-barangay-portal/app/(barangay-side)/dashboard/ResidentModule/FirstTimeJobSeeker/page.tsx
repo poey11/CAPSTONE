@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { db } from "../../../../db/firebase";
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
+import { useSearchParams } from 'next/navigation';
 
 export default function JobSeekerListModule() {
 
@@ -33,6 +34,41 @@ export default function JobSeekerListModule() {
   const [popupMessage, setPopupMessage] = useState("");
   const [showDeletePopup, setShowDeletePopup] = useState(false); 
   const [showAlertPopup, setshowAlertPopup] = useState(false); 
+
+  // Highlighting Logic based on the URL parameter
+  const searchParams = useSearchParams();
+  const highlightResidentId = searchParams.get("highlight");
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (highlightResidentId && filteredJobSeekers.length > 0) {
+      const targetIndex = filteredJobSeekers.findIndex(seeker => seeker.id === highlightResidentId);
+      if (targetIndex !== -1) {
+        const targetPage = Math.floor(targetIndex / residentsPerPage) + 1;
+        setHighlightedId(highlightResidentId);
+        setCurrentPage(targetPage);
+  
+        setTimeout(() => {
+          const targetElement = document.querySelector(`tr[data-id="${highlightResidentId}"]`);
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 500);
+  
+        const timeoutId = setTimeout(() => {
+          setHighlightedId(null);
+  
+          const params = new URLSearchParams(window.location.search);
+          params.delete("highlight");
+          const newUrl = `${window.location.pathname}?${params.toString()}`;
+          router.replace(newUrl, { scroll: false });
+        }, 3000);
+  
+        return () => clearTimeout(timeoutId);
+  
+      }
+    }
+  }, [highlightResidentId, filteredJobSeekers]);
 
   useEffect(() => {
     const fetchJobSeekers = async () => {
@@ -257,7 +293,11 @@ export default function JobSeekerListModule() {
     {filteredJobSeekers.map((seeker) => {
       const fullName = `${seeker.lastName || ""}, ${seeker.firstName || ""} ${seeker.middleName || ""}`.trim();
       return (
-        <tr key={seeker.id}>
+        <tr
+            key={seeker.id}
+            data-id={seeker.id}
+            className={highlightedId === seeker.id ? "highlighted-row" : ""}
+          >
           <td>{formatDateToMMDDYYYY(seeker.dateApplied)}</td>
           <td>{fullName}</td>
           <td>{seeker.dateOfBirth}</td>

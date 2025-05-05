@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { db } from "../../../../db/firebase";
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
+import { useSearchParams } from 'next/navigation';
 
 export default function KasambahayListModule() {
 
@@ -36,6 +37,40 @@ export default function KasambahayListModule() {
   const [showAlertPopup, setshowAlertPopup] = useState(false); 
 
 
+  // Highlighting Logic based on the URL parameter
+  const searchParams = useSearchParams();
+  const highlightResidentId = searchParams.get("highlight");
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (highlightResidentId && filteredResidents.length > 0) {
+      const targetIndex = filteredResidents.findIndex(resident => resident.id === highlightResidentId);
+      if (targetIndex !== -1) {
+        const targetPage = Math.floor(targetIndex / residentsPerPage) + 1;
+        setHighlightedId(highlightResidentId);
+        setCurrentPage(targetPage);
+  
+        setTimeout(() => {
+          const targetElement = document.querySelector(`tr[data-id="${highlightResidentId}"]`);
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 500);
+  
+        const timeoutId = setTimeout(() => {
+          setHighlightedId(null);
+  
+          const params = new URLSearchParams(window.location.search);
+          params.delete("highlight");
+          const newUrl = `${window.location.pathname}?${params.toString()}`;
+          router.replace(newUrl, { scroll: false });
+        }, 3000);
+  
+        return () => clearTimeout(timeoutId);
+  
+      }
+    }
+  }, [highlightResidentId, filteredResidents]);
 
   useEffect(() => {
     const fetchResidents = async () => {
@@ -264,7 +299,11 @@ export default function KasambahayListModule() {
       {currentResidents.map((resident) => {
         const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
         return (
-          <tr key={resident.id}>
+          <tr
+            key={resident.id}
+            data-id={resident.id}
+            className={highlightedId === resident.id ? "highlighted-row" : ""}
+          >
             <td>{resident.registrationControlNumber}</td>
             <td>{fullName}</td>
             <td>{resident.homeAddress}</td>

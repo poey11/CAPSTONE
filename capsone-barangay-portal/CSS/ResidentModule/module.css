@@ -431,3 +431,8 @@
   color: #888;
   margin-left: 10px;
 }
+
+.highlighted-row {
+  background-color: #bdf8a0ba !important;
+  transition: background-color 0.5s ease;
+}

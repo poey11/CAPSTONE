@@ -24,6 +24,7 @@ export default function addVoter() {
   const [popupMessage, setPopupMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchLatestNumber = async () => {
@@ -63,6 +64,7 @@ export default function addVoter() {
   };
   
 
+  /*
   const handleSubmitClick = async () => {
     const { fullName, homeAddress} = formData;
   
@@ -81,23 +83,55 @@ export default function addVoter() {
     }
   
     setShowSubmitPopup(true);
+  };*/
+
+  const handleSubmitClick = async () => {
+    const { fullName, homeAddress} = formData;
+
+    const invalidFields: string[] = [];
+
+
+    if (!fullName) invalidFields.push("fullName");
+    if (!homeAddress) invalidFields.push("homeAddress");
+  
+    if (invalidFields.length > 0) {
+      setInvalidFields(invalidFields);
+      setPopupErrorMessage("Please fill up all required fields.");
+      setShowErrorPopup(true);
+  
+      setTimeout(() => {
+        setShowErrorPopup(false);
+      }, 3000);
+      return;
+    }
+  
+    setInvalidFields([]);
+    setShowSubmitPopup(true);
+
   };
 
   const confirmSubmit = async () => {
     setShowSubmitPopup(false);
+
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
   
+    if (!docId) {
+      setPopupErrorMessage("Failed to create resident record.");
+      setShowErrorPopup(true);
+      return;
+    }
+    
     setPopupMessage("Voter Record added successfully!");
     setShowPopup(true);
   
     // Hide the popup after 3 seconds
     setTimeout(() => {
       setShowPopup(false);
-      router.push("/dashboard/ResidentModule/registeredVoters");
+      router.push(`/dashboard/ResidentModule/registeredVoters?highlight=${docId}`);
     }, 3000);
-  
-    // Create a fake event and call handleSubmit
-    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -120,11 +154,12 @@ export default function addVoter() {
       const currentDate = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
 
 
-      await addDoc(voterCollection, {
+      const docRef = await addDoc(voterCollection, {
         ...formData,
         voterNumber: latestNumber,
         createdAt: currentDate,
       });
+      return docRef.id; // return ID
 
      
     } catch (err) {
@@ -180,12 +215,12 @@ export default function addVoter() {
             <div className="fields-container">
               <div className="fields-section">
                 <p>Full Name <span className="required">*</span></p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Full Name" name="fullName" value={formData.fullName} onChange={handleChange} required />
+                <input type="text"  className={`add-resident-input-field ${invalidFields.includes("fullName") ? "input-error" : ""}`} placeholder="Enter Full Name" name="fullName" value={formData.fullName} onChange={handleChange} required />
               </div>
 
               <div className="fields-section">
                 <p>Home Address <span className="required">*</span></p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+                <input type="text"  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
               </div>
               
               <div className="fields-section">

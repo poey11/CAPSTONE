@@ -46,6 +46,7 @@ export default function AddKasambahay() {
   const [popupMessage, setPopupMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchLatestNumber = async () => {
@@ -128,41 +129,67 @@ export default function AddKasambahay() {
 
 
   const handleSubmitClick = async () => {
-    const { lastName, firstName, homeAddress, dateOfBirth, age, sex, civilStatus, educationalAttainment, natureOfWork, employmentArrangement, salary, employerName, employerAddress} = formData;
+    const { lastName, firstName, homeAddress, dateOfBirth, age, sex, 
+      civilStatus, educationalAttainment, natureOfWork, employmentArrangement, 
+      salary, employerName, employerAddress} = formData;
   
-    if (!lastName || !firstName ||!homeAddress ||!dateOfBirth || !age || !sex || !civilStatus || !educationalAttainment || !natureOfWork || !employmentArrangement || !salary || !employerName || !employerAddress) {
 
-      setPopupErrorMessage("Please fill up all required fields.");
-      setShowErrorPopup(true);
-  
-    // Hide the popup after 3 seconds
-    setTimeout(() => {
-      setShowErrorPopup(false);
-      
-    }, 3000);
+    const invalidFields : string[] = [];
+
+    if (!lastName) invalidFields.push("lastName");
+    if (!firstName) invalidFields.push("firstName");
+    if (!homeAddress) invalidFields.push("homeAddress");
+    if (!dateOfBirth) invalidFields.push("dateOfBirth");
+    if (!age) invalidFields.push("age");
+    if (!sex) invalidFields.push("sex");
+    if (!civilStatus) invalidFields.push("civilStatus");
+    if (!educationalAttainment) invalidFields.push ("educationalAttainment");
+    if (!natureOfWork) invalidFields.push ("natureOfWork");
+    if (!employmentArrangement) invalidFields.push ("employmentArrangement");
+    if (!salary) invalidFields.push("salary");
+    if (!employerName) invalidFields.push("employerName");
+    if (!employerAddress) invalidFields.push("employerAddress")
+
+
+
+      if (invalidFields.length > 0) {
+        setInvalidFields(invalidFields);
+        setPopupErrorMessage("Please fill up all required fields.");
+        setShowErrorPopup(true);
     
-      return;
-    }
-  
-    setShowSubmitPopup(true);
+        setTimeout(() => {
+          setShowErrorPopup(false);
+        }, 3000);
+        return;
+      }
+    
+      setInvalidFields([]);
+      setShowSubmitPopup(true);
   };
 
 
   const confirmSubmit = async () => {
     setShowSubmitPopup(false);
+
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
   
+    if (!docId) {
+      setPopupErrorMessage("Failed to create Kasambahay Record.");
+      setShowErrorPopup(true);
+      return;
+    }
+
     setPopupMessage("Kasambahay Record added successfully!");
     setShowPopup(true);
   
     // Hide the popup after 3 seconds
     setTimeout(() => {
       setShowPopup(false);
-      router.push("/dashboard/ResidentModule/kasambahayList");
+      router.push(`/dashboard/ResidentModule/kasambahayList?highlight=${docId}`);
     }, 3000);
-  
-    // Create a fake event and call handleSubmit
-    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -190,14 +217,15 @@ export default function AddKasambahay() {
       }
   
       const currentDate = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
-  
-      await addDoc(kasambahayCollection, {
+
+      const docRef = await addDoc(kasambahayCollection, {
         ...formData,
         registrationControlNumber: latestNumber,
         createdAt: currentDate,
         fileURL,
         createdBy: session?.user?.position || "Unknown",
       });
+      return docRef.id; // return ID
   
     } catch (err) {
       setError("Failed to add kasambahay");
@@ -252,39 +280,75 @@ export default function AddKasambahay() {
             <div className="fields-container">
               <div className="fields-section">
                 <p>Last Name<span className="required">*</span></p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                <input type="text"
+                className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`}
+                  placeholder="Enter Last Name"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange} 
+                  required />
               </div>
 
               <div className="fields-section">
                 <p>First Name<span className="required">*</span></p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                <input type="text"
+                   className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`}
+                   placeholder="Enter First Name"
+                   name="firstName"
+                   value={formData.firstName}
+                   onChange={handleChange}
+                   required />
               </div>
               
               <div className="fields-section">
                 <p>Middle Name</p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} />
+                <input type="text"
+                className="add-resident-input-field"
+                 placeholder="Enter Middle Name"
+                 name="middleName"
+                value={formData.middleName}
+                 onChange={handleChange} 
+                 required
+                 />
               </div>
 
               <div className="fields-section">
                 <p>Home Address<span className="required">*</span></p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+                <input type="text"
+                  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`}
+                  placeholder="Enter Address"
+                   name="homeAddress"
+                    value={formData.homeAddress}
+                     onChange={handleChange}
+                      required />
               </div>
 
               <div className="fields-section">
                 <p>Place of Birth</p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange}/>
+                <input type="text"
+                 className="add-resident-input-field"
+                  placeholder="Enter Place of Birth"
+                   name="placeOfBirth"
+                    value={formData.placeOfBirth}
+                     onChange={handleChange}/>
               </div>
 
               <div className="fields-section">
                 <p>Date of Birth<span className="required">*</span></p>
-                <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} max={new Date().toISOString().split("T")[0]} required />
+                <input type="date"
+                 className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
+                 name="dateOfBirth"
+                 value={formData.dateOfBirth}
+                 onChange={handleChange}
+                 max={new Date().toISOString().split("T")[0]}
+                 required />
               </div>
                 
               <div className="fields-section">
                 <p>Age<span className="required">*</span></p>
                   <input
                     type="number"
-                    className="add-resident-input-field" 
+                    className={`add-resident-input-field ${invalidFields.includes("age") ? "input-error" : ""}`}
                     placeholder="Enter Age" 
                     name="age"
                     value={formData.age}
@@ -296,7 +360,12 @@ export default function AddKasambahay() {
 
               <div className="fields-section">
                 <p>Sex<span className="required">*</span></p>
-                <select name="sex" className="add-resident-input-field" value={formData.sex} onChange={handleChange} required>
+                <select
+                 name="sex"
+                 className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
+                   value={formData.sex}
+                    onChange={handleChange}
+                     required>
                   <option value="" disabled>Choose Gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
@@ -305,7 +374,13 @@ export default function AddKasambahay() {
 
               <div className="fields-section">
                 <p>Civil Status<span className="required">*</span></p>
-                  <select name="civilStatus" className="add-resident-input-field" value={formData.civilStatus} onChange={handleChange} required>
+                  <select
+                   name="civilStatus"
+                   className={`add-resident-input-field ${invalidFields.includes("civilStatus") ? "input-error" : ""}`}
+                     value={formData.civilStatus}
+                      onChange={handleChange}
+                       required
+                       >
                     <option value="" disabled>Choose Civil Status</option>
                     <option value="Single">Single</option>
                     <option value="Married">Married</option>
@@ -317,7 +392,7 @@ export default function AddKasambahay() {
                 
               <div className="fields-section">
                 <p>Educational Attainment<span className="required">*</span></p>
-                  <select name="educationalAttainment" className="add-resident-input-field" value={formData.educationalAttainment} onChange={handleChange} required>
+                  <select name="educationalAttainment"  className={`add-resident-input-field ${invalidFields.includes("educationalAttainment") ? "input-error" : ""}`} value={formData.educationalAttainment} onChange={handleChange} required>
                     <option value="" disabled>Choose Educational Attainment</option>
                     <option value="1">Elem Under Grad</option>
                     <option value="2">Elem Grad</option>
@@ -332,7 +407,13 @@ export default function AddKasambahay() {
                 
               <div className="fields-section">
                 <p>Nature of Work<span className="required">*</span></p>
-                <select name="natureOfWork" className="add-resident-input-field" value={formData.natureOfWork} onChange={handleChange} required>
+                <select 
+                name="natureOfWork"
+                className={`add-resident-input-field ${invalidFields.includes("natureOfWork") ? "input-error" : ""}`} 
+                  value={formData.natureOfWork}
+                   onChange={handleChange}
+                    required
+                    >
                   <option value="" disabled>Choose Nature of Work</option>
                   <option value="1">Gen. House Help (All Around)</option>
                   <option value="2">YAYA</option>
@@ -345,7 +426,13 @@ export default function AddKasambahay() {
 
               <div className="fields-section">
                 <p>Employment Arrangement<span className="required">*</span></p>
-                <select name="employmentArrangement" className="add-resident-input-field" value={formData.employmentArrangement} onChange={handleChange} required>
+                <select 
+                name="employmentArrangement"
+                className={`add-resident-input-field ${invalidFields.includes("employmentArrangement") ? "input-error" : ""}`} 
+                  value={formData.employmentArrangement}
+                   onChange={handleChange}
+                    required
+                    >
                   <option value="" disabled>Choose Employment Arrangement</option>
                   <option value="1">Live - IN</option>
                   <option value="2">Live - OUT</option>
@@ -354,7 +441,13 @@ export default function AddKasambahay() {
 
               <div className="fields-section">
                 <p>Range of Salary<span className="required">*</span></p>
-                <select name="salary" className="add-resident-input-field" value={formData.salary} onChange={handleChange} required>
+                <select 
+                name="salary"
+                className={`add-resident-input-field ${invalidFields.includes("salary") ? "input-error" : ""}`} 
+                  value={formData.salary}
+                   onChange={handleChange}
+                    required>
+                  <option value="" disabled>Choose Salary Range</option>
                   <option value="1">₱1,500 - ₱1,999</option>
                   <option value="2">₱2,000 - ₱2,499</option>
                   <option value="3">₱2,500 - ₱4,999</option>
@@ -365,12 +458,26 @@ export default function AddKasambahay() {
                 
               <div className="fields-section">
                 <p>Employer Name<span className="required">*</span></p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Employer" name="employerName" value={formData.employerName} onChange={handleChange} required />
+                <input 
+                type="text"
+                className={`add-resident-input-field ${invalidFields.includes("employerName") ? "input-error" : ""}`} 
+                  placeholder="Enter Employer"
+                   name="employerName"
+                    value={formData.employerName}
+                     onChange={handleChange}
+                      required />
               </div>
 
               <div className="fields-section">
                 <p>Employer Address<span className="required">*</span></p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Employer Address" name="employerAddress" value={formData.employerAddress} onChange={handleChange} required />
+                <input 
+                type="text"
+                className={`add-resident-input-field ${invalidFields.includes("employerAddress") ? "input-error" : ""}`} 
+                  placeholder="Enter Employer Address"
+                  name="employerAddress"
+                  value={formData.employerAddress}
+                  onChange={handleChange}
+                  required />
               </div>
             </div>
           </div>
