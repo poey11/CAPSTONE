@@ -116,13 +116,12 @@ export default function AddFirstTimeJobSeeker() {
   };
 */
   const handleSubmitClick = () => {
-    const { lastName, firstName, middleName,dateApplied, dateOfBirth, age, sex } = formData;
+    const { lastName, firstName,dateApplied, dateOfBirth, age, sex } = formData;
   
     const invalidFields: string[] = [];
   
     if (!lastName) invalidFields.push("lastName");
     if (!firstName) invalidFields.push("firstName");
-    if (!middleName) invalidFields.push("middleName");
     if (!dateApplied) invalidFields.push("dateApplied");
     if (!dateOfBirth) invalidFields.push("dateOfBirth");
     if (!age) invalidFields.push("age");
@@ -148,18 +147,25 @@ export default function AddFirstTimeJobSeeker() {
   const confirmSubmit = async () => {
     setShowSubmitPopup(false);
   
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+
+    if (!docId) {
+      setPopupErrorMessage("Failed to create First-Time Jobseeker Record.");
+      setShowErrorPopup(true);
+      return;
+    }
+
     setPopupMessage("First-Time Jobseeker Record added successfully!");
     setShowPopup(true);
   
     // Hide the popup after 3 seconds
     setTimeout(() => {
       setShowPopup(false);
-      router.push("/dashboard/ResidentModule/FirstTimeJobSeeker");
+      router.push(`/dashboard/ResidentModule/FirstTimeJobSeeker?highlight=${docId}`);
     }, 3000);
-  
-    // Create a fake event and call handleSubmit
-    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+
   };
 
   // Handle form submission
@@ -187,7 +193,7 @@ export default function AddFirstTimeJobSeeker() {
       const currentDate = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
   
       // Save to Firestore
-      await addDoc(collection(db, "JobSeekerList"), {
+      const docRef = await addDoc(collection(db, "JobSeekerList"), {
         ...formData,
         monthOfBirth,
         dayOfBirth,
@@ -197,6 +203,8 @@ export default function AddFirstTimeJobSeeker() {
         createdAt: currentDate,
         createdBy: session?.user?.position || "Unknown",
       });
+
+      return docRef.id; // return ID
   
     } catch (err) {
       setError("Failed to add job seeker");
@@ -274,7 +282,7 @@ export default function AddFirstTimeJobSeeker() {
               </div>
 
               <div className="fields-section">
-                <p>Middle Name<span className="required">*</span></p>
+                <p>Middle Name</p>
                 <input type="text"
                    className={`add-resident-input-field ${invalidFields.includes("middleName") ? "input-error" : ""}`}
                    placeholder="Enter Middle Name"

@@ -129,7 +129,7 @@ export default function AddKasambahay() {
 
 
   const handleSubmitClick = async () => {
-    const { lastName, firstName, middleName,homeAddress, dateOfBirth, age, sex, 
+    const { lastName, firstName, homeAddress, dateOfBirth, age, sex, 
       civilStatus, educationalAttainment, natureOfWork, employmentArrangement, 
       salary, employerName, employerAddress} = formData;
   
@@ -138,7 +138,6 @@ export default function AddKasambahay() {
 
     if (!lastName) invalidFields.push("lastName");
     if (!firstName) invalidFields.push("firstName");
-    if (!middleName) invalidFields.push("middleName");
     if (!homeAddress) invalidFields.push("homeAddress");
     if (!dateOfBirth) invalidFields.push("dateOfBirth");
     if (!age) invalidFields.push("age");
@@ -171,19 +170,26 @@ export default function AddKasambahay() {
 
   const confirmSubmit = async () => {
     setShowSubmitPopup(false);
+
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
   
+    if (!docId) {
+      setPopupErrorMessage("Failed to create Kasambahay Record.");
+      setShowErrorPopup(true);
+      return;
+    }
+
     setPopupMessage("Kasambahay Record added successfully!");
     setShowPopup(true);
   
     // Hide the popup after 3 seconds
     setTimeout(() => {
       setShowPopup(false);
-      router.push("/dashboard/ResidentModule/kasambahayList");
+      router.push(`/dashboard/ResidentModule/kasambahayList?highlight=${docId}`);
     }, 3000);
-  
-    // Create a fake event and call handleSubmit
-    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -211,14 +217,15 @@ export default function AddKasambahay() {
       }
   
       const currentDate = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
-  
-      await addDoc(kasambahayCollection, {
+
+      const docRef = await addDoc(kasambahayCollection, {
         ...formData,
         registrationControlNumber: latestNumber,
         createdAt: currentDate,
         fileURL,
         createdBy: session?.user?.position || "Unknown",
       });
+      return docRef.id; // return ID
   
     } catch (err) {
       setError("Failed to add kasambahay");
@@ -294,9 +301,9 @@ export default function AddKasambahay() {
               </div>
               
               <div className="fields-section">
-                <p>Middle Name<span className="required">*</span></p>
+                <p>Middle Name</p>
                 <input type="text"
-                className={`add-resident-input-field ${invalidFields.includes("middleName") ? "input-error" : ""}`}
+                className="add-resident-input-field"
                  placeholder="Enter Middle Name"
                  name="middleName"
                 value={formData.middleName}
