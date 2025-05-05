@@ -76,6 +76,7 @@ export default function AddResident() {
   const [popupMessage, setPopupMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
+  const [newDocId, setNewDocId] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -182,7 +183,7 @@ export default function AddResident() {
     setShowSubmitPopup(true);
 };
 
-
+/*
 const confirmSubmit = async () => {
   setShowSubmitPopup(false);
 
@@ -192,12 +193,35 @@ const confirmSubmit = async () => {
   // Hide the popup after 3 seconds
   setTimeout(() => {
     setShowPopup(false);
-    router.push("/dashboard/ResidentModule");
+    //router.push("/dashboard/ResidentModule");
+    router.push(`/dashboard/ResidentModule?highlight=${newDocId}`);
   }, 3000);
 
   // Create a fake event and call handleSubmit
   const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
   await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+};*/
+
+const confirmSubmit = async () => {
+  setShowSubmitPopup(false);
+
+  // Wait for handleSubmit to finish and set newDocId
+  const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+  const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+
+  if (!docId) {
+    setPopupErrorMessage("Failed to create resident record.");
+    setShowErrorPopup(true);
+    return;
+  }
+
+  setPopupMessage("Resident Record added successfully!");
+  setShowPopup(true);
+
+  setTimeout(() => {
+    setShowPopup(false);
+    router.push(`/dashboard/ResidentModule?highlight=${docId}`);
+  }, 3000);
 };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -228,13 +252,22 @@ const confirmSubmit = async () => {
       const currentDate = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
   
       // Add the new resident with an incremented residentNumber
-      await addDoc(residentsRef, {
+      /*await addDoc(residentsRef, {
+        ...formData,
+        residentNumber: newResidentNumber,
+        createdAt: currentDate,
+        fileURL,
+        createdBy: session?.user?.position || "Unknown",
+      });*/
+
+      const docRef = await addDoc(residentsRef, {
         ...formData,
         residentNumber: newResidentNumber,
         createdAt: currentDate,
         fileURL,
         createdBy: session?.user?.position || "Unknown",
       });
+      return docRef.id; // return ID
   
     
     } catch (err) {
