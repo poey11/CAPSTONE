@@ -214,6 +214,14 @@ export default function AddKasambahay() {
 
   return (
     <main className="add-resident-main-container">
+      <div className="path-section">
+        <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
+        <h1 className="breadcrumb">
+          <Link href="/dashboard/ResidentModule/kasambahayList">Kasambahay Masterlist</Link>
+          <span className="chevron">/</span>
+        </h1>
+        <h2 className="breadcrumb">Add Kasambahay<span className="chevron"></span></h2>
+      </div>
 
       <div className="addresident-page-title-section-1">
       <h1>Kasambahay Masterlist</h1>

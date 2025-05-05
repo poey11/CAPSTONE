@@ -190,6 +190,10 @@ export default function JobSeekerListModule() {
 
   return (
     <main className="resident-module-main-container">
+      <div className="path-section">
+          <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
+          <h2 className="breadcrumb">First-Time Job Seeker List<span className="chevron"></span></h2>
+      </div>
       <div className="resident-module-section-1">
         <h1>First-Time Job Seeker List</h1>
         <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker/AddFirstTimeJobSeeker">

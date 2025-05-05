@@ -241,10 +241,19 @@ export default function AddIncident() {
         filteredData.respondent = deepFilter(filteredData.respondent);
 
         // Save filtered data to Firestore
-        await addDoc(collection(db, "IncidentReports"), filteredData);
+     //   await addDoc(collection(db, "IncidentReports"), filteredData);
 
 
        setShowSubmitPopup(false);
+            // Save filtered data to Firestore and get the reference
+        const docRef = await addDoc(collection(db, "IncidentReports"), filteredData);
+
+ 
+    router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&highlight=${docRef.id}`);
+
+
+      
+  
 
 
     } catch (e: any) {
@@ -313,7 +322,7 @@ export default function AddIncident() {
   
       setTimeout(() => {
         setShowPopup(false);
-        router.back();
+        
       }, 3000);
   
     } catch (error) {

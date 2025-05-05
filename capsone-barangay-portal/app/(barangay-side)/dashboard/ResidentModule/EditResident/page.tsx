@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { db, storage } from "../../../../db/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 export default function EditResident() {
@@ -323,6 +324,15 @@ export default function EditResident() {
 
     return (
         <main className="add-resident-main-container">
+          <div className="path-section">
+            <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
+            <h1 className="breadcrumb">
+              <Link href="/dashboard/ResidentModule">Main Residents</Link>
+              <span className="chevron">/</span>
+            </h1>
+            <h2 className="breadcrumb">Edit Resident<span className="chevron"></span></h2>
+          </div>
+
           <div className="addresident-page-title-section-1">
             <h1>Main Residents</h1>
           </div>

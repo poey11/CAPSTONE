@@ -14,6 +14,18 @@ export default function SettingsPage() {
 
      const searchParams = useSearchParams();
      const userId = searchParams.get("id")
+
+
+
+     
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+
      
     const [userData, setUserData] = useState({
         firstName: "",
@@ -70,7 +82,7 @@ export default function SettingsPage() {
         }));
     };
 
-    
+    /*
     const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file && userId) {
@@ -101,62 +113,112 @@ export default function SettingsPage() {
             }
         }
     };
-    
+    */
+
+    const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (file && userId) {
+    const storage = getStorage();
+    const storageRef = ref(storage, `profileImages/${userId}_${file.name}`);
+
+    try {
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+
+      // Set image preview and temp update, but DO NOT save to Firestore yet
+      setSelectedImage(downloadURL);
+      setUserData((prev) => ({
+        ...prev,
+        profileImage: downloadURL,
+      }));
+    } catch (err) {
+      console.error("Image upload failed", err);
+      setError("Failed to upload image. Please try again.");
+    }
+  }
+};
+
 
     const [preview, setPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+   
+
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("Form submitted"); // Debugging log
-    
+
+          // Prevent form submit popup if user just clicked Upload Image
+            if (isUploadingImage) {
+                setIsUploadingImage(false); // Reset after click
+                return;
+            }
+
+        setShowSubmitPopup(true); // Just show the confirmation popup
+      };
+      
+
+
+      const confirmSubmit = async () => {
+        setShowSubmitPopup(false);
         setLoading(true);
         setError("");
-    
+      
         if (!userId) {
-            setError("User ID not found.");
-            setLoading(false);
-            return;
+          setPopupErrorMessage("User session expired. Please log in again.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+          setLoading(false);
+          return;
         }
-    
-        if (!/^\d{10}$/.test(userData.phone)) {
-            setError("Please enter a valid 10-digit contact number.");
-            setLoading(false);
-            return;
+      
+        const phoneRegex = /^09\d{9}$/;
+        if (!phoneRegex.test(userData.phone)) {
+            setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+            setShowErrorPopup(true);
+            setTimeout(() => setShowErrorPopup(false), 3000);
+          setLoading(false);
+          return;
         }
-    
+      
         try {
-            const docRef = doc(db, "BarangayUsers", userId);
-            const docSnap = await getDoc(docRef);
-    
-            if (docSnap.exists()) {
-                const currentData = docSnap.data();
-                const isDataChanged = Object.keys(userData).some(
-                    (key) =>
-                        userData[key as keyof typeof userData]?.toString().trim() !==
-                        currentData[key]?.toString().trim()
-                );
-    
-                if (!isDataChanged) {
-                    alert("No changes detected.");
-                    setLoading(false);
-                    return;
-                }
+          const docRef = doc(db, "BarangayUsers", userId);
+          const docSnap = await getDoc(docRef);
+      
+          if (docSnap.exists()) {
+            const currentData = docSnap.data();
+            const isDataChanged = Object.keys(userData).some((key) => {
+              const newVal = userData[key as keyof typeof userData]?.toString().trim();
+              const currentVal = currentData[key]?.toString().trim();
+              return newVal !== currentVal;
+            });
+      
+            if (!isDataChanged) {
+                setPopupErrorMessage("No Changes Detected!");
+                setShowErrorPopup(true);
+                setTimeout(() => setShowErrorPopup(false), 3000);
+              setLoading(false);
+              return;
             }
-    
-            await updateDoc(docRef, { ...userData });
-    
-            alert("Profile updated successfully!");
-            router.push("/dashboard");
-        } catch (err) {
-            setError("Failed to update user data.");
-            console.error(err);
+          }
+      
+          await updateDoc(docRef, { ...userData });
+          setPopupMessage("Barangay User Updated Successfully!");
+          setShowPopup(true);
+      
+          setTimeout(() => {
+            setShowPopup(false);
+            // router.push("/dashboard/ResidentModule");
+          }, 3000);
+        } catch (err: any) {
+          console.error("Error updating profile:", err);
+          setError("Failed to update profile. Please try again. " + err.message);
         }
-    
+      
         setLoading(false);
-    };
-    
+      };
+      
     
 
     return (
@@ -170,7 +232,7 @@ export default function SettingsPage() {
           
                 <div className="modifyaccsettings-main-section1-settings">
                     <div className="modifyaccsettings-main-section1-left-settings">
-                        <button onClick={handleBack}>
+                        <button onClick={handleBack}>   
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-settings" />
                         </button>
                         <h1>Edit Account Settings</h1>
@@ -206,9 +268,16 @@ export default function SettingsPage() {
                                 style={{ display: "none" }}
                                 onChange={handleImageChange}
                             />
-                            <button className="upload-btn-settings" onClick={() => document.getElementById("fileUpload")?.click()}>
-                                Upload Image
-                            </button>
+                            <button
+                                    type="button"
+                                    className="upload-btn-settings"
+                                    onClick={() => {
+                                        document.getElementById("fileUpload")?.click();
+                                    }}
+                                    >
+                                    Upload Image
+                                    </button>
+
                         </div>
 
                         <div className="main-fields-container-section2-settings">
@@ -304,8 +373,8 @@ export default function SettingsPage() {
                                     name="phone"
                                     type="tel"
                                     className="input-field-settings"
-                                    maxLength={10}
-                                    title="Please enter a valid 10-digit contact number"
+                                    maxLength={11}
+                                    title="Please enter a valid 11-digit contact number"
                                     value={userData.phone}
                                     onChange={handleChange}
                                     />
@@ -335,6 +404,37 @@ export default function SettingsPage() {
             </form>
                 
             </div>
+
+
+            {showSubmitPopup && (
+                        <div className="confirmation-popup-overlay-add">
+                            <div className="confirmation-popup-add">
+                                <p>Are you sure you want to submit?</p>
+                                <div className="yesno-container-add">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
+                                    <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+        )}
+
+        {showPopup && (
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+        {showErrorPopup && (
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
 
         </main>
     );

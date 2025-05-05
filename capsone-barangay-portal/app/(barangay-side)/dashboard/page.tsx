@@ -12,6 +12,7 @@ export default function Dashboard() {
 
   // for residents and users
   const [residentUsersCount, setResidentUsersCount] = useState(0);
+  const [barangayUsersCount, setBarangayUsersCount] = useState(0);
   const [residentsCount, setResidentsCount] = useState(0);
   const [eastResidentsCount, seteastResidentsCount] = useState(0);
   const [westResidentsCount, setwestResidentsCount] = useState(0);
@@ -216,7 +217,9 @@ useEffect(() => {
       documentRequestFormattedWeeklyData.sort((a, b) => new Date(a.monthWeek.split(" - ")[0]).getTime() - new Date(b.monthWeek.split(" - ")[0]).getTime());
 
       setdocumentRequestsByWeek(documentRequestFormattedWeeklyData);
-
+     
+        const barangayUsersSnapshot = await getDocs(collection(db, "BarangayUsers"));
+        setBarangayUsersCount(barangayUsersSnapshot.size);
       
         // for residents pie charts
         const residentUsersSnapshot = await getDocs(collection(db, "ResidentUsers"));
@@ -519,7 +522,7 @@ useEffect(() => {
                 <p className="title">
                   Total Barangay Officials
                 </p>
-              <p className="count">{siteVisits}</p>
+              <p className="count">{barangayUsersCount}</p>
             </div>
 
             <div className="counts-card-right-side">
@@ -706,11 +709,11 @@ useEffect(() => {
                     </div>
 
                     <div className="card-right-side">
-                      <ResponsiveContainer width={700} height={300}>
+                      <ResponsiveContainer width={800} height={300}>
                         <BarChart
                           data={documentRequestsStatusChart.data}
                           layout="vertical"
-                          margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
+                          margin={{ top: 70, right: 70, bottom: 70, left: 70 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis type="number" />
@@ -843,11 +846,11 @@ useEffect(() => {
                           </div>
 
                           <div className="card-right-side">
-                            <ResponsiveContainer width={700} height={300}>
+                            <ResponsiveContainer width={1500} height={500}>
                               <BarChart
                                 data={totalIncidentReportsChart.data}
                                 layout="vertical"
-                                margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
+                                margin={{ top: 70, right: 70, bottom: 70, left: 70 }}
                               >
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis type="number" />
