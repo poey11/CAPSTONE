@@ -77,6 +77,7 @@ export default function AddResident() {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
   const [newDocId, setNewDocId] = useState<string | null>(null);
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -155,10 +156,28 @@ export default function AddResident() {
       age, sex, civilStatus, contactNumber,  emailAddress
   } = formData;
   
-    if (!firstName || !lastName || !address || !generalLocation || !dateOfBirth || !age || !sex || !civilStatus || !contactNumber) {
+    const invalidFields: string[] = [];
+
+    if (!lastName) invalidFields.push("lastName");
+    if (!firstName) invalidFields.push("firstName");
+    if (!address) invalidFields.push("address");
+    if (!generalLocation) invalidFields.push("generalLocation");
+    if (!dateOfBirth) invalidFields.push("dateOfBirth");
+    if (!age) invalidFields.push("age"); 
+    if (!sex) invalidFields.push("sex");
+    if (!civilStatus) invalidFields.push("civilStatus");
+    if (!contactNumber) invalidFields.push("contactNumber");
+    if (!emailAddress) invalidFields.push("emailAddress");
+
+
+    if (invalidFields.length > 0) {
+      setInvalidFields(invalidFields);
       setPopupErrorMessage("Please fill up all required fields.");
       setShowErrorPopup(true);
-      setTimeout(() => setShowErrorPopup(false), 3000);
+  
+      setTimeout(() => {
+        setShowErrorPopup(false);
+      }, 3000);
       return;
     }
     
@@ -180,6 +199,7 @@ export default function AddResident() {
       return;
     }
 
+    setInvalidFields([]);
     setShowSubmitPopup(true);
 };
 
@@ -325,12 +345,25 @@ const confirmSubmit = async () => {
               <div className="fields-container">
               <div className="fields-section">
                   <p>Last Name<span className="required">*</span></p>
-                  <input type="text" className="add-resident-input-field" placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                  <input type="text"
+                  className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`}
+                    placeholder="Enter Last Name"
+                     name="lastName"
+                      value={formData.lastName}
+                       onChange={handleChange}
+                        required />
                 </div>
                                 
                 <div className="fields-section">
                   <p>First Name<span className="required">*</span></p>
-                  <input type="text" className="add-resident-input-field" placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                  <input 
+                   type="text"
+                   className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`}
+                   placeholder="Enter First Name"
+                   name="firstName"
+                   value={formData.firstName}
+                   onChange={handleChange}
+                   required />
                 </div>
 
                 <div className="fields-section">
@@ -340,14 +373,21 @@ const confirmSubmit = async () => {
 
                 <div className="fields-section">
                   <p>Address<span className="required">*</span></p>
-                  <input type="text" className="add-resident-input-field" placeholder="Enter Address" name="address" value={formData.address} onChange={handleChange} required />
+                  <input 
+                  type="text"
+                  className={`add-resident-input-field ${invalidFields.includes("address") ? "input-error" : ""}`}
+                  placeholder="Enter Address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  required />
                 </div>
 
                 <div className="fields-section">
                   <p>Location<span className="required">*</span></p>
                   <select
                     name="generalLocation"
-                    className="add-resident-input-field"
+                    className={`add-resident-input-field ${invalidFields.includes("generalLocation") ? "input-error" : ""}`}
                     value={formData.generalLocation}
                     onChange={handleChange}
                     required
@@ -364,7 +404,7 @@ const confirmSubmit = async () => {
                     <p>Cluster/Section<span className="required">*</span></p>
                     <select
                       name="cluster"
-                      className="add-resident-input-field"
+                      className={`add-resident-input-field ${invalidFields.includes("cluster") ? "input-error" : ""}`}
                       value={formData.cluster || ""}
                       onChange={handleChange}
                       required
@@ -388,17 +428,36 @@ const confirmSubmit = async () => {
                 
                 <div className="fields-section">
                   <p>Date of Birth<span className="required">*</span></p>
-                  <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} max={new Date().toISOString().split("T")[0]} required />
+                  <input 
+                  type="date"
+                  className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
+                    name="dateOfBirth"
+                     value={formData.dateOfBirth}
+                      onChange={handleChange}
+                       max={new Date().toISOString().split("T")[0]}
+                        required />
                 </div>
 
                 <div className="fields-section">
                   <p>Age<span className="required">*</span></p>
-                  <input type="number" className="add-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} onChange={handleChange} readOnly />
+                  <input 
+                  type="number"
+                  className={`add-resident-input-field ${invalidFields.includes("age") ? "input-error" : ""}`}
+                    placeholder="Enter Age"
+                     name="age"
+                      value={formData.age}
+                       onChange={handleChange}
+                        readOnly />
                 </div>
                 
                 <div className="fields-section">
                   <p>Sex<span className="required">*</span></p>
-                  <select name="sex" className="add-resident-input-field" value={formData.sex} onChange={handleChange} required>
+                  <select
+                   name="sex"
+                   className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
+                     value={formData.sex}
+                      onChange={handleChange}
+                       required>
                     <option value="" disabled>Choose Gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -408,7 +467,12 @@ const confirmSubmit = async () => {
 
                 <div className="fields-section">
                   <p>Civil Status<span className="required">*</span></p>
-                  <select name="civilStatus" className="add-resident-input-field" value={formData.civilStatus} onChange={handleChange} required>
+                  <select 
+                  name="civilStatus"
+                  className={`add-resident-input-field ${invalidFields.includes("civilStatus") ? "input-error" : ""}`}
+                    value={formData.civilStatus}
+                     onChange={handleChange}
+                      required>
                     <option value="" disabled>Choose Civil Status</option>
                     <option value="Single">Single</option>
                     <option value="Married">Married</option>
@@ -425,7 +489,15 @@ const confirmSubmit = async () => {
                 
                 <div className="fields-section">
                   <p>Contact Number<span className="required">*</span></p>
-                  <input type="tel" className="add-resident-input-field" name="contactNumber" value={formData.contactNumber} onChange={handleChange} required pattern="[0-9]{11}" placeholder="Enter 11-digit phone number" />
+                  <input 
+                  type="tel" 
+                  className={`add-resident-input-field ${invalidFields.includes("contactNumber") ? "input-error" : ""}`}
+                   name="contactNumber"
+                    value={formData.contactNumber}
+                     onChange={handleChange}
+                      required pattern="[0-9]{11}"
+                       placeholder="Enter 11-digit phone number" 
+                       />
                 </div>
 
                 <div className="fields-section">
