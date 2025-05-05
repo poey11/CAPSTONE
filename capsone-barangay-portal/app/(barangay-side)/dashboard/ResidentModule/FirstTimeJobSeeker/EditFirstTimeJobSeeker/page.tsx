@@ -182,6 +182,15 @@ export default function EditFirstTimeJobSeeker() {
 
   return (
     <main className="add-resident-main-container">
+      <div className="path-section">
+        <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
+        <h1 className="breadcrumb">
+          <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker">First-Time Job Seeker List</Link>
+          <span className="chevron">/</span>
+        </h1>
+        <h2 className="breadcrumb">Edit First-Time Jobseeker<span className="chevron"></span></h2>
+      </div>
+
       <div className="addresident-page-title-section-1">
         <h1>First-Time Job Seeker List</h1>
       </div>
@@ -212,31 +221,31 @@ export default function EditFirstTimeJobSeeker() {
               <div className="fields-container">
                 <div className="fields-section">
                   <p>Last Name<span className="required">*</span></p>
-                  <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                  <input type="text" name="lastName" className="add-resident-input-field" value={formData.lastName} onChange={handleChange} required />
                 </div>
                 <div className="fields-section">
                   <p>First Name<span className="required">*</span></p>
-                  <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                  <input type="text" name="firstName" className="add-resident-input-field" value={formData.firstName} onChange={handleChange} required />
                 </div>
                 <div className="fields-section">
                   <p>Middle Name</p>
-                  <input type="text" name="middleName" value={formData.middleName} onChange={handleChange} />
+                  <input type="text" name="middleName" className="add-resident-input-field" value={formData.middleName} onChange={handleChange} />
                 </div>
                 <div className="fields-section">
                   <p>Date Applied<span className="required">*</span></p>
-                  <input type="date" name="dateApplied" value={formData.dateApplied} onChange={handleChange} required />
+                  <input type="date" name="dateApplied" className="add-resident-input-field" value={formData.dateApplied} onChange={handleChange} required />
                 </div>
                 <div className="fields-section">
                   <p>Date of Birth<span className="required">*</span></p>
-                  <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
+                  <input type="date" name="dateOfBirth" className="add-resident-input-field" value={formData.dateOfBirth} onChange={handleChange} required />
                 </div>
                 <div className="fields-section">
                   <p>Age<span className="required">*</span></p>
-                  <input type="number" name="age" value={formData.age} onChange={handleChange} required />
+                  <input type="number" name="age" className="add-resident-input-field" value={formData.age} onChange={handleChange} required />
                 </div>
                 <div className="fields-section">
                   <p>Sex<span className="required">*</span></p>
-                  <select name="sex" value={formData.sex} onChange={handleChange} required>
+                  <select name="sex" value={formData.sex} className="add-resident-input-field" onChange={handleChange} required>
                     <option value="" disabled>Choose Gender</option>
                     <option value="M">Male</option>
                     <option value="F">Female</option>
@@ -244,7 +253,7 @@ export default function EditFirstTimeJobSeeker() {
                 </div>
                 <div className="fields-section">
                   <p>Remarks</p>
-                  <input type="text" name="remarks" value={formData.remarks} onChange={handleChange} />
+                  <input type="text" name="remarks" className="add-resident-input-field" value={formData.remarks} onChange={handleChange} />
                 </div>
               </div>
             </div>
@@ -252,16 +261,18 @@ export default function EditFirstTimeJobSeeker() {
             <div className="add-resident-section-2-right-side">
               <div className="file-upload-container">
                 <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
-                <input id="file-upload" type="file" accept=".jpg,.jpeg,.png" onChange={handleFileChange} />
+                <input id="file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleFileChange} />
                 
                 {formData.fileURL && (
                   <div className="file-name-image-display">
                     <span className="section-title">Current Image</span>
                     <div className="file-name-image-display-indiv">
-                      <img src={formData.fileURL} style={{ width: "100px", height: "100px" }} />
-                      <button type="button" onClick={handleFileDelete}>
-                        <img src="/images/trash.png" className="delete-icon" />
-                      </button>
+                      <img src={formData.fileURL} alt="Current Resident Image" style={{ width: "100px", height: "100px" }} />
+                      <div className="delete-container">
+                          <button type="button" onClick={handleFileDelete} className="delete-button">
+                            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                          </button>
+                        </div>
                     </div>
                   </div>
                 )}
@@ -272,9 +283,11 @@ export default function EditFirstTimeJobSeeker() {
                     <div className="file-name-image-display-indiv">
                       <img src={preview || ""} style={{ width: "100px", height: "100px" }} />
                       <span>{file.name}</span>
-                      <button type="button" onClick={handleFileDelete}>
-                        <img src="/images/trash.png" className="delete-icon" />
-                      </button>
+                      <div className="delete-container">
+                        <button type="button" onClick={handleFileDelete} className="delete-button">
+                          <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

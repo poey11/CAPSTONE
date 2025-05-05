@@ -5,6 +5,7 @@ import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, sendEmailVerification, signOut } from "firebase/auth";
 import { useState, ChangeEvent } from "react";
 import { useRouter } from 'next/navigation';
+import { Eye, EyeOff } from "lucide-react";
 import  {isValidPhilippineMobileNumber} from "@/app/helpers/helpers";
 import ReCAPTCHA from "react-google-recaptcha";
 import "@/CSS/Components/registerform.css";
@@ -36,6 +37,8 @@ const RegisterForm: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState<string>("");
     const [showPopup, setShowPopup] = useState(false);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const [resident, setResident] = useState<residentUser>({
         sex: "",
@@ -258,67 +261,86 @@ const RegisterForm: React.FC = () => {
                     </div>
 
                     <div className="form-group-register-form">
-                    <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
-                    <input  value={resident.email} onChange={handleChange} id="email" 
-                    type="email" name="email" 
-                    className="form-input-register-form " 
-                    placeholder="Enter Email"
-                    required />
+                        <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
+                        <input  value={resident.email} onChange={handleChange} id="email" 
+                        type="email" name="email" 
+                        className="form-input-register-form " 
+                        placeholder="Enter Email"
+                        required />
                     </div>
 
                     <div className="form-group-register-form">
-                    <label htmlFor="phone" className="form-label-register-form" >Phone Number:<span className="required">*</span> </label>
-                    <input  value={resident.phone} onChange={handleChange} id="phone" 
-                    type="tel" name="phone"
-                    className="form-input-register-form " 
-                    placeholder="Enter Phone Number"
-                    required />
+                        <label htmlFor="phone" className="form-label-register-form" >Phone Number:<span className="required">*</span> </label>
+                        <input  value={resident.phone} onChange={handleChange} id="phone" 
+                        type="tel" name="phone"
+                        className="form-input-register-form " 
+                        placeholder="Enter Phone Number"
+                        required />
                     </div>
 
                     <div className="form-group-register-form">
-                    <label htmlFor="email" className="form-label-register-form" >Date Of Birth:<span className="required">*</span> </label>
-                    <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
-                    type="date" name="dateOfBirth" 
-                    className="form-input-register-form " 
-                    placeholder="Enter Email"
-                    max={today}
-                    onKeyDown={(e) => e.preventDefault()} // Prevent manual input
-                    required />
+                        <label htmlFor="email" className="form-label-register-form" >Date of Birth:<span className="required">*</span> </label>
+                        <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
+                        type="date" name="dateOfBirth" 
+                        className="form-input-register-form " 
+                        placeholder="Enter Email"
+                        max={today}
+                        onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                        required />
                     </div>
 
 
 
                     <div className="form-group-register-form">
-                    <label htmlFor="address" className="form-label-register-form">Address:<span className="required">*</span> </label>
-                    <input value={resident.address} onChange={handleChange} id="address" 
-                    type="text" name="address" 
-                    className="form-input-register-form " 
-                    placeholder="Enter Address"
-                    required />
+                        <label htmlFor="address" className="form-label-register-form">Address:<span className="required">*</span> </label>
+                        <input value={resident.address} onChange={handleChange} id="address" 
+                        type="text" name="address" 
+                        className="form-input-register-form " 
+                        placeholder="Enter Address"
+                        required />
                     </div>
 
 
                     <div className="form-group-register-form">
-                    <label htmlFor="password" className="form-label-register-form">Password:<span className="required">*</span> </label>
-                    <input value={resident.password} onChange={handleChange} id="password"
-                    type="password" name="password" 
-                    className="form-input-register-form "
-                    placeholder="Enter Password"
-                    required/>
+                        <label htmlFor="password" className="form-label-register-form">Password:<span className="required">*</span> </label>
+                        <div className="relative">
+                            <input value={resident.password} onChange={handleChange} id="password"
+                                type={showPassword ? "text" : "password"}
+                                name="password" 
+                                className="form-input-register-form "
+                                placeholder="Enter Password"
+                                required/>
+                                <button
+                                                                                type="button"
+                                                                                className="toggle-password-btn"
+                                                                                onClick={() => setShowPassword(!showPassword)}
+                                                                            >
+                                                                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                                            </button>
+                        </div>
                     </div>
 
                     <div className="form-group-register-form">
-                    <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password:<span className="required">*</span></label>
-                    <input
-                        id="confirm_password"
-                        type="password"
-                        name="confirm_password"
-                        value={confirmPassword}
-                        onChange={handleChange}
-                        className="form-input-register-form"
-                        placeholder="Confirm Password"
-                        required
-                    />
+                        <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password:<span className="required">*</span></label>
+                        <div className="relative">
+                            <input
+                                id="confirm_password"
+                                type={showConfirmPassword ? "text" : "password"}
+                                name="confirm_password"
+                                value={confirmPassword}
+                                onChange={handleChange}
+                                className="form-input-register-form"
+                                placeholder="Confirm Password"
+                                required
+                            />
+                            <button
+                                                                            type="button"
+                                                                            className="toggle-password-btn"
+                                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                                        >
+                                                                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                </button>
+                        </div>
                     </div>
 
 

@@ -25,7 +25,14 @@ import {customAlphabet} from "nanoid";
 export default function AddIncident() {
   const router = useRouter();
   const user = useSession().data?.user;
-  const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+
+
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
+
 
   const searchParam = useSearchParams();
   const departmentId = searchParam.get("departmentId");
@@ -232,9 +239,19 @@ export default function AddIncident() {
         filteredData.respondent = deepFilter(filteredData.respondent);
 
         // Save filtered data to Firestore
-        await addDoc(collection(db, "IncidentReports"), filteredData);
+     //   await addDoc(collection(db, "IncidentReports"), filteredData);
 
-        alert("Incident Report Submitted!");
+            // Save filtered data to Firestore and get the reference
+        const docRef = await addDoc(collection(db, "IncidentReports"), filteredData);
+
+ 
+    router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&highlight=${docRef.id}`);
+
+
+      
+  
+
+
     } catch (e: any) {
         console.log(e);
     }
@@ -242,11 +259,15 @@ export default function AddIncident() {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault(); 
-  
+
+
+ 
     const form = event.target as HTMLFormElement;
     if (form.checkValidity()) {
       if(!isValidPhilippineMobileNumber(complainant.contact)|| !isValidPhilippineMobileNumber(respondent.contact)){
-        setErrorPopup({ show: true, message: "Invalid Contact Number." });
+        setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
         return;
       }
       const dateFiled = reportInfo.dateFiled;
@@ -260,7 +281,9 @@ export default function AddIncident() {
 
       const isInvalid = !dateFiledIsPast &&(!dateIsFiledToday || !timeIsFiledPastOrNow);
       if (isInvalid) {
-        setErrorPopup({ show: true, message: "Date and/or Time in Filed Section is Invalid." });
+        setPopupErrorMessage("Date and/or Time in Filed Section is Invalid.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
         return;
       }
 
@@ -269,21 +292,43 @@ export default function AddIncident() {
       const dateReceivedIsPast = isPastDate(dateReceived);
       const isInvalidReceived = !dateReceivedIsPast &&(!dateIsReceivedToday || !timeIsRecievedPastOrNow);
       if (isInvalidReceived) {
-        setErrorPopup({ show: true, message: "Date and/or Time in Received Section is Invalid." });
+        setPopupErrorMessage("Date and/or Time in Received Section is Invalid.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
         return;
       }
 
 
-
-      handleUpload().then(() => {
-        //deleteForm();
-        router.back();
-      })
+    
+        setShowSubmitPopup(true);
+     
     } else {
      
       form.reportValidity();
     }
   };
+
+  const handleConfirmSubmit = async () => {
+    try {
+      await handleUpload(); // Save to Firestore only when confirmed
+  
+      setPopupMessage("Incident Successfully Submitted!");
+      setShowPopup(true);
+
+  
+      setTimeout(() => {
+        setShowPopup(false);
+        
+      }, 3000);
+  
+    } catch (error) {
+      console.error("Error saving incident:", error);
+      setPopupErrorMessage("Error saving incident. Please try again.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+    }
+  };
+  
 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type, id } = e.target;
@@ -368,17 +413,11 @@ export default function AddIncident() {
   };
 
 
+
   return (
     <main className="main-container-add">
       
-      {errorPopup.show && (
-              <div className="popup-overlay error">
-                  <div className="popup">
-                      <p>{errorPopup.message}</p>
-                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
-                  </div>
-              </div>
-        )}
+
 
         <div className="main-content-add">
 
@@ -390,7 +429,7 @@ export default function AddIncident() {
 
                     <div className="actions-add">
                         <button  type="button" onClick={deleteForm} className="action-delete-add">Delete</button>
-                        <button type="submit" className="action-view-add">Save</button>
+                        <button type="submit" className="action-view-add" >Save</button>
                     </div>
                 
              </div>
@@ -603,6 +642,7 @@ export default function AddIncident() {
                     value={respondent.contact}
                     name="contact"
                     required
+   
                     onChange={handleFormChange}
                     />
                 
@@ -836,6 +876,37 @@ export default function AddIncident() {
         </form>
 
         </div> 
+
+        {showSubmitPopup && (
+                        <div className="confirmation-popup-overlay-add">
+                            <div className="confirmation-popup-add">
+                                <p>Are you sure you want to submit?</p>
+                                <div className="yesno-container-add">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
+                                    <button onClick={handleConfirmSubmit} className="yes-button-add">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+        )}
+
+        {showPopup && (
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+        {showErrorPopup && (
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
+
 
     
     </main>

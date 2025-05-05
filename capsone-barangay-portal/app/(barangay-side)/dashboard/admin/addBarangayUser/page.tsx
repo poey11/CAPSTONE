@@ -6,6 +6,7 @@ import "@/CSS/User&Roles/AddBarangayUser.css";
 import { useRouter } from "next/navigation";
 import { hash } from "bcryptjs";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 interface BarangayUser{
     id?: string;
@@ -159,6 +160,14 @@ export default function AddBarangayUser() {
     return (
 
         <main className="add-barangayuser-main-container">
+            <div className="path-section">
+                <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
+                <h1 className="breadcrumb">
+                    <Link href="/dashboard/admin/BarangayUsers">Barangay Users</Link>
+                    <span className="chevron">/</span>
+                </h1>
+                <h2 className="breadcrumb">Add Barangay User<span className="chevron"></span></h2>
+            </div>
             <div className="add-barangayuser-page-title-section-1">
                 <h1>Barangay Users</h1>
             </div>

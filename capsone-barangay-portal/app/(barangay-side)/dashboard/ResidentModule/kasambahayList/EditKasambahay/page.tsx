@@ -297,6 +297,14 @@ export default function EditKasambahay() {
 
   return (
     <main className="add-resident-main-container">
+      <div className="path-section">
+        <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
+        <h1 className="breadcrumb">
+          <Link href="/dashboard/ResidentModule/kasambahayList">Kasambahay Masterlist</Link>
+          <span className="chevron">/</span>
+        </h1>
+        <h2 className="breadcrumb">Edit Kasambahay<span className="chevron"></span></h2>
+      </div>
 
       <div className="addresident-page-title-section-1">
         <h1>Edit Kasambahay Details</h1>
@@ -333,12 +341,12 @@ export default function EditKasambahay() {
               </div>
 
               <div className="fields-section">
-                <p>First Name</p>
+                <p>First Name<span className="required">*</span></p>
                 <input type="text" name="firstName" className="add-resident-input-field" value={formData.firstName} onChange={handleChange} required />
               </div>
 
               <div className="fields-section">
-                <p>Last Name</p>
+                <p>Last Name<span className="required">*</span></p>
                 <input type="text" name="lastName" className="add-resident-input-field" value={formData.lastName} onChange={handleChange} required />
               </div>
 
@@ -348,22 +356,22 @@ export default function EditKasambahay() {
               </div>
 
               <div className="fields-section">
-                <p>Home Address</p>
+                <p>Home Address<span className="required">*</span></p>
                 <input type="text" name="homeAddress" className="add-resident-input-field" value={formData.homeAddress} onChange={handleChange} required />
               </div>
            
               <div className="fields-section">
                 <p>Place of Birth</p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} required/>
+                <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange}/>
               </div>
 
               <div className="fields-section">
-                <p>Date of Birth</p>
+                <p>Date of Birth<span className="required">*</span></p>
                 <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} max={new Date().toISOString().split("T")[0]} required />
               </div>
             
               <div className="fields-section">
-                <p>Sex</p>
+                <p>Sex<span className="required">*</span></p>
                 <select name="sex" className="add-resident-input-field" value={formData.sex} onChange={handleChange} required>
                   <option value="" disabled>Choose Gender</option>
                   <option value="Male">Male</option>
@@ -372,7 +380,7 @@ export default function EditKasambahay() {
               </div>
 
               <div className="fields-section">
-                <p>Civil Status</p>
+                <p>Civil Status<span className="required">*</span></p>
                 <select name="civilStatus" className="add-resident-input-field" value={formData.civilStatus} onChange={handleChange} required>
                   <option value="" disabled>Choose Civil Status</option>
                   <option value="Single">Single</option>
@@ -384,7 +392,7 @@ export default function EditKasambahay() {
               </div>
 
               <div className="fields-section">
-                <p>Educational Attainment</p>
+                <p>Educational Attainment<span className="required">*</span></p>
                 <select name="educationalAttainment" className="add-resident-input-field" value={formData.educationalAttainment} onChange={handleChange} required>
                   <option value="" disabled>Choose Educational Attainment</option>
                   <option value="1">Elem Under Grad</option>
@@ -399,7 +407,7 @@ export default function EditKasambahay() {
               </div>
 
               <div className="fields-section">
-                <p>Nature of Work</p>
+                <p>Nature of Work<span className="required">*</span></p>
                 <select name="natureOfWork" className="add-resident-input-field" value={formData.natureOfWork} onChange={handleChange} required>
                 <option value="" disabled>Choose Nature of Work</option>
                   <option value="1">Gen. House Help (All Around)</option>
@@ -412,7 +420,7 @@ export default function EditKasambahay() {
               </div>
 
               <div className="fields-section">
-                <p>Employment Arrangement</p>
+                <p>Employment Arrangement<span className="required">*</span></p>
                 <select name="employmentArrangement" className="add-resident-input-field" value={formData.employmentArrangement} onChange={handleChange} required>
                    <option value="" disabled>Choose Employment Arrangement</option>
                    <option value="1">Live - IN</option>
@@ -421,7 +429,7 @@ export default function EditKasambahay() {
               </div>
             
               <div className="fields-section">
-                <p>Range of Salary</p>
+                <p>Range of Salary<span className="required">*</span></p>
                 <select name="salary" className="add-resident-input-field" value={formData.salary} onChange={handleChange} required>
                 <option value="1">₱1,500 - ₱1,999</option>
                   <option value="2">₱2,000 - ₱2,499</option>
@@ -431,12 +439,12 @@ export default function EditKasambahay() {
               </div>
 
               <div className="fields-section">
-                <p>Employer Name</p>
+                <p>Employer Name<span className="required">*</span></p>
                 <input type="text" className="add-resident-input-field" placeholder="Enter Employer" name="employerName" value={formData.employerName} onChange={handleChange} required />
               </div>
 
               <div className="fields-section">
-                <p>Employer Address</p>
+                <p>Employer Address<span className="required">*</span></p>
                 <input type="text" className="add-resident-input-field" placeholder="Enter Employer Address" name="employerAddress" value={formData.employerAddress} onChange={handleChange} required />
               </div>
             </div>
@@ -546,6 +554,7 @@ export default function EditKasambahay() {
           {showPopup && (
                 <div className={`popup-overlay-add show`}>
                     <div className="popup-add">
+                        <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                         <p>{popupMessage}</p>
                     </div>
                 </div>
@@ -553,6 +562,7 @@ export default function EditKasambahay() {
            {showErrorPopup && (
                 <div className={`error-popup-overlay-add show`}>
                     <div className="popup-add">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                         <p>{popupErrorMessage}</p>
                     </div>
                 </div>

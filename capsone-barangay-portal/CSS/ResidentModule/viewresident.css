@@ -68,7 +68,7 @@ margin-top: 20px;
     transition: transform 0.2s ease;
   }
 
-  .viewresident-section-1 {
+  .viewresident-section-1-header {
     display: flex;
     border-bottom: 2px solid #ddd;
     width: 100%;
@@ -76,7 +76,7 @@ margin-top: 20px;
     background: #dddbdb95;
   }
 
-  .viewresident-section-1 p {
+  .viewresident-section-1-header p {
     font-weight: bold;
     color: grey;
     margin-left: 1rem;
@@ -122,4 +122,32 @@ margin-top: 20px;
 
     color: grey;
     font-size: 1rem;
+  }
+
+  .path-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+  
+  .path-section h1 {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .path-section h2 {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: rgba(61, 61, 61, 0.5);
+  }
+  
+  .breadcrumb {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .chevron {
+    color: #888;
+    margin-left: 10px;
   }

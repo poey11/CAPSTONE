@@ -164,7 +164,7 @@ export default function AddResident() {
     // Phone number validation logic
     const phoneRegex = /^09\d{9}$/;
     if (!phoneRegex.test(contactNumber)) {
-      setPopupErrorMessage("Invalid contact number. Format should be: 0917XXXXXXX");
+      setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
       setShowErrorPopup(true);
       setTimeout(() => setShowErrorPopup(false), 3000);
       return;
@@ -173,7 +173,7 @@ export default function AddResident() {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     if (!emailRegex.test(emailAddress)) {
-      setPopupErrorMessage( "Invalid email address. Preferred format: example@domain.com" );
+      setPopupErrorMessage( "Invalid email address. Format: example@domain.com" );
       setShowErrorPopup(true);
       setTimeout(() => setShowErrorPopup(false), 3000);
       return;
@@ -251,6 +251,14 @@ const confirmSubmit = async () => {
 
   return (
       <main className="add-resident-main-container">
+        <div className="path-section">
+          <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
+          <h1 className="breadcrumb">
+            <Link href="/dashboard/ResidentModule">Main Residents</Link>
+            <span className="chevron">/</span>
+          </h1>
+          <h2 className="breadcrumb">Add Resident<span className="chevron"></span></h2>
+        </div>
 
         <div className="addresident-page-title-section-1">
           <h1>Main Residents</h1>
@@ -472,7 +480,8 @@ const confirmSubmit = async () => {
         {showPopup && (
                 <div className={`popup-overlay-add show`}>
                     <div className="popup-add">
-                        <p>{popupMessage}</p>
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
                     </div>
                 </div>
                 )}
@@ -480,7 +489,8 @@ const confirmSubmit = async () => {
         {showErrorPopup && (
                 <div className={`error-popup-overlay-add show`}>
                     <div className="popup-add">
-                        <p>{popupErrorMessage}</p>
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
                     </div>
                 </div>
                 )}

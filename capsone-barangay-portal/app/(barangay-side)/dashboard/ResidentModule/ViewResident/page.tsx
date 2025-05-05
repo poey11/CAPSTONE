@@ -3,6 +3,7 @@ import "@/CSS/ResidentModule/viewresident.css";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { db } from "../../../../db/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -12,6 +13,8 @@ export default function ViewResident() {
 
   const [residentData, setResidentData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (!residentId) return;
@@ -64,18 +67,27 @@ export default function ViewResident() {
   ];
 
   const handleBack = () => {
-    window.location.href = "/dashboard/ResidentModule";
+    router.back();
   };
 
   return (
     <main className="viewresident-main-container">
+
+        <div className="path-section">
+          <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
+          <h1 className="breadcrumb">
+            <Link href="/dashboard/ResidentModule">Main Residents</Link>
+            <span className="chevron">/</span>
+          </h1>
+          <h2 className="breadcrumb">Resident Details<span className="chevron"></span></h2>
+        </div>
 
         <div className="viewresident-page-title-section-1">
           <h1>Main Residents</h1>
         </div>
 
       <div className="viewresident-main-content">
-        <div className="viewresident-section-1">
+        <div className="viewresident-section-1-header">
           <button onClick={handleBack}>
                 <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
               </button>

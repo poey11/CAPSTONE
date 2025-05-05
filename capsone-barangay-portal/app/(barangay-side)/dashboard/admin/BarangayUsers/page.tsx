@@ -247,6 +247,10 @@ useEffect(() => {
  
     return (
         <main className="barangayusers-page-main-container">
+            <div className="path-section">
+                <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
+                <h2 className="breadcrumb">Barangay Users<span className="chevron"></span></h2>
+            </div>
             <div className="user-roles-module-section-1">
                 <h1>Barangay Users</h1>
                 {isAuthorized &&(
@@ -339,7 +343,10 @@ useEffect(() => {
             className={highlightedId === user.id ? "highlighted-row" : ""}
             >
             <td>{user.userid}</td>
-            <td>{user.firstName} {user.lastName}</td>
+            <td>
+                {user.lastName ? `${user.lastName}, ` : ""}
+                {user.firstName} {user.middleName}
+            </td>
             <td>{user.sex}</td>
             <td>{user.address}</td>
             <td>{user.phone}</td>

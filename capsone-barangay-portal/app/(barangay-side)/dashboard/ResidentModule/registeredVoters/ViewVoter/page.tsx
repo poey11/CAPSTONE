@@ -53,13 +53,21 @@ export default function ViewVoter() {
 
   return (
     <main className="viewresident-main-container">
+      <div className="path-section">
+          <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
+          <h1 className="breadcrumb">
+            <Link href="/dashboard/ResidentModule/registeredVoters">Registered Voters</Link>
+            <span className="chevron">/</span>
+          </h1>
+          <h2 className="breadcrumb">View Voter Details<span className="chevron"></span></h2>
+        </div>
 
       <div className="viewresident-page-title-section-1">
       <h1>Registered Voters</h1>
       </div>
 
       <div className="viewresident-main-content">
-        <div className="viewresident-section-1">
+        <div className="viewresident-section-1-header">
           <button onClick={handleBack}>
             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
           </button>

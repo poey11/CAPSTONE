@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getAllSpecificDocument, deleteDocument } from "@/app/helpers/firestorehelper";
 import { useSession } from "next-auth/react";
+import { db,storage } from "@/app/db/firebase";
+
 
 const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
 
@@ -20,6 +22,20 @@ export default function Department() {
   const incidentsPerPage = 10; // Can be changed
   
 
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [selectedIncidentNumber, setSelectedIncidentNumber] = useState<string | null> (null);
+
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showAlertPopup, setshowAlertPopup] = useState(false); 
+
+ const searchParams = useSearchParams();
+  const highlightUserId = searchParams.get("highlight");
+ const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+
+
   const router = useRouter();
   const searchParam = useSearchParams();
   const departmentId = searchParam.get("id");
@@ -30,6 +46,76 @@ export default function Department() {
     (userPosition === "LT Staff") &&
     userRole === "Barangay Official"
   );
+
+
+
+  useEffect(() => {
+  if (highlightUserId && incidentData.length > 0) {
+    setHighlightedId(highlightUserId);
+
+    const incidentIndex = filteredIncidents.findIndex(
+      (incident) => incident.id === highlightUserId
+    );
+
+    if (incidentIndex !== -1) {
+      const newPage = Math.floor(incidentIndex / incidentsPerPage) + 1;
+
+      if (currentPage !== newPage) {
+        setCurrentPage(newPage);
+      }
+
+      setTimeout(() => {
+        const targetElement = document.querySelector(`tr.highlighted-row`);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 500);
+
+      const timeoutId = setTimeout(() => {
+        setHighlightedId(null);
+
+        const params = new URLSearchParams(window.location.search);
+        params.delete("highlight");
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        router.replace(newUrl, { scroll: false });
+      }, 3000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }
+}, [highlightUserId, incidentData, filteredIncidents, currentPage]);
+
+
+
+
+  const confirmDelete = async () => {
+    if (deleteUserId) {
+      try {
+        await deleteDocument("IncidentReports", deleteUserId);
+        await deleteDocument("IncidentReports/Investigator", deleteUserId);
+  
+        setIncidentData((prev) => prev.filter(resident => resident.id !== deleteUserId));
+        setShowDeletePopup(false);
+        setDeleteUserId(null);
+  
+        setPopupMessage("Incident Record deleted successfully!");
+        setShowPopup(true);
+  
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 3000);
+      } catch (error) {
+        console.error("Error deleting incident:", error);
+        setPopupMessage("Failed to delete incident.");
+        setShowPopup(true);
+  
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 3000);
+      }
+    }
+  };
+  
 
 
   useEffect(() => {
@@ -64,12 +150,17 @@ export default function Department() {
     }
   };
 
-  const handleDelete = (reportId: string) => {
+  const handleDeleteClick = (reportId: string, incidentNumber: string) => {
     if (isAuthorized) {
-      deleteDocument("IncidentReports", reportId);
-      deleteDocument("IncidentReports/Investigator", reportId);
+      setDeleteUserId(reportId);
+      setSelectedIncidentNumber(incidentNumber);
+      setShowDeletePopup(true);
+    } else {
+      alert("You are not authorized to delete this resident.");
+      router.refresh(); // Refresh the page
     }
   };
+
 
 
 //FILTERS LOGIC
@@ -210,7 +301,10 @@ useEffect(() => {
       </thead>
       <tbody>
         {currentIncidents.map((incident, index) => (
-          <tr key={index}>
+         <tr
+          key={incident.id}
+          className={highlightedId === incident.id ? "highlighted-row" : ""}
+        >
             <td>{incident.caseNumber}</td>
             <td>{incident.dateFiled} {incident.timeFiled}</td>
             <td>{incident.nature}</td>
@@ -225,7 +319,8 @@ useEffect(() => {
                 {isAuthorized && (
                   <>
                     <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}>Edit</button>
-                    <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDelete(incident.id); }}>Delete</button>
+                    <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}>Delete</button>
+
                   </>
                 )}
               </div>
@@ -252,6 +347,41 @@ useEffect(() => {
         ))}
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
+
+
+
+    
+      {showDeletePopup && (
+      <div className="confirmation-popup-overlay-add">
+        <div className="confirmation-popup-add">
+          <p>Are you sure you want to delete this Incident Record?</p>
+          <h2>Incident Number: {selectedIncidentNumber}</h2>
+          <div className="yesno-container-add">
+            <button onClick={() => setShowDeletePopup(false)} className="no-button-add">No</button>
+            <button onClick={confirmDelete} className="yes-button-add">Yes</button>
+          </div> 
+        </div>
+      </div>
+    )}
+  
+    {showPopup && (
+      <div className={`popup-overlay-add show`}>
+        <div className="popup-add">
+          <p>{popupMessage}</p>
+        </div>
+      </div>
+    )}
+  
+    {showAlertPopup && (
+      <div className="confirmation-popup-overlay-add">
+        <div className="confirmation-popup-add">
+          <p>{popupMessage}</p>
+          <div className="yesno-container-add">
+            <button onClick={() => setshowAlertPopup(false)} className="no-button-add">Continue</button>
+          </div> 
+        </div>
+      </div>
+    )}
 
     </main>
   );

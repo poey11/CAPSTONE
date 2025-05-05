@@ -4,8 +4,10 @@ import { useRouter, useSearchParams} from "next/navigation";
 import type { Metadata } from "next";
 import { useState } from "react";
 import { db } from '@/app/db/firebase';
-import { doc, updateDoc, collection, setDoc , getDoc} from "firebase/firestore";
+import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { doc, updateDoc, collection, setDoc , getDoc, deleteDoc} from "firebase/firestore";
 import "@/CSS/User&Roles/ReasonForRejection.css";
+import Link from "next/link";
 
 
 
@@ -65,7 +67,9 @@ export default function reasonForRejection() {
                 const data = docSnap.data();
                 const currentCount = data.resubmissionCount || 0;
                 const newCount = currentCount + 1;
-                const newStatus = newCount >= 2 ? "Rejected" : "Resubmission";
+        
+                // If the reason is "User is not a resident of Barangay Fairview", set the status to "Rejected"
+                const newStatus = selectedReason === "User not a resident" ? "Rejected" : (newCount >= 2 ? "Rejected" : "Resubmission");
     
                 await updateDoc(docRef, {
                     rejectionReason: finalReason,
@@ -78,7 +82,7 @@ export default function reasonForRejection() {
                     residentID: userId,
                     message:
                         newStatus === "Rejected"
-                            ? `Your account was REJECTED due to: "${finalReason}".`
+                            ? `Your account was REJECTED due to: "${finalReason}". 24 hours until deactivation.`
                             : `Your account was REJECTED due to: "${finalReason}". Reupload valid ID in your profile.`,
                     transactionType: "Verification",
                     timestamp: new Date(),
@@ -104,6 +108,19 @@ export default function reasonForRejection() {
     
     return (
     <main className="reasonforrejection-main-container">
+        <div className="path-section">
+                <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
+                <h1 className="breadcrumb">
+                    <Link href="/dashboard/admin/PendingResidentUsers">Pending Resident Users</Link>
+                    <span className="chevron">/</span>
+                </h1>
+                <h1 className="breadcrumb">
+                    <Link href={`/dashboard/admin/viewResidentUser?id=${userId}`}>Resident User Details</Link>
+                    <span className="chevron">/</span>
+                </h1>
+                <h2 className="breadcrumb">Reason For Rejection<span className="chevron"></span></h2>
+            </div>
+
         <div className="reasonforrejection-section-1">
             <h1>Pending Resident Users</h1>
         </div>
@@ -137,6 +154,7 @@ export default function reasonForRejection() {
                 }}
               >
                 <option value="">Select Reason for Rejection</option>
+                <option value="User not a resident">User not a resident</option>
                 <option value="ID is blurry or unclear">ID is blurry or unclear</option>
                 <option value="ID is expired">ID is expired</option>
                 <option value="ID does not match the name on the account">ID does not match the name on the account</option>

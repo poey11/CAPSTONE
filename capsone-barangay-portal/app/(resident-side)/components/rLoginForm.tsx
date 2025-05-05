@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import { auth } from '../../db/firebase';
-import { signInWithEmailAndPassword,signOut, sendPasswordResetEmail } from 'firebase/auth';
+import { signInWithEmailAndPassword,signOut, sendPasswordResetEmail, fetchSignInMethodsForEmail} from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import {signIn} from 'next-auth/react';
+import { Eye, EyeOff } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from '../../db/firebase';
 
@@ -17,6 +18,7 @@ const rLoginForm:React.FC = () => {
     const router = useRouter(); 
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleRegister = () => {
       router.push("/register");
@@ -67,56 +69,57 @@ const rLoginForm:React.FC = () => {
               });
         }
     }
-    
-    const handleLogin = async(e: React.FormEvent<HTMLFormElement>) => {    
-        e.preventDefault();
-        try{
-            const userCredentials = await signInWithEmailAndPassword(auth, resident.email, resident.password);
-            const user = userCredentials.user;
 
-            if (user.emailVerified) {
-               
-                const userDocRef = doc(db, "ResidentUsers", user.uid);
-                const userDocSnap = await getDoc(userDocRef);
+
+        const handleLogin = async(e: React.FormEvent<HTMLFormElement>) => {    
+            e.preventDefault();
+            try{
+                const userCredentials = await signInWithEmailAndPassword(auth, resident.email, resident.password);
+                const user = userCredentials.user;
     
-                if (userDocSnap.exists()) {
-                    const userData = userDocSnap.data();
-                    setFirstName(userData.first_name || "");
-                    setLastName(userData.last_name || "");
+                if (user.emailVerified) {
+                   
+                    const userDocRef = doc(db, "ResidentUsers", user.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+        
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data();
+                        setFirstName(userData.first_name || "");
+                        setLastName(userData.last_name || "");
+                    }
+        
+                    setShowPopup(true);
+                    setTimeout(() => {
+                        setShowPopup(false);
+                        router.push("/");
+                    }, 2000);
+                    return;
+                } else {
+                    await signOut(auth);
+                    setShowVerifyPopup(true);
                 }
     
-                setShowPopup(true);
-                setTimeout(() => {
-                    setShowPopup(false);
-                    router.push("/");
-                }, 2000);
-                return;
-            } else {
-                await signOut(auth);
-                setShowVerifyPopup(true);
+                
+                
+            } catch (error: string | any) {
+                const result = await signIn("credentials", {
+                    userid: resident.email,
+                    password: resident.password,
+                    redirect: false,
+                });
+                
+                // Display a generic error message for both incorrect password and non-existing email
+                setErrorMessage("Login failed. Please try again.");
+                setShowErrorPopup(true);
+               
             }
-
-            
-            
-        } catch (error: string | any) {
-            const result = await signIn("credentials", {
-                userid: resident.email,
-                password: resident.password,
-                redirect: false,
-            });
-            
-            setErrorMessage("Invalid email or password. Please try again.");
-            setShowErrorPopup(true);
+         
+           
+                
            
         }
-     
-       
-            
-       
-    }
+        
     
-
-
     return (   
 
         <div className="login-container-resident">
@@ -160,7 +163,7 @@ const rLoginForm:React.FC = () => {
                     <form onSubmit={handleLogin}>
                         <div className="section1-resident">
                             <div className="form-group-resident">
-                                <label htmlFor="Email" className="form-label-resident">Email</label>
+                                <label htmlFor="Email" className="form-label-resident">Email:</label>
                                 <input 
                                     onChange={handleChange}
                                     value={resident.email}
@@ -173,16 +176,26 @@ const rLoginForm:React.FC = () => {
                             </div>
 
                             <div className="form-group-resident">
-                                <label htmlFor="password" className="form-label-resident">Password</label>
+                                <label htmlFor="password" className="form-label-resident">Password:</label>
+                                <div className="relative">
                                 <input 
                                     onChange={handleChange}
                                     value={resident.password}
-                                    type="password"  
+                                    type={showPassword ? "text" : "password"}
                                     id="password"  
                                     name="password"  
                                     className="form-input-resident" 
                                     required  
                                 />
+                                <button
+                                                                    type="button"
+                                                                    className="toggle-password-btn"
+                                                                    onClick={() => setShowPassword(!showPassword)}
+                                                                >
+                                                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                                </button>
+
+                                </div>
                             </div>
                         </div>
 
