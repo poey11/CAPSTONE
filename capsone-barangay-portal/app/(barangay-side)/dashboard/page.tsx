@@ -390,9 +390,9 @@ useEffect(() => {
     title: "Barangay Population:",
     count: residentsCount,
     data: [
-      { name: "East Fairview", value: eastResidentsCount },
-      { name: "West Fairview", value: westResidentsCount },
-      { name: "South Fairview", value: southResidentsCount },
+      { name: "E. Fairview", value: eastResidentsCount },
+      { name: "W. Fairview", value: westResidentsCount },
+      { name: "S. Fairview", value: southResidentsCount },
     ],
     colors: ["#4CAF50", "#2196F3", "#FF9800"],
   };
@@ -466,7 +466,7 @@ useEffect(() => {
       count: onlineIncidentReportsPendingCount + onlineIncidentReportsAcknowledgedCount,
       data: [
         { name: "Pending", value: onlineIncidentReportsPendingCount },
-        { name: "Acknowledged", value: onlineIncidentReportsAcknowledgedCount },
+        { name: "ACK", value: onlineIncidentReportsAcknowledgedCount },
       ],
       colors: ["#FF9800", "#03A9F4"],
     };
@@ -709,11 +709,11 @@ useEffect(() => {
                     </div>
 
                     <div className="card-right-side">
-                      <ResponsiveContainer width={800} height={300}>
+                      <ResponsiveContainer width={700} height={300}>
                         <BarChart
                           data={documentRequestsStatusChart.data}
                           layout="vertical"
-                          margin={{ top: 70, right: 70, bottom: 70, left: 70 }}
+                          margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis type="number" />
@@ -846,11 +846,11 @@ useEffect(() => {
                           </div>
 
                           <div className="card-right-side">
-                            <ResponsiveContainer width={1500} height={500}>
+                            <ResponsiveContainer width={700} height={300}>
                               <BarChart
                                 data={totalIncidentReportsChart.data}
                                 layout="vertical"
-                                margin={{ top: 70, right: 70, bottom: 70, left: 70 }}
+                                margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
                               >
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis type="number" />
