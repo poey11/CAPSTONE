@@ -35,6 +35,7 @@ export default function AddBarangayUser() {
     const [popupMessage, setPopupMessage] = useState("");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [popupErrorMessage, setPopupErrorMessage] = useState("");
+    const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
 
     const [loading, setLoading] = useState(true);
@@ -99,17 +100,30 @@ export default function AddBarangayUser() {
     }
 
     const handleSubmitClick = async () => {
-        const { password, userId } = users;
-      
-        if (!password || !userId) {
+        const { position, password, userId } = users;
+
+        const invalidFields : string[] = [];
+
+        if (!position) invalidFields.push("position");
+        if (!password) invalidFields.push("password");
+        if (!userId) invalidFields.push("userId");
+        
+        if (invalidFields.length > 0) {
+            
+         setInvalidFields(invalidFields);
+        setPopupErrorMessage("Please fill up all required fields.");
+        setShowErrorPopup(true);
     
-            setPopupErrorMessage("Please fill up all required fields.");
-            setShowErrorPopup(true);
-            setTimeout(() => { setShowErrorPopup(false); }, 3000);
-            return;
+        setTimeout(() => {
+          setShowErrorPopup(false);
+        }, 3000);
+        return;
+
         }
 
+
         if (password.length < 6) {
+            setInvalidFields(invalidFields);
             setPopupErrorMessage("Password must be at least 6 characters.");
             setShowErrorPopup(true);
             setTimeout(() => setShowErrorPopup(false), 3000);
@@ -195,8 +209,8 @@ export default function AddBarangayUser() {
                     <form id="addBarangayUserForm" onSubmit={handleSubmit}>
                         <div className="fields-container">
                             <div className="fields-section">
-                                <p>Position</p>
-                                <select  value={users.position}  onChange={handleChange} id="roles" name="position" className="role" >
+                                <p>Position <span className="required">*</span> </p>
+                                <select  value={users.position}  onChange={handleChange} id="roles" name="position" className={`role ${invalidFields.includes("position") ? "input-error" : ""}`} >
                                     <option value="" disabled>Select a Position</option>
                                     <option value="Punong Barangay">Punong Barangay</option>
                                     <option value="Secretary">Secretary</option>
@@ -214,7 +228,7 @@ export default function AddBarangayUser() {
                                     id="password" 
                                     type="password" 
                                     name="password" 
-                                    className="password" 
+                                    className={`password ${invalidFields.includes("password") ? "input-error" : ""}`}
                                     placeholder="Enter Password"
                                     required
                                 />
@@ -226,7 +240,7 @@ export default function AddBarangayUser() {
                                     type="text" 
                                     id="username"
                                     name="userId"
-                                    className="userID" 
+                                    className={`userID ${invalidFields.includes("userId") ? "input-error" : ""}`}
                                     value={users.userId} 
                                     placeholder="User ID"
                                     disabled  
