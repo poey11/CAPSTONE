@@ -559,67 +559,69 @@
 
 
 
-.popup-overlay-add,
-.error-popup-overlay-add{
-    position: fixed;
-    top: 13%;
-    right: -3px;
-    color: white;
-    width: 420px;
-    height: 50px;
-    border-radius: 5px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    text-align: center;
-    font-size: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.popup-overlay-add-resident,
+.error-popup-overlay-add-resident{
+  position: fixed;
+  top: 13%;
+  right: -3px;
+  background: #777575;
+  color: white;
+  width: 440px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 10px solid #403f3e;
   }
 
-  .popup-overlay-add{
-    background: #8fa98d;
+  .popup-overlay-add-resident{
+    background: #777575;
     border-left: 10px solid #403f3e;
   }
 
-  .error-popup-overlay-add{
+  .error-popup-overlay-add-resident{
     background: #cc3434;
     border-left: 10px solid #8a0f0f;
   }
 
-.popup-add{
+.popup-add-resident{
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
 }
 
-.popup-overlay-add.show,
-.error-popup-overlay-add.show {
+.popup-overlay-add-resident.show,
+.error-popup-overlay-add-resident.show {
   animation: slideIn 0.5s ease-out;
 }
 
-.popup-overlay-add.hide,
-.error-popup-overlay-add.hide {
+.popup-overlay-add-resident.hide,
+.error-popup-overlay-add-resident.hide {
   animation: slideOut 0.5s ease-out;
 }
 
 
-.confirmation-popup-overlay-add {
+.confirmation-popup-overlay-add-resident {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.076); 
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999; 
 }
 
-.confirmation-popup-add {
+.confirmation-popup-add-resident {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -635,10 +637,9 @@
   font-size: 18px;
   font-weight: lighter;
   position: fixed;
-  left: 43%; /* Adjust the value */
 }
 
-.confirmation-popup-add p{
+.confirmation-popup-add-resident p{
   color: rgb(97, 97, 97);
 }
 
