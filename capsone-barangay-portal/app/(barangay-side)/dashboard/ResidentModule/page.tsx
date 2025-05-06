@@ -448,8 +448,8 @@ export default function ResidentModule() {
     </div>
   
     {showDeletePopup && (
-      <div className="confirmation-popup-overlay-module">
-        <div className="confirmation-popup-module">
+      <div className="confirmation-popup-overlay-module-main-res">
+        <div className="confirmation-popup-module-main-res">
           <p>Are you sure you want to delete this Resident Record?</p>
           <h2>Resident Number: {selectedResidentNumber}</h2>
           <div className="yesno-container-module">
@@ -461,16 +461,17 @@ export default function ResidentModule() {
     )}
   
     {showPopup && (
-      <div className={`popup-overlay-module show`}>
-        <div className="popup-module">
+      <div className={`popup-overlay-module-main-res show`}>
+        <div className="popup-module-main-res">
+          <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
           <p>{popupMessage}</p>
         </div>
       </div>
     )}
   
     {showAlertPopup && (
-      <div className="confirmation-popup-overlay-module">
-        <div className="confirmation-popup-module">
+      <div className="confirmation-popup-overlay-module-main-res">
+        <div className="confirmation-popup-module-main-res">
           <p>{popupMessage}</p>
           <div className="yesno-container-module">
             <button onClick={() => setshowAlertPopup(false)} className="no-button-module">Continue</button>

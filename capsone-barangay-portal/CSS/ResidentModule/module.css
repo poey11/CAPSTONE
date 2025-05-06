@@ -247,52 +247,53 @@
     }
   }
 
-.popup-overlay-module,
-.error-popup-overlay-module{
-    position: fixed;
-    top: 13%;
-    right: -3px;
-    color: white;
-    width: 350px;
-    height: 50px;
-    border-radius: 5px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    text-align: center;
-    font-size: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-left: 10px solid #403f3e;
+.popup-overlay-module-main-res,
+.error-popup-overlay-module-main-res{
+  position: fixed;
+  top: 13%;
+  right: -3px;
+  background: #777575;
+  color: white;
+  width: 380px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 10px solid #403f3e;
   }
 
-  .popup-overlay-module{
+  .popup-overlay-module-main-res{
     background: #777575;
   }
 
-  .error-popup-overlay-module{
+  .error-popup-overlay-module-main-res{
     background: #991e1e;
   }
 
-  .popup-module{
+  .popup-module-main-res{
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 20px;
   }
   
-  .popup-overlay-module.show {
+  .popup-overlay-module-main-res.show {
     animation: slideIn 0.5s ease-out;
   }
   
-  .popup-overlay-module.hide {
+  .popup-overlay-module-main-res.hide {
     animation: slideOut 0.5s ease-out;
   }
 
 
 
-  .confirmation-popup-overlay-module {
+  .confirmation-popup-overlay-module-main-res {
     position: fixed;
     top: 0;
     left: 0;
@@ -305,7 +306,7 @@
     z-index: 9999; 
   }
   
-  .confirmation-popup-module {
+  .confirmation-popup-module-main-res {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -324,11 +325,11 @@
     left: 43%; /* Adjust the value */
   }
   
-  .confirmation-popup-module p{
+  .confirmation-popup-module-main-res p{
     color: rgb(97, 97, 97);
   }
 
-  .confirmation-popup-module h2{
+  .confirmation-popup-module-main-res h2{
     margin-top: 10px;
     color: #f44336;
     font-size: 15px;
@@ -435,4 +436,9 @@
 .highlighted-row {
   background-color: #bdf8a0ba !important;
   transition: background-color 0.5s ease;
+}
+
+.icon-alert {
+  width: 27px;
+  height: 27px;
 }
