@@ -388,10 +388,11 @@ export default function KasambahayListModule() {
 
 
       {showDeletePopup && (
-                        <div className="confirmation-popup-overlay-module">
-                            <div className="confirmation-popup-module">
-                            <p>Are you sure you want to delete this Kasambahay Record?</p>
-                            <h2>Registration Control Number: {selectedRegistrationControlNumber}</h2>
+                        <div className="confirmation-popup-overlay-module-kasambahay">
+                            <div className="confirmation-popup-module-kasambahay">
+                              <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                              <p>Are you sure you want to delete this Kasambahay Record?</p>
+                              <h2>Registration Control Number: {selectedRegistrationControlNumber}</h2>
                                 <div className="yesno-container-module">
                                     <button onClick={() => setShowDeletePopup(false)} className="no-button-module">No</button>
                                     <button onClick={confirmDelete} className="yes-button-module">Yes</button>
@@ -402,16 +403,17 @@ export default function KasambahayListModule() {
 
 
       {showPopup && (
-                <div className={`popup-overlay-module show`}>
-                    <div className="popup-module">
-                        <p>{popupMessage}</p>
+                <div className={`popup-overlay-module-kasambahay show`}>
+                    <div className="popup-module-kasambahay">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
                     </div>
                 </div>
       )}
 
       {showAlertPopup && (
-                        <div className="confirmation-popup-overlay-module">
-                            <div className="confirmation-popup-module">
+                        <div className="confirmation-popup-overlay-module-kasambahay">
+                            <div className="confirmation-popup-module-kasambahay">
                                 <p>{popupMessage}</p>
                                 <div className="yesno-container-module">
                                     <button onClick={() => setshowAlertPopup(false)} className="no-button-module">Continue</button>

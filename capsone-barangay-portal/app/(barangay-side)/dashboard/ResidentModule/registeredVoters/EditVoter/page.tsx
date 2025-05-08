@@ -235,8 +235,9 @@ export default function EditVoter() {
 
 
       {showDiscardPopup && (
-                        <div className="confirmation-popup-overlay-add">
-                            <div className="confirmation-popup-add">
+                        <div className="confirmation-popup-overlay-add-voter">
+                            <div className="confirmation-popup-add-voter">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to discard the changes?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">No</button>
@@ -247,8 +248,9 @@ export default function EditVoter() {
                     )}
 
           {showSavePopup && (
-                        <div className="confirmation-popup-overlay-add">
-                            <div className="confirmation-popup-add">
+                        <div className="confirmation-popup-overlay-add-voter">
+                            <div className="confirmation-popup-add-voter">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to save the changes?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowSavePopup(false)} className="no-button-add">No</button> 
@@ -260,16 +262,16 @@ export default function EditVoter() {
                     
 
           {showPopup && (
-                <div className={`popup-overlay-add show`}>
-                    <div className="popup-add">
+                <div className={`popup-overlay-add-voter show`}>
+                    <div className="popup-add-voter">
                       <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                       <p>{popupMessage}</p>
                     </div>
                 </div>
                 )}
              {showErrorPopup && (
-                <div className={`error-popup-overlay-add show`}>
-                    <div className="popup-add">
+                <div className={`error-popup-overlay-add-voter show`}>
+                    <div className="popup-add-voter">
                       <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                       <p>{popupErrorMessage}</p>
                     </div>

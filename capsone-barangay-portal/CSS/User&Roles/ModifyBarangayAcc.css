@@ -508,7 +508,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.076); 
+  background: rgba(0, 0, 0, 0.4); 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -520,8 +520,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 200px;
-  width: 400px;
+  height: 220px;
+  width: 420px;
   background-color: #f9f9f9;
   border-radius: 20px;
   border: 2px solid rgb(168, 161, 158);
@@ -531,7 +531,6 @@
   font-size: 18px;
   font-weight: lighter;
   position: fixed;
-  left: 43%; /* Adjust the value */
 }
 
 .confirmation-popup-add p{

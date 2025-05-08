@@ -559,72 +559,107 @@
 
 
 
-.popup-overlay-add,
-.error-popup-overlay-add{
-    position: fixed;
-    top: 13%;
-    right: -3px;
-    color: white;
-    width: 420px;
-    height: 50px;
-    border-radius: 5px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    text-align: center;
-    font-size: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.popup-overlay-add-resident,
+.popup-overlay-add-voter,
+.popup-overlay-add-kasambahay,
+.popup-overlay-add-jobseeker,
+.error-popup-overlay-add-resident,
+.error-popup-overlay-add-voter,
+.error-popup-overlay-add-kasambahay,
+.error-popup-overlay-add-jobseeker{
+  position: fixed;
+  top: 13%;
+  right: -3px;
+  background: #777575;
+  color: white;
+  width: 440px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 10px solid #403f3e;
   }
 
-  .popup-overlay-add{
-    background: #8fa98d;
+  .popup-overlay-add-resident,
+  .popup-overlay-add-voter,
+  .popup-overlay-add-kasambahay,
+  .popup-overlay-add-jobseeker{
+    background: #777575;
     border-left: 10px solid #403f3e;
   }
 
-  .error-popup-overlay-add{
+  .error-popup-overlay-add-resident,
+  .error-popup-overlay-add-voter,
+  .error-popup-overlay-add-kasambahay,
+  .error-popup-overlay-add-jobseeker{
     background: #cc3434;
     border-left: 10px solid #8a0f0f;
   }
 
-.popup-add{
+.popup-add-resident,
+.popup-add-voter,
+.popup-add-kasambahay,
+.popup-add-jobseeker{
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
 }
 
-.popup-overlay-add.show,
-.error-popup-overlay-add.show {
+.popup-overlay-add-resident.show,
+.popup-overlay-add-voter.show,
+.popup-overlay-add-kasambahay.show,
+.popup-overlay-add-jobseeker.show,
+.error-popup-overlay-add-resident.show,
+.error-popup-overlay-add-voter.show,
+.error-popup-overlay-add-kasambahay.show,
+.error-popup-overlay-add-jobseeker.show {
   animation: slideIn 0.5s ease-out;
 }
 
-.popup-overlay-add.hide,
-.error-popup-overlay-add.hide {
+.popup-overlay-add-resident.hide,
+.popup-overlay-add-voter.hide,
+.popup-overlay-add-kasambahay.hide,
+.popup-overlay-add-jobseeker.hide,
+.error-popup-overlay-add-resident.hide,
+.error-popup-overlay-add-voter.hide,
+.error-popup-overlay-add-kasambahay.hide,
+.error-popup-overlay-add-jobseeker.hide {
   animation: slideOut 0.5s ease-out;
 }
 
 
-.confirmation-popup-overlay-add {
+.confirmation-popup-overlay-add-resident,
+.confirmation-popup-overlay-add-voter,
+.confirmation-popup-overlay-add-kasambahay,
+.confirmation-popup-overlay-add-jobseeker {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.076); 
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999; 
 }
 
-.confirmation-popup-add {
+.confirmation-popup-add-resident,
+.confirmation-popup-add-voter,
+.confirmation-popup-add-kasambahay,
+.confirmation-popup-add-jobseeker {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 200px;
+  height: 220px;
   width: 400px;
   background-color: #f9f9f9;
   border-radius: 20px;
@@ -635,10 +670,12 @@
   font-size: 18px;
   font-weight: lighter;
   position: fixed;
-  left: 43%; /* Adjust the value */
 }
 
-.confirmation-popup-add p{
+.confirmation-popup-add-resident p,
+.confirmation-popup-add-voter p,
+.confirmation-popup-add-kasambahay p,
+.confirmation-popup-add-jobseeker p{
   color: rgb(97, 97, 97);
 }
 
@@ -734,5 +771,11 @@
 
 .input-error:hover {
   background-color: #ffd6d6 !important;
+}
+
+.successful-icon-popup {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
 }
 

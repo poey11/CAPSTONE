@@ -364,8 +364,9 @@ export default function registeredVotersModule() {
       </div>
 
       {showDeletePopup && (
-                        <div className="confirmation-popup-overlay-module">
-                            <div className="confirmation-popup-module">
+                        <div className="confirmation-popup-overlay-module-voters">
+                            <div className="confirmation-popup-module-voters">
+                            <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                             <p>Are you sure you want to delete this Voter Record?</p>
                             <h2>Voter Number: {selectedVoterNumber}</h2>
                                 <div className="yesno-container-module">
@@ -378,8 +379,9 @@ export default function registeredVotersModule() {
 
 
       {showPopup && (
-                <div className={`popup-overlay-module show`}>
-                    <div className="popup-module">
+                <div className={`popup-overlay-module-voters show`}>
+                    <div className="popup-module-voters">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                         <p>{popupMessage}</p>
                     </div>
                 </div>
