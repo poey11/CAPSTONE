@@ -162,6 +162,15 @@ const Menu = () => {
     } else {
       console.log("Transaction is not an Online Incident. No navigation performed.");
     }
+
+    if (
+      notification.transactionType === "Verification" &&
+      notification.message?.toLowerCase().includes("update")
+    ) {
+      router.push(`/ResidentAccount/Profile?id=${user?.uid}#resubmit-section`);
+
+    }
+
   };
   
   
@@ -184,6 +193,9 @@ const Menu = () => {
       </>
     );
   }
+
+
+  
 
   return (
     <>
