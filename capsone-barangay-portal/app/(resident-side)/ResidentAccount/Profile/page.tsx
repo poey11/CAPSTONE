@@ -234,6 +234,27 @@ export default function SettingsPageResident() {
       
         setLoading(false);
       };
+
+
+    //FOR NOTIFICATION REJECTION    
+      useEffect(() => {
+        const hash = window.location.hash;
+        if (hash) {
+          // Wait for the page to render the section
+          const scrollToSection = () => {
+            const element = document.querySelector(hash);
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth" });
+            } else {
+              // Retry after slight delay if not yet available
+              setTimeout(scrollToSection, 100);
+            }
+          };
+          scrollToSection();
+        }
+      }, []);
+
+  
       
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -458,7 +479,7 @@ export default function SettingsPageResident() {
                             </div>
                         </div>
                         {formData.status === "Resubmission" && (!resident.reupload || resident.reupload === "N/A") && (
-                            <div className="valid-id-section-profile">
+                            <div id="resubmit-section" className="valid-id-section-profile">
                                 <h3 className="valid-id-header">ID Rejected — Please Resubmit</h3>
                                 <p className="valid-id-subtext">
                                     Your previously submitted valid ID did not meet the requirements. Kindly upload a new, clear image for review.
