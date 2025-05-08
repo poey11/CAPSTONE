@@ -289,7 +289,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.076); 
+    background: rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -312,7 +312,6 @@
     font-size: 18px;
     font-weight: lighter;
     position: fixed;
-    left: 43%; /* Adjust the value */
   }
   
   .addbrgyuser-confirmation-popup p{

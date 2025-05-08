@@ -379,8 +379,9 @@ export default function AddFirstTimeJobSeeker() {
       </div>
 
       {showSubmitPopup && (
-                        <div className="confirmation-popup-overlay-add">
-                            <div className="confirmation-popup-add">
+                        <div className="confirmation-popup-overlay-add-jobseeker">
+                            <div className="confirmation-popup-add-jobseeker">
+                            <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to submit?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
@@ -391,8 +392,8 @@ export default function AddFirstTimeJobSeeker() {
         )}
 
         {showPopup && (
-                <div className={`popup-overlay-add show`}>
-                    <div className="popup-add">
+                <div className={`popup-overlay-add-jobseeker show`}>
+                    <div className="popup-add-jobseeker">
                         <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                         <p>{popupMessage}</p>
                     </div>
@@ -400,8 +401,8 @@ export default function AddFirstTimeJobSeeker() {
                 )}
 
         {showErrorPopup && (
-                <div className={`error-popup-overlay-add show`}>
-                    <div className="popup-add">
+                <div className={`error-popup-overlay-add-jobseeker show`}>
+                    <div className="popup-add-jobseeker">
                         <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                         <p>{popupErrorMessage}</p>
                     </div>

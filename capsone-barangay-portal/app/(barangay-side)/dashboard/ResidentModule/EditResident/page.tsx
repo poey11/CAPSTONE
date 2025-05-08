@@ -570,6 +570,7 @@ export default function EditResident() {
           {showDiscardPopup && (
                         <div className="confirmation-popup-overlay-add-resident">
                             <div className="confirmation-popup-add-resident">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to discard the changes?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">No</button>
@@ -582,6 +583,7 @@ export default function EditResident() {
           {showSavePopup && (
                         <div className="confirmation-popup-overlay-add-resident">
                             <div className="confirmation-popup-add-resident">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to save the changes?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowSavePopup(false)} className="no-button-add">No</button> 

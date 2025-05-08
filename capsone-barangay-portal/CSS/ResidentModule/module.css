@@ -248,7 +248,9 @@
   }
 
 .popup-overlay-module-main-res,
-.error-popup-overlay-module-main-res{
+.error-popup-overlay-module-main-res,
+.popup-overlay-module-voters,
+.popup-overlay-module-kasambahay{
   position: fixed;
   top: 13%;
   right: -3px;
@@ -268,7 +270,9 @@
   border-left: 10px solid #403f3e;
   }
 
-  .popup-overlay-module-main-res{
+  .popup-overlay-module-main-res,
+  .popup-overlay-module-voters,
+  .popup-overlay-module-kasambahay{
     background: #777575;
   }
 
@@ -276,24 +280,33 @@
     background: #991e1e;
   }
 
-  .popup-module-main-res{
+  .popup-module-main-res,
+  .popup-module-voters,
+  .popup-module-kasambahay{
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 20px;
   }
   
-  .popup-overlay-module-main-res.show {
+  .popup-overlay-module-main-res.show,
+  .popup-overlay-module-voters.show,
+  .popup-overlay-module-kasambahay.show {
     animation: slideIn 0.5s ease-out;
   }
   
-  .popup-overlay-module-main-res.hide {
+  .popup-overlay-module-main-res.hide,
+  .popup-overlay-module-voters.hide,
+  .popup-overlay-module-kasambahay.hide {
     animation: slideOut 0.5s ease-out;
   }
 
 
 
-  .confirmation-popup-overlay-module-main-res {
+  .confirmation-popup-overlay-module-main-res,
+  .confirmation-popup-overlay-module-voters,
+  .confirmation-popup-overlay-module-kasambahay,
+  .confirmation-popup-overlay-module-jobseeker {
     position: fixed;
     top: 0;
     left: 0;
@@ -306,13 +319,16 @@
     z-index: 9999; 
   }
   
-  .confirmation-popup-module-main-res {
+  .confirmation-popup-module-main-res,
+  .confirmation-popup-module-voters,
+  .confirmation-popup-module-kasambahay,
+  .confirmation-popup-module-jobseeker {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 200px;
-    width: 400px;
+    height: 250px;
+    width: 450px;
     background-color: #f9f9f9;
     border-radius: 20px;
     border: 2px solid rgb(168, 161, 158);
@@ -324,11 +340,17 @@
     position: fixed;
   }
   
-  .confirmation-popup-module-main-res p{
+  .confirmation-popup-module-main-res p,
+  .confirmation-popup-module-voters p,
+  .confirmation-popup-module-kasambahay p,
+  .confirmation-popup-module-jobseeker p{
     color: rgb(97, 97, 97);
   }
 
-  .confirmation-popup-module-main-res h2{
+  .confirmation-popup-module-main-res h2,
+  .confirmation-popup-module-voters h2,
+  .confirmation-popup-module-kasambahay h2,
+  .confirmation-popup-module-jobseeker h2{
     margin-top: 10px;
     color: #f44336;
     font-size: 15px;
@@ -440,4 +462,10 @@
 .icon-alert {
   width: 27px;
   height: 27px;
+}
+
+.successful-icon-popup {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
 }

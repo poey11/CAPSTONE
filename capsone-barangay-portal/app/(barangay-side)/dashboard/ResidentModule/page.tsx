@@ -450,6 +450,7 @@ export default function ResidentModule() {
     {showDeletePopup && (
       <div className="confirmation-popup-overlay-module-main-res">
         <div className="confirmation-popup-module-main-res">
+          <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
           <p>Are you sure you want to delete this Resident Record?</p>
           <h2>Resident Number: {selectedResidentNumber}</h2>
           <div className="yesno-container-module">

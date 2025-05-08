@@ -88,6 +88,8 @@ export default function reasonForRejection() {
                     timestamp: new Date(),
                     isRead: false,
                 });
+
+                setShowSubmitPopup(false);
     
                 setPopupMessage("Reason for Rejection submitted successfully!");
                 setShowPopup(true);
@@ -184,8 +186,8 @@ export default function reasonForRejection() {
 
 
         {showSubmitPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-reject">
+                            <div className="confirmation-popup-reject">
                                 <img src="/Images/question.png" alt="warning icon" className="clarify-icon-popup" />
                                 <p>Are you sure you want to submit?</p>
                                 <div className="yesno-container">
@@ -197,8 +199,8 @@ export default function reasonForRejection() {
         )}
 
         {showPopup && (
-                <div className={`popup-overlay show`}>
-                    <div className="popup">
+                <div className={`popup-overlay-reject show`}>
+                    <div className="popup-reject">
                         <img src={"/Images/check.png"} alt="popup icon" className="icon-alert" />
                         <p>{popupMessage}</p>
                     </div>
@@ -206,8 +208,8 @@ export default function reasonForRejection() {
         )}
 
         {showErrorPopup && (
-                <div className={`error-popup-overlay show`}>
-                    <div className="popup">
+                <div className={`error-popup-overlay-reject show`}>
+                    <div className="popup-reject">
                         <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                         <p>{popupErrorMessage}</p>
                     </div>
