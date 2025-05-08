@@ -129,7 +129,8 @@ export default function AddBarangayUser() {
             setTimeout(() => setShowErrorPopup(false), 3000);
             return;
         }
-      
+        
+        setInvalidFields([]);
         setShowSubmitPopup(true);
     };
 
