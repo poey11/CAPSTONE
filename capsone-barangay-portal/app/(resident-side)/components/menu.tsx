@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc, orderBy } from "firebase/firestore"; // Firestore functions
 import "@/CSS/Components/menu.css";
 import { Timestamp } from "firebase-admin/firestore";
+import { serverTimestamp } from "firebase/firestore";
 
 
 type Notification = {
@@ -73,6 +74,9 @@ const Menu = () => {
     };
   }, []);
 
+
+  /*
+
   useEffect(() => {
     const fetchResidentData = async () => {
       if (user?.uid) {
@@ -91,8 +95,34 @@ const Menu = () => {
   
     fetchResidentData();
   }, [user]);
+  */
+
+  useEffect(() => {
+    const fetchResidentData = async () => {
+      if (user?.uid) {
+        const userDocRef = doc(db, "ResidentUsers", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (userDocSnap.exists()) {
+          const data = userDocSnap.data();
+          console.log("Resident data fetched:", data);
+          setResident(data as Resident);
+
+          const deactivationStart = data?.deactivationStart?.toDate?.();
+          if (deactivationStart && new Date() >= deactivationStart) {
+            alert("Your account has been deactivated. You will now be logged out.");
+            await signOut(auth);
+            router.push("/login"); // Redirect to login or another appropriate page
+          }
+        } else {
+          console.log("No resident found in Firestore!");
+        }
+      }
+    };
   
-  
+    fetchResidentData();
+  }, [user, router]);
+
 
   const [isOpen, setIsOpen] = useState(false);
   const [filter, setFilter] = useState("all");
@@ -135,45 +165,6 @@ const Menu = () => {
   }, [user]);
   
 
-  const handleNotificationClick = async (notification: Notification) => {
-    console.log("Notification clicked:", notification);
-  
-    // Check if the notification is unread
-    if (!notification.isRead) {
-      try {
-        const notificationRef = doc(db, "Notifications", notification.id);
-        await updateDoc(notificationRef, { isRead: true });
-  
-        // Update UI directly for a smoother experience
-        setNotifications((prevNotifications) =>
-          prevNotifications.map((notif) =>
-            notif.id === notification.id ? { ...notif, isRead: true } : notif
-          )
-        );
-        console.log("Notification marked as read!");
-      } catch (error) {
-        console.error("Error marking notification as read:", error);
-      }
-    }
-  
-    if (notification.transactionType === "Online Incident") {
-      const targetUrl = `/ResidentAccount/Transactions/IncidentTransactions?id=${notification.incidentID}`;
-      router.push(targetUrl);
-    } else {
-      console.log("Transaction is not an Online Incident. No navigation performed.");
-    }
-
-    if (
-      notification.transactionType === "Verification" &&
-      notification.message?.toLowerCase().includes("update")
-    ) {
-      router.push(`/ResidentAccount/Profile?id=${user?.uid}#resubmit-section`);
-
-    }
-
-  };
-  
-  
   
   
 
@@ -193,6 +184,69 @@ const Menu = () => {
       </>
     );
   }
+
+
+  const handleNotificationClick = async (notification: Notification) => {
+    alert("Notification clicked!"); // ✅ Confirm the function was triggered
+    console.log("Notification clicked:", notification);
+  
+    // Check if the notification is unread
+    if (!notification.isRead) {
+      try {
+        const notificationRef = doc(db, "Notifications", notification.id);
+        await updateDoc(notificationRef, { isRead: true });
+  
+        setNotifications((prevNotifications) =>
+          prevNotifications.map((notif) =>
+            notif.id === notification.id ? { ...notif, isRead: true } : notif
+          )
+        );
+        console.log("Notification marked as read!");
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
+      }
+    }
+  
+    // NAVIGATION for INCIDENT
+    if (notification.transactionType === "Online Incident") {
+      const targetUrl = `/ResidentAccount/Transactions/IncidentTransactions?id=${notification.incidentID}`;
+      router.push(targetUrl);
+    } else {
+      console.log("Transaction is not an Online Incident. No navigation performed.");
+    }
+  
+    // NAVIGATION for VERIFICATION
+    if (
+      notification.transactionType === "Verification" &&
+      notification.message?.toLowerCase().includes("update")
+    ) {
+      router.push(`/ResidentAccount/Profile?id=${user?.uid}#resubmit-section`);
+    }
+  
+    // ✅ LOGIC FOR DEACTIVATING ACCOUNT
+    if (notification.message?.includes("24")) {
+      alert("Deactivation message detected!"); // ✅ Confirm match
+  
+      if (user?.uid) {
+        alert(`Starting deactivation timer for user: ${user.uid}`); // ✅ Confirm UID is available
+        const userRef = doc(db, "ResidentUsers", user.uid);
+  
+        try {
+          await updateDoc(userRef, {
+            deactivationStart: serverTimestamp(),
+            willDeactivate: true,
+          });
+          alert("Deactivation timer started!"); // ✅ Final confirmation
+        } catch (err) {
+          console.error("Error setting deactivation start time:", err);
+          alert("Error starting deactivation timer.");
+        }
+      } else {
+        alert("No user UID found.");
+      }
+    }
+  };
+  
 
 
   

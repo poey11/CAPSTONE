@@ -1,48 +1,88 @@
 "use client";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-
-interface official{
+import { useRouter } from "next/navigation"; // Fix for 'router'
+import { getAuth, onAuthStateChanged } from "firebase/auth"; // Fix for 'auth'
+import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { db } from "../../db/firebase"; 
+interface Official {
     username: string;
     password: string;
+  }
+  
+  const bLoginForm: React.FC = () => {
+    const [official, setOfficial] = useState<Official>({ username: "", password: "" });
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+  
+    const router = useRouter(); // Initialize router
+    const auth = getAuth();     // Initialize auth
+  
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setOfficial((prev) => ({ ...prev, [name]: value }));
+    };
+  
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+  
+      const result = await signIn("credentials", {
+        userid: official.username,
+        password: official.password,
+        redirect: false,
+      });
+  
+      if (result?.error) {
+        setShowErrorPopup(true);
+        return;
+      }
+  
+      const userSnap = await getDoc(doc(db, "ResidentUsers", official.username));
+if (userSnap.exists()) {
+  const { deactivationStart, willDeactivate } = userSnap.data();
+  if (willDeactivate && deactivationStart) {
+    const startTime = deactivationStart.toDate();
+    const now = new Date();
+    const secondsPassed = (now.getTime() - startTime.getTime()) / 1000;
+    if (secondsPassed >=  ) {
+      alert("Your account has been deactivated.");
+      router.push("/account-deactivated");
+      return;
+    }
+  }
 }
 
-const bLoginForm:React.FC = () => {
-
-    const [official, setOfficial] = useState<official>({
-        username: "",
-        password: "",
-    });
-    
-    const [showErrorPopup, setShowErrorPopup] = useState(false);
+router.push("/dashboard");
 
 
-    const handleChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setOfficial({
-            ...official,
-            [name]: value,
-        });
-        
-    }
-
-    const handleLogin = async(e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const result = await signIn("credentials", {
-            userid: official.username,
-            password: official.password,
-            redirect: false,
-        });
-
+    };
+  
+    /*
+    const checkDeactivation = async (uid: string) => {
+        const userRef = doc(db, "ResidentUsers", uid);
+        const userSnap = await getDoc(userRef);
       
-        if (result?.error) {
-            setShowErrorPopup(true);
-            return;
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          const { deactivationStart, willDeactivate } = data;
+      
+          if (willDeactivate && deactivationStart) {
+            const startTime = deactivationStart.toDate();
+            const now = new Date();
+            const elapsed = now.getTime() - startTime.getTime(); // in milliseconds
+            const secondsPassed = elapsed / 1000;
+      
+            if (secondsPassed >= 10) { // simulate 24 hours with 10 seconds
+              alert("Your account has been deactivated.");
+              router.push("/account-deactivated");
+              return false;
+            }
+          }
         }
-   
-     
-    }
-
+      
+        return true;
+      };
+*/
+      
     return (  
         <main className="main-container-officer-login">
 
