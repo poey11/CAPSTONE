@@ -187,7 +187,7 @@ const Menu = () => {
 
 
   const handleNotificationClick = async (notification: Notification) => {
-    alert("Notification clicked!"); // ✅ Confirm the function was triggered
+   // alert("Notification clicked!"); /
     console.log("Notification clicked:", notification);
   
     // Check if the notification is unread
@@ -223,20 +223,38 @@ const Menu = () => {
       router.push(`/ResidentAccount/Profile?id=${user?.uid}#resubmit-section`);
     }
   
-    // ✅ LOGIC FOR DEACTIVATING ACCOUNT
     if (notification.message?.includes("24")) {
-      alert("Deactivation message detected!"); // ✅ Confirm match
-  
+   //   alert("Deactivation message detected!"); // ✅ Confirm match
+    
       if (user?.uid) {
-        alert(`Starting deactivation timer for user: ${user.uid}`); // ✅ Confirm UID is available
+     //   alert(`Starting deactivation timer for user: ${user.uid}`);
         const userRef = doc(db, "ResidentUsers", user.uid);
-  
+    
         try {
           await updateDoc(userRef, {
             deactivationStart: serverTimestamp(),
             willDeactivate: true,
           });
-          alert("Deactivation timer started!"); // ✅ Final confirmation
+        //  alert("Deactivation timer started!");
+    
+          // ➕ Check if user should be logged out immediately based on timer
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const { deactivationStart, willDeactivate } = userSnap.data();
+            if (willDeactivate && deactivationStart) {
+              const startTime = deactivationStart.toDate();
+              const now = new Date();
+              const secondsPassed = (now.getTime() - startTime.getTime()) / 1000;
+    
+              if (secondsPassed >= 60) { // Example: 24 hours = 86400 seconds
+                alert("Your account has been deactivated.");
+                await signOut(auth);
+                router.push("/account-deactivated");
+                return;
+              }
+            }
+          }
+    
         } catch (err) {
           console.error("Error setting deactivation start time:", err);
           alert("Error starting deactivation timer.");
@@ -245,6 +263,9 @@ const Menu = () => {
         alert("No user UID found.");
       }
     }
+    
+
+
   };
   
 

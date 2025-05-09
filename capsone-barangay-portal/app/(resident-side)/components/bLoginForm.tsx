@@ -35,53 +35,12 @@ interface Official {
         setShowErrorPopup(true);
         return;
       }
-  
-      const userSnap = await getDoc(doc(db, "ResidentUsers", official.username));
-if (userSnap.exists()) {
-  const { deactivationStart, willDeactivate } = userSnap.data();
-  if (willDeactivate && deactivationStart) {
-    const startTime = deactivationStart.toDate();
-    const now = new Date();
-    const secondsPassed = (now.getTime() - startTime.getTime()) / 1000;
-    if (secondsPassed >=  ) {
-      alert("Your account has been deactivated.");
-      router.push("/account-deactivated");
-      return;
-    }
-  }
-}
 
 router.push("/dashboard");
 
 
     };
-  
-    /*
-    const checkDeactivation = async (uid: string) => {
-        const userRef = doc(db, "ResidentUsers", uid);
-        const userSnap = await getDoc(userRef);
-      
-        if (userSnap.exists()) {
-          const data = userSnap.data();
-          const { deactivationStart, willDeactivate } = data;
-      
-          if (willDeactivate && deactivationStart) {
-            const startTime = deactivationStart.toDate();
-            const now = new Date();
-            const elapsed = now.getTime() - startTime.getTime(); // in milliseconds
-            const secondsPassed = elapsed / 1000;
-      
-            if (secondsPassed >= 10) { // simulate 24 hours with 10 seconds
-              alert("Your account has been deactivated.");
-              router.push("/account-deactivated");
-              return false;
-            }
-          }
-        }
-      
-        return true;
-      };
-*/
+ 
       
     return (  
         <main className="main-container-officer-login">
