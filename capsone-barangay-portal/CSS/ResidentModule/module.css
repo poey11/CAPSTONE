@@ -247,71 +247,88 @@
     }
   }
 
-.popup-overlay-module,
-.error-popup-overlay-module{
-    position: fixed;
-    top: 13%;
-    right: -3px;
-    color: white;
-    width: 350px;
-    height: 50px;
-    border-radius: 5px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    text-align: center;
-    font-size: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-left: 10px solid #403f3e;
+.popup-overlay-module-main-res,
+.error-popup-overlay-module-main-res,
+.popup-overlay-module-voters,
+.popup-overlay-module-kasambahay{
+  position: fixed;
+  top: 13%;
+  right: -3px;
+  background: #777575;
+  color: white;
+  width: 380px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 10px solid #403f3e;
   }
 
-  .popup-overlay-module{
+  .popup-overlay-module-main-res,
+  .popup-overlay-module-voters,
+  .popup-overlay-module-kasambahay{
     background: #777575;
   }
 
-  .error-popup-overlay-module{
+  .error-popup-overlay-module-main-res{
     background: #991e1e;
   }
 
-  .popup-module{
+  .popup-module-main-res,
+  .popup-module-voters,
+  .popup-module-kasambahay{
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 20px;
   }
   
-  .popup-overlay-module.show {
+  .popup-overlay-module-main-res.show,
+  .popup-overlay-module-voters.show,
+  .popup-overlay-module-kasambahay.show {
     animation: slideIn 0.5s ease-out;
   }
   
-  .popup-overlay-module.hide {
+  .popup-overlay-module-main-res.hide,
+  .popup-overlay-module-voters.hide,
+  .popup-overlay-module-kasambahay.hide {
     animation: slideOut 0.5s ease-out;
   }
 
 
 
-  .confirmation-popup-overlay-module {
+  .confirmation-popup-overlay-module-main-res,
+  .confirmation-popup-overlay-module-voters,
+  .confirmation-popup-overlay-module-kasambahay,
+  .confirmation-popup-overlay-module-jobseeker {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.076); 
+    background: rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 9999; 
   }
   
-  .confirmation-popup-module {
+  .confirmation-popup-module-main-res,
+  .confirmation-popup-module-voters,
+  .confirmation-popup-module-kasambahay,
+  .confirmation-popup-module-jobseeker {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 200px;
-    width: 400px;
+    height: 250px;
+    width: 450px;
     background-color: #f9f9f9;
     border-radius: 20px;
     border: 2px solid rgb(168, 161, 158);
@@ -321,14 +338,19 @@
     font-size: 18px;
     font-weight: lighter;
     position: fixed;
-    left: 43%; /* Adjust the value */
   }
   
-  .confirmation-popup-module p{
+  .confirmation-popup-module-main-res p,
+  .confirmation-popup-module-voters p,
+  .confirmation-popup-module-kasambahay p,
+  .confirmation-popup-module-jobseeker p{
     color: rgb(97, 97, 97);
   }
 
-  .confirmation-popup-module h2{
+  .confirmation-popup-module-main-res h2,
+  .confirmation-popup-module-voters h2,
+  .confirmation-popup-module-kasambahay h2,
+  .confirmation-popup-module-jobseeker h2{
     margin-top: 10px;
     color: #f44336;
     font-size: 15px;
@@ -435,4 +457,15 @@
 .highlighted-row {
   background-color: #bdf8a0ba !important;
   transition: background-color 0.5s ease;
+}
+
+.icon-alert {
+  width: 27px;
+  height: 27px;
+}
+
+.successful-icon-popup {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
 }

@@ -86,13 +86,14 @@ export default function addVoter() {
   };*/
 
   const handleSubmitClick = async () => {
-    const { fullName, homeAddress} = formData;
+    const { fullName, homeAddress, precinctNumber} = formData;
 
     const invalidFields: string[] = [];
 
 
     if (!fullName) invalidFields.push("fullName");
     if (!homeAddress) invalidFields.push("homeAddress");
+    if (!precinctNumber) invalidFields.push("precinctNumber");
   
     if (invalidFields.length > 0) {
       setInvalidFields(invalidFields);
@@ -214,18 +215,18 @@ export default function addVoter() {
 
             <div className="fields-container">
               <div className="fields-section">
-                <p>Full Name <span className="required">*</span></p>
+                <p>Full Name<span className="required">*</span></p>
                 <input type="text"  className={`add-resident-input-field ${invalidFields.includes("fullName") ? "input-error" : ""}`} placeholder="Enter Full Name" name="fullName" value={formData.fullName} onChange={handleChange} required />
               </div>
 
               <div className="fields-section">
-                <p>Home Address <span className="required">*</span></p>
+                <p>Home Address<span className="required">*</span></p>
                 <input type="text"  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
               </div>
               
               <div className="fields-section">
-                <p>Precinct Number</p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
+                <p>Precinct Number<span className="required">*</span></p>
+                <input type="text" className={`add-resident-input-field ${invalidFields.includes("precinctNumber") ? "input-error" : ""}`} placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required/>
               </div>
             </div>
           </div>
@@ -234,8 +235,10 @@ export default function addVoter() {
       </div>
 
       {showSubmitPopup && (
-                        <div className="confirmation-popup-overlay-add">
-                            <div className="confirmation-popup-add">
+                        <div className="confirmation-popup-overlay-add-voter">
+                            <div className="confirmation-popup-add-voter">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                                
                                 <p>Are you sure you want to submit?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
@@ -246,8 +249,8 @@ export default function addVoter() {
         )}
 
         {showPopup && (
-                <div className={`popup-overlay-add show`}>
-                    <div className="popup-add">
+                <div className={`popup-overlay-add-voter show`}>
+                    <div className="popup-add-voter">
                       <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                       <p>{popupMessage}</p>
                     </div>
@@ -255,8 +258,8 @@ export default function addVoter() {
                 )}
 
         {showErrorPopup && (
-                <div className={`error-popup-overlay-add show`}>
-                    <div className="popup-add">
+                <div className={`error-popup-overlay-add-voter show`}>
+                    <div className="popup-add-voter">
                         <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                         <p>{popupErrorMessage}</p>
                     </div>

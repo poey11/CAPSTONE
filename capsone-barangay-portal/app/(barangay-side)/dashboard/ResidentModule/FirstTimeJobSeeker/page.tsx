@@ -376,10 +376,20 @@ export default function JobSeekerListModule() {
 
 
       {showDeletePopup && (
-                        <div className="confirmation-popup-overlay-module">
-                            <div className="confirmation-popup-module">
-                            <p>Are you sure you want to delete this Jobseeker Record?</p>
-          
+                        <div className="confirmation-popup-overlay-module-jobseeker">
+                            <div className="confirmation-popup-module-jobseeker">
+                              <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                              <p>Are you sure you want to delete this Jobseeker Record?</p>
+                              {(() => {
+                                const seeker = jobSeekers.find((s) => s.id === deleteUserId);
+                                if (!seeker) return null;
+
+                                const fullName = `${seeker.lastName || ""}, ${seeker.firstName || ""} ${seeker.middleName || ""}`.trim();
+
+                                return (
+                                  <h2>Jobseeker Name: {fullName}</h2>
+                                );
+                              })()}
                                 <div className="yesno-container-module">
                                     <button onClick={() => setShowDeletePopup(false)} className="no-button-module">No</button>
                                     <button onClick={confirmDelete} className="yes-button-module">Yes</button>

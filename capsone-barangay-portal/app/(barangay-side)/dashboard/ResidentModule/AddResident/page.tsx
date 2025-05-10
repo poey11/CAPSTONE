@@ -494,8 +494,13 @@ const confirmSubmit = async () => {
                   className={`add-resident-input-field ${invalidFields.includes("contactNumber") ? "input-error" : ""}`}
                    name="contactNumber"
                     value={formData.contactNumber}
-                     onChange={handleChange}
-                      required pattern="[0-9]{11}"
+                     onChange={(e) => {
+                      const input = e.target.value;
+                      if (/^\d{0,11}$/.test(input)) {
+                        setFormData({ ...formData, contactNumber: input });
+                      }
+                     }}
+                      pattern="^[0-9]{11}$" 
                        placeholder="Enter 11-digit phone number" 
                        />
                 </div>
@@ -571,8 +576,8 @@ const confirmSubmit = async () => {
 
 
         {showSubmitPopup && (
-                        <div className="confirmation-popup-overlay-add">
-                            <div className="confirmation-popup-add">
+                        <div className="confirmation-popup-overlay-add-resident">
+                            <div className="confirmation-popup-add-resident">
                                 <p>Are you sure you want to submit?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
@@ -583,8 +588,8 @@ const confirmSubmit = async () => {
         )}
 
         {showPopup && (
-                <div className={`popup-overlay-add show`}>
-                    <div className="popup-add">
+                <div className={`popup-overlay-add-resident show`}>
+                    <div className="popup-add-resident">
                       <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                       <p>{popupMessage}</p>
                     </div>
@@ -592,8 +597,8 @@ const confirmSubmit = async () => {
                 )}
 
         {showErrorPopup && (
-                <div className={`error-popup-overlay-add show`}>
-                    <div className="popup-add">
+                <div className={`error-popup-overlay-add-resident show`}>
+                    <div className="popup-add-resident">
                       <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                       <p>{popupErrorMessage}</p>
                     </div>
