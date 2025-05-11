@@ -7,6 +7,9 @@ import { collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } f
 import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useSession } from "next-auth/react";
+import { useRef } from "react";
+
+
 
 
 export default function AddKasambahay() {
@@ -47,6 +50,63 @@ export default function AddKasambahay() {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
+  const [showResidentsPopup, setShowResidentsPopup] = useState(false);
+  const employerPopupRef = useRef<HTMLDivElement>(null);
+
+  const [residents, setResidents] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+
+  useEffect(() => {
+    const fetchResidents = async () => {
+      try {
+        const residentsCollection = collection(db, "Residents");
+            const residentsSnapshot = await getDocs(residentsCollection);
+            const residentsList = residentsSnapshot.docs.map(doc => {
+                const data = doc.data() as {
+                    residentNumber: string;
+                    firstName: string;
+                    middleName: string;
+                    lastName: string;
+                    address: string;
+                };
+    
+                return {
+                    id: doc.id,
+                    ...data
+                };
+            });
+    
+            setResidents(residentsList);
+      } catch (error) {
+        console.error("Error fetching residents:", error);
+      }
+    };
+  
+    fetchResidents();
+  }, []);
+
+  // Show popup on input focus
+  const handleEmployerClick = () => {
+    setShowResidentsPopup(true);
+  };
+
+  // Close popup when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        employerPopupRef.current &&
+        !employerPopupRef.current.contains(event.target as Node)
+      ) {
+        setShowResidentsPopup(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchLatestNumber = async () => {
@@ -456,16 +516,20 @@ export default function AddKasambahay() {
               </div>
 
                 
-              <div className="fields-section">
-                <p>Employer Name<span className="required">*</span></p>
-                <input 
-                type="text"
-                className={`add-resident-input-field ${invalidFields.includes("employerName") ? "input-error" : ""}`} 
-                  placeholder="Enter Employer"
-                   name="employerName"
+              <div ref={employerPopupRef}>
+                <div className="fields-section">
+                  <p>Employer Name<span className="required">*</span></p>
+                  <input 
+                  type="text"
+                  className={`add-resident-input-field ${invalidFields.includes("employerName") ? "input-error" : ""}`} 
+                    placeholder="Select Employer"
+                    name="employerName"
                     value={formData.employerName}
-                     onChange={handleChange}
-                      required />
+                    onChange={handleChange}
+                    required
+                    onClick={handleEmployerClick}
+                    />
+                </div>
               </div>
 
               <div className="fields-section">
@@ -534,6 +598,68 @@ export default function AddKasambahay() {
         {error && <p className="error">{error}</p>}
       </div>
 
+
+
+      {showResidentsPopup && (
+      <div className="kasambahay-employer-popup-overlay">
+        <div className="kasambahay-employer-popup" ref={employerPopupRef}>
+          <h2>Employers List</h2>
+          <h1>* Please select Employer's Name *</h1>
+
+          <input
+            type="text"
+            placeholder="Search Employer's Name"
+            className="employer-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <div className="employers-list">
+            {residents.length === 0 ? (
+              <p>No residents found.</p>
+            ) : (
+              <table className="employers-table">
+                <thead>
+                  <tr>
+                    <th>Resident Number</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Last Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {residents
+                .filter((resident) => {
+                  const fullName = `${resident.firstName} ${resident.middleName || ""} ${resident.lastName}`.toLowerCase();
+                  return fullName.includes(searchTerm.toLowerCase());
+                })
+                .map((resident) => (
+                    <tr
+                      key={resident.id}
+                      className="employers-table-row"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          employerName: `${resident.lastName}, ${resident.firstName} ${resident.middleName || ''}`,
+                          employerAddress: resident.address || '',
+                        });
+                        setShowResidentsPopup(false);
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <td>{resident.residentNumber}</td>
+                      <td>{resident.firstName}</td>
+                      <td>{resident.middleName}</td>
+                      <td>{resident.lastName}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
 
       {showSubmitPopup && (
                         <div className="confirmation-popup-overlay-add-kasambahay">

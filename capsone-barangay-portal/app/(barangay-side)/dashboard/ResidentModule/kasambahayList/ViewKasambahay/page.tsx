@@ -39,6 +39,38 @@ export default function ViewKasambahay() {
   if (loading) return <p>Loading...</p>;
   if (!kasambahayData) return <p>Kasambahay not found</p>;
 
+  const educationalAttainmentMap: Record<number, string> = {
+    1: "Elem Under Grad",
+    2: "Elem Grad",
+    3: "HS Grad",
+    4: "HS Under Grad",
+    5: "COL Grad",
+    6: "COL Under Grad",
+    7: "Educational",
+    8: "Vocational",
+  };
+
+  const natureOfWorkMap: Record<number, string> = {
+    1: "Gen. House Help (All Around)",
+    2: "YAYA",
+    3: "COOK",
+    4: "Gardener",
+    5: "Laundry Person",
+    6: "Others",
+  };
+
+  const employeeArrangementMap: Record<number, string> = {
+    1: "Live - IN",
+    2: "Live - OUT",
+  };
+
+  const rangeOfSalaryMap: Record<number, string> = {
+    1: "₱1,500 - ₱1,999",
+    2: "₱2,000 - ₱2,499",
+    3: "₱2,500 - ₱4,999",
+    4: "₱5,000 and Above",
+  };
+
   const kasambahayFields = [
     { label: "Registration Control Number", key: "registrationControlNumber" },
     { label: "First Name", key: "firstName" },
@@ -98,9 +130,17 @@ export default function ViewKasambahay() {
             </div>
             <div className="viewresident-description">
               <p>
-                {field.isBoolean !== undefined
-                  ? kasambahayData[field.key] ? "Yes" : "No"
-                  : kasambahayData[field.key] ?? "N/A"}
+                {field.key === "educationalAttainment"
+                    ? educationalAttainmentMap[kasambahayData[field.key]] || "N/A"
+                    : field.key === "natureOfWork"
+                    ? natureOfWorkMap[kasambahayData[field.key]] || "N/A"
+                    : field.key === "employmentArrangement"
+                    ? employeeArrangementMap[kasambahayData[field.key]] || "N/A"
+                    : field.key === "salary"
+                    ? rangeOfSalaryMap[kasambahayData[field.key]] || "N/A"
+                    : field.isBoolean !== undefined
+                    ? kasambahayData[field.key] ? "Yes" : "No"
+                    : kasambahayData[field.key] ?? "N/A"}
               </p>
             </div>
           </div>
