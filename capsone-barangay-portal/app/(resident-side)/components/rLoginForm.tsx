@@ -70,7 +70,7 @@ const rLoginForm:React.FC = () => {
         }
     }
 
-
+/*
         const handleLogin = async(e: React.FormEvent<HTMLFormElement>) => {    
             e.preventDefault();
             try{
@@ -118,7 +118,54 @@ const rLoginForm:React.FC = () => {
                 
            
         }
-        
+        */
+
+        const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
+            try {
+              const userCredentials = await signInWithEmailAndPassword(auth, resident.email, resident.password);
+              const user = userCredentials.user;
+          
+              if (!user.emailVerified) {
+                await signOut(auth);
+                setShowVerifyPopup(true);
+                return;
+              }
+          
+              const userDocRef = doc(db, "ResidentUsers", user.uid);
+              const userDocSnap = await getDoc(userDocRef);
+          
+              if (userDocSnap.exists()) {
+                const userData = userDocSnap.data();
+          
+                if (userData.status === "Rejected") {
+                    setErrorMessage("Your account has been disabled because your request was rejected.");
+                    setShowErrorPopup(true);
+                  
+                    return; // Stop further execution
+                  }
+                  
+                setFirstName(userData.first_name || "");
+                setLastName(userData.last_name || "");
+              }
+          
+              setShowPopup(true);
+              setTimeout(() => {
+                setShowPopup(false);
+                router.push("/");
+              }, 2000);
+            } catch (error: string | any) {
+              const result = await signIn("credentials", {
+                userid: resident.email,
+                password: resident.password,
+                redirect: false,
+              });
+          
+              setErrorMessage("Login failed. Please try again.");
+              setShowErrorPopup(true);
+            }
+          };
+          
     
     return (   
 

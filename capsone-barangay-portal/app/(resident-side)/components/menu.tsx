@@ -92,8 +92,6 @@ const Menu = () => {
       setResident(data as Resident);
   
       if (data.status === "Rejected") {
-        alert("Your account has been disabled because your request was rejected.");
-  
         try {
           // Delete the document from Firestore
           await deleteDoc(userRef);
@@ -105,10 +103,8 @@ const Menu = () => {
             console.log("Firebase Auth user deleted.");
           }
   
-          // Just in case, try to sign out
           await signOut(auth);
-  
-          router.push("/dashboard"); // or "/dashboard" if preferred
+
         } catch (err) {
           console.error("Error during account deletion:", err);
           alert("An error occurred while deleting your account.");
@@ -224,8 +220,6 @@ const Menu = () => {
 
   };
   
-
-
   
 
   return (
