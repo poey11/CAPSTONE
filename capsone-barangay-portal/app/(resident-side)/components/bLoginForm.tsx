@@ -1,48 +1,46 @@
 "use client";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation"; // Fix for 'router'
+import { getAuth} from "firebase/auth"; // Fix for 'auth'
 
-interface official{
+interface Official {
     username: string;
     password: string;
-}
-
-const bLoginForm:React.FC = () => {
-
-    const [official, setOfficial] = useState<official>({
-        username: "",
-        password: "",
-    });
-    
+  }
+  
+  const bLoginForm: React.FC = () => {
+    const [official, setOfficial] = useState<Official>({ username: "", password: "" });
     const [showErrorPopup, setShowErrorPopup] = useState(false);
+  
+    const router = useRouter(); // Initialize router
+    const auth = getAuth();     // Initialize auth
+  
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setOfficial((prev) => ({ ...prev, [name]: value }));
+    };
+  
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+  
+      const result = await signIn("credentials", {
+        userid: official.username,
+        password: official.password,
+        redirect: false,
+      });
+  
+      if (result?.error) {
+        setShowErrorPopup(true);
+        return;
+      }
+
+router.push("/dashboard");
 
 
-    const handleChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setOfficial({
-            ...official,
-            [name]: value,
-        });
-        
-    }
-
-    const handleLogin = async(e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const result = await signIn("credentials", {
-            userid: official.username,
-            password: official.password,
-            redirect: false,
-        });
-
+    };
+ 
       
-        if (result?.error) {
-            setShowErrorPopup(true);
-            return;
-        }
-   
-     
-    }
-
     return (  
         <main className="main-container-officer-login">
 
