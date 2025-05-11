@@ -2,9 +2,8 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation"; // Fix for 'router'
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // Fix for 'auth'
-import { doc, getDoc, getFirestore } from "firebase/firestore";
-import { db } from "../../db/firebase"; 
+import { getAuth} from "firebase/auth"; // Fix for 'auth'
+
 interface Official {
     username: string;
     password: string;

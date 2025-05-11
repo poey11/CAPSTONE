@@ -7,10 +7,10 @@ import { signOut } from "firebase/auth";
 import SideNav from '../../(barangay-side)/components/bMenu';
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
-import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc, orderBy } from "firebase/firestore"; // Firestore functions
+import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc, orderBy, deleteDoc } from "firebase/firestore"; // Firestore functions
 import "@/CSS/Components/menu.css";
 import { Timestamp } from "firebase-admin/firestore";
-import { serverTimestamp } from "firebase/firestore";
+
 
 
 type Notification = {
@@ -46,6 +46,7 @@ const Menu = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [userIcon, setUserIcon] = useState<string | undefined>(undefined);
   const db = getFirestore();
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
 
   const [resident, setResident] = useState<Resident | null>(null);
   
@@ -75,54 +76,51 @@ const Menu = () => {
   }, []);
 
 
-  /*
-
   useEffect(() => {
     const fetchResidentData = async () => {
-      if (user?.uid) {
-        const userDocRef = doc(db, "ResidentUsers", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        
-        if (userDocSnap.exists()) {
-          const data = userDocSnap.data();
-          console.log("Resident data fetched:", data);
-          setResident(data as Resident);
-        } else {
-          console.log("No resident found in Firestore!");
+      if (!user?.uid) return;
+  
+      const userRef = doc(db, "ResidentUsers", user.uid);
+      const userSnap = await getDoc(userRef);
+  
+      if (!userSnap.exists()) return;
+  
+      const data = userSnap.data();
+      if (!data) return;
+  
+      console.log("Resident data fetched:", data);
+      setResident(data as Resident);
+  
+      if (data.status === "Rejected") {
+        alert("Your account has been disabled because your request was rejected.");
+  
+        try {
+          // Delete the document from Firestore
+          await deleteDoc(userRef);
+          console.log("Resident document deleted.");
+  
+          // Delete user from Firebase Auth
+          if (auth.currentUser) {
+            await auth.currentUser.delete();
+            console.log("Firebase Auth user deleted.");
+          }
+  
+          // Just in case, try to sign out
+          await signOut(auth);
+  
+          router.push("/dashboard"); // or "/dashboard" if preferred
+        } catch (err) {
+          console.error("Error during account deletion:", err);
+          alert("An error occurred while deleting your account.");
         }
       }
     };
   
     fetchResidentData();
   }, [user]);
-  */
-
-  useEffect(() => {
-    const fetchResidentData = async () => {
-      if (user?.uid) {
-        const userDocRef = doc(db, "ResidentUsers", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        
-        if (userDocSnap.exists()) {
-          const data = userDocSnap.data();
-          console.log("Resident data fetched:", data);
-          setResident(data as Resident);
-
-          const deactivationStart = data?.deactivationStart?.toDate?.();
-          if (deactivationStart && new Date() >= deactivationStart) {
-            alert("Your account has been deactivated. You will now be logged out.");
-            await signOut(auth);
-            router.push("/login"); // Redirect to login or another appropriate page
-          }
-        } else {
-          console.log("No resident found in Firestore!");
-        }
-      }
-    };
   
-    fetchResidentData();
-  }, [user, router]);
-
+  
+  
 
   const [isOpen, setIsOpen] = useState(false);
   const [filter, setFilter] = useState("all");
@@ -222,48 +220,6 @@ const Menu = () => {
     ) {
       router.push(`/ResidentAccount/Profile?id=${user?.uid}#resubmit-section`);
     }
-  
-    if (notification.message?.includes("24")) {
-   //   alert("Deactivation message detected!"); // ✅ Confirm match
-    
-      if (user?.uid) {
-     //   alert(`Starting deactivation timer for user: ${user.uid}`);
-        const userRef = doc(db, "ResidentUsers", user.uid);
-    
-        try {
-          await updateDoc(userRef, {
-            deactivationStart: serverTimestamp(),
-            willDeactivate: true,
-          });
-        //  alert("Deactivation timer started!");
-    
-          // ➕ Check if user should be logged out immediately based on timer
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const { deactivationStart, willDeactivate } = userSnap.data();
-            if (willDeactivate && deactivationStart) {
-              const startTime = deactivationStart.toDate();
-              const now = new Date();
-              const secondsPassed = (now.getTime() - startTime.getTime()) / 1000;
-    
-              if (secondsPassed >= 60) { // Example: 24 hours = 86400 seconds
-                alert("Your account has been deactivated.");
-                await signOut(auth);
-                router.push("/account-deactivated");
-                return;
-              }
-            }
-          }
-    
-        } catch (err) {
-          console.error("Error setting deactivation start time:", err);
-          alert("Error starting deactivation timer.");
-        }
-      } else {
-        alert("No user UID found.");
-      }
-    }
-    
 
 
   };
