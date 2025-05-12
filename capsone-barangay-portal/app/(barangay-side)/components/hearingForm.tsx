@@ -21,16 +21,6 @@ interface HearingDetails {
     secondHearingOfficer: string;
     thirdHearingOfficer: string;
     filled: boolean;
-    complainant:{
-        firstName: string;
-        middleName: string;
-         lastName: string;
-     },
-     respondent:{
-         firstName: string;
-         middleName: string;
-          lastName: string;
-     },
     hearingMeetingDateTime: string;
 }
 
@@ -59,16 +49,6 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
     const [details, setDetails] = useState<HearingDetails>({
         nosHearing: hearingIndex,
         nos: nos,
-        complainant:{
-            firstName: "",
-            middleName: "",
-             lastName:"",
-        },
-        respondent:{
-            firstName: "",
-            middleName: "",
-             lastName:"",
-        },
         minutesOfCaseProceedings: "",
         remarks: "",
         partyA: "",
@@ -170,9 +150,9 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
     
   
     const handleToggleClick = () => {
-        if(hearingDetails.length < hearingIndex) return;
-        if(hearingIndex === 0 && !dialogue) return;
-        if(nosOfGeneration <= hearingIndex) return;
+        // if(hearingDetails.length < hearingIndex) return;
+        // if(nosOfGeneration < 1 || !dialogue) return;
+        // if(nosOfGeneration <= hearingIndex) return;
         setShowHearingContent(prev => !prev);
     };
     
@@ -182,17 +162,6 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
         try {
             const docRef = collection(db, "IncidentReports", id, "SummonsMeeting");
             await addDoc(docRef, {
-                complainant: {
-                    firstName: details.complainant.firstName,
-                    middleName: details.complainant.middleName,
-                    lastName: details.complainant.lastName,
-                   
-                },
-                respondent: {
-                    firstName: details.respondent.firstName,
-                    middleName: details.respondent.middleName,
-                    lastName: details.respondent.lastName,
-                },
                 minutesOfCaseProceedings: details.minutesOfCaseProceedings,
                 remarks: details.remarks,
                 partyA: details.partyA,
@@ -210,7 +179,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
             
             const UpdateRef = doc(db, "IncidentReports", id,);
             await updateDoc(UpdateRef, {
-                ...(hearing !=3   && { nosHearing: hearing + 1 })
+            ...(hearing !=3   && { nosHearing: hearing + 1 })
             });
         } catch (error:any) {
             console.error("Error saving data:", error.message);
@@ -224,12 +193,12 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                 <div className="title-section-edit">
                     <button type="button" className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
                 <h1>{nos} Hearing Section</h1>
-                {((hearingIndex === 0) && !dialogue) && (
+                {(nosOfGeneration < 1 || !dialogue) && (
                     <span className="text-red-500 ml-4">
                         In order to fill up the current Hearing Section, you must fill up the Dialogue Letter and/or also generate a Summons Letter
                     </span>
                 )}
-                {(hearingDetails.length < hearingIndex ) && (
+                {(hearingDetails.length < hearingIndex || nosOfGeneration < hearingIndex) && (
                   <span className="text-red-500 ml-4">
                   In order to fill up the current Hearing Section, you must fill up the previous Hearing and/or also generate a Summons Letter
                   </span>
@@ -248,97 +217,31 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                                 className="search-bar-edit" 
                                 name="hearingMeetingDateTime"
                                 id="hearingMeetingDateTime"
-                                value={details.hearingMeetingDateTime||""}
-                                disabled={filled ? true : false}
-                                required={!filled}
-                                onChange={handleChange}
-                                max={today} 
-                                onKeyDown={(e => e.preventDefault())}
+                                disabled
                             />
                         </div>
                     </div>  
-                  <p>Complainant's Information</p>
+                  <p>Complainant's Name</p>
                               <div className="bars-edit">
                                   <div className="input-group-edit">
-                                        <p>First Name</p>
                                         <input type="text" 
                                         className="search-bar-edit" 
                                         name="complainant.firstName"
                                         id="complainant.firstName"
-                                        value={details.complainant.firstName||""}
-                                        onChange={handleChange}
-                                        disabled={filled ? true : false}
-                                        required={!filled}
-                                        placeholder="Enter First Name" />
-                                  </div>
-                                  <div className="input-group-edit">
-                                        <p>Middle Name</p>
-                                        <input type="text" 
-                                        className="search-bar-edit" 
-                                        name="complainant.middleName"
-                                        id="complainant.middleName"
-                                        value={details.complainant.middleName||""}
-                                        onChange={handleChange}
-                                        disabled={filled ? true : false}
-                                        required={!filled}
-                                        placeholder="Enter Middle Name"
-                                        />
-                                  </div>
-                                  <div className="input-group-edit">
-                                        <p>Last Name</p>
-                                        <input type="text" 
-                                        className="search-bar-edit" 
-                                        name="complainant.lastName"
-                                        id="complainant.lastName"
-                                        value={details.complainant.lastName||""}
-                                        onChange={handleChange}
-                                        disabled={filled ? true : false}
-                                        required={!filled}
-                                        placeholder="Enter Last Name"
-                                        />
+                                        disabled/>
                                   </div>
                               </div>
                           </div>
 
                           <div className="section-2-dialouge-edit">
-                              <p>Respondents' Information</p>
+                              <p>Respondents' Name</p>
                               <div className="bars-edit">
                                 <div className="input-group-edit">
-                                        <p>First Name</p>
                                         <input type="text" 
                                         className="search-bar-edit" 
                                         name="respondent.firstName"
                                         id="respondent.firstName"
-                                        value={details.respondent.firstName||""}
-                                        onChange={handleChange}
-                                        disabled={filled ? true : false}
-                                        required={!filled}
-                                        placeholder="Enter First Name" />
-                                  </div>
-                                  <div className="input-group-edit">
-                                        <p>Middle Name</p>
-                                        <input type="text" 
-                                        className="search-bar-edit" 
-                                        name="respondent.middleName"
-                                        id="respondent.middleName"
-                                        value={details.respondent.middleName||""}
-                                        onChange={handleChange}
-                                        disabled={filled ? true : false}
-                                        required={!filled}
-                                        placeholder="Enter Middle Name"
-                                        />
-                                  </div>
-                                  <div className="input-group-edit">
-                                        <p>Last Name</p>
-                                        <input type="text" 
-                                        className="search-bar-edit" 
-                                        name="respondent.lastName"
-                                        id="respondent.lastName"
-                                        value={details.respondent.lastName||""}
-                                        onChange={handleChange}
-                                        disabled={filled ? true : false}
-                                        required={!filled}
-                                        placeholder="Enter Last Name"
+                                        disabled
                                         />
                                   </div>
                               </div>

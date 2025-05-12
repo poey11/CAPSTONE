@@ -5,11 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/firestorehelper";
 import { doc, updateDoc} from "firebase/firestore";
 import { db } from "../../../../db/firebase";
-import { getLocalDateTimeString,isValidPhilippineMobileNumber } from "@/app/helpers/helpers";
+import { isValidPhilippineMobileNumber } from "@/app/helpers/helpers";
 import React from "react";
 import Dialogue from "@/app/(barangay-side)/components/dialogueForm"
 import Hearing from "@/app/(barangay-side)/components/hearingForm";
-import { report } from "process";
 
 
 
@@ -34,7 +33,6 @@ export default function EditLuponIncident() {
     const docId = searchParam.get("id");
     const [reportData, setReportData] = useState<any>();
     const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
-    const today = getLocalDateTimeString(new Date());
     const [toUpdate, setToUpdate] = useState<any|null>({
       complainant: {
         fname: "",
@@ -61,12 +59,6 @@ export default function EditLuponIncident() {
       status: reportData?.status,
       nosofMaleChildren: "",
       nosofFemaleChildren: "",
-      investigator: {
-        accAssigned: "",
-        dateTimeInvestigated: "",
-        investigationReport: "",
-        investigateImage: "",
-      }
     });
 
     useEffect(() => {
@@ -130,7 +122,6 @@ export default function EditLuponIncident() {
           if (fileInput.files && fileInput.files.length > 0) {
             const file = fileInput.files[0];
     
-            // Handle nested properties (e.g., "investigator.investigateImage")
             const keys = name.split(".");
             if (keys.length === 2) {
               return {
@@ -222,12 +213,6 @@ export default function EditLuponIncident() {
             civilStatus: mergeData(reportData.respondent?.civilStatus, toUpdate.respondent?.civilStatus),
             address: mergeData(reportData.respondent?.address, toUpdate.respondent?.address),
             contact: mergeData(reportData.respondent?.contact, toUpdate.respondent?.contact),
-          },
-          investigator: {
-            accAssigned: mergeData(reportData.investigator?.accAssigned, toUpdate.investigator?.accAssigned),
-            dateTimeInvestigated: mergeData(reportData.investigator?.dateTimeInvestigated, toUpdate.investigator?.dateTimeInvestigated),
-            investigationReport: mergeData(reportData.investigator?.investigationReport, toUpdate.investigator?.investigationReport),
-            investigateImage: mergeData(reportData.investigator?.investigateImage, toUpdate.investigator?.investigateImage),
           },
           receivedBy: `${receivedByFname} ${receivedByLname}`,
           nature: mergeData(reportData.nature, toUpdate.nature),
@@ -331,7 +316,7 @@ const confirmSubmit = async () => {
     setTimeout(() => {
       setShowPopup(false);
      handleBack();
-    }, 3000);
+    }, 1000);
   } catch (error) {
     console.error("Error during confirmation submit:", error);
     setPopupErrorMessage("Error updating incident. Please try again.");
@@ -379,12 +364,6 @@ const confirmSubmit = async () => {
           status:"",
           nosofFemaleChildren: "",
           nosofMaleChildren: "",
-          investigator: {
-            accAssigned: "",
-            dateTimeInvestigated: "",
-            investigationReport: "",
-            investigateImage: "",
-          },
         });
     }
 
@@ -402,7 +381,7 @@ const confirmSubmit = async () => {
 
 
 
- 
+console.log("Report Data:", reportData?.nosHearing);
  
 
 
@@ -415,7 +394,7 @@ const confirmSubmit = async () => {
                <button className="letter-announcement-btn-edit" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialogue Letter</button>
 
                 {(reportData.isDialogue) ? (<button className="letter-announcement-btn-edit" name="summon" onClick={handleGenerateLetterAndInvitation}>Generate Summon Letter</button>)
-                :(<><button className="letter-announcement-btn-edit" name="summon" onClick={() => setErrorPopup({ show: true, message: "Generate A Dialogue Letter First"})}>Generate Summon Letter</button></>)}
+                :(<><button className="letter-announcement-btn-edit" name="summon" onClick={() => {setPopupErrorMessage("Generate A Dialogue Letter First"); setShowErrorPopup(true); setTimeout(() => setShowErrorPopup(false), 3000)}}>Generate Summon Letter</button></>)}
               
                <select
                   id="status"
@@ -674,7 +653,7 @@ const confirmSubmit = async () => {
 
 
             
-            
+          
               {showRecordDetails && (
 
              
@@ -758,7 +737,7 @@ const confirmSubmit = async () => {
                                 className={showComplainantDetails ? "record-details-minus-button" : "record-details-plus-button"} 
                                 onClick={toggleComplainantDetails}>
                             </button>
-                   <h1>Complainant's Recieved by</h1>
+                   <h1>Complaint Received by</h1>
               </div>
 
                     <hr/>
@@ -800,49 +779,7 @@ const confirmSubmit = async () => {
 
                   </div>
 
-              )}
-
-
-            <div className="record-details-topsection">
-                            <button type="button" 
-                                className={showInvestigatedDetails ? "record-details-minus-button" : "record-details-plus-button"} 
-                                onClick={toggleInvestigatedDetails}>
-                            </button>
-                   <h1>Investigated Conducted By</h1>
-              </div>
-
-              <hr/>
-
-
-                  {showInvestigatedDetails&& (   
-                    <div className="bars-edit">
-                      {/* revised this. the investigator will be the sitio/kagawads or the lf staffs. will discuss with grpmates */}
-                        <div className="input-group-edit">
-                            <p>Investigator Assigned</p>
-                            <input type="text" className="search-bar-edit" 
-                            placeholder={reportData?.investigator?.accAssigned ?? "Enter Full Name"}
-                            value={toUpdate?.investigator.accAssigned}
-                            name="investigator.accAssigned"
-                            id="investigator.accAssigned"
-                            onChange={handleFormChange}
-                            />
-                        </div>
-
-                        <div className="input-group-edit">
-                            <p>Date and Time Investigated</p>
-                            <input type="datetime-local" className="search-bar-edit" 
-                              value={toUpdate?.investigator?.dateTimeInvestigated || reportData?.investigator?.dateTimeInvestigated || ""}
-                              name="investigator.dateTimeInvestigated"
-                              id="investigator.dateTimeInvestigated"
-                              onChange={handleFormChange} 
-                              max={today} 
-                              />
-                        </div>
-                        
-                    </div>
-
-                  )}
-
+              )}              
     
                </div>
                
@@ -869,93 +806,47 @@ const confirmSubmit = async () => {
       <div className="section-4-upper-edit">
         <div className="section-4-left-side-edit">
           <div className="fields-section-edit">
-            <p>Investigation Report</p>
-            {/* only the assigned investiagtor should be able to edit this */}
+            <p>Nature of Facts</p>
             <textarea
-              className="description-edit resize-none"
-              placeholder="Enter Investigation Report"
+              className="description-edit resize-none hover:cursor-default"
               rows={15}
-              value={toUpdate.investigator.investigationReport}
-              name="investigator.investigationReport"
-              id="investigator.investigationReport"
+              value={reportData.concern}
+              name="concern"
+              id="concern"
               onChange={handleFormChange}
+              onFocusCapture={(e) => {e.target.blur();}}
+
             ></textarea>
           </div>
         </div>
 
         <div className="section-4-right-side-edit">
           <div className="title-edit">
-            <p>Photo of Investigation (if Applicable)</p>
+            <p>Image of Incident</p>
           </div>
 
           <div className="file-upload-container-edit">
-            <label htmlFor="file-upload1" className="upload-link-edit">Click to Upload File</label>
-            <input
-              id="file-upload1"
-              type="file"
-              className="file-upload-input-edit"
-              accept=".jpg,.jpeg,.png"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFileChangeContainer1(e);
-                handleFormChange(e);
-              }}
-            />
-            <div className="uploadedFiles-container-edit">
-              {filesContainer1.length > 0 && (
-                <div className="file-name-image-display-edit">
-                  <ul>
-                    {filesContainer1.map((file, index) => (
-                      <div className="file-name-image-display-indiv-edit" key={index}>
-                        <li>
-                          {file.preview && (
-                            <div className="filename-image-container-edit">
-                              <img
-                                src={file.preview}
-                                alt={file.name}
-                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                              />
-                            </div>
-                          )}
-                          {file.name}
-                          <div className="delete-container-edit">
-                            <button
-                              type="button"
-                              onClick={() => handleFileDeleteContainer1(file.name)}
-                              className="delete-button-edit"
-                            >
-                              <img src="/images/trash.png" alt="Delete" className="delete-icon-edit" />
-                            </button>
-                          </div>
-                        </li>
-                      </div>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <div className="description">
+                {concernImageUrl ? (
+                  <a href={concernImageUrl} target="_blank" rel="noopener noreferrer">
+                    <img src={concernImageUrl} alt="Incident" className="incident-image" />
+                  </a>
+                ) : (
+                  <div className="input-group">
+                    <p style={{ color: "gray", fontStyle: "italic" }}>No image available</p>
+                  </div>
+                )}
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="section-4-lower-edit">
-        <p className="title">Image of Incident</p>
-        <div className="description">
-          {concernImageUrl ? (
-            <a href={concernImageUrl} target="_blank" rel="noopener noreferrer">
-              <img src={concernImageUrl} alt="Incident" className="incident-image" style={{ width: '30%', height: '100%', marginRight: '5px', cursor: "pointer" }} />
-            </a>
-          ) : (
-            <div className="input-group">
-              <p style={{ color: "gray", fontStyle: "italic" }}>No image available</p>
-            </div>
-          )}
         </div>
-      </div>
+
+     
       </>
      )}
       </div>
       </form>
-        <Dialogue  id={docId || ""}/>
+        <Dialogue  id={docId || ""} complainantName={`${reportData.complainant.fname} ${reportData.complainant.lname}`} respondentName={`${reportData.respondent.fname} ${reportData.respondent.lname}`}/>
         {Array.from({ length: reportData.nosHearing }, (_, i) => (
           <Hearing key={i}  hearingIndex={i} nosOfGeneration={reportData?.nosOfGeneration} id={docId||""}/>
         ))}

@@ -193,6 +193,7 @@ export default function AddIncident() {
             staffId: user?.id,
             isDialogue: false,
             nosHearing:1,
+            nosOfGeneration:0,
             createdAt: new Date(),
             ...(departmentId === "GAD" && { 
               nosofMaleChildren: reportInfo.nosofMaleChildren,
@@ -250,10 +251,6 @@ export default function AddIncident() {
 
  
     router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&highlight=${docRef.id}`);
-
-
-      
-  
 
 
     } catch (e: any) {
