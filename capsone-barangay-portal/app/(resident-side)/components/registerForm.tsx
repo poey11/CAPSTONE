@@ -239,12 +239,11 @@ const RegisterForm: React.FC = () => {
                     </div>
 
                     <div className="form-group-register-form">
-                        <label htmlFor="middle_name" className="form-label-register-form">Middle Name:<span className="required">*</span> </label>
+                        <label htmlFor="middle_name" className="form-label-register-form">Middle Name: </label>
                         <input value={resident.middle_name} onChange={handleChange} id="middle_name" 
                         type="text" name="middle_name" 
                         className="form-input-register-form "
-                        placeholder= "Enter Middle Name"
-                        required />
+                        placeholder= "Enter Middle Name" />
 
                     </div>
 
@@ -271,10 +270,19 @@ const RegisterForm: React.FC = () => {
 
                     <div className="form-group-register-form">
                         <label htmlFor="phone" className="form-label-register-form" >Phone Number:<span className="required">*</span> </label>
-                        <input  value={resident.phone} onChange={handleChange} id="phone" 
+                        <input  value={resident.phone} id="phone" 
                         type="tel" name="phone"
                         className="form-input-register-form " 
+                        maxLength={11}
+                        pattern="^[0-9]{11}$" 
                         placeholder="Enter Phone Number"
+                        onChange={(e) => {
+                            const input = e.target.value;
+                            // Only allow digits and limit to 11 characters
+                            if (/^\d{0,11}$/.test(input)) {
+                              handleChange(e);
+                            }
+                        }}
                         required />
                     </div>
 
@@ -285,7 +293,6 @@ const RegisterForm: React.FC = () => {
                         className="form-input-register-form " 
                         placeholder="Enter Email"
                         max={today}
-                        onKeyDown={(e) => e.preventDefault()} // Prevent manual input
                         required />
                     </div>
 
@@ -307,7 +314,7 @@ const RegisterForm: React.FC = () => {
                             <input value={resident.password} onChange={handleChange} id="password"
                                 type={showPassword ? "text" : "password"}
                                 name="password" 
-                                className="form-input-register-form "
+                                className="form-input-register-form"
                                 placeholder="Enter Password"
                                 required/>
                                 <button
