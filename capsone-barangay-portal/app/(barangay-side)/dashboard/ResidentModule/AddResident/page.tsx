@@ -349,30 +349,20 @@ const [activeSection, setActiveSection] = useState("basic");
           <hr/>
 
 
-        <div className="info-toggle-links">
+      <nav className="info-toggle-wrapper">
+        {["basic", "full", "others"].map((section) => (
           <button
+            key={section}
             type="button"
-            className={`info-toggle-btn ${activeSection === "basic" ? "active" : ""}`}
-            onClick={() => setActiveSection("basic")}
+            className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+            onClick={() => setActiveSection(section)}
           >
-            Basic Info
+            {section === "basic" && "Basic Info"}
+            {section === "full" && "Full Info"}
+            {section === "others" && "Others"}
           </button>
-          <button
-            type="button"
-            className={`info-toggle-btn ${activeSection === "full" ? "active" : ""}`}
-            onClick={() => setActiveSection("full")}
-          >
-            Full Info
-          </button>
-          <button
-            type="button"
-            className={`info-toggle-btn ${activeSection === "others" ? "active" : ""}`}
-            onClick={() => setActiveSection("others")}
-          >
-            Others
-          </button>
-        </div>
-
+        ))}
+      </nav>
 
 
 

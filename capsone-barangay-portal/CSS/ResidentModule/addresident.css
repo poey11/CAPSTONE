@@ -346,6 +346,7 @@ COMPACT MODES
     width: 350px;
     overflow-y: auto;
     margin-top: 10px;
+    align-self: center;
   }
 
   
@@ -924,45 +925,37 @@ COMPACT MODES
 /*
 FOR INFO
 */
-.info-toggle-links {
+.info-toggle-wrapper {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
+  justify-content: flex-start;
+  gap: 15px;
+  margin-top: 20px;
+  margin-bottom: 40px;
+  border-bottom: 2px solid #e0e0e0;
 }
 
 .info-toggle-btn {
-  background-color: #f0f0f0;
+  background-color: transparent;
   border: none;
-  padding: 6px 12px;
+  padding: 10px 16px;
   cursor: pointer;
-  font-weight: 500;
-  border-radius: 4px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.info-toggle-btn:hover {
+  color: #007bff;
 }
 
 .info-toggle-btn.active {
-  background-color: #007bff;
-  color: white;
+  color: #007bff;
+  border-bottom: 3px solid #007bff;
+  background-color: transparent;
 }
 
-
-.add-resident-section-2-left-side {
-    display: flex;
-    flex-direction: column;
-     width: 100%;
-} 
-
-
-.add-resident-section-2-left-side p {
-   color: grey;
-   font-weight: bold;
-   font-size: 1rem;
-}
-
-
-.narrow-width {
-  width: 20%; /* or any width that looks good for basic info */
-  transition: width 0.3s ease;
-}
 
 
 
