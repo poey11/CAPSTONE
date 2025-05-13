@@ -324,8 +324,8 @@ const confirmSubmit = async () => {
           <h1>Main Residents</h1>
         </div>
         
-        <div className={`add-resident-main-content ${!showFullInfo ? "compact-mode" : ""}`}>
-
+      
+          <div className="add-resident-main-content ">
 
           <div className="add-resident-main-section1">
             <div className="add-resident-main-section1-left">
@@ -369,7 +369,8 @@ const confirmSubmit = async () => {
 
           <form id="addResidentForm" onSubmit={handleSubmit} className="add-resident-section-2">
             {/* Left Side - Resident Form */}
-            <div className="add-resident-section-2-left-side">
+
+                <div className={`add-resident-section-2-left-side ${!showFullInfo ? "compact-mode" : ""}`}>
               <div className="fields-container">
 
               {!showFullInfo && (
@@ -411,6 +412,22 @@ const confirmSubmit = async () => {
                         onChange={handleChange}
                       />
                     </div>
+
+                     <div className="fields-section">
+                        <p>Sex<span className="required">*</span></p>
+                        <select
+                          name="sex"
+                          className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
+                          value={formData.sex}
+                          onChange={handleChange}
+                          required>
+                          <option value="" disabled>Choose Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                        </select>
+                      </div>
+
+
                   </>
                 )}
 
@@ -495,20 +512,7 @@ const confirmSubmit = async () => {
                           readOnly />
                       </div>
                       
-                      <div className="fields-section">
-                        <p>Sex<span className="required">*</span></p>
-                        <select
-                          name="sex"
-                          className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
-                          value={formData.sex}
-                          onChange={handleChange}
-                          required>
-                          <option value="" disabled>Choose Gender</option>
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                        </select>
-                      </div>
-
+          
                       <div className="fields-section">
                         <p>Civil Status<span className="required">*</span></p>
                         <select 

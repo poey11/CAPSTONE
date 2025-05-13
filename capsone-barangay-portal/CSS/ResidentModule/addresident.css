@@ -22,7 +22,7 @@
     display: flex;
     flex-direction: column;
     align-self: center;
-    width: 95%;
+    width: 70%;
     border-radius: 1rem;
     border: 2px solid  #ddd;
     padding-left: 30px;
@@ -31,15 +31,12 @@
     padding-bottom: 50px;
     margin:  auto; 
     background-color: #f4f2f2;
-    margin-top: 20px;   
+    margin-top: 20px;  
+    overflow-y: auto;
+   overflow-x: hidden;
+    height: 650px;
 }
 
-
-.add-resident-main-content.compact-mode {
-  width: 70%; /* or any reduced size */
-  padding: 2rem;
-  
-}
 
 
 .add-resident-main-content hr{
@@ -147,8 +144,10 @@
 .add-resident-section-2-left-side {
     display: flex;
     flex-direction: column;
-    
-}
+     width: 50%;
+} 
+
+
 
 .add-resident-section-2-left-side p {
    color: grey;
@@ -169,12 +168,62 @@
   position: relative;
 }
 
+
+
 .fields-section p{
   font-size: 15px;
   color: grey;
   font-weight: bold;
 }
 
+
+  .add-resident-input-field {
+    padding: 8px;
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: rgba(0, 0, 0, 0.4);
+    text-align: left;
+  }
+
+
+
+/*
+COMPACT MODES
+*/
+
+.add-resident-section-2-left-side.compact-mode .fields-container{
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+}
+.add-resident-section-2-left-side.compact-mode.add-resident-input-field {
+  width: 100%;
+}
+
+.add-resident-section-2-left-side.compact-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+}
+
+
+
+
+
+  .add-resident-input-field-disabled{
+    background-color: white; 
+    color: rgba(0, 0, 0, 0.4);
+    opacity: 1;
+    padding: 8px;
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: left;
+  }
 
 
 /* Toggle switch container */
@@ -236,27 +285,6 @@
     font-weight: bold;
   }
 
-  .add-resident-input-field {
-    padding: 8px;
-    width: 100%;
-    margin-top: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    color: rgba(0, 0, 0, 0.4);
-    text-align: left;
-  }
-
-  .add-resident-input-field-disabled{
-    background-color: white; 
-    color: rgba(0, 0, 0, 0.4);
-    opacity: 1;
-    padding: 8px;
-    width: 100%;
-    margin-top: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    text-align: left;
-  }
 
   .featuredStatus option {
     color: rgba(0, 0, 0, 0.4); 
