@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "../../../../db/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import Link from "next/link";
 
 
 export default function ViewUser() {
@@ -45,6 +46,7 @@ export default function ViewUser() {
     const barangayUserFields = [
         { label: "User ID", key: "userid" },
         { label: "Official First Name", key: "firstName" },
+        { label: "Official Middle Name", key: "middleName" },
         { label: "Official Last Name", key: "lastName" },
         { label: "Position", key: "position" },
         { label: "Birthday", key: "birthDate" },
@@ -66,6 +68,16 @@ export default function ViewUser() {
     return (
 
         <main className="viewresident-main-container">
+
+            <div className="path-section">
+                <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
+                <h1 className="breadcrumb">
+                    <Link href="/dashboard/admin/BarangayUsers">Barangay Users</Link>
+                    <span className="chevron">/</span>
+                </h1>
+                <h2 className="breadcrumb">View Barangay User Details<span className="chevron"></span></h2>
+            </div>
+
             <div className="viewresident-page-title-section-1">
                 <h1>Barangay Users</h1>
             </div>

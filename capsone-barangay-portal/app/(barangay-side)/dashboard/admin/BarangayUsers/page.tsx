@@ -56,6 +56,10 @@ const BarangayUsers = () => {
         }
     };
 
+    const handleViewBarangayUserClick = (id: string) => {  
+        router.push(`/dashboard/admin/viewBarangayUser?id=${id}`);   
+    };
+
     const handleEditBarangayUserClick = (id: string) => {
         if (isAuthorized) {
             router.push(`/dashboard/admin/modifyBarangayAcc?id=${id}`);
@@ -353,7 +357,9 @@ useEffect(() => {
             <td>{user.position}</td>
             <td>
                 <div className="admin-actions">
-                <button className="admin-action-view" onClick={(e) => { e.stopPropagation(); }}>View</button>
+                {/*<button className="admin-action-view" onClick={(e) => { e.stopPropagation(); }}>View</button>*/}
+
+                <button className="admin-action-view" onClick={() => handleViewBarangayUserClick(user.id)}>View</button>
 
                 {isAuthorized && (
                     <>
