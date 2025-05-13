@@ -190,7 +190,7 @@ export default function EditFirstTimeJobSeeker() {
           <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker">First-Time Job Seeker List</Link>
           <span className="chevron">/</span>
         </h1>
-        <h2 className="breadcrumb">Edit First-Time Jobseeker<span className="chevron"></span></h2>
+        <h2 className="breadcrumb">Edit First-Time Job Seeker<span className="chevron"></span></h2>
       </div>
 
       <div className="addresident-page-title-section-1">
