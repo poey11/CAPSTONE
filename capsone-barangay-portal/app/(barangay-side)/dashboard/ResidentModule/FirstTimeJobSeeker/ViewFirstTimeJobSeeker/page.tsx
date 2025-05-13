@@ -65,7 +65,7 @@ export default function ViewFirstTimeJobSeeker() {
           <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker">First-Time Job Seeker List</Link>
           <span className="chevron">/</span>
         </h1>
-        <h2 className="breadcrumb">View First-Time Jobseeker Details<span className="chevron"></span></h2>
+        <h2 className="breadcrumb">View First-Time Job Seeker Details<span className="chevron"></span></h2>
       </div>
 
       <div className="viewresident-page-title-section-1">
@@ -76,7 +76,7 @@ export default function ViewFirstTimeJobSeeker() {
           <button onClick={handleBack}>
             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
           </button>
-          <p>View First-Time Jobseeker</p>
+          <p>View First-Time Job Seeker</p>
         </div>
 
         {jobSeekerFields.map((field) => (
