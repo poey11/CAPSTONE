@@ -35,6 +35,13 @@
 }
 
 
+.add-resident-main-content.compact-mode {
+  width: 70%; /* or any reduced size */
+  padding: 2rem;
+  
+}
+
+
 .add-resident-main-content hr{
   border: none; 
   border-top: 2px solid rgba(0, 0, 0, 0.10);
@@ -140,7 +147,7 @@
 .add-resident-section-2-left-side {
     display: flex;
     flex-direction: column;
-    width: 50%;
+    
 }
 
 .add-resident-section-2-left-side p {
@@ -880,3 +887,45 @@
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
+
+
+
+
+
+/*
+FOR INFO
+*/
+.info-toggle-links {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.info-toggle-btn {
+  background-color: #f0f0f0;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+.info-toggle-btn.active {
+  background-color: #007bff;
+  color: white;
+}
+
+
+
+
+
+
+.narrow-width {
+  width: 20%; /* or any width that looks good for basic info */
+  transition: width 0.3s ease;
+}
+
+
+
+
