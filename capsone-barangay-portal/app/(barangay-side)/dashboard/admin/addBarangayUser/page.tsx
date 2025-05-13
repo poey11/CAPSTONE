@@ -25,7 +25,7 @@ export default function AddBarangayUser() {
         userId:"",
         position:"",
         password:"",
-        role:"Barangay Official"
+        role:"Barangay Official",
     });
    
     const router = useRouter();
@@ -146,6 +146,8 @@ export default function AddBarangayUser() {
           position: users.position,
           createdAt: new Date().toISOString().split("T")[0],
           firstTimelogin: true,
+          firstName: "User",
+          lastName: ""
         });
     
         setPopupMessage("Barangay User created successfully!");

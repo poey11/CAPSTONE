@@ -175,7 +175,7 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                         
                         <div className="form-group-accsetup-form">
                             <label htmlFor="bday">Birthday:<span className="required">*</span></label>
-                            <input onChange={handleChange} value={user.bday} id="bday" type="date" name="bday" max={today} onKeyDown={(e) => e.preventDefault()} className="form-input-accsetup-form" required />
+                            <input onChange={handleChange} value={user.bday} id="bday" type="date" name="bday" max={today} className="form-input-accsetup-form" required />
                         </div>
                             
                         <div className="form-group-accsetup-form">
