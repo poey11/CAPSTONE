@@ -21,7 +21,6 @@
 .add-resident-main-content {
     display: flex;
     flex-direction: column;
-    align-self: center;
     width: 70%;
     border-radius: 1rem;
     border: 2px solid  #ddd;
@@ -33,7 +32,6 @@
     background-color: #f4f2f2;
     margin-top: 20px;  
     overflow-y: auto;
-   overflow-x: hidden;
     height: 650px;
 }
 
@@ -135,40 +133,39 @@
   background-color: #CA2D2D; 
 }
 
+/*
 .add-resident-section-2 {
     display: flex;
     width: 100%;
-    margin-left: 70px;
+    margin-left: 50px;
 }
-
-.add-resident-section-2-left-side {
+*/
+/*
+.add-resident-section-2 {
     display: flex;
-    flex-direction: column;
-     width: 50%;
-} 
-
-
-
-.add-resident-section-2-left-side p {
-   color: grey;
-   font-weight: bold;
-   font-size: 1rem;
-   
+    width: 100%;
 }
-
+    */
+/*
 .fields-container{
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 50px;
 }
-
+  */
+/*
 .fields-section{
   display: flex;
   flex-direction: column;
   margin-top: 30px;
   position: relative;
 }
+  */
 
-
+/*
 
 .fields-section p{
   font-size: 15px;
@@ -179,7 +176,7 @@
 
   .add-resident-input-field {
     padding: 8px;
-    width: 100%;
+    width: 80%;
     margin-top: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -192,6 +189,8 @@
 /*
 COMPACT MODES
 */
+
+/*
 
 .add-resident-section-2-left-side.compact-mode .fields-container{
   display: flex;
@@ -209,6 +208,7 @@ COMPACT MODES
   width: 90%;
 }
 
+*/
 
 
 
@@ -945,8 +945,18 @@ FOR INFO
 }
 
 
+.add-resident-section-2-left-side {
+    display: flex;
+    flex-direction: column;
+     width: 100%;
+} 
 
 
+.add-resident-section-2-left-side p {
+   color: grey;
+   font-weight: bold;
+   font-size: 1rem;
+}
 
 
 .narrow-width {
@@ -954,6 +964,102 @@ FOR INFO
   transition: width 0.3s ease;
 }
 
+
+
+
+
+
+
+
+
+/*
+FOR ADDITION OF NEW MAIN RESIDENTS
+*/
+
+
+
+
+.add-main-resident-section-2-left-side {
+    display: flex;
+    flex-direction: column;
+     width: 50%;
+} 
+
+
+.add-main-resident-section-2-left-side p {
+   color: grey;
+   font-weight: bold;
+   font-size: 1rem;
+}
+
+
+
+  .add-main-resident-section-2-right-side {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+  }
+
+  .add-main-resident-section-2-right-side p {
+   color: grey;
+   font-weight: bold;
+   font-size: 1rem;
+}
+
+
+.fields-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 50px;
+
+}
+
+.fields-section{
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+  width: 100%;
+}
+
+.fields-section p{
+  font-size: 15px;
+  color: grey;
+  font-weight: bold;
+   align-self: flex-start; /* Left-aligns the label */
+    margin-left: 15%;
+}
+
+
+
+
+
+
+.add-resident-section-2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  
+}
+
+
+  .add-resident-input-field {
+    padding: 8px;
+    width: 70%;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: rgba(0, 0, 0, 0.4);
+    text-align: left;
+    
+  }
+
+  .fields-section input,select{
+  align-self: center; 
+}
 
 
 

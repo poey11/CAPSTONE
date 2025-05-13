@@ -302,8 +302,9 @@ const confirmSubmit = async () => {
     window.location.href = "/dashboard/ResidentModule";
   };
 
+const [activeSection, setActiveSection] = useState("basic");
+// options: "basic", "full", "others"
 
-  const [showFullInfo, setShowFullInfo] = useState(false);
 
 
 
@@ -348,94 +349,112 @@ const confirmSubmit = async () => {
           <hr/>
 
 
-          <div className="info-toggle-links">
+        <div className="info-toggle-links">
           <button
             type="button"
-            className={`info-toggle-btn ${!showFullInfo ? "active" : ""}`}
-            onClick={() => setShowFullInfo(false)}
+            className={`info-toggle-btn ${activeSection === "basic" ? "active" : ""}`}
+            onClick={() => setActiveSection("basic")}
           >
             Basic Info
           </button>
           <button
             type="button"
-            className={`info-toggle-btn ${showFullInfo ? "active" : ""}`}
-            onClick={() => setShowFullInfo(true)}
+            className={`info-toggle-btn ${activeSection === "full" ? "active" : ""}`}
+            onClick={() => setActiveSection("full")}
           >
             Full Info
           </button>
+          <button
+            type="button"
+            className={`info-toggle-btn ${activeSection === "others" ? "active" : ""}`}
+            onClick={() => setActiveSection("others")}
+          >
+            Others
+          </button>
         </div>
+
 
 
 
           <form id="addResidentForm" onSubmit={handleSubmit} className="add-resident-section-2">
             {/* Left Side - Resident Form */}
 
-                <div className={`add-resident-section-2-left-side ${!showFullInfo ? "compact-mode" : ""}`}>
-              <div className="fields-container">
 
-              {!showFullInfo && (
-                  <>
+    
+         {activeSection === "basic" && (
+            <>
+              <div className={`add-main-resident-section-2-left-side ${!activeSection ? "compact-mode" : ""}`}>
+                <div className="fields-container">
+                  <div className="fields-section">
+                    <p>Last Name<span className="required">*</span></p>
+                    <input
+                      type="text"
+                      className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`}
+                      placeholder="Enter Last Name"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="fields-section">
+                    <p>First Name<span className="required">*</span></p>
+                    <input
+                      type="text"
+                      className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`}
+                      placeholder="Enter First Name"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="add-main-resident-section-2-right-side">
+                <div className="fields-container">
+                  <div className="fields-section">
+                    <p>Middle Name</p>
+                    <input
+                      type="text"
+                      className="add-resident-input-field"
+                      placeholder="Enter Middle Name"
+                      name="middleName"
+                      value={formData.middleName}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="fields-section">
+                    <p>Sex<span className="required">*</span></p>
+                    <select
+                      name="sex"
+                      className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
+                      value={formData.sex}
+                      onChange={handleChange}
+                      required>
+                      <option value="" disabled>Choose Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+
+            
+
+
+          {activeSection === "full" && (
+            <>
+
+               <div className="add-main-resident-section-2-left-side">
+
                     <div className="fields-section">
-                      <p>Last Name<span className="required">*</span></p>
-                      <input
-                        type="text"
-                        className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`}
-                        placeholder="Enter Last Name"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="fields-section">
-                      <p>First Name<span className="required">*</span></p>
-                      <input
-                        type="text"
-                        className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`}
-                        placeholder="Enter First Name"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="fields-section">
-                      <p>Middle Name</p>
-                      <input
-                        type="text"
-                        className="add-resident-input-field"
-                        placeholder="Enter Middle Name"
-                        name="middleName"
-                        value={formData.middleName}
-                        onChange={handleChange}
-                      />
-                    </div>
-
-                     <div className="fields-section">
-                        <p>Sex<span className="required">*</span></p>
-                        <select
-                          name="sex"
-                          className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
-                          value={formData.sex}
-                          onChange={handleChange}
-                          required>
-                          <option value="" disabled>Choose Gender</option>
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                        </select>
-                      </div>
-
-
-                  </>
-                )}
-
-
-             
-                {showFullInfo && (
-                    <>
-                      <div className="fields-section">
                         <p>Address<span className="required">*</span></p>
                         <input 
                           type="text"
@@ -499,7 +518,8 @@ const confirmSubmit = async () => {
                           max={new Date().toISOString().split("T")[0]}
                           required />
                       </div>
-
+                      
+                        
                       <div className="fields-section">
                         <p>Age<span className="required">*</span></p>
                         <input 
@@ -511,6 +531,11 @@ const confirmSubmit = async () => {
                           onChange={handleChange}
                           readOnly />
                       </div>
+               </div>
+
+
+                <div className="add-main-resident-section-2-right-side">
+                    
                       
           
                       <div className="fields-section">
@@ -562,20 +587,18 @@ const confirmSubmit = async () => {
                         <p>Precinct Number</p>
                         <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
                       </div>
-                    </>
-                  )}
+                   
+               </div>
 
-               
-              </div>
-              
-            </div>
+           </>
+         )}
 
-            
 
-            {/* Right Side - Checkboxes & File Upload */}
-            {showFullInfo && (
+         
+          {activeSection === "others" && (
               <>
-            <div className="add-resident-section-2-right-side">
+              
+                  <div className="add-main-resident-section-2-left-side">
               <div className="checkboxes-container">
                 <p>Student</p>
                 <div className="checkbox-container">
@@ -602,8 +625,10 @@ const confirmSubmit = async () => {
                 </div>
               </div>
 
+              </div>
 
 
+            <div className="add-main-resident-section-2-right-side">
               {/* File Upload Section */}
               <div className="file-upload-container">
                 <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
@@ -626,8 +651,15 @@ const confirmSubmit = async () => {
               
               </div>
             </div>
-            </>
-            )}
+              
+              </>
+         )}
+
+
+
+
+
+
           </form>
 
           {error && <p className="error">{error}</p>}
