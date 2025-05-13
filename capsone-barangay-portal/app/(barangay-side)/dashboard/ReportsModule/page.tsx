@@ -20,16 +20,23 @@ const ReportsPage = () => {
   const { data: session } = useSession();
 
 
+  // for residents
   const [loadingKasambahay, setLoadingKasambahay] = useState(false); 
   const [loadingJobSeeker, setLoadingJobSeeker] = useState(false);    
   const [loadingMasterResident, setLoadingMasterResident] = useState(false);    
   const [loadingEastResident, setLoadingEastResident] = useState(false);
   const [loadingWestResident, setLoadingWestResident] = useState(false);    
   const [loadingSouthResident, setLoadingSouthResident] = useState(false);  
+
+
   const [files, setFiles] = useState<FileData[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
   const [selectedModule, setSelectedModule] = useState<string>("");
   const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(null);
+
+    // for incident reports
+    const [loadingVAWCReport, setLoadingVAWCReport] = useState(false);    
+
 
 
   
@@ -160,7 +167,7 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
-  
+
       const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow === 0);
       const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 5);
   
@@ -900,7 +907,7 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
-  
+
       worksheet.getCell("A1").value = reportTitle;
   
       let insertionRow = 3;
@@ -1098,7 +1105,7 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
-  
+      
       worksheet.getCell("A1").value = reportTitle;
   
       let insertionRow = 3;
@@ -1250,6 +1257,165 @@ const ReportsPage = () => {
   };
 
 
+  // for incident reports
+
+  // vawc monthly report
+
+  const generateVAWCReport = async () => {
+    setLoadingVAWCReport(true);
+    try {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = currentDate.toLocaleString("default", { month: "long" });
+      const reportTitle = `FOR THE MONTH OF ${month.toUpperCase()} ${year}`;
+  
+      //  Get VAWC IncidentReports
+      const reportsRef = collection(db, "IncidentReports");
+      const q = query(reportsRef, where("department", "==", "VAWC"));
+      const querySnapshot = await getDocs(q);
+      const vawcReports = querySnapshot.docs.map((doc) => doc.data());
+  
+      if (vawcReports.length === 0) {
+        alert("No VAWC reports found.");
+        return;
+      }
+  
+      //  Load Excel template
+      const templateRef = ref(storage, "ReportsModule/VAWC Report Template.xlsx");
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+
+      worksheet.pageSetup = {
+        fitToPage: true,
+        fitToHeight: 0, 
+        fitToWidth: 1,  
+        orientation: 'landscape', 
+      };
+  
+      //  Update report title
+      worksheet.getCell("A2").value = reportTitle;
+  
+      const headerEndRow = 3;
+      const dataStartRow = 5;
+      const footerStartRow = 17;
+  
+      //  Handle header/footer images
+      const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow < dataStartRow);
+      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= footerStartRow);
+  
+      // to save footer
+      worksheet.insertRows(footerStartRow - 1, new Array(vawcReports.length).fill([]));
+  
+      //  Insert dynamic data
+      vawcReports.forEach((report, index) => {
+        const rowIndex = dataStartRow + index;
+        const row = worksheet.getRow(rowIndex);
+        row.height = 55;
+  
+        const complainant = report.complainant || {};
+        const respondent = report.respondent || {};
+  
+        const complainantFullName = `${complainant.fname || ""} ${complainant.lname || ""}`.trim();
+        const complainantAge = complainant.age || "";
+        const complainantAddress = complainant.address || "";
+  
+        const respondentFullName = `${respondent.fname || ""} ${respondent.lname || ""}`.trim();
+        const respondentAge = respondent.age || "";
+        const respondentAddress = respondent.address || "";
+  
+        const cells = [
+          report.dateFiled || "",
+          `C- ${complainantFullName}\nR- ${respondentFullName}`,
+          `C- ${complainantAge}\nR- ${respondentAge}`,
+          `C- ${complainantAddress}\nR- ${respondentAddress}`,
+          report.nature || "",
+          report.occupation || "",
+          report.educationalAttainment || "",
+          report.remarks || "",
+        ];
+  
+        cells.forEach((val, colIdx) => {
+          const cell = row.getCell(colIdx + 1);
+          cell.value = val;
+          cell.font = { name: "Calibri", size: 12 };
+          cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+          cell.border = {
+            top: { style: "medium" },
+            bottom: { style: "medium" },
+            left: { style: "medium" },
+            right: { style: "medium" },
+          };
+        });
+  
+        row.commit();
+      });
+  
+      //  Move footer images
+      footerDrawings.forEach(drawing => {
+        const offset = vawcReports.length;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+      });
+  
+      //  Save and upload
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const fileName = `VAWC_Report_${month}_${year}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+      const fileUrl = await getDownloadURL(storageRef);
+  
+      alert("VAWC Report generated successfully! Please wait for the downloadable file!");
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating VAWC report:", error);
+      alert("Failed to generate VAWC Report.");
+    } finally {
+      setLoadingVAWCReport(false);
+    }
+  };
+  
+  
+  const handleGenerateVAWCPDF = async () => {
+    setLoadingVAWCReport(true);
+    try {
+      const fileUrl = await generateVAWCReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+  
+      saveAs(blob, `VAWC_Report_${year}.pdf`);
+  
+      alert("VAWC Report successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingVAWCReport(false);
+    }
+  };
+  
+  
+
+
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedName = e.target.value;
     const file = files.find((f) => f.name.replace(".docx", "") === selectedName) || null;
@@ -1347,18 +1513,20 @@ const ReportsPage = () => {
               <button className="report-button">Summary of Incidents</button>
               <button className="report-button">Incident Status Summary</button>
           
-          {session?.user?.department === "Lupon" && (
+          {session?.user?.department === "Lupon" || session?.user?.position === "Assistant Secretary" && (
             <>
               <button className="report-button">Lupon Settled Report</button>
               <button className="report-button">Lupon Pending Report</button>
             </>
           )}
-          {session?.user?.department === "VAWC" && (
+          {session?.user?.department === "VAWC" || session?.user?.position === "Assistant Secretary" && (
             <>
-              <button className="report-button">Monthly VAWC Report</button>
+              <button onClick={handleGenerateVAWCPDF} disabled={loadingVAWCReport} className="report-button">
+                {loadingVAWCReport ? "Generating..." : "Monthly VAWC Report"}
+              </button>      
             </>
           )}
-          {session?.user?.department === "GAD" || session?.user?.department === "BCPC"  && (
+          {session?.user?.department === "GAD" || session?.user?.department === "BCPC" || session?.user?.position === "Assistant Secretary"  && (
             <>
               <button className="report-button">GADRCO Quarterly Monitoring Report</button>
             </>
