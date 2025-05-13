@@ -3,10 +3,11 @@ import "@/CSS/ResidentModule/addresident.css";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { db, storage } from "../../../../../db/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, getDocs } from "firebase/firestore";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { useRef } from "react";
 
 
 interface KasambahayFormData {
@@ -24,6 +25,7 @@ interface KasambahayFormData {
   natureOfWork: string;
   employmentArrangement: string;
   salary: string;
+  employerId: string;
   employerName: string;
   employerAddress: string;
   sssMember: boolean;
@@ -56,6 +58,7 @@ export default function EditKasambahay() {
     natureOfWork: "",
     employmentArrangement: "",
     salary: "",
+    employerId: "",
     employerName: "",
     employerAddress: "",
     sssMember: false,
@@ -79,6 +82,12 @@ export default function EditKasambahay() {
   const [popupMessage, setPopupMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
+
+  const [showResidentsPopup, setShowResidentsPopup] = useState(false);
+  const employerPopupRef = useRef<HTMLDivElement>(null);
+  
+    const [residents, setResidents] = useState<any[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
 
   const handleDiscardClick = async () => {
     setShowDiscardPopup(true);
@@ -124,6 +133,7 @@ export default function EditKasambahay() {
             natureOfWork: docSnap.data().natureOfWork || "",
             employmentArrangement: docSnap.data().employmentArrangement || "",
             salary: docSnap.data().salary || "",
+            employerId: docSnap.data().employerId || "",
             employerName: docSnap.data().employerName || "",
             employerAddress: docSnap.data().employerAddress || "",
             sssMember: docSnap.data().sssMember ?? false,
@@ -185,7 +195,38 @@ export default function EditKasambahay() {
   };
   
 
+  useEffect(() => {
+      const fetchResidents = async () => {
+        try {
+          const residentsCollection = collection(db, "Residents");
+              const residentsSnapshot = await getDocs(residentsCollection);
+              const residentsList = residentsSnapshot.docs.map(doc => {
+                  const data = doc.data() as {
+                      residentNumber: string;
+                      firstName: string;
+                      middleName: string;
+                      lastName: string;
+                      address: string;
+                  };
+      
+                  return {
+                      id: doc.id,
+                      ...data
+                  };
+              });
+      
+              setResidents(residentsList);
+        } catch (error) {
+          console.error("Error fetching residents:", error);
+        }
+      };
+    
+      fetchResidents();
+    }, []);
 
+  const handleEmployerClick = () => {
+    setShowResidentsPopup(true);
+  };
 
 
   // Handle input changes
@@ -224,20 +265,19 @@ export default function EditKasambahay() {
 
   const confirmSave = async () => {
     setShowSavePopup(false);
-
     setPopupMessage("Changes saved successfully!");
     setShowPopup(true);
+
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
 
     // Hide the popup after 3 seconds
     setTimeout(() => {
       setShowPopup(false);
 
-      router.push("/dashboard/ResidentModule/kasambahayList");
+      router.push(`/dashboard/ResidentModule/kasambahayList?highlight=${docId}`);
     }, 3000);
-
-    // Create a fake event and call handleSubmit
-    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
   };
 
   // Handle form submission
@@ -274,6 +314,7 @@ export default function EditKasambahay() {
         natureOfWork: formData.natureOfWork,
         employmentArrangement: formData.employmentArrangement,
         salary: formData.salary,
+        employerId: formData.employerId,
         employerName: formData.employerName,
         employerAddress: formData.employerAddress,
         sssMember: formData.sssMember,
@@ -282,6 +323,8 @@ export default function EditKasambahay() {
         fileURL,
         updatedBy: session?.user?.position,
       });
+
+      return docRef.id; // return ID
       
     } catch (err) {
       console.error("Update failed:", err);
@@ -438,14 +481,32 @@ export default function EditKasambahay() {
                 </select>
               </div>
 
-              <div className="fields-section">
-                <p>Employer Name<span className="required">*</span></p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Employer" name="employerName" value={formData.employerName} onChange={handleChange} required />
+              <div ref={employerPopupRef}>
+                <div className="fields-section">
+                  <p>Employer Name<span className="required">*</span></p>
+                  <input 
+                    type="text"
+                    className="add-resident-input-field"
+                    placeholder="Select Employer"
+                    name="employerName"
+                    value={formData.employerName}
+                    onChange={handleChange}
+                    required
+                    onClick={handleEmployerClick}
+                    />
+                </div>
               </div>
 
               <div className="fields-section">
                 <p>Employer Address<span className="required">*</span></p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Employer Address" name="employerAddress" value={formData.employerAddress} onChange={handleChange} required />
+                <input 
+                  type="text"
+                  className="add-resident-input-field"
+                  placeholder="Enter Employer Address"
+                  name="employerAddress"
+                  value={formData.employerAddress}
+                  onChange={handleChange}
+                  required />
               </div>
             </div>
           </div>
@@ -525,6 +586,69 @@ export default function EditKasambahay() {
             </form>
         {error && <p className="error">{error}</p>}
       </div>
+
+
+      {showResidentsPopup && (
+      <div className="kasambahay-employer-popup-overlay">
+        <div className="kasambahay-employer-popup" ref={employerPopupRef}>
+          <h2>Employers List</h2>
+          <h1>* Please select Employer's Name *</h1>
+
+          <input
+            type="text"
+            placeholder="Search Employer's Name"
+            className="employer-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <div className="employers-list">
+            {residents.length === 0 ? (
+              <p>No residents found.</p>
+            ) : (
+              <table className="employers-table">
+                <thead>
+                  <tr>
+                    <th>Resident Number</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Last Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {residents
+                .filter((resident) => {
+                  const fullName = `${resident.firstName} ${resident.middleName || ""} ${resident.lastName}`.toLowerCase();
+                  return fullName.includes(searchTerm.toLowerCase());
+                })
+                .map((resident) => (
+                    <tr
+                      key={resident.id}
+                      className="employers-table-row"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          employerId: resident.id,
+                          employerName: `${resident.lastName}, ${resident.firstName} ${resident.middleName || ''}`,
+                          employerAddress: resident.address || '',
+                        });
+                        setShowResidentsPopup(false);
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <td>{resident.residentNumber}</td>
+                      <td>{resident.firstName}</td>
+                      <td>{resident.middleName}</td>
+                      <td>{resident.lastName}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
 
       {showDiscardPopup && (
                         <div className="confirmation-popup-overlay-add-kasambahay">

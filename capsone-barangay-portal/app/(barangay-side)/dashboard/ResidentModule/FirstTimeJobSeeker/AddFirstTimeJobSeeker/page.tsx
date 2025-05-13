@@ -3,7 +3,7 @@ import "@/CSS/ResidentModule/addresident.css";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { db, storage } from "../../../../../db/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useSession } from "next-auth/react";
@@ -94,29 +94,9 @@ export default function AddFirstTimeJobSeeker() {
     setFile(null);
     setPreview(null);
   };
-/*
-  const handleSubmitClick = async () => {
-    const { lastName, firstName, dateApplied, dateOfBirth, age, sex } = formData;
-  
-    if (!lastName || !firstName || !dateApplied || !dateOfBirth || !age || !sex) {
 
-      setPopupErrorMessage("Please fill up all required fields.");
-      setShowErrorPopup(true);
-  
-    // Hide the popup after 3 seconds
-    setTimeout(() => {
-      setShowErrorPopup(false);
-      
-    }, 3000);
-    
-      return;
-    }
-  
-    setShowSubmitPopup(true);
-  };
-*/
-  const handleSubmitClick = () => {
-    const { lastName, firstName,dateApplied, dateOfBirth, age, sex } = formData;
+  const handleSubmitClick = async () => {
+    const { lastName, middleName, firstName, dateApplied, dateOfBirth, age, sex } = formData;
   
     const invalidFields: string[] = [];
   
@@ -138,8 +118,48 @@ export default function AddFirstTimeJobSeeker() {
       return;
     }
   
-    setInvalidFields([]);
-    setShowSubmitPopup(true);
+    try {
+      
+      const cleanFirst = firstName.trim().toLowerCase();
+      const cleanMiddle = middleName.trim().toLowerCase();
+      const cleanLast = lastName.trim().toLowerCase();
+  
+      
+      const snapshot = await getDocs(collection(db, "JobSeekerList"));
+  
+      let isDuplicate = false;
+  
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+  
+        const dbFirst = (data.firstName || "").trim().toLowerCase();
+        const dbMiddle = (data.middleName || "").trim().toLowerCase();
+        const dbLast = (data.lastName || "").trim().toLowerCase();
+  
+        if (
+          dbFirst === cleanFirst &&
+          dbMiddle === cleanMiddle &&
+          dbLast === cleanLast
+        ) {
+          isDuplicate = true;
+        }
+      });
+  
+      if (isDuplicate) {
+        setPopupErrorMessage("Job Seeker is already in the record.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
+  
+      // No duplicate found — show confirmation popup
+      setShowSubmitPopup(true);
+    } catch (err) {
+      console.error("Error checking for duplicates:", err);
+      setPopupErrorMessage("Something went wrong. Please try again.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+    }
   };
   
 
@@ -229,7 +249,7 @@ export default function AddFirstTimeJobSeeker() {
           <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker">First-Time Job Seeker List</Link>
           <span className="chevron">/</span>
         </h1>
-        <h2 className="breadcrumb">Add First-Time Jobseeker<span className="chevron"></span></h2>
+        <h2 className="breadcrumb">Add First-Time Job Seeker<span className="chevron"></span></h2>
       </div>
 
       <div className="addresident-page-title-section-1">
@@ -243,7 +263,7 @@ export default function AddFirstTimeJobSeeker() {
                 <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
               </button>
 
-              <h1> Add New First-Time Jobseeker </h1>
+              <h1> Add New First-Time Job Seeker </h1>
             </div>
 
             <div className="action-btn-section">

@@ -151,3 +151,11 @@ margin-top: 20px;
     color: #888;
     margin-left: 10px;
   }
+
+  .employer-link {
+    color: grey;
+    font-size: 1rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  

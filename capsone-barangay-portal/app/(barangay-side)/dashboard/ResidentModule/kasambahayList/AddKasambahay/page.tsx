@@ -32,6 +32,7 @@ export default function AddKasambahay() {
     sssMember: false,
     philhealthMember: false,
     pagibigMember: false,
+    employerId: "",
     employerName: "",
     employerAddress: "",
     createdAt:"",
@@ -640,6 +641,7 @@ export default function AddKasambahay() {
                       onClick={() => {
                         setFormData({
                           ...formData,
+                          employerId: resident.id,
                           employerName: `${resident.lastName}, ${resident.firstName} ${resident.middleName || ''}`,
                           employerAddress: resident.address || '',
                         });
