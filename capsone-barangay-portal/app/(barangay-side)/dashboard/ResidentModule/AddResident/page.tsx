@@ -590,6 +590,9 @@ const [activeSection, setActiveSection] = useState("basic");
               
                   <div className="add-main-resident-section-2-left-side">
               <div className="checkboxes-container">
+
+                <h3 className="checkboxes-title"> Resident Classification</h3>
+
                 <p>Student</p>
                 <div className="checkbox-container">
                   <label className="checkbox-label">

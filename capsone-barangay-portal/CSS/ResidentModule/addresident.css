@@ -330,6 +330,14 @@ COMPACT MODES
    margin-top: 20px;
   }
 
+  .checkboxes-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: gray;
+    align-self: center;
+  }
+
 
   .file-upload-container {
     margin-bottom: 40px;
