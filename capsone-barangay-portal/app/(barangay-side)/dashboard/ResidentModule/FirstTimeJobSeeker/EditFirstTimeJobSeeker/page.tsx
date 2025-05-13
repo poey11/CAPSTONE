@@ -203,7 +203,7 @@ export default function EditFirstTimeJobSeeker() {
             <button onClick={handleBack}>
               <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
             </button>
-            <h1>Edit First-Time Jobseeker</h1>
+            <h1>Edit First-Time Job Seeker</h1>
           </div>
 
           <div className="action-btn-section">
