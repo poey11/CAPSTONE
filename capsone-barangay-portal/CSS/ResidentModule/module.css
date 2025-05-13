@@ -250,7 +250,8 @@
 .popup-overlay-module-main-res,
 .error-popup-overlay-module-main-res,
 .popup-overlay-module-voters,
-.popup-overlay-module-kasambahay{
+.popup-overlay-module-kasambahay,
+.popup-overlay-module-jobseeker{
   position: fixed;
   top: 13%;
   right: -3px;
@@ -272,7 +273,8 @@
 
   .popup-overlay-module-main-res,
   .popup-overlay-module-voters,
-  .popup-overlay-module-kasambahay{
+  .popup-overlay-module-kasambahay,
+  .popup-overlay-module-jobseeker{
     background: #777575;
   }
 
@@ -282,7 +284,8 @@
 
   .popup-module-main-res,
   .popup-module-voters,
-  .popup-module-kasambahay{
+  .popup-module-kasambahay,
+  .popup-module-jobseeker{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -291,13 +294,15 @@
   
   .popup-overlay-module-main-res.show,
   .popup-overlay-module-voters.show,
-  .popup-overlay-module-kasambahay.show {
+  .popup-overlay-module-kasambahay.show,
+  .popup-overlay-module-jobseeker.show {
     animation: slideIn 0.5s ease-out;
   }
   
   .popup-overlay-module-main-res.hide,
   .popup-overlay-module-voters.hide,
-  .popup-overlay-module-kasambahay.hide {
+  .popup-overlay-module-kasambahay.hide,
+  .popup-overlay-module-jobseeker.hide {
     animation: slideOut 0.5s ease-out;
   }
 
