@@ -123,20 +123,20 @@ export default function EditVoter() {
 
   const confirmSave = async () => {
     setShowSavePopup(false);
-
     setPopupMessage("Changes saved successfully!");
     setShowPopup(true);
+
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
 
     // Hide the popup after 3 seconds
     setTimeout(() => {
       setShowPopup(false);
 
-      router.push("/dashboard/ResidentModule/registeredVoters");
+      router.push(`/dashboard/ResidentModule/registeredVoters?highlight=${docId}`);
     }, 3000);
 
-    // Create a fake event and call handleSubmit
-    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
   };
 
   // Handle form submission
@@ -155,6 +155,8 @@ export default function EditVoter() {
         homeAddress: formData.homeAddress,
         precinctNumber: formData.precinctNumber,
       });
+
+      return docRef.id; // return ID
       
     } catch (err) {
       console.error("Update failed:", err);

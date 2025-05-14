@@ -140,7 +140,14 @@ export default function ViewKasambahay() {
                     ? rangeOfSalaryMap[kasambahayData[field.key]] || "N/A"
                     : field.isBoolean !== undefined
                     ? kasambahayData[field.key] ? "Yes" : "No"
-                    : kasambahayData[field.key] ?? "N/A"}
+                    : field.key === "employerName" && kasambahayData.employerId ? (
+                      <Link
+                        href={`/dashboard/ResidentModule/ViewResident?id=${kasambahayData.employerId}`}
+                        className="employer-link"
+                      >
+                        {kasambahayData[field.key]}
+                      </Link>
+                    ) : kasambahayData[field.key] ?? "N/A"}
               </p>
             </div>
           </div>

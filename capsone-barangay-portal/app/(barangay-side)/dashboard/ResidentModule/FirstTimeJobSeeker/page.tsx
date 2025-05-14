@@ -400,16 +400,18 @@ export default function JobSeekerListModule() {
 
 
       {showPopup && (
-                <div className={`popup-overlay-module show`}>
-                    <div className="popup-module">
+                <div className={`popup-overlay-module-jobseeker show`}>
+                    <div className="popup-module-jobseeker">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                         <p>{popupMessage}</p>
                     </div>
                 </div>
       )}
 
       {showAlertPopup && (
-                        <div className="confirmation-popup-overlay-module">
-                            <div className="confirmation-popup-module">
+                        <div className="confirmation-popup-overlay-module-jobseeker">
+                            <div className="confirmation-popup-module-jobseeker">
+                              <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>{popupMessage}</p>
                                 <div className="yesno-container-module">
                                     <button onClick={() => setshowAlertPopup(false)} className="no-button-module">Continue</button>

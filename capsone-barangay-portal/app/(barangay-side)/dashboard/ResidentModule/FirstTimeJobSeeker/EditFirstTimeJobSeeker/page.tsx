@@ -124,13 +124,14 @@ export default function EditFirstTimeJobSeeker() {
     setPopupMessage("Changes saved successfully!");
     setShowPopup(true);
 
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+
     setTimeout(() => {
       setShowPopup(false);
-      router.push("/dashboard/ResidentModule/FirstTimeJobSeeker");
+      router.push(`/dashboard/ResidentModule/FirstTimeJobSeeker?highlight=${docId}`);
     }, 3000);
-
-    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -166,6 +167,7 @@ export default function EditFirstTimeJobSeeker() {
   
       const docRef = doc(db, "JobSeekerList", id);
       await updateDoc(docRef, updatedData);
+      return docRef.id; // return ID
     } catch (err) {
       console.error(err);
       setError("Failed to update job seeker");
@@ -188,7 +190,7 @@ export default function EditFirstTimeJobSeeker() {
           <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker">First-Time Job Seeker List</Link>
           <span className="chevron">/</span>
         </h1>
-        <h2 className="breadcrumb">Edit First-Time Jobseeker<span className="chevron"></span></h2>
+        <h2 className="breadcrumb">Edit First-Time Job Seeker<span className="chevron"></span></h2>
       </div>
 
       <div className="addresident-page-title-section-1">
@@ -201,7 +203,7 @@ export default function EditFirstTimeJobSeeker() {
             <button onClick={handleBack}>
               <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
             </button>
-            <h1>Edit First-Time Jobseeker</h1>
+            <h1>Edit First-Time Job Seeker</h1>
           </div>
 
           <div className="action-btn-section">
@@ -327,6 +329,7 @@ export default function EditFirstTimeJobSeeker() {
           {showPopup && (
                 <div className={`popup-overlay-add-jobseeker show`}>
                     <div className="popup-add-jobseeker">
+                        <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                         <p>{popupMessage}</p>
                     </div>
                 </div>
@@ -334,6 +337,7 @@ export default function EditFirstTimeJobSeeker() {
           {showErrorPopup && (
                 <div className={`error-popup-overlay-add-jobseeker show`}>
                     <div className="popup-add-jobseeker">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                         <p>{popupErrorMessage}</p>
                     </div>
                 </div>
