@@ -1,7 +1,7 @@
 
 import { db } from "@/app/db/firebase";
 import {getLocalDateTimeString} from "@/app/helpers/helpers";
-import { doc, onSnapshot,collection, setDoc } from "firebase/firestore";
+import { doc, onSnapshot,collection, setDoc, query, where } from "firebase/firestore";
 import { useState,useEffect } from "react";
 import { useSession } from "next-auth/react";
 
@@ -81,7 +81,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     
     useEffect(()=>{
         if(!id) return;
-        const colRef = collection(db, "IncidentReports", id, "GeneratedLetters");
+        const colRef = query(collection(db, "IncidentReports", id, "GeneratedLetters"), where("letterType", "==", "dialogue"));
         const unsubscribe = onSnapshot(colRef, (snapshot) => {
             snapshot.forEach((doc) => {
                 setDialogueLetterData(doc.data());
@@ -89,8 +89,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         });
         return () => unsubscribe();
     },[])
-    console.log(dialogueLetterData);
 
+    
     const handleToggleClick = () => {
         if(!isDialogue) return; 
         setShowDialogueContent(prevState => !prevState);

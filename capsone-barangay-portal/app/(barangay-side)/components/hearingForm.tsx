@@ -1,13 +1,14 @@
 import {  useEffect, useState } from "react";
-import { collection, addDoc, doc, onSnapshot,updateDoc } from "firebase/firestore";
+import { collection, addDoc, doc, onSnapshot,updateDoc,query, orderBy, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 import {getLocalDateTimeString} from "@/app/helpers/helpers";
+import { fill } from "pdf-lib";
 
 interface HearingFormProps {
-    hearingIndex: number;
+    index: number;
     id: string;
-    nosOfGeneration: number;
+    generatedHearingSummons: number;
 }
 
 interface HearingDetails {
@@ -25,14 +26,13 @@ interface HearingDetails {
 }
 
 
-const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGeneration}) => {
+const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSummons, }) => {
     const user = useSession().data?.user;
     const [showHearingContent, setShowHearingContent] = useState(false); // Initially hidden
     const [hearingDetails, setHearingDetails] = useState<HearingDetails[]>([]);
-    const today = getLocalDateTimeString(new Date());
 
     let nos ="";
-    switch (hearingIndex) {
+    switch (index) {
         case 0:
             nos = "First";
             break;
@@ -47,7 +47,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
     }
     const [dialogue, setIsDialogue] = useState(false);
     const [details, setDetails] = useState<HearingDetails>({
-        nosHearing: hearingIndex,
+        nosHearing: index,
         nos: nos,
         minutesOfCaseProceedings: "",
         remarks: "",
@@ -60,8 +60,20 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
         hearingMeetingDateTime: "",
     }); 
     
+    const [summonLetterData, setSummonLetterData] = useState<any[]>([]);
+    useEffect(()=>{
+        if(!id) return;
+        const colRef = query(collection(db, "IncidentReports", id, "GeneratedLetters"), where("letterType", "==", "summon"), orderBy("createdAt", "asc"));
+        const unsubscribe = onSnapshot(colRef, (snapshot) => {
+            const fetchedData = snapshot.docs.map(doc => doc.data());
+            setSummonLetterData(fetchedData);
+        });
+        return () => unsubscribe();
+    },[])
+ 
+
     useEffect(() => { 
-        const docRef = collection(db, "IncidentReports", id, "SummonsMeeting");
+        const docRef = query(collection(db, "IncidentReports", id, "SummonsMeeting"), orderBy("nosHearing", "asc"));
         const unsubscribe = onSnapshot(docRef, (snapshot) => {
             const fetchedDetails = snapshot.docs.map(doc => doc.data());
             setHearingDetails(fetchedDetails as HearingDetails[]);
@@ -78,16 +90,9 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
             
     },[user])
 
-    const [filled, setFilled] = useState(false);
-    useEffect(() => {
-        let j = hearingIndex;
-        for (let i = 0; i < hearingDetails.length; i++) {
-          if (j === hearingDetails[i].nosHearing) {
-            setDetails(hearingDetails[i]);
-            setFilled(hearingDetails[i].filled);
-          }
-        }
-      }, [hearingDetails] );
+
+
+      
 
       useEffect(() => { 
         const docRef = doc(db, "IncidentReports", id, "DialogueMeeting", id);
@@ -102,13 +107,13 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
         return () => unsubscribe(); 
     }, [])
 
-    const [hearing, setHearing] = useState(0);
+    const [data, setData] = useState<any>({});  
     useEffect(() => {
         const docRef = doc(db, "IncidentReports", id);
         const unsubscribe = onSnapshot(docRef, (doc) => {
             if (doc.exists()) {
                 const data = doc.data();
-                setHearing(data.nosHearing || 0); 
+                setData(data); 
             } else {
                 console.log("No such document!");
             }
@@ -149,13 +154,16 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
     
     
   
+    const prevFilledHearing = hearingDetails[index - 1]?.filled || false;
     const handleToggleClick = () => {
-        // if(hearingDetails.length < hearingIndex) return;
-        // if(nosOfGeneration < 1 || !dialogue) return;
-        // if(nosOfGeneration <= hearingIndex) return;
+        if(index === 0 && generatedHearingSummons === 0 || !dialogue) return;
+        if( index !== 0 && (index >= generatedHearingSummons||!prevFilledHearing)) return;
+        
+        
         setShowHearingContent(prev => !prev);
     };
-    
+   
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -169,22 +177,20 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                 firstHearingOfficer: details.firstHearingOfficer,
                 secondHearingOfficer: details.secondHearingOfficer,
                 thirdHearingOfficer: details.thirdHearingOfficer,
-                nosHearing: hearingIndex,
+                nosHearing: index,
                 nos: nos,
                 filled: true,
                 hearingMeetingDateTime: details.hearingMeetingDateTime,
                 createdAt: new Date(),
             });
-            console.log("Document written with ID: ", docRef.id);
             
             const UpdateRef = doc(db, "IncidentReports", id,);
             await updateDoc(UpdateRef, {
-            ...(hearing !=3   && { nosHearing: hearing + 1 })
+            ...(data?.hearing !=3   && { hearing: data?.hearing + 1 })
             });
         } catch (error:any) {
             console.error("Error saving data:", error.message);
         }
-        console.log("Form submitted:", details);
     }
   
     return (
@@ -193,12 +199,12 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                 <div className="title-section-edit">
                     <button type="button" className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
                 <h1>{nos} Hearing Section</h1>
-                {(nosOfGeneration < 1 || !dialogue) && (
+                {(index === 0 && (generatedHearingSummons === 0 || !dialogue)) && (
                     <span className="text-red-500 ml-4">
                         In order to fill up the current Hearing Section, you must fill up the Dialogue Letter and/or also generate a Summons Letter
                     </span>
                 )}
-                {(hearingDetails.length < hearingIndex || nosOfGeneration < hearingIndex) && (
+                {( index !== 0 && (index >= generatedHearingSummons||!prevFilledHearing) ) && (
                   <span className="text-red-500 ml-4">
                   In order to fill up the current Hearing Section, you must fill up the previous Hearing and/or also generate a Summons Letter
                   </span>
@@ -217,6 +223,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                                 className="search-bar-edit" 
                                 name="hearingMeetingDateTime"
                                 id="hearingMeetingDateTime"
+                                value={summonLetterData[index]?.DateTimeOfMeeting||""}
                                 disabled
                             />
                         </div>
@@ -226,8 +233,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                                   <div className="input-group-edit">
                                         <input type="text" 
                                         className="search-bar-edit" 
-                                        name="complainant.firstName"
-                                        id="complainant.firstName"
+                                        value={`${data.complainant.fname} ${data.complainant.lname} `|| ""}
                                         disabled/>
                                   </div>
                               </div>
@@ -239,8 +245,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                                 <div className="input-group-edit">
                                         <input type="text" 
                                         className="search-bar-edit" 
-                                        name="respondent.firstName"
-                                        id="respondent.firstName"
+                                        value={`${data.respondent.fname} ${data.respondent.lname} `|| ""}
                                         disabled
                                         />
                                   </div>
@@ -254,10 +259,10 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                             placeholder="Enter Minutes of Case Proceedings" 
                             name="minutesOfCaseProceedings"
                             id="minutesOfCaseProceedings"
-                            value={details.minutesOfCaseProceedings||""}
+                            value={details.minutesOfCaseProceedings||hearingDetails[index]?.minutesOfCaseProceedings||""}
                             onChange={handleChange}
-                            onFocus={filled ? (e => e.target.blur()):(() => {}) }
-                            required={!filled}
+                            onFocus={hearingDetails[index]?.filled||false ? (e => e.target.blur()):(() => {}) }
+                            required={!hearingDetails[index]?.filled||false}
                             rows={13}/>
                       </div>
                   </div>
@@ -269,11 +274,11 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                             placeholder="Enter Party A" 
                             name="partyA"
                             id="partyA"
-                            value={details.partyA||""}
+                            value={details.partyA||hearingDetails[index]?.partyA||""}
                             onChange={handleChange}
                             rows={10}
-                            onFocus={filled ? (e => e.target.blur()):(() => {}) }
-                            required={!filled}
+                            onFocus={hearingDetails[index]?.filled||false ? (e => e.target.blur()):(() => {}) }
+                            required={!hearingDetails[index]?.filled||false}
                             />
                       </div>
                       <div className="fields-section-edit">
@@ -282,11 +287,12 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                             placeholder="Enter Party"
                             id="partyB"
                             name="partyB"
-                            value={details.partyB||""}
+                            value={details.partyB||hearingDetails[index]?.partyB||""}
                             onChange={handleChange}
                             rows={10}
-                            onFocus={filled ? (e => e.target.blur()):(() => {}) }
-                            required={!filled}/>
+                            onFocus={hearingDetails[index]?.filled||false ? (e => e.target.blur()):(() => {}) }
+                            required={!hearingDetails[index]?.filled||false}
+                            />
                       </div>
 
                   </div>
@@ -296,12 +302,13 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                             <textarea className="description-edit resize-none" 
                             name="remarks"
                             id="remarks"
-                            value={details.remarks||""}
+                            value={details.remarks||hearingDetails[index]?.remarks||""}
+                            onFocus={hearingDetails[index]?.filled||false ? (e => e.target.blur()):(() => {}) }
+                            required={!hearingDetails[index]?.filled||false}
                             onChange={handleChange}
                             placeholder="Enter Remarks" 
                             rows={10}
-                            onFocus={filled ? (e => e.target.blur()):(() => {}) }
-                            required={!filled}/>
+                            />
                       </div>
                       <div className="fields-section-edit">
                             <p>First Hearing Officer</p>
@@ -319,28 +326,28 @@ const HearingForm: React.FC<HearingFormProps> = ({ hearingIndex, id, nosOfGenera
                             <input type="text" 
                             name="secondHearingOfficer"
                             id="secondHearingOfficer"
-                            value={details.secondHearingOfficer||""}
+                            value={details.secondHearingOfficer||hearingDetails[index]?.secondHearingOfficer||""}
                             onChange={handleChange}
                             className="search-bar-edit" 
                             placeholder="Enter Hearing Officer"
-                            disabled={filled ? true : false}
+                            disabled={hearingDetails[index]?.filled||false}
                             />
 
                             <p>Third Hearing Officer</p>
                             <input type="text" 
                             name="thirdHearingOfficer"
                             id="thirdHearingOfficer"
-                            value={details.thirdHearingOfficer||""}
+                            value={details.thirdHearingOfficer||hearingDetails[index]?.thirdHearingOfficer||""}
                             onChange={handleChange}
                             className="search-bar-edit" 
+                            disabled={hearingDetails[index]?.filled||false}
                             placeholder="Enter Hearing Officer"
-                            disabled={filled ? true : false}
                             />
                       </div>
 
                   </div>
                   <div className="flex justify-center items-center mt-10">
-                        {!filled && (<button type="submit" className="action-view-edit">Save</button>)}
+                        {!hearingDetails[index]?.filled && (<button type="submit" className="action-view-edit">Save</button>)}
                   </div>
                 </form>
             </>

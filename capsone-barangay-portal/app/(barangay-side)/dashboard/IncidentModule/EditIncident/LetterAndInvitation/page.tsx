@@ -60,7 +60,6 @@ export default function GenerateDialougeLetter() {
         fetchStaffList();
     },[]);
 
-    console.log(listOfStaffs);
     useEffect(() => {
         if(!docId) return;
         try {
@@ -115,8 +114,8 @@ export default function GenerateDialougeLetter() {
         return () => unsubscribe();
 
     }, []);
-    let nosHearing = userInfo?.nosHearing;
-    let nosOfGeneration = userInfo?.nosOfGeneration || 0; 
+    let hearing = userInfo?.hearing;
+    let generatedHearingSummons = userInfo?.generatedHearingSummons || 0; 
     
     useEffect(() => {
         if (userInfo) {
@@ -136,7 +135,8 @@ export default function GenerateDialougeLetter() {
         }
     }, [userInfo]);
   
-
+    console.log("otherinfo",otherInfo);
+    console.log("userinfo",userInfo);
     const handleAddLupon = () => {
       router.back();
     };
@@ -321,15 +321,15 @@ export default function GenerateDialougeLetter() {
         const issueMonth = monthNames[issueMonthIndex];
         const issueYear = dayToday.split("T")[0].split("-")[0];
         
-        let nosHearingB ="";
-        if(nosHearing == 0 ){ 
-            nosHearingB = "First";
+        let hearingB ="";
+        if(hearing == 0 ){ 
+            hearingB = "First";
         }
-        else if (nosHearing == 1){
-            nosHearingB = "Second";
+        else if (hearing == 1){
+            hearingB = "Second";
         }
-        else if (nosHearing == 2){
-            nosHearingB = "Third";
+        else if (hearing == 2){
+            hearingB = "Third";
         }
        
         
@@ -347,7 +347,7 @@ export default function GenerateDialougeLetter() {
                     "Text2":otherInfo.complainant.address,
                     "Text3":otherInfo.respondent.fname,
                     "Text4":otherInfo.respondent.address,
-                    "Text5":nosHearingB,//make it dynamic
+                    "Text5":hearingB,//make it dynamic
                     "Text6": `${month} ${day}, ${year}`,//Month Day, Year
                     "Text7":day,//Day
                     "Text8":`${month} ${year}`,//MonthYear
@@ -405,15 +405,8 @@ export default function GenerateDialougeLetter() {
         try {
             if(!docId) throw new Error("Document ID is undefined");
 
-            // const docRef = doc(db, "IncidentReports", docId);
-            // const updates = {
-            //     ...(nosHearing !=2 && {nosHearing: nosHearing+1}),
-            //     nosOfGeneration: nosOfGeneration+1,
-            // };
-            //await updateDoc(docRef, updates);
-
             const docRefB = (collection(db, "IncidentReports", docId, "GeneratedLetters"))
-            console.log(nosHearing);
+            console.log(hearing);
             await addDoc(docRefB, {
                 createdAt: new Date(),
                 createdBy: user?.fullName,
@@ -422,8 +415,15 @@ export default function GenerateDialougeLetter() {
                 DateTimeOfMeeting: otherInfo.DateTimeOfMeeting,
                 LuponStaff: otherInfo.LuponStaff,
                 DateFiled: otherInfo.DateFiled,                
-               hearingNumber: nosHearing
+               hearingNumber: hearing
             });
+
+            const docRef = doc(db, "IncidentReports", docId);
+            const updates = {
+                    ...(hearing !== 3 && { hearing: hearing + 1 }),
+                generatedHearingSummons: generatedHearingSummons + 1,
+            };
+            await updateDoc(docRef, updates);
 
         }
         catch (error: string|any) {
@@ -464,21 +464,20 @@ export default function GenerateDialougeLetter() {
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => { 
         const { name, value } = e.target;
-        const keys = name.split("."); // Split "complainant.fname" into ["complainant", "fname"]
+        const keys = name.split("."); 
     
         setOtherInfo((prev) => {
             if (keys.length === 2) {
-                // If name is like "complainant.fname", update the nested object
                 const [parentKey, childKey] = keys;
                 return {
                     ...prev,
                     [parentKey]: {
-                        ...(prev[parentKey as keyof typeof prev] as object), // Copy existing object
-                        [childKey]: value // Update the specific field
+                        ...(prev[parentKey as keyof typeof prev] as object), 
+                        [childKey]: value 
                     }
                 };
             }
-            return { ...prev, [name]: value }; // Default case for non-nested values
+            return { ...prev, [name]: value };
         });
     };
     
@@ -516,7 +515,7 @@ export default function GenerateDialougeLetter() {
         <div className="main-content">
             <div className="section-1">
                 <button type="button" className="back-button" onClick={handleAddLupon}></button>
-                {actionId === "summon" ? <p className="NewOfficial">Summon Letter ({nosHearing} Hearing)</p> : <p className="NewOfficial">Dialouge Letter</p>}
+                {actionId === "summon" ? <p className="NewOfficial">Summon Letter ({hearing} Hearing)</p> : <p className="NewOfficial">Dialouge Letter</p>}
 
              </div>
 
@@ -677,7 +676,8 @@ export default function GenerateDialougeLetter() {
                         </div>
                     </div>
                 
-                </>) : (<>
+                </>) : 
+                (<>
                     <div className="bars">
                         <div className="input-group">
                             <p>Date of Delivery</p>
@@ -743,7 +743,7 @@ export default function GenerateDialougeLetter() {
                 </>)}
                     
                     <div className="section-4">
-                        {(nosOfGeneration < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
+                        {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                         {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                         <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button>
                     </div>

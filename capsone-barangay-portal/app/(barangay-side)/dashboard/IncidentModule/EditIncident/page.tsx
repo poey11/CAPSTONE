@@ -380,11 +380,6 @@ const confirmSubmit = async () => {
 
 
 
-
-console.log("Report Data:", reportData?.nosHearing);
- 
-
-
   return (
     <>
       {loading ? (       <p></p> ) : (
@@ -847,8 +842,8 @@ console.log("Report Data:", reportData?.nosHearing);
       </div>
       </form>
         <Dialogue  id={docId || ""} complainantName={`${reportData.complainant.fname} ${reportData.complainant.lname}`} respondentName={`${reportData.respondent.fname} ${reportData.respondent.lname}`}/>
-        {Array.from({ length: reportData.nosHearing }, (_, i) => (
-          <Hearing key={i}  hearingIndex={i} nosOfGeneration={reportData?.nosOfGeneration} id={docId||""}/>
+        {Array.from({ length: reportData.hearing }, (_, i) => (
+          <Hearing key={i}  index={i} generatedHearingSummons={reportData?.generatedHearingSummons} id={docId||""}/>
         ))}
 
 

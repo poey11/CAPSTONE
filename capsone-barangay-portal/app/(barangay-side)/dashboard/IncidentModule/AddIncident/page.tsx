@@ -192,8 +192,8 @@ export default function AddIncident() {
             department: departmentId,
             staffId: user?.id,
             isDialogue: false,
-            nosHearing:1,
-            nosOfGeneration:0,
+            hearing:1,
+            generatedHearingSummons:0,
             createdAt: new Date(),
             ...(departmentId === "GAD" && { 
               nosofMaleChildren: reportInfo.nosofMaleChildren,
