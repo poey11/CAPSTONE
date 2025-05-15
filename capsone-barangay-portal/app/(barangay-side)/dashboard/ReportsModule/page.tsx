@@ -27,6 +27,14 @@ const ReportsPage = () => {
   const [loadingEastResident, setLoadingEastResident] = useState(false);
   const [loadingWestResident, setLoadingWestResident] = useState(false);    
   const [loadingSouthResident, setLoadingSouthResident] = useState(false);  
+  const [loadingRegistrationSummary, setLoadingRegistrationSummary] = useState(false);  
+
+  // for resident demographic reports
+  const [loadingResidentSeniorDemographic, setLoadingResidentSeniortDemographic] = useState(false);  
+  const [loadingResidentStudentDemographic, setLoadingResidentStudentDemographic] = useState(false);  
+  const [loadingResidentPWDDemographic, setLoadingResidentPWDDemographic] = useState(false);  
+  const [loadingResidentSoloParentDemographic, setLoadingResidentSoloParentDemographic] = useState(false);  
+  
 
 
   const [files, setFiles] = useState<FileData[]>([]);
@@ -496,6 +504,169 @@ const ReportsPage = () => {
   
 
   // all residents
+
+  const generateResidentRegistrationSummary = async () => {
+    setLoadingRegistrationSummary(true);
+  try {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = currentDate.toLocaleString("default", { month: "long" });
+    const reportTitle = `RESIDENT REGISTRATION SUMMARY - ${month.toUpperCase()} ${year}`;
+
+    const residentRef = collection(db, "Residents");
+
+    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+    const q = query(
+      residentRef,
+      where("createdAt", ">=", startOfMonth),
+      where("createdAt", "<=", endOfMonth)
+    );
+
+    const querySnapshot = await getDocs(q);
+    let residents = querySnapshot.docs.map((doc) => doc.data());
+
+    if (residents.length === 0) {
+      alert("No residents registered this month.");
+      setLoadingRegistrationSummary(false);
+      return;
+    }
+
+    residents.sort((a, b) => {
+      const lastA = (a.lastName || "").trim().toUpperCase();
+      const lastB = (b.lastName || "").trim().toUpperCase();
+      const firstA = (a.firstName || "").trim().toUpperCase();
+      const firstB = (b.firstName || "").trim().toUpperCase();
+      const addressA = (a.address || "").trim().toUpperCase();
+      const addressB = (b.address || "").trim().toUpperCase();
+
+      if (lastA === lastB) {
+        if (firstA === firstB) {
+          return addressA.localeCompare(addressB);
+        }
+        return firstA.localeCompare(firstB);
+      }
+      return lastA.localeCompare(lastB);
+    });
+
+    const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
+    const url = await getDownloadURL(templateRef);
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(arrayBuffer);
+    const worksheet = workbook.worksheets[0];
+
+    worksheet.getCell("A1").value = reportTitle;
+
+    const dataStartRow = 3;
+    let insertionRow = dataStartRow;
+
+    residents.forEach((resident, index) => {
+      const row = worksheet.getRow(insertionRow);
+      row.height = 55;
+
+      const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
+      const cells = [
+        (index + 1).toString(),
+        fullName,
+        resident.address || "",
+        resident.dateOfBirth || "",
+        resident.placeOfBirth || "",
+        resident.age || "",
+        resident.sex || "",
+        resident.civilStatus || "",
+        resident.occupation || "",
+        resident.contactNumber || "",
+        resident.emailAddress || "",
+        resident.precinctNumber || "",
+      ];
+
+      cells.forEach((value, index) => {
+        row.getCell(index + 1).value = value;
+        row.getCell(index + 1).font = { name: "Calibri", size: 12, bold: false };
+        row.getCell(index + 1).alignment = {
+          horizontal: "center",
+          wrapText: true,
+        };
+        row.getCell(index + 1).border = {
+          top: { style: "medium", color: { argb: "000000" } },
+          bottom: { style: "medium", color: { argb: "000000" } },
+          left: { style: "medium", color: { argb: "000000" } },
+          right: { style: "medium", color: { argb: "000000" } },
+        };
+      });
+
+      row.commit();
+      insertionRow++;
+    });
+
+    const totalRow = worksheet.getRow(insertionRow);
+    worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
+    Object.assign(totalRow.getCell(1), {
+      value: `TOTAL REGISTERED: ${residents.length}`,
+      alignment: { horizontal: "center", vertical: "middle" },
+      font: { name: "Times New Roman", size: 10, bold: false },
+    });
+
+    totalRow.commit();
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const fileName = `Resident_Registration_Summary_${month}_${year}.xlsx`;
+    const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+    await uploadBytes(storageRef, blob);
+
+    const fileUrl = await getDownloadURL(storageRef);
+
+    alert("Resident Registration Summary generated successfully!");
+
+    return fileUrl;
+  } catch (error) {
+    console.error("Error generating summary report:", error);
+    alert("Failed to generate Resident Registration Summary.");
+  } finally {
+    setLoadingRegistrationSummary(false);
+  }
+};
+
+
+  const handleRegistrationSummaryPDF = async () => {
+    setLoadingRegistrationSummary(true);
+    try {
+      const fileUrl = await generateResidentRegistrationSummary();
+      if (!fileUrl) return alert("Failed to generate Excel summary report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+  
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = currentDate.toLocaleString("default", { month: "long" });
+  
+      saveAs(blob, `Resident_Registration_Summary_${month}_${year}.pdf`);
+  
+      alert("Resident Registration Summary successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingRegistrationSummary(false);
+    }
+  };
+  
 
   const generateResidentListReport = async () => {
     setLoadingMasterResident(true);
@@ -1485,11 +1656,23 @@ const ReportsPage = () => {
 
           {selectedModule === "Resident Module" && (
             <>
-              <button onClick={handleGenerateResidentPDF} disabled={loadingMasterResident} className="report-button">
-                {loadingMasterResident ? "Generating..." : "Generate Resident Masterlist"}
+              <button onClick={handleRegistrationSummaryPDF} disabled={loadingRegistrationSummary} className="report-button">
+                {loadingRegistrationSummary ? "Generating..." : "Generate Resident Registration Summary Report"}
               </button>
-              <button onClick={handleGenerateEastResidentPDF} disabled={loadingEastResident} className="report-button">
-                {loadingEastResident ? "Generating..." : "Generate East Resident List"}
+              <button onClick={handleResidentSeniorDemographicPDF} disabled={loadingResidentSeniorDemographic} className="report-button">
+                {loadingResidentSeniorDemographic ? "Generating..." : "Generate Resident Demographic Report(Senior Citizens)"}
+              </button>
+              <button onClick={handleResidentStudentDemographicPDF} disabled={loadingResidentStudentDemographic} className="report-button">
+                {loadingResidentStudentDemographic ? "Generating..." : "Generate Resident Demographic Report(Students/Minors)"}
+              </button> 
+              <button onClick={handleResidentPWDDemographicPDF} disabled={loadingResidentPWDDemographic} className="report-button">
+                {loadingResidentPWDDemographic ? "Generating..." : "Generate Resident Demographic Report(PWD)"}
+              </button>   
+              <button onClick={handleResidentSoloParentDemographicPDF} disabled={loadingResidentSoloParentDemographic} className="report-button">
+                {loadingResidentSoloParentDemographic ? "Generating..." : "Generate Resident Demographic Report(Solo Parents)"}
+              </button>    
+              <button onClick={handleGenerateEastResidentPDF} disabled={loadingResidentSeniorDemographic} className="report-button">
+                {loadingResidentSeniorDemographic ? "Generating..." : "Generate East Resident List"}
               </button>
 
               <button onClick={handleGenerateWestResidentPDF} disabled={loadingWestResident} className="report-button">
