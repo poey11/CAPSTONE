@@ -665,7 +665,7 @@ const ReportsPage = () => {
   
       let residents = querySnapshot.docs
         .map((doc) => doc.data())
-        .filter((resident) => resident.isStudent === true);
+        .filter((resident) => resident.isStudent === true || (resident.age !== undefined && resident.age <= 18));
   
       if (residents.length === 0) {
         alert("No student records found.");
