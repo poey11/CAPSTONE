@@ -186,7 +186,6 @@ export default function GenerateDialougeLetter() {
     }
 
     const sendSMSForSummons = async () => {
-        //dont forget to add respondent contact number
         try{
           const response = await fetch("/api/clickSendApi", {
               method: "POST",
@@ -745,7 +744,7 @@ export default function GenerateDialougeLetter() {
                     <div className="section-4">
                         {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                         {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
-                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button>
+                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
                     </div>
             </div>
            </form>
