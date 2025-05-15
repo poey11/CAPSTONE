@@ -2240,13 +2240,13 @@ const ReportsPage = () => {
                 {loadingResidentSoloParentDemographic ? "Generating..." : "Generate Resident Demographic Report(Solo Parents)"}
               </button>    
               <button onClick={handleGenerateEastResidentPDF} disabled={loadingResidentSeniorDemographic} className="report-button">
-                {loadingEastResident ? "Generating..." : "Generate East Resident List"}
+                {loadingEastResident ? "Generating..." : "Generate East Resident Inhabitant Record"}
               </button>
               <button onClick={handleGenerateWestResidentPDF} disabled={loadingWestResident} className="report-button">
-                {loadingWestResident ? "Generating..." : "Generate West Resident List"}
+                {loadingWestResident ? "Generating..." : "Generate West Resident Inhabitant Record"}
               </button>
               <button onClick={handleGenerateSouthResidentPDF} disabled={loadingSouthResident} className="report-button">
-                {loadingSouthResident ? "Generating..." : "Generate South Resident List"}
+                {loadingSouthResident ? "Generating..." : "Generate South Resident Inhabitant Record"}
               </button>
               <button onClick={handleGenerateKasambahayPDF} disabled={loadingKasambahay} className="report-button">
                 {loadingKasambahay ? "Generating..." : "Generate Kasambahay Masterlist"}
