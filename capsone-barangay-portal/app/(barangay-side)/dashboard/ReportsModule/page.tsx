@@ -2239,6 +2239,9 @@ const ReportsPage = () => {
               <button onClick={handleGenerateSoloParentPDF} disabled={loadingResidentSoloParentDemographic} className="report-button">
                 {loadingResidentSoloParentDemographic ? "Generating..." : "Generate Resident Demographic Report(Solo Parents)"}
               </button>    
+              <button onClick={handleGenerateResidentPDF} disabled={loadingMasterResident} className="report-button">
+                {loadingMasterResident ? "Generating..." : "Generate Master Resident Inhabitant Record"}
+              </button>
               <button onClick={handleGenerateEastResidentPDF} disabled={loadingResidentSeniorDemographic} className="report-button">
                 {loadingEastResident ? "Generating..." : "Generate East Resident Inhabitant Record"}
               </button>
