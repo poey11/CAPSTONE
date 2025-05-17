@@ -11,7 +11,7 @@
   top: 0;
   left: 0;
   gap: 5px;
-  background-color: rgb(242, 238, 238);
+  background-color: #214666;
   border: 1px solid #ddd;
   z-index: 1000;
   overflow-y: auto;
@@ -29,6 +29,8 @@
 .logo-side-bar {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
+  border-bottom:  2px solid #24354C;
+  padding-bottom: 30px;
 }
 
 .logo-image-side-bar{
@@ -40,7 +42,7 @@
 
 
 .module-title:hover {
-  background-color: #D9D9D9;
+  background-color: #24354C;
 }
 
 .module-title:not(:last-child) {
@@ -59,7 +61,7 @@
   justify-content: space-between; 
   align-items: center; 
   padding: 1rem;
-  color: grey;
+  color: #FFFFFF;
   font-size: 17px;
   font-weight: bold;
   text-align: center; 
@@ -68,7 +70,7 @@
 }
 
 .dropdown-button:hover {
-  background-color: #D9D9D9;
+  background-color: #24354C;
 }
 
 
@@ -76,7 +78,7 @@
 .module-title {
   font-size: 17px;
   padding: 1rem;
-  color: grey;
+  color: #FFFFFF;
   font-weight: bold;
   text-align: center;
   width: 100%;
@@ -93,6 +95,7 @@
   width: 13px; 
   height: 13px;
   margin-left: auto;
+  filter: invert(1);
 }
 
 
@@ -121,7 +124,7 @@
 .dropdown-item-brgy {
   padding: 0.75rem 1rem;
   text-align: center;
-  color: grey;
+  color: #2C3E50;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
@@ -130,6 +133,6 @@
 }
 
 .dropdown-item-brgy:hover {
-  background-color: #c3c2c2;
+  background-color: #24354C;
   color: rgb(255, 255, 255);
 }
