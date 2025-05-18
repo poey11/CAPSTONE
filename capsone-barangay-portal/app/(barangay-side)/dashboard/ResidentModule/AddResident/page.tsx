@@ -66,8 +66,11 @@ export default function AddResident() {
   };
 
   const { data: session } = useSession();
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [identificationFile, setIdentificationFile] = useState<File | null>(null);
+  const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
+  const [verificationFiles, setVerificationFiles] = useState<File[]>([]);
+  const [verificationPreviews, setVerificationPreviews] = useState<string[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -131,22 +134,39 @@ export default function AddResident() {
   
   
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  
+  const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFile = e.target.files[0];
   
       // Ensure only one file is processed
-      setFile(selectedFile);
-      setPreview(URL.createObjectURL(selectedFile));
+      setIdentificationFile(selectedFile);
+      setIdentificationPreview(URL.createObjectURL(selectedFile));
   
       // Reset the file input to prevent multiple selections
       e.target.value = "";
     }
   };
+
+  const handleVerificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (e.target.files && e.target.files.length > 0) {
+    const selectedFiles = Array.from(e.target.files);
+    const newPreviews = selectedFiles.map((file) => URL.createObjectURL(file));
+    setVerificationFiles((prev) => [...prev, ...selectedFiles]);
+    setVerificationPreviews((prev) => [...prev, ...newPreviews]);
+    e.target.value = "";
+  }
+};
   
-  const handleFileDelete = () => {
-    setFile(null);
-    setPreview(null);
+
+  const handleIdentificationFileDelete = () => {
+    setIdentificationFile(null);
+    setIdentificationPreview(null);
+  };
+
+  const handleVerificationFileDelete = (index: number) => {
+    setVerificationFiles((prev) => prev.filter((_, i) => i !== index));
+    setVerificationPreviews((prev) => prev.filter((_, i) => i !== index));
   };
   
 
@@ -250,11 +270,21 @@ const confirmSubmit = async () => {
     setError("");
   
     try {
-      let fileURL = "";
-      if (file) {
-        const storageRef = ref(storage, `ResidentsFiles/${file.name}`);
-        await uploadBytes(storageRef, file);
-        fileURL = await getDownloadURL(storageRef);
+      let verificationFilesURLs: string[] = [];
+      if (verificationFiles.length > 0) {
+        for (const file of verificationFiles) {
+          const storageRef = ref(storage, `ResidentsFiles/${file.name}`);
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+          verificationFilesURLs.push(url);
+        }
+      }
+
+      let identificationFileURL = "";
+      if (identificationFile) {
+        const storageRef = ref(storage, `ResidentsFiles/${identificationFile.name}`);
+        await uploadBytes(storageRef, identificationFile);
+        identificationFileURL = await getDownloadURL(storageRef);
       }
   
       // Fetch the highest residentNumber
@@ -270,21 +300,14 @@ const confirmSubmit = async () => {
       }
 
       const currentDate = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
-  
-      // Add the new resident with an incremented residentNumber
-      /*await addDoc(residentsRef, {
-        ...formData,
-        residentNumber: newResidentNumber,
-        createdAt: currentDate,
-        fileURL,
-        createdBy: session?.user?.position || "Unknown",
-      });*/
+
 
       const docRef = await addDoc(residentsRef, {
         ...formData,
         residentNumber: newResidentNumber,
         createdAt: currentDate,
-        fileURL,
+        verificationFilesURLs,
+        identificationFileURL,
         createdBy: session?.user?.position || "Unknown",
       });
       return docRef.id; // return ID
@@ -312,348 +335,401 @@ const [activeSection, setActiveSection] = useState("basic");
 
   return (
       <main className="add-resident-main-container">
-        <div className="path-section">
-          <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
-          <h1 className="breadcrumb">
-            <Link href="/dashboard/ResidentModule">Main Residents</Link>
-            <span className="chevron">/</span>
-          </h1>
-          <h2 className="breadcrumb">Add Resident<span className="chevron"></span></h2>
-        </div>
+        <div className="add-resident-main-header">
 
-        <div className="addresident-page-title-section-1">
-          <h1>Main Residents</h1>
+          <div className="path-section">
+            <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
+            <h1 className="breadcrumb">
+              <Link href="/dashboard/ResidentModule">Main Residents</Link>
+              <span className="chevron">/</span>
+            </h1>
+            <h2 className="breadcrumb">Add Resident<span className="chevron"></span></h2>
+          </div>
+
+          <div className="addresident-page-title-section-1">
+            <h1>Main Residents</h1>
+          </div>
+
         </div>
         
+
+        
+        
       
-          <div className="add-resident-main-content ">
+          <div className="add-resident-main-content">
 
-          <div className="add-resident-main-section1">
-            <div className="add-resident-main-section1-left">
-              <button onClick={handleBack}>
-                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
-              </button>
+            <div className="add-resident-main-section1">
+              <div className="add-resident-main-section1-left">
+                <button onClick={handleBack}>
+                  <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                </button>
 
-              <h1> New Resident </h1>
+                <h1> New Resident </h1>
+              </div>
+
+              <div className="action-btn-section">
+                {/*<button className="action-view" type="submit" form="addResidentForm" disabled={loading}>*/}
+                <button className="action-view"  onClick={handleSubmitClick} disabled={loading}>
+                  {loading ? "Saving..." : "Save"}
+                </button>
+              </div>
+              
             </div>
-
-            <div className="action-btn-section">
-              {/*<button className="action-view" type="submit" form="addResidentForm" disabled={loading}>*/}
-              <button className="action-view"  onClick={handleSubmitClick} disabled={loading}>
-                {loading ? "Saving..." : "Save"}
-              </button>
-            </div>
-            
-          </div>
           
-          <hr/>
+
+            <div className="add-resident-bottom-section">
+                <nav className="info-toggle-wrapper">
+                  {["basic", "full", "others"].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "basic" && "Basic Info"}
+                      {section === "full" && "Full Info"}
+                      {section === "others" && "Others"}
+                    </button>
+                  ))}
+                </nav>
 
 
-      <nav className="info-toggle-wrapper">
-        {["basic", "full", "others"].map((section) => (
-          <button
-            key={section}
-            type="button"
-            className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-            onClick={() => setActiveSection(section)}
-          >
-            {section === "basic" && "Basic Info"}
-            {section === "full" && "Full Info"}
-            {section === "others" && "Others"}
-          </button>
-        ))}
-      </nav>
 
+                <div className="add-resident-bottom-section-scroll">
 
+                  <form id="addResidentForm" onSubmit={handleSubmit} className="add-resident-section-2">
+                    {/* Left Side - Resident Form */}
 
-          <form id="addResidentForm" onSubmit={handleSubmit} className="add-resident-section-2">
-            {/* Left Side - Resident Form */}
+                    {activeSection === "basic" && (
+                        <>
+                          <div className="add-main-resident-section-2-left-side">
+                              <div className="fields-section">
+                                <p>Last Name<span className="required">*</span></p>
+                                <input
+                                  type="text"
+                                  className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`}
+                                  placeholder="Enter Last Name"
+                                  name="lastName"
+                                  value={formData.lastName}
+                                  onChange={handleChange}
+                                  required
+                                />
+                              </div>
 
+                              <div className="fields-section">
+                                <p>First Name<span className="required">*</span></p>
+                                <input
+                                  type="text"
+                                  className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`}
+                                  placeholder="Enter First Name"
+                                  name="firstName"
+                                  value={formData.firstName}
+                                  onChange={handleChange}
+                                  required
+                                />
+                              </div>
 
-    
-         {activeSection === "basic" && (
-            <>
-              <div className={`add-main-resident-section-2-left-side ${!activeSection ? "compact-mode" : ""}`}>
-                <div className="fields-container">
-                  <div className="fields-section">
-                    <p>Last Name<span className="required">*</span></p>
-                    <input
-                      type="text"
-                      className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`}
-                      placeholder="Enter Last Name"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
+                              <div className="fields-section">
+                                <p>Middle Name</p>
+                                <input
+                                  type="text"
+                                  className="add-resident-input-field"
+                                  placeholder="Enter Middle Name"
+                                  name="middleName"
+                                  value={formData.middleName}
+                                  onChange={handleChange}
+                                />
+                              </div>
+                       
+                          </div>
 
-                  <div className="fields-section">
-                    <p>First Name<span className="required">*</span></p>
-                    <input
-                      type="text"
-                      className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`}
-                      placeholder="Enter First Name"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
+                          <div className="add-main-resident-section-2-right-side">
+                            
+                              <div className="fields-section">
+                                <p>Sex<span className="required">*</span></p>
+                                <select
+                                  name="sex"
+                                  className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
+                                  value={formData.sex}
+                                  onChange={handleChange}
+                                  required>
+                                  <option value="" disabled>Choose Gender</option>
+                                  <option value="Male">Male</option>
+                                  <option value="Female">Female</option>
+                                </select>
+                              </div>
 
-              <div className="add-main-resident-section-2-right-side">
-                <div className="fields-container">
-                  <div className="fields-section">
-                    <p>Middle Name</p>
-                    <input
-                      type="text"
-                      className="add-resident-input-field"
-                      placeholder="Enter Middle Name"
-                      name="middleName"
-                      value={formData.middleName}
-                      onChange={handleChange}
-                    />
-                  </div>
+                              <div className="fields-section">
+                                    <p>Address<span className="required">*</span></p>
+                                    <input 
+                                      type="text"
+                                      className={`add-resident-input-field ${invalidFields.includes("address") ? "input-error" : ""}`}
+                                      placeholder="Enter Address"
+                                      name="address"
+                                      value={formData.address}
+                                      onChange={handleChange}
+                                      required />
+                              </div>
 
-                  <div className="fields-section">
-                    <p>Sex<span className="required">*</span></p>
-                    <select
-                      name="sex"
-                      className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
-                      value={formData.sex}
-                      onChange={handleChange}
-                      required>
-                      <option value="" disabled>Choose Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
+                              <div className="fields-section">
+                                    <p>Date of Birth<span className="required">*</span></p>
+                                    <input 
+                                      type="date"
+                                      className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
+                                      name="dateOfBirth"
+                                      value={formData.dateOfBirth}
+                                      onChange={handleChange}
+                                      max={new Date().toISOString().split("T")[0]}
+                                      required />
+                                  </div>
 
-
-            
-
-
-          {activeSection === "full" && (
-            <>
-
-               <div className="add-main-resident-section-2-left-side">
-
-                    <div className="fields-section">
-                        <p>Address<span className="required">*</span></p>
-                        <input 
-                          type="text"
-                          className={`add-resident-input-field ${invalidFields.includes("address") ? "input-error" : ""}`}
-                          placeholder="Enter Address"
-                          name="address"
-                          value={formData.address}
-                          onChange={handleChange}
-                          required />
-                      </div>
-
-                      <div className="fields-section">
-                        <p>Location<span className="required">*</span></p>
-                        <select
-                          name="generalLocation"
-                          className={`add-resident-input-field ${invalidFields.includes("generalLocation") ? "input-error" : ""}`}
-                          value={formData.generalLocation}
-                          onChange={handleChange}
-                          required
-                        >
-                          <option value="" disabled>Choose Part of Fairview</option>
-                          <option value="East Fairview">East Fairview</option>
-                          <option value="West Fairview">West Fairview</option>
-                          <option value="South Fairview">South Fairview</option>
-                        </select>
-                      </div>
-
-                      {formData.generalLocation && (
-                        <div className="fields-section">
-                          <p>Cluster/Section<span className="required">*</span></p>
-                          <select
-                            name="cluster"
-                            className={`add-resident-input-field ${invalidFields.includes("cluster") ? "input-error" : ""}`}
-                            value={formData.cluster || ""}
-                            onChange={handleChange}
-                            required
-                          >
-                            <option value="" disabled>Choose HOA/Sitio</option>
-                            {clusterOptions[formData.generalLocation].map((option, index) => (
-                              <option key={index} value={option}>
-                                {option}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                              
+                          </div>
+                        </>
                       )}
 
-                      <div className="fields-section">
-                        <p>Place of Birth</p>
-                        <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} />
-                      </div>
-                      
-                      <div className="fields-section">
-                        <p>Date of Birth<span className="required">*</span></p>
-                        <input 
-                          type="date"
-                          className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
-                          name="dateOfBirth"
-                          value={formData.dateOfBirth}
-                          onChange={handleChange}
-                          max={new Date().toISOString().split("T")[0]}
-                          required />
-                      </div>
-                      
-                        
-                      <div className="fields-section">
-                        <p>Age<span className="required">*</span></p>
-                        <input 
-                          type="number"
-                          className={`add-resident-input-field ${invalidFields.includes("age") ? "input-error" : ""}`}
-                          placeholder="Enter Age"
-                          name="age"
-                          value={formData.age}
-                          onChange={handleChange}
-                          readOnly />
-                      </div>
-               </div>
+                      {activeSection === "full" && (
+                        <>
+                          <div className="add-main-resident-section-2-left-side">
+                              <div className="fields-section">
+                                <p>Age<span className="required">*</span></p>
+                                <input 
+                                  type="number"
+                                  className={`add-resident-input-field ${invalidFields.includes("age") ? "input-error" : ""}`}
+                                  placeholder="Enter Age"
+                                  name="age"
+                                  value={formData.age}
+                                  onChange={handleChange}
+                                  readOnly />
+                               </div>
+
+                               <div className="fields-section">
+                                    <p>Location<span className="required">*</span></p>
+                                    <select
+                                      name="generalLocation"
+                                      className={`add-resident-input-field ${invalidFields.includes("generalLocation") ? "input-error" : ""}`}
+                                      value={formData.generalLocation}
+                                      onChange={handleChange}
+                                      required
+                                    >
+                                      <option value="" disabled>Choose Part of Fairview</option>
+                                      <option value="East Fairview">East Fairview</option>
+                                      <option value="West Fairview">West Fairview</option>
+                                      <option value="South Fairview">South Fairview</option>
+                                    </select>
+                                </div>
+
+                                  {formData.generalLocation && (
+                                    <div className="fields-section">
+                                      <p>Cluster/Section<span className="required">*</span></p>
+                                      <select
+                                        name="cluster"
+                                        className={`add-resident-input-field ${invalidFields.includes("cluster") ? "input-error" : ""}`}
+                                        value={formData.cluster || ""}
+                                        onChange={handleChange}
+                                        required
+                                      >
+                                        <option value="" disabled>Choose HOA/Sitio</option>
+                                        {clusterOptions[formData.generalLocation].map((option, index) => (
+                                          <option key={index} value={option}>
+                                            {option}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  )}
+
+                                  <div className="fields-section">
+                                    <p>Place of Birth</p>
+                                    <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} />
+                                  </div>
+                                
+
+                                  <div className="fields-section">
+                                    <p>Civil Status<span className="required">*</span></p>
+                                    <select 
+                                      name="civilStatus"
+                                      className={`add-resident-input-field ${invalidFields.includes("civilStatus") ? "input-error" : ""}`}
+                                      value={formData.civilStatus}
+                                      onChange={handleChange}
+                                      required>
+                                      <option value="" disabled>Choose Civil Status</option>
+                                      <option value="Single">Single</option>
+                                      <option value="Married">Married</option>
+                                      <option value="Widowed">Widowed</option>
+                                      <option value="Divorced">Divorced</option>
+                                      <option value="Separated">Separated</option>
+                                    </select>
+                                  </div>
+                                  
+                                    
+            
+                          </div>
 
 
-                <div className="add-main-resident-section-2-right-side">
-                    
-                      
-          
-                      <div className="fields-section">
-                        <p>Civil Status<span className="required">*</span></p>
-                        <select 
-                          name="civilStatus"
-                          className={`add-resident-input-field ${invalidFields.includes("civilStatus") ? "input-error" : ""}`}
-                          value={formData.civilStatus}
-                          onChange={handleChange}
-                          required>
-                          <option value="" disabled>Choose Civil Status</option>
-                          <option value="Single">Single</option>
-                          <option value="Married">Married</option>
-                          <option value="Widowed">Widowed</option>
-                          <option value="Divorced">Divorced</option>
-                          <option value="Separated">Separated</option>
-                        </select>
-                      </div>
+                            <div className="add-main-resident-section-2-right-side">
+                                  <div className="fields-section">
+                                    <p>Occupation</p>
+                                    <input type="text" className="add-resident-input-field" placeholder="Enter Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
+                                  </div>
+                                  
+                                  <div className="fields-section">
+                                    <p>Contact Number<span className="required">*</span></p>
+                                    <input 
+                                      type="tel" 
+                                      className={`add-resident-input-field ${invalidFields.includes("contactNumber") ? "input-error" : ""}`}
+                                      name="contactNumber"
+                                      value={formData.contactNumber}
+                                      onChange={(e) => {
+                                        const input = e.target.value;
+                                        if (/^\d{0,11}$/.test(input)) {
+                                          setFormData({ ...formData, contactNumber: input });
+                                        }
+                                      }}
+                                      pattern="^[0-9]{11}$" 
+                                      placeholder="Enter 11-digit phone number" 
+                                    />
+                                  </div>
 
-                      <div className="fields-section">
-                        <p>Occupation</p>
-                        <input type="text" className="add-resident-input-field" placeholder="Enter Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
-                      </div>
-                      
-                      <div className="fields-section">
-                        <p>Contact Number<span className="required">*</span></p>
-                        <input 
-                          type="tel" 
-                          className={`add-resident-input-field ${invalidFields.includes("contactNumber") ? "input-error" : ""}`}
-                          name="contactNumber"
-                          value={formData.contactNumber}
-                          onChange={(e) => {
-                            const input = e.target.value;
-                            if (/^\d{0,11}$/.test(input)) {
-                              setFormData({ ...formData, contactNumber: input });
-                            }
-                          }}
-                          pattern="^[0-9]{11}$" 
-                          placeholder="Enter 11-digit phone number" 
-                        />
-                      </div>
+                                  <div className="fields-section">
+                                    <p>Email Address</p>
+                                    <input type="email" className="add-resident-input-field" placeholder="Enter Email Address" name="emailAddress" value={formData.emailAddress} onChange={handleChange} />
+                                  </div>
 
-                      <div className="fields-section">
-                        <p>Email Address</p>
-                        <input type="email" className="add-resident-input-field" placeholder="Enter Email Address" name="emailAddress" value={formData.emailAddress} onChange={handleChange} />
-                      </div>
+                                  <div className="fields-section">
+                                    <p>Precinct Number</p>
+                                    <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
+                                  </div> 
+                          </div>
+                        </>
+                      )}
 
-                      <div className="fields-section">
-                        <p>Precinct Number</p>
-                        <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
-                      </div>
-                   
-               </div>
+                      {activeSection === "others" && (
+                        <>
+                          
+                          <div className="add-main-resident-others-mainsection">
 
-           </>
-         )}
+                            <div className="add-main-resident-section-2-top-side">
+                              <div className="box-container-outer-resclassification">
+                                <div className="title-resclassification">
+                                  Resident Classification
+                                </div>
+
+                                <div className="box-container-resclassification">
+                                  <div className="checkbox-container">
+                                    <label className="checkbox-label">
+                                      <input type="checkbox" name="isStudent" checked={formData.isStudent} onChange={handleChange} />
+                                      Student
+                                    </label>
+                                  </div>
+
+                                  <div className="checkbox-container">
+                                    <label className="checkbox-label">
+                                      <input type="checkbox" name="isPWD" checked={formData.isPWD} onChange={handleChange} />
+                                      PWD
+                                    </label>
+                                  </div>
+
+                                  <div className="checkbox-container">
+                                    <label className="checkbox-label">
+                                      <input type="checkbox" name="isSoloParent" checked={formData.isSoloParent} onChange={handleChange} />
+                                      Solo Parent
+                                    </label>
+                                  </div>  
+                                </div>
+                              </div> 
+                            </div>
 
 
-         
-          {activeSection === "others" && (
-              <>
-              
-                  <div className="add-main-resident-section-2-left-side">
-              <div className="checkboxes-container">
+                            <div className="add-main-resident-section-2-bottom-side">
 
-                <h3 className="checkboxes-title"> Resident Classification</h3>
+                            <div className="box-container-outer-resindentificationpic">
+                                <div className="title-resindentificationpic">
+                                  Identification Picture
+                                </div>
 
-                <p>Student</p>
-                <div className="checkbox-container">
-                  <label className="checkbox-label">
-                    <input type="checkbox" name="isStudent" checked={formData.isStudent} onChange={handleChange} />
-                    Is this resident a student?
-                  </label>
+                                <div className="box-container-resindentificationpic">
+
+                                  {/* File Upload Section */}
+                                  <div className="file-upload-container">
+                                      <label htmlFor="identification-file-upload" className="upload-link">Click to Upload File</label>
+                                      <input id="identification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleIdentificationFileChange} />
+
+
+                                      {identificationFile && (
+                                        <div className="file-name-image-display">
+                                          <div className="file-name-image-display-indiv">
+                                            {identificationPreview && <img src={identificationPreview} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />}
+                                            <span>{identificationFile.name}</span>
+                                            <div className="delete-container">
+                                              <button type="button" onClick={handleIdentificationFileDelete} className="delete-button">
+                                                <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                   
+                                </div>
+                              </div> 
+                              
+
+                              <div className="box-container-outer-verificationdocs">
+                                <div className="title-verificationdocs">
+                                  Verification Documents
+                                </div>
+
+                                <div className="box-container-verificationdocs">
+
+                                  {/* File Upload Section */}
+                                  <div className="file-upload-container">
+                                      <label htmlFor="verification-file-upload" className="upload-link">Click to Upload File</label>
+                                      <input id="verification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleVerificationFileChange} />
+
+
+                                      {verificationFiles.length > 0 && (
+                                        <div className="file-name-image-display">
+                                          {verificationFiles.map((file, index) => (
+                                            <div key={index} className="file-name-image-display-indiv">
+                                              {verificationPreviews[index] && (
+                                                <img src={verificationPreviews[index]} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />
+                                              )}
+                                              <span>{file.name}</span>
+                                              <div className="delete-container">
+                                                <button type="button" onClick={() => handleVerificationFileDelete(index)} className="delete-button">
+                                                  <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                                </button>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  
+                                </div>
+                              </div> 
+
+
+
+                              
+                            </div>
+
+
+
+                          </div>    
+                        </>
+                      )}
+                  </form>
                 </div>
+                
 
-                <p>PWD</p>
-                <div className="checkbox-container">
-                  <label className="checkbox-label">
-                    <input type="checkbox" name="isPWD" checked={formData.isPWD} onChange={handleChange} />
-                    Is this resident a person with disability?
-                  </label>
-                </div>
-
-                <p>Solo Parent</p>
-                <div className="checkbox-container">
-                  <label className="checkbox-label">
-                    <input type="checkbox" name="isSoloParent" checked={formData.isSoloParent} onChange={handleChange} />
-                    Is this resident a solo parent?
-                  </label>
-                </div>
-              </div>
-
-              </div>
-
-
-            <div className="add-main-resident-section-2-right-side">
-              {/* File Upload Section */}
-              <div className="file-upload-container">
-                <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
-                <input id="file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleFileChange} />
-
-                {file && (
-                  <div className="file-name-image-display">
-                    <div className="file-name-image-display-indiv">
-                      {preview && <img src={preview} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />}
-                      <span>{file.name}</span>
-                      <div className="delete-container">
-                        <button type="button" onClick={handleFileDelete} className="delete-button">
-                          <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-              
-              </div>
             </div>
               
-              </>
-         )}
 
 
 
-
-
-
-          </form>
+          
 
           {error && <p className="error">{error}</p>}
         </div>
