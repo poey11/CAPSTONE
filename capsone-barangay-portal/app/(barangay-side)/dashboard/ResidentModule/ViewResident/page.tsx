@@ -86,12 +86,15 @@ export default function ViewResident() {
     }
   }, [residentId]);
 
+  const handleBack = () => {
+    window.location.href = "/dashboard/ResidentModule";
+  };
+
+
+  const [activeSection, setActiveSection] = useState("basic");
+
   return (
     <main className="viewresident-main-container">
-
-
-
-
 
 
        <div className="path-section">
@@ -115,7 +118,6 @@ export default function ViewResident() {
                 <img src="/Images/QClogo.png" alt="Barangay Captain" className="logo-image-side-bar-1" />
             </div>
 
-
            <div className="viewresident-header-second-section">
             <h2 className="gov-info">Republic of the Philippines</h2>
             <h2 className="gov-info">Quezon City</h2>
@@ -131,6 +133,34 @@ export default function ViewResident() {
         </div>
 
 
+
+          <div className="view-resident-section-2-header">
+
+              <div className="main-resident-back-section">
+                  <button onClick={handleBack}>
+                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-main-resident"/> 
+              </button>
+              </div>
+                <div className="info-toggle-wrapper">
+                    {["basic", "full", "others"].map((section) => (
+                      <button
+                        key={section}
+                        type="button"
+                        className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                        onClick={() => setActiveSection(section)}
+                      >
+                        {section === "basic" && "Basic Info"}
+                        {section === "full" && "Full Info"}
+                        {section === "others" && "Others"}
+                      </button>
+                    ))}
+                  </div>  
+            </div>
+
+  
+
+
+
      <div className="viewresident-content-body">
         <div className="resident-photo-section">
           <span className="resident-details-label">Resident Details</span>
@@ -138,13 +168,14 @@ export default function ViewResident() {
           <div className="resident-profile-container">
             <img src="/Images/feeding2.jpg" alt="Resident" className="resident-photo" />
             <div className="resident-name-box">
-              <h2 className="resident-name">Justine Anne Rosete</h2>
+              <h2 className="resident-name">Ronda Macapagal</h2>
             </div>
           </div>
         </div>
 
 
           <div className="resident-details-section">
+
 
               <div className="resident-details-container">
                     <div className="resident-details-container-left-side">
@@ -166,9 +197,7 @@ export default function ViewResident() {
 
 
                 
-                
-
-                      
+            
 
                     </div>
 
