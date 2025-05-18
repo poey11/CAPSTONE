@@ -185,7 +185,7 @@ margin:  auto;
 background-color: white;
 overflow: hidden; 
 margin-top: 20px;
-height: 700px;
+height: 80%;
 }
 
 
@@ -195,7 +195,6 @@ height: 700px;
     border-bottom: 2px solid #ddd;
     width: 100%;
     background: #214666;
-    
   }
 
 
@@ -247,65 +246,70 @@ background-color: #214666;
 }
 
 
-  .viewresident-content-body {
-    width: 100%;
-    height: 100%;
-    display: flex;
-  }
 
+/* Main container with fixed height */
+.viewresident-main-content-1 {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  border-radius: 1rem;
+  border: 2px solid #ddd;
+  background-color: white;
+  overflow: hidden;
+  margin: 20px auto;
+  height: 70vh; /* Fixed height relative to viewport */
+}
 
+/* The body that holds photo and details */
+.viewresident-content-body {
+  width: 100%;
+  flex: 1; /* Take remaining space */
+  display: flex;
+  overflow: hidden; /* Prevent body overflow */
+}
 
+/* Left photo section */
 .resident-photo-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-left: 50px;
-  padding-right: 50px;
-  padding-bottom: 50px;
+  padding: 0 50px 50px;
   width: 35%;
-  position: relative;
+  overflow-y: auto; /* optional, in case photo content exceeds */
 }
 
+/* Right section that holds scrollable content */
 .resident-details-section {
   width: 65%;
-    padding-left: 50px;
-  padding-right: 50px;
-  padding-bottom: 50px;
-  position: relative;
+  padding: 0 50px 50px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
+/* The actual scrollable container */
 .resident-details-container {
   border: 1px solid rgba(44, 62, 80, 0.7);
   border-radius: 8px;
-  overflow: hidden;
   background-color: white;
   width: 100%;
-  height: 90%;
+  height: 100%; /* Fill all available height */
   padding: 2rem;
   display: flex;
-  overflow-y: scroll;
-   gap: 2rem; 
+  gap: 2rem;
+  overflow-y: auto; /* ✅ only this scrolls */
 }
 
-.resident-details-container-left-side {
-  display: flex;
-  flex-direction: column;
-  width: 50%;
-  height: auto;
- 
-  
-}
-
-
+.resident-details-container-left-side,
 .resident-details-container-right-side {
   display: flex;
   flex-direction: column;
   width: 50%;
-  height: auto;
-
+  background-color: #007bff;
+  gap: 1rem;
+  padding-right: 1rem;
+  box-sizing: border-box;
 }
-
-
 
 
 
@@ -332,6 +336,8 @@ background-color: #214666;
   top: 12px; /* Pushes it closer to the card */
   z-index: 1;
 }
+
+
 .resident-photo {
   width: 100%;
   height: auto;

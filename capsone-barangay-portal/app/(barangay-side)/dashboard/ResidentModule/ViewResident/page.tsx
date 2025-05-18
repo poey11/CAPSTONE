@@ -178,7 +178,10 @@ export default function ViewResident() {
 
 
               <div className="resident-details-container">
-                    <div className="resident-details-container-left-side">
+             
+            <div className="resident-details-container-left-side">
+               {activeSection === "basic" && (
+                  <> 
                         <div className="fields-section-residents">
                         <p>Resident Number</p>
                         <input type="text" className="main-resident-input-field" name="residentNumber" value={formData.residentNumber} readOnly/>
@@ -195,14 +198,59 @@ export default function ViewResident() {
                     <input type="number" className="main-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} required readOnly/>
                   </div>
 
+                      </>
+                  )}
 
-                
-            
+                   {activeSection === "full" && (
+                  <> 
+                    <div className="fields-section-residents">
+                          <p>Address</p>
+                          <input type="text" className="main-resident-input-field" placeholder="Enter Address" name="address" value={formData.address} readOnly />
+                        </div>
+
+                           <div className="fields-section-residents">
+                            <p>Cluster</p>
+                            <input
+                            type="text"
+                            name="cluster"
+                            className="main-resident-input-field"
+                            value={formData.cluster}
+                            readOnly
+                            />
+                         </div>
+
+                      <div className="fields-section-residents">
+                        <p>Date of Birth</p>
+                        <input type="date" className="main-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth}  max={new Date().toISOString().split("T")[0]} readOnly />
+                      </div>
+
+                      
+                       <div className="fields-section-residents">
+                        <p>Occupation</p>
+                        <input type="text" className="main-resident-input-field" placeholder="Enter Occupation" name="occupation" value={formData.occupation} readOnly />
+                      </div>
+
+                        <div className="fields-section-residents">
+                          <p>Precinct Number</p>
+                          <input type="text" className="main-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber || "N/A"} readOnly />
+                        </div>
+                            
+
+
+                  </>
+                  )}
+
+
+
 
                     </div>
 
                     
                     <div className="resident-details-container-right-side">
+
+
+                      {activeSection === "basic" && (
+                  <> 
 
                       <div className="fields-section-residents">
                         <p>Last Name </p>
@@ -222,10 +270,67 @@ export default function ViewResident() {
                       </div>
                       
 
-                    </div>
+                    </>
+                  )}
 
+
+
+
+
+              {activeSection === "full" && (
+                              <> 
+                   
+                         <div className="fields-section-residents">
+                            <p>Location</p>
+                            <input
+                              type="text"
+                              name="generalLocation"
+                              className="main-resident-input-field"
+                              value={formData.generalLocation}
+                              readOnly
+                            />
+                         </div>
+
+                         
+                      <div className="fields-section-residents">
+                        <p>Place of Birth</p>
+                        <input type="text" className="main-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth}  readOnly />
+                      </div>
+
+                         <div className="fields-section-residents">
+                            <p>Civil Status</p>
+                            <input
+                            type="text"
+                            name="civilStatus"
+                            className="main-resident-input-field"
+                            value={formData.civilStatus}
+                            readOnly
+                            />
+                         </div>
+
+                      <div className="fields-section-residents">
+                        <p>Contact Number</p>
+                        <input type="text" className="main-resident-input-field" placeholder="Contact Numbeere" name="contactNumber" value={formData.contactNumber} readOnly />
+                      </div>
+
+                       <div className="fields-section-residents">
+                        <p>Email Address</p>
+                        <input type="email" className="main-resident-input-field" placeholder="Enter Email Address" name="emailAddress" value={formData.emailAddress} readOnly />
+                      </div>
+                      
+
+                      </>
+                                )}
+
+                   
+                  </div>
+                     
 
               </div>
+
+
+              
+              
           </div>
       </div>
 
