@@ -4,8 +4,10 @@
     height: 100vh;
     background-color: #F0F2F8;
     margin-left: 3rem; 
+    padding-top: 150px;
 }
 
+/*
 .add-resident-main-header{
   background-color: #ffffff;
   border-bottom: 2px solid #ddd;
@@ -13,8 +15,9 @@
   padding-right: 30px;
   padding-top: 15px;
   padding-bottom: 15px;
-}
+}*/
 
+/*
 .addresident-page-title-section-1{
   width: 20%;
   background-color: #2C3E50;
@@ -27,7 +30,7 @@
   font-size: 1.5rem;
   font-weight: bold;
   color: #ffffff;
-}
+}*/
 
 .add-resident-main-content {
     display: flex;
@@ -37,7 +40,7 @@
     border: 2px solid  #ddd;
     margin:  auto; 
     background-color: #ffffff;
-    margin-top: 35px;  
+    /*margin-top: 150px;  */
     overflow: hidden; 
     height: 580px;
 }
@@ -755,6 +758,7 @@ input[type="checkbox"] {
   height: 27px;
 }
 
+/*
 .path-section {
   display: flex;
   gap: 10px;
@@ -781,7 +785,7 @@ input[type="checkbox"] {
 .chevron {
   color: #2C3E50;
   margin-left: 10px;
-}
+}*/
 
 /*
 .input-error {
@@ -1226,8 +1230,3 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 
  
-
-
-
-
-

@@ -335,6 +335,7 @@ const [activeSection, setActiveSection] = useState("basic");
 
   return (
       <main className="add-resident-main-container">
+        {/*}
         <div className="add-resident-main-header">
 
           <div className="path-section">
@@ -350,7 +351,7 @@ const [activeSection, setActiveSection] = useState("basic");
             <h1>Main Residents</h1>
           </div>
 
-        </div>
+        </div>*/}
         
 
         
