@@ -14,66 +14,87 @@ export default function ViewResident() {
   const [residentData, setResidentData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const router = useRouter();
+
+   
+
+  const [formData, setFormData] = useState({
+    residentNumber: 0,
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    address: "",
+    dateOfBirth: "",
+    placeOfBirth: "",
+    age: 0,
+    sex: "",
+    civilStatus: "",
+    occupation: "",
+    contactNumber: "",
+    emailAddress: "",
+    precinctNumber: "",
+    generalLocation: "",
+    cluster: "",
+    isStudent: false,
+    isPWD: false,
+    isSeniorCitizen: false,
+    isSoloParent: false,
+    fileURL: "",
+    updatedBy: "",
+  });
+
+   const [originalData, setOriginalData] = useState({ ...formData });
+     const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!residentId) return;
-
-    const fetchResident = async () => {
-      try {
+    if (residentId) {
+      const fetchResidentData = async () => {
         const docRef = doc(db, "Residents", residentId);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          setResidentData(docSnap.data());
-        } else {
-          console.error("Resident not found");
+          const data = {
+            residentNumber: docSnap.data().residentNumber || 0,
+            firstName: docSnap.data().firstName || "",
+            lastName: docSnap.data().lastName || "",
+            middleName: docSnap.data().middleName || "",
+            address: docSnap.data().address || "",
+            dateOfBirth: docSnap.data().dateOfBirth || "",
+            placeOfBirth: docSnap.data().placeOfBirth || "",
+            age: docSnap.data().age || 0,
+            sex: docSnap.data().sex || "",
+            civilStatus: docSnap.data().civilStatus || "",
+            occupation: docSnap.data().occupation || "",
+            contactNumber: docSnap.data().contactNumber || "",
+            emailAddress: docSnap.data().emailAddress || "",
+            precinctNumber: docSnap.data().precinctNumber || "",
+            generalLocation: docSnap.data().generalLocation || "",
+            cluster: docSnap.data().cluster || "",
+            isStudent: docSnap.data().isStudent || false,
+            isPWD: docSnap.data().isPWD || false,
+            isSeniorCitizen: docSnap.data().isSeniorCitizen || false,
+            isSoloParent: docSnap.data().isSoloParent || false,
+            fileURL: docSnap.data().fileURL || "",
+            updatedBy: docSnap.data().updatedBy || "",
+          };
+
+          setFormData(data);
+          setOriginalData(data); // Store original data
+          setPreview(docSnap.data().fileURL || null);
         }
-      } catch (error) {
-        console.error("Error fetching resident:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResident();
+      };
+      fetchResidentData();
+    }
   }, [residentId]);
-
-  if (loading) return <p>Loading...</p>;
-  if (!residentData) return <p>Resident not found</p>;
-
-  const residentFields = [
-    { label: "Resident Number", key: "residentNumber" },
-    { label: "Full Name", key: "name" },
-    { label: "Home Address", key: "address" },
-    { label: "Date of Birth", key: "dateOfBirth" },
-    { label: "Place of Birth", key: "placeOfBirth" },
-    { label: "Age", key: "age" },
-    { label: "Sex", key: "sex" },
-    { label: "Civil Status", key: "civilStatus" },
-    { label: "Occupation", key: "occupation" },
-    { label: "Contact Number", key: "contactNumber" },
-    { label: "Email Address", key: "emailAddress" },
-    { label: "Precinct Number", key: "precinctNumber" },
-    { label: "General Location", key: "generalLocation" },
-    { label: "Cluster", key: "cluster" },
-    { label: "Student", key: "isStudent", isBoolean: true },
-    { label: "PWD", key: "isPWD", isBoolean: true },
-    { label: "Senior Citizen", key: "isSeniorCitizen", isBoolean: true },
-    { label: "Solo Parent", key: "isSoloParent", isBoolean: true },
-    { label: "Created By", key: "createdBy" },
-    { label: "Updated By", key: "updatedBy" },
-    { label: "Created At", key: "createdAt" },
-  ];
-
-  const handleBack = () => {
-    router.back();
-  };
 
   return (
     <main className="viewresident-main-container">
 
-        <div className="path-section">
+
+
+
+
+
+       <div className="path-section">
           <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
           <h1 className="breadcrumb">
             <Link href="/dashboard/ResidentModule">Main Residents</Link>
@@ -84,75 +105,7 @@ export default function ViewResident() {
 
         <div className="viewresident-page-title-section-1">
           <h1>Main Residents</h1>
-        </div>
-
-      <div className="viewresident-main-content">
-        <div className="viewresident-section-1-header">
-          <button onClick={handleBack}>
-                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
-              </button>
-          <p>Resident Details</p>
-        </div>
-
-        {residentFields.map((field) => {
-          let value;
-
-          if (field.key === "name") {
-            const { lastName = "", firstName = "", middleName = "" } = residentData;
-            value = `${lastName}, ${firstName} ${middleName}`.trim();
-          } else if (field.isBoolean !== undefined) {
-            value = residentData[field.key] ? "Yes" : "No";
-          } else {
-            value = residentData[field.key] ?? "N/A";
-          }
-
-          return (
-            <div className="viewresident-details-section" key={field.key}>
-              <div className="viewresident-title">
-                <p>{field.label}</p>
-              </div>
-              <div className={`viewresident-description ${field.key === "residentNumber" ? "disabled-field" : ""}`}>
-                <p>{value}</p>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Display Valid ID */}
-        <div className="viewresident-details-section">
-          <div className="viewresident-title">
-            <p>Valid ID</p>
-          </div>
-          <div className="viewresident-description">
-            {residentData.fileURL ? (
-              <div className="resident-id-container">
-                <img
-                  src={residentData.fileURL}
-                  alt="Resident's Valid ID"
-                  className="resident-id-image"
-                />
-                <a
-                  href={residentData.fileURL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="view-image-link"
-                >
-                  View Image
-                </a>
-              </div>
-            ) : (
-              <p>No ID uploaded</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-
-
-
-
-
-
+        </div>    
 
 
       <div className="viewresident-main-content-1">
@@ -195,8 +148,54 @@ export default function ViewResident() {
 
               <div className="resident-details-container">
                     <div className="resident-details-container-left-side">
-                        
+                        <div className="fields-section-residents">
+                        <p>Resident Number</p>
+                        <input type="text" className="main-resident-input-field" name="residentNumber" value={formData.residentNumber} readOnly/>
+                      </div>
+
+                      <div className="fields-section-residents">
+                        <p>First Name</p>
+                        <input type="text" className="main-resident-input-field" placeholder="Enter First Name" name="firstName" value={formData.firstName} required readOnly />
+                      </div>
+
+                      
+                  <div className="fields-section-residents">
+                    <p>Age</p>
+                    <input type="number" className="main-resident-input-field" placeholder="Enter Age" name="age" value={formData.age} required readOnly/>
+                  </div>
+
+
+                
+                
+
+                      
+
                     </div>
+
+                    
+                    <div className="resident-details-container-right-side">
+
+                      <div className="fields-section-residents">
+                        <p>Last Name </p>
+                        <input type="text" className="main-resident-input-field" placeholder="Enter Last Name" name="lastName" value={formData.lastName}  required readOnly />
+                      </div>
+
+                      <div className="fields-section-residents">
+                        <p>Middle Name</p>
+                        <input type="text" className="main-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} required readOnly />
+                      </div>
+
+
+                      <div className="fields-section-residents">
+                        <p>Sex</p>
+                        <input name="sex" className="main-resident-input-field" value={formData.sex}  readOnly>
+                        </input>
+                      </div>
+                      
+
+                    </div>
+
+
               </div>
           </div>
       </div>

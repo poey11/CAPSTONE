@@ -279,12 +279,30 @@ background-color: #214666;
   height: 80%;
   padding: 2rem;
   display: flex;
+  overflow-y: scroll;
+   gap: 2rem; 
 }
 
 .resident-details-container-left-side {
   display: flex;
+  flex-direction: column;
   width: 50%;
+  height: auto;
+ 
+  
 }
+
+
+.resident-details-container-right-side {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  height: auto;
+
+}
+
+
+
 
 
 .resident-profile-container {
@@ -328,6 +346,35 @@ background-color: #214666;
 }
 
 
+.fields-section-residents{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+.fields-section-residents p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+   align-self: flex-start; /* Left-aligns the label */
+   margin-left: 15%;
+}
+
+
+
+  .main-resident-input-field {
+    padding: 8px;
+    width: 70%;
+    margin-top: 10px;
+ border: 1px solid rgba(44, 62, 80, 0.7); /* 70% opacity */
+    border-radius: 5px;
+    color: black;
+    text-align: center;
+    
+  }
 
 
 
@@ -336,6 +383,16 @@ background-color: #214666;
 
   
   
+
+
+
+
+
+
+
+
+
+
   .back-btn{
     width: 25px;
     height: 25px;
