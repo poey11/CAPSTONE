@@ -180,12 +180,10 @@ align-self: center;
 width: 80%;
 border-radius: 1rem;
 border: 2px solid  #ddd;
-height: auto;
 margin:  auto; 
 background-color: white;
 overflow: hidden; 
 margin-top: 20px;
-height: 80%;
 }
 
 
@@ -246,20 +244,6 @@ background-color: #214666;
 }
 
 
-
-/* Main container with fixed height */
-.viewresident-main-content-1 {
-  display: flex;
-  flex-direction: column;
-  width: 80%;
-  border-radius: 1rem;
-  border: 2px solid #ddd;
-  background-color: white;
-  overflow: hidden;
-  margin: 20px auto;
-  height: 70vh; /* Fixed height relative to viewport */
-}
-
 /* The body that holds photo and details */
 .viewresident-content-body {
   width: 100%;
@@ -282,22 +266,23 @@ background-color: #214666;
 .resident-details-section {
   width: 65%;
   padding: 0 50px 50px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+   flex-wrap: wrap;  
 }
 
-/* The actual scrollable container */
+
 .resident-details-container {
   border: 1px solid rgba(44, 62, 80, 0.7);
   border-radius: 8px;
   background-color: white;
   width: 100%;
-  height: 100%; /* Fill all available height */
   padding: 2rem;
   display: flex;
   gap: 2rem;
-  overflow-y: auto; /* ✅ only this scrolls */
+  height: 400px;        
+  overflow-y: auto;    
+   flex-wrap: nowrap; /* Optional: keep side-by-side */
 }
 
 .resident-details-container-left-side,
@@ -305,11 +290,12 @@ background-color: #214666;
   display: flex;
   flex-direction: column;
   width: 50%;
-  background-color: #007bff;
-  gap: 1rem;
-  padding-right: 1rem;
-  box-sizing: border-box;
 }
+
+
+
+
+
 
 
 

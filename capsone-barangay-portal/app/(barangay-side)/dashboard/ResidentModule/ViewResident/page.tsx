@@ -319,8 +319,8 @@ export default function ViewResident() {
                       </div>
                       
 
-                      </>
-                                )}
+                </>
+                                  )}
 
                    
                   </div>
