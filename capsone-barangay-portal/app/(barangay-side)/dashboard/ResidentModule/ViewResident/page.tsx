@@ -189,6 +189,16 @@ export default function ViewResident() {
             </div>
           </div>
         </div>
+
+
+          <div className="resident-details-section">
+
+              <div className="resident-details-container">
+                    <div className="resident-details-container-left-side">
+                        
+                    </div>
+              </div>
+          </div>
       </div>
 
 
