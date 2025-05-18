@@ -23,6 +23,8 @@ interface HearingDetails {
     thirdHearingOfficer: string;
     filled: boolean;
     hearingMeetingDateTime: string;
+    Cstatus: string;
+    Rstatus:string;
 }
 
 
@@ -58,6 +60,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
         thirdHearingOfficer: "",
         filled:false,
         hearingMeetingDateTime: "",
+        Cstatus: "",
+        Rstatus: "",
     }); 
     
     const [summonLetterData, setSummonLetterData] = useState<any[]>([]);
@@ -122,7 +126,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
 
     },[])
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement| HTMLSelectElement> ) => {
         const { name, value } = e.target;
         const keys = name.split(".");
     
@@ -170,18 +174,10 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
         try {
             const docRef = collection(db, "IncidentReports", id, "SummonsMeeting");
             await addDoc(docRef, {
-                minutesOfCaseProceedings: details.minutesOfCaseProceedings,
-                remarks: details.remarks,
-                partyA: details.partyA,
-                partyB: details.partyB,
-                firstHearingOfficer: details.firstHearingOfficer,
-                secondHearingOfficer: details.secondHearingOfficer,
-                thirdHearingOfficer: details.thirdHearingOfficer,
+                ...details,
                 nosHearing: index,
                 nos: nos,
-                filled: true,
-                hearingMeetingDateTime: details.hearingMeetingDateTime,
-                createdAt: new Date(),
+                filled: true
             });
             
             const UpdateRef = doc(db, "IncidentReports", id,);
@@ -192,7 +188,49 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
             console.error("Error saving data:", error.message);
         }
     }
-  
+
+    const usersAbsent = () => details.Cstatus === "Absent" || details.Rstatus === "Absent";
+
+    useEffect(() => {
+    const updatedDetails = { ...details };
+
+    let absentMinutes: string[] = [];
+    let absentRemarks: string[] = [];
+
+    // Handle Complainant status
+    if (details.Cstatus === "Absent") {
+        updatedDetails.partyA = "Complainant Absent";
+        absentMinutes.push("Complainant Absent.");
+        absentRemarks.push("Complainant Absent.");
+    } else {
+        updatedDetails.partyA = "";
+    }
+
+    // Handle Respondent status
+    if (details.Rstatus === "Absent") {
+        updatedDetails.partyB = "Respondent Absent";
+        absentMinutes.push("Respondent Absent.");
+        absentRemarks.push("Respondent Absent.");
+    } else {
+        updatedDetails.partyB = "";
+    }
+
+    // If any user is marked absent, overwrite with only absent messages
+    if (absentMinutes.length > 0 || absentRemarks.length > 0) {
+        updatedDetails.minutesOfCaseProceedings = absentMinutes.join(" ");
+        updatedDetails.remarks = absentRemarks.join(" ");
+    }
+
+    // If both are present, clear everything
+    if (details.Cstatus === "Present" && details.Rstatus === "Present") {
+        updatedDetails.minutesOfCaseProceedings = "";
+        updatedDetails.remarks = "";
+    }
+
+    setDetails(updatedDetails);
+}, [details.Cstatus, details.Rstatus]);
+
+
     return (
         <>
             <div className="hearing-section-edit">    
@@ -228,29 +266,47 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                             />
                         </div>
                     </div>  
-                  <p>Complainant's Name</p>
-                              <div className="bars-edit">
-                                  <div className="input-group-edit">
-                                        <input type="text" 
-                                        className="search-bar-edit" 
-                                        value={`${data.complainant.fname} ${data.complainant.lname} `|| ""}
-                                        disabled/>
-                                  </div>
-                              </div>
+                    <p>Complainant's Name</p>
+                    <select className="input-group-edit" disabled={hearingDetails[index]?.filled}
+                    name="Cstatus"
+                    id="Cstatus"
+                    value={details.Cstatus||hearingDetails[index]?.Cstatus||""}
+                    onChange={handleChange}
+                    >
+                        <option value="Present">Present</option>
+                        <option value="Absent">Absent</option>
+                    </select>
+                      <div className="bars-edit">
+                          <div className="input-group-edit">
+                                <input type="text" 
+                                className="search-bar-edit" 
+                                value={`${data.complainant.fname} ${data.complainant.lname} `|| ""}
+                                disabled/>
                           </div>
-
-                          <div className="section-2-dialouge-edit">
-                              <p>Respondents' Name</p>
-                              <div className="bars-edit">
-                                <div className="input-group-edit">
-                                        <input type="text" 
-                                        className="search-bar-edit" 
-                                        value={`${data.respondent.fname} ${data.respondent.lname} `|| ""}
-                                        disabled
-                                        />
-                                  </div>
-                              </div>
+                      </div>
+                  </div>
+                  <div className="section-2-dialouge-edit">
+                      <p>Respondents' Name</p>
+                      <select className="input-group-edit" disabled={hearingDetails[index]?.filled}
+                        name="Rstatus"
+                        id="Rstatus"
+                        value={details.Rstatus||hearingDetails[index]?.Rstatus||""}
+                        onChange={handleChange}
+                        >
+                            <option value="Present">Present</option>
+                            <option value="Absent">Absent</option>
+                      </select>
+                      <div className="bars-edit">
+                        <div className="input-group-edit">
+                            
+                                <input type="text" 
+                                className="search-bar-edit" 
+                                value={`${data.respondent.fname} ${data.respondent.lname} `|| ""}
+                                disabled
+                                />
                           </div>
+                      </div>
+                  </div>
         
                   <div className="section-3-dialouge-edit">
                       <div className="fields-section-edit">
@@ -261,8 +317,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                             id="minutesOfCaseProceedings"
                             value={details.minutesOfCaseProceedings||hearingDetails[index]?.minutesOfCaseProceedings||""}
                             onChange={handleChange}
-                            onFocus={hearingDetails[index]?.filled||false ? (e => e.target.blur()):(() => {}) }
-                            required={!hearingDetails[index]?.filled||false}
+                            onFocus={hearingDetails[index]?.filled|| usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                            required={!hearingDetails[index]?.filled|| usersAbsent()? false : true}
                             rows={13}/>
                       </div>
                   </div>
@@ -277,8 +333,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                             value={details.partyA||hearingDetails[index]?.partyA||""}
                             onChange={handleChange}
                             rows={10}
-                            onFocus={hearingDetails[index]?.filled||false ? (e => e.target.blur()):(() => {}) }
-                            required={!hearingDetails[index]?.filled||false}
+                            onFocus={hearingDetails[index]?.filled|| usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                            required={!hearingDetails[index]?.filled||usersAbsent() ? false : true}
                             />
                       </div>
                       <div className="fields-section-edit">
@@ -290,8 +346,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                             value={details.partyB||hearingDetails[index]?.partyB||""}
                             onChange={handleChange}
                             rows={10}
-                            onFocus={hearingDetails[index]?.filled||false ? (e => e.target.blur()):(() => {}) }
-                            required={!hearingDetails[index]?.filled||false}
+                            onFocus={hearingDetails[index]?.filled|| usersAbsent()? (e => e.target.blur()):(() => {}) }
+                            required={!hearingDetails[index]?.filled|| usersAbsent() ? false : true}
                             />
                       </div>
 
@@ -303,8 +359,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                             name="remarks"
                             id="remarks"
                             value={details.remarks||hearingDetails[index]?.remarks||""}
-                            onFocus={hearingDetails[index]?.filled||false ? (e => e.target.blur()):(() => {}) }
-                            required={!hearingDetails[index]?.filled||false}
+                            onFocus={hearingDetails[index]?.filled||usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                            required={!hearingDetails[index]?.filled||usersAbsent() ? false : true}
                             onChange={handleChange}
                             placeholder="Enter Remarks" 
                             rows={10}

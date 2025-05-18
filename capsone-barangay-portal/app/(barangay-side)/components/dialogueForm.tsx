@@ -20,8 +20,8 @@ type DialogueDetails = {
     partyB: string;
     HearingOfficer: string;
     dialogueMeetingDateTime: string;
-
-    
+    Cstatus: string;
+    Rstatus: string;
   };
   
 
@@ -40,6 +40,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         partyA: "",
         partyB: "",
         dialogueMeetingDateTime:"",
+        Cstatus: "",
+        Rstatus: "",
     });
 
     useEffect(() => {
@@ -96,7 +98,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         setShowDialogueContent(prevState => !prevState);
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement|HTMLSelectElement>) => {
         const { name, value } = e.target;
         const keys = name.split(".");
     
@@ -128,13 +130,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             const subColRef = collection(db, "IncidentReports", id, "DialogueMeeting");
             const docRef = doc(subColRef, id);
             await setDoc(docRef, {
-                minutesOfDialogue: details.minutesOfDialogue,
-                remarks: details.remarks,
-                partyA: details.partyA,
-                partyB: details.partyB,
-                HearingOfficer: details.HearingOfficer,
+                ...details,
                 filled:true,
-                createdAt: new Date(),
             });
             console.log("Document written with ID: ", docRef.id);
         } catch (error:any) {
@@ -142,6 +139,59 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         }
         console.log(details);
     }
+
+    const usersAbsent = () => details.Cstatus === "Absent" || details.Rstatus === "Absent";
+
+    useEffect(() => {
+    const updatedDetails = { ...details };
+
+    let minutes = details.minutesOfDialogue || "";
+    let remarks = details.remarks || "";
+
+    // Handle Complainant status change
+    if (details.Cstatus === "Absent") {
+        updatedDetails.partyA = "Complainant Absent";
+
+        if (!minutes.includes("Complainant Absent")) {
+            minutes += (minutes ? " " : "") + "Complainant Absent.";
+        }
+
+        if (!remarks.includes("Complainant Absent")) {
+            remarks += (remarks ? " " : "") + "Complainant Absent.";
+        }
+    } else if (details.Cstatus === "Present") {
+        updatedDetails.partyA = "";
+
+        minutes = minutes.replace(/Complainant Absent\.?\s*/g, "").trim();
+        remarks = remarks.replace(/Complainant Absent\.?\s*/g, "").trim();
+    }
+
+    // Handle Respondent status change
+    if (details.Rstatus === "Absent") {
+        updatedDetails.partyB = "Respondent Absent";
+
+        if (!minutes.includes("Respondent Absent")) {
+            minutes += (minutes ? " " : "") + "Respondent Absent.";
+        }
+
+        if (!remarks.includes("Respondent Absent")) {
+            remarks += (remarks ? " " : "") + "Respondent Absent.";
+        }
+    } else if (details.Rstatus === "Present") {
+        updatedDetails.partyB = "";
+
+        minutes = minutes.replace(/Respondent Absent\.?\s*/g, "").trim();
+        remarks = remarks.replace(/Respondent Absent\.?\s*/g, "").trim();
+    }
+
+    updatedDetails.minutesOfDialogue = minutes;
+    updatedDetails.remarks = remarks;
+
+    setDetails(updatedDetails);
+    }, [details.Cstatus, details.Rstatus]);
+
+
+    
     return (
         <>
             <div className="dialouge-meeting-section-edit">    
@@ -171,7 +221,16 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                 </div>
                             </div>    
                               <p>Complainant's Name</p>
-                              <div className="bars-edit">
+                              <select className="input-group-edit" disabled={existingData} 
+                                name="Cstatus"
+                                id="Cstatus"
+                                value={details.Cstatus}
+                                onChange={handleChange}
+                                >
+                                    <option value="Present">Present</option>
+                                    <option value="Absent">Absent</option>
+                              </select>
+                              <div className="input-group-edit">
                                   <div className="input-group-edit">
                                         <input type="text" 
                                         className="search-bar-edit" 
@@ -187,6 +246,15 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
 
                           <div className="section-2-dialouge-edit">
                               <p>Respondent's Name</p>
+                              <select className="input-group-edit" disabled={existingData}
+                                name="Rstatus"
+                                id="Rstatus"
+                                value={details.Rstatus}
+                                onChange={handleChange}
+                                >
+                                <option value="Present">Present</option>
+                                <option value="Absent">Absent</option>
+                              </select>
                               <div className="bars-edit">
                                 <div className="input-group-edit">
                                         <input type="text" 
@@ -209,9 +277,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                     id="minutesOfDialogue"
                                     value={details.minutesOfDialogue||""}
                                     onChange={handleChange}
-                                    onFocus={existingData ? (e => e.target.blur()):(() => {}) }
-                                    required={!existingData}
-
+                                    onFocus={existingData || usersAbsent() ? (e => e.target.blur()) : (() => {})}
+                                    required={!existingData || usersAbsent() ? false : true}
                                     rows={13}/>
                               </div>
                           </div>
@@ -225,8 +292,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                     id="partyA"
                                     value={details.partyA||""}
                                     onChange={handleChange}
-                                    onFocus={existingData ? (e => e.target.blur()):(() => {}) }
-                                    required={!existingData}
+                                    onFocus={existingData || usersAbsent()? (e => e.target.blur()):(() => {}) }
+                                    required={!existingData || usersAbsent() ? false : true}
                                     rows={10}/>
                               </div>
                               <div className="fields-section-edit">
@@ -237,8 +304,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                     name="partyB"
                                     value={details.partyB||""}
                                     onChange={handleChange}
-                                    onFocus={existingData ? (e => e.target.blur()):(() => {}) }
-                                    required={!existingData}
+                                    onFocus={existingData || usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                                    required={!existingData || usersAbsent() ? false : true}
                                     rows={10}/>
                               </div>
 
@@ -252,8 +319,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                     value={details.remarks||""}
                                     onChange={handleChange}
                                     placeholder="Enter Remarks" 
-                                    onFocus={existingData ? (e => e.target.blur()):(() => {}) }
-                                    required={!existingData}
+                                    onFocus={existingData || usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                                    required={!existingData|| usersAbsent() ? false : true}
                                     rows={10}/>
                               </div>
                               <div className="fields-section-edit">
