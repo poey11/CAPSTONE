@@ -146,6 +146,70 @@ export default function ViewResident() {
           </div>
         </div>
       </div>
+
+
+
+
+
+
+
+
+
+      <div className="viewresident-main-content-1">
+        <div className="viewresident-section-1-header-1">
+            
+            <div className="viewresident-header-first-section">
+                <img src="/Images/QClogo.png" alt="Barangay Captain" className="logo-image-side-bar-1" />
+            </div>
+
+
+           <div className="viewresident-header-second-section">
+            <h2 className="gov-info">Republic of the Philippines</h2>
+            <h2 className="gov-info">Quezon City</h2>
+            <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+            <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+            <h2 className="contact">930-0040 / 428-9030</h2>
+          </div>
+
+            
+            <div className="viewresident-header-third-section">
+                  <img src="/Images/QClogo.png" alt="Barangay Captain" className="logo-image-side-bar-1" />
+            </div>
+        </div>
+
+
+     <div className="viewresident-content-body">
+        <div className="resident-photo-section">
+          <span className="resident-details-label">Resident Details</span>
+
+          <div className="resident-profile-container">
+            <img src="/Images/feeding2.jpg" alt="Resident" className="resident-photo" />
+            <div className="resident-name-box">
+              <h2 className="resident-name">Justine Anne Rosete</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+
+      
+
+
+
+       
+      </div>
+
+
+
+
+
+      
+
+
+
     </main>
   );
 }

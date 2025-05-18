@@ -30,7 +30,7 @@ margin-top: 20px;
 .viewresident-page-title-section-1 h1{
   font-size: 2rem;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.5);
+      color: #2C3E50
 }
 
 .resident-id-image{
@@ -91,6 +91,286 @@ margin-top: 20px;
     height: 25px;
     filter: grayscale(100%) brightness(0%) invert(50%);
   }
+
+  .viewresident-details-section {
+    display: flex;
+    border-top: 2px solid #ddd;
+  }
+
+  .viewresident-title {
+    width: 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-right: 2px solid #ddd;
+    background: #dddbdb33;
+  }
+
+  .viewresident-title p {
+    font-weight: bold;
+    color: grey;
+    font-size: 1rem;
+  }
+
+  .viewresident-description {
+    padding: 2rem;
+    width: 80%;
+    margin-left: 20px;
+  }
+
+  .viewresident-description p {
+
+    color: grey;
+    font-size: 1rem;
+  }
+
+  .path-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+  
+  .path-section h1 {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .path-section h2 {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: rgba(61, 61, 61, 0.5);
+  }
+  
+  .breadcrumb {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .chevron {
+    color: #888;
+    margin-left: 10px;
+  }
+
+  .employer-link {
+    color: grey;
+    font-size: 1rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  
+
+
+
+
+
+
+  /*
+
+TRY
+  */
+
+
+
+
+.viewresident-main-content-1 {
+display: flex;
+flex-direction: column;
+align-self: center;
+width: 80%;
+border-radius: 1rem;
+border: 2px solid  #ddd;
+height: auto;
+margin:  auto; 
+background-color: white;
+overflow: hidden; 
+margin-top: 20px;
+height: 700px;
+}
+
+
+  .viewresident-section-1-header-1 {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 2px solid #ddd;
+    width: 100%;
+    background: #214666;
+    
+  }
+
+
+.viewresident-header-first-section,
+.viewresident-header-third-section {
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.viewresident-header-first-section {
+  padding-left: 30px;
+}
+
+.viewresident-header-third-section {
+  padding-right: 30px;
+}
+
+.viewresident-header-second-section {
+background-color: #214666;
+   padding: 0.5rem;
+  text-align: center;
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.viewresident-header-second-section h2 {
+  margin: 2px 0;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.viewresident-header-second-section .barangay-name {
+  font-size: 22px;
+  font-weight: bold;
+  margin: 10px 0 6px;
+  letter-spacing: 1px;
+}
+
+.viewresident-header-second-section .address,
+.viewresident-header-second-section .contact {
+  font-size: 13px;
+}
+
+  .logo-image-side-bar-1{
+  width: 150px;
+  height: 100px;
+}
+
+/*
+.viewresident-content-body {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  background-color: white;
+  height: 500px;
+}
+  */
+
+
+
+.resident-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50px;
+  width: 35%;
+  position: relative;
+}
+
+.resident-profile-container {
+  border: 1px solid rgba(44, 62, 80, 0.7);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%;
+  text-align: center;
+  margin-top: -8px; /* Pulls the card up under the label */
+}
+
+.resident-details-label {
+  background-color: #214E77;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  position: relative;
+  top: 12px; /* Pushes it closer to the card */
+  z-index: 1;
+}
+.resident-photo {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.resident-name-box {
+  padding: 10px;
+  background-color: #F2F2F2;
+}
+
+.resident-name {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2C3E50;
+  margin: 0;
+}
+
+
+
+
+
+
+
+
+  
+  
+  .back-btn{
+    width: 25px;
+    height: 25px;
+    filter: grayscale(100%) brightness(0%) invert(50%);
+  }
+
+
+
+
+
+.viewresident-page-title-section-1{
+  width: 100%;
+}
+
+.viewresident-page-title-section-1 h1{
+  font-size: 2rem;
+  font-weight: bold;
+      color: #2C3E50
+}
+
+.resident-id-image{
+  width: 100%;
+}
+
+.resident-id-container{
+  width: 50%;
+  text-align: center;
+}
+
+.view-image-link{
+  margin-top: 10px;
+  display: inline-block;
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+  
+}
+
+
+.back-button {
+    background-image: url('/Images/left-arrow.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 30px; 
+    height: 30px;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .back-button:hover {
+    transform: scale(1.1); 
+    transition: transform 0.2s ease;
+  }
+
 
   .viewresident-details-section {
     display: flex;
