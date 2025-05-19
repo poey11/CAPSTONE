@@ -16,13 +16,14 @@ interface FileData {
 const ReportsPage = () => {
 
   // rbac
-
   const { data: session } = useSession();
 
 
   // for residents
   const [loadingKasambahay, setLoadingKasambahay] = useState(false); 
-  const [loadingJobSeeker, setLoadingJobSeeker] = useState(false);    
+  const [loadingJobSeeker, setLoadingJobSeeker] = useState(false);
+
+  // inhabitant record
   const [loadingMasterResident, setLoadingMasterResident] = useState(false);    
   const [loadingEastResident, setLoadingEastResident] = useState(false);
   const [loadingWestResident, setLoadingWestResident] = useState(false);    
@@ -44,6 +45,11 @@ const ReportsPage = () => {
 
     // for incident reports
     const [loadingVAWCReport, setLoadingVAWCReport] = useState(false);    
+    const [loadingLuponSettledReport, setLoadingLuponSettledReport] = useState(false);    
+    const [loadingLuponPendingReport, setLoadingLuponPendingReport] = useState(false);    
+    const [loadingIncidentSummary, setLoadingIncidentSummary] = useState(false);    
+    const [loadingIncidentStatuses, setLoadingIncidentStatuses] = useState(false);    
+    const [loadingGADRCOMonitoringReport, setGADRCOMonitoringReport] = useState(false);    
 
 
 
