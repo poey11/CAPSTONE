@@ -14,9 +14,6 @@ import Hearing from "@/app/(barangay-side)/components/hearingForm";
 
 
 export default function EditLuponIncident() {
-   
-    const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
-
     const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
@@ -26,7 +23,6 @@ export default function EditLuponIncident() {
 
 
 
-    const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
     const [loading , setLoading] = useState(true);
     const router = useRouter();
     const searchParam = useSearchParams();

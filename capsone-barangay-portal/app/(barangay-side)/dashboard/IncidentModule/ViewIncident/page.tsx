@@ -61,7 +61,7 @@ export default  function ViewLupon() {
     if(!docId)return;
       const docRef = doc(db, "IncidentReports", docId);
       const subDocRef = collection(docRef, "SummonsMeeting");
-      const subDocQuery = query(subDocRef, orderBy("createdAt", "asc"));
+      const subDocQuery = query(subDocRef, orderBy("nosHearing", "desc"));
       const unsubscribe = onSnapshot(subDocQuery, (snapshot) => {
       const reports:any[] = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -407,16 +407,12 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
      {hearingData.length > 0 && hearingData.map((item, index) => {
         const hearingFormData = hearingFormDataA(item,index);
 
-        // Human-readable hearing label
-        const hearingLabels = ["First Hearing Details", "Second Hearing Details", "Third Hearing Details"];
-        const hearingTitle = hearingLabels[index] || `Hearing #${index + 1}`;
-
         return (
-          <div className="main-content-view" key={index}>
+          <>
+            <div className="main-content-view" key={index}>
             <div className="section-1-view">
-              <h1>{hearingTitle}</h1>
+              <h1>{hearingData[index].nos} Hearing Details</h1>
             </div>
-        
             {hearingFields.map((field) => (
               <div className="details-section-view" key={field.key}>
                 <div className="title-view">
@@ -428,6 +424,9 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
               </div>
             ))}
           </div>
+          
+          
+          </>
         );    
       })}
 
