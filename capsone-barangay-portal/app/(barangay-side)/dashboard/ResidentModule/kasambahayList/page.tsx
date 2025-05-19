@@ -223,12 +223,13 @@ export default function KasambahayListModule() {
 
   return (
     <main className="resident-module-main-container">
+      {/*
       <div className="path-section">
           <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
           <h2 className="breadcrumb">Kasambahay Masterlist<span className="chevron"></span></h2>
-      </div>
+      </div>*/}
       <div className="resident-module-section-1">
-        <h1>Kasambahay Masterlist</h1>
+        {/*<h1>Kasambahay Masterlist</h1>*/}
         {isAuthorized ? (
         <Link href="/dashboard/ResidentModule/kasambahayList/AddKasambahay">
           <button className="add-announcement-btn">Add New Kasambahay</button>

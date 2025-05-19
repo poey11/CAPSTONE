@@ -403,6 +403,7 @@ const [activeSection, setActiveSection] = useState("basic");
 
                     {activeSection === "basic" && (
                         <>
+                        <div className="add-main-resident-section-2-full-top">  
                           <div className="add-main-resident-section-2-left-side">
                               <div className="fields-section">
                                 <p>Last Name<span className="required">*</span></p>
@@ -486,121 +487,131 @@ const [activeSection, setActiveSection] = useState("basic");
 
                               
                           </div>
+                        </div>
                         </>
                       )}
 
                       {activeSection === "full" && (
                         <>
-                          <div className="add-main-resident-section-2-left-side">
-                              <div className="fields-section">
-                                <p>Age<span className="required">*</span></p>
-                                <input 
-                                  type="number"
-                                  className={`add-resident-input-field ${invalidFields.includes("age") ? "input-error" : ""}`}
-                                  placeholder="Enter Age"
-                                  name="age"
-                                  value={formData.age}
-                                  onChange={handleChange}
-                                  readOnly />
-                               </div>
+                        <div className="add-main-resident-section-2-full-top">
 
-                               <div className="fields-section">
-                                    <p>Location<span className="required">*</span></p>
-                                    <select
-                                      name="generalLocation"
-                                      className={`add-resident-input-field ${invalidFields.includes("generalLocation") ? "input-error" : ""}`}
-                                      value={formData.generalLocation}
-                                      onChange={handleChange}
-                                      required
-                                    >
-                                      <option value="" disabled>Choose Part of Fairview</option>
-                                      <option value="East Fairview">East Fairview</option>
-                                      <option value="West Fairview">West Fairview</option>
-                                      <option value="South Fairview">South Fairview</option>
-                                    </select>
+                          <div className="add-main-resident-section-2-left-side">
+                                <div className="fields-section">
+                                  <p>Age<span className="required">*</span></p>
+                                  <input 
+                                    type="number"
+                                    className={`add-resident-input-field ${invalidFields.includes("age") ? "input-error" : ""}`}
+                                    placeholder="Enter Age"
+                                    name="age"
+                                    value={formData.age}
+                                    onChange={handleChange}
+                                    readOnly />
                                 </div>
 
-                                  {formData.generalLocation && (
                                     <div className="fields-section">
-                                      <p>Cluster/Section<span className="required">*</span></p>
+                                      <p>Place of Birth</p>
+                                      <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} />
+                                    </div>
+                                  
+
+                                    <div className="fields-section">
+                                      <p>Civil Status<span className="required">*</span></p>
+                                      <select 
+                                        name="civilStatus"
+                                        className={`add-resident-input-field ${invalidFields.includes("civilStatus") ? "input-error" : ""}`}
+                                        value={formData.civilStatus}
+                                        onChange={handleChange}
+                                        required>
+                                        <option value="" disabled>Choose Civil Status</option>
+                                        <option value="Single">Single</option>
+                                        <option value="Married">Married</option>
+                                        <option value="Widowed">Widowed</option>
+                                        <option value="Divorced">Divorced</option>
+                                        <option value="Separated">Separated</option>
+                                      </select>
+                                    </div>
+
+                                    <div className="fields-section">
+                                      <p>Location<span className="required">*</span></p>
                                       <select
-                                        name="cluster"
-                                        className={`add-resident-input-field ${invalidFields.includes("cluster") ? "input-error" : ""}`}
-                                        value={formData.cluster || ""}
+                                        name="generalLocation"
+                                        className={`add-resident-input-field ${invalidFields.includes("generalLocation") ? "input-error" : ""}`}
+                                        value={formData.generalLocation}
                                         onChange={handleChange}
                                         required
                                       >
-                                        <option value="" disabled>Choose HOA/Sitio</option>
-                                        {clusterOptions[formData.generalLocation].map((option, index) => (
-                                          <option key={index} value={option}>
-                                            {option}
-                                          </option>
-                                        ))}
+                                        <option value="" disabled>Choose Part of Fairview</option>
+                                        <option value="East Fairview">East Fairview</option>
+                                        <option value="West Fairview">West Fairview</option>
+                                        <option value="South Fairview">South Fairview</option>
                                       </select>
-                                    </div>
-                                  )}
-
-                                  <div className="fields-section">
-                                    <p>Place of Birth</p>
-                                    <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} />
-                                  </div>
-                                
-
-                                  <div className="fields-section">
-                                    <p>Civil Status<span className="required">*</span></p>
-                                    <select 
-                                      name="civilStatus"
-                                      className={`add-resident-input-field ${invalidFields.includes("civilStatus") ? "input-error" : ""}`}
-                                      value={formData.civilStatus}
-                                      onChange={handleChange}
-                                      required>
-                                      <option value="" disabled>Choose Civil Status</option>
-                                      <option value="Single">Single</option>
-                                      <option value="Married">Married</option>
-                                      <option value="Widowed">Widowed</option>
-                                      <option value="Divorced">Divorced</option>
-                                      <option value="Separated">Separated</option>
-                                    </select>
                                   </div>
                                   
+                            </div>
+
+
+                              <div className="add-main-resident-section-2-right-side">
+                                    <div className="fields-section">
+                                      <p>Occupation</p>
+                                      <input type="text" className="add-resident-input-field" placeholder="Enter Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
+                                    </div>
                                     
-            
+                                    <div className="fields-section">
+                                      <p>Contact Number<span className="required">*</span></p>
+                                      <input 
+                                        type="tel" 
+                                        className={`add-resident-input-field ${invalidFields.includes("contactNumber") ? "input-error" : ""}`}
+                                        name="contactNumber"
+                                        value={formData.contactNumber}
+                                        onChange={(e) => {
+                                          const input = e.target.value;
+                                          if (/^\d{0,11}$/.test(input)) {
+                                            setFormData({ ...formData, contactNumber: input });
+                                          }
+                                        }}
+                                        pattern="^[0-9]{11}$" 
+                                        placeholder="Enter 11-digit phone number" 
+                                      />
+                                    </div>
+
+                                    <div className="fields-section">
+                                      <p>Email Address</p>
+                                      <input type="email" className="add-resident-input-field" placeholder="Enter Email Address" name="emailAddress" value={formData.emailAddress} onChange={handleChange} />
+                                    </div>
+
+                                    <div className="fields-section">
+                                      <p>Precinct Number</p>
+                                      <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
+                                    </div> 
+                                    
+                            </div>
+
                           </div>
 
+                          <div className="add-main-resident-section-2-full-bottom">  
+                          
+                            <div className="add-main-resident-section-2-cluster">
+                            {formData.generalLocation && (
+                                      <div className="fields-section">
+                                        <p>Cluster/Section<span className="required">*</span></p>
+                                        <select
+                                          name="cluster"
+                                          className={`add-resident-input-field ${invalidFields.includes("cluster") ? "input-error" : ""}`}
+                                          value={formData.cluster || ""}
+                                          onChange={handleChange}
+                                          required
+                                        >
+                                          <option value="" disabled>Choose HOA/Sitio</option>
+                                          {clusterOptions[formData.generalLocation].map((option, index) => (
+                                            <option key={index} value={option}>
+                                              {option}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                    )}
 
-                            <div className="add-main-resident-section-2-right-side">
-                                  <div className="fields-section">
-                                    <p>Occupation</p>
-                                    <input type="text" className="add-resident-input-field" placeholder="Enter Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
-                                  </div>
-                                  
-                                  <div className="fields-section">
-                                    <p>Contact Number<span className="required">*</span></p>
-                                    <input 
-                                      type="tel" 
-                                      className={`add-resident-input-field ${invalidFields.includes("contactNumber") ? "input-error" : ""}`}
-                                      name="contactNumber"
-                                      value={formData.contactNumber}
-                                      onChange={(e) => {
-                                        const input = e.target.value;
-                                        if (/^\d{0,11}$/.test(input)) {
-                                          setFormData({ ...formData, contactNumber: input });
-                                        }
-                                      }}
-                                      pattern="^[0-9]{11}$" 
-                                      placeholder="Enter 11-digit phone number" 
-                                    />
-                                  </div>
-
-                                  <div className="fields-section">
-                                    <p>Email Address</p>
-                                    <input type="email" className="add-resident-input-field" placeholder="Enter Email Address" name="emailAddress" value={formData.emailAddress} onChange={handleChange} />
-                                  </div>
-
-                                  <div className="fields-section">
-                                    <p>Precinct Number</p>
-                                    <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
-                                  </div> 
+                            </div>
                           </div>
                         </>
                       )}

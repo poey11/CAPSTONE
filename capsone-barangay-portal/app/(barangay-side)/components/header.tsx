@@ -10,7 +10,11 @@ export default function Header() {
 
   const routeInfo = useMemo(() => {
     const map: Record<string, { title: string; breadcrumb: string[] }> = {
-      /* Dashboard */
+
+    /*
+      NOTE: will add the remaining path links pa
+    */
+    /* Dashboard */
       // Summaries
       "/dashboard": {
         title: "Summaries",
@@ -22,7 +26,7 @@ export default function Header() {
         breadcrumb: ["Dashboard", "Reports Module"],
       },
 
-      /* User and Roles*/
+    /* User and Roles*/
       // Barangay Users
       "/dashboard/admin/BarangayUsers": {
         title: "Barangay Users",
@@ -42,16 +46,28 @@ export default function Header() {
         title: "Main Residents",
         breadcrumb: ["Residents Management", "Main Residents", "Add Resident"],
       },
-
-      // Kasambahay
-      "/dashboard/KasambahayModule": {
-        title: "Kasambahay List",
-        breadcrumb: ["Residents Management", "Kasambahay List"],
+      
+      // Voter
+      "/dashboard/ResidentModule/registeredVoters": {
+        title: "Registered Voters",
+        breadcrumb: ["Residents Management", "Registered Voters"],
       },
 
-      // Default fallback
+      // Kasambahay
+      "/dashboard/ResidentModule/kasambahayList": {
+        title: "Kasambahay Masterlist",
+        breadcrumb: ["Residents Management", "Kasambahay Masterlist"],
+      },
+
+      // Jobseeker
+      "/dashboard/ResidentModule/FirstTimeJobSeeker": {
+        title: "First-Time Job Seeker List",
+        breadcrumb: ["Residents Management", "First-Time Job Seeker List"],
+      },
+
     };
 
+    // default
     return (
       map[pathname] || {
         title: "Undefined",

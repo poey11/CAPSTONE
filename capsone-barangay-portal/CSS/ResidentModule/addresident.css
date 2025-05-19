@@ -37,12 +37,12 @@
     flex-direction: column;
     width: 70%;
     border-radius: 1rem;
-    border: 2px solid  #ddd;
+    border: 2px solid rgba(36, 53, 76, 0.7);
     margin:  auto; 
     background-color: #ffffff;
-    /*margin-top: 150px;  */
     overflow: hidden; 
     height: 580px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 
@@ -324,35 +324,15 @@ COMPACT MODES
     overflow: hidden;
     box-sizing: border-box;
   }
-  .checkboxes-container {
-    display: flex;
-    flex-direction: column;
-    padding: 3rem;
-    margin-bottom: 2rem;
-    border-radius: 1rem;
-    border: 2px solid  #ddd;
-  }
+
 
   .checkbox-container{
     margin-bottom: 20px;
     margin-left: 30px;
   }
 
-  .checkboxes-container p {
-   color: grey;
-   font-weight: bold;
-   font-size: 1rem;
-   margin-bottom: 10px;
-   margin-top: 20px;
-  }
 
-  .checkboxes-title {
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    color: gray;
-    align-self: center;
-  }
+
 
 
   
@@ -1027,10 +1007,10 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 .fields-section p{
   font-size: 15px;
-  color: grey;
+  color: #2C3E50;
   font-weight: bold;
-   align-self: flex-start; /* Left-aligns the label */
-    margin-left: 15%;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 15%;
 }
 
 
@@ -1041,16 +1021,27 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 .add-resident-bottom-section-scroll{
   overflow-y: auto;
-  height: 350px;
+  height: 370px;
 }
 
 
 .add-resident-section-2 {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
   
+}
+
+.add-main-resident-section-2-full-top{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.add-main-resident-section-2-full-bottom{
+  width: 50%;
 }
 
 
@@ -1058,11 +1049,15 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     padding: 8px;
     width: 70%;
     margin-top: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
-    color: rgba(0, 0, 0, 0.4);
+    color: #000000;
     text-align: left;
     
+  }
+
+  .add-resident-input-field option:disabled {
+    color: grey;
   }
 
   .fields-section input,select{

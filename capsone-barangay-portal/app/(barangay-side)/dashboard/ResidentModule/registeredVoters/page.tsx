@@ -216,12 +216,13 @@ export default function registeredVotersModule() {
 
   return (
     <main className="resident-module-main-container">
+      {/*}
       <div className="path-section">
           <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
           <h2 className="breadcrumb">Registered Voters<span className="chevron"></span></h2>
-      </div>
+      </div>*/}
       <div className="resident-module-section-1">
-        <h1>Registered Voters</h1>
+        {/*<h1>Registered Voters</h1>*/}
           {isAuthorized ? (
             <Link href="/dashboard/ResidentModule/registeredVoters/AddVoter">
               <button className="add-announcement-btn" onClick={handleAddResidentClick}>Add New Voter</button>
