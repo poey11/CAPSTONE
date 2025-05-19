@@ -82,36 +82,6 @@ export default function EditLuponIncident() {
 
 
     const department =  reportData?.department;
-
-    
-    const handleFileChangeContainer1 = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const selectedFile = event.target.files?.[0];
-      if (selectedFile) {
-        const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
-        
-        if (!validImageTypes.includes(selectedFile.type)) {
-          alert("Only JPG, JPEG, and PNG files are allowed.");
-          return;
-        }
-    
-        // Replace existing file instead of adding multiple
-        const preview = URL.createObjectURL(selectedFile);
-        setFilesContainer1([{ name: selectedFile.name, preview }]);
-      }
-    };
-
-    const handleFileDeleteContainer1 = (fileName: string) => {
-      setFilesContainer1([]);
-  
-      // Reset file input
-      const fileInput = document.getElementById('file-upload1') as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = "";
-      }
-    };    
-    
-
-    
     
     const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       const { name, value, type } = e.target;
@@ -226,36 +196,7 @@ export default function EditLuponIncident() {
       }
     };
 
-    /*
     
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-        const form = event.target as HTMLFormElement;
-        console.log(toUpdate);  
-
-        if (form.checkValidity()) {
-          if(!isValidPhilippineMobileNumber(toUpdate.complainant.contact) || !isValidPhilippineMobileNumber(toUpdate.respondent.contact)){
-            setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
-            setShowErrorPopup(true);
-            setTimeout(() => setShowErrorPopup(false), 3000);
-            return;
-          } 
-          HandleEditDoc().then(() => {
-
-            setPopupMessage("Incident Successfully Updated!")
-            setShowPopup(true);
-        
-          }).catch((error) => {
-            console.error("Error updating document: ", error);
-          }); 
-        } else {
-          form.reportValidity(); 
-        }
-
-        setShowSubmitPopup(true);
-    };
-
-    */
 
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault();
@@ -283,26 +224,7 @@ const respondentContact = toUpdate.respondent.contact || reportData?.respondent?
       }
     };
     
-/*
-    const confirmSubmit = async () => {
-      setShowSubmitPopup(false);
-    
-    
-      setPopupMessage("Incident Record added successfully!");
-      setShowPopup(true);
-    
-      // Hide the popup after 3 seconds
-      setTimeout(() => {
-        setShowPopup(false);
-        router.push("/dashboard/IncidentModule");
-      }, 3000);
-    
-      // Create a fake event and call handleSubmit
-      const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-      await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
-    };
 
-*/
 
 const confirmSubmit = async () => {
   setShowSubmitPopup(false);
