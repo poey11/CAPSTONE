@@ -1,15 +1,14 @@
-.barangayusers-page-main-container,
-.residentusers-page-main-container,
-.pendingresidentusers-page-main-container{
-  width: 100%;
+  .barangayusers-page-main-container,
+  .residentusers-page-main-container,
+  .pendingresidentusers-page-main-container{
+  width: 100%;  
   height: 100vh;
-  background-color: #f9f9f9;
+   background-color: #F0F2F8; 
   padding-left:30px;
   padding-right:30px;
   padding-bottom:30px;
   padding-top: 150px;
   margin-left: 3rem;
-  overflow-y: auto; 
 }
 
 .barangayusers-page-section-2,
@@ -28,10 +27,10 @@
   width: 100%;
   max-width: 400px;
   margin-top: 10px;
-  border: 1px solid #ccc;
+ border: 1px solid rgba(36, 53, 76, 0.7);
   border-radius: 5px;
-  color: rgba(0, 0, 0, 0.4);
-  text-align: center;
+    color: #000000;
+  text-align: left;
 }
 
 .barangayusers-page-filter:focus,
@@ -55,20 +54,23 @@
   display: flex; 
   flex-direction: column;
   padding: 0;
-  margin: 0; /* Remove default margin */
-  overflow: auto; /* Allow scrolling if content overflows */
+  margin: 0; 
+  overflow: auto; 
   width: 100%;
   height: 100%; 
   max-height: 70%;
   margin-top: 2rem;
-  border: 2px solid  #ddd;
+  border: 2px solid rgba(36, 53, 76, 0.7);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background-color: #ffffff;
 }
+
 
 .barangayusers-page-main-section table,
 .residentusers-page-main-section table,
 .pendingresidentusers-page-main-section table {
-  width: 100%; /* Ensures the table spans the full width */
-  border-collapse: collapse; /* Removes unnecessary spacing between table cells */
+  width: 100%; 
+  border-collapse: collapse; 
 }
 
 .barangayusers-page-main-section tbody tr:hover,
@@ -85,8 +87,8 @@
   padding: 1rem; 
   text-align: center; 
   border-bottom: 2px solid #ddd;
-  color: grey;
-  font-weight: lighter;
+    color: #2C3E50;
+     font-weight: normal;
 }
 
 .barangayusers-page-main-section th,
@@ -95,7 +97,7 @@
   padding: 1rem; 
   text-align: left; 
   border-bottom: 2px solid #ddd;
-  color: grey;
+    color: #FFFFFF;
   text-align: center;
   
 }
@@ -105,11 +107,13 @@
 .pendingresidentusers-page-main-section thead {
   position: sticky;
   top: 0;
-  background-color: rgb(232, 228, 228); /* Ensures it's visible when scrolled */
-  z-index: 10; /* Ensures it stays above other content */
-  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
+ background-color: #214666;
+  z-index: 10; 
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); 
   height: 80px;
 }
+
+  
 .user-roles-module-main-container{
   width: 100%;
   height: 100vh;
