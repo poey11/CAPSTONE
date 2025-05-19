@@ -2,37 +2,47 @@
 .add-resident-main-container{
     width: 100%;
     height: 100vh;
-    background-color: #f9f9f9;
-    padding: 30px;
+    background-color: #F0F2F8;
     margin-left: 3rem; 
-    overflow-y: auto; 
+    padding-top: 150px;
 }
 
+/*
+.add-resident-main-header{
+  background-color: #ffffff;
+  border-bottom: 2px solid #ddd;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}*/
+
+/*
 .addresident-page-title-section-1{
-  width: 100%;
+  width: 20%;
+  background-color: #2C3E50;
+  border-radius: 6px;
+  padding: 5px;
+  text-align: center;
 }
 
 .addresident-page-title-section-1 h1{
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.5);
-}
+  color: #ffffff;
+}*/
 
 .add-resident-main-content {
     display: flex;
     flex-direction: column;
     width: 70%;
     border-radius: 1rem;
-    border: 2px solid  #ddd;
-    padding-left: 30px;
-    padding-right: 30px;
-    padding-top: 30px;
-    padding-bottom: 50px;
+    border: 2px solid rgba(36, 53, 76, 0.7);
     margin:  auto; 
-    background-color: #f4f2f2;
-    margin-top: 20px;  
-    overflow-y: auto;
-    height: 650px;
+    background-color: #ffffff;
+    overflow: hidden; 
+    height: 580px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 
@@ -47,25 +57,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background-color: #214666;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  
 }
 
 .add-resident-main-section1-left{
   display: flex;
   align-items: center;
   gap: 20px;
+  padding-left: 30px;
 }
 
 .add-resident-main-section1 h1{
   font-size: 1.25rem;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
 }
 
 
 .back-btn{
   width: 25px;
   height: 25px;
-  filter: grayscale(100%) brightness(0%) invert(50%);
+  filter: invert(1);
 }
 
 .NewResident {
@@ -82,6 +97,7 @@
   display: flex;
   align-items: center;
   gap: 20px;
+  padding-right: 30px;
 }
 
 .action-view,
@@ -308,60 +324,18 @@ COMPACT MODES
     overflow: hidden;
     box-sizing: border-box;
   }
-  .checkboxes-container {
-    display: flex;
-    flex-direction: column;
-    padding: 3rem;
-    margin-bottom: 2rem;
-    border-radius: 1rem;
-    border: 2px solid  #ddd;
-  }
+
 
   .checkbox-container{
     margin-bottom: 20px;
     margin-left: 30px;
   }
 
-  .checkboxes-container p {
-   color: grey;
-   font-weight: bold;
-   font-size: 1rem;
-   margin-bottom: 10px;
-   margin-top: 20px;
-  }
-
-  .checkboxes-title {
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    color: gray;
-    align-self: center;
-  }
 
 
-  .file-upload-container {
-    margin-bottom: 40px;
-    border: 2px dashed rgba(0, 0, 0, 0.3);
-    border-radius: 8px;
-    padding: 30px;
-    background-color: rgba(255, 255, 255, 0.9);
-    transition: background-color 0.3s ease;
-    display: block;
-    align-items: center; 
-    justify-content: center; 
-    text-align: center;
-    height: 350px; 
-    width: 350px;
-    overflow-y: auto;
-    margin-top: 10px;
-    align-self: center;
-  }
+
 
   
-
-  .file-upload-container:hover {
-    background-color: rgba(245, 143, 88, 0.2);
-  }
 
   .uploadedFiles-container{
     display: flex;
@@ -384,9 +358,10 @@ COMPACT MODES
       justify-content: space-between;
       padding: 8px;
       border-bottom: 1px solid #ddd;
-      background-color: #f8f8f8;
+      background-color: #F0F2F8;
       border-radius: 5px;
       gap: 10px;
+      margin-bottom: 10px;
   }
   
   .file-item {
@@ -539,20 +514,21 @@ COMPACT MODES
   
 
 
+  
 .checkbox-label {
   font-size: 1rem; 
-  color: grey;
+  color: #2C3E50;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 30px;
 }
 
-.checkbox-label input[type="checkbox"] {
-  transform: scale(2); 
-  margin: 0; 
+
+input[type="checkbox"] {
+  accent-color: #ED7014;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  width: 10px;
-  height: 10px; 
 }
 
 .checkbox-label input[type="checkbox"]:checked {
@@ -762,22 +738,23 @@ COMPACT MODES
   height: 27px;
 }
 
+/*
 .path-section {
   display: flex;
   gap: 10px;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 
 .path-section h1 {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.5);
+  color: #214666;
 }
 
 .path-section h2 {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: bold;
-  color: rgba(61, 61, 61, 0.5);
+  color: rgba(33, 70, 102, 0.6);
 }
 
 .breadcrumb {
@@ -786,9 +763,9 @@ COMPACT MODES
 }
 
 .chevron {
-  color: #888;
+  color: #2C3E50;
   margin-left: 10px;
-}
+}*/
 
 /*
 .input-error {
@@ -933,12 +910,14 @@ COMPACT MODES
 /*
 FOR INFO
 */
+
+
 .info-toggle-wrapper {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 15px;
-  margin-top: 20px;
-  margin-bottom: 40px;
+  margin-top: 5px;
+  margin-bottom: 20px;
   border-bottom: 2px solid #e0e0e0;
 }
 
@@ -949,20 +928,21 @@ FOR INFO
   cursor: pointer;
   font-weight: 600;
   font-size: 15px;
-  color: #666;
+  color: #2C3E50;
   border-bottom: 3px solid transparent;
   transition: all 0.3s ease;
 }
 
 .info-toggle-btn:hover {
-  color: #007bff;
+  color: #ED7014;
 }
 
 .info-toggle-btn.active {
-  color: #007bff;
-  border-bottom: 3px solid #007bff;
+  color: #ED7014;
+  border-bottom: 3px solid #ED7014;
   background-color: transparent;
 }
+
 
 
 
@@ -983,7 +963,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 .add-main-resident-section-2-left-side {
     display: flex;
     flex-direction: column;
-     width: 50%;
+    width: 50%;
 } 
 
 
@@ -1027,23 +1007,41 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 .fields-section p{
   font-size: 15px;
-  color: grey;
+  color: #2C3E50;
   font-weight: bold;
-   align-self: flex-start; /* Left-aligns the label */
-    margin-left: 15%;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 15%;
 }
 
 
 
+.add-resident-bottom-section{
+  padding: 35px;
+}
 
+.add-resident-bottom-section-scroll{
+  overflow-y: auto;
+  height: 370px;
+}
 
 
 .add-resident-section-2 {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
   
+}
+
+.add-main-resident-section-2-full-top{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.add-main-resident-section-2-full-bottom{
+  width: 50%;
 }
 
 
@@ -1051,11 +1049,15 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     padding: 8px;
     width: 70%;
     margin-top: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
-    color: rgba(0, 0, 0, 0.4);
+    color: #000000;
     text-align: left;
     
+  }
+
+  .add-resident-input-field option:disabled {
+    color: grey;
   }
 
   .fields-section input,select{
@@ -1063,4 +1065,163 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 }
 
 
+.add-main-resident-others-mainsection{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
 
+.add-main-resident-section-2-bottom-side{
+  display:flex;
+  flex-direction: row;
+  gap: 30px;
+}
+
+
+/* Resident Classification Box */
+.box-container-resclassification {
+  position: relative;
+  width: 320px;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding: 30px 20px 20px;
+  padding-top: 40px;
+  margin-top: 30px;
+}
+
+.title-resclassification {
+  position: absolute;
+  left: 50%; 
+  top: 0; 
+  transform: translate(-50%, -50%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 210px;
+}
+
+.box-content-resclassification label {
+  display: block;
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #2a2a2a;
+}
+
+.box-container-outer-resclassification {
+  position: relative; 
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+
+/* Resident Identification Pic Box */
+.box-container-resindentificationpic {
+  position: relative;
+  width: 370px;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding: 30px 20px 20px;
+  padding-top: 40px;
+  margin-top: 30px;
+
+  display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.title-resindentificationpic {
+  position: absolute;
+  left: 10%; 
+  top: 0; 
+  transform: translate(25%, 25%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 192px;
+}
+
+.box-container-outer-resindentificationpic {
+  position: relative; 
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.box-container-resindentificationpic:hover {
+  background-color: rgba(245, 143, 88, 0.2);
+}
+
+
+/* Verification Documents */
+   .box-container-verificationdocs {
+     position: relative;
+     width: 370px;
+     border: 1px solid #5a6b7c;
+     border-radius: 10px;
+     background-color: #ffffff;
+     padding: 30px 20px 20px;
+     padding-top: 40px;
+     margin-top: 30px;
+
+     display: flex;
+    justify-content: center;
+    align-items: center;
+   }
+
+   .title-verificationdocs {
+     position: absolute;
+     left: 7%; 
+     top: 0; 
+     transform: translate(25%, 25%);
+     background-color: #1f3b57;
+     color: white;
+     padding: 8px 16px;
+     border-radius: 10px;
+     font-weight: bold;
+     font-size: 16px;
+     z-index: 10;
+     width: 210px;
+   }
+   
+   .box-container-outer-verificationdocs {
+     position: relative; 
+     margin-top: 20px;
+     margin-bottom: 20px;
+     display: flex;
+     align-items: center;
+   }
+
+   .box-container-verificationdocs:hover {
+    background-color: rgba(245, 143, 88, 0.2);
+  }
+
+
+
+   .file-upload-container {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    display: block;
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    height: 220px; 
+    width: 350px;
+    overflow-y: auto;
+    margin-top: 10px;
+    align-self: center;
+  }
+
+
+ 
