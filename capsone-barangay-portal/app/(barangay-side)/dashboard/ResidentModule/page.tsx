@@ -378,16 +378,17 @@ export default function ResidentModule() {
                      
                       <td>
                         <div className="residentmodule-actions">
-                          <button
-                            className="residentmodule-action-view"
-                            onClick={() =>
-                              router.push(
-                                `/dashboard/ResidentModule/ViewResident?id=${resident.id}`
-                              )
-                            }
-                          >
-                            View
-                          </button>
+                         <button
+                          className="residentmodule-action-view"
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/ResidentModule/ViewResident?id=${resident.id}`
+                            )
+                          }
+                        >
+                          <img src="/Images/view.png" alt="View" />
+                        </button>
+
                           {!isAuthorized ? (
                           <>
                             <button
@@ -400,7 +401,7 @@ export default function ResidentModule() {
                               className="residentmodule-action-delete hidden"
                               aria-hidden="true"
                             >
-                              Delete
+                                <img src="/Images/edit.png" alt="View" />
                             </button>
                           </>
                         ) : (
@@ -409,7 +410,7 @@ export default function ResidentModule() {
                               className="residentmodule-action-edit"
                               onClick={() => handleEditClick(resident.id)}
                             >
-                              Edit
+                                <img src="/Images/edit.png" alt="View" />
                             </button>
                             <button
                               className="residentmodule-action-delete"
@@ -417,7 +418,7 @@ export default function ResidentModule() {
                                 handleDeleteClick(resident.id, resident.residentNumber)
                               }
                             >
-                              Delete
+                                <img src="/Images/delete.png" alt="View" />
                             </button>
                           </>
                         )}

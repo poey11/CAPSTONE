@@ -93,45 +93,27 @@
 .residentmodule-action-delete {
     border: none;
     cursor: pointer;
-    padding: 8px 12px;
-    font-size: 13px;
-    border-radius: 5px;
-    transition: background-color 0.2s ease;
+    width: 24px;
+    height: 24px;
 
 }
 
-.residentmodule-action-view {
-    background-color: #4caf50; /* Green */
-    color: white;
+
+.residentmodule-action-view img {
+  filter: brightness(0) saturate(100%) invert(38%) sepia(78%) saturate(374%) hue-rotate(81deg) brightness(91%) contrast(92%);
 }
 
-.residentmodule-action-edit {
-    background-color: #ff9800; /* Orange */
-    color: white;
+.residentmodule-action-edit img {
+  filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-rotate(189deg) brightness(91%) contrast(101%);
 }
 
-.residentmodule-action-delete {
-    background-color: #f44336; /* Red */
-    color: white;
-}
-.action-view {
-    background-color: #4caf50; /* Green */
-    color: white;
+.residentmodule-action-delete img {
+  filter: brightness(0) saturate(100%) invert(19%) sepia(93%) saturate(7490%) hue-rotate(357deg) brightness(96%) contrast(107%);
 }
 
 
-.residentmodule-action-view:hover {
-    background-color: #3e8f41; /* Green */
-}
-
-.residentmodule-action-edit:hover {
-    background-color: #d58102; /* Orange */
-}
 
 
-.residentmodule-action-delete:hover {
-    background-color: #d73c31; /* Red */
-}
 
 .resident-module-section-1{
     display: flex;
