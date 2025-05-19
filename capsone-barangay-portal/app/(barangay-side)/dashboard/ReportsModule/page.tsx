@@ -557,10 +557,12 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
+      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      worksheet.getCell("A2").value = reportTitle;
   
-      worksheet.getCell("A1").value = reportTitle;
-  
-      const dataStartRow = 3;
+      const dataStartRow = 4;
       let insertionRow = dataStartRow;
   
       residents.forEach((resident, index) => {
@@ -604,8 +606,16 @@ const ReportsPage = () => {
       worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
       totalRow.getCell(1).value = `TOTAL SENIOR CITIZENS: ${residents.length}`;
       totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
-      totalRow.getCell(1).font = { name: "Times New Roman", size: 10 };
-  
+      totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
+      for (let col = 1; col <= 12; col++) {
+        const cell = totalRow.getCell(col);
+        cell.border = {
+          top: { style: "medium" },
+          bottom: { style: "medium" },
+          left: { style: "medium" },
+          right: { style: "medium" },
+        };
+      }      
       totalRow.commit();
   
       const buffer = await workbook.xlsx.writeBuffer();
@@ -704,10 +714,12 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
+      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      worksheet.getCell("A2").value = reportTitle;
   
-      worksheet.getCell("A1").value = reportTitle;
-  
-      const dataStartRow = 3;
+      const dataStartRow = 4;
       let insertionRow = dataStartRow;
   
       residents.forEach((resident, index) => {
@@ -751,8 +763,16 @@ const ReportsPage = () => {
       worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
       totalRow.getCell(1).value = `TOTAL STUDENTS: ${residents.length}`;
       totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
-      totalRow.getCell(1).font = { name: "Times New Roman", size: 10 };
-  
+      totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
+      for (let col = 1; col <= 12; col++) {
+        const cell = totalRow.getCell(col);
+        cell.border = {
+          top: { style: "medium" },
+          bottom: { style: "medium" },
+          left: { style: "medium" },
+          right: { style: "medium" },
+        };
+      }      
       totalRow.commit();
   
       const buffer = await workbook.xlsx.writeBuffer();
@@ -835,10 +855,12 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
+      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      worksheet.getCell("A2").value = reportTitle;
   
-      worksheet.getCell("A1").value = reportTitle;
-  
-      let insertionRow = 3;
+      let insertionRow = 4;
   
       residents.forEach((resident, index) => {
         const row = worksheet.getRow(insertionRow);
@@ -881,7 +903,16 @@ const ReportsPage = () => {
       worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
       totalRow.getCell(1).value = `TOTAL PWDs: ${residents.length}`;
       totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
-      totalRow.getCell(1).font = { name: "Times New Roman", size: 10 };
+      totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
+      for (let col = 1; col <= 12; col++) {
+        const cell = totalRow.getCell(col);
+        cell.border = {
+          top: { style: "medium" },
+          bottom: { style: "medium" },
+          left: { style: "medium" },
+          right: { style: "medium" },
+        };
+      }      
       totalRow.commit();
   
       const buffer = await workbook.xlsx.writeBuffer();
@@ -978,10 +1009,12 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
+      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      worksheet.getCell("A2").value = reportTitle;
   
-      worksheet.getCell("A1").value = reportTitle;
-  
-      const dataStartRow = 3;
+      const dataStartRow = 4;
       let insertionRow = dataStartRow;
   
       residents.forEach((resident, index) => {
@@ -1025,7 +1058,17 @@ const ReportsPage = () => {
       worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
       totalRow.getCell(1).value = `TOTAL SOLO PARENTS: ${residents.length}`;
       totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
-      totalRow.getCell(1).font = { name: "Times New Roman", size: 10 };
+      totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
+      for (let col = 1; col <= 12; col++) {
+        const cell = totalRow.getCell(col);
+        cell.border = {
+          top: { style: "medium" },
+          bottom: { style: "medium" },
+          left: { style: "medium" },
+          right: { style: "medium" },
+        };
+      }
+      
       totalRow.commit();
   
       const buffer = await workbook.xlsx.writeBuffer();
@@ -1132,10 +1175,12 @@ const ReportsPage = () => {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(arrayBuffer);
     const worksheet = workbook.worksheets[0];
+    worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
+    worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
+    worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+    worksheet.getCell("A2").value = reportTitle;
 
-    worksheet.getCell("A1").value = reportTitle;
-
-    const dataStartRow = 3;
+    const dataStartRow = 4;
     let insertionRow = dataStartRow;
 
     residents.forEach((resident, index) => {
@@ -1182,9 +1227,18 @@ const ReportsPage = () => {
     Object.assign(totalRow.getCell(1), {
       value: `TOTAL REGISTERED: ${residents.length}`,
       alignment: { horizontal: "center", vertical: "middle" },
-      font: { name: "Times New Roman", size: 10, bold: false },
+      font: { name: "Times New Roman", size: 10, bold: true },
     });
-
+    
+    for (let col = 1; col <= 12; col++) {
+      const cell = totalRow.getCell(col);
+      cell.border = {
+        top: { style: "medium" },
+        bottom: { style: "medium" },
+        left: { style: "medium" },
+        right: { style: "medium" },
+      };
+    }
     totalRow.commit();
 
     const buffer = await workbook.xlsx.writeBuffer();
@@ -1286,10 +1340,12 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
+      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      worksheet.getCell("A2").value = reportTitle;
   
-      worksheet.getCell("A1").value = reportTitle;
-  
-      const dataStartRow = 3;
+      const dataStartRow = 4;
       let insertionRow = dataStartRow;
   
         residents.forEach((resident, index) => {
@@ -1440,10 +1496,12 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
+      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      worksheet.getCell("A2").value = reportTitle;
   
-      worksheet.getCell("A1").value = reportTitle;
-  
-      let insertionRow = 3;
+      let insertionRow = 4;
       let count = 1;
   
       for (const [group, members] of filteredGroups) {
@@ -1652,10 +1710,12 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
-
-      worksheet.getCell("A1").value = reportTitle;
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
+      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      worksheet.getCell("A2").value = reportTitle;
   
-      let insertionRow = 3;
+      let insertionRow = 4;
       let count = 1;
   
       for (const [group, members] of filteredGroups) {
@@ -1850,10 +1910,12 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
-      
-      worksheet.getCell("A1").value = reportTitle;
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
+      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      worksheet.getCell("A2").value = reportTitle;
   
-      let insertionRow = 3;
+      let insertionRow = 4;
       let count = 1;
   
       for (const [group, members] of filteredGroups) {
