@@ -6,6 +6,7 @@ import { addDoc,collection,doc, getDocs, onSnapshot, orderBy, query, updateDoc, 
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
 import { getLocalDateString, getLocalDateTimeString } from "@/app/helpers/helpers";
+import Letter from "@/app/(barangay-side)/components/letterForm"
 
 export default function GenerateDialougeLetter() {
     const user = useSession().data?.user;
@@ -500,7 +501,8 @@ export default function GenerateDialougeLetter() {
         })
     }
     
-
+console.log(safeData);
+console.log(safeData.length)
   return (
     <main className="main-container">
         {errorPopup.show && (
@@ -750,8 +752,44 @@ export default function GenerateDialougeLetter() {
            </form>
 
         </div> 
+        {/* {data && data.length > 0 && (
+           <>
+             {Array.from({ length: data.length }, (_, i) => (
+               <Template key={i} index={i} complainant={data[i].complainant} 
+               respondent={data[i].respondent} DateFiled={data[i].DateFiled}
+               DateOfDelivery={data[i].DateOfDelivery} DateOfMeeting={data[i].DateTimeOfMeeting}
+               LuponStaff={data[i].LuponStaff} />
+             ))}
+           </>
+        )} */}
        
-       
+       {/* {actionId === "summon" && (
+                safeData.map((item, i) => (
+                    <Letter 
+                      key={i}
+                      DateOfDelivery={item.DateOfDelivery}
+                      DateFiled={item.DateFiled}
+                      DateTimeOfMeeting={item.DateTimeOfMeeting}
+                      LuponStaff={item.LuponStaff}
+                      hearingNumber={item.hearingNumber}
+                    />
+                ))
+        )} */}
+        {actionId === "summon" && (
+            Array.from({ length: safeData.length }, (_, i) => (
+                <Letter 
+                key={i}
+                DateOfDelivery={safeData[i].DateOfDelivery}
+                DateFiled={safeData[i].DateFiled}
+                DateTimeOfMeeting={safeData[i].DateTimeOfMeeting}
+                LuponStaff={safeData[i].LuponStaff}
+                hearingNumber={safeData[i].hearingNumber}
+                />
+            ))
+        )}
+
+
+
     </main>
   );
 }
