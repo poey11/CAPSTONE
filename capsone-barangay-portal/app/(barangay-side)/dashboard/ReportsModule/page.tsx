@@ -2043,7 +2043,7 @@ const ReportsPage = () => {
       };
   
       //  Update report title
-      worksheet.getCell("A2").value = reportTitle;
+      worksheet.getCell("A3").value = reportTitle;
   
       const headerEndRow = 3;
       const dataStartRow = 5;
