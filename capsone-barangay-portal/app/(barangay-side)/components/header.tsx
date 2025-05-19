@@ -37,6 +37,44 @@ export default function Header() {
         breadcrumb: ["User and Roles", "Barangay Users", "Add Barangay User"],
       },
 
+         "/dashboard/admin/viewBarangayUser": {
+        title: "Barangay Users",
+          breadcrumb: ["User and Roles", "Barangay Users", "View Barangay User"],
+      },
+
+         "/dashboard/admin/modifyBarangayAcc": {
+        title: "Barangay Users",
+          breadcrumb: ["User and Roles", "Barangay Users", "Edit Barangay User"],
+      },
+
+
+      
+      //NEED PA AYUSIN VIEEWS FOR PENDING AND RESIDENT USEERS KASI SAME CSS SILA 
+      //MAY BUG PA
+
+      //Pending Resident Useers
+      "/dashboard/admin/PendingResidentUsers": {
+        title: "Pending Resident Users",
+        breadcrumb: ["User and Roles", "Pending Resident Users"],
+      },
+
+       "/dashboard/admin/viewResidentUser": {
+        title: "Pending Resident Users",
+        breadcrumb: ["User and Roles", "Pending Resident Users", "View Pending Resident Users"],
+      },
+
+    
+
+      //ResidentUsers
+      "/dashboard/admin/ResidentUsers": {
+        title: "Resident Users",
+        breadcrumb: ["User and Roles", "Resident Users"],
+      },
+
+
+
+
+
       // Resident Management
       "/dashboard/ResidentModule": {
         title: "Main Residents",

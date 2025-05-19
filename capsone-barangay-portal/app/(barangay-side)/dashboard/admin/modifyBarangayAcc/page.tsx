@@ -248,6 +248,8 @@ export default function EditBarangayAccount() {
     return (
 
         <main className="editbrgyacc-main-container">
+
+            {/*
             <div className="path-section">
                 <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
                 <h1 className="breadcrumb">
@@ -259,6 +261,7 @@ export default function EditBarangayAccount() {
             <div className="editbrgyacc-page-title-section-1">
                 <h1>Barangay Users</h1>
             </div>
+              */}
 
             <div className="editbrgyacc-main-content">
                 <div className="editbrgyacc-main-section1">

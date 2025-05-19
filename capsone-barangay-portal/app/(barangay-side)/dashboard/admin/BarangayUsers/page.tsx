@@ -253,12 +253,26 @@ useEffect(() => {
         <main className="barangayusers-page-main-container">
             
             <div className="user-roles-module-section-1">
+                <div className="redirection-section-users">
+                    <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+                    {getPageNumbers().map((number, index) => (
+                    <button
+                        key={index}
+                        onClick={() => typeof number === 'number' && paginate(number)}
+                        className={currentPage === number ? "active" : ""}
+                    >
+                        {number}
+                    </button>
+                    ))}
+                    <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+                </div>
                 
                 {isAuthorized &&(
                     <Link href="/dashboard/admin/addBarangayUser">
                     <button className="add-announcement-btn" onClick={handleAddBarangayUserClick}>Add New Barangay User</button>
                     </Link>
                 )}
+
             </div>
 
             
@@ -420,19 +434,7 @@ useEffect(() => {
             )}
 
         
-    <div className="redirection-section-users">
-        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {getPageNumbers().map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === 'number' && paginate(number)}
-            className={currentPage === number ? "active" : ""}
-          >
-            {number}
-          </button>
-        ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-    </div>
+
 
         </main>
     );
