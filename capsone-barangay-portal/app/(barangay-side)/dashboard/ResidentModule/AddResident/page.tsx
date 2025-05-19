@@ -65,6 +65,25 @@ export default function AddResident() {
     ]
   };
 
+  const fieldSectionMap: { [key: string]: "basic" | "full" | "others" } = {
+    lastName: "basic",
+    firstName: "basic",
+    middleName: "basic",
+    sex: "basic",
+    address: "basic",
+    dateOfBirth: "basic",
+    age: "full",
+    placeOfBirth: "full",
+    civilStatus: "full",
+    generalLocation: "full",
+    cluster: "full",
+    occupation: "full",
+    contactNumber: "full",
+    emailAddress: "full",
+    precinctNumber: "full",
+    verificationFiles: "others",
+  };
+
   const { data: session } = useSession();
   const [identificationFile, setIdentificationFile] = useState<File | null>(null);
   const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
@@ -79,7 +98,6 @@ export default function AddResident() {
   const [popupMessage, setPopupMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
-  const [newDocId, setNewDocId] = useState<string | null>(null);
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -172,7 +190,7 @@ export default function AddResident() {
 
   const handleSubmitClick = async () => {
     const { 
-      firstName, lastName, address, generalLocation, dateOfBirth, 
+      firstName, lastName, address, generalLocation, cluster, dateOfBirth, 
       age, sex, civilStatus, contactNumber,  emailAddress
   } = formData;
   
@@ -182,6 +200,7 @@ export default function AddResident() {
     if (!firstName) invalidFields.push("firstName");
     if (!address) invalidFields.push("address");
     if (!generalLocation) invalidFields.push("generalLocation");
+    if (!cluster) invalidFields.push("cluster");
     if (!dateOfBirth) invalidFields.push("dateOfBirth");
     if (!age) invalidFields.push("age"); 
     if (!sex) invalidFields.push("sex");
@@ -189,8 +208,16 @@ export default function AddResident() {
     if (!contactNumber) invalidFields.push("contactNumber");
     if (!emailAddress) invalidFields.push("emailAddress");
 
+    if (verificationFiles.length === 0) {
+      invalidFields.push("verificationFiles");
+    }
 
     if (invalidFields.length > 0) {
+      // Set the section based on the first invalid field
+      const firstInvalidField = invalidFields[0];
+      const section = fieldSectionMap[firstInvalidField];
+      setActiveSection("others");
+
       setInvalidFields(invalidFields);
       setPopupErrorMessage("Please fill up all required fields.");
       setShowErrorPopup(true);
@@ -200,10 +227,12 @@ export default function AddResident() {
       }, 3000);
       return;
     }
+
     
     // Phone number validation logic
     const phoneRegex = /^09\d{9}$/;
     if (!phoneRegex.test(contactNumber)) {
+      setActiveSection("full");
       setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
       setShowErrorPopup(true);
       setTimeout(() => setShowErrorPopup(false), 3000);
@@ -213,6 +242,7 @@ export default function AddResident() {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     if (!emailRegex.test(emailAddress)) {
+      setActiveSection("full");
       setPopupErrorMessage( "Invalid email address. Format: example@domain.com" );
       setShowErrorPopup(true);
       setTimeout(() => setShowErrorPopup(false), 3000);
@@ -223,24 +253,6 @@ export default function AddResident() {
     setShowSubmitPopup(true);
 };
 
-/*
-const confirmSubmit = async () => {
-  setShowSubmitPopup(false);
-
-  setPopupMessage("Resident Record added successfully!");
-  setShowPopup(true);
-
-  // Hide the popup after 3 seconds
-  setTimeout(() => {
-    setShowPopup(false);
-    //router.push("/dashboard/ResidentModule");
-    router.push(`/dashboard/ResidentModule?highlight=${newDocId}`);
-  }, 3000);
-
-  // Create a fake event and call handleSubmit
-  const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-  await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
-};*/
 
 const confirmSubmit = async () => {
   setShowSubmitPopup(false);
@@ -590,28 +602,29 @@ const [activeSection, setActiveSection] = useState("basic");
 
                           <div className="add-main-resident-section-2-full-bottom">  
                           
-                            <div className="add-main-resident-section-2-cluster">
-                            {formData.generalLocation && (
-                                      <div className="fields-section">
-                                        <p>Cluster/Section<span className="required">*</span></p>
-                                        <select
-                                          name="cluster"
-                                          className={`add-resident-input-field ${invalidFields.includes("cluster") ? "input-error" : ""}`}
-                                          value={formData.cluster || ""}
-                                          onChange={handleChange}
-                                          required
-                                        >
-                                          <option value="" disabled>Choose HOA/Sitio</option>
-                                          {clusterOptions[formData.generalLocation].map((option, index) => (
-                                            <option key={index} value={option}>
-                                              {option}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </div>
-                                    )}
-
+                          <div className="add-main-resident-section-2-cluster">
+                            <div className="fields-section">
+                              <p>Cluster/Section<span className="required">*</span></p>
+                              <select
+                                name="cluster"
+                                className={`add-resident-input-field ${invalidFields.includes("cluster") ? "input-error" : ""}`}
+                                value={formData.cluster || ""}
+                                onChange={handleChange}
+                                required
+                                disabled={!formData.generalLocation} // Optional: disables until a location is picked
+                              >
+                                <option value="" disabled>
+                                  {formData.generalLocation ? "Choose HOA/Sitio" : "Select Location First"}
+                                </option>
+                                {formData.generalLocation &&
+                                  clusterOptions[formData.generalLocation].map((option, index) => (
+                                    <option key={index} value={option}>
+                                      {option}
+                                    </option>
+                                  ))}
+                              </select>
                             </div>
+                          </div>
                           </div>
                         </>
                       )}
@@ -692,12 +705,13 @@ const [activeSection, setActiveSection] = useState("basic");
                                   Verification Documents
                                 </div>
 
-                                <div className="box-container-verificationdocs">
+                                <div className={`box-container-verificationdocs ${invalidFields.includes("verificationFiles") ? "input-error" : ""}`}>
+                                <span className="required-asterisk">*</span>
 
                                   {/* File Upload Section */}
                                   <div className="file-upload-container">
                                       <label htmlFor="verification-file-upload" className="upload-link">Click to Upload File</label>
-                                      <input id="verification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleVerificationFileChange} />
+                                      <input id="verification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleVerificationFileChange} required/>
 
 
                                       {verificationFiles.length > 0 && (

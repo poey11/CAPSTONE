@@ -7,30 +7,6 @@
     padding-top: 150px;
 }
 
-/*
-.add-resident-main-header{
-  background-color: #ffffff;
-  border-bottom: 2px solid #ddd;
-  padding-left: 30px;
-  padding-right: 30px;
-  padding-top: 15px;
-  padding-bottom: 15px;
-}*/
-
-/*
-.addresident-page-title-section-1{
-  width: 20%;
-  background-color: #2C3E50;
-  border-radius: 6px;
-  padding: 5px;
-  text-align: center;
-}
-
-.addresident-page-title-section-1 h1{
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #ffffff;
-}*/
 
 .add-resident-main-content {
     display: flex;
@@ -149,85 +125,6 @@
   background-color: #CA2D2D; 
 }
 
-/*
-.add-resident-section-2 {
-    display: flex;
-    width: 100%;
-    margin-left: 50px;
-}
-*/
-/*
-.add-resident-section-2 {
-    display: flex;
-    width: 100%;
-}
-    */
-/*
-.fields-container{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin-top: 50px;
-}
-  */
-/*
-.fields-section{
-  display: flex;
-  flex-direction: column;
-  margin-top: 30px;
-  position: relative;
-}
-  */
-
-/*
-
-.fields-section p{
-  font-size: 15px;
-  color: grey;
-  font-weight: bold;
-}
-
-
-  .add-resident-input-field {
-    padding: 8px;
-    width: 80%;
-    margin-top: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    color: rgba(0, 0, 0, 0.4);
-    text-align: left;
-  }
-
-
-
-/*
-COMPACT MODES
-*/
-
-/*
-
-.add-resident-section-2-left-side.compact-mode .fields-container{
-  display: flex;
-  flex-direction: column;
-  width: 60%;
-}
-.add-resident-section-2-left-side.compact-mode.add-resident-input-field {
-  width: 100%;
-}
-
-.add-resident-section-2-left-side.compact-mode {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 90%;
-}
-
-*/
-
-
-
 
   .add-resident-input-field-disabled{
     background-color: white; 
@@ -310,6 +207,14 @@ COMPACT MODES
   p .required {
     color: red;
     margin-left: 5px;
+  }
+
+  .required-asterisk {
+    color: red;
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 20px;
   }
   
 
@@ -738,40 +643,6 @@ input[type="checkbox"] {
   height: 27px;
 }
 
-/*
-.path-section {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.path-section h1 {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #214666;
-}
-
-.path-section h2 {
-  font-size: 1rem;
-  font-weight: bold;
-  color: rgba(33, 70, 102, 0.6);
-}
-
-.breadcrumb {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.chevron {
-  color: #2C3E50;
-  margin-left: 10px;
-}*/
-
-/*
-.input-error {
-  border: 2px solid red !important;
-}
-*/
 
 .input-error {
   border: 2px solid red !important;
