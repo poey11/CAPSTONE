@@ -6,9 +6,10 @@ import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
 import {getAllSpecificDocument} from "@/app/helpers/firestorehelper";
-import {isPastDate,isToday,isPastOrCurrentTime, getLocalDateString, isValidPhilippineMobileNumber} from "@/app/helpers/helpers";
+import {isPastDate,isToday,isPastOrCurrentTime, getLocalDateString, isValidPhilippineMobileNumber, getLocalTimeString} from "@/app/helpers/helpers";
 import { useSession } from "next-auth/react";
 import {customAlphabet} from "nanoid";
+
 
  interface userProps{
   fname: string;
@@ -26,14 +27,14 @@ export default function AddIncident() {
   const router = useRouter();
   const user = useSession().data?.user;
 
-
   const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
-
+  const currentDate = getLocalDateString(new Date());
+  const currentTime = getLocalTimeString(new Date());
   const searchParam = useSearchParams();
   const departmentId = searchParam.get("departmentId");
   const [complainant, setComplainant] = useState<userProps>({
@@ -60,11 +61,12 @@ export default function AddIncident() {
     timeFiled: "",
     location: "",
     nature: "",
+    specifyNature: "",
     concern: "",
     status: "Pending",
     receivedBy: "",
-    dateReceived: "",
-    timeReceived: "",
+    dateReceived: currentDate,
+    timeReceived: currentTime,
     nosofMaleChildren: "",
     nosofFemaleChildren: "",
     file: null,
@@ -83,7 +85,6 @@ export default function AddIncident() {
   },[user]);
  
 
-  const currentDate = getLocalDateString(new Date());
 
   const [reportCollection, setReportCollection] = useState<any[]>([]);
  
@@ -181,6 +182,7 @@ export default function AddIncident() {
             timeFiled: reportInfo.timeFiled,
             location: reportInfo.location,
             nature: reportInfo.nature,
+            specifyNature: reportInfo.specifyNature,
             concern: reportInfo.concern,
             status: "Pending",
             receivedBy: `${deskStaff.fname} ${deskStaff.lname}`,
@@ -190,7 +192,8 @@ export default function AddIncident() {
             department: departmentId,
             staffId: user?.id,
             isDialogue: false,
-            nosHearing:1,
+            hearing:1,
+            generatedHearingSummons:0,
             createdAt: new Date(),
             ...(departmentId === "GAD" && { 
               nosofMaleChildren: reportInfo.nosofMaleChildren,
@@ -241,15 +244,13 @@ export default function AddIncident() {
         // Save filtered data to Firestore
      //   await addDoc(collection(db, "IncidentReports"), filteredData);
 
+
+       setShowSubmitPopup(false);
             // Save filtered data to Firestore and get the reference
         const docRef = await addDoc(collection(db, "IncidentReports"), filteredData);
 
  
     router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&highlight=${docRef.id}`);
-
-
-      
-  
 
 
     } catch (e: any) {
@@ -383,6 +384,7 @@ export default function AddIncident() {
         nature: "",
         concern: "",
         status: "",
+        specifyNature: "",
         receivedBy: "",
         dateReceived: "",
         timeReceived: "",
@@ -656,9 +658,8 @@ export default function AddIncident() {
                 <p className="title-add">Other Information</p>
                 
                 <div className="bars-add">
-                {departmentId === "GAD" ? 
-                (
-                  <div className="input-group-add">
+                  
+                <div className="input-group-add">
                     <p>Nature of Complaint</p>
                     <select 
                     className="featuredStatus-add" 
@@ -668,23 +669,58 @@ export default function AddIncident() {
                     onChange={handleFormChange}
                     >
                     <option value="" disabled>Choose A Nature of Incident</option>
-                    <option value="Physical Abuse">Physical Abuse</option>
-                    <option value="Sexual Abuse">Sexual Abuse</option>
-                    <option value="Psychological, Enviromental, Verbal Abuse">Psychological, Enviromental, Verbal Abuse</option>
-                    <option value="Economic, Financial Abuse">Economic, Financial Abuse</option>
-                    <option value="Public Space Sexual Harassment">Public Space Sexual Harassment</option>
-                    <option value="Others">Others: (Trafficking, Prostitution, Violaiton of RA9208)</option>
-
+                    {departmentId === "Lupon" ? 
+                    (<>
+                      <option value="Conciliation">Conciliation</option>
+                      <option value="Mediation">Mediation</option>
+                      <option value="Arbitration">Arbitration</option>
+                      <option value="Others">Others</option>
+                    </>): 
+                    departmentId === "GAD" ?
+                    (<>
+                      <option value="Physical Abuse">Physical Abuse</option>
+                      <option value="Sexual Abuse">Sexual Abuse</option>
+                      <option value="Psychological, Enviromental, Verbal Abuse">Psychological, Enviromental, Verbal Abuse</option>
+                      <option value="Economic, Financial Abuse">Economic, Financial Abuse</option>
+                      <option value="Public Space Sexual Harassment">Public Space Sexual Harassment</option>
+                      <option value="Others">Others: (Trafficking, Prostitution, Violaiton of RA9208)</option>
+                    </>):
+                    departmentId === "BCPC" ? 
+                    (<>
+                      <option value="Child Abuse">Child Abuse</option>
+                      <option value="Child Exploitation">Child Exploitation</option>
+                      <option value="Child Trafficking">Child Trafficking</option>
+                      <option value="Child Labor">Child Labor</option>
+                      <option value="Child Neglect">Child Neglect</option>
+                      <option value="Child Abandonment">Child Abandonment</option>
+                      <option value="Child Sexual Abuse">Child Sexual Abuse</option>
+                      <option value="Child Physical Abuse">Child Physical Abuse</option>
+                      <option value="Child Psychological Abuse">Child Psychological Abuse</option>
+                      <option value="Child Bullying">Child Bullying</option>
+                      <option value="Child Prostitution">Child Prostitution</option>
+                      <option value="Others">Others</option>
+                    </>):
+                    departmentId === "VAWC" && 
+                    (<>
+                      <option value="Physical Abuse">Physical Abuse</option>
+                      <option value="Sexual Abuse">Sexual Abuse</option>
+                      <option value="Psychological, Enviromental, Verbal Abuse">Psychological, Enviromental, Verbal Abuse</option>
+                      <option value="Economic, Financial Abuse">Economic, Financial Abuse</option>
+                      <option value="Public Space Sexual Harassment">Public Space Sexual Harassment</option>
+                      <option value="Others">Others: (Trafficking, Prostitution, Violaiton of RA9208)</option>
+                    </>)}
                   </select>
+                    
+
                   </div>
-                ):(
-                  <div className="input-group-add">
-                    <p>Nature of Complaint</p>
-                    <input type="text" className="search-bar-add" placeholder="Enter Nature of Complaint"  id="nature" name="nature" 
-                    value = {reportInfo.nature} onChange={handleFormChange} required/>
-                  </div>
-                )}
-                   
+                   {reportInfo.nature === "Others" && 
+                   (<>
+                    <div className="input-group-add">
+                        <p>Specify Nature of Complaint</p>
+                        <input type="text" className="search-bar-add" placeholder="Enter Nature of Complaint" id="specifyNature" name="specifyNature" 
+                        value = {reportInfo.specifyNature} onChange={handleFormChange} required/>
+                    </div>
+                   </>)}
 
                     <div className="input-group-add">
                         <p>Date Filed</p>
@@ -770,13 +806,13 @@ export default function AddIncident() {
                   <div className="input-group-add">
                         <p>Date Received</p>
                         <input type="date" className="search-bar-add" max={currentDate}  id="dateReceived" name="dateReceived" 
-                        value = {reportInfo.dateReceived} onChange={handleFormChange} required/>
+                        value = {reportInfo.dateReceived} onChange={handleFormChange} disabled/>
                     </div>
 
                     <div className="input-group-add">
                         <p>Time Received</p>
                         <input type="time" className="search-bar-add" id="timeReceived" name="timeReceived" 
-                        value = {reportInfo.timeReceived} onChange={handleFormChange} required />
+                        value = {reportInfo.timeReceived} onChange={handleFormChange} disabled />
                     </div>
 
 

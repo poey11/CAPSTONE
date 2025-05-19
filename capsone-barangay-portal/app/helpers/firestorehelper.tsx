@@ -24,21 +24,6 @@ const getAllDocument =  (collect:string,data:(data: any[])=>  void) => {
 }
 
 
-const getAllStaffList = async (setStaffList:(data: any)=> void) => {
-    try {
-        const staffquery = collection(db, "BarangayUsers");
-        const querySnapshot = await getDocs(staffquery);
-        
-        const newStaffList: any[] = [];
-        querySnapshot.forEach((doc) => {
-            newStaffList.push(doc.data());
-        });
-  
-        return setStaffList(newStaffList);
-      } catch (error: any) {
-        console.error("Error fetching LT List:", error.message);
-      }
-}
 
 
 const getStaffList = async (position:string,setStaffList:(data: any)=> void) => {
@@ -182,5 +167,5 @@ const getSpecificCountofCollection = async (collectionRef: string, attribute: st
 export {getAllSpecificDocument, getSpecificDocument,
     getAllDocument
     , generateDownloadLink, deleteDocument,
-    getStaffList,getAllStaffList,getAllSpecificSubDocument,getCountofCollection,getSpecificCountofCollection
+    getStaffList,getAllSpecificSubDocument,getCountofCollection,getSpecificCountofCollection
 };
