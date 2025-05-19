@@ -2158,6 +2158,141 @@ const ReportsPage = () => {
     }
   };
   
+  // summary of incident statuses
+
+  const generateIncidentStatusSummaryReport = async () => {
+    setLoadingIncidentSummary(true);
+    try {
+      const currentDate = new Date();
+      const monthYear = currentDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+      });
+  
+      const reportTitle = `INCIDENT STATUS SUMMARY REPORT AS OF ${monthYear.toUpperCase()}`;
+  
+      const incidentRef = collection(db, "IncidentReports");
+      const q = query(incidentRef);
+      const querySnapshot = await getDocs(q);
+  
+      let incidents = querySnapshot.docs.map((doc) => doc.data());
+  
+      const departments = ["Lupon", "VAWC", "GAD", "BCPC", "Online"];
+  
+      // Group counts by department and status
+      const departmentCounts = departments.map((dept) => {
+        const filtered = incidents.filter(
+          (incident) => incident.department === dept
+        );
+        return {
+          department: dept,
+          pending: filtered.filter((i) => i.status === "Pending").length,
+          resolved: filtered.filter((i) => i.status === "Resolved").length,
+          settled: filtered.filter((i) => i.status === "Settled").length,
+          archived: filtered.filter((i) => i.status === "Archived").length,
+          acknowledged: filtered.filter((i) => i.status === "Acknowledged").length,
+        };
+      });
+  
+      // Load Excel Template
+      const templateRef = ref(
+        storage,
+        "ReportsModule/Incident Status Summary Report.xlsx"
+      );
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+  
+      // Set report title
+      worksheet.getCell("A1").value = reportTitle;
+  
+      let startRow = 3;
+      departmentCounts.forEach((item, index) => {
+        const row = worksheet.getRow(startRow + index);
+        row.getCell(1).value = item.department;
+        row.getCell(2).value = item.pending;
+        row.getCell(3).value = item.resolved;
+        row.getCell(4).value = item.settled;
+        row.getCell(5).value = item.archived;
+        row.getCell(6).value = item.acknowledged;
+  
+        // Style
+        for (let col = 1; col <= 6; col++) {
+          const cell = row.getCell(col);
+          cell.font = { name: "Calibri", size: 12 };
+          cell.alignment = { horizontal: "center", vertical: "middle" };
+          cell.border = {
+            top: { style: "thin" },
+            bottom: { style: "thin" },
+            left: { style: "thin" },
+            right: { style: "thin" },
+          };
+        }
+  
+        row.commit();
+      });
+  
+      // Export
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const fileName = `Incident_Status_Summary_Report_${monthYear.replace(
+        " ",
+        "_"
+      )}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+  
+      alert("Incident Summary Report generated successfully. Please wait for the downloadable file!");
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating incident summary report:", error);
+      alert("Failed to generate Incident Summary Report.");
+    } finally {
+      setLoadingIncidentSummary(false);
+    }
+  };
+
+  const handleGenerateIncidentStatusSummaryPDF = async () => {
+    setLoadingIncidentSummary(true);
+    try {
+      const fileUrl = await generateIncidentStatusSummaryReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+      const currentDate = new Date();
+      const monthYear = currentDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+      });
+  
+      saveAs(blob, `Incident_Status_Summary_Report_${monthYear.replace(" ", "_")}.pdf`);
+  
+      alert("Incident Summary Report successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate Incident Summary PDF.");
+    } finally {
+      setLoadingIncidentSummary(false);
+    }
+  };
+  
   
 
 
@@ -2269,8 +2404,9 @@ const ReportsPage = () => {
           {selectedModule === "Incident Module" && (
             <>
               <button className="report-button">Summary of Incidents</button>
-              <button className="report-button">Incident Status Summary</button>
-          
+              <button onClick={handleGenerateIncidentStatusSummaryPDF} disabled={loadingIncidentStatuses} className="report-button">
+                {loadingIncidentStatuses ? "Generating..." : "Incident Status Summary"}
+              </button>             
           {session?.user?.department === "Lupon" || session?.user?.position === "Assistant Secretary" && (
             <>
               <button className="report-button">Lupon Settled Report</button>
