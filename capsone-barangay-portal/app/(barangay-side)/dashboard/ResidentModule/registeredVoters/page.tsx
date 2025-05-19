@@ -221,7 +221,24 @@ export default function registeredVotersModule() {
           <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
           <h2 className="breadcrumb">Registered Voters<span className="chevron"></span></h2>
       </div>*/}
+
       <div className="resident-module-section-1">
+
+          <div className="redirection-section">
+              <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+              {getPageNumbers().map((number, index) => (
+                <button
+                  key={index}
+                  onClick={() => typeof number === 'number' && paginate(number)}
+                  className={currentPage === number ? "active" : ""}
+                >
+                  {number}
+                </button>
+              ))}
+              <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+          </div>
+
+
         {/*<h1>Registered Voters</h1>*/}
           {isAuthorized ? (
             <Link href="/dashboard/ResidentModule/registeredVoters/AddVoter">
@@ -306,7 +323,7 @@ export default function registeredVotersModule() {
                   className="residentmodule-action-view"
                   onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}
                 >
-                  View
+                   <img src="/Images/view.png" alt="View" />
                 </button>
                 {!isAuthorized ? (
                 <>
@@ -314,13 +331,13 @@ export default function registeredVotersModule() {
                     className="residentmodule-action-edit hidden"
                     aria-hidden="true"
                   >
-                    Edit
+                   <img src="/Images/edit.png" alt="View" />
                   </button>
                   <button
                     className="residentmodule-action-delete hidden"
                     aria-hidden="true"
                   >
-                    Delete
+                     <img src="/Images/delete.png" alt="View" />
                   </button>
                 </>
               ) : (
@@ -329,13 +346,13 @@ export default function registeredVotersModule() {
                     className="residentmodule-action-edit"
                     onClick={() => handleEditClick(resident.id)}
                   >
-                    Edit
+                    <img src="/Images/edit.png" alt="View" />
                   </button>
                   <button
                     className="residentmodule-action-delete"
                     onClick={() => handleDeleteClick(resident.id, resident.voterNumber)}
                   >
-                    Delete
+                     <img src="/Images/delete.png" alt="View" />
                   </button>
                 </>
               )}
@@ -349,21 +366,7 @@ export default function registeredVotersModule() {
   )}
 </div>
 
-    
-      <div className="redirection-section">
-        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {getPageNumbers().map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === 'number' && paginate(number)}
-            className={currentPage === number ? "active" : ""}
-          >
-            {number}
-          </button>
-        ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-      </div>
-
+  
       {showDeletePopup && (
                         <div className="confirmation-popup-overlay-module-voters">
                             <div className="confirmation-popup-module-voters">

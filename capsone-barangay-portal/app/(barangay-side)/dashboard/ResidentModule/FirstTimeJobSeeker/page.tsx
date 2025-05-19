@@ -232,6 +232,25 @@ export default function JobSeekerListModule() {
           <h2 className="breadcrumb">First-Time Job Seeker List<span className="chevron"></span></h2>
       </div>*/}
       <div className="resident-module-section-1">
+
+        
+
+      <div className="redirection-section">
+        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+        {getPageNumbers().map((number, index) => (
+          <button
+            key={index}
+            onClick={() => typeof number === 'number' && paginate(number)}
+            className={currentPage === number ? "active" : ""}
+          >
+            {number}
+          </button>
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+      </div>
+
+
+
         {/*<h1>First-Time Job Seeker List</h1>*/}
         <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker/AddFirstTimeJobSeeker">
           <button className="add-announcement-btn">Add New Job Seeker</button>
@@ -315,7 +334,7 @@ export default function JobSeekerListModule() {
                   )
                 }
               >
-                View
+                <img src="/Images/view.png" alt="View" />
               </button>
               {!isAuthorized ? (
               <>
@@ -323,13 +342,13 @@ export default function JobSeekerListModule() {
                   className="residentmodule-action-edit hidden"
                   aria-hidden="true"
                 >
-                  Edit
+                  <img src="/Images/edit.png" alt="Edit" />
                 </button>
                 <button
                   className="residentmodule-action-delete hidden"
                   aria-hidden="true"
                 >
-                  Delete
+                   <img src="/Images/delete.png" alt="Delete" />
                 </button>
               </>
             ) : (
@@ -338,13 +357,13 @@ export default function JobSeekerListModule() {
                   className="residentmodule-action-edit"
                   onClick={() => handleEditClick(seeker.id)}
                 >
-                  Edit
+                     <img src="/Images/edit.png" alt="Edit" />
                 </button>
                 <button
                   className="residentmodule-action-delete"
                   onClick={() => handleDeleteClick(seeker.id)}
                 >
-                  Delete
+                  <img src="/Images/delete.png" alt="Delete" />
                 </button>
               </>
             )}
@@ -359,23 +378,6 @@ export default function JobSeekerListModule() {
 
   )}
 </div>
-
-
-      <div className="redirection-section">
-        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {getPageNumbers().map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === 'number' && paginate(number)}
-            className={currentPage === number ? "active" : ""}
-          >
-            {number}
-          </button>
-        ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-      </div>
-
-
       {showDeletePopup && (
                         <div className="confirmation-popup-overlay-module-jobseeker">
                             <div className="confirmation-popup-module-jobseeker">

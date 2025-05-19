@@ -115,73 +115,24 @@
 
 
 
-.resident-module-section-1{
+.resident-module-section-1 {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between; 
     width: 100%;
-
+    gap: 1rem; 
 }
 
-.resident-module-section-1 h1{
-   font-size: 2rem;
+.resident-module-section-1 h1 {
+    font-size: 2rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
-   
 }
 
-.add-announcement-btn {
-    background-color:#e56723;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .add-announcement-btn:hover {
-    background-color:#cc591b;
-  }
-
-  .resident-module-section-2{
-    display: flex;
-    gap: 20px;
-    padding: 0;
-    margin-top: 25px;
-  }
-
-  .resident-module-filter{
-    padding: 8px;
-    width: 100%;
-    max-width: 400px;
-    margin-top: 10px;
-     border: 1px solid rgba(36, 53, 76, 0.7);
-    border-radius: 5px;
-    color: #000000;
-    text-align: left;
-  }
-
-
-
-  .resident-module-filter:focus {
-    border-color: #f49028;
-    outline: none;
-    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
-  }
-
-  .resident-module-filter option {
-    color: rgba(0, 0, 0, 0.4); 
-  }
-
-  
 .redirection-section {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 2rem auto;
-    width: fit-content;
-    padding: 10px;
+    padding: 5px;
     border-radius: 5px;
     gap: 5px;
       border: 2px solid rgba(36, 53, 76, 0.7);
@@ -213,6 +164,53 @@
     font-weight: bold;
   }
   
+
+.add-announcement-btn {
+    background-color:#e56723;
+    color: white;
+    border: none;
+    padding: 13px 22px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .add-announcement-btn:hover {
+    background-color:#cc591b;
+  }
+
+  .resident-module-section-2{
+    display: flex;
+    gap: 20px;
+    padding: 0;
+    margin-top: 5px; /*ADDDED TANDAAN MO TO DERICK*/
+  }
+
+  .resident-module-filter{
+    padding: 8px;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 10px;
+     border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left;
+  }
+
+
+
+  .resident-module-filter:focus {
+    border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+
+  .resident-module-filter option {
+    color: rgba(0, 0, 0, 0.4); 
+  }
+
+  
+
 
   @keyframes slideIn {
     from {

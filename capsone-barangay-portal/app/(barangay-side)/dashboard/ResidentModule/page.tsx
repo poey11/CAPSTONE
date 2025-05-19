@@ -259,6 +259,22 @@ export default function ResidentModule() {
       </div>*/}
 
       <div className="resident-module-section-1">
+
+
+           <div className="redirection-section">
+            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+            {getPageNumbers().map((number, index) => (
+              <button
+                key={index}
+                onClick={() => typeof number === 'number' && paginate(number)}
+                className={currentPage === number ? "active" : ""}
+              >
+                {number}
+              </button>
+            ))}
+            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+          </div>
+
         {/*<h1>Main Residents</h1>*/}
         {isAuthorized ? (
           <Link href="/dashboard/ResidentModule/AddResident">
@@ -267,6 +283,8 @@ export default function ResidentModule() {
         ) : (
           <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Resident</button>
         )}
+
+       
       </div>
   
     <div className="resident-module-section-2">
@@ -395,13 +413,13 @@ export default function ResidentModule() {
                               className="residentmodule-action-edit hidden"
                               aria-hidden="true"
                             >
-                              Edit
+                              <img src="/Images/edit.png" alt="View" />
                             </button>
                             <button
                               className="residentmodule-action-delete hidden"
                               aria-hidden="true"
                             >
-                                <img src="/Images/edit.png" alt="View" />
+                                <img src="/Images/delete.png" alt="View" />
                             </button>
                           </>
                         ) : (
@@ -435,19 +453,7 @@ export default function ResidentModule() {
       )}
     </div>
   
-    <div className="redirection-section">
-      <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-      {getPageNumbers().map((number, index) => (
-        <button
-          key={index}
-          onClick={() => typeof number === 'number' && paginate(number)}
-          className={currentPage === number ? "active" : ""}
-        >
-          {number}
-        </button>
-      ))}
-      <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-    </div>
+
   
     {showDeletePopup && (
       <div className="confirmation-popup-overlay-module-main-res">
