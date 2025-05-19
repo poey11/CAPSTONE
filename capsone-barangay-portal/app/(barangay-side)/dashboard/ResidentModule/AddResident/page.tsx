@@ -191,22 +191,21 @@ export default function AddResident() {
   const handleSubmitClick = async () => {
     const { 
       firstName, lastName, address, generalLocation, cluster, dateOfBirth, 
-      age, sex, civilStatus, contactNumber,  emailAddress
+      age, sex, civilStatus, contactNumber, emailAddress
   } = formData;
   
     const invalidFields: string[] = [];
 
-    if (!lastName) invalidFields.push("lastName");
-    if (!firstName) invalidFields.push("firstName");
-    if (!address) invalidFields.push("address");
-    if (!generalLocation) invalidFields.push("generalLocation");
-    if (!cluster) invalidFields.push("cluster");
-    if (!dateOfBirth) invalidFields.push("dateOfBirth");
-    if (!age) invalidFields.push("age"); 
-    if (!sex) invalidFields.push("sex");
-    if (!civilStatus) invalidFields.push("civilStatus");
-    if (!contactNumber) invalidFields.push("contactNumber");
-    if (!emailAddress) invalidFields.push("emailAddress");
+    if (!lastName) invalidFields.push("lastName"); //
+    if (!firstName) invalidFields.push("firstName"); //
+    if (!address) invalidFields.push("address"); //
+    if (!generalLocation) invalidFields.push("generalLocation"); //
+    if (!cluster) invalidFields.push("cluster"); //
+    if (!dateOfBirth) invalidFields.push("dateOfBirth"); //
+    if (!age) invalidFields.push("age"); //
+    if (!sex) invalidFields.push("sex"); //
+    if (!civilStatus) invalidFields.push("civilStatus"); //
+    if (!contactNumber) invalidFields.push("contactNumber"); //
 
     if (verificationFiles.length === 0) {
       invalidFields.push("verificationFiles");
@@ -216,7 +215,7 @@ export default function AddResident() {
       // Set the section based on the first invalid field
       const firstInvalidField = invalidFields[0];
       const section = fieldSectionMap[firstInvalidField];
-      setActiveSection("others");
+      setActiveSection(section);
 
       setInvalidFields(invalidFields);
       setPopupErrorMessage("Please fill up all required fields.");
@@ -241,7 +240,7 @@ export default function AddResident() {
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-    if (!emailRegex.test(emailAddress)) {
+    if (emailAddress && !emailRegex.test(emailAddress)) {
       setActiveSection("full");
       setPopupErrorMessage( "Invalid email address. Format: example@domain.com" );
       setShowErrorPopup(true);
@@ -347,28 +346,7 @@ const [activeSection, setActiveSection] = useState("basic");
 
   return (
       <main className="add-resident-main-container">
-        {/*}
-        <div className="add-resident-main-header">
 
-          <div className="path-section">
-            <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
-            <h1 className="breadcrumb">
-              <Link href="/dashboard/ResidentModule">Main Residents</Link>
-              <span className="chevron">/</span>
-            </h1>
-            <h2 className="breadcrumb">Add Resident<span className="chevron"></span></h2>
-          </div>
-
-          <div className="addresident-page-title-section-1">
-            <h1>Main Residents</h1>
-          </div>
-
-        </div>*/}
-        
-
-        
-        
-      
           <div className="add-resident-main-content">
 
             <div className="add-resident-main-section1">

@@ -46,6 +46,10 @@ export default function Header() {
         title: "Main Residents",
         breadcrumb: ["Residents Management", "Main Residents", "Add Resident"],
       },
+      "/dashboard/ResidentModule/EditResident": {
+        title: "Main Residents",
+        breadcrumb: ["Residents Management", "Main Residents", "Edit Resident"],
+      },
       
       // Voter
       "/dashboard/ResidentModule/registeredVoters": {
