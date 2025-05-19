@@ -1,6 +1,6 @@
 .main-container {
     width: 100%;
-    height: 100vh;
+    height: auto;
    background-color: #F0F2F8; 
     padding: 30px;
     margin-left: 2rem;
@@ -14,6 +14,28 @@
     margin-bottom: 1.5rem;
     margin-top: 1.5rem;
 }
+
+.dashboard-title {
+      position: relative;
+     width: 600px;
+     border: 1px solid #5a6b7c;
+     border-radius: 10px;
+     background-color: #ffffff;
+     padding: 30px 20px 20px;
+     padding-top: 30px;
+     margin-top: 30px;
+     margin-bottom: 30px;
+     display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1.8rem;
+    background-color: #1f3b57;
+  
+}
+
+
 
 .metric-card {
     display: flex;
@@ -96,7 +118,7 @@
     align-items: center;
     text-align: center;
     width: 60%;
-    height: 1050%;
+    height: 100%;
     margin-left: 1rem;
 }
 
@@ -242,8 +264,14 @@
     width: 100%;
     justify-content: center;
     align-items: center;
- 
+    background-color: #ffffff;
+        border: 2px solid rgba(36, 53, 76, 0.7);
+     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+     border-radius: 1rem;
+     padding-bottom: 20px;
+    overflow: hidden;
 }
+
 .services-section-left-side {
     display: flex;
     width: 30%;
