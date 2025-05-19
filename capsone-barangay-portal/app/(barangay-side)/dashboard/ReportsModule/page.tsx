@@ -315,6 +315,16 @@ const ReportsPage = () => {
       });
   
       // Create a buffer and upload to Firebase Storage
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   
@@ -456,6 +466,16 @@ const ReportsPage = () => {
         });
 
       // Create a buffer and upload to Firebase Storage
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   
@@ -670,6 +690,16 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Export the file
+
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -888,6 +918,16 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Save and upload
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1089,6 +1129,16 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Save and upload
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1306,6 +1356,16 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Save and upload
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1507,6 +1567,16 @@ const ReportsPage = () => {
   
       dateRow.commit();
   
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   
@@ -1706,6 +1776,17 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Save and upload
+
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   
@@ -1964,6 +2045,17 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Save and upload
+
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -2230,6 +2322,16 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Save and upload
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -2483,7 +2585,16 @@ const ReportsPage = () => {
       dateRow.commit();
   
  
-  
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -2643,6 +2754,17 @@ const ReportsPage = () => {
       });
   
       //  Save and upload
+
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -2772,6 +2894,17 @@ const ReportsPage = () => {
       });
   
       // Export
+
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
