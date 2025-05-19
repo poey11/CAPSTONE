@@ -281,7 +281,7 @@ const PendingResidentUsers = () => {
                                                 className="admin-action-view"
                                                 onClick={() => router.push(`/dashboard/admin/viewResidentUser?id=${user.id}`)}
                                             >   
-                                                View
+                                                <img src="/Images/view.png" alt="View" />
                                             </button>
                                          </div>
                                     </td>

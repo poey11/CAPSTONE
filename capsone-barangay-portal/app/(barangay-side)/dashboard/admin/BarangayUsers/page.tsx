@@ -356,7 +356,7 @@ useEffect(() => {
                 <div className="admin-actions">
                 {/*<button className="admin-action-view" onClick={(e) => { e.stopPropagation(); }}>View</button>*/}
 
-                <button className="admin-action-view" onClick={() => handleViewBarangayUserClick(user.id)}>View</button>
+                <button className="admin-action-view" onClick={() => handleViewBarangayUserClick(user.id)}><img src="/Images/view.png" alt="View" /></button>
 
                 {isAuthorized && (
                     <>
@@ -364,13 +364,13 @@ useEffect(() => {
                         className="admin-action-edit"
                         onClick={() => handleEditBarangayUserClick(user.id)}
                     >
-                        Edit
+                         <img src="/Images/edit.png" alt="Edit" />
                     </button>
                     <button
                         className="admin-action-delete"
                         onClick={() => handleDeleteBarangayUserClick(user.id)}
                     >
-                        Delete
+                         <img src="/Images/delete.png" alt="Delete" />
                     </button>
                     </>
                 )}

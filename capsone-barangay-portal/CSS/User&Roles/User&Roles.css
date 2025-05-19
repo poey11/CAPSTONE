@@ -113,7 +113,7 @@
   height: 80px;
 }
 
-  
+
 .user-roles-module-main-container{
   width: 100%;
   height: 100vh;
@@ -294,9 +294,6 @@
 
 .admin-action-accept,
 .admin-action-reject,
-.admin-action-edit,
-.admin-action-view,
-.admin-action-delete,
 .admin-generateUserID,
 .createNewBarangayUser {   
     border: none;
@@ -307,35 +304,44 @@
     transition: background-color 0.2s ease;
 }
 
-.admin-action-view {
-  background-color: #4caf50; /* Green */
-  color: white;
+.admin-action-view, .admin-action-edit, .admin-action-delete {
+  border: none;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+
 }
 
-.admin-action-view:hover {
-  background-color: #3e8f41; /* Green */
+.admin-action-view img {
+ filter: brightness(0) saturate(100%) invert(38%) sepia(78%) saturate(374%) hue-rotate(81deg) brightness(91%) contrast(92%);
 }
 
 
-.admin-action-edit,
+.admin-action-edit img {
+filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-rotate(189deg) brightness(91%) contrast(101%);
+}
+
+.admin-action-delete img {
+   filter: brightness(0) saturate(100%) invert(19%) sepia(93%) saturate(7490%) hue-rotate(357deg) brightness(96%) contrast(107%);
+}
+
+
 .admin-action-accept{
   background-color: #ff9800; /* Orange */
   color: white;
 }
 
 
-.admin-action-edit:hover,
+
 .admin-action-accept:hover{
     background-color: #d58102; /* Orange */
 }
 
-.admin-action-reject,
-.admin-action-delete {
+.admin-action-reject {
     background-color: #f44336; /* Red */
     color: white;
 }
-.admin-action-reject:hover,
-.admin-action-delete:hover {
+.admin-action-reject:hover{
     background-color: #d73c31; /* Red */
 }
 
