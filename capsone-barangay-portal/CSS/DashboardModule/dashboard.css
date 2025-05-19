@@ -1,14 +1,13 @@
 .main-container {
     width: 100%;
-    height: 100vh;
-    background-color: #f9f9f9;
+    height: auto;
+   background-color: #F0F2F8; 
     padding: 30px;
     margin-left: 2rem;
-    overflow-y: auto;
 }
 
 .dashboard {
-    color: grey;
+   color: #2C3E50;
     font-weight: bold;
     font-size: 2rem;
     padding-left: 2rem;
@@ -16,18 +15,41 @@
     margin-top: 1.5rem;
 }
 
+.dashboard-title {
+      position: relative;
+     width: 600px;
+     border: 1px solid #5a6b7c;
+     border-radius: 10px;
+     background-color: #ffffff;
+     padding: 30px 20px 20px;
+     padding-top: 30px;
+     margin-top: 30px;
+     margin-bottom: 30px;
+     display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1.8rem;
+    background-color: #1f3b57;
+  
+}
+
+
+
 .metric-card {
     display: flex;
     flex-direction: column;
     justify-content: space-between; 
     align-items: center;
     border-radius: 1rem;
-    border: 2px solid #ddd;
     padding: 2rem;
     min-height: 250px;
-    background-color: #f4f2f2;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     width: 100%;
+    border: 2px solid rgba(36, 53, 76, 0.7);
+     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
 }
 
 
@@ -38,19 +60,21 @@
     border-radius: 1rem;
     border: 2px solid #ddd;
     padding: 2rem;
-    height: 180px; /* use fixed height */
+    height: 180px; 
     min-height: 200px;
-    background-color: #f4f2f2;
     margin-top: 1.5rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     width: 100%;
+    border: 2px solid rgba(36, 53, 76, 0.7);
+     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
 }
 
 .counts-metric-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
     background-color: #f0f0f0;
-    border-color: #bbb;
+    border-color:  #214666;
 }
 
 .counts-metric-card:hover .count {
@@ -73,7 +97,7 @@
     transform: translateY(-10px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
     background-color: #f0f0f0;
-    border-color: #bbb;
+    border-color:  #214666;
 }
 
 .card-left-side {
@@ -94,7 +118,7 @@
     align-items: center;
     text-align: center;
     width: 60%;
-    height: 1050%;
+    height: 100%;
     margin-left: 1rem;
 }
 
@@ -145,7 +169,7 @@
 .title {
     font-size: 1.25rem;
     font-weight: bold;
-    color: grey;
+    color: #2C3E50;
 }
 
 .count {
@@ -240,8 +264,14 @@
     width: 100%;
     justify-content: center;
     align-items: center;
- 
+    background-color: #ffffff;
+        border: 2px solid rgba(36, 53, 76, 0.7);
+     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+     border-radius: 1rem;
+     padding-bottom: 20px;
+    overflow: hidden;
 }
+
 .services-section-left-side {
     display: flex;
     width: 30%;

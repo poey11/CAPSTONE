@@ -229,6 +229,23 @@ export default function KasambahayListModule() {
           <h2 className="breadcrumb">Kasambahay Masterlist<span className="chevron"></span></h2>
       </div>*/}
       <div className="resident-module-section-1">
+
+           <div className="redirection-section">
+        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+        {getPageNumbers().map((number, index) => (
+          <button
+            key={index}
+            onClick={() => typeof number === 'number' && paginate(number)}
+            className={currentPage === number ? "active" : ""}
+          >
+            {number}
+          </button>
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+      </div>
+
+
+
         {/*<h1>Kasambahay Masterlist</h1>*/}
         {isAuthorized ? (
         <Link href="/dashboard/ResidentModule/kasambahayList/AddKasambahay">
@@ -322,7 +339,7 @@ export default function KasambahayListModule() {
                     )
                   }
                 >
-                  View
+                  <img src="/Images/view.png" alt="View" />
                 </button>
                 {!isAuthorized ? (
                 <>
@@ -330,13 +347,13 @@ export default function KasambahayListModule() {
                     className="residentmodule-action-edit hidden"
                     aria-hidden="true"
                   >
-                    Edit
+                    <img src="/Images/edit.png" alt="View" />
                   </button>
                   <button
                     className="residentmodule-action-delete hidden"
                     aria-hidden="true"
                   >
-                    Delete
+                     <img src="/Images/delete.png" alt="View" />
                   </button>
                 </>
               ) : (
@@ -345,7 +362,7 @@ export default function KasambahayListModule() {
                     className="residentmodule-action-edit"
                     onClick={() => handleEditClick(resident.id)}
                   >
-                    Edit
+                    <img src="/Images/edit.png" alt="View" />
                   </button>
                   <button
                     className="residentmodule-action-delete"
@@ -356,7 +373,7 @@ export default function KasambahayListModule() {
                       )
                     }
                   >
-                    Delete
+                   <img src="/Images/delete.png" alt="View" />
                   </button>
                 </>
               )}
@@ -373,21 +390,6 @@ export default function KasambahayListModule() {
 </div>
 
     
-      <div className="redirection-section">
-        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {getPageNumbers().map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === 'number' && paginate(number)}
-            className={currentPage === number ? "active" : ""}
-          >
-            {number}
-          </button>
-        ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-      </div>
-
-
       {showDeletePopup && (
                         <div className="confirmation-popup-overlay-module-kasambahay">
                             <div className="confirmation-popup-module-kasambahay">

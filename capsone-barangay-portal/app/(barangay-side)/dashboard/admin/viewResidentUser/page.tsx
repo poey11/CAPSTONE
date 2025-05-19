@@ -209,6 +209,8 @@ export default function ViewUser() {
 
     return (
         <main className="viewresident-main-container">
+
+               {/*
             <div className="path-section">
                 <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
                 <h1 className="breadcrumb">
@@ -227,6 +229,7 @@ export default function ViewUser() {
                 </h1>
                 <h2 className="breadcrumb">Resident User Details<span className="chevron"></span></h2>
             </div>
+        
 
             <div className="viewresident-page-title-section-1">
                 <h1>
@@ -235,6 +238,8 @@ export default function ViewUser() {
                         : "Pending Resident Users"}
                 </h1>
             </div>
+            */}
+
 
             <div className="viewresident-main-content">
                 <div className="viewresident-section-1">
