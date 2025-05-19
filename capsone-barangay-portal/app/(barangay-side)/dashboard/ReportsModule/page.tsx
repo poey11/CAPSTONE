@@ -31,7 +31,7 @@ const ReportsPage = () => {
   const [loadingRegistrationSummary, setLoadingRegistrationSummary] = useState(false);  
 
   // for resident demographic reports
-  const [loadingResidentSeniorDemographic, setLoadingResidentSeniortDemographic] = useState(false);  
+  const [loadingResidentSeniorDemographic, setLoadingResidentSeniorDemographic] = useState(false);  
   const [loadingResidentStudentDemographic, setLoadingResidentStudentDemographic] = useState(false);  
   const [loadingResidentPWDDemographic, setLoadingResidentPWDDemographic] = useState(false);  
   const [loadingResidentSoloParentDemographic, setLoadingResidentSoloParentDemographic] = useState(false);  
@@ -251,7 +251,7 @@ const ReportsPage = () => {
       
       // Set the value and styles for the header
       headerRow.getCell(1).value = `(NEW MEMBERS ${currentMonthYear})`;
-      headerRow.getCell(1).font = { bold: false, italic: true, size: 21, color: { argb: "FF0000" } }; // Increased font size
+      headerRow.getCell(1).font = { bold: true, italic: true, size: 21, color: { argb: "FF0000" } }; // Increased font size
       headerRow.height = 25;
       headerRow.alignment = { horizontal: "left", vertical: "middle" };
       
@@ -512,7 +512,7 @@ const ReportsPage = () => {
   // for demographic reports
 
   const generateSeniorCitizenReport = async () => {
-    setLoadingResidentSeniortDemographic(true);
+    setLoadingResidentSeniorDemographic(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -528,7 +528,7 @@ const ReportsPage = () => {
   
       if (residents.length === 0) {
         alert("No senior citizens found.");
-        setLoadingResidentSeniortDemographic(false);
+        setLoadingResidentSeniorDemographic(false);
         return;
       }
   
@@ -557,173 +557,29 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
-      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
-      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
+  
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY DEMOGRAPHICS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
       worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
       worksheet.getCell("A2").value = reportTitle;
   
       const dataStartRow = 4;
-      let insertionRow = dataStartRow;
+      const originalFooterStartRow = 24;
+      const originalFooterEndRow = 28;
   
+      // Get footer images/drawings
+      const footerDrawings = worksheet.getImages().filter(img => {
+        const row = img.range?.tl?.nativeRow;
+        return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
+      });
+  
+      // Insert rows to make room for residents before footer
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(residents.length).fill([]));
+  
+      // Insert resident data
       residents.forEach((resident, index) => {
-        const row = worksheet.getRow(insertionRow);
-        row.height = 55;
-  
-        const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
-        const cells = [
-          (index + 1).toString(),
-          fullName,
-          resident.address || "",
-          resident.dateOfBirth || "",
-          resident.placeOfBirth || "",
-          resident.age || "",
-          resident.sex || "",
-          resident.civilStatus || "",
-          resident.occupation || "",
-          resident.contactNumber || "",
-          resident.emailAddress || "",
-          resident.precinctNumber || "",
-        ];
-  
-        cells.forEach((value, idx) => {
-          const cell = row.getCell(idx + 1);
-          cell.value = value;
-          cell.font = { name: "Calibri", size: 12 };
-          cell.alignment = { horizontal: 'center', wrapText: true };
-          cell.border = {
-            top: { style: "medium", color: { argb: "000000" } },
-            bottom: { style: "medium", color: { argb: "000000" } },
-            left: { style: "medium", color: { argb: "000000" } },
-            right: { style: "medium", color: { argb: "000000" } },
-          };
-        });
-  
-        row.commit();
-        insertionRow++;
-      });
-  
-      const totalRow = worksheet.getRow(insertionRow);
-      worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
-      totalRow.getCell(1).value = `TOTAL SENIOR CITIZENS: ${residents.length}`;
-      totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
-      totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
-      for (let col = 1; col <= 12; col++) {
-        const cell = totalRow.getCell(col);
-        cell.border = {
-          top: { style: "medium" },
-          bottom: { style: "medium" },
-          left: { style: "medium" },
-          right: { style: "medium" },
-        };
-      }      
-      totalRow.commit();
-  
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-  
-      const fileName = `Senior_Citizen_Report_${year}.xlsx`;
-      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
-      await uploadBytes(storageRef, blob);
-  
-      const fileUrl = await getDownloadURL(storageRef);
-  
-      alert("Senior Citizen Report generated successfully. Please wait for the downloadable file!");
-  
-      return fileUrl;
-    } catch (error) {
-      console.error("Error generating senior citizen report:", error);
-      alert("Failed to generate Senior Citizen Report.");
-    } finally {
-      setLoadingResidentSeniortDemographic(false);
-    }
-  };
-
-  const handleGenerateSeniorPDF = async () => {
-    setLoadingResidentSeniortDemographic(true);
-    try {
-      const fileUrl = await generateSeniorCitizenReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
-  
-      const response = await fetch("/api/convertPDF", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileUrl }),
-      });
-  
-      if (!response.ok) throw new Error("Failed to convert to PDF");
-  
-      const blob = await response.blob();
-      const currentDate = new Date();
-      const year = currentDate.getFullYear();
-      saveAs(blob, `Senior_Citizen_Report_${year}.pdf`);
-  
-      alert("Senior Citizen Report successfully converted to PDF!");
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to generate PDF.");
-    } finally {
-      setLoadingResidentSeniortDemographic(false);
-    }
-  };
-  
-  const generateStudentDemographicReport = async () => {
-    setLoadingResidentStudentDemographic(true);
-    try {
-      const currentDate = new Date();
-      const year = currentDate.getFullYear();
-      const reportTitle = `STUDENT DEMOGRAPHIC REPORT ${year}`;
-  
-      const residentRef = collection(db, "Residents");
-      const q = query(residentRef);
-      const querySnapshot = await getDocs(q);
-  
-      let residents = querySnapshot.docs
-        .map((doc) => doc.data())
-        .filter((resident) => resident.isStudent === true || (resident.age !== undefined && resident.age <= 18));
-  
-      if (residents.length === 0) {
-        alert("No student records found.");
-        setLoadingResidentStudentDemographic(false);
-        return;
-      }
-  
-      residents.sort((a, b) => {
-        const lastA = (a.lastName || "").trim().toUpperCase();
-        const lastB = (b.lastName || "").trim().toUpperCase();
-        const firstA = (a.firstName || "").trim().toUpperCase();
-        const firstB = (b.firstName || "").trim().toUpperCase();
-        const addressA = (a.address || "").trim().toUpperCase();
-        const addressB = (b.address || "").trim().toUpperCase();
-  
-        if (lastA === lastB) {
-          if (firstA === firstB) {
-            return addressA.localeCompare(addressB);
-          }
-          return firstA.localeCompare(firstB);
-        }
-        return lastA.localeCompare(lastB);
-      });
-  
-      const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
-      const url = await getDownloadURL(templateRef);
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-  
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(arrayBuffer);
-      const worksheet = workbook.worksheets[0];
-      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
-      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
-      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
-      worksheet.getCell("A2").value = reportTitle;
-  
-      const dataStartRow = 4;
-      let insertionRow = dataStartRow;
-  
-      residents.forEach((resident, index) => {
-        const row = worksheet.getRow(insertionRow);
+        const rowIndex = dataStartRow + index;
+        const row = worksheet.getRow(rowIndex);
         row.height = 55;
   
         const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
@@ -756,12 +612,13 @@ const ReportsPage = () => {
         });
   
         row.commit();
-        insertionRow++;
       });
   
-      const totalRow = worksheet.getRow(insertionRow);
-      worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
-      totalRow.getCell(1).value = `TOTAL STUDENTS: ${residents.length}`;
+      // Insert TOTAL row after data
+      const totalRowIndex = dataStartRow + residents.length;
+      const totalRow = worksheet.getRow(totalRowIndex);
+      worksheet.mergeCells(`A${totalRowIndex}:L${totalRowIndex}`);
+      totalRow.getCell(1).value = `TOTAL SENIOR CITIZENS: ${residents.length}`;
       totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
       totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
       for (let col = 1; col <= 12; col++) {
@@ -772,9 +629,265 @@ const ReportsPage = () => {
           left: { style: "medium" },
           right: { style: "medium" },
         };
-      }      
+      }
       totalRow.commit();
   
+      // Shift footer drawings down
+      footerDrawings.forEach(drawing => {
+        const offset = residents.length;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+      });
+  
+      // Insert dual date row below footer
+      const footerShift = residents.length;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 2;
+  
+      worksheet.insertRow(newDateRowIndex - 1, []);
+      worksheet.insertRow(newDateRowIndex, []);
+  
+      const dateRow = worksheet.getRow(newDateRowIndex + 1);
+      dateRow.height = 40;
+  
+      const formattedDate = currentDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+  
+      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(1);
+      dateCell1.value = `${formattedDate}\nDate`;
+      dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
+  
+      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(4);
+      dateCell2.value = `${formattedDate}\nDate`;
+      dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
+  
+      dateRow.commit();
+  
+      // Export the file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const fileName = `Senior_Citizen_Report_${year}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+      alert("Senior Citizen Report generated successfully. Please wait for the downloadable file!");
+  
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating senior citizen report:", error);
+      alert("Failed to generate Senior Citizen Report.");
+    } finally {
+      setLoadingResidentSeniorDemographic(false);
+    }
+  };
+  
+  const handleGenerateSeniorPDF = async () => {
+    setLoadingResidentSeniorDemographic(true);
+    try {
+      const fileUrl = await generateSeniorCitizenReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      saveAs(blob, `Senior_Citizen_Report_${year}.pdf`);
+  
+      alert("Senior Citizen Report successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingResidentSeniorDemographic(false);
+    }
+  };
+  
+  const generateStudentDemographicReport = async () => {
+    setLoadingResidentStudentDemographic(true);
+    try {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const reportTitle = `STUDENT DEMOGRAPHIC REPORT ${year}`;
+  
+      const residentRef = collection(db, "Residents");
+      const q = query(residentRef);
+      const querySnapshot = await getDocs(q);
+  
+      const residents = querySnapshot.docs
+        .map((doc) => doc.data())
+        .filter((resident) => resident.isStudent === true || (resident.age !== undefined && resident.age <= 18));
+  
+      if (residents.length === 0) {
+        alert("No student records found.");
+        setLoadingResidentStudentDemographic(false);
+        return;
+      }
+  
+      residents.sort((a, b) => {
+        const lastA = (a.lastName || "").trim().toUpperCase();
+        const lastB = (b.lastName || "").trim().toUpperCase();
+        const firstA = (a.firstName || "").trim().toUpperCase();
+        const firstB = (b.firstName || "").trim().toUpperCase();
+        const addressA = (a.address || "").trim().toUpperCase();
+        const addressB = (b.address || "").trim().toUpperCase();
+  
+        if (lastA === lastB) {
+          if (firstA === firstB) {
+            return addressA.localeCompare(addressB);
+          }
+          return firstA.localeCompare(firstB);
+        }
+        return lastA.localeCompare(lastB);
+      });
+  
+      // Load Excel template
+      const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+  
+      // Update header
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY DEMOGRAPHICS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
+      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      worksheet.getCell("A2").value = reportTitle;
+  
+      // Define rows for data and footer
+      const dataStartRow = 4;
+      const originalFooterStartRow = 24; // Original footer drawing start row (adjust if needed)
+      const originalFooterEndRow = 28;   // Original footer drawing end row (adjust if needed)
+  
+      // Get footer drawings (images) in the footer rows
+      const footerDrawings = worksheet.getImages().filter(img => {
+        const row = img.range?.tl?.nativeRow;
+        return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
+      });
+  
+      // Insert enough rows before footer to fit all resident rows
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(residents.length).fill([]));
+  
+      // Insert resident data rows
+      residents.forEach((resident, index) => {
+        const rowIndex = dataStartRow + index;
+        const row = worksheet.getRow(rowIndex);
+        row.height = 55;
+  
+        const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
+  
+        const cells = [
+          (index + 1).toString(),
+          fullName,
+          resident.address || "",
+          resident.dateOfBirth || "",
+          resident.placeOfBirth || "",
+          resident.age || "",
+          resident.sex || "",
+          resident.civilStatus || "",
+          resident.occupation || "",
+          resident.contactNumber || "",
+          resident.emailAddress || "",
+          resident.precinctNumber || "",
+        ];
+  
+        cells.forEach((value, idx) => {
+          const cell = row.getCell(idx + 1);
+          cell.value = value;
+          cell.font = { name: "Calibri", size: 12 };
+          cell.alignment = { horizontal: "center", wrapText: true };
+          cell.border = {
+            top: { style: "medium", color: { argb: "000000" } },
+            bottom: { style: "medium", color: { argb: "000000" } },
+            left: { style: "medium", color: { argb: "000000" } },
+            right: { style: "medium", color: { argb: "000000" } },
+          };
+        });
+  
+        row.commit();
+      });
+  
+      // Add the total solo parents row just below the last resident data row
+      const totalRowIndex = dataStartRow + residents.length;
+      const totalRow = worksheet.getRow(totalRowIndex);
+      worksheet.mergeCells(`A${totalRowIndex}:L${totalRowIndex}`);
+      totalRow.getCell(1).value = `TOTAL STUDENTS/MINORS: ${residents.length}`;
+      totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
+      totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
+      for (let col = 1; col <= 12; col++) {
+        const cell = totalRow.getCell(col);
+        cell.border = {
+          top: { style: "medium" },
+          bottom: { style: "medium" },
+          left: { style: "medium" },
+          right: { style: "medium" },
+        };
+      }
+      totalRow.commit();
+  
+      // Move footer drawings down by the number of inserted rows (residents.length)
+      footerDrawings.forEach(drawing => {
+        const offset = residents.length;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+      });
+  
+      // Insert 2 more rows after footer to add date text
+      // Footer end row shifts by the number of inserted rows too
+      const footerShift = residents.length;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 2; // 2 rows after footer end
+  
+      // Insert 2 rows for spacing before date (optional, since we calculate exact position)
+      worksheet.insertRow(newDateRowIndex - 1, []); // 1st empty row before date
+      worksheet.insertRow(newDateRowIndex, []);     // 2nd empty row before date
+  
+      // Set the date string in column A of newDateRowIndex + 1
+      const dateRow = worksheet.getRow(newDateRowIndex + 1);
+
+      // Increase the row height (e.g., 30 points)
+      dateRow.height = 40;
+      
+      const formattedDate = currentDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      
+      // First date: Merge A to B
+      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(1);
+      dateCell1.value = `${formattedDate}\nDate`;
+      dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
+
+      // Second date: Merge D to E
+      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(4); // E is column 5
+      dateCell2.value = `${formattedDate}\nDate`;
+      dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
+      dateRow.commit();
+  
+      // Save and upload
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -785,16 +898,17 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-  
       alert("Student Demographic Report generated successfully. Please wait for the downloadable file!");
       return fileUrl;
     } catch (error) {
-      console.error("Error generating student report:", error);
-      alert("Failed to generate Student Demographic Report.");
+      console.error("Error generating Student report:", error);
+      alert("Failed to generate Student Report.");
     } finally {
       setLoadingResidentStudentDemographic(false);
     }
   };
+  
+  
 
   const handleGenerateStudentPDF = async () => {
     setLoadingResidentStudentDemographic(true);
@@ -844,9 +958,7 @@ const ReportsPage = () => {
         return;
       }
   
-      // Sort, load template, insert data (same as previous implementations)
-      // Use same structure but replace title and filename accordingly
-  
+      // Load Excel template
       const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
       const url = await getDownloadURL(templateRef);
       const response = await fetch(url);
@@ -855,18 +967,35 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
-      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
-      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
+  
+      // Update header
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY DEMOGRAPHICS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
       worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
       worksheet.getCell("A2").value = reportTitle;
   
-      let insertionRow = 4;
+      // Define rows for data and footer
+      const dataStartRow = 4;
+      const originalFooterStartRow = 24; // Original footer drawing start row (adjust if needed)
+      const originalFooterEndRow = 28;   // Original footer drawing end row (adjust if needed)
   
+      // Get footer drawings (images) in the footer rows
+      const footerDrawings = worksheet.getImages().filter(img => {
+        const row = img.range?.tl?.nativeRow;
+        return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
+      });
+  
+      // Insert enough rows before footer to fit all resident rows
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(residents.length).fill([]));
+  
+      // Insert resident data rows
       residents.forEach((resident, index) => {
-        const row = worksheet.getRow(insertionRow);
+        const rowIndex = dataStartRow + index;
+        const row = worksheet.getRow(rowIndex);
         row.height = 55;
   
         const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
+  
         const cells = [
           (index + 1).toString(),
           fullName,
@@ -882,8 +1011,8 @@ const ReportsPage = () => {
           resident.precinctNumber || "",
         ];
   
-        cells.forEach((value, i) => {
-          const cell = row.getCell(i + 1);
+        cells.forEach((value, idx) => {
+          const cell = row.getCell(idx + 1);
           cell.value = value;
           cell.font = { name: "Calibri", size: 12 };
           cell.alignment = { horizontal: "center", wrapText: true };
@@ -896,12 +1025,13 @@ const ReportsPage = () => {
         });
   
         row.commit();
-        insertionRow++;
       });
   
-      const totalRow = worksheet.getRow(insertionRow);
-      worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
-      totalRow.getCell(1).value = `TOTAL PWDs: ${residents.length}`;
+      // Add the total solo parents row just below the last resident data row
+      const totalRowIndex = dataStartRow + residents.length;
+      const totalRow = worksheet.getRow(totalRowIndex);
+      worksheet.mergeCells(`A${totalRowIndex}:L${totalRowIndex}`);
+      totalRow.getCell(1).value = `TOTAL STUDENTS/MINORS: ${residents.length}`;
       totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
       totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
       for (let col = 1; col <= 12; col++) {
@@ -912,9 +1042,53 @@ const ReportsPage = () => {
           left: { style: "medium" },
           right: { style: "medium" },
         };
-      }      
+      }
       totalRow.commit();
   
+      // Move footer drawings down by the number of inserted rows (residents.length)
+      footerDrawings.forEach(drawing => {
+        const offset = residents.length;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+      });
+  
+      // Insert 2 more rows after footer to add date text
+      // Footer end row shifts by the number of inserted rows too
+      const footerShift = residents.length;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 2; // 2 rows after footer end
+  
+      // Insert 2 rows for spacing before date (optional, since we calculate exact position)
+      worksheet.insertRow(newDateRowIndex - 1, []); // 1st empty row before date
+      worksheet.insertRow(newDateRowIndex, []);     // 2nd empty row before date
+  
+      // Set the date string in column A of newDateRowIndex + 1
+      const dateRow = worksheet.getRow(newDateRowIndex + 1);
+
+      // Increase the row height (e.g., 30 points)
+      dateRow.height = 40;
+      
+      const formattedDate = currentDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      
+      // First date: Merge A to B
+      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(1);
+      dateCell1.value = `${formattedDate}\nDate`;
+      dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
+
+      // Second date: Merge D to E
+      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(4); // E is column 5
+      dateCell2.value = `${formattedDate}\nDate`;
+      dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
+      dateRow.commit();
+  
+      // Save and upload
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -928,7 +1102,7 @@ const ReportsPage = () => {
       alert("PWD Demographic Report generated successfully. Please wait for the downloadable file!");
       return fileUrl;
     } catch (error) {
-      console.error("Error generating PWD report:", error);
+      console.error("Error generating Student report:", error);
       alert("Failed to generate PWD Report.");
     } finally {
       setLoadingResidentPWDDemographic(false);
@@ -980,7 +1154,7 @@ const ReportsPage = () => {
   
       if (residents.length === 0) {
         alert("No solo parent records found.");
-        setLoadingMasterResident(false);
+        setLoadingResidentSoloParentDemographic(false);
         return;
       }
   
@@ -1001,6 +1175,7 @@ const ReportsPage = () => {
         return lastA.localeCompare(lastB);
       });
   
+      // Load Excel template
       const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
       const url = await getDownloadURL(templateRef);
       const response = await fetch(url);
@@ -1009,14 +1184,244 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
+  
+      // Update header
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY DEMOGRAPHICS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
+      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      worksheet.getCell("A2").value = reportTitle;
+  
+      // Define rows for data and footer
+      const dataStartRow = 4;
+      const originalFooterStartRow = 24; // Original footer drawing start row (adjust if needed)
+      const originalFooterEndRow = 28;   // Original footer drawing end row (adjust if needed)
+  
+      // Get footer drawings (images) in the footer rows
+      const footerDrawings = worksheet.getImages().filter(img => {
+        const row = img.range?.tl?.nativeRow;
+        return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
+      });
+  
+      // Insert enough rows before footer to fit all resident rows
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(residents.length).fill([]));
+  
+      // Insert resident data rows
+      residents.forEach((resident, index) => {
+        const rowIndex = dataStartRow + index;
+        const row = worksheet.getRow(rowIndex);
+        row.height = 55;
+  
+        const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
+  
+        const cells = [
+          (index + 1).toString(),
+          fullName,
+          resident.address || "",
+          resident.dateOfBirth || "",
+          resident.placeOfBirth || "",
+          resident.age || "",
+          resident.sex || "",
+          resident.civilStatus || "",
+          resident.occupation || "",
+          resident.contactNumber || "",
+          resident.emailAddress || "",
+          resident.precinctNumber || "",
+        ];
+  
+        cells.forEach((value, idx) => {
+          const cell = row.getCell(idx + 1);
+          cell.value = value;
+          cell.font = { name: "Calibri", size: 12 };
+          cell.alignment = { horizontal: "center", wrapText: true };
+          cell.border = {
+            top: { style: "medium", color: { argb: "000000" } },
+            bottom: { style: "medium", color: { argb: "000000" } },
+            left: { style: "medium", color: { argb: "000000" } },
+            right: { style: "medium", color: { argb: "000000" } },
+          };
+        });
+  
+        row.commit();
+      });
+  
+      // Add the total solo parents row just below the last resident data row
+      const totalRowIndex = dataStartRow + residents.length;
+      const totalRow = worksheet.getRow(totalRowIndex);
+      worksheet.mergeCells(`A${totalRowIndex}:L${totalRowIndex}`);
+      totalRow.getCell(1).value = `TOTAL SOLO PARENTS: ${residents.length}`;
+      totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
+      totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
+      for (let col = 1; col <= 12; col++) {
+        const cell = totalRow.getCell(col);
+        cell.border = {
+          top: { style: "medium" },
+          bottom: { style: "medium" },
+          left: { style: "medium" },
+          right: { style: "medium" },
+        };
+      }
+      totalRow.commit();
+  
+      // Move footer drawings down by the number of inserted rows (residents.length)
+      footerDrawings.forEach(drawing => {
+        const offset = residents.length;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+      });
+  
+      // Insert 2 more rows after footer to add date text
+      // Footer end row shifts by the number of inserted rows too
+      const footerShift = residents.length;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 2; // 2 rows after footer end
+  
+      // Insert 2 rows for spacing before date (optional, since we calculate exact position)
+      worksheet.insertRow(newDateRowIndex - 1, []); // 1st empty row before date
+      worksheet.insertRow(newDateRowIndex, []);     // 2nd empty row before date
+  
+      // Set the date string in column A of newDateRowIndex + 1
+      const dateRow = worksheet.getRow(newDateRowIndex + 1);
+
+      // Increase the row height (e.g., 30 points)
+      dateRow.height = 40;
+      
+      const formattedDate = currentDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      
+      // First date: Merge A to B
+      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(1);
+      dateCell1.value = `${formattedDate}\nDate`;
+      dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
+
+      // Second date: Merge D to E
+      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(4); // E is column 5
+      dateCell2.value = `${formattedDate}\nDate`;
+      dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
+      dateRow.commit();
+  
+      // Save and upload
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const fileName = `Solo_Parent_Demographic_Report_${year}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+      alert("Solo Parent Demographic Report generated successfully. Please wait for the downloadable file!");
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating Solo Parent report:", error);
+      alert("Failed to generate Solo Parent Report.");
+    } finally {
+      setLoadingResidentSoloParentDemographic(false);
+    }
+  };
+  
+  
+  const handleGenerateSoloParentPDF = async () => {
+    setLoadingResidentSoloParentDemographic(true);
+    try {
+      const fileUrl = await generateSoloParentReport();
+      if (!fileUrl) return;
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+      const year = new Date().getFullYear();
+      saveAs(blob, `Solo_Parent_Demographic_Report_${year}.pdf`);
+  
+      alert("Solo Parent Report successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error generating Solo Parent PDF:", error);
+      alert("Failed to generate Solo Parent PDF.");
+    } finally {
+      setLoadingResidentSoloParentDemographic(false);
+    }
+  };
+  
+
+  // all residents
+
+  const generateResidentRegistrationSummary = async () => {
+    setLoadingRegistrationSummary(true);
+    try {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = currentDate.toLocaleString("default", { month: "long" });
+      const reportTitle = `RESIDENT REGISTRATION SUMMARY - ${month.toUpperCase()} ${year}`;
+  
+      const residentRef = collection(db, "Residents");
+  
+      const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+  
+      const q = query(
+        residentRef,
+        where("createdAt", ">=", startOfMonth),
+        where("createdAt", "<=", endOfMonth)
+      );
+  
+      const querySnapshot = await getDocs(q);
+      let residents = querySnapshot.docs.map((doc) => doc.data());
+  
+      if (residents.length === 0) {
+        alert("No residents registered this month.");
+        setLoadingRegistrationSummary(false);
+        return;
+      }
+  
+      // Sort alphabetically
+      residents.sort((a, b) => {
+        const lastA = (a.lastName || "").trim().toUpperCase();
+        const lastB = (b.lastName || "").trim().toUpperCase();
+        const firstA = (a.firstName || "").trim().toUpperCase();
+        const firstB = (b.firstName || "").trim().toUpperCase();
+        const addressA = (a.address || "").trim().toUpperCase();
+        const addressB = (b.address || "").trim().toUpperCase();
+  
+        if (lastA === lastB) {
+          if (firstA === firstB) {
+            return addressA.localeCompare(addressB);
+          }
+          return firstA.localeCompare(firstB);
+        }
+        return lastA.localeCompare(lastB);
+      });
+  
+      // Load the Excel template
+      const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+  
       worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
-      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
       worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
       worksheet.getCell("A2").value = reportTitle;
   
       const dataStartRow = 4;
       let insertionRow = dataStartRow;
   
+      // Insert residents
       residents.forEach((resident, index) => {
         const row = worksheet.getRow(insertionRow);
         row.height = 55;
@@ -1054,214 +1459,88 @@ const ReportsPage = () => {
         insertionRow++;
       });
   
+      // Insert TOTAL row
       const totalRow = worksheet.getRow(insertionRow);
       worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
-      totalRow.getCell(1).value = `TOTAL SOLO PARENTS: ${residents.length}`;
+      totalRow.getCell(1).value = `TOTAL REGISTERED: ${residents.length}`;
       totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
       totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
       for (let col = 1; col <= 12; col++) {
-        const cell = totalRow.getCell(col);
-        cell.border = {
+        totalRow.getCell(col).border = {
           top: { style: "medium" },
           bottom: { style: "medium" },
           left: { style: "medium" },
           right: { style: "medium" },
         };
       }
-      
       totalRow.commit();
   
+      // Move footer rows (24–26) down after total row
+      const footerOriginalStart = 24;
+      const footerOriginalEnd = 26;
+      const footerTargetStart = insertionRow + 1;
+      const footerTargetEnd = footerTargetStart + (footerOriginalEnd - footerOriginalStart);
+  
+      for (let i = 0; i <= (footerOriginalEnd - footerOriginalStart); i++) {
+        const sourceRow = worksheet.getRow(footerOriginalStart + i);
+        const targetRow = worksheet.getRow(footerTargetStart + i);
+  
+        sourceRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+          const targetCell = targetRow.getCell(colNumber);
+          targetCell.value = cell.value;
+          targetCell.style = { ...cell.style };
+        });
+  
+        targetRow.commit();
+      }
+  
+      // Add date row two rows after the footer
+      const dateRow = worksheet.getRow(footerTargetEnd + 2);
+      const date = new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+  
+      // First date under "Prepared by"
+      worksheet.mergeCells(`A${dateRow.number}:C${dateRow.number}`);
+      const preparedDateCell = dateRow.getCell(1);
+      preparedDateCell.value = `${date}\nDate`;
+      preparedDateCell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
+      preparedDateCell.font = { italic: true, bold: true };
+  
+      // Second date under "Noted by"
+      worksheet.mergeCells(`E${dateRow.number}:I${dateRow.number}`);
+      const notedDateCell = dateRow.getCell(5);
+      notedDateCell.value = `${date}\nDate`;
+      notedDateCell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
+      notedDateCell.font = { italic: true, bold: true };
+  
+      dateRow.commit();
+  
+      // Generate and upload
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
   
-      const fileName = `Solo_Parent_Demographic_Report_${year}.xlsx`;
+      const fileName = `Resident_Registration_Summary_${month}_${year}.xlsx`;
       const storageRef = ref(storage, `GeneratedReports/${fileName}`);
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      alert("Solo Parent Demographic Report generated successfully. Please wait for the downloadable file!");
+  
+      alert("Resident Registration Summary generated successfully. Please wait for the downloadable file!");
+  
       return fileUrl;
     } catch (error) {
-      console.error("Error generating Solo Parent report:", error);
-      alert("Failed to generate Solo Parent Report.");
+      console.error("Error generating summary report:", error);
+      alert("Failed to generate Resident Registration Summary.");
     } finally {
-      setLoadingResidentSoloParentDemographic(false);
-    }
-  };
-
-  
-  const handleGenerateSoloParentPDF = async () => {
-    setLoadingResidentSoloParentDemographic(true);
-    try {
-      const fileUrl = await generateSoloParentReport();
-      if (!fileUrl) return;
-  
-      const response = await fetch("/api/convertPDF", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileUrl }),
-      });
-  
-      if (!response.ok) throw new Error("Failed to convert to PDF");
-  
-      const blob = await response.blob();
-      const year = new Date().getFullYear();
-      saveAs(blob, `Solo_Parent_Demographic_Report_${year}.pdf`);
-  
-      alert("Solo Parent Report successfully converted to PDF!");
-    } catch (error) {
-      console.error("Error generating Solo Parent PDF:", error);
-      alert("Failed to generate Solo Parent PDF.");
-    } finally {
-      setLoadingResidentSoloParentDemographic(false);
-    }
-  };
-  
-
-  // all residents
-
-  const generateResidentRegistrationSummary = async () => {
-    setLoadingRegistrationSummary(true);
-  try {
-    const currentDate = new Date();
-    const year = currentDate.getFullYear();
-    const month = currentDate.toLocaleString("default", { month: "long" });
-    const reportTitle = `RESIDENT REGISTRATION SUMMARY - ${month.toUpperCase()} ${year}`;
-
-    const residentRef = collection(db, "Residents");
-
-    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-
-    const q = query(
-      residentRef,
-      where("createdAt", ">=", startOfMonth),
-      where("createdAt", "<=", endOfMonth)
-    );
-
-    const querySnapshot = await getDocs(q);
-    let residents = querySnapshot.docs.map((doc) => doc.data());
-
-    if (residents.length === 0) {
-      alert("No residents registered this month.");
       setLoadingRegistrationSummary(false);
-      return;
     }
-
-    residents.sort((a, b) => {
-      const lastA = (a.lastName || "").trim().toUpperCase();
-      const lastB = (b.lastName || "").trim().toUpperCase();
-      const firstA = (a.firstName || "").trim().toUpperCase();
-      const firstB = (b.firstName || "").trim().toUpperCase();
-      const addressA = (a.address || "").trim().toUpperCase();
-      const addressB = (b.address || "").trim().toUpperCase();
-
-      if (lastA === lastB) {
-        if (firstA === firstB) {
-          return addressA.localeCompare(addressB);
-        }
-        return firstA.localeCompare(firstB);
-      }
-      return lastA.localeCompare(lastB);
-    });
-
-    const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
-    const url = await getDownloadURL(templateRef);
-    const response = await fetch(url);
-    const arrayBuffer = await response.arrayBuffer();
-
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(arrayBuffer);
-    const worksheet = workbook.worksheets[0];
-    worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
-    worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center",vertical: "middle" };
-    worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
-    worksheet.getCell("A2").value = reportTitle;
-
-    const dataStartRow = 4;
-    let insertionRow = dataStartRow;
-
-    residents.forEach((resident, index) => {
-      const row = worksheet.getRow(insertionRow);
-      row.height = 55;
-
-      const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
-      const cells = [
-        (index + 1).toString(),
-        fullName,
-        resident.address || "",
-        resident.dateOfBirth || "",
-        resident.placeOfBirth || "",
-        resident.age || "",
-        resident.sex || "",
-        resident.civilStatus || "",
-        resident.occupation || "",
-        resident.contactNumber || "",
-        resident.emailAddress || "",
-        resident.precinctNumber || "",
-      ];
-
-      cells.forEach((value, index) => {
-        row.getCell(index + 1).value = value;
-        row.getCell(index + 1).font = { name: "Calibri", size: 12, bold: false };
-        row.getCell(index + 1).alignment = {
-          horizontal: "center",
-          wrapText: true,
-        };
-        row.getCell(index + 1).border = {
-          top: { style: "medium", color: { argb: "000000" } },
-          bottom: { style: "medium", color: { argb: "000000" } },
-          left: { style: "medium", color: { argb: "000000" } },
-          right: { style: "medium", color: { argb: "000000" } },
-        };
-      });
-
-      row.commit();
-      insertionRow++;
-    });
-
-    const totalRow = worksheet.getRow(insertionRow);
-    worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
-    Object.assign(totalRow.getCell(1), {
-      value: `TOTAL REGISTERED: ${residents.length}`,
-      alignment: { horizontal: "center", vertical: "middle" },
-      font: { name: "Times New Roman", size: 10, bold: true },
-    });
-    
-    for (let col = 1; col <= 12; col++) {
-      const cell = totalRow.getCell(col);
-      cell.border = {
-        top: { style: "medium" },
-        bottom: { style: "medium" },
-        left: { style: "medium" },
-        right: { style: "medium" },
-      };
-    }
-    totalRow.commit();
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-
-    const fileName = `Resident_Registration_Summary_${month}_${year}.xlsx`;
-    const storageRef = ref(storage, `GeneratedReports/${fileName}`);
-    await uploadBytes(storageRef, blob);
-
-    const fileUrl = await getDownloadURL(storageRef);
-
-    alert("Resident Registration Summary generated successfully. Please wait for the downloadable file!");
-
-    return fileUrl;
-  } catch (error) {
-    console.error("Error generating summary report:", error);
-    alert("Failed to generate Resident Registration Summary.");
-  } finally {
-    setLoadingRegistrationSummary(false);
-  }
-};
+  };
+  
 
 
   const handleRegistrationSummaryPDF = async () => {
