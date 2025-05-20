@@ -87,7 +87,7 @@
   padding: 1rem; 
   text-align: center; 
   border-bottom: 2px solid #ddd;
-    color: #2C3E50;
+    color: rgb(44, 42, 42); /*new text color sa td*/
      font-weight: normal;
 }
 
