@@ -7,30 +7,6 @@
     padding-top: 150px;
 }
 
-/*
-.add-resident-main-header{
-  background-color: #ffffff;
-  border-bottom: 2px solid #ddd;
-  padding-left: 30px;
-  padding-right: 30px;
-  padding-top: 15px;
-  padding-bottom: 15px;
-}*/
-
-/*
-.addresident-page-title-section-1{
-  width: 20%;
-  background-color: #2C3E50;
-  border-radius: 6px;
-  padding: 5px;
-  text-align: center;
-}
-
-.addresident-page-title-section-1 h1{
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #ffffff;
-}*/
 
 .add-resident-main-content {
     display: flex;
@@ -149,85 +125,6 @@
   background-color: #CA2D2D; 
 }
 
-/*
-.add-resident-section-2 {
-    display: flex;
-    width: 100%;
-    margin-left: 50px;
-}
-*/
-/*
-.add-resident-section-2 {
-    display: flex;
-    width: 100%;
-}
-    */
-/*
-.fields-container{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin-top: 50px;
-}
-  */
-/*
-.fields-section{
-  display: flex;
-  flex-direction: column;
-  margin-top: 30px;
-  position: relative;
-}
-  */
-
-/*
-
-.fields-section p{
-  font-size: 15px;
-  color: grey;
-  font-weight: bold;
-}
-
-
-  .add-resident-input-field {
-    padding: 8px;
-    width: 80%;
-    margin-top: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    color: rgba(0, 0, 0, 0.4);
-    text-align: left;
-  }
-
-
-
-/*
-COMPACT MODES
-*/
-
-/*
-
-.add-resident-section-2-left-side.compact-mode .fields-container{
-  display: flex;
-  flex-direction: column;
-  width: 60%;
-}
-.add-resident-section-2-left-side.compact-mode.add-resident-input-field {
-  width: 100%;
-}
-
-.add-resident-section-2-left-side.compact-mode {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 90%;
-}
-
-*/
-
-
-
 
   .add-resident-input-field-disabled{
     background-color: white; 
@@ -311,6 +208,14 @@ COMPACT MODES
     color: red;
     margin-left: 5px;
   }
+
+  .required-asterisk {
+    color: red;
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 20px;
+  }
   
 
   .add-resident-section-2-right-side {
@@ -344,11 +249,15 @@ COMPACT MODES
     width: 100%; 
   }
 
-  .file-name-image-display {
+  .identificationpic-display {
     margin-top: 10px;
     font-size: 16px;
     color: rgba(0, 0, 0, 0.6);
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     }
 
 
@@ -362,6 +271,26 @@ COMPACT MODES
       border-radius: 5px;
       gap: 10px;
       margin-bottom: 10px;
+  }
+
+  .identificationpic-file-name-image-display-indiv {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    background-color: #F0F2F8;
+    border-radius: 5px;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+  .identification-picture{
+    width: 200px;
+    margin-top: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .file-item {
@@ -397,6 +326,7 @@ COMPACT MODES
       border: none;
       cursor: pointer;
       padding: 5px;
+      margin-top: 7px;
   }
   
   .delete-icon {
@@ -429,13 +359,7 @@ COMPACT MODES
     text-align: center;
   }
 
-  .file-name-image-display-indiv {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; 
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-  }
+
 
   .filename-image-container {
     display: flex;
@@ -457,12 +381,6 @@ COMPACT MODES
     margin-left: auto; 
   }
 
-  .delete-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-  }
 
   .delete-icon {
     width: 20px;
@@ -738,40 +656,6 @@ input[type="checkbox"] {
   height: 27px;
 }
 
-/*
-.path-section {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.path-section h1 {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #214666;
-}
-
-.path-section h2 {
-  font-size: 1rem;
-  font-weight: bold;
-  color: rgba(33, 70, 102, 0.6);
-}
-
-.breadcrumb {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.chevron {
-  color: #2C3E50;
-  margin-left: 10px;
-}*/
-
-/*
-.input-error {
-  border: 2px solid red !important;
-}
-*/
 
 .input-error {
   border: 2px solid red !important;
@@ -1016,12 +900,15 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 
 .add-resident-bottom-section{
-  padding: 35px;
+  padding-top: 35px;
+  padding-left: 35px;
+  padding-right: 35px;
+  height: 100%;
 }
 
 .add-resident-bottom-section-scroll{
   overflow-y: auto;
-  height: 370px;
+  height: 400px;
 }
 
 
@@ -1128,7 +1015,10 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   border: 1px solid #5a6b7c;
   border-radius: 10px;
   background-color: #ffffff;
-  padding: 30px 20px 20px;
+  padding-top: 30px;
+  padding-right: 20px;
+  padding-bottom: 50px;
+  padding-left: 20px;
   padding-top: 40px;
   margin-top: 30px;
 
@@ -1170,8 +1060,12 @@ FOR ADDITION OF NEW MAIN RESIDENTS
      border: 1px solid #5a6b7c;
      border-radius: 10px;
      background-color: #ffffff;
-     padding: 30px 20px 20px;
-     padding-top: 40px;
+     padding-top: 30px;
+    padding-right: 20px;
+    padding-bottom: 50px;
+    padding-left: 20px;
+    padding-top: 40px;
+
      margin-top: 30px;
 
      display: flex;
@@ -1200,6 +1094,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
      margin-bottom: 20px;
      display: flex;
      align-items: center;
+     background-color: pink;
    }
 
    .box-container-verificationdocs:hover {
@@ -1219,6 +1114,20 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     height: 220px; 
     width: 350px;
     overflow-y: auto;
+    margin-top: 10px;
+    align-self: center;
+  }
+
+  .identificationpic-container {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    display: block;
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    height: 220px; 
+    width: 350px;
     margin-top: 10px;
     align-self: center;
   }
