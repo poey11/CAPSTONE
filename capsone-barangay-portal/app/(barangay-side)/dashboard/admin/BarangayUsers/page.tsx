@@ -253,19 +253,6 @@ useEffect(() => {
         <main className="barangayusers-page-main-container">
             
             <div className="user-roles-module-section-1">
-                <div className="redirection-section-users">
-                    <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-                    {getPageNumbers().map((number, index) => (
-                    <button
-                        key={index}
-                        onClick={() => typeof number === 'number' && paginate(number)}
-                        className={currentPage === number ? "active" : ""}
-                    >
-                        {number}
-                    </button>
-                    ))}
-                    <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-                </div>
                 
                 {isAuthorized &&(
                     <Link href="/dashboard/admin/addBarangayUser">
@@ -344,10 +331,8 @@ useEffect(() => {
               </button>
             </th>
             <th>Official Name</th>
+                 <th>Position</th>
             <th>Sex</th>
-            <th>Address</th>
-            <th>Phone</th>
-            <th>Position</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -362,10 +347,8 @@ useEffect(() => {
                 {user.lastName ? `${user.lastName}, ` : ""}
                 {user.firstName} {user.middleName}
             </td>
-            <td>{user.sex}</td>
-            <td>{user.address}</td>
-            <td>{user.phone}</td>
             <td>{user.position}</td>
+            <td>{user.sex}</td>
             <td>
                 <div className="admin-actions">
                 {/*<button className="admin-action-view" onClick={(e) => { e.stopPropagation(); }}>View</button>*/}
@@ -398,6 +381,20 @@ useEffect(() => {
     )}
   </>
 </div>
+
+   <div className="redirection-section-users">
+                    <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+                    {getPageNumbers().map((number, index) => (
+                    <button
+                        key={index}
+                        onClick={() => typeof number === 'number' && paginate(number)}
+                        className={currentPage === number ? "active" : ""}
+                    >
+                        {number}
+                    </button>
+                    ))}
+                    <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+                </div>  
 
             {showDeletePopup && (
                 <div className="user-roles-confirmation-popup-overlay">

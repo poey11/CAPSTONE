@@ -46,7 +46,7 @@
     padding: 1rem; 
     text-align: center; 
     border-bottom: 2px solid #ddd;
-    color: #2C3E50;
+ color: rgb(44, 42, 42);
     font-weight: normal;
 }
 
@@ -117,7 +117,7 @@
 
 .resident-module-section-1 {
     display: flex;
-    justify-content: space-between; 
+    justify-content: flex-end; /*Gawin space between if sa taas yung pagination*/ 
     width: 100%;
     gap: 1rem; 
 }
