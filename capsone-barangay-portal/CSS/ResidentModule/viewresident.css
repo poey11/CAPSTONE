@@ -766,12 +766,12 @@ background-color: #214666;
 }
 
 .uploaded-picture {
-  width: 255px;
+  width: 100%;
   height: 200px;
 }
 
 .default-picture {
-  width: 252px;
+  width: 100%;
   height: 200px;
 }
 
