@@ -3,7 +3,7 @@
     width: 100%;
     height: 100vh;
     background-color: #f9f9f9;
-    padding: 30px;
+    padding-top: 150px;
     margin-left: 3rem;
     overflow-y: auto; 
    
@@ -124,33 +124,6 @@ margin-top: 20px;
     font-size: 1rem;
   }
 
-  .path-section {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 30px;
-  }
-  
-  .path-section h1 {
-    font-size: 1.15rem;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.5);
-  }
-  
-  .path-section h2 {
-    font-size: 1.15rem;
-    font-weight: bold;
-    color: rgba(61, 61, 61, 0.5);
-  }
-  
-  .breadcrumb {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  .chevron {
-    color: #888;
-    margin-left: 10px;
-  }
 
   .employer-link {
     color: grey;
@@ -252,15 +225,7 @@ background-color: #214666;
   overflow: hidden; /* Prevent body overflow */
 }
 
-/* Left photo section */
-.resident-photo-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 50px 50px;
-  width: 35%;
-  overflow-y: auto; /* optional, in case photo content exceeds */
-}
+
 
 /* Right section that holds scrollable content */
 .resident-details-section {
@@ -299,48 +264,7 @@ background-color: #214666;
 
 
 
-.resident-profile-container {
-  border: 1px solid rgba(44, 62, 80, 0.7);
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  width: 100%;
-  text-align: center;
-  margin-top: -8px; /* Pulls the card up under the label */
 
-}
-
-.resident-details-label {
-  background-color: #214E77;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 14px;
-  position: relative;
-  top: 12px; /* Pushes it closer to the card */
-  z-index: 1;
-}
-
-
-.resident-photo {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.resident-name-box {
-  padding: 10px;
-  background-color: #F2F2F2;
-}
-
-.resident-name {
-  font-size: 16px;
-  font-weight: bold;
-  color: #2C3E50;
-  margin: 0;
-}
 
 
 .fields-section-residents{
@@ -532,33 +456,6 @@ background-color: #214666;
     font-size: 1rem;
   }
 
-  .path-section {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 30px;
-  }
-  
-  .path-section h1 {
-    font-size: 1.15rem;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.5);
-  }
-  
-  .path-section h2 {
-    font-size: 1.15rem;
-    font-weight: bold;
-    color: rgba(61, 61, 61, 0.5);
-  }
-  
-  .breadcrumb {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  .chevron {
-    color: #888;
-    margin-left: 10px;
-  }
 
   .employer-link {
     color: grey;
@@ -566,4 +463,331 @@ background-color: #214666;
     text-decoration: underline;
     cursor: pointer;
   }
+
+
+
+  /* NEW */
+
+.view-resident-main-content {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  border-radius: 1rem;
+  border: 2px solid rgba(36, 53, 76, 0.7);
+  margin:  auto; 
+  background-color: #ffffff;
+  overflow: hidden; 
+  height: 580px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.view-resident-main-content hr{
+  border: none; 
+  border-top: 2px solid rgba(0, 0, 0, 0.10);
+  margin: 30px 0; 
+}
+
+.view-resident-main-section1{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #214666;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.view-resident-header-second-section {
+  background-color: #214666;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-right: 50px;
+  text-align: center;
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+  }
   
+.view-resident-header-second-section h2 {
+  margin: 1px 0;
+  font-size: 12px;
+  font-weight: normal;
+}
+  
+.view-resident-header-second-section .barangay-name {
+  font-size: 18px;
+  font-weight: bolder;
+  margin: 10px 0 6px;
+  letter-spacing: 1px;
+}
+  
+.view-resident-header-second-section .address,
+.view-resident-header-second-section .contact {
+  font-size: 11px;
+}
+  
+.logo1-image-side-bar-1{
+  width: 170px;
+  height: 100px;
+}
+
+.logo2-image-side-bar-1{
+  width: 90px;
+  height: 90px;
+  margin-right: 45px;
+}
+
+.view-resident-header-body{
+  display: flex;
+  flex-direction: column;
+}
+
+.view-resident-header-body-top-section{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.view-resident-info-toggle-wrapper {
+  display: flex;
+  justify-content: center; 
+  gap: 30px;
+  margin-bottom: 20px;
+  width: 70%;
+  align-items: center;
+}
+
+.view-resident-backbutton-container{
+  width: 30%;
+  display: flex;
+  padding-left: 30px;
+}
+
+.view-resident-header-body-bottom-section{
+  display: flex;
+  flex-direction: row;
+}
+
+
+.title-resident-details-box {
+  position: absolute;
+  left: 10%; 
+  top: 0; 
+  transform: translate(25%, 25%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 192px;
+  text-align: center;
+}
+
+
+.resident-profile-container {
+  border: 1px solid rgba(44, 62, 80, 0.7);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%;
+  text-align: center;
+  margin-top: -8px; /* Pulls the card up under the label */
+  margin-left: 20px;
+  height: 250px;
+}
+
+.resident-details-label {
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  position: relative;
+  top: 12px; /* Pushes it closer to the card */
+  z-index: 1;
+  left: 10px;
+}
+
+
+.resident-photo {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.resident-name-box {
+  padding: 10px;
+  background-color: #F2F2F2;
+}
+
+.resident-name {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2C3E50;
+  margin: 0;
+}
+
+.resident-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-left: 60px;
+  padding-right: 50px;
+  padding-bottom: 50px;
+  width: 35%;
+}
+
+.view-resident-info-main-container{
+  width: 63%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 20px;
+}
+
+.view-resident-info-container-scrollable{
+  width: 100%;
+  height: 325px;
+  border: 1px solid rgba(44, 62, 80, 0.7);
+  border-radius: 8px;
+  margin-right: 45px;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+
+.view-resident-info-main-content{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.view-main-resident-content-left-side{
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+} 
+
+.view-main-resident-content-right-side {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+} 
+
+
+.view-main-resident-content-left-side p,
+.view-main-resident-content-right-side p {
+ color: grey;
+ font-weight: bold;
+ font-size: 1rem;
+}
+
+.view-resident-fields-section{
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 13px;
+}
+
+.view-resident-fields-section p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 20px;
+}
+
+.view-resident-input-field {
+  padding: 8px;
+  width: 85%;
+  margin-top: 10px;
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  color: #000000;
+  text-align: left;
+}
+
+.box-container-outer-resident-picture {
+  position: relative; 
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.title-resident-picture {
+  position: absolute;
+  left: -3%; 
+  top: 0; 
+  transform: translate(25%, 25%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  z-index: 10;
+  width: 180px;
+  text-align: center;
+}
+
+.box-container-resident-picture {
+  position: relative;
+  width: 100%;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.resident-picture-container {
+  width: 100%;
+  height: 60%;
+  overflow: hidden;
+}
+
+.resident-picture{
+  width: 255px;
+  height: 200px;
+}
+
+.uploaded-picture {
+  width: 100%;
+  height: 200px;
+}
+
+.default-picture {
+  width: 100%;
+  height: 200px;
+}
+
+
+
+.resident-name-section{
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid #5a6b7c;
+}
+
+.resident-name-section h2 {
+  font-weight: bold;
+  color: #2C3E50;
+  font-size: 18px;
+}
+

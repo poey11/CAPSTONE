@@ -87,7 +87,7 @@
   padding: 1rem; 
   text-align: center; 
   border-bottom: 2px solid #ddd;
-    color: #2C3E50;
+    color: rgb(44, 42, 42); /*new text color sa td*/
      font-weight: normal;
 }
 
@@ -125,7 +125,7 @@
 
 .user-roles-module-section-1{
  display: flex;
-    justify-content: space-between; 
+    justify-content: flex-end; 
     width: 100%;
     gap: 1rem; 
 }
@@ -655,10 +655,10 @@ filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-
     padding: 5px;
     border-radius: 5px;
     gap: 5px;
-      border: 2px solid rgba(36, 53, 76, 0.7);
-     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(36, 53, 76, 0.7);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     background-color: #ffffff;
-}
+} 
 
 .redirection-section-users button {
   padding: 4px 8px;
