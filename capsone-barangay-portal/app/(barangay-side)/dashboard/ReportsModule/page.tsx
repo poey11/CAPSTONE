@@ -2676,13 +2676,6 @@ const ReportsPage = () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
-
-      worksheet.pageSetup = {
-        fitToPage: true,
-        fitToHeight: 0, 
-        fitToWidth: 1,  
-        orientation: 'landscape', 
-      };
   
       //  Update report title
       worksheet.getCell("A3").value = reportTitle;
