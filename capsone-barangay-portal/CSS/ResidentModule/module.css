@@ -117,7 +117,7 @@
 
 .resident-module-section-1 {
     display: flex;
-    justify-content: space-between; 
+    justify-content: flex-end; /*Gawin space between if sa taas yung pagination*/ 
     width: 100%;
     gap: 1rem; 
 }

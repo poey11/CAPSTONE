@@ -253,19 +253,6 @@ useEffect(() => {
         <main className="barangayusers-page-main-container">
             
             <div className="user-roles-module-section-1">
-                <div className="redirection-section-users">
-                    <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-                    {getPageNumbers().map((number, index) => (
-                    <button
-                        key={index}
-                        onClick={() => typeof number === 'number' && paginate(number)}
-                        className={currentPage === number ? "active" : ""}
-                    >
-                        {number}
-                    </button>
-                    ))}
-                    <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-                </div>
                 
                 {isAuthorized &&(
                     <Link href="/dashboard/admin/addBarangayUser">
@@ -398,6 +385,20 @@ useEffect(() => {
     )}
   </>
 </div>
+
+   <div className="redirection-section-users">
+                    <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+                    {getPageNumbers().map((number, index) => (
+                    <button
+                        key={index}
+                        onClick={() => typeof number === 'number' && paginate(number)}
+                        className={currentPage === number ? "active" : ""}
+                    >
+                        {number}
+                    </button>
+                    ))}
+                    <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+                </div>  
 
             {showDeletePopup && (
                 <div className="user-roles-confirmation-popup-overlay">
