@@ -196,55 +196,65 @@ export default function AddBarangayUser() {
                     </div>
                 </div>
 
-                <hr/>
+              
 
                 <div className="create-new-barangay-user">
-                    <form id="addBarangayUserForm" onSubmit={handleSubmit}>
-                        <div className="fields-container">
-                            <div className="fields-section">
-                                <p>Position <span className="required">*</span> </p>
-                                <select  value={users.position}  onChange={handleChange} id="roles" name="position" className={`role ${invalidFields.includes("position") ? "input-error" : ""}`} >
-                                    <option value="" disabled>Select a Position</option>
-                                    <option value="Punong Barangay">Punong Barangay</option>
-                                    <option value="Secretary">Secretary</option>
-                                    <option value="Assistant Secretary">Asst Secretary</option>
-                                    <option value="Admin Staff">Admin Staff</option>
-                                    <option value="LF Staff">LF Staff</option>
-                                </select>
-                            </div>
-                    
-                            <div className="fields-section">
-                                <p>Password <span className="required">*</span></p>
-                                <input 
-                                    value={users.password} 
-                                    onChange={handleChange} 
-                                    id="password" 
-                                    type="password" 
-                                    name="password" 
-                                    className={`password ${invalidFields.includes("password") ? "input-error" : ""}`}
-                                    placeholder="Enter Password"
-                                    required
-                                />
-                            </div>
+                    <form id="addBarangayUserForm" onSubmit={handleSubmit} className="add-barangay-section-2">
+                        <div className="fields-container-barangay-user">
 
-                            <div className="fields-section">
+                             <div className="add-barangay-user-section-2-left-side">
+                                    <div className="fields-section">
+                                        <p>Position <span className="required">*</span> </p>
+                                        <select  value={users.position}  onChange={handleChange} id="roles" name="position" className={`barangay-user-input-fields ${invalidFields.includes("position") ? "input-error" : ""}`} >
+                                            <option value="" disabled>Select a Position</option>
+                                            <option value="Punong Barangay">Punong Barangay</option>
+                                            <option value="Secretary">Secretary</option>
+                                            <option value="Assistant Secretary">Asst Secretary</option>
+                                            <option value="Admin Staff">Admin Staff</option>
+                                            <option value="LF Staff">LF Staff</option>
+                                        </select>
+                                    </div>
+                            
+                                    <div className="fields-section">
+                                        <p>Password <span className="required">*</span></p>
+                                        <input 
+                                            value={users.password} 
+                                            onChange={handleChange} 
+                                            id="password" 
+                                            type="password" 
+                                            name="password" 
+                                            className={`barangay-user-input-fields ${invalidFields.includes("password") ? "input-error" : ""}`}
+                                            placeholder="Enter Password"
+                                            required
+                                        />
+                                    </div>
+                             </div>
+                          
+                              <div className="add-barangay-user-section-2-right-side">
+
+                                <div className="fields-section">
                                 <p>User ID <span className="required">*</span> </p>
                                 <input 
                                     type="text" 
                                     id="username"
                                     name="userId"
-                                    className={`userID ${invalidFields.includes("userId") ? "input-error" : ""}`}
+                                    className={`barangay-user-input-fields ${invalidFields.includes("userId") ? "input-error" : ""}`}
                                     value={users.userId} 
                                     placeholder="User ID"
                                     disabled  
                                     required
                                 />
-                            </div>
-                        </div>
-                        <div className="actions-section-addbrgyuser">
-                            <button onClick={GenerateID} className="generateUserID">Generate User ID</button>
-                        </div>
+                                </div>
+                               
+                               <div className="actions-section-addbrgyuser">
+                                    <button onClick={GenerateID} className="generateUserID">Generate User ID</button>
+                                </div>
+
+                              </div>
+                     
                         
+                        </div>
+                     
                     </form>
                 </div>
 
