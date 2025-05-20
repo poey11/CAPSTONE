@@ -1,68 +1,53 @@
 
 import { db } from "@/app/db/firebase";
 import {getLocalDateTimeString} from "@/app/helpers/helpers";
-import { doc, onSnapshot,collection, setDoc } from "firebase/firestore";
+import { doc, onSnapshot,collection, setDoc, query, where } from "firebase/firestore";
 import { useState,useEffect } from "react";
 import { useSession } from "next-auth/react";
 
 
 
-interface HearingFormProps {
+
+interface DialogueFormProps {
     id: string;
+    complainantName: string;
+    respondentName: string;
 }
 type DialogueDetails = {
     minutesOfDialogue: string;
     remarks: string;
     partyA: string;
     partyB: string;
-    firstHearingOfficer: string;
-    secondHearingOfficer: string;
-    thirdHearingOfficer: string;
+    HearingOfficer: string;
     dialogueMeetingDateTime: string;
-    complainant:{
-       firstName: string;
-       middleName: string;
-        lastName: string;
-    },
-    respondent:{
-        firstName: string;
-        middleName: string;
-         lastName: string;
-    },
+    Cstatus: string;
+    Rstatus: string;
   };
   
 
-const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
+const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respondentName}) => {
     const user = useSession().data?.user;
     const [showDialogueContent, setShowDialogueContent] = useState(false); // Initially hidden
     const [existingData, setExistingData] = useState(false);
     const [isDialogue, setIsDialogue] = useState(false);
     const today = getLocalDateTimeString(new Date());
+    const [dialogueLetterData, setDialogueLetterData] = useState<any>(null);
+
     const [details, setDetails] = useState<DialogueDetails>({
-        complainant:{
-            firstName: "",
-            middleName: "",
-             lastName:"",
-        },
-        respondent:{
-            firstName: "",
-            middleName: "",
-             lastName:"",
-        },
-        firstHearingOfficer: "",
-        secondHearingOfficer: "",
-        thirdHearingOfficer: "",
+        HearingOfficer: "",
         minutesOfDialogue: "",
         remarks: "",
         partyA: "",
         partyB: "",
-        dialogueMeetingDateTime: "",// add date validation
+        dialogueMeetingDateTime:"",
+        Cstatus: "",
+        Rstatus: "",
     });
 
     useEffect(() => {
         setDetails(prevDetails => ({
             ...prevDetails,
-            firstHearingOfficer: user?.fullName || ""
+            HearingOfficer: user?.fullName || ""
         }));
             
     },[user])
@@ -95,13 +80,25 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
         return () => unsubscribe();
         
     },[])
+    
+    useEffect(()=>{
+        if(!id) return;
+        const colRef = query(collection(db, "IncidentReports", id, "GeneratedLetters"), where("letterType", "==", "dialogue"));
+        const unsubscribe = onSnapshot(colRef, (snapshot) => {
+            snapshot.forEach((doc) => {
+                setDialogueLetterData(doc.data());
+            });
+        });
+        return () => unsubscribe();
+    },[])
 
+    
     const handleToggleClick = () => {
         if(!isDialogue) return; 
         setShowDialogueContent(prevState => !prevState);
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement|HTMLSelectElement>) => {
         const { name, value } = e.target;
         const keys = name.split(".");
     
@@ -133,27 +130,8 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
             const subColRef = collection(db, "IncidentReports", id, "DialogueMeeting");
             const docRef = doc(subColRef, id);
             await setDoc(docRef, {
-                complainant: {
-                    firstName: details.complainant.firstName,
-                    middleName: details.complainant.middleName,
-                    lastName: details.complainant.lastName,
-                   
-                },
-                respondent: {
-                    firstName: details.respondent.firstName,
-                    middleName: details.respondent.middleName,
-                    lastName: details.respondent.lastName,
-                },
-                minutesOfDialogue: details.minutesOfDialogue,
-                remarks: details.remarks,
-                partyA: details.partyA,
-                partyB: details.partyB,
-                firstHearingOfficer: details.firstHearingOfficer,
-                secondHearingOfficer: details.secondHearingOfficer,
-                thirdHearingOfficer: details.thirdHearingOfficer,
-                dialogueMeetingDateTime: details.dialogueMeetingDateTime,
+                ...details,
                 filled:true,
-                createdAt: new Date(),
             });
             console.log("Document written with ID: ", docRef.id);
         } catch (error:any) {
@@ -161,6 +139,59 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
         }
         console.log(details);
     }
+
+    const usersAbsent = () => details.Cstatus === "Absent" || details.Rstatus === "Absent";
+
+    useEffect(() => {
+    const updatedDetails = { ...details };
+
+    let minutes = details.minutesOfDialogue || "";
+    let remarks = details.remarks || "";
+
+    // Handle Complainant status change
+    if (details.Cstatus === "Absent") {
+        updatedDetails.partyA = "Complainant Absent";
+
+        if (!minutes.includes("Complainant Absent")) {
+            minutes += (minutes ? " " : "") + "Complainant Absent.";
+        }
+
+        if (!remarks.includes("Complainant Absent")) {
+            remarks += (remarks ? " " : "") + "Complainant Absent.";
+        }
+    } else if (details.Cstatus === "Present") {
+        updatedDetails.partyA = "";
+
+        minutes = minutes.replace(/Complainant Absent\.?\s*/g, "").trim();
+        remarks = remarks.replace(/Complainant Absent\.?\s*/g, "").trim();
+    }
+
+    // Handle Respondent status change
+    if (details.Rstatus === "Absent") {
+        updatedDetails.partyB = "Respondent Absent";
+
+        if (!minutes.includes("Respondent Absent")) {
+            minutes += (minutes ? " " : "") + "Respondent Absent.";
+        }
+
+        if (!remarks.includes("Respondent Absent")) {
+            remarks += (remarks ? " " : "") + "Respondent Absent.";
+        }
+    } else if (details.Rstatus === "Present") {
+        updatedDetails.partyB = "";
+
+        minutes = minutes.replace(/Respondent Absent\.?\s*/g, "").trim();
+        remarks = remarks.replace(/Respondent Absent\.?\s*/g, "").trim();
+    }
+
+    updatedDetails.minutesOfDialogue = minutes;
+    updatedDetails.remarks = remarks;
+
+    setDetails(updatedDetails);
+    }, [details.Cstatus, details.Rstatus]);
+
+
+    
     return (
         <>
             <div className="dialouge-meeting-section-edit">    
@@ -182,101 +213,58 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
                                         <p>Dialogue Meeting Date and Time</p>
                                         <input type="datetime-local" 
                                         className="search-bar-edit" 
-                                        name="dialogueMeetingDateTime"
-                                        id="dialogueMeetingDateTime"
-                                        value={details.dialogueMeetingDateTime||""}
-                                        disabled={existingData ? true : false}
-                                        required={!existingData}
-                                        onChange={handleChange}
-                                        max={today} 
-                                        onKeyDown={(e => e.preventDefault())}
+                                        name="DateTimeOfMeeting"
+                                        id="DateTimeOfMeeting"
+                                        value={dialogueLetterData?.DateTimeOfMeeting||""}
+                                        disabled
                                     />
                                 </div>
                             </div>    
-                              <p>Complainant's Information</p>
-                              <div className="bars-edit">
+                              <p>Complainant's Name</p>
+                              <select className="input-group-edit" disabled={existingData} 
+                                name="Cstatus"
+                                id="Cstatus"
+                                value={details.Cstatus}
+                                onChange={handleChange}
+                                >
+                                    <option value="Present">Present</option>
+                                    <option value="Absent">Absent</option>
+                              </select>
+                              <div className="input-group-edit">
                                   <div className="input-group-edit">
-                                        <p>First Name</p>
                                         <input type="text" 
                                         className="search-bar-edit" 
-                                        name="complainant.firstName"
-                                        id="complainant.firstName"
-                                        value={details.complainant.firstName||""}
-                                        onChange={handleChange}
-                                        disabled={existingData ? true : false}
-                                        required={!existingData}
-                                        placeholder="Enter First Name" />
-                                  </div>
-                                  <div className="input-group-edit">
-                                        <p>Middle Name</p>
-                                        <input type="text" 
-                                        className="search-bar-edit" 
-                                        name="complainant.middleName"
-                                        id="complainant.middleName"
-                                        value={details.complainant.middleName||""}
-                                        onChange={handleChange}
-                                        disabled={existingData ? true : false}
-                                        required={!existingData}
-                                        placeholder="Enter Middle Name"
+                                        name="complainant.fname"
+                                        id="complainant.fname"
+                                        value={complainantName}
+                                        disabled
                                         />
                                   </div>
-                                  <div className="input-group-edit">
-                                        <p>Last Name</p>
-                                        <input type="text" 
-                                        className="search-bar-edit" 
-                                        name="complainant.lastName"
-                                        id="complainant.lastName"
-                                        value={details.complainant.lastName||""}
-                                        onChange={handleChange}
-                                        disabled={existingData ? true : false}
-                                        required={!existingData}
-                                        placeholder="Enter Last Name"
-                                        />
-                                  </div>
+                                  
                               </div>
                           </div>
 
                           <div className="section-2-dialouge-edit">
-                              <p>Respondents' Information</p>
+                              <p>Respondent's Name</p>
+                              <select className="input-group-edit" disabled={existingData}
+                                name="Rstatus"
+                                id="Rstatus"
+                                value={details.Rstatus}
+                                onChange={handleChange}
+                                >
+                                <option value="Present">Present</option>
+                                <option value="Absent">Absent</option>
+                              </select>
                               <div className="bars-edit">
                                 <div className="input-group-edit">
-                                        <p>First Name</p>
                                         <input type="text" 
                                         className="search-bar-edit" 
-                                        name="respondent.firstName"
-                                        id="respondent.firstName"
-                                        value={details.respondent.firstName||""}
-                                        onChange={handleChange}
-                                        disabled={existingData ? true : false}
-                                        required={!existingData}
-                                        placeholder="Enter First Name" />
+                                        name="respondent.fname"
+                                        id="respondent.fname"
+                                        value={respondentName}
+                                        disabled/>
                                   </div>
-                                  <div className="input-group-edit">
-                                        <p>Middle Name</p>
-                                        <input type="text" 
-                                        className="search-bar-edit" 
-                                        name="respondent.middleName"
-                                        id="respondent.middleName"
-                                        value={details.respondent.middleName||""}
-                                        onChange={handleChange}
-                                        disabled={existingData ? true : false}
-                                        required={!existingData}
-                                        placeholder="Enter Middle Name"
-                                        />
-                                  </div>
-                                  <div className="input-group-edit">
-                                        <p>Last Name</p>
-                                        <input type="text" 
-                                        className="search-bar-edit" 
-                                        name="respondent.lastName"
-                                        id="respondent.lastName"
-                                        value={details.respondent.lastName||""}
-                                        onChange={handleChange}
-                                        disabled={existingData ? true : false}
-                                        required={!existingData}
-                                        placeholder="Enter Last Name"
-                                        />
-                                  </div>
+                                  
                               </div>
                           </div>
 
@@ -289,9 +277,8 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
                                     id="minutesOfDialogue"
                                     value={details.minutesOfDialogue||""}
                                     onChange={handleChange}
-                                    onFocus={existingData ? (e => e.target.blur()):(() => {}) }
-                                    required={!existingData}
-
+                                    onFocus={existingData || usersAbsent() ? (e => e.target.blur()) : (() => {})}
+                                    required={!existingData || usersAbsent() ? false : true}
                                     rows={13}/>
                               </div>
                           </div>
@@ -305,8 +292,8 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
                                     id="partyA"
                                     value={details.partyA||""}
                                     onChange={handleChange}
-                                    onFocus={existingData ? (e => e.target.blur()):(() => {}) }
-                                    required={!existingData}
+                                    onFocus={existingData || usersAbsent()? (e => e.target.blur()):(() => {}) }
+                                    required={!existingData || usersAbsent() ? false : true}
                                     rows={10}/>
                               </div>
                               <div className="fields-section-edit">
@@ -317,8 +304,8 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
                                     name="partyB"
                                     value={details.partyB||""}
                                     onChange={handleChange}
-                                    onFocus={existingData ? (e => e.target.blur()):(() => {}) }
-                                    required={!existingData}
+                                    onFocus={existingData || usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                                    required={!existingData || usersAbsent() ? false : true}
                                     rows={10}/>
                               </div>
 
@@ -332,39 +319,21 @@ const dialogueForm: React.FC<HearingFormProps> = ({id}) => {
                                     value={details.remarks||""}
                                     onChange={handleChange}
                                     placeholder="Enter Remarks" 
-                                    onFocus={existingData ? (e => e.target.blur()):(() => {}) }
-                                    required={!existingData}
+                                    onFocus={existingData || usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                                    required={!existingData|| usersAbsent() ? false : true}
                                     rows={10}/>
                               </div>
                               <div className="fields-section-edit">
-                                    <p>First Hearing Officer</p>
+                                    <p>Hearing Officer</p>
                                     <input type="text" 
-                                    name="firstHearingOfficer"
-                                    id="firstHearingOfficer"
-                                    value={details.firstHearingOfficer||""}
+                                    name="HearingOfficer"
+                                    id="HearingOfficer"
+                                    value={details.HearingOfficer||""}
                                     onChange={handleChange}
                                     className="search-bar-edit" 
                                     disabled/>
 
-                                    <p>Second Hearing Officer</p>
-                                    <input type="text" 
-                                    name="secondHearingOfficer"
-                                    id="secondHearingOfficer"
-                                    value={details.secondHearingOfficer||""}
-                                    onChange={handleChange}
-                                    className="search-bar-edit" 
-                                    disabled={existingData ? true : false}
-                                    placeholder="Enter Hearing Officer"/>
-
-                                    <p>Third Hearing Officer</p>
-                                    <input type="text" 
-                                    name="thirdHearingOfficer"
-                                    id="thirdHearingOfficer"
-                                    value={details.thirdHearingOfficer||""}
-                                    onChange={handleChange}
-                                    className="search-bar-edit" 
-                                    disabled={existingData ? true : false}
-                                    placeholder="Enter Hearing Officer"/>
+                                  
                               </div>
 
                           </div>

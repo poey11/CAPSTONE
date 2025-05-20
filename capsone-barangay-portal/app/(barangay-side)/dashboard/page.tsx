@@ -740,7 +740,7 @@ useEffect(() => {
             <div className="services-second-section">
                       
                   <Link href="/dashboard/ServicesModule/InBarangayRequests">
-              <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
+              <p className="dashboard-title" style={{ cursor: "pointer", textDecoration: "underline" }}>
                 Weekly Barangay Requests Chart
               </p>
             </Link>
@@ -881,7 +881,7 @@ useEffect(() => {
             <div className="services-second-section">
                       
              <Link href="/dashboard/IncidentModule">
-                <p className="dashboard" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                <p className="dashboard-title" style={{ cursor: "pointer", textDecoration: "underline" }}>
                   Monthly Incident Reports Chart
                 </p>
               </Link>

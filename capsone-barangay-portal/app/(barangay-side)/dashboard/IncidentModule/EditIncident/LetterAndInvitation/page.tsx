@@ -2,24 +2,27 @@
 import "@/CSS/IncidentModule/Letters.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import {  useEffect,useState } from "react";
-import { addDoc,collection,doc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { addDoc,collection,doc, getDocs, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
 import { getLocalDateString, getLocalDateTimeString } from "@/app/helpers/helpers";
-import Template from "@/app/(barangay-side)/components/letterTemplate";
+import Letter from "@/app/(barangay-side)/components/letterForm"
 
 export default function GenerateDialougeLetter() {
     const user = useSession().data?.user;
     const searchParam = useSearchParams();
     const docId = searchParam.get("id")?.split("?")[0];
     const actionId = searchParam.get("id")?.split("?")[1].split("=")[1];
+    const today = getLocalDateString(new Date());
+    const [listOfStaffs, setListOfStaffs] = useState<any[]>([]);
     const [userInfo, setUserInfo] = useState<any | null>(null);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+    
     const [otherInfo, setOtherInfo] = useState({
         DateOfDelivery: "",
         DateTimeOfMeeting: "",
         LuponStaff: "",
-        DateFiled: "",
+        DateFiled:today ,
         complainant:{
             fname:"",
             address: "",
@@ -33,10 +36,30 @@ export default function GenerateDialougeLetter() {
     });
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-    const today = getLocalDateString(new Date());
-    const todayWithTime = getLocalDateTimeString(new Date(new Date().setDate(new Date().getDate() + 1)));
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0); // Set time to 00:00:00.000
+
+    const todayWithTime = getLocalDateTimeString(tomorrow);
     const [isDialogue, setIsDialogue] = useState(false);
     const [data, setData] = useState<any>(null);
+
+    useEffect(() => {
+        const fetchStaffList = async () => {
+            try {
+                const staffquery = query(collection(db, "BarangayUsers"), where("position", "==","LF Staff"), where("firstTimelogin", "==", false));
+                const querySnapshot = await getDocs(staffquery);
+                
+                querySnapshot.forEach((doc) => {
+                    setListOfStaffs((prev) => [...prev, doc.data()]);
+                });
+      
+            } catch (error: any) {
+              console.error("Error fetching LT List:", error.message);
+            }    
+        }
+        fetchStaffList();
+    },[]);
 
     useEffect(() => {
         if(!docId) return;
@@ -60,6 +83,8 @@ export default function GenerateDialougeLetter() {
         }        
     
     },[])
+
+    const safeData = Array.isArray(data) ? data : [];
 
     useEffect(() => {
         if(!docId) return;
@@ -90,8 +115,8 @@ export default function GenerateDialougeLetter() {
         return () => unsubscribe();
 
     }, []);
-    let nosHearing = userInfo?.nosHearing;
-    let nosOfGeneration = userInfo?.nosOfGeneration || 0; 
+    let hearing = userInfo?.hearing;
+    let generatedHearingSummons = userInfo?.generatedHearingSummons || 0; 
     
     useEffect(() => {
         if (userInfo) {
@@ -111,14 +136,15 @@ export default function GenerateDialougeLetter() {
         }
     }, [userInfo]);
   
-
+    console.log("otherinfo",otherInfo);
+    console.log("userinfo",userInfo);
     const handleAddLupon = () => {
       router.back();
     };
     
  
     const sendSMSForDialogue = async () => {
-     //dont forget to add respondent contact number
+     //dont forget to add the assing staff contact number
 
       try{
         const response = await fetch("/api/clickSendApi", {
@@ -136,6 +162,23 @@ export default function GenerateDialougeLetter() {
 
         const data = await response.json();
         console.log(data);
+
+
+        const responseB = await fetch("/api/clickSendApi", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                to: otherInfo.respondent.contact,
+                message: `Hello Mr/Ms. ${otherInfo.respondent.fname}, a dialogue invitation will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
+                Please wait for the invitation. Thank you!`
+            })
+        });
+        if (!responseB.ok) throw new Error("Failed to send SMS");
+
+        const dataB = await responseB.json();
+        console.log(dataB);
       }
       catch(err) {
         console.log(err);
@@ -144,7 +187,6 @@ export default function GenerateDialougeLetter() {
     }
 
     const sendSMSForSummons = async () => {
-        //dont forget to add respondent contact number
         try{
           const response = await fetch("/api/clickSendApi", {
               method: "POST",
@@ -161,6 +203,22 @@ export default function GenerateDialougeLetter() {
   
           const data = await response.json();
           console.log(data);
+
+          const responseB = await fetch("/api/clickSendApi", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                to: otherInfo.complainant.contact,
+                message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, a summons will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
+              Please wait for the invitation. Thank you!`
+            })
+        });
+        if (!responseB.ok) throw new Error("Failed to send SMS");
+
+        const dataB = await responseB.json();
+        console.log(dataB);
         }
         catch(err) {
           console.log(err);
@@ -263,15 +321,15 @@ export default function GenerateDialougeLetter() {
         const issueMonth = monthNames[issueMonthIndex];
         const issueYear = dayToday.split("T")[0].split("-")[0];
         
-        let nosHearingB ="";
-        if(nosHearing == 0 ){ 
-            nosHearingB = "First";
+        let hearingB ="";
+        if(hearing == 0 ){ 
+            hearingB = "First";
         }
-        else if (nosHearing == 1){
-            nosHearingB = "Second";
+        else if (hearing == 1){
+            hearingB = "Second";
         }
-        else if (nosHearing == 2){
-            nosHearingB = "Third";
+        else if (hearing == 2){
+            hearingB = "Third";
         }
        
         
@@ -289,7 +347,7 @@ export default function GenerateDialougeLetter() {
                     "Text2":otherInfo.complainant.address,
                     "Text3":otherInfo.respondent.fname,
                     "Text4":otherInfo.respondent.address,
-                    "Text5":nosHearingB,//make it dynamic
+                    "Text5":hearingB,//make it dynamic
                     "Text6": `${month} ${day}, ${year}`,//Month Day, Year
                     "Text7":day,//Day
                     "Text8":`${month} ${year}`,//MonthYear
@@ -330,22 +388,9 @@ export default function GenerateDialougeLetter() {
             const docRefB = (collection(db, "IncidentReports", docId, "GeneratedLetters"))
             
             await addDoc(docRefB, {
-                ...otherInfo,
                 createdAt: new Date(),
                 createdBy: user?.fullName,
                 letterType: actionId,
-                complainant: {
-                    ...otherInfo.complainant,
-                    fname: otherInfo.complainant.fname,
-                    address: otherInfo.complainant.address,
-                    contact: otherInfo.complainant.contact,
-                },
-                respondent: {
-                    ...otherInfo.respondent,
-                    fname: otherInfo.respondent.fname,
-                    address: otherInfo.respondent.address,
-                    contact: otherInfo.respondent.contact,
-                },
                 DateOfDelivery: otherInfo.DateOfDelivery,
                 DateTimeOfMeeting: otherInfo.DateTimeOfMeeting,
                 LuponStaff: otherInfo.LuponStaff,
@@ -360,44 +405,32 @@ export default function GenerateDialougeLetter() {
         try {
             if(!docId) throw new Error("Document ID is undefined");
 
-            const docRef = doc(db, "IncidentReports", docId);
-            const updates = {
-
-                ...(nosHearing !=3 && {nosHearing: nosHearing+1}),
-                nosOfGeneration: nosOfGeneration+1,
-            };
-            await updateDoc(docRef, updates);
-
             const docRefB = (collection(db, "IncidentReports", docId, "GeneratedLetters"))
-            
+            console.log(hearing);
             await addDoc(docRefB, {
-                ...otherInfo,
                 createdAt: new Date(),
                 createdBy: user?.fullName,
                 letterType: actionId,
-                complainant: {
-                    ...otherInfo.complainant,
-                    fname: otherInfo.complainant.fname,
-                    address: otherInfo.complainant.address,
-                    contact: otherInfo.complainant.contact,
-                },
-                respondent: {
-                    ...otherInfo.respondent,
-                    fname: otherInfo.respondent.fname,
-                    address: otherInfo.respondent.address,
-                    contact: otherInfo.respondent.contact,
-                },
                 DateOfDelivery: otherInfo.DateOfDelivery,
                 DateTimeOfMeeting: otherInfo.DateTimeOfMeeting,
                 LuponStaff: otherInfo.LuponStaff,
                 DateFiled: otherInfo.DateFiled,                
+               hearingNumber: hearing
             });
+
+            const docRef = doc(db, "IncidentReports", docId);
+            const updates = {
+                    ...(hearing !== 3 && { hearing: hearing + 1 }),
+                generatedHearingSummons: generatedHearingSummons + 1,
+            };
+            await updateDoc(docRef, updates);
 
         }
         catch (error: string|any) {
             console.error(error);
         }
     }
+
     const meeting = getLocalDateString(new Date(otherInfo.DateTimeOfMeeting.split("T")[0]));
     const delivery = getLocalDateString(new Date(otherInfo.DateOfDelivery));
     const onSubmit = (e: any) => {
@@ -408,8 +441,6 @@ export default function GenerateDialougeLetter() {
             setErrorPopup({ show: true, message: "Date of Delivery must be earlier than Date of Meeting" });
             return;
         }
-
-
         if (action === "print") {
             if(actionId === "summon"){
                 handleIsHearing();
@@ -419,31 +450,34 @@ export default function GenerateDialougeLetter() {
                 handleIsDialogue();
                 // printDialouge()
             }
-            clearForm();
+            //clearForm();
         } else if (action === "sendSMS") {
-            sendSMSForDialogue();
-            sendSMSForSummons();
+            if(actionId === "summon"){
+                //sendSMSForSummons();
+            }
+            else{
+                //sendSMSForDialogue();
+            }
         }
         console.log(otherInfo);
     }
     
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => { 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => { 
         const { name, value } = e.target;
-        const keys = name.split("."); // Split "complainant.fname" into ["complainant", "fname"]
+        const keys = name.split("."); 
     
         setOtherInfo((prev) => {
             if (keys.length === 2) {
-                // If name is like "complainant.fname", update the nested object
                 const [parentKey, childKey] = keys;
                 return {
                     ...prev,
                     [parentKey]: {
-                        ...(prev[parentKey as keyof typeof prev] as object), // Copy existing object
-                        [childKey]: value // Update the specific field
+                        ...(prev[parentKey as keyof typeof prev] as object), 
+                        [childKey]: value 
                     }
                 };
             }
-            return { ...prev, [name]: value }; // Default case for non-nested values
+            return { ...prev, [name]: value };
         });
     };
     
@@ -467,7 +501,8 @@ export default function GenerateDialougeLetter() {
         })
     }
     
-
+console.log(safeData);
+console.log(safeData.length)
   return (
     <main className="main-container">
         {errorPopup.show && (
@@ -481,7 +516,7 @@ export default function GenerateDialougeLetter() {
         <div className="main-content">
             <div className="section-1">
                 <button type="button" className="back-button" onClick={handleAddLupon}></button>
-                {actionId === "summon" ? <p className="NewOfficial">Summon Letter</p> : <p className="NewOfficial">Dialouge Letter</p>}
+                {actionId === "summon" ? <p className="NewOfficial">Summon Letter ({hearing} Hearing)</p> : <p className="NewOfficial">Dialouge Letter</p>}
 
              </div>
 
@@ -500,7 +535,7 @@ export default function GenerateDialougeLetter() {
                         value={otherInfo.complainant.fname}
                         id="complainant.fname"
                         name="complainant.fname"
-                        onChange={handleChange}
+                        disabled
                     />
 
                     <p>Address</p>
@@ -512,7 +547,7 @@ export default function GenerateDialougeLetter() {
                     value={otherInfo.complainant.address}
                     id="complainant.address"
                     name="complainant.address"
-                    onChange={handleChange}
+                    disabled
                     />
                     
                     <p>Contact Nos</p>
@@ -524,7 +559,7 @@ export default function GenerateDialougeLetter() {
                     value={otherInfo.complainant.contact}
                     id="complainant.contact"
                     name="complainant.contact"
-                    onChange={handleChange}
+                    disabled
                     />
 
                 </div>
@@ -542,7 +577,7 @@ export default function GenerateDialougeLetter() {
                     value={otherInfo.respondent.fname}
                     id="respondent.fname"
                     name="respondent.fname"
-                    onChange={handleChange}
+                    disabled
                     />
 
                     <p>Address</p>
@@ -554,7 +589,7 @@ export default function GenerateDialougeLetter() {
                     value={otherInfo.respondent.address}
                     id="respondent.address"
                     name="respondent.address"
-                    onChange={handleChange}
+                    disabled
                     />
                 
 
@@ -567,7 +602,7 @@ export default function GenerateDialougeLetter() {
                     value={otherInfo.respondent.contact}
                     id="respondent.contact"
                     name="respondent.contact"
-                    onChange={handleChange}
+                    disabled
                     />
                 </div>
             </div>
@@ -575,7 +610,75 @@ export default function GenerateDialougeLetter() {
 
               <div className="section-3">
                 <p className="title">Other Information</p>
+                {actionId === "dialogue" ? (<>
+                    <div className="bars">
+                        <div className="input-group">
+                            <p>Date of Delivery</p>
+                            <input type="date" className="search-bar" placeholder="Enter Date of Delivery" 
+                            value={safeData[0]?.DateOfDelivery||otherInfo.DateOfDelivery}
+                            id="DateOfDelivery"
+                            name="DateOfDelivery"
+                            min={today}
+                            onKeyDown={(e) => e.preventDefault()}
+                            onChange={handleChange}
+                            required
+                            disabled = {safeData[0]?.DateOfDelivery ? true : false}
+                            />
+                        </div>
+                        
+                        <div className="input-group">
+                            <p>Date and Time of Meeting</p>
+                            <input type="datetime-local" className="search-bar" 
+                            value={safeData[0]?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
+                            onKeyDown={(e) => e.preventDefault()}
+                            id="DateTimeOfMeeting"
+                            name="DateTimeOfMeeting"
+                            onChange={handleChange}
+                            min={todayWithTime}
+                            required
+                            disabled = {safeData[0]?.DateTimeOfMeeting ? true : false}
+                            />
+                            
+                        </div>
+
+                    </div>
+
+                    <div className="bars">
+                        <div className="input-group">
+                            {/* change into drop box */}
+                            <p>Delivered By</p>
+                            <select className="search-bar" value={safeData[0]?.LuponStaff||otherInfo.LuponStaff}
+                            id="LuponStaff"
+                            name="LuponStaff"
+                            onChange={handleChange}
+                            required
+                            disabled = {safeData[0]?.LuponStaff ? true : false}
+                            >
+                                <option value="">Select Official/Kagawad</option>
+                                {listOfStaffs.map((staff, index) => (
+                                    <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
+                                        {staff.firstName} {staff.lastName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="input-group">
+                            <p>Date Filed</p>
+                            <input type="date" className="search-bar" 
+                            value={otherInfo.DateFiled}
+                            max={today}
+                            id="DateFiled"
+                            name="DateFiled"
+                            onKeyDown={(e) => e.preventDefault()}
+                            onChange={handleChange}
+                            disabled
+                            />
+                        </div>
+                    </div>
                 
+                </>) : 
+                (<>
                     <div className="bars">
                         <div className="input-group">
                             <p>Date of Delivery</p>
@@ -587,20 +690,20 @@ export default function GenerateDialougeLetter() {
                             onKeyDown={(e) => e.preventDefault()}
                             onChange={handleChange}
                             required
+                           
                             />
                         </div>
                         
                         <div className="input-group">
                             <p>Date and Time of Meeting</p>
-                            <input type="datetime-local" className="search-bar" placeholder="Enter Date of Meeting" 
+                            <input type="datetime-local" className="search-bar" 
                             value={otherInfo.DateTimeOfMeeting}
                             onKeyDown={(e) => e.preventDefault()}
                             id="DateTimeOfMeeting"
                             name="DateTimeOfMeeting"
                             onChange={handleChange}
                             min={todayWithTime}
-                            required
-                            />
+                            required                            />
                             
                         </div>
 
@@ -610,48 +713,83 @@ export default function GenerateDialougeLetter() {
                         <div className="input-group">
                             {/* change into drop box */}
                             <p>Delivered By</p>
-                            <input type="text" className="search-bar" placeholder="Enter Name of Lupon Staff" 
-                            value={otherInfo.LuponStaff}
+                            <select className="search-bar" value={otherInfo.LuponStaff}
                             id="LuponStaff"
                             name="LuponStaff"
                             onChange={handleChange}
                             required
-                            />
+                            >
+                                <option value="">Select Official/Kagawad</option>
+                                {listOfStaffs.map((staff, index) => (
+                                    <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
+                                        {staff.firstName} {staff.lastName}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div className="input-group">
                             <p>Date Filed</p>
-                            <input type="date" className="search-bar" placeholder="Choose hearing number" 
+                            <input type="date" className="search-bar" 
                             value={otherInfo.DateFiled}
                             max={today}
                             id="DateFiled"
                             name="DateFiled"
                             onKeyDown={(e) => e.preventDefault()}
                             onChange={handleChange}
-                            required
+                            disabled
                             />
                         </div>
                     </div>
+                </>)}
+                    
                     <div className="section-4">
-                        {(nosOfGeneration < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
+                        {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                         {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
-                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button>
+                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
                     </div>
             </div>
            </form>
 
         </div> 
-       {data && data.length > 0 && (
-          <>
-            {Array.from({ length: data.length }, (_, i) => (
-              <Template key={i} index={i} complainant={data[i].complainant} 
-              respondent={data[i].respondent} DateFiled={data[i].DateFiled}
-              DateOfDelivery={data[i].DateOfDelivery} DateOfMeeting={data[i].DateTimeOfMeeting}
-              LuponStaff={data[i].LuponStaff} />
-            ))}
-          </>
-        )}
+        {/* {data && data.length > 0 && (
+           <>
+             {Array.from({ length: data.length }, (_, i) => (
+               <Template key={i} index={i} complainant={data[i].complainant} 
+               respondent={data[i].respondent} DateFiled={data[i].DateFiled}
+               DateOfDelivery={data[i].DateOfDelivery} DateOfMeeting={data[i].DateTimeOfMeeting}
+               LuponStaff={data[i].LuponStaff} />
+             ))}
+           </>
+        )} */}
        
+       {/* {actionId === "summon" && (
+                safeData.map((item, i) => (
+                    <Letter 
+                      key={i}
+                      DateOfDelivery={item.DateOfDelivery}
+                      DateFiled={item.DateFiled}
+                      DateTimeOfMeeting={item.DateTimeOfMeeting}
+                      LuponStaff={item.LuponStaff}
+                      hearingNumber={item.hearingNumber}
+                    />
+                ))
+        )} */}
+        {actionId === "summon" && (
+            Array.from({ length: safeData.length }, (_, i) => (
+                <Letter 
+                key={i}
+                DateOfDelivery={safeData[i].DateOfDelivery}
+                DateFiled={safeData[i].DateFiled}
+                DateTimeOfMeeting={safeData[i].DateTimeOfMeeting}
+                LuponStaff={safeData[i].LuponStaff}
+                hearingNumber={safeData[i].hearingNumber}
+                />
+            ))
+        )}
+
+
+
     </main>
   );
 }

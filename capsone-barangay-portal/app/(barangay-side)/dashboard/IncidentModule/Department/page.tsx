@@ -10,10 +10,8 @@ import { db,storage } from "@/app/db/firebase";
 const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
 
 export default function Department() {
-  const { data: session } = useSession();
-  const userDepartment = session?.user?.department;
-  const userPosition = session?.user?.position;
-  const userRole = session?.user?.role;
+  const user = useSession().data?.user;
+  const userDepartment = user?.department;
 
   
   const [incidentData, setIncidentData] = useState<any[]>([]);
@@ -40,12 +38,7 @@ export default function Department() {
   const searchParam = useSearchParams();
   const departmentId = searchParam.get("id");
 
-  const isAuthorized =
-  userDepartment === departmentId ||
-  (
-    (userPosition === "LT Staff") &&
-    userRole === "Barangay Official"
-  );
+  const isAuthorized = userDepartment === departmentId;
 
 
 
@@ -238,9 +231,13 @@ useEffect(() => {
     <main className="main-container-departments">
       <div className="section-1-departments">
         <h1>Lupon Tagapamayapa: {departmentId} Table</h1>
-        <button className="add-announcement-btn-departments" onClick={() => router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`)}>
+        {isAuthorized && (
+          <button className="add-announcement-btn-departments" onClick={() => router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`)}>
           Add New Incident
-        </button>
+          </button>
+
+        )}
+        
       </div>
 
       <div className="section-2-departments">
@@ -307,7 +304,8 @@ useEffect(() => {
         >
             <td>{incident.caseNumber}</td>
             <td>{incident.dateFiled} {incident.timeFiled}</td>
-            <td>{incident.nature}</td>
+            {incident.nature === "Others" ? (<td>{incident.specifyNature}</td>):(<td>{incident.nature}</td>)}
+            
             <td>
               <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
                 {incident.status}
