@@ -253,8 +253,6 @@ const PendingResidentUsers = () => {
                                     <th>Name</th>
                                     <th>Address</th>
                                     <th>Phone</th>
-                                    <th>Sex</th>
-                                    <th>Role</th>
                                     <th>Email</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -271,8 +269,6 @@ const PendingResidentUsers = () => {
                                     <td>{user.last_name}, {user.first_name} {user.middle_name}</td>
                                     <td>{user.address}</td>
                                     <td>{user.phone}</td>
-                                    <td>{user.sex}</td>
-                                    <td>{user.role}</td>
                                     <td>{user.email}</td>
                                     <td>
                                         <span className={`status-badge ${user.status.toLowerCase().replace(" ", "-")}`}>

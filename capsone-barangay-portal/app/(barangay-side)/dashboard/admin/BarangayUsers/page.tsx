@@ -331,10 +331,8 @@ useEffect(() => {
               </button>
             </th>
             <th>Official Name</th>
+                 <th>Position</th>
             <th>Sex</th>
-            <th>Address</th>
-            <th>Phone</th>
-            <th>Position</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -349,10 +347,8 @@ useEffect(() => {
                 {user.lastName ? `${user.lastName}, ` : ""}
                 {user.firstName} {user.middleName}
             </td>
-            <td>{user.sex}</td>
-            <td>{user.address}</td>
-            <td>{user.phone}</td>
             <td>{user.position}</td>
+            <td>{user.sex}</td>
             <td>
                 <div className="admin-actions">
                 {/*<button className="admin-action-view" onClick={(e) => { e.stopPropagation(); }}>View</button>*/}
