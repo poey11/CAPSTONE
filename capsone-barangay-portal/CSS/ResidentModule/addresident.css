@@ -900,12 +900,15 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 
 .add-resident-bottom-section{
-  padding: 35px;
+  padding-top: 35px;
+  padding-left: 35px;
+  padding-right: 35px;
+  height: 100%;
 }
 
 .add-resident-bottom-section-scroll{
   overflow-y: auto;
-  height: 370px;
+  height: 400px;
 }
 
 
@@ -1091,6 +1094,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
      margin-bottom: 20px;
      display: flex;
      align-items: center;
+     background-color: pink;
    }
 
    .box-container-verificationdocs:hover {
