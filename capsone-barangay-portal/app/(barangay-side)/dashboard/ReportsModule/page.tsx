@@ -315,6 +315,16 @@ const ReportsPage = () => {
       });
   
       // Create a buffer and upload to Firebase Storage
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   
@@ -456,6 +466,16 @@ const ReportsPage = () => {
         });
 
       // Create a buffer and upload to Firebase Storage
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   
@@ -574,8 +594,9 @@ const ReportsPage = () => {
       });
   
       // Insert rows to make room for residents before footer
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(residents.length).fill([]));
-  
+      const rowsNeeded = Math.max(0, dataStartRow + residents.length - (originalFooterStartRow - 1));
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));
+
       // Insert resident data
       residents.forEach((resident, index) => {
         const rowIndex = dataStartRow + index;
@@ -634,14 +655,14 @@ const ReportsPage = () => {
   
       // Shift footer drawings down
       footerDrawings.forEach(drawing => {
-        const offset = residents.length;
+        const offset = rowsNeeded;
         if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
         if (drawing.range?.br) drawing.range.br.nativeRow += offset;
       });
   
       // Insert dual date row below footer
-      const footerShift = residents.length;
-      const newDateRowIndex = originalFooterEndRow + footerShift + 2;
+      const footerShift = rowsNeeded;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 1;
   
       worksheet.insertRow(newDateRowIndex - 1, []);
       worksheet.insertRow(newDateRowIndex, []);
@@ -670,6 +691,16 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Export the file
+
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -785,8 +816,8 @@ const ReportsPage = () => {
       });
   
       // Insert enough rows before footer to fit all resident rows
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(residents.length).fill([]));
-  
+      const rowsNeeded = Math.max(0, dataStartRow + residents.length - (originalFooterStartRow - 1));
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));  
       // Insert resident data rows
       residents.forEach((resident, index) => {
         const rowIndex = dataStartRow + index;
@@ -846,15 +877,15 @@ const ReportsPage = () => {
   
       // Move footer drawings down by the number of inserted rows (residents.length)
       footerDrawings.forEach(drawing => {
-        const offset = residents.length;
+        const offset = rowsNeeded;
         if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
         if (drawing.range?.br) drawing.range.br.nativeRow += offset;
       });
   
       // Insert 2 more rows after footer to add date text
       // Footer end row shifts by the number of inserted rows too
-      const footerShift = residents.length;
-      const newDateRowIndex = originalFooterEndRow + footerShift + 2; // 2 rows after footer end
+      const footerShift = rowsNeeded;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 1; 
   
       // Insert 2 rows for spacing before date (optional, since we calculate exact position)
       worksheet.insertRow(newDateRowIndex - 1, []); // 1st empty row before date
@@ -888,6 +919,16 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Save and upload
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -986,8 +1027,8 @@ const ReportsPage = () => {
       });
   
       // Insert enough rows before footer to fit all resident rows
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(residents.length).fill([]));
-  
+      const rowsNeeded = Math.max(0, dataStartRow + residents.length - (originalFooterStartRow - 1));
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));  
       // Insert resident data rows
       residents.forEach((resident, index) => {
         const rowIndex = dataStartRow + index;
@@ -1047,15 +1088,15 @@ const ReportsPage = () => {
   
       // Move footer drawings down by the number of inserted rows (residents.length)
       footerDrawings.forEach(drawing => {
-        const offset = residents.length;
+        const offset = rowsNeeded;
         if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
         if (drawing.range?.br) drawing.range.br.nativeRow += offset;
       });
   
       // Insert 2 more rows after footer to add date text
       // Footer end row shifts by the number of inserted rows too
-      const footerShift = residents.length;
-      const newDateRowIndex = originalFooterEndRow + footerShift + 2; // 2 rows after footer end
+      const footerShift = rowsNeeded;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 1; 
   
       // Insert 2 rows for spacing before date (optional, since we calculate exact position)
       worksheet.insertRow(newDateRowIndex - 1, []); // 1st empty row before date
@@ -1089,6 +1130,16 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Save and upload
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1203,8 +1254,8 @@ const ReportsPage = () => {
       });
   
       // Insert enough rows before footer to fit all resident rows
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(residents.length).fill([]));
-  
+      const rowsNeeded = Math.max(0, dataStartRow + residents.length - (originalFooterStartRow - 1));
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));  
       // Insert resident data rows
       residents.forEach((resident, index) => {
         const rowIndex = dataStartRow + index;
@@ -1264,15 +1315,15 @@ const ReportsPage = () => {
   
       // Move footer drawings down by the number of inserted rows (residents.length)
       footerDrawings.forEach(drawing => {
-        const offset = residents.length;
+        const offset = rowsNeeded;
         if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
         if (drawing.range?.br) drawing.range.br.nativeRow += offset;
       });
   
       // Insert 2 more rows after footer to add date text
       // Footer end row shifts by the number of inserted rows too
-      const footerShift = residents.length;
-      const newDateRowIndex = originalFooterEndRow + footerShift + 2; // 2 rows after footer end
+      const footerShift = rowsNeeded;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 1; 
   
       // Insert 2 rows for spacing before date (optional, since we calculate exact position)
       worksheet.insertRow(newDateRowIndex - 1, []); // 1st empty row before date
@@ -1306,6 +1357,16 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Save and upload
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1421,9 +1482,11 @@ const ReportsPage = () => {
   
       const originalFooterStartRow = 24;
       const originalFooterEndRow = 28;
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(residents.length).fill([]));
-  
+ 
       let insertionRow = 4;
+      const rowsNeeded = Math.max(0, insertionRow + residents.length - (originalFooterStartRow - 1));
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));  
+
       residents.forEach((resident, index) => {
         const row = worksheet.getRow(insertionRow);
         row.height = 55;
@@ -1507,6 +1570,16 @@ const ReportsPage = () => {
   
       dateRow.commit();
   
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   
@@ -1612,11 +1685,13 @@ const ReportsPage = () => {
       const originalFooterStartRow = 24;
       const originalFooterEndRow = 28;
   
-      // Insert rows before footer to make room for residents
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(residents.length).fill([]));
-  
+
       // Insert resident data starting at row 4
       let insertionRow = 4;
+
+      // Insert rows before footer to make room for residents
+      const rowsNeeded = Math.max(0, insertionRow + residents.length);
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));  
   
       residents.forEach((resident, index) => {
         const row = worksheet.getRow(insertionRow);
@@ -1664,7 +1739,7 @@ const ReportsPage = () => {
       totalRow.commit();
   
       // Shift footer drawings/images down by number of inserted resident rows
-      const totalInsertedRows = residents.length;
+      const totalInsertedRows = rowsNeeded - 4;
       const footerDrawings = worksheet.getImages().filter((img) => {
         const row = img.range?.tl?.nativeRow;
         return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
@@ -1706,6 +1781,17 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Save and upload
+
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   
@@ -1831,10 +1917,11 @@ const ReportsPage = () => {
       });
   
       // Insert rows before footer to make room for all residents
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(totalResidents).fill([]));
-  
       // Now start inserting data from this row
       let insertionRow = 4;
+      const rowsNeeded = Math.max(0, insertionRow + residents.length);
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));  
+
       let count = 1;
   
       for (const [group, members] of filteredGroups) {
@@ -1924,14 +2011,14 @@ const ReportsPage = () => {
   
       // Move footer drawings down by number of inserted resident rows
       footerDrawings.forEach((drawing) => {
-        const offset = totalResidents;
+        const offset = rowsNeeded;
         if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
         if (drawing.range?.br) drawing.range.br.nativeRow += offset;
       });
   
       // Insert 2 extra rows after footer for dates
-      const footerShift = totalResidents;
-      const newDateRowIndex = originalFooterEndRow + footerShift + 2; // 2 rows after footer end
+      const footerShift = rowsNeeded;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 1; 
   
       // Insert 2 empty rows before date row
       worksheet.insertRow(newDateRowIndex - 1, []);
@@ -1964,6 +2051,17 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Save and upload
+
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -2100,10 +2198,9 @@ const ReportsPage = () => {
       });
   
       // Insert blank rows before footer to make room for all residents
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(totalResidents).fill([]));
-  
-      // Start insertion of residents at row 4
       let insertionRow = 4;
+      const rowsNeeded = Math.max(0, insertionRow + residents.length);
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));  
       let count = 1;
   
       for (const [group, members] of filteredGroups) {
@@ -2194,14 +2291,14 @@ const ReportsPage = () => {
   
       // Shift footer drawings down by totalResidents rows
       footerDrawings.forEach((drawing) => {
-        const offset = totalResidents;
+        const offset = rowsNeeded;
         if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
         if (drawing.range?.br) drawing.range.br.nativeRow += offset;
       });
   
       // Insert 2 extra rows after footer for dates
-      const footerShift = totalResidents;
-      const newDateRowIndex = originalFooterEndRow + footerShift + 2; // 2 rows after footer end
+      const footerShift = rowsNeeded;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 1; 
   
       worksheet.insertRow(newDateRowIndex - 1, []);
       worksheet.insertRow(newDateRowIndex, []);
@@ -2230,6 +2327,16 @@ const ReportsPage = () => {
       dateRow.commit();
   
       // Save and upload
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -2314,7 +2421,9 @@ const ReportsPage = () => {
         ),
       };
   
-      const filteredGroups = Object.entries(addressGroups).filter(([key, value]) => value.length > 0);
+      const filteredGroups = Object.entries(addressGroups).filter(
+        ([, value]) => value.length > 0
+      );
   
       if (filteredGroups.length === 0) {
         alert("No residents found.");
@@ -2322,7 +2431,6 @@ const ReportsPage = () => {
         return;
       }
   
-      // Load template
       const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
       const url = await getDownloadURL(templateRef);
       const response = await fetch(url);
@@ -2332,35 +2440,29 @@ const ReportsPage = () => {
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
   
-      // Update header
+      // Header
       worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
       worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
       worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
       worksheet.getCell("A2").value = reportTitle;
   
-      // === Footer rows and drawings ===
-      // Adjust these to your actual footer row numbers in the template
       const originalFooterStartRow = 24;
       const originalFooterEndRow = 28;
   
-      // Count total residents to know how many rows to insert before footer
       const totalResidents = filteredGroups.reduce((sum, [, members]) => sum + members.length, 0);
   
-      // Get footer drawings that need to be shifted down
       const footerDrawings = worksheet.getImages().filter((img) => {
         const row = img.range?.tl?.nativeRow;
         return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
       });
   
-      // Insert blank rows before footer to make room for all residents
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(totalResidents).fill([]));
-  
-      // Start insertion of residents at row 4
       let insertionRow = 4;
+      const rowsNeeded = Math.max(0, insertionRow + totalResidents);
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));
+  
       let count = 1;
   
       for (const [group, members] of filteredGroups) {
-        // Sort members by lastName, then firstName
         members.sort((a, b) => {
           const lastA = (a.lastName || "").trim().toUpperCase();
           const lastB = (b.lastName || "").trim().toUpperCase();
@@ -2371,7 +2473,6 @@ const ReportsPage = () => {
           return lastA.localeCompare(lastB);
         });
   
-        // Group header row
         worksheet.mergeCells(insertionRow, 1, insertionRow, 12);
         const headerRow = worksheet.getRow(insertionRow);
         const headerCell = headerRow.getCell(1);
@@ -2389,7 +2490,6 @@ const ReportsPage = () => {
         headerRow.commit();
         insertionRow++;
   
-        // Resident rows
         members.forEach((resident) => {
           const row = worksheet.getRow(insertionRow);
           row.height = 55;
@@ -2429,7 +2529,6 @@ const ReportsPage = () => {
           count++;
         });
   
-        // Total row for the group
         const totalRow = worksheet.getRow(insertionRow);
         worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
         totalRow.getCell(1).value = `TOTAL: ${members.length}`;
@@ -2445,16 +2544,16 @@ const ReportsPage = () => {
         insertionRow++;
       }
   
-      // Shift footer drawings down by totalResidents rows
+      // Shift footer drawings
       footerDrawings.forEach((drawing) => {
-        const offset = totalResidents;
+        const offset = rowsNeeded;
         if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
         if (drawing.range?.br) drawing.range.br.nativeRow += offset;
       });
   
-      // Insert 2 extra rows after footer for dates
-      const footerShift = totalResidents;
-      const newDateRowIndex = originalFooterEndRow + footerShift + 2; // 2 rows after footer end
+      // Add dual date rows
+      const footerShift = rowsNeeded;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 1;
   
       worksheet.insertRow(newDateRowIndex - 1, []);
       worksheet.insertRow(newDateRowIndex, []);
@@ -2482,7 +2581,15 @@ const ReportsPage = () => {
   
       dateRow.commit();
   
- 
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9,
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0,
+      };
   
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
@@ -2504,7 +2611,7 @@ const ReportsPage = () => {
     } finally {
       setLoadingSouthResident(false);
     }
-  };  
+  };
   
   
   const handleGenerateSouthResidentPDF = async () => {
@@ -2643,6 +2750,17 @@ const ReportsPage = () => {
       });
   
       //  Save and upload
+
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -2772,6 +2890,17 @@ const ReportsPage = () => {
       });
   
       // Export
+
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
