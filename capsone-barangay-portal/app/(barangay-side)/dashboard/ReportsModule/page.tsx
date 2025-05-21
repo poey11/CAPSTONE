@@ -2646,6 +2646,262 @@ const ReportsPage = () => {
 
   // for incident reports
 
+  // summary of incident reports
+
+  const generateIncidentSummaryReport = async () => {
+    setLoadingIncidentSummary(true);
+    try {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const reportTitle = `BARANGAY FAIRVIEW INCIDENT REPORTS - ${year}`;
+  
+      const reportsRef = collection(db, "IncidentReports");
+      const q = query(reportsRef);
+      const querySnapshot = await getDocs(q);
+  
+      const incidentReports = querySnapshot.docs.map((doc) => doc.data());
+  
+      const departmentGroups = {
+        Lupon: incidentReports.filter((rep) => rep.department === "Lupon"),
+        VAWC: incidentReports.filter((rep) => rep.department === "VAWC"),
+        BCPC: incidentReports.filter((rep) => rep.department === "BCPC"),
+        GAD: incidentReports.filter((rep) => rep.department === "GAD"),
+      };
+  
+      const filteredGroups = Object.entries(departmentGroups).filter(
+        ([, reports]) => reports.length > 0
+      );
+  
+      if (filteredGroups.length === 0) {
+        alert("No incident reports found.");
+        setLoadingIncidentSummary(false);
+        return;
+      }
+  
+      const templateRef = ref(storage, "ReportsModule/Summary of Incidents Template.xlsx");
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+  
+      worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\n SUMMARY OF INCIDENTS";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
+      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      worksheet.getCell("A2").value = reportTitle;
+  
+      const originalFooterStartRow = 25;
+      const originalFooterEndRow = 28;
+  
+      const totalReports = filteredGroups.reduce((sum, [, reports]) => sum + reports.length, 0);
+  
+      const footerDrawings = worksheet.getImages().filter((img) => {
+        const row = img.range?.tl?.nativeRow;
+        return row >= originalFooterStartRow - 1 && row <= originalFooterEndRow - 1;
+      });
+  
+      let insertionRow = 4;
+      const rowsNeeded = Math.max(0, insertionRow + totalReports + filteredGroups.length * 4);
+      worksheet.insertRows(originalFooterStartRow, new Array(rowsNeeded).fill([]));
+  
+      const defaultFont = { name: "Calibri", size: 12, bold: false, italic: false };
+  
+      for (const [department, reports] of filteredGroups) {
+        // --- Department Header ---
+        const headerRange = `A${insertionRow}:E${insertionRow}`;
+
+        for (let col = 1; col <= 5; col++) {
+          const cell = worksheet.getRow(insertionRow).getCell(col);
+          cell.font = { name: "Times New Roman", size: 20, bold: true, italic: true };
+          cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+          cell.border = {
+            top: { style: "medium" },
+            bottom: { style: "medium" },
+            left: { style: "medium" },
+            right: { style: "medium" },
+          };
+        }
+        
+        try {
+          worksheet.unMergeCells(headerRange);
+        } catch (_) {}
+        worksheet.mergeCells(headerRange);
+        
+        const headerRow = worksheet.getRow(insertionRow);
+        const headerCell = headerRow.getCell(1);
+        headerCell.value = department;
+        headerRow.height = 25;
+        headerRow.commit();
+        insertionRow++;
+        
+  
+        // --- Incident Data Rows ---
+        reports.forEach((report) => {
+          const row = worksheet.getRow(insertionRow);
+          row.height = 55;
+  
+          const complainant = report.complainant || {};
+          const respondent = report.respondent || {};
+          const complainantFullName = `${complainant.fname || ""} ${complainant.lname || ""}`.trim();
+          const respondentFullName = `${respondent.fname || ""} ${respondent.lname || ""}`.trim();
+  
+          const cells = [
+            report.caseNumber,
+            ` C- ${complainantFullName}\n\n R- ${respondentFullName}`,
+            `${report.dateFiled || ""} ${report.timeFiled || ""}`,
+            report.nature || "",
+            report.status || "",
+          ];
+  
+          cells.forEach((value, index) => {
+            const cell = row.getCell(index + 1);
+            cell.value = value;
+            cell.font = {
+              name: "Calibri",
+              size: 12,
+              bold: false,
+              italic: false
+            };
+            cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+            cell.border = {
+              top: { style: "medium", color: { argb: "000000" } },
+              bottom: { style: "medium", color: { argb: "000000" } },
+              left: { style: "medium", color: { argb: "000000" } },
+              right: { style: "medium", color: { argb: "000000" } },
+            };
+          });
+  
+          row.commit();
+          insertionRow++;
+        });
+  
+        // --- Department Total Row ---
+        const totalRange = `A${insertionRow}:E${insertionRow}`;
+        try {
+          worksheet.unMergeCells(totalRange);
+        } catch (_) {}
+        worksheet.mergeCells(totalRange);
+  
+        const totalRow = worksheet.getRow(insertionRow);
+        const totalCell = totalRow.getCell(1);
+        totalCell.value = `TOTAL: ${reports.length}`;
+        totalCell.font = { name: "Times New Roman", size: 12, italic: true, bold: true };
+        totalCell.alignment = { horizontal: "center", vertical: "middle" };
+        totalCell.border = {
+          bottom: { style: "medium", color: { argb: "000000" } },
+          left: { style: "medium", color: { argb: "000000" } },
+          right: { style: "medium", color: { argb: "000000" } },
+        };
+        totalRow.commit();
+        insertionRow++;
+  
+        // --- Add spacer to prevent formatting overlap ---
+        worksheet.getRow(insertionRow).values = ["", "", "", "", ""];
+        worksheet.getRow(insertionRow).height = 5;
+        worksheet.getRow(insertionRow).commit();
+        insertionRow++;
+      }
+  
+      // --- Adjust footer drawings ---
+      footerDrawings.forEach((drawing) => {
+        const offset = rowsNeeded;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+      });
+  
+      // --- Add dual date rows ---
+      const newDateRowIndex = originalFooterEndRow + rowsNeeded + 1;
+      worksheet.insertRow(newDateRowIndex - 1, []);
+      worksheet.insertRow(newDateRowIndex, []);
+  
+      const dateRow = worksheet.getRow(newDateRowIndex + 1);
+      dateRow.height = 40;
+  
+      const formattedDate = currentDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+  
+      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(1);
+      dateCell1.value = `${formattedDate}\nDate`;
+      dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
+  
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(4);
+      dateCell2.value = `${formattedDate}\nDate`;
+      dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
+  
+      dateRow.commit();
+  
+      // --- Page setup ---
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9,
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0,
+      };
+  
+      // --- Save and upload ---
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const fileName = `Incident_Report_BarangayFairview_${year}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+      alert("Incident Report generated successfully. Please wait for the downloadable file!");
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating report:", error);
+      alert("Failed to generate Incident Report.");
+    } finally {
+      setLoadingIncidentSummary(false);
+    }
+  };
+  
+
+  const handleGenerateIncidentSummaryPDF = async () => {
+    setLoadingIncidentSummary(true);
+    try {
+      const fileUrl = await generateIncidentSummaryReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+  
+      saveAs(blob, `Incident_Summary_Report${year}.pdf`);
+  
+      alert("Incident Summary Report successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingIncidentSummary(false);
+    }
+  };
+  
+
   // vawc monthly report
 
   const generateVAWCReport = async () => {
@@ -3060,7 +3316,9 @@ const ReportsPage = () => {
 
           {selectedModule === "Incident Module" && (
             <>
-              <button className="report-button">Summary of Incidents</button>
+              <button onClick={handleGenerateIncidentSummaryPDF} disabled={loadingIncidentSummary} className="report-button">
+                {loadingIncidentSummary ? "Generating..." : "All Incidents Summary"}
+              </button>      
               <button onClick={handleGenerateIncidentStatusSummaryPDF} disabled={loadingIncidentStatuses} className="report-button">
                 {loadingIncidentStatuses ? "Generating..." : "Incident Status Summary"}
               </button>             

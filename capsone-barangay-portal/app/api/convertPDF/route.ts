@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     if (!fileUrl) return NextResponse.json({ error: "Missing file URL" }, { status: 400 });
 
     // Initialize ConvertAPI
-    const convertapi = new ConvertAPI("secret_78ohTVl3zLDhAwlm");
+    const convertapi = new ConvertAPI(process.env.CONVERTAPI_KEY || "");
 
     // Convert Excel to PDF
     const result = await convertapi.convert("pdf", { File: fileUrl }, "xlsx");
