@@ -126,6 +126,10 @@ export default function Header() {
         title: "First-Time Job Seeker List",
         breadcrumb: ["Residents Management", "First-Time Job Seeker List"],
       },
+      "/dashboard/ResidentModule/FirstTimeJobSeeker/AddFirstTimeJobSeeker": {
+        title: "First-Time Job Seeker List",
+        breadcrumb: ["Residents Management", "First-Time Job Seeker List", "Add New First-Time Job Seeker"],
+      },
 
     };
 
