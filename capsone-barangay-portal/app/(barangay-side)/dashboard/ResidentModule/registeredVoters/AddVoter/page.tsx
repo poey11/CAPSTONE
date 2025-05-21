@@ -213,6 +213,7 @@ export default function addVoter() {
           <div className="add-resident-bottom-section">
             <div className="residents-search-section">
               <p>Search Resident Here</p>
+              <p>will implement</p>
             </div>
 
             <form id="addVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
