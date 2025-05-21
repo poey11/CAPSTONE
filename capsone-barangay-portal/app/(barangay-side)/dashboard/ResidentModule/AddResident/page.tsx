@@ -284,7 +284,7 @@ const confirmSubmit = async () => {
       let verificationFilesURLs: string[] = [];
       if (verificationFiles.length > 0) {
         for (const file of verificationFiles) {
-          const storageRef = ref(storage, `ResidentsFiles/VerificationFiles/${file.name}`);
+          const storageRef = ref(storage, `ResidentsFiles/VerificationFile/${file.name}`);
           await uploadBytes(storageRef, file);
           const url = await getDownloadURL(storageRef);
           verificationFilesURLs.push(url);
