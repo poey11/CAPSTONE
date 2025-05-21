@@ -157,6 +157,7 @@ export default function ViewResident() {
                 {section === "basic" && "Basic Info"}
                 {section === "full" && "Full Info"}
                 {section === "others" && "Others"}
+                {section === "history" && "History"}
               </button>
             ))}
           </div>  
@@ -289,6 +290,16 @@ export default function ViewResident() {
 
                   </>
                 )}
+
+
+                {activeSection === "history" && (
+                 <>
+                        
+                        
+                  </>
+
+                  )}
+
               </div>
                 
             </div>
