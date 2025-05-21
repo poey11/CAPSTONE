@@ -3,7 +3,8 @@ import "@/CSS/barangaySide/ServicesModule/OnlineRequests.css";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getAllDocument } from "@/app/helpers/firestorehelper";
-/*import OnlineForm from "@/app/(barangay-side)/components/onlinerequestform";*/
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { db } from "@/app/db/firebase";
 
 
 
@@ -13,13 +14,37 @@ import { getAllDocument } from "@/app/helpers/firestorehelper";
     const router = useRouter();
     
     useEffect(() => {
-      const unsubscribe = getAllDocument("ServiceRequests", setRequestData);
-      return () => {
-        if (unsubscribe) {
-          unsubscribe();
-        }
+      try {
+        const Collection = query(
+          collection(db, "ServiceRequests"),
+          orderBy("requestDate", "desc") // First, sort by latest
+        );
+      
+        const unsubscribe = onSnapshot(Collection, (snapshot) => {
+          let reports: any[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+        
+          // Now sort client-side: Pending (1) first, then Pickup (2), etc.
+          reports.sort((a, b) => {
+            if (a.statusPriority !== b.statusPriority) {
+              return a.statusPriority - b.statusPriority; // status priority asc
+            }
+          
+            // Convert string dates to timestamps
+            return new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime();
+          });
+        
+          setRequestData(reports);
+        });
+      
+        return unsubscribe;
+      } catch (error: any) {
+        console.log(error.message);
       }
-    },[])
+    }, []);
+
 
     console.log(requestData);
   const [currentPage, setCurrentPage] = useState(1);
@@ -120,9 +145,10 @@ import { getAllDocument } from "@/app/helpers/firestorehelper";
             <thead>
               <tr>
                 <th>Document Type</th>
+                <th>Purpose</th>
                 <th>Name</th>
                 <th>Contact</th>
-                <th>Date</th>
+                <th>Request Date</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -131,6 +157,7 @@ import { getAllDocument } from "@/app/helpers/firestorehelper";
             {requestData.map((request, index) => (
               <tr key={index}>
                 <td>{request.docType}</td>
+                <td>{request.purpose}</td>
                 <td>{request.firstName} {request.middleName} {request.lastName}</td>
                 <td>{request.contact}</td>
                 <td>{request.requestDate}</td>
