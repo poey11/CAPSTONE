@@ -19,44 +19,37 @@ export default function MainPageIncident() {
 
   const router = useRouter();
 
-  /*
+ 
+
+
   useEffect(() => {
-    const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "!=", "Online", setIncidentData);
+    /*Revised this. Copy from Online Request in Service Module. */
+    const unsubscribe = getAllSpecificDocument(
+      "IncidentReports",
+      "department",
+      "!=",
+      "Online",
+      (data: any[]) => {
+        // Sort by dateFiled and timeFiled, newest first
+        const sortedData = [...data].sort((a, b) => {
+          const dateA = new Date(`${a.dateFiled} ${a.timeFiled}`);
+          const dateB = new Date(`${b.dateFiled} ${b.timeFiled}`);
+          return dateB.getTime() - dateA.getTime(); // newest first
+        });
+      
+        // Take only the latest 20 incidents
+        const latest20 = sortedData.slice(0, 20);
+      
+        setIncidentData(latest20);
+      }
+    );
+    
     return () => {
       if (unsubscribe) {
-        unsubscribe(); 
+        unsubscribe();
       }
-    }  
-}, []);
-*/
-
-useEffect(() => {
-  const unsubscribe = getAllSpecificDocument(
-    "IncidentReports",
-    "department",
-    "!=",
-    "Online",
-    (data: any[]) => {
-      // Sort by dateFiled and timeFiled, newest first
-      const sortedData = [...data].sort((a, b) => {
-        const dateA = new Date(`${a.dateFiled} ${a.timeFiled}`);
-        const dateB = new Date(`${b.dateFiled} ${b.timeFiled}`);
-        return dateB.getTime() - dateA.getTime(); // newest first
-      });
-
-      // Take only the latest 20 incidents
-      const latest20 = sortedData.slice(0, 20);
-
-      setIncidentData(latest20);
-    }
-  );
-  
-  return () => {
-    if (unsubscribe) {
-      unsubscribe();
-    }
-  };
-}, []);
+    };
+  }, []);
 
 
 
