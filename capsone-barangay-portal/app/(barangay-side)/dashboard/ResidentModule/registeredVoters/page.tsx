@@ -92,12 +92,17 @@ export default function registeredVotersModule() {
     let filtered = [...residents];
 
     if (searchName) {
+      const lowerSearch = searchName.toLowerCase();
       filtered = filtered.filter((resident) => {
-        const fullName = resident.fullName?.toLowerCase() || "";
-
+        const firstName = resident.firstName?.toLowerCase() || "";
+        const middleName = resident.middleName?.toLowerCase() || "";
+        const lastName = resident.lastName?.toLowerCase() || "";
     
         return (
-          fullName.includes(searchName.toLowerCase()));
+          firstName.includes(lowerSearch) ||
+          middleName.includes(lowerSearch) ||
+          lastName.includes(lowerSearch)
+        );
       });
     }
 
@@ -298,7 +303,7 @@ export default function registeredVotersModule() {
             className={highlightedId === resident.id ? "highlighted-row" : ""}
           >
             <td>{resident.voterNumber}</td>
-            <td>{resident.fullName}</td>
+            <td>{`${resident.lastName}, ${resident.firstName}${resident.middleName ? ' ' + resident.middleName : ''}`}</td>
             <td>{resident.homeAddress}</td>
             <td>{resident.precinctNumber}</td>
             <td>{resident.createdAt}</td>

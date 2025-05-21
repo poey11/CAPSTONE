@@ -8,7 +8,9 @@ import Link from "next/link";
 
 interface VoterFormData {
   voterNumber: string;
-  fullName: string;
+  lastName: string;
+  firstName: string;
+  middleName: string;
   homeAddress: string;
   precinctNumber: string;
 
@@ -21,7 +23,9 @@ export default function EditVoter() {
 
   const [formData, setFormData] = useState<VoterFormData>({
     voterNumber: "",
-    fullName: "",
+    lastName: "",
+    firstName: "",
+    middleName: "",
     homeAddress: "",
     precinctNumber: "",
   });
@@ -71,7 +75,9 @@ export default function EditVoter() {
         if (docSnap.exists()) {
           const data = {
             voterNumber: docSnap.data().voterNumber || "",
-            fullName: docSnap.data().fullName || "",
+            lastName: docSnap.data().lastName || "",
+            firstName: docSnap.data().firstName || "",
+            middleName: docSnap.data().middleName || "",
             homeAddress: docSnap.data().homeAddress || "",
             precinctNumber: docSnap.data().precinctNumber || "",
           };
@@ -107,10 +113,10 @@ export default function EditVoter() {
 
 
     const { 
-    fullName, homeAddress, precinctNumber
+    lastName, firstName, homeAddress, precinctNumber
   } = formData;
 
-  if (!fullName || !homeAddress || !precinctNumber) {
+  if (!lastName || !firstName || !homeAddress || !precinctNumber) {
     setPopupErrorMessage("Please fill up all required fields.");
     setShowErrorPopup(true);
     setTimeout(() => setShowErrorPopup(false), 3000);
@@ -151,7 +157,9 @@ export default function EditVoter() {
       const docRef = doc(db, "VotersList", voterId);
       await updateDoc(docRef, {
         voterNumber: formData.voterNumber,
-        fullName: formData.fullName,
+        lastName: formData.lastName,
+        firstName: formData.firstName,
+        middleName: formData.middleName,
         homeAddress: formData.homeAddress,
         precinctNumber: formData.precinctNumber,
       });
@@ -172,6 +180,7 @@ export default function EditVoter() {
 
   return (
     <main className="add-resident-main-container">
+      {/*
       <div className="path-section">
         <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
         <h1 className="breadcrumb">
@@ -183,7 +192,7 @@ export default function EditVoter() {
 
       <div className="addresident-page-title-section-1">
       <h1>Registered Voters</h1>
-      </div>
+      </div>*/}
 
       <div className="add-resident-main-content">
         <div className="add-resident-main-section1">
@@ -202,36 +211,50 @@ export default function EditVoter() {
                   {loading ? "Saving..." : "Save"}
                 </button>
               </div>
-              
           </div>
 
-          <hr/>
-        <form id="editVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
-          <div className="add-resident-section-2-left-side">
+          <div className="add-resident-bottom-section">
+            <form id="editVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
+              <div className="edit-voter-section-2-full-top">
+                <div className="add-main-resident-section-2-left-side">
+                  
+                    <div className="fields-section">
+                      <p>Voter Number</p>
+                      <input type="text" name="voterNumber" value={formData.voterNumber} onChange={handleChange} disabled className="add-resident-input-field-disabled" />
+                    </div>
 
-            <div className="fields-container">
-              <div className="fields-section">
-                <p>Voter Number</p>
-                <input type="text" name="voterNumber" value={formData.voterNumber} onChange={handleChange} disabled className="add-resident-input-field-disabled" />
-              </div>
+                    <div className="fields-section">
+                      <p>First Name</p>
+                      <input type="text" className="add-resident-input-field" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                    </div>
 
-              <div className="fields-section">
-                <p>Full Name</p>
-                <input type="text" className="add-resident-input-field" name="fullName" value={formData.fullName} onChange={handleChange} required />
-              </div>
-              
-              <div className="fields-section">
-                <p>Home Address</p>
-                <input type="text" className="add-resident-input-field" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
-              </div>
+                    <div className="fields-section">
+                      <p>Middle Name</p>
+                      <input type="text" className="add-resident-input-field" name="middleName" value={formData.middleName} onChange={handleChange} />
+                    </div>
+                </div>
+                <div className="add-main-resident-section-2-right-side">
+                  <div className="fields-section">
+                    <p>Last Name</p>
+                    <input type="text" className="add-resident-input-field" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                  </div>
+                    
+                  <div className="fields-section">
+                    <p>Home Address</p>
+                    <input type="text" className="add-resident-input-field" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+                  </div>
 
-              <div className="fields-section">
-                <p>Precinct Number</p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
-              </div>
-            </div>
+                  <div className="fields-section">
+                    <p>Precinct Number</p>
+                    <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
+                  </div>
+                </div>
+              </div>  
+            </form>
           </div>
-        </form>
+
+         
+        
         {error && <p className="error">{error}</p>}
       </div>
 

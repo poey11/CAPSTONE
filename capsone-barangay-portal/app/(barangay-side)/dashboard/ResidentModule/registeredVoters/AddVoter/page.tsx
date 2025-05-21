@@ -10,7 +10,9 @@ export default function addVoter() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     voterNumber: "",
-    fullName: "",
+    lastName: "",
+    firstName: "",
+    middleName: "",
     homeAddress: "",
     precinctNumber: "",
     createdAt:"",
@@ -86,12 +88,13 @@ export default function addVoter() {
   };*/
 
   const handleSubmitClick = async () => {
-    const { fullName, homeAddress, precinctNumber} = formData;
+    const { lastName, firstName, homeAddress, precinctNumber} = formData;
 
     const invalidFields: string[] = [];
 
 
-    if (!fullName) invalidFields.push("fullName");
+    if (!lastName) invalidFields.push("lastName");
+    if (!firstName) invalidFields.push("firstName");
     if (!homeAddress) invalidFields.push("homeAddress");
     if (!precinctNumber) invalidFields.push("precinctNumber");
   
@@ -176,6 +179,7 @@ export default function addVoter() {
 
   return (
     <main className="add-resident-main-container">
+      {/*}
         <div className="path-section">
           <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
           <h1 className="breadcrumb">
@@ -187,7 +191,7 @@ export default function addVoter() {
 
         <div className="addresident-page-title-section-1">
         <h1>Registered Voters</h1>
-        </div>
+        </div>*/}
         
         <div className="add-resident-main-content">
           <div className="add-resident-main-section1">
@@ -204,35 +208,51 @@ export default function addVoter() {
                 {loading ? "Saving..." : "Save"}
               </button>
             </div>
-            
           </div>
 
-          <hr/>
-
-
-        <form id="addVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
-          <div className="add-resident-section-2-left-side">
-
-            <div className="fields-container">
-              <div className="fields-section">
-                <p>Full Name<span className="required">*</span></p>
-                <input type="text"  className={`add-resident-input-field ${invalidFields.includes("fullName") ? "input-error" : ""}`} placeholder="Enter Full Name" name="fullName" value={formData.fullName} onChange={handleChange} required />
-              </div>
-
-              <div className="fields-section">
-                <p>Home Address<span className="required">*</span></p>
-                <input type="text"  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
-              </div>
-              
-              <div className="fields-section">
-                <p>Precinct Number<span className="required">*</span></p>
-                <input type="text" className={`add-resident-input-field ${invalidFields.includes("precinctNumber") ? "input-error" : ""}`} placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required/>
-              </div>
+          <div className="add-resident-bottom-section">
+            <div className="residents-search-section">
+              <p>Search Resident Here</p>
             </div>
+
+            <form id="addVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
+
+              <div className="add-main-resident-section-2-full-top">  
+                <div className="add-main-resident-section-2-left-side">
+                    <div className="fields-section">
+                      <p>Last Name<span className="required">*</span></p>
+                      <input type="text"  className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`} placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                    </div>
+                    <div className="fields-section">
+                      <p>First Name<span className="required">*</span></p>
+                      <input type="text"  className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`} placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                    </div>
+                </div>
+
+                <div className="add-main-resident-section-2-right-side">
+                  <div className="fields-section">
+                    <p>Middle Name</p>
+                    <input type="text"  className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} />
+                  </div>
+                  <div className="fields-section">
+                    <p>Home Address<span className="required">*</span></p>
+                    <input type="text"  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+                  </div>
+                </div>
+                </div>
+
+                <div className="add-main-resident-section-2-full-bottom">
+                  <div className="add-main-resident-section-2-cluster">
+                    <div className="fields-section">
+                      <p>Precinct Number<span className="required">*</span></p>
+                      <input type="text" className={`add-resident-input-field ${invalidFields.includes("precinctNumber") ? "input-error" : ""}`} placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required/>
+                    </div>
+                  </div>
+                </div>  
+            </form>
           </div>
-        </form>
-        {error && <p className="error">{error}</p>}
-      </div>
+          {error && <p className="error">{error}</p>}
+        </div>
 
       {showSubmitPopup && (
                         <div className="confirmation-popup-overlay-add-voter">
