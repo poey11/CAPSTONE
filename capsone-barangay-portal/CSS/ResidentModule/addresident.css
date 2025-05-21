@@ -4,7 +4,8 @@
     height: 100vh;
     background-color: #F0F2F8;
     margin-left: 3rem; 
-    padding-top: 150px;
+    /*padding-top: 150px;*/
+    padding-top: 11.2%;
 }
 
 
@@ -131,7 +132,7 @@
     color: rgba(0, 0, 0, 0.4);
     opacity: 1;
     padding: 8px;
-    width: 100%;
+    width: 70%;
     margin-top: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -909,6 +910,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 .add-resident-bottom-section-scroll{
   overflow-y: auto;
   height: 400px;
+  padding-bottom: 40px;
 }
 
 
@@ -921,10 +923,26 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   
 }
 
+.add-voter-section-2 {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+
+}
+
 .add-main-resident-section-2-full-top{
   display: flex;
   flex-direction: row;
   width: 100%;
+}
+
+.edit-voter-section-2-full-top{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  margin-top: 40px;
 }
 
 .add-main-resident-section-2-full-bottom{
@@ -992,6 +1010,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   font-size: 16px;
   z-index: 10;
   width: 210px;
+  text-align: center;
 }
 
 .box-content-resclassification label {
@@ -1040,6 +1059,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   font-size: 16px;
   z-index: 10;
   width: 192px;
+  text-align: center;
 }
 
 .box-container-outer-resindentificationpic {
@@ -1086,6 +1106,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
      font-size: 16px;
      z-index: 10;
      width: 210px;
+     text-align: center;
    }
    
    .box-container-outer-verificationdocs {
@@ -1131,5 +1152,17 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     align-self: center;
   }
 
+  .residents-search-section{
+    height: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
- 
+  .add-voter-main-content{
+  background-color: yellow;
+  height: 80%;
+  display: flex;
+  flex-direction: row;
+  }
+

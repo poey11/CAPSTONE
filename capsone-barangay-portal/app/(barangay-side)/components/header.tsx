@@ -82,7 +82,7 @@ export default function Header() {
       },
       "/dashboard/ResidentModule/AddResident": {
         title: "Main Residents",
-        breadcrumb: ["Residents Management", "Main Residents", "Add Resident"],
+        breadcrumb: ["Residents Management", "Main Residents", "Add New Resident"],
       },
       "/dashboard/ResidentModule/EditResident": {
         title: "Main Residents",
@@ -98,11 +98,27 @@ export default function Header() {
         title: "Registered Voters",
         breadcrumb: ["Residents Management", "Registered Voters"],
       },
+      "/dashboard/ResidentModule/registeredVoters/AddVoter": {
+        title: "Registered Voters",
+        breadcrumb: ["Residents Management", "Registered Voters", "Add New Voter"],
+      },
+      "/dashboard/ResidentModule/registeredVoters/EditVoter": {
+        title: "Registered Voters",
+        breadcrumb: ["Residents Management", "Registered Voters", "Edit Voter"],
+      },
 
       // Kasambahay
       "/dashboard/ResidentModule/kasambahayList": {
         title: "Kasambahay Masterlist",
         breadcrumb: ["Residents Management", "Kasambahay Masterlist"],
+      },
+      "/dashboard/ResidentModule/kasambahayList/AddKasambahay": {
+        title: "Kasambahay Masterlist",
+        breadcrumb: ["Residents Management", "Kasambahay Masterlist", "Add New Kasambahay"],
+      },
+      "/dashboard/ResidentModule/kasambahayList/EditKasambahay": {
+        title: "Kasambahay Masterlist",
+        breadcrumb: ["Residents Management", "Kasambahay Masterlist", "Edit Kasambahay"],
       },
 
       // Jobseeker
