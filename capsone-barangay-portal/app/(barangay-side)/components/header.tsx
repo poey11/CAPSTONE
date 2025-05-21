@@ -112,6 +112,10 @@ export default function Header() {
         title: "Kasambahay Masterlist",
         breadcrumb: ["Residents Management", "Kasambahay Masterlist"],
       },
+      "/dashboard/ResidentModule/kasambahayList/AddKasambahay": {
+        title: "Kasambahay Masterlist",
+        breadcrumb: ["Residents Management", "Kasambahay Masterlist", "Add Kasambahay"],
+      },
 
       // Jobseeker
       "/dashboard/ResidentModule/FirstTimeJobSeeker": {
