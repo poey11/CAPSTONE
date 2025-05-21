@@ -98,6 +98,14 @@ export default function Header() {
         title: "Registered Voters",
         breadcrumb: ["Residents Management", "Registered Voters"],
       },
+      "/dashboard/ResidentModule/registeredVoters/AddVoter": {
+        title: "Registered Voters",
+        breadcrumb: ["Residents Management", "Registered Voters", "Add New Voter"],
+      },
+      "/dashboard/ResidentModule/registeredVoters/EditVoter": {
+        title: "Registered Voters",
+        breadcrumb: ["Residents Management", "Registered Voters", "Edit Voter"],
+      },
 
       // Kasambahay
       "/dashboard/ResidentModule/kasambahayList": {
