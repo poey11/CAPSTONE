@@ -224,7 +224,7 @@ export default function EditVoter() {
                     </div>
 
                     <div className="fields-section">
-                      <p>First Name</p>
+                      <p>First Name<span className="required">*</span></p>
                       <input type="text" className="add-resident-input-field" name="firstName" value={formData.firstName} onChange={handleChange} required />
                     </div>
 
@@ -235,18 +235,18 @@ export default function EditVoter() {
                 </div>
                 <div className="add-main-resident-section-2-right-side">
                   <div className="fields-section">
-                    <p>Last Name</p>
+                    <p>Last Name<span className="required">*</span></p>
                     <input type="text" className="add-resident-input-field" name="lastName" value={formData.lastName} onChange={handleChange} required />
                   </div>
                     
                   <div className="fields-section">
-                    <p>Home Address</p>
+                    <p>Home Address<span className="required">*</span></p>
                     <input type="text" className="add-resident-input-field" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
                   </div>
 
                   <div className="fields-section">
-                    <p>Precinct Number</p>
-                    <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
+                    <p>Precinct Number<span className="required">*</span></p>
+                    <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required />
                   </div>
                 </div>
               </div>  

@@ -349,7 +349,7 @@ export default function EditResident() {
         let uploadedVerificationURLs: string[] = [];
 
         for (const file of verificationFiles) {
-          const fileRef = ref(storage, `ResidentsFiles/${file.name}`);
+          const fileRef = ref(storage, `ResidentsFiles/VerificationFile/${file.name}`);
           await uploadBytes(fileRef, file);
           const url = await getDownloadURL(fileRef);
           uploadedVerificationURLs.push(url);
@@ -357,7 +357,7 @@ export default function EditResident() {
   
         let uploadedIdentificationURL = formData.identificationFileURL;
         if (identificationFile) {
-          const idRef = ref(storage, `ResidentsFiles/${identificationFile.name}`);
+          const idRef = ref(storage, `ResidentsFiles/IdentificationFile/${identificationFile.name}`);
           await uploadBytes(idRef, identificationFile);
           uploadedIdentificationURL = await getDownloadURL(idRef);
         }
@@ -476,16 +476,13 @@ export default function EditResident() {
                         <div className="add-main-resident-section-2-full-top">  
                           <div className="add-main-resident-section-2-left-side">
                               <div className="fields-section">
-                                <p>Last Name<span className="required">*</span></p>
-                                <input
-                                  type="text"
-                                  className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`}
-                                  placeholder="Enter Last Name"
-                                  name="lastName"
-                                  value={formData.lastName}
-                                  onChange={handleChange}
-                                  required
-                                />
+                                <p>Resident Number</p>
+                                <input type="text" 
+                                  name="residentNumber" 
+                                  value={formData.residentNumber} 
+                                  onChange={handleChange} 
+                                  disabled 
+                                  className="add-resident-input-field-disabled" />
                               </div>
 
                               <div className="fields-section">
@@ -516,6 +513,18 @@ export default function EditResident() {
                           </div>
 
                           <div className="add-main-resident-section-2-right-side">
+                              <div className="fields-section">
+                                <p>Last Name<span className="required">*</span></p>
+                                <input
+                                  type="text"
+                                  className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`}
+                                  placeholder="Enter Last Name"
+                                  name="lastName"
+                                  value={formData.lastName}
+                                  onChange={handleChange}
+                                  required
+                                />
+                              </div>
                             
                               <div className="fields-section">
                                 <p>Sex<span className="required">*</span></p>
@@ -542,20 +551,22 @@ export default function EditResident() {
                                       onChange={handleChange}
                                       required />
                               </div>
+                          </div>
+                        </div>
 
-                              <div className="fields-section">
-                                    <p>Date of Birth<span className="required">*</span></p>
-                                    <input 
-                                      type="date"
-                                      className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
-                                      name="dateOfBirth"
-                                      value={formData.dateOfBirth}
-                                      onChange={handleChange}
-                                      max={new Date().toISOString().split("T")[0]}
-                                      required />
-                                  </div>
-
-                              
+                        <div className="add-main-resident-section-2-full-bottom">
+                          <div className="add-main-resident-section-2-cluster">
+                            <div className="fields-section">
+                              <p>Date of Birth<span className="required">*</span></p>
+                                <input 
+                                  type="date"
+                                  className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
+                                  name="dateOfBirth"
+                                  value={formData.dateOfBirth}
+                                  onChange={handleChange}
+                                  max={new Date().toISOString().split("T")[0]}
+                                  required />
+                            </div>
                           </div>
                         </div>
                         </>
@@ -777,10 +788,7 @@ export default function EditResident() {
 
                                   {/* File Upload Section */}
                                   <div className="file-upload-container">
-                                      <label htmlFor="verification-file-upload" className="upload-link">Click to Upload File</label>
-                                      <input id="verification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleVerificationFileChange}/>
-
-
+                                     
                                       {(verificationFiles.length > 0 || verificationPreviews.length > 0) && (
                                         <div className="file-name-image-display">
                                           {verificationPreviews.map((preview, index) => (

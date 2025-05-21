@@ -284,7 +284,7 @@ const confirmSubmit = async () => {
       let verificationFilesURLs: string[] = [];
       if (verificationFiles.length > 0) {
         for (const file of verificationFiles) {
-          const storageRef = ref(storage, `ResidentsFiles/${file.name}`);
+          const storageRef = ref(storage, `ResidentsFiles/VerificationFile/${file.name}`);
           await uploadBytes(storageRef, file);
           const url = await getDownloadURL(storageRef);
           verificationFilesURLs.push(url);
@@ -293,7 +293,7 @@ const confirmSubmit = async () => {
 
       let identificationFileURL = "";
       if (identificationFile) {
-        const storageRef = ref(storage, `ResidentsFiles/${identificationFile.name}`);
+        const storageRef = ref(storage, `ResidentsFiles/IndentificationFile/${identificationFile.name}`);
         await uploadBytes(storageRef, identificationFile);
         identificationFileURL = await getDownloadURL(storageRef);
       }
@@ -355,7 +355,7 @@ const [activeSection, setActiveSection] = useState("basic");
                   <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                 </button>
 
-                <h1> New Resident </h1>
+                <h1> Add New Resident </h1>
               </div>
 
               <div className="action-btn-section">
