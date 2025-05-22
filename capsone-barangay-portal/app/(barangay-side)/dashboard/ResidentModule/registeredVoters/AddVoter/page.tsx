@@ -18,6 +18,7 @@ export default function addVoter() {
     precinctNumber: "",
     createdAt:"",
     residentId: "",
+    identificationFileURL: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -196,6 +197,7 @@ export default function addVoter() {
                     middleName: string;
                     lastName: string;
                     address: string;
+                    identificationFileURL: string
                 };
     
                 return {
@@ -277,56 +279,62 @@ export default function addVoter() {
               <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleEmployerClick} />
             </div>
 
-            <nav className="info-toggle-wrapper">
-              {["details"].map((section) => (
-                <button
-                  key={section}
-                  type="button"
-                  className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                  onClick={() => setActiveSection(section)}
-                >
-                  {section === "details" && "Details"}
-                </button>
-              ))}
-            </nav>  
-            <form id="addVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
-            {activeSection === "details" && (
-                <>
-              <div className="add-main-resident-section-2-full-top">  
-                <div className="add-main-resident-section-2-left-side">
-                    <div className="fields-section">
-                      <p>Last Name<span className="required">*</span></p>
-                      <input type="text"  className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`} placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
-                    </div>
-                    <div className="fields-section">
-                      <p>First Name<span className="required">*</span></p>
-                      <input type="text"  className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`} placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
-                    </div>
-                </div>
+            <div className="add-resident-bottom-section">
+          
+              <nav className="info-toggle-wrapper">
+                {["details"].map((section) => (
+                  <button
+                    key={section}
+                    type="button"
+                    className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                    onClick={() => setActiveSection(section)}
+                  >
+                    {section === "details" && "Details"}
+                  </button>
+                ))}
+              </nav>  
+              <div className="add-resident-bottom-section-scroll">
 
-                <div className="add-main-resident-section-2-right-side">
-                  <div className="fields-section">
-                    <p>Middle Name</p>
-                    <input type="text"  className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} />
-                  </div>
-                  <div className="fields-section">
-                    <p>Home Address<span className="required">*</span></p>
-                    <input type="text"  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
-                  </div>
-                </div>
-                </div>
+                <form id="addVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
+                {activeSection === "details" && (
+                  <>
+                    <div className="addvoter-outer-container">
+                      <div className="addvoter-outer-container-left">
 
-                <div className="add-main-resident-section-2-full-bottom">
-                  <div className="add-main-resident-section-2-cluster">
-                    <div className="fields-section">
-                      <p>Precinct Number<span className="required">*</span></p>
-                      <input type="text" className={`add-resident-input-field ${invalidFields.includes("precinctNumber") ? "input-error" : ""}`} placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required/>
+                      <div className="resident-photo-section-voter">
+                        <span className="resident-details-label-voter">Identification Picture</span>
+
+                        <div className="resident-profile-container-voter">
+                          <img
+                              src={formData.identificationFileURL || "/Images/default-identificationpic.jpg"}
+                              alt="Resident"
+                              className={
+                                formData.identificationFileURL
+                                  ? "resident-picture uploaded-picture"
+                                  : "resident-picture default-picture"
+                              }
+                          /> 
+                        </div>
+                      </div>
+                      </div>
+
+                      <div className="addvoter-outer-container-right">
+                      </div>
+
+                    
+
                     </div>
-                  </div>
-                </div>  
-              </>
-            )}
-            </form>
+
+                    
+                  
+
+                  </>
+                )}
+                </form>
+
+              </div>
+              
+            </div>
           </div>
           {error && <p className="error">{error}</p>}
         </div>
@@ -409,6 +417,7 @@ export default function addVoter() {
                           firstName: resident.firstName || '',
                           middleName: resident.middleName || '',
                           homeAddress: resident.address || '',
+                          identificationFileURL: resident.identificationFileURL || '',
                         });
                         setShowResidentsPopup(false);
                       }}

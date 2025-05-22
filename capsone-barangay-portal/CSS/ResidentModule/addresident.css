@@ -850,6 +850,14 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     display: flex;
     flex-direction: column;
     width: 50%;
+
+} 
+
+.add-voter-section-2-left-side {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
 } 
 
 
@@ -865,6 +873,14 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     display: flex;
     flex-direction: column;
     width: 50%;
+
+  }
+
+  .add-voter-section-2-right-side {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+
   }
 
   .add-main-resident-section-2-right-side p {
@@ -891,6 +907,15 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   width: 100%;
 }
 
+.fields-section-middle-section{
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+  width: 100%;
+}
+
+
+
 .fields-section p{
   font-size: 15px;
   color: #2C3E50;
@@ -906,12 +931,14 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   padding-left: 35px;
   padding-right: 35px;
   height: 100%;
+  /*background-color: yellow;*/
 }
 
 .add-resident-bottom-section-scroll{
   overflow-y: auto;
   height: 400px;
   padding-bottom: 40px;
+  /*background-color: pink;*/
 }
 
 .add-jobseeker-bottom-section-scroll{
@@ -943,6 +970,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   display: flex;
   flex-direction: row;
   width: 100%;
+  background-color: yellow;
 }
 
 .edit-voter-section-2-full-top{
@@ -954,6 +982,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 .add-main-resident-section-2-full-bottom{
   width: 50%;
+  background-color: pink;
 }
 
   .add-resident-input-field {
@@ -1230,3 +1259,92 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   flex-direction: row;
   }
 
+  .resident-photo-section-voter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-left: 30px;
+    padding-bottom: 50px;
+    width: 100%;
+    padding-top: 30px;
+  }
+
+  .resident-details-label-voter {
+    background-color: #1f3b57;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 12px;
+    position: relative;
+    top: 12px; /* Pushes it closer to the card */
+    z-index: 1;
+    left: 0px;
+  }
+
+  .resident-profile-container-voter {
+    border: 1px solid rgba(44, 62, 80, 0.7);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 100%;
+    text-align: center;
+    margin-top: -8px; /* Pulls the card up under the label */
+    height: 200px;
+  }
+
+  .resident-picture{
+    width: 255px;
+    height: 200px;
+  }
+  
+  .uploaded-picture {
+    width: 100%;
+    height: 200px;
+  }
+  
+  .default-picture {
+    width: 100%;
+    height: 200px;
+  }
+
+  .addvoter-outer-container-main{
+    display: flex;
+  }
+
+  .addvoter-rightinfo-container{
+  display: flex;
+    flex-direction: column;
+  }
+
+  .addvoter-outer-top{
+    display: flex;
+    background-color: blue;
+  }
+
+
+  .addvoter-info-container{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .addvoter-top-details-section{
+    display: flex;
+    /*background-color: red;*/
+  }
+
+  .addvoter-outer-container{
+    display: flex;
+    width: 100%;
+  }
+
+  .addvoter-outer-container-left{
+    width: 30%;
+    /*background-color: red;*/
+  }
+
+  .addvoter-outer-container-right{
+    width: 70%;
+    /*background-color: blue;*/
+  }
