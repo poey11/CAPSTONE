@@ -259,6 +259,16 @@ background-color: #214666;
 }
 
 
+.voters-details-container-center {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+
+}
+
+
 
 
 

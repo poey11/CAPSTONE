@@ -102,83 +102,11 @@ export default function ViewKasambahay() {
 
   return (
     <main className="viewresident-main-container">
-      <div className="path-section">
-        <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
-        <h1 className="breadcrumb">
-          <Link href="/dashboard/ResidentModule/kasambahayList">Kasambahay Masterlist</Link>
-          <span className="chevron">/</span>
-        </h1>
-        <h2 className="breadcrumb">View Kasambahay Details<span className="chevron"></span></h2>
-      </div>
+      
 
-      <div className="viewresident-page-title-section-1">
-        <h1>Kasambahay Masterlist</h1>
-      </div>
+      <div className="view-resident-main-content">
+        
 
-      <div className="viewresident-main-content">
-        <div className="viewresident-section-1-header">
-          <button onClick={handleBack}>
-            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
-          </button>
-          <p>View Kasambahay </p>
-        </div>
-
-        {kasambahayFields.map((field) => (
-          <div className="viewresident-details-section" key={field.key}>
-            <div className="viewresident-title">
-              <p>{field.label}</p>
-            </div>
-            <div className="viewresident-description">
-              <p>
-                {field.key === "educationalAttainment"
-                    ? educationalAttainmentMap[kasambahayData[field.key]] || "N/A"
-                    : field.key === "natureOfWork"
-                    ? natureOfWorkMap[kasambahayData[field.key]] || "N/A"
-                    : field.key === "employmentArrangement"
-                    ? employeeArrangementMap[kasambahayData[field.key]] || "N/A"
-                    : field.key === "salary"
-                    ? rangeOfSalaryMap[kasambahayData[field.key]] || "N/A"
-                    : field.isBoolean !== undefined
-                    ? kasambahayData[field.key] ? "Yes" : "No"
-                    : field.key === "employerName" && kasambahayData.employerId ? (
-                      <Link
-                        href={`/dashboard/ResidentModule/ViewResident?id=${kasambahayData.employerId}`}
-                        className="employer-link"
-                      >
-                        {kasambahayData[field.key]}
-                      </Link>
-                    ) : kasambahayData[field.key] ?? "N/A"}
-              </p>
-            </div>
-          </div>
-        ))}
-        {/* Display Valid ID */}
-        <div className="viewresident-details-section">
-          <div className="viewresident-title">
-            <p>Valid ID</p>
-          </div>
-          <div className="viewresident-description">
-            {kasambahayData.fileURL ? (
-              <div className="resident-id-container">
-                <img
-                  src={kasambahayData.fileURL}
-                  alt="Resident's Valid ID"
-                  className="resident-id-image"
-                />
-                <a
-                  href={kasambahayData.fileURL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="view-image-link"
-                >
-                  View Image
-                </a>
-              </div>
-            ) : (
-              <p>No ID uploaded</p>
-            )}
-          </div>
-        </div>
       </div>
     </main>
   );
