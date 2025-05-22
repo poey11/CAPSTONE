@@ -15,7 +15,8 @@ const metadata:Metadata = {
   export default function reasonForRejection() {
 
     const router = useRouter();
-
+    const searchParams = useSearchParams();
+    const requestId = searchParams.get("id");
 
     const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
@@ -24,7 +25,7 @@ const metadata:Metadata = {
 
 
     const handleBack = () => {
-        router.push("/dashboard/ServicesModule/OnlineRequests/View");
+        router.back();
     };
 
     const handleSubmitClick = async () => {
