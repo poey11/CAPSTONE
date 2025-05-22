@@ -468,6 +468,7 @@ input[type="checkbox"] {
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
 
+
 .highlight {
   background-color: yellow;
   transition: background-color 3s ease-out;
@@ -913,6 +914,12 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   padding-bottom: 40px;
 }
 
+.add-jobseeker-bottom-section-scroll{
+  overflow-y: auto;
+  height: 400px;
+  padding-bottom: 110px;
+}
+
 
 .add-resident-section-2 {
     display: flex;
@@ -949,6 +956,54 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   width: 50%;
 }
 
+  .add-resident-input-field {
+    padding: 8px;
+    width: 70%;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left;
+    
+  }
+
+  .select-resident-input-field {
+    padding: 8px;
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left;
+    
+  }
+
+  .select-resident-input-field{
+    padding: 8px;
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: center;
+  }
+.remarks-input-field {
+    padding: 8px;
+    width: 100%;
+    border-radius: 5px;
+    color: #000000;
+    text-align: left;
+    height: 120px;
+    margin-top: 20px;
+    resize: none;
+  }
+
+  .remarks-input-field:focus {
+    outline: none;
+    border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
+    box-shadow: none;
+  }
+
 
   .add-resident-input-field {
     padding: 8px;
@@ -984,6 +1039,15 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   gap: 30px;
 }
 
+.box-container-remarks {
+  position: relative;
+  width: 320px;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  margin-top: 30px;
+  height: 200px;
+}
 
 /* Resident Classification Box */
 .box-container-resclassification {
@@ -1153,7 +1217,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   }
 
   .residents-search-section{
-    height: 20%;
+    height: 12%;
     display: flex;
     align-items: center;
     justify-content: center;
