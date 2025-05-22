@@ -676,14 +676,14 @@ const ReportsPage = () => {
         day: "numeric",
       });
   
-      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(1);
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(3);
       dateCell1.value = `${formattedDate}\nDate`;
       dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
   
-      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
-      const dateCell2 = dateRow.getCell(4);
+      worksheet.mergeCells(`H${dateRow.number}:I${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(8);
       dateCell2.value = `${formattedDate}\nDate`;
       dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
@@ -903,20 +903,17 @@ const ReportsPage = () => {
         day: "numeric",
       });
       
-      // First date: Merge A to B
-      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(1);
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(3);
       dateCell1.value = `${formattedDate}\nDate`;
       dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
-
-      // Second date: Merge D to E
-      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
-      const dateCell2 = dateRow.getCell(4); // E is column 5
+  
+      worksheet.mergeCells(`H${dateRow.number}:I${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(8);
       dateCell2.value = `${formattedDate}\nDate`;
       dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
-      dateRow.commit();
   
       // Save and upload
       worksheet.pageSetup = {
@@ -1114,20 +1111,17 @@ const ReportsPage = () => {
         day: "numeric",
       });
       
-      // First date: Merge A to B
-      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(1);
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(3);
       dateCell1.value = `${formattedDate}\nDate`;
       dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
-
-      // Second date: Merge D to E
-      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
-      const dateCell2 = dateRow.getCell(4); // E is column 5
+  
+      worksheet.mergeCells(`H${dateRow.number}:I${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(8);
       dateCell2.value = `${formattedDate}\nDate`;
       dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
-      dateRow.commit();
   
       // Save and upload
       worksheet.pageSetup = {
@@ -1341,21 +1335,18 @@ const ReportsPage = () => {
         day: "numeric",
       });
       
-      // First date: Merge A to B
-      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(1);
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(3);
       dateCell1.value = `${formattedDate}\nDate`;
       dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
-
-      // Second date: Merge D to E
-      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
-      const dateCell2 = dateRow.getCell(4); // E is column 5
+  
+      worksheet.mergeCells(`H${dateRow.number}:I${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(8);
       dateCell2.value = `${formattedDate}\nDate`;
       dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
-      dateRow.commit();
-  
+      
       // Save and upload
       worksheet.pageSetup = {
         horizontalCentered: true,
@@ -1556,14 +1547,14 @@ const ReportsPage = () => {
         day: "numeric",
       });
   
-      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(1);
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(3);
       dateCell1.value = `${formattedDate}\nDate`;
       dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
   
-      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
-      const dateCell2 = dateRow.getCell(4);
+      worksheet.mergeCells(`H${dateRow.number}:I${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(8);
       dateCell2.value = `${formattedDate}\nDate`;
       dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
@@ -1764,16 +1755,14 @@ const ReportsPage = () => {
         day: "numeric",
       });
   
-      // First date cell (merge A-B)
-      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(1);
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(3);
       dateCell1.value = `${formattedDate}\nDate`;
       dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
   
-      // Second date cell (merge D-E)
-      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
-      const dateCell2 = dateRow.getCell(4);
+      worksheet.mergeCells(`H${dateRow.number}:I${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(8);
       dateCell2.value = `${formattedDate}\nDate`;
       dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
@@ -1861,19 +1850,19 @@ const ReportsPage = () => {
   
       // Group residents by cluster for East Fairview
       const addressGroups = {
-        RINA: residents.filter((resident) =>
+        "RINA": residents.filter((resident) =>
           resident.cluster && resident.cluster.toUpperCase().includes("RINA")
         ),
-        SAMAFA: residents.filter((resident) =>
+        "SAMAFA": residents.filter((resident) =>
           resident.cluster && resident.cluster.toUpperCase().includes("SAMAFA")
         ),
-        SAMAPLI: residents.filter((resident) =>
+        "SAMAPLI": residents.filter((resident) =>
           resident.cluster && resident.cluster.toUpperCase().includes("SAMAPLI")
         ),
         "SITIO KISLAP": residents.filter((resident) =>
           resident.cluster && resident.cluster.toUpperCase().includes("SITIO KISLAP")
         ),
-        EFHAI: residents.filter((resident) =>
+        "EFHAI": residents.filter((resident) =>
           resident.cluster && resident.cluster.toUpperCase().includes("EFHAI")
         ),
       };
@@ -1903,24 +1892,23 @@ const ReportsPage = () => {
       worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
       worksheet.getCell("A2").value = reportTitle;
   
-      // Define footer rows from your template - adjust these to your actual footer rows
+      // Define footer rows 
       const originalFooterStartRow = 24;
       const originalFooterEndRow = 28;
   
       // Calculate total residents count
       const totalResidents = filteredGroups.reduce((sum, [, members]) => sum + members.length, 0);
   
-      // Collect footer drawings (images)
+      // Collect footer drawings
       const footerDrawings = worksheet.getImages().filter((img) => {
         const row = img.range?.tl?.nativeRow;
         return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
       });
   
       // Insert rows before footer to make room for all residents
-      // Now start inserting data from this row
       let insertionRow = 4;
-      const rowsNeeded = Math.max(0, insertionRow + residents.length);
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));  
+      const rowsNeeded = Math.max(0, insertionRow + totalResidents);
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));
 
       let count = 1;
   
@@ -1936,7 +1924,6 @@ const ReportsPage = () => {
           return lastA.localeCompare(lastB);
         });
   
-        // Insert group header
         worksheet.mergeCells(insertionRow, 1, insertionRow, 12);
         const headerRow = worksheet.getRow(insertionRow);
         const headerCell = headerRow.getCell(1);
@@ -1954,7 +1941,6 @@ const ReportsPage = () => {
         headerRow.commit();
         insertionRow++;
   
-        // Insert resident rows
         members.forEach((resident) => {
           const row = worksheet.getRow(insertionRow);
           row.height = 55;
@@ -1994,7 +1980,6 @@ const ReportsPage = () => {
           count++;
         });
   
-        // Insert total for this group
         const totalRow = worksheet.getRow(insertionRow);
         worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
         totalRow.getCell(1).value = `TOTAL: ${members.length}`;
@@ -2006,10 +1991,11 @@ const ReportsPage = () => {
           right: { style: "medium", color: { argb: "000000" } },
         };
         totalRow.commit();
+  
         insertionRow++;
       }
   
-      // Move footer drawings down by number of inserted resident rows
+      // Shift footer drawings
       footerDrawings.forEach((drawing) => {
         const offset = rowsNeeded;
         if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
@@ -2034,16 +2020,14 @@ const ReportsPage = () => {
         day: "numeric",
       });
   
-      // First date cell (merge A-B)
-      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(1);
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(3);
       dateCell1.value = `${formattedDate}\nDate`;
       dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
   
-      // Second date cell (merge D-E)
-      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
-      const dateCell2 = dateRow.getCell(4);
+      worksheet.mergeCells(`H${dateRow.number}:I${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(8);
       dateCell2.value = `${formattedDate}\nDate`;
       dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
@@ -2312,14 +2296,14 @@ const ReportsPage = () => {
         day: "numeric",
       });
   
-      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(1);
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(3);
       dateCell1.value = `${formattedDate}\nDate`;
       dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
   
-      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
-      const dateCell2 = dateRow.getCell(4);
+      worksheet.mergeCells(`H${dateRow.number}:i${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(8);
       dateCell2.value = `${formattedDate}\nDate`;
       dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
@@ -2395,7 +2379,7 @@ const ReportsPage = () => {
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
-      const reportTitle = `RECORD OF BARANGAY INHABITANTS ${year} - South FAIRVIEW`;
+      const reportTitle = `RECORD OF BARANGAY INHABITANTS ${year} - SOUTH FAIRVIEW`;
   
       const residentRef = collection(db, "Residents");
       const q = query(residentRef);
@@ -2567,14 +2551,14 @@ const ReportsPage = () => {
         day: "numeric",
       });
   
-      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(1);
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(3);
       dateCell1.value = `${formattedDate}\nDate`;
       dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
   
-      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
-      const dateCell2 = dateRow.getCell(4);
+      worksheet.mergeCells(`H${dateRow.number}:I${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(8);
       dateCell2.value = `${formattedDate}\nDate`;
       dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
