@@ -262,8 +262,6 @@ const ViewOnlineRequest = () => {
       return n + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
     }
 
-
-    
     
     
     const handlePrint = async() => {
