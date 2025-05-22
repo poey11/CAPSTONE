@@ -274,12 +274,12 @@ export default function addVoter() {
             </div>
           </div>
 
-          <div className="add-resident-bottom-section">
+          <div className="add-voter-bottom-section">
             <div className="residents-search-section">
               <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleEmployerClick} />
             </div>
 
-            <div className="add-resident-bottom-section">
+            
           
               <nav className="info-toggle-wrapper">
                 {["details"].map((section) => (
@@ -319,6 +319,36 @@ export default function addVoter() {
                       </div>
 
                       <div className="addvoter-outer-container-right">
+                        <div className="addvoter-top-details-section">
+                          <div className="add-main-resident-section-2-left-side">
+                            <div className="fields-section">
+                              <p>Last Name<span className="required">*</span></p>
+                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`} placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                            </div>
+                            <div className="fields-section">
+                              <p>First Name<span className="required">*</span></p>
+                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`} placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                            </div>
+                          </div>
+                          <div className="add-main-resident-section-2-right-side">
+                            <div className="fields-section">
+                              <p>Middle Name</p>
+                              <input type="text"  className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} />
+                            </div>
+                            <div className="fields-section">
+                              <p>Home Address<span className="required">*</span></p>
+                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="add-voter-section-2-full-bottom">
+                          
+                            <div className="fields-section-precinct">
+                              <p>Precinct Number<span className="required">*</span></p>
+                              <input type="text" className={`add-voterprecinct-input-field ${invalidFields.includes("precinctNumber") ? "input-error" : ""}`} placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required/>
+                            </div>
+                         
+                        </div>  
                       </div>
 
                     
@@ -334,7 +364,7 @@ export default function addVoter() {
 
               </div>
               
-            </div>
+         
           </div>
           {error && <p className="error">{error}</p>}
         </div>

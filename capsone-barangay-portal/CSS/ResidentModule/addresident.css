@@ -132,7 +132,7 @@
     color: rgba(0, 0, 0, 0.4);
     opacity: 1;
     padding: 8px;
-    width: 70%;
+    width: 85%;
     margin-top: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -803,7 +803,7 @@ FOR INFO
   justify-content: center;
   gap: 15px;
   margin-top: 5px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   border-bottom: 2px solid #e0e0e0;
 }
 
@@ -914,6 +914,20 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   width: 100%;
 }
 
+.fields-section-precinct{
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+  width: 100%;
+}
+
+.fields-section-precinct p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 25%;
+}
 
 
 .fields-section p{
@@ -921,7 +935,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   color: #2C3E50;
   font-weight: bold;
   align-self: flex-start; /* Left-aligns the label */
-  margin-left: 15%;
+  margin-left: 8%;
 }
 
 
@@ -931,14 +945,19 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   padding-left: 35px;
   padding-right: 35px;
   height: 100%;
-  /*background-color: yellow;*/
+}
+
+.add-voter-bottom-section{
+  padding-top: 20px;
+  padding-left: 35px;
+  padding-right: 35px;
+  height: 100%;
 }
 
 .add-resident-bottom-section-scroll{
   overflow-y: auto;
   height: 400px;
   padding-bottom: 40px;
-  /*background-color: pink;*/
 }
 
 .add-jobseeker-bottom-section-scroll{
@@ -970,7 +989,6 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   display: flex;
   flex-direction: row;
   width: 100%;
-  background-color: yellow;
 }
 
 .edit-voter-section-2-full-top{
@@ -982,19 +1000,15 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 .add-main-resident-section-2-full-bottom{
   width: 50%;
-  background-color: pink;
 }
 
-  .add-resident-input-field {
-    padding: 8px;
-    width: 70%;
-    margin-top: 10px;
-    border: 1px solid rgba(36, 53, 76, 0.7);
-    border-radius: 5px;
-    color: #000000;
-    text-align: left;
-    
-  }
+.add-voter-section-2-full-bottom{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+ 
 
   .select-resident-input-field {
     padding: 8px;
@@ -1036,13 +1050,22 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
   .add-resident-input-field {
     padding: 8px;
-    width: 70%;
+    width: 85%;
     margin-top: 10px;
     border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
     color: #000000;
-    text-align: left;
-    
+    text-align: left; 
+  }
+
+  .add-voterprecinct-input-field {
+    padding: 8px;
+    width: 50%;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left; 
   }
 
   .add-resident-input-field option:disabled {
@@ -1050,6 +1073,10 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   }
 
   .fields-section input,select{
+  align-self: center; 
+}
+
+.fields-section-precinct input,select{
   align-self: center; 
 }
 
@@ -1253,7 +1280,6 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   }
 
   .add-voter-main-content{
-  background-color: yellow;
   height: 80%;
   display: flex;
   flex-direction: row;
@@ -1266,7 +1292,8 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     padding-left: 30px;
     padding-bottom: 50px;
     width: 100%;
-    padding-top: 30px;
+    padding-right: 15px;
+    padding-top: 40px;
   }
 
   .resident-details-label-voter {
@@ -1275,7 +1302,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     padding: 8px 16px;
     border-radius: 10px;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 15px;
     position: relative;
     top: 12px; /* Pushes it closer to the card */
     z-index: 1;
@@ -1320,7 +1347,6 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
   .addvoter-outer-top{
     display: flex;
-    background-color: blue;
   }
 
 
@@ -1331,7 +1357,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
   .addvoter-top-details-section{
     display: flex;
-    /*background-color: red;*/
+    width: 100%;
   }
 
   .addvoter-outer-container{
@@ -1341,10 +1367,10 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
   .addvoter-outer-container-left{
     width: 30%;
-    /*background-color: red;*/
   }
 
   .addvoter-outer-container-right{
+    display: flex;
+    flex-direction: column;
     width: 70%;
-    /*background-color: blue;*/
   }
