@@ -2703,18 +2703,27 @@ const ReportsPage = () => {
       });
   
       let insertionRow = 4;
-      const rowsNeeded = Math.max(0, insertionRow + totalReports + filteredGroups.length * 4);
-      worksheet.insertRows(originalFooterStartRow, new Array(rowsNeeded).fill([]));
-  
-      const defaultFont = { name: "Calibri", size: 12, bold: false, italic: false };
+      const rowsNeeded = Math.max(0, insertionRow + totalReports + filteredGroups.length);
+      for (let i = 0; i < rowsNeeded; i++) {
+        worksheet.insertRow(originalFooterStartRow + i, []);
+      }  
   
       for (const [department, reports] of filteredGroups) {
-        // --- Department Header ---
+        worksheet.spliceRows(insertionRow, 1, []);
         const headerRange = `A${insertionRow}:E${insertionRow}`;
-
+        try {
+          worksheet.unMergeCells(headerRange);
+        } catch (_) {}
+        
+        worksheet.mergeCells(headerRange);
+        const headerRow = worksheet.getRow(insertionRow);
+        
+        // Only set value in A
+        headerRow.getCell(1).value = department;
+        
         for (let col = 1; col <= 5; col++) {
-          const cell = worksheet.getRow(insertionRow).getCell(col);
-          cell.font = { name: "Times New Roman", size: 20, bold: true, italic: true };
+          const cell = headerRow.getCell(col);
+          cell.font = { name: "Times New Roman", size: 20, bold: true };
           cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
           cell.border = {
             top: { style: "medium" },
@@ -2724,17 +2733,10 @@ const ReportsPage = () => {
           };
         }
         
-        try {
-          worksheet.unMergeCells(headerRange);
-        } catch (_) {}
-        worksheet.mergeCells(headerRange);
-        
-        const headerRow = worksheet.getRow(insertionRow);
-        const headerCell = headerRow.getCell(1);
-        headerCell.value = department;
         headerRow.height = 25;
         headerRow.commit();
         insertionRow++;
+        
         
   
         // --- Incident Data Rows ---
@@ -2776,27 +2778,33 @@ const ReportsPage = () => {
           row.commit();
           insertionRow++;
         });
-  
-        // --- Department Total Row ---
+
+        worksheet.spliceRows(insertionRow, 1, []);
+
         const totalRange = `A${insertionRow}:E${insertionRow}`;
         try {
           worksheet.unMergeCells(totalRange);
         } catch (_) {}
         worksheet.mergeCells(totalRange);
-  
+        
         const totalRow = worksheet.getRow(insertionRow);
-        const totalCell = totalRow.getCell(1);
-        totalCell.value = `TOTAL: ${reports.length}`;
-        totalCell.font = { name: "Times New Roman", size: 12, italic: true, bold: true };
-        totalCell.alignment = { horizontal: "center", vertical: "middle" };
-        totalCell.border = {
-          bottom: { style: "medium", color: { argb: "000000" } },
-          left: { style: "medium", color: { argb: "000000" } },
-          right: { style: "medium", color: { argb: "000000" } },
-        };
+        totalRow.getCell(1).value = `TOTAL: ${reports.length}`;
+        
+        for (let col = 1; col <= 5; col++) {
+          const cell = totalRow.getCell(col);
+          cell.font = { name: "Times New Roman", size: 12, italic: true, bold: true };
+          cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+          cell.border = {
+            top: { style: "medium", color: { argb: "000000" } },
+            bottom: { style: "medium", color: { argb: "000000" } },
+            left: { style: "medium", color: { argb: "000000" } },
+            right: { style: "medium", color: { argb: "000000" } },
+          };
+        }
+        
         totalRow.commit();
         insertionRow++;
-  
+        
         // --- Add spacer to prevent formatting overlap ---
         worksheet.getRow(insertionRow).values = ["", "", "", "", ""];
         worksheet.getRow(insertionRow).height = 5;
@@ -2825,13 +2833,13 @@ const ReportsPage = () => {
         day: "numeric",
       });
   
-      worksheet.mergeCells(`A${dateRow.number}:B${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(1);
+      worksheet.mergeCells(`B${dateRow.number}:C${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(2);
       dateCell1.value = `${formattedDate}\nDate`;
       dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
   
-      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      worksheet.mergeCells(`D${dateRow.number}:E${dateRow.number}`);
       const dateCell2 = dateRow.getCell(4);
       dateCell2.value = `${formattedDate}\nDate`;
       dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
