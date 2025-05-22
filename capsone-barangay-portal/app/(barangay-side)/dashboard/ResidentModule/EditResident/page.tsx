@@ -259,9 +259,6 @@ export default function EditResident() {
     if (!civilStatus) invalidFields.push("civilStatus");
     if (!contactNumber) invalidFields.push("contactNumber");
 
-    if (verificationFiles.length === 0) {
-      invalidFields.push("verificationFiles");
-    }
 
     if (invalidFields.length > 0) {
       // Set the section based on the first invalid field
@@ -306,20 +303,20 @@ export default function EditResident() {
 
   const confirmSave = async () => {
     setShowSavePopup(false);
-
     setPopupMessage("Changes saved successfully!");
     setShowPopup(true);
+
+    // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
 
     // Hide the popup after 3 seconds
     setTimeout(() => {
       setShowPopup(false);
 
-      router.push("/dashboard/ResidentModule");
+      //router.push("/dashboard/ResidentModule");
+      router.push(`/dashboard/ResidentModule?highlight=${docId}`);
     }, 3000);
-
-    // Create a fake event and call handleSubmit
-    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-    await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -370,13 +367,15 @@ export default function EditResident() {
         identificationFileURL,
         updatedBy: session?.user?.position,
       });*/
-
+      const docRef = doc(db, "Residents", residentId!);
       await updateDoc(doc(db, "Residents", residentId as string), {
         ...formData,
         verificationFilesURLs: uploadedVerificationURLs.length ? uploadedVerificationURLs : formData.verificationFilesURLs,
         identificationFileURL: uploadedIdentificationURL,
         updatedBy: session?.user?.position || "",
       });
+
+      return docRef.id; // return ID
 
     } catch (err) {
       setError("Failed to update resident");
