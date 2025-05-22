@@ -12,9 +12,9 @@ export default function AddFirstTimeJobSeeker() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     dateApplied: "", // YYYY-MM-DD format
-    lastName: "",
-    firstName: "",
-    middleName: "",
+    lastName: "", //-
+    firstName: "", //-
+    middleName: "", //-
     age: 0,
     dateOfBirth: "", // YYYY-MM-DD format from input
     monthOfBirth: "",
@@ -23,6 +23,19 @@ export default function AddFirstTimeJobSeeker() {
     sex: "",
     remarks: "",
   });
+
+  const fieldSectionMap: { [key: string]: "full" | "others" } = {
+    dateApplied: "full",
+    lastName: "full",
+    firstName: "full",
+    middleName: "full",
+    age: "full",
+    dateOfBirth: "full",
+    sex: "full",
+    remarks: "others",
+    verificationFiles: "others",
+    identificationFile: "others"
+  };
 
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
@@ -38,9 +51,15 @@ export default function AddFirstTimeJobSeeker() {
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
+  const [identificationFile, setIdentificationFile] = useState<File | null>(null);
+  const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
+  const [verificationFiles, setVerificationFiles] = useState<File[]>([]);
+  const [verificationPreviews, setVerificationPreviews] = useState<string[]>([]);
+
+
 
   // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const newValue: any = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
   
@@ -107,59 +126,28 @@ export default function AddFirstTimeJobSeeker() {
     if (!age) invalidFields.push("age");
     if (!sex) invalidFields.push("sex");
   
-    if (invalidFields.length > 0) {
-      setInvalidFields(invalidFields);
-      setPopupErrorMessage("Please fill up all required fields.");
-      setShowErrorPopup(true);
-  
-      setTimeout(() => {
-        setShowErrorPopup(false);
-      }, 3000);
-      return;
+    if (verificationFiles.length === 0) {
+      invalidFields.push("verificationFiles");
     }
-  
-    try {
-      
-      const cleanFirst = firstName.trim().toLowerCase();
-      const cleanMiddle = middleName.trim().toLowerCase();
-      const cleanLast = lastName.trim().toLowerCase();
-  
-      
-      const snapshot = await getDocs(collection(db, "JobSeekerList"));
-  
-      let isDuplicate = false;
-  
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-  
-        const dbFirst = (data.firstName || "").trim().toLowerCase();
-        const dbMiddle = (data.middleName || "").trim().toLowerCase();
-        const dbLast = (data.lastName || "").trim().toLowerCase();
-  
-        if (
-          dbFirst === cleanFirst &&
-          dbMiddle === cleanMiddle &&
-          dbLast === cleanLast
-        ) {
-          isDuplicate = true;
-        }
-      });
-  
-      if (isDuplicate) {
-        setPopupErrorMessage("Job Seeker is already in the record.");
+
+      if (invalidFields.length > 0) {
+        // Set the section based on the first invalid field
+        const firstInvalidField = invalidFields[0];
+        const section = fieldSectionMap[firstInvalidField];
+        setActiveSection(section);
+
+        setInvalidFields(invalidFields);
+        setPopupErrorMessage("Please fill up all required fields.");
         setShowErrorPopup(true);
-        setTimeout(() => setShowErrorPopup(false), 3000);
+    
+        setTimeout(() => {
+          setShowErrorPopup(false);
+        }, 3000);
         return;
       }
-  
-      // No duplicate found — show confirmation popup
+    
+      setInvalidFields([]);
       setShowSubmitPopup(true);
-    } catch (err) {
-      console.error("Error checking for duplicates:", err);
-      setPopupErrorMessage("Something went wrong. Please try again.");
-      setShowErrorPopup(true);
-      setTimeout(() => setShowErrorPopup(false), 3000);
-    }
   };
   
 
@@ -195,11 +183,21 @@ export default function AddFirstTimeJobSeeker() {
     setError("");
   
     try {
-      let fileURL = "";
-      if (file) {
-        const storageRef = ref(storage, `JobSeekerFiles/${file.name}`);
-        await uploadBytes(storageRef, file);
-        fileURL = await getDownloadURL(storageRef);
+      let verificationFilesURLs: string[] = [];
+      if (verificationFiles.length > 0) {
+        for (const file of verificationFiles) {
+          const storageRef = ref(storage, `ResidentsFiles/VerificationFiles/${file.name}`);
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+          verificationFilesURLs.push(url);
+        }
+      }
+
+      let identificationFileURL = "";
+      if (identificationFile) {
+        const storageRef = ref(storage, `ResidentsFiles/IndentificationFile/${identificationFile.name}`);
+        await uploadBytes(storageRef, identificationFile);
+        identificationFileURL = await getDownloadURL(storageRef);
       }
   
       // Extract Month, Day, and Year from Date of Birth
@@ -219,7 +217,8 @@ export default function AddFirstTimeJobSeeker() {
         dayOfBirth,
         yearOfBirth,
         dateApplied: formattedDateApplied,
-        fileURL,
+        verificationFilesURLs,
+        identificationFileURL,
         createdAt: currentDate,
         createdBy: session?.user?.position || "Unknown",
       });
@@ -240,9 +239,46 @@ export default function AddFirstTimeJobSeeker() {
     router.push("/dashboard/ResidentModule/FirstTimeJobSeeker");
   };
 
+  const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFile = e.target.files[0];
+  
+      // Ensure only one file is processed
+      setIdentificationFile(selectedFile);
+      setIdentificationPreview(URL.createObjectURL(selectedFile));
+  
+      // Reset the file input to prevent multiple selections
+      e.target.value = "";
+    }
+  };
+
+  const handleVerificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (e.target.files && e.target.files.length > 0) {
+    const selectedFiles = Array.from(e.target.files);
+    const newPreviews = selectedFiles.map((file) => URL.createObjectURL(file));
+    setVerificationFiles((prev) => [...prev, ...selectedFiles]);
+    setVerificationPreviews((prev) => [...prev, ...newPreviews]);
+    e.target.value = "";
+  }
+};
+
+  const handleIdentificationFileDelete = () => {
+    setIdentificationFile(null);
+    setIdentificationPreview(null);
+  };
+
+  const handleVerificationFileDelete = (index: number) => {
+    setVerificationFiles((prev) => prev.filter((_, i) => i !== index));
+    setVerificationPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const [activeSection, setActiveSection] = useState("full");
+  // options: "basic", "full", "others"
+
   return (
     <main className="add-resident-main-container">
 
+      {/*}
       <div className="path-section">
         <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
         <h1 className="breadcrumb">
@@ -254,7 +290,7 @@ export default function AddFirstTimeJobSeeker() {
 
       <div className="addresident-page-title-section-1">
       <h1>First-Time Job Seeker List</h1>
-      </div>
+      </div>*/}
 
       <div className="add-resident-main-content">
           <div className="add-resident-main-section1">
@@ -271,97 +307,222 @@ export default function AddFirstTimeJobSeeker() {
                 {loading ? "Saving..." : "Save"}
               </button>
             </div>
-            
           </div>
 
-          <hr/>
+          <div className="add-resident-bottom-section">
+            <div className="residents-search-section">
+              <p>Search Resident Here</p>
+              <p>will implement</p>
+            </div>
+
+            <nav className="info-toggle-wrapper">
+              {["full", "others"].map((section) => (
+                <button
+                  key={section}
+                  type="button"
+                  className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                  onClick={() => setActiveSection(section)}
+                >
+                  {section === "full" && "Full Info"}
+                  {section === "others" && "Others"}
+                </button>
+              ))}
+            </nav>
+
+            <div className="add-jobseeker-bottom-section-scroll">
+            <form id="addJobSeekerForm" onSubmit={handleSubmit} className="add-resident-section-2">
+
+              {activeSection === "full" && (
+                <>
+                  <div className="add-main-resident-section-2-full-top">  
+                    <div className="add-main-resident-section-2-left-side">
+                      <div className="fields-section">
+                        <p>Last Name<span className="required">*</span></p>
+                        <input
+                            type="text"
+                            className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`}
+                            placeholder="Enter Last Name"
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleChange}
+                          />
+                      </div>
+
+                      <div className="fields-section">
+                        <p>First Name<span className="required">*</span></p>
+                        <input type="text"
+                        className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`}
+                        placeholder="Enter First Name" 
+                        name="firstName"
+                        value={formData.firstName} 
+                        onChange={handleChange} required />
+                      </div>
+
+                      <div className="fields-section">
+                        <p>Middle Name</p>
+                        <input type="text"
+                          className={`add-resident-input-field ${invalidFields.includes("middleName") ? "input-error" : ""}`}
+                          placeholder="Enter Middle Name"
+                          name="middleName" 
+                          value={formData.middleName} 
+                          onChange={handleChange}
+                          required
+                          />
+                      </div>
+                    </div>
+
+                    <div className="add-main-resident-section-2-right-side">
+                      <div className="fields-section">
+                        <p>Sex<span className="required">*</span></p>
+                        <select 
+                          name="sex" 
+                          className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
+                          value={formData.sex} 
+                          onChange={handleChange} 
+                          required>
+                          <option value="" disabled>Choose Gender</option>
+                          <option value="M">Male</option>
+                          <option value="F">Female</option>
+                        </select>
+                      </div>
+
+                      <div className="fields-section">
+                        <p>Date of Birth<span className="required">*</span></p>
+                        <input type="date"
+                        className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
+                          name="dateOfBirth"
+                          value={formData.dateOfBirth}
+                            onChange={handleChange}
+                            max={new Date().toISOString().split("T")[0]} 
+                            required />
+                      </div>
+
+                      <div className="fields-section">
+                        <p>Age<span className="required">*</span></p>
+                        <input 
+                          type="number"
+                          className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
+                          placeholder="Enter Age"
+                          name="age"
+                          value={formData.age}
+                          onChange={handleChange}
+                          readOnly />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="add-main-resident-section-2-full-bottom">
+                    <div className="add-main-resident-section-2-cluster">
+                      <div className="fields-section">
+                        <p>Date Applied<span className="required">*</span></p>
+                        <input 
+                          type="date"
+                          className={`add-resident-input-field ${invalidFields.includes("dateApplied") ? "input-error" : ""}`}
+                          name="dateApplied" 
+                          value={formData.dateApplied} 
+                          onChange={handleChange}
+                          required />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeSection === "others" && (
+                <>
+                  <div className="add-main-resident-others-mainsection">
+                    <div className="add-main-resident-section-2-top-side">
+                      <div className="box-container-outer-resclassification">
+                        <div className="title-resclassification">
+                          Remarks
+                        </div>
+                        <div className="box-container-remarks">
+                          <textarea className="remarks-input-field" placeholder="Enter Remarks" name="remarks" value={formData.remarks} onChange={handleChange} />
+
+                        </div>
+                      </div>
+                    </div>
+                    <div className="add-main-resident-section-2-bottom-side">
+                      <div className="box-container-outer-resindentificationpic">
+                        <div className="title-resindentificationpic">
+                          Identification Picture
+                        </div>
+
+                        <div className="box-container-resindentificationpic">
+
+                          {/* File Upload Section */}
+                          <div className="file-upload-container">
+                            <label htmlFor="identification-file-upload" className="upload-link">Click to Upload File</label>
+                            <input id="identification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleIdentificationFileChange} />
+
+                            {identificationFile && (
+                              <div className="file-name-image-display">
+                                <div className="file-name-image-display-indiv">
+                                  {identificationPreview && <img src={identificationPreview} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />}
+                                  <span>{identificationFile.name}</span>
+                                  <div className="delete-container">
+                                    <button type="button" onClick={handleIdentificationFileDelete} className="delete-button">
+                                      <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>              
+                        </div>
+                      </div>
+
+                      <div className="box-container-outer-verificationdocs">
+                        <div className="title-verificationdocs">
+                          Verification Documents
+                        </div>
+
+                        <div className={`box-container-verificationdocs ${invalidFields.includes("verificationFiles") ? "input-error" : ""}`}>
+                          <span className="required-asterisk">*</span>
+
+                          {/* File Upload Section */}
+                          <div className="file-upload-container">
+                            <label htmlFor="verification-file-upload" className="upload-link">Click to Upload File</label>
+                            <input id="verification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleVerificationFileChange} required/>
+
+                            {verificationFiles.length > 0 && (
+                              <div className="file-name-image-display">
+                                {verificationFiles.map((file, index) => (
+                                  <div key={index} className="file-name-image-display-indiv">
+                                    {verificationPreviews[index] && (
+                                      <img src={verificationPreviews[index]} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />
+                                    )}
+                                    <span>{file.name}</span>
+                                    <div className="delete-container">
+                                      <button type="button" onClick={() => handleVerificationFileDelete(index)} className="delete-button">
+                                        <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </form>
+
+            </div>
+          </div>
+
+        
 
         <form id="addJobSeekerForm" onSubmit={handleSubmit} className="add-resident-section-2">
           <div className="add-resident-section-2-left-side">
             <div className="fields-container">
-              <div className="fields-section">
-                <p>Last Name<span className="required">*</span></p>
-                <input
-                    type="text"
-                    className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`}
-                    placeholder="Enter Last Name"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                  />
-              </div>
-
-              <div className="fields-section">
-                <p>First Name<span className="required">*</span></p>
-                <input type="text"
-                className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`}
-                 placeholder="Enter First Name" 
-                 name="firstName"
-                 value={formData.firstName} 
-                onChange={handleChange} required />
-              </div>
-
-              <div className="fields-section">
-                <p>Middle Name</p>
-                <input type="text"
-                   className={`add-resident-input-field ${invalidFields.includes("middleName") ? "input-error" : ""}`}
-                   placeholder="Enter Middle Name"
-                   name="middleName" 
-                   value={formData.middleName} 
-                   onChange={handleChange}
-                   required
-                   />
-              </div>
-
-              <div className="fields-section">
-                <p>Date Applied<span className="required">*</span></p>
-                <input 
-                  type="date"
-                  className={`add-resident-input-field ${invalidFields.includes("dateApplied") ? "input-error" : ""}`}
-                  name="dateApplied" 
-                  value={formData.dateApplied} 
-                  onChange={handleChange}
-                   required />
-              </div>
+        
                 
-
-              <div className="fields-section">
-                <p>Date of Birth<span className="required">*</span></p>
-                <input type="date"
-                 className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
-                  name="dateOfBirth"
-                   value={formData.dateOfBirth}
-                    onChange={handleChange}
-                     max={new Date().toISOString().split("T")[0]} 
-                     required />
-              </div>
-
-
-              <div className="fields-section">
-                <p>Age<span className="required">*</span></p>
-                <input 
-                  type="number"
-                  className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
-                  placeholder="Enter Age"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleChange}
-                  readOnly />
-              </div>
                 
-              <div className="fields-section">
-                <p>Sex<span className="required">*</span></p>
-                <select 
-                  name="sex" 
-                  className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
-                  value={formData.sex} 
-                  onChange={handleChange} 
-                  required>
-                  <option value="" disabled>Choose Gender</option>
-                  <option value="M">Male</option>
-                  <option value="F">Female</option>
-                </select>
-              </div>
+              
               
               <div className="fields-section">
                 <p>Remarks</p>

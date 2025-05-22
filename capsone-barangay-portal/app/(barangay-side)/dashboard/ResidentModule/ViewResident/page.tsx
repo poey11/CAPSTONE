@@ -45,7 +45,9 @@ export default function ViewResident() {
     isSoloParent: false,
     verificationFilesURLs: [],
     identificationFileURL: "",
+    createdBy: "",
     updatedBy: "",
+    createdAt: "",
   });
 
    const [originalData, setOriginalData] = useState({ ...formData });
@@ -81,7 +83,9 @@ export default function ViewResident() {
             isSoloParent: docSnap.data().isSoloParent || false,
             verificationFilesURLs: docSnap.data().verificationFilesURLs || [],
             identificationFileURL: docSnap.data().identificationFileURL || "",
+            createdBy: docSnap.data().createdBy || "",
             updatedBy: docSnap.data().updatedBy || "",
+            createdAt: docSnap.data().createdAt || "",
           };
 
           setFormData(data);
@@ -147,7 +151,7 @@ export default function ViewResident() {
           </div>
               
           <div className="view-resident-info-toggle-wrapper">
-            {["basic", "full", "others"].map((section) => (
+            {["basic", "full", "others" , "history"].map((section) => (
               <button
                 key={section}
                 type="button"
@@ -157,6 +161,7 @@ export default function ViewResident() {
                 {section === "basic" && "Basic Info"}
                 {section === "full" && "Full Info"}
                 {section === "others" && "Others"}
+                {section === "history" && "History"}
               </button>
             ))}
           </div>  
@@ -289,6 +294,79 @@ export default function ViewResident() {
 
                   </>
                 )}
+
+
+                    {activeSection === "others" && (
+                          <>
+                            <div className="view-main-resident-content-left-side">
+
+                                <div className="view-resident-fields-section">
+                                  <p>Student</p>
+                                  <input type="text" className="view-resident-input-field" name="isStudent"  value={formData.isStudent ? 'Yes' : 'No'} readOnly/>
+                                </div>
+
+                                <div className="view-resident-fields-section">
+                                  <p>Student</p>
+                                  <input type="text" className="view-resident-input-field" name="isStudent"  value={formData.isStudent ? 'Yes' : 'No'} readOnly/>
+                                </div>
+
+                            </div>
+
+                            <div className="view-main-resident-content-right-side">
+
+                              <div className="view-resident-fields-section">
+                                <p>PWD</p>
+                                <input type="text" className="view-resident-input-field" name="isPWD"  value={formData.isPWD ? 'Yes' : 'No'} readOnly/>
+                              </div>
+
+
+                              <div className="view-resident-fields-section">
+                                <p>Solo Parent</p>
+                                <input type="text" className="view-resident-input-field" name="isSoloParent"  value={formData.isSoloParent ? 'Yes' : 'No'} readOnly/>
+                              </div>
+
+                              </div>
+                          
+                          </>
+                          
+                        )}
+
+
+                {activeSection === "history" && (
+                 <>
+
+                  <div className="view-main-resident-content-left-side">
+                      <div className="view-resident-fields-section">
+                        <p>Created By</p>
+                        <input type="text" className="view-resident-input-field" name="createDby" value={formData.createdBy} readOnly/>
+                      </div>
+
+                      <div className="view-resident-fields-section">
+                        <p>Created At</p>
+                        <input type="text" className="view-resident-input-field" name="createdAt" value={formData.createdAt} readOnly/>
+                      </div>
+
+                    
+                      
+                    </div>
+
+                    <div className="view-main-resident-content-right-side">
+                      <div className="view-resident-fields-section">
+                        <p>Updated By</p>
+                        <input type="text" className="view-resident-input-field" name="updatedby" value={formData.updatedBy} readOnly/>
+                      </div>
+
+                    
+                      
+                    </div>
+                    
+                    
+                        
+                        
+                  </>
+
+                  )}
+
               </div>
                 
             </div>
