@@ -29,6 +29,8 @@ interface KasambahayFormData {
   pagibigMember: boolean;
   fileURL: string;
   updatedBy: string;
+  createdBy: string;
+  createdAt: string;
 }
 
 
@@ -63,6 +65,8 @@ export default function ViewKasambahay() {
       pagibigMember: false,
       fileURL: "",
       updatedBy: "",
+      createdBy: "",
+      createdAt: "",
     });
   
 
@@ -98,6 +102,8 @@ export default function ViewKasambahay() {
               pagibigMember: docSnap.data().pagibigMember ?? false,
               fileURL: docSnap.data().fileURL || "",
               updatedBy: docSnap.data().updatedBy || "",
+              createdBy: docSnap.data().createdBy || "",
+              createdAt: docSnap.data().createdAt || "",
             };
   
             setFormData(data);
@@ -469,6 +475,53 @@ export default function ViewKasambahay() {
 
                   </>
                 )}
+
+            {activeSection === "history" && (
+                  <>
+
+                   <div className="voters-details-container-center ">
+
+                        <div className="view-resident-fields-section">
+                          <p>Created By</p>
+                          <input
+                            type="text"
+                            name="createdBy"
+                            value={formData.createdBy}
+                            className="view-resident-input-field"
+                            readOnly
+                          />
+                        </div>
+
+                        <div className="view-resident-fields-section">
+                          <p>Created At</p>
+                          <input
+                            type="text"
+                            name="createdAt"
+                            value={formData.createdAt}
+                            className="view-resident-input-field"
+                            readOnly
+                          />
+                        </div>
+
+                        <div className="view-resident-fields-section">
+                          <p>Last Updated By</p>
+                          <input
+                            type="text"
+                            name="updatedBy"
+                            value={formData.updatedBy}
+                            className="view-resident-input-field"
+                            readOnly
+                          />
+                        </div>
+
+
+                        
+
+                   </div>
+
+                  </>
+                )}
+
 
 
 
