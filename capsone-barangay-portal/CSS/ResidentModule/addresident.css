@@ -811,7 +811,8 @@ FOR INFO
 .info-toggle-wrapper,
 .main-residents-info-toggle-wrapper,
 .voters-info-toggle-wrapper,
-.kasambahay-info-toggle-wrapper {
+.kasambahay-info-toggle-wrapper,
+.jobseeker-info-toggle-wrapper {
   display: flex;
   justify-content: center;
   gap: 15px;
