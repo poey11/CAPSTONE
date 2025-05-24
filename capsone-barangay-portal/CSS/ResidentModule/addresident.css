@@ -808,7 +808,8 @@ FOR INFO
 */
 
 
-.info-toggle-wrapper {
+.info-toggle-wrapper,
+.main-residents-info-toggle-wrapper {
   display: flex;
   justify-content: center;
   gap: 15px;
