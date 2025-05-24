@@ -421,7 +421,11 @@ export default function EditKasambahay() {
 
   const handleIdentificationFileDelete = () => {
     setIdentificationFile(null);
-    setIdentificationPreview(null);
+      setIdentificationPreview(null);
+      setFormData((prev) => ({
+        ...prev,
+        identificationFileURL: "",
+      }));
   };
 
   const handleVerificationFileDelete = (index: number) => {

@@ -412,10 +412,27 @@ export default function EditResident() {
       }
     };
 
+    /*
     const handleIdentificationFileDelete = () => {
       setIdentificationFile(null);
       setIdentificationPreview(null);
+      setFormData((prev) => ({
+        ...prev,
+        identificationFileURL: "",  // Clear the actual field
+      }));
+    };*/
+
+    const handleIdentificationFileDelete = async () => {
+
+      setIdentificationFile(null);
+      setIdentificationPreview(null);
+      setFormData((prev) => ({
+        ...prev,
+        identificationFileURL: "",
+      }));
     };
+
+  
   
     const handleVerificationFileDelete = (index: number) => {
       setVerificationFiles((prev) => prev.filter((_, i) => i !== index));
