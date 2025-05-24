@@ -497,7 +497,7 @@ export default function EditResident() {
                                   name="residentNumber" 
                                   value={formData.residentNumber} 
                                   onChange={handleChange} 
-                                  disabled 
+                                  readOnly 
                                   className="add-resident-input-field-disabled" />
                               </div>
 

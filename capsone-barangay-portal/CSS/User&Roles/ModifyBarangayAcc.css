@@ -1,13 +1,10 @@
 .editbrgyacc-main-container{
   width: 100%;
   height: 100vh;
-  background-color: #f9f9f9;
-padding-left:30px;
-  padding-right:30px;
-  padding-bottom:30px;
-  padding-top: 150px;
+  background-color: #F0F2F8; 
+  /*padding-top: 150px;*/
+  padding-top: 11.2%;
   margin-left: 3rem; 
-  overflow-y: auto; 
 }
 
 .editbrgyacc-page-title-section-1{
@@ -18,6 +15,187 @@ padding-left:30px;
   font-size: 2rem;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.5);
+}
+
+.editbrgyuser-main-content {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+  border-radius: 1rem;
+  border: 2px solid rgba(36, 53, 76, 0.7);
+  margin:  auto; 
+  background-color: #ffffff;
+  overflow: hidden; 
+  height: 580px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.editbrgyuser-main-section1{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #214666;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.editbrgyuser-main-section1-left{
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-left: 30px;
+}
+
+.editbrgyuser-info-toggle-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.editbrgyuser-main-section1 h1{
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.editbrgyuser-bottom-section-scroll{
+  overflow-y: auto;
+  height: 400px;
+  padding-bottom: 40px;
+}
+
+.editbrgyuser-section-2-full-top{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.editbrgyuser-section-2-left-side {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+} 
+
+.editbrgyuser-section-2-left-side p {
+  color: grey;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.editbrgyuser-section-2-right-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  justify-content: center; 
+  width: 40%;
+  padding: 3rem;
+  flex-wrap: wrap;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.editbrgyuser-section-2-right-side p {
+  color: grey;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.fields-section{
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+  width: 100%;
+}
+
+.fields-section p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 8%;
+}
+
+.fields-section input,select{
+  align-self: center; 
+}
+
+.fields-section-precinct input,select{
+  align-self: center; 
+}
+
+.editbrgyuser-input-field {
+  padding: 8px;
+  width: 85%;
+  margin-top: 10px;
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  color: #000000;
+  text-align: left; 
+}
+
+.editbrgyuser-input-field-pass {
+  padding: 8px;
+  width: 85%;
+  margin-top: 10px;
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  color: #000000;
+  text-align: left; 
+  margin-left: 33px;
+}
+
+.editbrgyuser-input-field option:disabled {
+  color: grey;
+}
+
+.editbrgyuser-input-field-disabled{
+  background-color: white; 
+  color: rgba(0, 0, 0, 0.4);
+  opacity: 1;
+  padding: 8px;
+  width: 85%;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: left;
+}
+
+.editbrgyuser-input-field:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+}
+
+.info-toggle-btn {
+  background-color: transparent;
+  border: none;
+  padding: 10px 16px; 
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  color: #2C3E50;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.info-toggle-btn:hover {
+  color: #ED7014;
+}
+
+.info-toggle-btn.active {
+  color: #ED7014;
+  border-bottom: 3px solid #ED7014;
+  background-color: transparent;
+}
+
+.add-resident-bottom-section{
+  padding-top: 35px;
+  padding-left: 35px;
+  padding-right: 35px;
+  height: 100%;
 }
 
 .editbrgyacc-main-content {
@@ -63,9 +241,9 @@ padding-left:30px;
 
 
 .back-btn{
-    width: 25px;
-    height: 25px;
-    filter: grayscale(100%) brightness(0%) invert(50%);
+  width: 25px;
+  height: 25px;
+  filter: invert(1);
 }
 
 
@@ -73,6 +251,7 @@ padding-left:30px;
     display: flex;
     align-items: center;
     gap: 20px;
+    padding-right: 30px;
 }
 
 .discard-btn,
@@ -165,7 +344,7 @@ padding-left:30px;
 
 .editbrgyacc-input-field{
     padding: 8px;
-    width: 100%;
+    width: 90%;
     max-width: 100%;
     margin-top: 10px;
     border: 1px solid #ccc;
@@ -205,6 +384,7 @@ padding-left:30px;
     flex-direction:column;
 }
 
+/*
 .toggle-password-btn {
     position: absolute;
     right: 12px;
@@ -218,7 +398,7 @@ padding-left:30px;
     align-items: center;
     justify-content: center;
     height: 100%;
-}
+}*/
 
 .toggle-password-btn svg {
     vertical-align: middle;
@@ -584,4 +764,45 @@ padding-left:30px;
 .icon-alert {
   width: 27px;
   height: 27px;
+}
+
+
+.password-input-wrapper {
+  position: relative;
+  width: 100%; /* match input width */
+  margin-top: 30px;
+}
+
+
+.password-input-wrapper p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 8%;
+}
+
+.password-input-wrapper input,select{
+  align-self: center; 
+}
+
+.editbrgyuser-toggle-password-btn {
+  position: absolute;
+  right: 45px;
+  top: 73%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.editbrgyuser-input-field-pass:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
