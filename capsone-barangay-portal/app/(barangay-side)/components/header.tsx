@@ -106,6 +106,11 @@ export default function Header() {
         title: "Registered Voters",
         breadcrumb: ["Residents Management", "Registered Voters", "Edit Voter"],
       },
+      "/dashboard/ResidentModule/registeredVoters/ViewVoter": {
+        title: "Registered Voters",
+        breadcrumb: ["Residents Management", "Registered Voters", "View Voter"],
+      },
+
 
       // Kasambahay
       "/dashboard/ResidentModule/kasambahayList": {
@@ -118,7 +123,11 @@ export default function Header() {
       },
       "/dashboard/ResidentModule/kasambahayList/EditKasambahay": {
         title: "Kasambahay Masterlist",
-        breadcrumb: ["Residents Management", "Kasambahay Masterlist", "Edit Kasambahay"],
+        breadcrumb: ["Residents Management", "Kasambahay Masterlist", "Edit Kasambahay"],  
+      },
+      "/dashboard/ResidentModule/kasambahayList/ViewKasambahay": {
+        title: "Kasambahay Masterlist",
+        breadcrumb: ["Residents Management", "Kasambahay Masterlist", "View Kasambahay"],
       },
 
       // Jobseeker
@@ -133,6 +142,16 @@ export default function Header() {
       "/dashboard/ResidentModule/FirstTimeJobSeeker/EditFirstTimeJobSeeker": {
         title: "First-Time Job Seeker List",
         breadcrumb: ["Residents Management", "First-Time Job Seeker List", "Edit First-Time Job Seeker"],
+      },
+
+      "/dashboard/ResidentModule/FirstTimeJobSeeker/ViewFirstTimeJobSeeker": {
+        title: "First-Time Job Seeker List",
+        breadcrumb: ["Residents Management", "First-Time Job Seeker List", "View Job Seeker"],
+      },
+
+      "/dashboard/ResidentModule/FirstTimeJobSeeker/ViewFirstTimeJobSeeker": {
+        title: "First-Time Job Seeker List",
+        breadcrumb: ["Residents Management", "First-Time Job Seeker List", "View Job Seeker"],
       },
 
     };
