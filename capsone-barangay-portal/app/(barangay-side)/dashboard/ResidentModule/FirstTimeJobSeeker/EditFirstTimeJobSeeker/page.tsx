@@ -292,7 +292,7 @@ export default function EditFirstTimeJobSeeker() {
 
         <div className="add-resident-bottom-section">
         
-          <nav className="info-toggle-wrapper">
+          <nav className="jobseeker-info-toggle-wrapper">
               {["full", "others"].map((section) => (
                 <button
                   key={section}

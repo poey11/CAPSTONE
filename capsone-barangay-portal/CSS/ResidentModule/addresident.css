@@ -2,7 +2,7 @@
 .add-resident-main-container{
     width: 100%;
     height: 100vh;
-    background-color: #F0F2F8;
+    background-color: #F0F2F8; 
     margin-left: 3rem; 
     /*padding-top: 150px;*/
     padding-top: 11.2%;
@@ -37,7 +37,6 @@
   background-color: #214666;
   padding-top: 20px;
   padding-bottom: 20px;
-  
 }
 
 .add-resident-main-section1-left{
@@ -808,7 +807,11 @@ FOR INFO
 */
 
 
-.info-toggle-wrapper {
+.info-toggle-wrapper,
+.main-residents-info-toggle-wrapper,
+.voters-info-toggle-wrapper,
+.kasambahay-info-toggle-wrapper,
+.jobseeker-info-toggle-wrapper {
   display: flex;
   justify-content: center;
   gap: 15px;

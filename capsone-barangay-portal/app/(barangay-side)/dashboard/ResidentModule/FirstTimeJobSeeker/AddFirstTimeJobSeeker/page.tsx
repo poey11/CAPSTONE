@@ -358,7 +358,7 @@ export default function AddFirstTimeJobSeeker() {
               <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleVotersClick} />
             </div>
 
-            <nav className="info-toggle-wrapper">
+            <nav className="jobseeker-info-toggle-wrapper">
               {["full", "others"].map((section) => (
                 <button
                   key={section}
