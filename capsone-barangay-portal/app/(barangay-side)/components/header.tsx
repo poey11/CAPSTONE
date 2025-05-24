@@ -98,17 +98,31 @@ export default function Header() {
         title: "Registered Voters",
         breadcrumb: ["Residents Management", "Registered Voters"],
       },
+      "/dashboard/ResidentModule/registeredVoters/ViewVoter": {
+        title: "Registered Voters",
+        breadcrumb: ["Residents Management", "Registered Voters", "View Voter"],
+      },
+
 
       // Kasambahay
       "/dashboard/ResidentModule/kasambahayList": {
         title: "Kasambahay Masterlist",
         breadcrumb: ["Residents Management", "Kasambahay Masterlist"],
       },
+      "/dashboard/ResidentModule/kasambahayList/ViewKasambahay": {
+        title: "Kasambahay Masterlist",
+        breadcrumb: ["Residents Management", "Kasambahay Masterlist", "View Kasambahay"],
+      },
 
       // Jobseeker
       "/dashboard/ResidentModule/FirstTimeJobSeeker": {
         title: "First-Time Job Seeker List",
         breadcrumb: ["Residents Management", "First-Time Job Seeker List"],
+      },
+
+      "/dashboard/ResidentModule/FirstTimeJobSeeker/ViewFirstTimeJobSeeker": {
+        title: "First-Time Job Seeker List",
+        breadcrumb: ["Residents Management", "First-Time Job Seeker List", "View Job Seeker"],
       },
 
     };
