@@ -388,6 +388,8 @@ export default function AddFirstTimeJobSeeker() {
                             name="lastName"
                             value={formData.lastName}
                             onChange={handleChange}
+                            readOnly
+                            required
                           />
                       </div>
 
@@ -398,7 +400,10 @@ export default function AddFirstTimeJobSeeker() {
                         placeholder="Enter First Name" 
                         name="firstName"
                         value={formData.firstName} 
-                        onChange={handleChange} required />
+                        onChange={handleChange} 
+                        required 
+                        readOnly
+                        />
                       </div>
 
                       <div className="fields-section">
@@ -409,7 +414,7 @@ export default function AddFirstTimeJobSeeker() {
                           name="middleName" 
                           value={formData.middleName} 
                           onChange={handleChange}
-                          required
+                          readOnly
                           />
                       </div>
                     </div>
@@ -422,7 +427,9 @@ export default function AddFirstTimeJobSeeker() {
                           className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
                           value={formData.sex} 
                           onChange={handleChange} 
-                          required>
+                          required
+                          disabled
+                          >
                           <option value="" disabled>Choose Gender</option>
                           <option value="Male">Male</option>
                           <option value="Female">Female</option>
@@ -435,9 +442,11 @@ export default function AddFirstTimeJobSeeker() {
                         className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
                           name="dateOfBirth"
                           value={formData.dateOfBirth}
-                            onChange={handleChange}
-                            max={new Date().toISOString().split("T")[0]} 
-                            required />
+                          onChange={handleChange}
+                          max={new Date().toISOString().split("T")[0]} 
+                          required 
+                          readOnly
+                          />
                       </div>
 
                       <div className="fields-section">
