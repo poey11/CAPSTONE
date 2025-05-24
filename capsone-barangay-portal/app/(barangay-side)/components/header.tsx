@@ -149,11 +149,6 @@ export default function Header() {
         breadcrumb: ["Residents Management", "First-Time Job Seeker List", "View Job Seeker"],
       },
 
-      "/dashboard/ResidentModule/FirstTimeJobSeeker/ViewFirstTimeJobSeeker": {
-        title: "First-Time Job Seeker List",
-        breadcrumb: ["Residents Management", "First-Time Job Seeker List", "View Job Seeker"],
-      },
-
     };
 
     // default
