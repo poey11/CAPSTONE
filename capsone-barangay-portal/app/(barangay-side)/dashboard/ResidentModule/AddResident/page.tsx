@@ -3,7 +3,7 @@ import "@/CSS/ResidentModule/addresident.css";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { db, storage } from "../../../../db/firebase";
-import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs, where} from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -188,35 +188,31 @@ export default function AddResident() {
   };
   
 
-  const handleSubmitClick = async () => {
-    const { 
-      firstName, lastName, address, generalLocation, cluster, dateOfBirth, 
-      age, sex, civilStatus, contactNumber, emailAddress
-  } = formData;
+  const handleSubmitClick = () => {
+    const { firstName, lastName, address, generalLocation, cluster, dateOfBirth, age, sex, civilStatus, contactNumber } = formData;
   
     const invalidFields: string[] = [];
-
-    if (!lastName) invalidFields.push("lastName"); //
-    if (!firstName) invalidFields.push("firstName"); //
-    if (!address) invalidFields.push("address"); //
-    if (!generalLocation) invalidFields.push("generalLocation"); //
-    if (!cluster) invalidFields.push("cluster"); //
-    if (!dateOfBirth) invalidFields.push("dateOfBirth"); //
-    if (!age) invalidFields.push("age"); //
-    if (!sex) invalidFields.push("sex"); //
-    if (!civilStatus) invalidFields.push("civilStatus"); //
-    if (!contactNumber) invalidFields.push("contactNumber"); //
-
+  
+    if (!lastName) invalidFields.push("lastName");
+    if (!firstName) invalidFields.push("firstName");
+    if (!address) invalidFields.push("address");
+    if (!generalLocation) invalidFields.push("generalLocation");
+    if (!cluster) invalidFields.push("cluster");
+    if (!dateOfBirth) invalidFields.push("dateOfBirth");
+    if (!age) invalidFields.push("age");
+    if (!sex) invalidFields.push("sex");
+    if (!civilStatus) invalidFields.push("civilStatus");
+    if (!contactNumber) invalidFields.push("contactNumber");
+  
     if (verificationFiles.length === 0) {
       invalidFields.push("verificationFiles");
     }
-
+  
     if (invalidFields.length > 0) {
-      // Set the section based on the first invalid field
       const firstInvalidField = invalidFields[0];
       const section = fieldSectionMap[firstInvalidField];
       setActiveSection(section);
-
+  
       setInvalidFields(invalidFields);
       setPopupErrorMessage("Please fill up all required fields.");
       setShowErrorPopup(true);
@@ -226,9 +222,8 @@ export default function AddResident() {
       }, 3000);
       return;
     }
-
-    
-    // Phone number validation logic
+  
+    // Phone number validation
     const phoneRegex = /^09\d{9}$/;
     if (!phoneRegex.test(contactNumber)) {
       setActiveSection("full");
@@ -237,43 +232,74 @@ export default function AddResident() {
       setTimeout(() => setShowErrorPopup(false), 3000);
       return;
     }
-
+  
+    // Email validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    if (emailAddress && !emailRegex.test(emailAddress)) {
+    if (formData.emailAddress && !emailRegex.test(formData.emailAddress)) {
       setActiveSection("full");
-      setPopupErrorMessage( "Invalid email address. Format: example@domain.com" );
+      setPopupErrorMessage("Invalid email address. Format: example@domain.com");
       setShowErrorPopup(true);
       setTimeout(() => setShowErrorPopup(false), 3000);
       return;
     }
-
+  
+    // All validation passed — show confirmation popup
     setInvalidFields([]);
     setShowSubmitPopup(true);
-};
+  };
 
 
-const confirmSubmit = async () => {
-  setShowSubmitPopup(false);
-
-  // Wait for handleSubmit to finish and set newDocId
-  const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-  const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
-
-  if (!docId) {
-    setPopupErrorMessage("Failed to create resident record.");
-    setShowErrorPopup(true);
-    return;
-  }
-
-  setPopupMessage("Resident Record added successfully!");
-  setShowPopup(true);
-
-  setTimeout(() => {
-    setShowPopup(false);
-    router.push(`/dashboard/ResidentModule?highlight=${docId}`);
-  }, 3000);
-};
+  const confirmSubmit = async () => {
+    setShowSubmitPopup(false);
+    setLoading(true);
+  
+    try {
+      // Check if resident already exists by matching firstName, lastName, and middleName
+      const residentsRef = collection(db, "Residents");
+      const q = query(
+        residentsRef,
+        where("firstName", "==", formData.firstName.trim()),
+        where("lastName", "==", formData.lastName.trim()),
+        where("middleName", "==", formData.middleName?.trim() || "")
+      );
+  
+      const querySnapshot = await getDocs(q);
+  
+      if (!querySnapshot.empty) {
+        setLoading(false);
+        setPopupErrorMessage("Resident is already in the Residents Table");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
+  
+      // No duplicate found — proceed with actual submit
+      const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+      const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+  
+      setLoading(false);
+  
+      if (!docId) {
+        setPopupErrorMessage("Failed to create resident record.");
+        setShowErrorPopup(true);
+        return;
+      }
+  
+      setPopupMessage("Resident Record added successfully!");
+      setShowPopup(true);
+  
+      setTimeout(() => {
+        setShowPopup(false);
+        router.push(`/dashboard/ResidentModule?highlight=${docId}`);
+      }, 3000);
+  
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
+      setPopupErrorMessage("An error occurred. Please try again.");
+      setShowErrorPopup(true);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -742,6 +768,7 @@ const [activeSection, setActiveSection] = useState("basic");
         {showSubmitPopup && (
                         <div className="confirmation-popup-overlay-add-resident">
                             <div className="confirmation-popup-add-resident">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to submit?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>

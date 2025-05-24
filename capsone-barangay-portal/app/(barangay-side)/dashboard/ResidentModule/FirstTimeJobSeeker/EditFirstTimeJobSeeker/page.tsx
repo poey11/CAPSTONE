@@ -412,54 +412,30 @@ export default function EditFirstTimeJobSeeker() {
                 <>
                   <div className="add-main-resident-others-mainsection">
                     <div className="add-main-resident-section-2-top-side">
+                    <div className="jobseeker-photo-section-voter">
+                        <span className="resident-details-label-voter">Identification Picture</span>
+
+                        <div className="resident-profile-container-voter">
+                          <img
+                              src={formData.identificationFileURL || "/Images/default-identificationpic.jpg"}
+                              alt="Resident"
+                              className={
+                                formData.identificationFileURL
+                                  ? "resident-picture uploaded-picture"
+                                  : "resident-picture default-picture"
+                              }
+                          /> 
+                        </div>
+                      </div>
+                    </div>
+                    <div className="add-main-resident-section-2-bottom-side">
                       <div className="box-container-outer-resclassification">
-                        <div className="title-resclassification">
+                        <div className="title-remarks">
                           Remarks
                         </div>
                         <div className="box-container-remarks">
                           <textarea className="remarks-input-field" placeholder="Enter Remarks" name="remarks" value={formData.remarks} onChange={handleChange} />
 
-                        </div>
-                      </div>
-                    </div>
-                    <div className="add-main-resident-section-2-bottom-side">
-                      <div className="box-container-outer-resindentificationpic">
-                        <div className="title-resindentificationpic">
-                          Identification Picture
-                        </div>
-
-                        <div className="box-container-resindentificationpic">
-
-                         
-                          {/* File Upload Section */}
-                          <div className="identificationpic-container">
-                                      <label htmlFor="identification-file-upload" className="upload-link">Click to Upload File</label>
-                                      <input id="identification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleIdentificationFileChange} />
-
-
-                                      {(identificationFile || identificationPreview) && (
-                                        <div className="identificationpic-display">
-                                          <div className="identification-picture">
-                                            {identificationPreview && (
-                                              <img
-                                                src={identificationPreview}
-                                                alt="Preview"
-                                                style={{ height: '200px'}}
-                                              />
-                                            )}
-                                          </div>
-                                          
-                                        </div>
-
-                                      )}
-                                      {(identificationFile || identificationPreview) && (
-                                        <div className="delete-container">
-                                          <button type="button" onClick={handleIdentificationFileDelete} className="delete-button">
-                                            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                                          </button>
-                                        </div>
-                                      )}
-                                    </div>              
                         </div>
                       </div>
 

@@ -1,12 +1,13 @@
 "use client";
 import "@/CSS/ResidentModule/addresident.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { db, storage } from "../../../../../db/firebase";
 import { collection, addDoc, getDocs, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useSession } from "next-auth/react";
+import { useRef } from "react";
 
 export default function AddFirstTimeJobSeeker() {
   const router = useRouter();
@@ -22,6 +23,8 @@ export default function AddFirstTimeJobSeeker() {
     yearOfBirth: "",
     sex: "",
     remarks: "",
+    residentId: "",
+    identificationFileURL: "",
   });
 
   const fieldSectionMap: { [key: string]: "full" | "others" } = {
@@ -51,12 +54,14 @@ export default function AddFirstTimeJobSeeker() {
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
-  const [identificationFile, setIdentificationFile] = useState<File | null>(null);
-  const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
+  
   const [verificationFiles, setVerificationFiles] = useState<File[]>([]);
   const [verificationPreviews, setVerificationPreviews] = useState<string[]>([]);
 
-
+  const [showResidentsPopup, setShowResidentsPopup] = useState(false);
+  const employerPopupRef = useRef<HTMLDivElement>(null);
+  const [residents, setResidents] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -192,13 +197,6 @@ export default function AddFirstTimeJobSeeker() {
           verificationFilesURLs.push(url);
         }
       }
-
-      let identificationFileURL = "";
-      if (identificationFile) {
-        const storageRef = ref(storage, `ResidentsFiles/IndentificationFile/${identificationFile.name}`);
-        await uploadBytes(storageRef, identificationFile);
-        identificationFileURL = await getDownloadURL(storageRef);
-      }
   
       // Extract Month, Day, and Year from Date of Birth
       const { monthOfBirth, dayOfBirth, yearOfBirth } = formatDateParts(formData.dateOfBirth);
@@ -218,7 +216,6 @@ export default function AddFirstTimeJobSeeker() {
         yearOfBirth,
         dateApplied: formattedDateApplied,
         verificationFilesURLs,
-        identificationFileURL,
         createdAt: currentDate,
         createdBy: session?.user?.position || "Unknown",
       });
@@ -239,18 +236,7 @@ export default function AddFirstTimeJobSeeker() {
     router.push("/dashboard/ResidentModule/FirstTimeJobSeeker");
   };
 
-  const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const selectedFile = e.target.files[0];
   
-      // Ensure only one file is processed
-      setIdentificationFile(selectedFile);
-      setIdentificationPreview(URL.createObjectURL(selectedFile));
-  
-      // Reset the file input to prevent multiple selections
-      e.target.value = "";
-    }
-  };
 
   const handleVerificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   if (e.target.files && e.target.files.length > 0) {
@@ -262,15 +248,73 @@ export default function AddFirstTimeJobSeeker() {
   }
 };
 
-  const handleIdentificationFileDelete = () => {
-    setIdentificationFile(null);
-    setIdentificationPreview(null);
-  };
+
 
   const handleVerificationFileDelete = (index: number) => {
     setVerificationFiles((prev) => prev.filter((_, i) => i !== index));
     setVerificationPreviews((prev) => prev.filter((_, i) => i !== index));
   };
+
+  useEffect(() => {
+    const fetchResidents = async () => {
+      try {
+        const residentsCollection = collection(db, "Residents");
+            const residentsSnapshot = await getDocs(residentsCollection);
+            const residentsList = residentsSnapshot.docs.map(doc => {
+                const data = doc.data() as {
+                    residentNumber: string;
+                    firstName: string;
+                    middleName: string;
+                    lastName: string;
+                    address: string;
+                    sex: string;
+                    dateOfBirth: string;
+                    age: number;
+                    identificationFileURL: string
+                };
+    
+                return {
+                    id: doc.id,
+                    ...data
+                };
+            });
+    
+            setResidents(residentsList);
+      } catch (error) {
+        console.error("Error fetching residents:", error);
+      }
+    };
+  
+    fetchResidents();
+  }, []);
+
+  // Show popup on input focus
+    const handleVotersClick = () => {
+      setShowResidentsPopup(true);
+    };
+  
+    // Close popup when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          employerPopupRef.current &&
+          !employerPopupRef.current.contains(event.target as Node)
+        ) {
+          setShowResidentsPopup(false);
+        }
+      };
+  
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, []);
+  
+    const filteredResidents = residents.filter((resident) =>
+      `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    );
 
   const [activeSection, setActiveSection] = useState("full");
   // options: "basic", "full", "others"
@@ -311,8 +355,7 @@ export default function AddFirstTimeJobSeeker() {
 
           <div className="add-resident-bottom-section">
             <div className="residents-search-section">
-              <p>Search Resident Here</p>
-              <p>will implement</p>
+              <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleVotersClick} />
             </div>
 
             <nav className="info-toggle-wrapper">
@@ -381,8 +424,8 @@ export default function AddFirstTimeJobSeeker() {
                           onChange={handleChange} 
                           required>
                           <option value="" disabled>Choose Gender</option>
-                          <option value="M">Male</option>
-                          <option value="F">Female</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
                         </select>
                       </div>
 
@@ -432,8 +475,28 @@ export default function AddFirstTimeJobSeeker() {
                 <>
                   <div className="add-main-resident-others-mainsection">
                     <div className="add-main-resident-section-2-top-side">
+
+                    <div className="jobseeker-photo-section-voter">
+                        <span className="resident-details-label-voter">Identification Picture</span>
+
+                        <div className="resident-profile-container-voter">
+                          <img
+                              src={formData.identificationFileURL || "/Images/default-identificationpic.jpg"}
+                              alt="Resident"
+                              className={
+                                formData.identificationFileURL
+                                  ? "resident-picture uploaded-picture"
+                                  : "resident-picture default-picture"
+                              }
+                          /> 
+                        </div>
+                      </div>
+
+                      
+                    </div>
+                    <div className="add-main-resident-section-2-bottom-side">
                       <div className="box-container-outer-resclassification">
-                        <div className="title-resclassification">
+                        <div className="title-remarks">
                           Remarks
                         </div>
                         <div className="box-container-remarks">
@@ -441,37 +504,6 @@ export default function AddFirstTimeJobSeeker() {
 
                         </div>
                       </div>
-                    </div>
-                    <div className="add-main-resident-section-2-bottom-side">
-                      <div className="box-container-outer-resindentificationpic">
-                        <div className="title-resindentificationpic">
-                          Identification Picture
-                        </div>
-
-                        <div className="box-container-resindentificationpic">
-
-                          {/* File Upload Section */}
-                          <div className="file-upload-container">
-                            <label htmlFor="identification-file-upload" className="upload-link">Click to Upload File</label>
-                            <input id="identification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleIdentificationFileChange} />
-
-                            {identificationFile && (
-                              <div className="file-name-image-display">
-                                <div className="file-name-image-display-indiv">
-                                  {identificationPreview && <img src={identificationPreview} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />}
-                                  <span>{identificationFile.name}</span>
-                                  <div className="delete-container">
-                                    <button type="button" onClick={handleIdentificationFileDelete} className="delete-button">
-                                      <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>              
-                        </div>
-                      </div>
-
                       <div className="box-container-outer-verificationdocs">
                         <div className="title-verificationdocs">
                           Verification Documents
@@ -589,6 +621,97 @@ export default function AddFirstTimeJobSeeker() {
                     </div>
                 </div>
                 )}
+
+{showResidentsPopup && (
+      <div className="kasambahay-employer-popup-overlay">
+        <div className="kasambahay-employer-popup" ref={employerPopupRef}>
+          <h2>Residents List</h2>
+          <h1>* Please select Resident's Name *</h1>
+
+          <input
+            type="text"
+            placeholder="Search Resident's Name"
+            className="employer-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <div className="employers-list">
+            {residents.length === 0 ? (
+              <p>No residents found.</p>
+            ) : (
+              <table className="employers-table">
+                <thead>
+                  <tr>
+                    <th>Resident Number</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Last Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {filteredResidents.map((resident) => (
+            <tr
+              key={resident.id}
+              className="employers-table-row"
+              onClick={async () => {
+                try {
+                  const votersSnapshot = await getDocs(collection(db, "JobSeekerList"));
+                  const isDuplicate = votersSnapshot.docs.some((doc) => {
+                    const data = doc.data();
+                    return (
+                      data.lastName?.toLowerCase() === resident.lastName?.toLowerCase() &&
+                      data.firstName?.toLowerCase() === resident.firstName?.toLowerCase() &&
+                      data.middleName?.toLowerCase() === resident.middleName?.toLowerCase()
+                    );
+                  });
+
+                  if (isDuplicate) {
+                    setPopupErrorMessage("Resident is already in the Jobseeker Database.");
+                    setShowErrorPopup(true);
+                    setTimeout(() => {
+                      setShowErrorPopup(false);
+                    }, 3000);
+                    return;
+                  }
+
+                  // Not a duplicate, proceed to set the form
+                  setFormData({
+                    ...formData,
+                    residentId: resident.id,
+                    lastName: resident.lastName || '',
+                    firstName: resident.firstName || '',
+                    middleName: resident.middleName || '',
+                    sex: resident.sex || '',
+                    dateOfBirth: resident.dateOfBirth || '',
+                    age: resident.age || '',
+                    identificationFileURL: resident.identificationFileURL || '',
+                  });
+                  setShowResidentsPopup(false);
+                } catch (error) {
+                  console.error("Error checking for duplicates:", error);
+                  setPopupErrorMessage("An error occurred. Please try again.");
+                  setShowErrorPopup(true);
+                  setTimeout(() => {
+                    setShowErrorPopup(false);
+                  }, 3000);
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <td>{resident.residentNumber}</td>
+              <td>{resident.firstName}</td>
+              <td>{resident.middleName}</td>
+              <td>{resident.lastName}</td>
+            </tr>
+          ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
       
     </main>
   );
