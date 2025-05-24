@@ -286,7 +286,7 @@ export default function addVoter() {
 
             
           
-              <nav className="info-toggle-wrapper">
+              <nav className="voters-info-toggle-wrapper">
                 {["details"].map((section) => (
                   <button
                     key={section}
