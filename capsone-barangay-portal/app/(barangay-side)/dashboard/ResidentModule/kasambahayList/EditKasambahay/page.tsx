@@ -112,6 +112,7 @@ export default function EditKasambahay() {
 
   const [identificationFile, setIdentificationFile] = useState<File | null>(null);
   const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
+  const [identificationFileDeleted, setIdentificationFileDeleted] = useState(false);
   const [verificationFiles, setVerificationFiles] = useState<File[]>([]);
   const [verificationPreviews, setVerificationPreviews] = useState<string[]>([]);
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
@@ -126,16 +127,20 @@ export default function EditKasambahay() {
   const confirmDiscard = async () => {
     setShowDiscardPopup(false);
 
-    setFormData(originalData); // Reset to original data
+      setFormData(originalData); // Reset to original data
+      setIdentificationPreview(originalData.identificationFileURL || null);
+      setIdentificationFile(null); // Reset file selection
+      setVerificationPreviews(originalData.verificationFilesURLs || []);
+      setVerificationFiles([]); // Reset file selection
 
-    setPopupMessage("Changes discarded successfully!");
-    setShowPopup(true);
-    
+      setPopupMessage("Changes discarded successfully!");
+      setShowPopup(true);
+      
 
-    // Hide the popup after 3 seconds
-    setTimeout(() => {
-      setShowPopup(false);
-    }, 3000);
+      // Hide the popup after 3 seconds
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 3000);
 
 };
 
@@ -191,6 +196,9 @@ export default function EditKasambahay() {
     fetchKasambahay();
   }, [kasambahayId]);
 
+
+  const [activeSection, setActiveSection] = useState("basic");
+  // options: "basic", "full", "others"
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -249,24 +257,45 @@ export default function EditKasambahay() {
     });
   };
   
+  
   const handleSaveClick = async () => {
 
     const { lastName, firstName, homeAddress, dateOfBirth, age, sex, civilStatus, educationalAttainment, natureOfWork, employmentArrangement, salary, employerName, employerAddress} = formData;
   
-    if (!lastName || !firstName ||!homeAddress ||!dateOfBirth || !age || !sex || !civilStatus || !educationalAttainment || !natureOfWork || !employmentArrangement || !salary || !employerName || !employerAddress) {
+    const invalidFields: string[] = [];
 
+    if (!lastName) invalidFields.push("lastName");
+    if (!firstName) invalidFields.push("firstName");
+    if (!homeAddress) invalidFields.push("homeAddress");
+    if (!dateOfBirth) invalidFields.push("dateOfBirth");
+    if (!age) invalidFields.push("age");
+    if (!sex) invalidFields.push("sex");
+    if (!civilStatus) invalidFields.push("civilStatus");
+    if (!educationalAttainment) invalidFields.push("educationalAttainment");
+    if (!natureOfWork) invalidFields.push("natureOfWork");
+    if (!employmentArrangement) invalidFields.push("employmentArrangement");
+    if (!salary) invalidFields.push("salary");
+    if (!employerName) invalidFields.push("employerName");
+    if (!employerAddress) invalidFields.push("employerAddress");
+    
+   
+
+    if (invalidFields.length > 0) {
+      // Set the section based on the first invalid field
+      const firstInvalidField = invalidFields[0];
+      const section = fieldSectionMap[firstInvalidField];
+      setActiveSection(section);
+
+      setInvalidFields(invalidFields);
       setPopupErrorMessage("Please fill up all required fields.");
       setShowErrorPopup(true);
   
-    // Hide the popup after 3 seconds
-    setTimeout(() => {
-      setShowErrorPopup(false);
-      
-    }, 3000);
-    
+      setTimeout(() => {
+        setShowErrorPopup(false);
+      }, 3000);
       return;
     }
-
+    setInvalidFields([]);
     setShowSavePopup(true);
   } 
 
@@ -296,21 +325,35 @@ export default function EditKasambahay() {
     setError("");
 
     try {
-      let uploadedVerificationURLs: string[] = [];
+      // Initialize with existing URLs or empty array
+    let uploadedVerificationURLs: string[] = [...(formData.verificationFilesURLs || [])];
 
-        for (const file of verificationFiles) {
-          const fileRef = ref(storage, `KasambahayFiles/VerificationFile/${file.name}`);
-          await uploadBytes(fileRef, file);
-          const url = await getDownloadURL(fileRef);
-          uploadedVerificationURLs.push(url);
+    // Upload new verification files and get their URLs
+    for (const file of verificationFiles) {
+      const fileRef = ref(storage, `KasambahayFiles/VerificationFile/${file.name}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      uploadedVerificationURLs.push(url);
+    }
+
+    let uploadedIdentificationURL: string | null = formData.identificationFileURL;
+
+    if (identificationFile) {
+      // Upload new file
+      const idRef = ref(storage, `KasambahayFiles/IdentificationFile/${identificationFile.name}`);
+      await uploadBytes(idRef, identificationFile);
+      uploadedIdentificationURL = await getDownloadURL(idRef);
+    } else if (identificationFileDeleted) {
+      // Delete existing file
+      if (formData.identificationFileURL) {
+        const oldFileName = formData.identificationFileURL.split("%2F").pop()?.split("?")[0];
+        if (oldFileName) {
+          const deleteRef = ref(storage, `KasambahayFiles/IdentificationFile/${oldFileName}`);
+          await deleteObject(deleteRef);
         }
-  
-        let uploadedIdentificationURL = formData.identificationFileURL;
-        if (identificationFile) {
-          const idRef = ref(storage, `KasambahayFiles/IdentificationFile/${identificationFile.name}`);
-          await uploadBytes(idRef, identificationFile);
-          uploadedIdentificationURL = await getDownloadURL(idRef);
-        }
+      }
+      uploadedIdentificationURL = null;
+    }
 
       const docRef = doc(db, "KasambahayList", kasambahayId);
       await updateDoc(docRef, {
@@ -378,7 +421,11 @@ export default function EditKasambahay() {
 
   const handleIdentificationFileDelete = () => {
     setIdentificationFile(null);
-    setIdentificationPreview(null);
+      setIdentificationPreview(null);
+      setFormData((prev) => ({
+        ...prev,
+        identificationFileURL: "",
+      }));
   };
 
   const handleVerificationFileDelete = (index: number) => {
@@ -387,8 +434,7 @@ export default function EditKasambahay() {
   };
   
 
-  const [activeSection, setActiveSection] = useState("basic");
-  // options: "basic", "full", "others"
+ 
 
   return (
     <main className="add-resident-main-container">

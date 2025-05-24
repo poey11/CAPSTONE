@@ -294,7 +294,7 @@ export default function AddKasambahay() {
     setError("");
   
     try {
-      let fileURL = "";
+      
       let verificationFilesURLs: string[] = [];
       if (verificationFiles.length > 0) {
         for (const file of verificationFiles) {

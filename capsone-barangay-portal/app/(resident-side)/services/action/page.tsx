@@ -18,16 +18,16 @@ export default function Action() {
   const searchParam = useSearchParams();
   const docType = searchParam.get("doc");
   const router = useRouter();
-
+  console.log(docType);
   const [clearanceInput, setClearanceInput] =  useState<any>({
     accountId: user?.uid || "Guest",
     purpose: "",
-    dateRequested: new Date().toISOString().split('T')[0],
+    dateRequested: new Date().toLocaleString(),
     firstName: "",
-    middleName: "",
     appointmentDate: "",
     lastName: "",
     dateOfResidency: "",
+    dateofdeath: "",
     address: "",//will be also the home address
     businessLocation: "",// will be project location
     businessNature: "",
@@ -56,12 +56,14 @@ export default function Action() {
     precinctnumber:"",
     emergencyDetails:{
       firstName: "",
-      middleName: "",
       lastName: "",
       address: "",
       relationship: "",
       contactNumber: "",
     },
+    requestorMrMs: "",
+    requestorFname: "",
+    requestorLname: "",
     signaturejpg: null,
     barangayIDjpg:null,
     validIDjpg: null,
@@ -70,36 +72,25 @@ export default function Action() {
     dtiRegistration: null,
     isCCTV: null,
     taxDeclaration: null,
-    approvedBldgPlan:null 
+    approvedBldgPlan:null,
+    deathCertificate: null,
   })
 
 
-  const [firstName, setFirstName] = useState("");
-  const [middleName, setMiddleName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [contact, setContact] = useState("");
-  const [address, setAddress] = useState("");
-  const [gender, setGender] = useState("");
+ 
 
   useEffect(() => {
     const fetchUserData = async () => {
+      /*if the user requesting has an accountt and is logined*/
       const user = auth.currentUser;
       if (user) {
         const docRef = doc(db, "ResidentUsers", user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setFirstName(data.first_name || "");
-          setMiddleName(data.middle_name || "");
-          setLastName(data.last_name || "");
-          setContact(data.phone || "");
-          setAddress(data.address || "");
-          setGender(data.sex || "");
-          // Set firstName in the clearanceInput state when user data is fetched
           setClearanceInput((prev: any) => ({
             ...prev,
-            firstName: data.first_name || "",
-            middleName: data.middle_name || "",
+            firstName: `${data.first_name} ${data.middle_name}`  || "",
             lastName: data.last_name || "",
             contact: data.phone || "",
             address: data.address || "",
@@ -254,7 +245,7 @@ const handleFileChange = (
     const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
 
-      const contactPattern = /^0917\d{7}$/;
+      const contactPattern = /^09\d{9}$/; // Regex for Philippine mobile numbers
       if (!contactPattern.test(clearanceInput.contact)) {
         setErrorMessage("Invalid contact number. Format should be: 0917XXXXXXX");
         setShowErrorPopup(true);
@@ -273,7 +264,8 @@ const handleFileChange = (
         "dtiRegistration",
         "isCCTV",
         "taxDeclaration",
-        "approvedBldgPlan"
+        "approvedBldgPlan",
+        "deathCertificate"
       ];
     
       const filenames: Record<string, string> = {};
@@ -314,11 +306,12 @@ const handleFileChange = (
         const clearanceVars = {
           requestDate: clearanceInput.dateRequested,
           status: "Pending",
+          statusPriority: 1,
+          requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
           accID: clearanceInput.accountId,
           docType: docType,
           purpose: clearanceInput.purpose,
           firstName: clearanceInput.firstName,
-          middleName: clearanceInput.middleName,
           lastName: clearanceInput.lastName,
           dateOfResidency: clearanceInput.dateOfResidency,
           address: clearanceInput.address,
@@ -329,6 +322,10 @@ const handleFileChange = (
           contact: clearanceInput.contact,
           citizenship: clearanceInput.citizenship,
           signaturejpg: filenames.signaturejpg, // Store filename instead of file object
+          ...((docType === "Barangay Certificate" && clearanceInput.purpose === "Death Residency")  && {
+            dateofdeath: clearanceInput.dateofdeath,
+            deathCertificate: filenames.deathCertificate,
+          }),
           ...(clearanceInput.barangayIDjpg && { barangayIDjpg: filenames.barangayIDjpg }),
           ...(clearanceInput.validIDjpg && { validIDjpg: filenames.validIDjpg }),
           ...(clearanceInput.letterjpg && { endorsementLetter: filenames.letterjpg }),
@@ -363,6 +360,8 @@ const handleFileChange = (
         const clearanceVars = {
           requestDate: clearanceInput.dateRequested,
           status: "Pending",
+          statusPriority: 1,
+          requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
           accID: clearanceInput.accountId,
           docType: docType,
           purpose: clearanceInput.purpose,
@@ -371,7 +370,6 @@ const handleFileChange = (
           businessNature: clearanceInput.businessNature,
           estimatedCapital: clearanceInput.estimatedCapital,
           firstName: clearanceInput.firstName,
-          middleName: clearanceInput.middleName,
           lastName: clearanceInput.lastName,
           contact: clearanceInput.contact,
           homeAddress: clearanceInput.address,
@@ -391,29 +389,31 @@ const handleFileChange = (
         const clearanceVars = {
           requestDate: clearanceInput.dateRequested,
           status: "Pending",
+          statusPriority: 1,
+          requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
           accID: clearanceInput.accountId,
           docType: docType,
-          typeofconstruction: clearanceInput.typeofconstruction,
+          purpose: clearanceInput.typeofconstruction,
           typeofbldg: clearanceInput.typeofbldg,
           projectName: clearanceInput.projectName,
           projectLocation: clearanceInput.businessLocation,
           taxDeclaration: filenames.taxDeclaration,
           approvedBldgPlan: filenames.approvedBldgPlan,
           firstName: clearanceInput.firstName,
-          middleName: clearanceInput.middleName,
           lastName: clearanceInput.lastName,
           contact: clearanceInput.contact,
           homeAddress: clearanceInput.address,
           copyOfPropertyTitle: filenames.copyOfPropertyTitle,
           signaturejpg: filenames.signaturejpg,
           endorsementLetter: filenames.letterjpg,
-          othersTypeofbldg: ""
+          ...(clearanceInput.typeofbldg === "Others" && {othersTypeofbldg: clearanceInput.othersTypeofbldg}),
+          //othersTypeofbldg: ""
         };
 
         // ✅ Add othersTypeofbldg if typeofbldg is "Others"
-        if (clearanceInput.typeofbldg === "Others") {
-          clearanceVars.othersTypeofbldg = clearanceInput.othersTypeofbldg;
-        }
+        // if (clearanceInput.typeofbldg === "Others") {
+        //   clearanceVars.othersTypeofbldg = clearanceInput.othersTypeofbldg;
+        // }
         console.log(clearanceVars, storageRefs);
         handleReportUpload(clearanceVars, storageRefs);
       }
@@ -532,29 +532,29 @@ const handleFileChange = (
                 <div className="main-form-radio-group">
                     <div className="form-radio-group">
                         <label className="form-radio">
-                        <input type="radio" id="structure" name="typeofconstruction"  value="structure"  checked={clearanceInput.typeofconstruction === 'structure'}  onChange={handleChange} required />
+                        <input type="radio" id="Structure" name="typeofconstruction"  value="Structure"  checked={clearanceInput.typeofconstruction === 'Structure'}  onChange={handleChange} required />
                             Structure
                         </label>
                         <label className="form-radio">
-                        <input type="radio" id="renovation" name="typeofconstruction" value="renovation"  checked={clearanceInput.typeofconstruction === 'renovation'}  onChange={handleChange} required />
+                        <input type="radio" id="Renovation" name="typeofconstruction" value="Renovation"  checked={clearanceInput.typeofconstruction === 'Renovation'}  onChange={handleChange} required />
                             Renovation
                         </label>
                     </div>
 
                     <div className="form-radio-group">
                         <label className="form-radio">
-                        <input type="radio" id="fencing" name="typeofconstruction" value="fencing" checked={clearanceInput.typeofconstruction === 'fencing'}  onChange={handleChange}   required />
+                        <input type="radio" id="Fencing" name="typeofconstruction" value="Fencing" checked={clearanceInput.typeofconstruction === 'Fencing'}  onChange={handleChange}   required />
                             Fencing
                         </label>
                         <label className="form-radio">
-                        <input type="radio" id="excavation" name="typeofconstruction" value="excavation" checked={clearanceInput.typeofconstruction === 'excavation'}  onChange={handleChange} required />
+                        <input type="radio" id="Excavation" name="typeofconstruction" value="Excavation" checked={clearanceInput.typeofconstruction === 'Excavation'}  onChange={handleChange} required />
                             Excavation
                         </label>
                     </div>
 
                     <div className="form-radio-group">
                         <label className="form-radio">
-                        <input type="radio" id="demolition" name="typeofconstruction" value="demolition" checked={clearanceInput.typeofconstruction === 'demolition'}  onChange={handleChange}  required />
+                        <input type="radio" id="Demolition" name="typeofconstruction" value="Demolition" checked={clearanceInput.typeofconstruction === 'Demolition'}  onChange={handleChange}  required />
                             Demolition
                         </label>
                     </div>
@@ -577,19 +577,7 @@ const handleFileChange = (
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="middleName" className="form-label">Middle Name<span className="required">*</span></label>
-              <input 
-                type="text"  
-                id="middleName"  
-                name="middleName"  
-                className="form-input" 
-                required  
-                value={clearanceInput.middleName}
-                onChange={handleChange}
-                placeholder="Enter Middle Name"  
-              />
-            </div>
+         
 
             <div className="form-group">
               <label htmlFor="lastName" className="form-label">Last Name<span className="required">*</span></label>
@@ -676,7 +664,7 @@ const handleFileChange = (
                   onChange={handleChange}
                   className="form-input" 
                   required 
-                  max={new Date().toISOString().split("T")[0]}
+                  max={getLocalDateString(new Date())}
                 />
              </div>
 
@@ -704,12 +692,26 @@ const handleFileChange = (
                 value={clearanceInput.birthday}
                 onChange={handleChange}
                 required 
-                max={new Date().toISOString().split("T")[0]}
+                max={getLocalDateString(new Date())}
               />
             </div>
             
             </>)}
-            
+            {(docType ==="Barangay Certificate" && clearanceInput.purpose === "Death Residency" ) && (
+              <div className="form-group">
+                <label htmlFor="dateofdeath" className="form-label">Date Of Death<span className="required">*</span></label>
+                <input 
+                  type="date" 
+                  id="dateofdeath" 
+                  name="dateofdeath" 
+                  className="form-input" 
+                  value={clearanceInput.dateofdeath}
+                  onChange={handleChange}
+                  required 
+                  max={getLocalDateString(new Date())} // Set max date to today
+                />
+              </div>
+            )}
 
             {docType ==="Barangay ID" && (
               <div className="form-group">
@@ -997,7 +999,7 @@ const handleFileChange = (
                 maxLength={11}  
                 pattern="^[0-9]{11}$" 
                 placeholder="Please enter a valid 11-digit contact number" 
-                 title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX"
+                 title="Please enter a valid 11-digit contact number. Format: 09XXXXXXXXX"
               />
             </div>
 
@@ -1190,11 +1192,57 @@ const handleFileChange = (
             </>
         )}
 
-          <br/>
+          <div className="form-group">
+            <label htmlFor="requestorMrMs" className="form-label">Requestor's Title<span className="required">*</span></label>
+            <select
+              id="requestorMrMs" 
+              name="requestorMrMs" 
+              className="form-input" 
+              required
+              value={clearanceInput.requestorMrMs}
+              onChange={handleChange}
+            >
+              <option value="" disabled>Select Requestor's Title</option>
+              <option value="Mr.">Mr.</option>
+              <option value="Ms.">Ms.</option>
+              <option value="Mrs.">Mrs.</option>
+            </select>
+          </div>
+
+
+          <div className="form-group">
+            <label htmlFor="requestorFname" className="form-label">Requestor First Name<span className="required">*</span></label>
+            <input 
+              type="text"  
+              id="requestorFname"  
+              name="requestorFname"  
+              className="form-input" 
+              value={clearanceInput.requestorFname}
+              onChange={handleChange}
+              required  
+              placeholder="Enter Requestor First Name"  
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="requestorLname" className="form-label">Requestor Last Name<span className="required">*</span></label>
+            <input 
+              type="text"  
+              id="requestorLname"  
+              name="requestorLname"  
+              className="form-input" 
+              value={clearanceInput.requestorLname}
+              onChange={handleChange}
+              required  
+              placeholder="Enter Requestor Last Name"  
+            />
+          </div>
+
           <hr/>
 
-          <br/>
+          
           <h1 className="form-requirements-title">Requirements</h1>
+
 
           {(docType ==="Temporary Business Permit" || docType ==="Business Permit" || docType === "Construction Permit") &&(
         
@@ -1267,10 +1315,73 @@ const handleFileChange = (
         </>
           )}
 
-          
+        
+            {(docType==="Barangay Certificate" && clearanceInput.purpose === "Death Residency") && (
+            <>
+              <div className="barangayID-container">
+                  <h1 className="form-label">Death Certification<span className="required">*</span></h1>
+              <div className="file-upload-container">
+                <label htmlFor="file-upload8"  className="upload-link">Click to Upload File</label>
+                  <input
+                    id="file-upload8"
+                    type="file"
+                    required
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleFileChange(e, setFiles10, 'deathCertificate');
+                    }}
+                    accept=".jpg,.jpeg,.png"
+                    style={{ display: "none" }}
+                  />
+                <div className="uploadedFiles-container">
+                  {/* Display the file names with image previews */}
+                  {files10.length > 0 && (
+                    <div className="file-name-image-display">
+                      <ul>
+                        {files10.map((file, index) => (
+                          <div className="file-name-image-display-indiv" key={index}>
+                            <li> 
+                                {/* Display the image preview */}
+                                {file.preview && (
+                                  <div className="filename&image-container">
+                                    <img
+                                      src={file.preview}
+                                      alt={file.name}
+                                      style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                    />
+                                  </div>
+                                  )}
+                                {file.name}  
+                              <div className="delete-container">
+                                {/* Delete button with image */}
+                                <button
+                                    type="button"
+                                    onClick={() => handleFileDelete('file-upload10',setFiles10)}
+                                    className="delete-button"
+                                  >
+                                    <img
+                                      src="/images/trash.png"  
+                                      alt="Delete"
+                                      className="delete-icon"
+                                    />
+                                  </button>
+                                
+                              </div>
+                                
+                            </li>
+                          </div>
+                        ))}  
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            </>
+          )}
+
 
           {(docType ==="Temporary Business Permit"||docType ==="Business Permit") &&(
-          // WILL Have to fix this part
           <>
             
 
@@ -1467,6 +1578,8 @@ const handleFileChange = (
               </div>
             </div>
           </div>
+
+          
           {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction Permit" ) && (
             <>
               <br/>
@@ -1551,7 +1664,7 @@ const handleFileChange = (
                   type="file"
                   required
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleFileChange(e, setFiles10, 'approvedBldgPlan');
+                    handleFileChange(e, setFiles9, 'approvedBldgPlan');
                   }}
                   accept=".jpg,.jpeg,.png"
                   style={{ display: "none" }}
@@ -1559,10 +1672,10 @@ const handleFileChange = (
 
               <div className="uploadedFiles-container">
                 {/* Display the file names with image previews */}
-                {files8.length > 0 && (
+                {files9.length > 0 && (
                   <div className="file-name-image-display">
                     <ul>
-                      {files10.map((file, index) => (
+                      {files9.map((file, index) => (
                         <div className="file-name-image-display-indiv" key={index}>
                           <li> 
                               {/* Display the image preview */}
@@ -1580,7 +1693,7 @@ const handleFileChange = (
                               {/* Delete button with image */}
                               <button
                                   type="button"
-                                  onClick={() => handleFileDelete('file-upload10',setFiles10)}
+                                  onClick={() => handleFileDelete('file-upload9',setFiles9)}
                                   className="delete-button"
                                 >
                                   <img
@@ -1742,7 +1855,7 @@ const handleFileChange = (
           </>)}
           <div className="endorsementletter-container">
             <h1 className="form-label"> Endorsement Letter from Homeowner/Sitio President</h1>
-            <h1 className="form-label-description">(for residents of Barangay Fairview for less than 6 months)</h1>
+            <h1 className="form-label-description">(for residents of Barangay Fairview for less than 6 months) </h1>
 
             <div className="file-upload-container">
               <label htmlFor="file-upload4"  className="upload-link">Click to Upload File</label>

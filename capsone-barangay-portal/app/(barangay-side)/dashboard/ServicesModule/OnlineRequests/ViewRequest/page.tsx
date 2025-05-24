@@ -1,9 +1,15 @@
 "use client";
 
 import { getSpecificDocument } from "@/app/helpers/firestorehelper";
-import { useSearchParams } from "next/navigation";
-import { use, useEffect,useState } from "react";
+import { useSearchParams,useRouter } from "next/navigation";
+import { useEffect,useState } from "react";
+import { useSession } from "next-auth/react";
+import { getDownloadURL, ref } from "firebase/storage";
+import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
+import { doc, updateDoc } from "firebase/firestore";
+import { getLocalDateString } from "@/app/helpers/helpers";
+import { Timestamp } from "firebase-admin/firestore";
 
 interface EmergencyDetails {
     firstName: string;
@@ -16,12 +22,12 @@ interface EmergencyDetails {
   
   interface OnlineRequest {
     accountId: string;
+    requestor: string;
     docType: string;
     status: string;
     purpose: string;
-    dateRequested: string;
+    requestDate: string;
     firstName: string;
-    middleName: string;
     appointmentDate: string;
     lastName: string;
     dateOfResidency: string;
@@ -60,43 +66,110 @@ interface EmergencyDetails {
     isCCTV: string;
     taxDeclaration: string;
     approvedBldgPlan: string;
+    deathCertificate: string;
+    dateofdeath: string;
   }
 
 
 const ViewOnlineRequest = () => {
+    const user = useSession().data?.user;
+    const userPosition = user?.position;
+    const router = useRouter();
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
     const  [loading, setLoading] = useState(true);
     const [requestData, setRequestData] = useState<OnlineRequest>();
+
     useEffect(() => {
         if(!id) return
         getSpecificDocument("ServiceRequests", id, setRequestData).then(() => setLoading(false));   
         console.log(id);    
     }, [id]);
     const [status, setStatus] = useState("");    
-    console.log(requestData);
-   useEffect(() => {
+    
+   
+    useEffect(() => {
      setStatus(requestData?.status?.toLowerCase().replace(" ", "-") || "");
    }, [requestData]);
   
+    const handleDownloadUrl = async (data: OnlineRequest): Promise<OnlineRequest> => {
+      const fileJpgFields = [
+        "signaturejpg",
+        "barangayIDjpg",
+        "validIDjpg",
+        "letterjpg",
+        "copyOfPropertyTitle",
+        "dtiRegistration",
+        "isCCTV",
+        "taxDeclaration",
+        "approvedBldgPlan",
+        "deathCertificate",
+      ] as const;
+
+      const updatedData = { ...data };
+
+      for (const field of fileJpgFields) {
+        const filename = data[field];
+
+        // Skip if already a full URL
+        if (
+          filename &&
+          typeof filename === "string" &&
+          !filename.startsWith("https://")
+        ) {
+          try {
+            const fileRef = ref(storage, `/ServiceRequests/${filename}`);
+            const downloadUrl = await getDownloadURL(fileRef);
+            updatedData[field] = downloadUrl;
+          } catch (error) {
+            console.warn(`Could not get URL for ${field}:`, error);
+          }
+        }
+      }
+
+      return updatedData;
+    };
+
+
+   useEffect(() => {
+      if (!requestData) return;
+
+      const fetchUrls = async () => {
+        const updated = await handleDownloadUrl(requestData);
+
+        // Avoid state update if no real changes
+        if (JSON.stringify(updated) !== JSON.stringify(requestData)) {
+          setRequestData(updated);
+        }
+      };
+
+      fetchUrls();
+    }, [requestData]);
+
+
+    
     if(loading) return <p>......</p>
     const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setStatus(e.target.value.toLowerCase().replace(" ", "-"));
     };
+
     const requestField = [
+        { key: "requestDate", label: "Date Requested" },
         { key: "docType", label: "Document Type" },
         { key: "purpose", label: "Purpose" },
-        { key: "requestDate", label: "Date Requested" },
         { key: "firstName", label: "First Name" },
-        { key: "middleName", label: "Middle Name" },
         { key: "lastName", label: "Last Name" },
         { key: "address", label: "Address" },
         { key: "age", label: "Age" },
+        { key: "dateOfResidency", label: "Date of Residency" },
+        { key: "businessLocation", label: "Business Location" },
+        { key: "occupation", label: "Occupation" },
         { key: "civilStatus", label: "Civil Status" },
         { key: "citizenship", label: "Citizenship" },
         { key: "gender", label: "Gender" },
         { key: "contact", label: "Contact" },
         { key: "birthday", label: "Birthday" },
+        { key: "dateofdeath", label: "Date Of Death" },
         { key: "businessNature", label: "Business Nature" },
         { key: "estimatedCapital", label: "Estimated Capital" },
         { key: "businessName", label: "Business Name" },
@@ -108,6 +181,7 @@ const ViewOnlineRequest = () => {
         { key: "isBeneficiary", label: "Is Beneficiary" },
         { key: "birthplace", label: "Birthplace" },
         { key: "religion", label: "Religion" },
+
         
         // Emergency Details Fields
         { key: "emergencyDetails.firstName", label: "Emergency Contact First Name" },
@@ -116,6 +190,8 @@ const ViewOnlineRequest = () => {
         { key: "emergencyDetails.address", label: "Emergency Contact Address" },
         { key: "emergencyDetails.relationship", label: "Emergency Contact Relationship" },
         { key: "emergencyDetails.contactNumber", label: "Emergency Contact Number" },
+
+        {key: "requestor", label: "Requestor Name"},
 
         // File Fields
         { key: "signaturejpg", label: "Signature" },
@@ -127,60 +203,152 @@ const ViewOnlineRequest = () => {
         { key: "isCCTV", label: "CCTV Requirement" },
         { key: "taxDeclaration", label: "Tax Declaration" },
         { key: "approvedBldgPlan", label: "Approved Building Plan" },
+        { key: "deathCertificate", label: "Death Certificate" },
         ];
      
     const handleBack = () => {
-        window.location.href = "/dashboard/ServicesModule/OnlineRequests";
+        router.back();
     };
 
     const handleviewappointmentdetails = () => {
-        window.location.href = "/dashboard/ServicesModule/Appointments/View";
+        //window.location.href = "/dashboard/ServicesModule/Appointments/View";
     };
 
     const handlerejection = () => {
-        window.location.href = "/dashboard/ServicesModule/OnlineRequests/ReasonForReject";
+        //window.location.href = "/dashboard/ServicesModule/OnlineRequests/ReasonForReject";
+        router.push("/dashboard/ServicesModule/OnlineRequests/ReasonForReject/?id=" + id);
     };
 
+    const handleSave = async() => {
+        try {
+            if(!id) return
+            const docRef = doc(db, "ServiceRequests", id);
+            const updatedData = {
+                status: status,
+                ...(status === "pending" && { statusPriority: 1 }),
+                ...(status === "pick-up" && { statusPriority: 2 }),
+                ...(status === "completed" && { statusPriority: 3 }),
+            }
+            await updateDoc(docRef, updatedData).then(() => {
+                alert("Status Updated");
+            });
+            
+        } catch (error) {
+            console.error("Error updating status:", error);
+        }
+    }
+
     const handleSMS = () => {
-        window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
+        //window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
     };
+    
+    
+    const getMonthName = (monthNumber:number) => {
+      const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+    
+      if (monthNumber >= 1 && monthNumber <= 12) {
+        return monthNames[monthNumber - 1];
+      } else {
+        return "Invalid month number";
+      }
+    }
+
+    function getOrdinal(n: number): string {
+      const suffixes = ["th", "st", "nd", "rd"];
+      const v = n % 100;
+      return n + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
+    }
+
+
+    
+    
+    
+    const handlePrint = async() => {
+        if(!requestData) return
+        const dateToday = getLocalDateString(new Date());
+        const dayToday = getOrdinal(parseInt(dateToday.split("-")[2]));
+        const monthToday = getMonthName(parseInt(dateToday.split("-")[1]));
+        const yearToday = dateToday.split("-")[0];
+        let locationPath = "";
+        if(requestData?.purpose === "Death Residency"){
+            locationPath = "DeathResidency.pdf";
+        }
+
+        const response = await fetch("/api/fillPDF", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                location: "/ServiceRequests/templates",
+                pdfTemplate: locationPath,
+                data: {
+                    "Text1":`${requestData?.firstName.toUpperCase()} ${requestData?.lastName.toUpperCase()} (Deceased),`,
+                    "Text2": requestData?.address,
+                    "Text3": `${getMonthName(parseInt(requestData?.dateofdeath.split("-")[1]))} ${requestData?.dateofdeath.split("-")[2]}, ${requestData?.dateofdeath.split("-")[0]}`,
+                    "Text4": requestData?.requestor,
+                    "Text5": dayToday,
+                    "Text6": `${monthToday} ${yearToday}`,  
+                },
+            })
+        });
+        if(!response.ok)throw new Error("Failed to generate PDF");
+        
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download=`${requestData?.docType}_${requestData?.purpose || ""}_certificate.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+        link.remove();
+
+    }
+
+
     return (
         <main className="viewonlinereq-main-container">
 
             <div className="viewonlinereq-page-title-section-1">
                 <h1>Online Document Requests</h1>
             </div>
+            {(userPosition === "Assistant Secretary" || userPosition === "Admin Staff")&& (<>
+                <div className="viewonlinereq-actions-content">
+                    <div className="viewonlinereq-actions-content-section1">
+                        <button type="button" className="actions-button-reject" onClick ={handlerejection}>Reject</button>
+                        <button type="button" className="actions-button" onClick={handlePrint}>Print</button>
+                        {requestData?.appointmentDate && (<>
+                            <button type="button" className="actions-button" onClick ={handleviewappointmentdetails}>View Appointment Details</button>
+                        </>)}
 
-            <div className="viewonlinereq-actions-content">
-                <div className="viewonlinereq-actions-content-section1">
-                    <button type="button" className="actions-button-reject" onClick ={handlerejection}>Reject</button>
-                    <button type="button" className="actions-button">Print</button>
-                    <button type="button" className="actions-button" onClick ={handleviewappointmentdetails}>View Appointment Details</button>
+                        <select
+                            id="status"
+                            className={`status-dropdown-viewonlinereq ${status}`}
+                            name="status"
+                            value={status}
+                            onChange={handleStatusChange}
+                        >
+                            <option value="pending">Pending</option>
+                            <option value="pick-up">Pick-up</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <button type="button" className="status-dropdown-viewonlinereq completed" onClick={handleSave}>Save</button> {/* to update the status*/}
+                    </div>
 
-                    {/* Dropdown with dynamic class */}
-                    <select
-                        id="status"
-                        className={`status-dropdown-viewonlinereq ${status}`}
-                        name="status"
-                        value={status}
-                        onChange={handleStatusChange}
-                    >
-                        <option value="pick-up">Pick-up</option>
-                        <option value="completed">Completed</option>
-                        <option value="pending">Pending</option>
-                    </select>
+                    <div className="viewonlinereq-actions-content-section2">
+                        {status === "pick-up" && (
+                            <button type="button" className="actions-button" onClick={handleSMS}>Send Pick-up Notif</button>
+                        )}
+                    </div>
 
+                    
+                    
                 </div>
-                
-                <div className="viewonlinereq-actions-content-section2">
-                    {status === "pick-up" && (
-                        <button type="button" className="actions-button" onClick={handleSMS}>SMS</button>
-                    )}
-                </div>
-
-                
+            </>)}
             
-            </div>
 
             <div className="viewonlinereq-main-content">
                 <div className="viewonlinereq-section-1">
@@ -232,17 +400,15 @@ const ViewOnlineRequest = () => {
                             </div>
                          <div className="viewonlinereq-description">
                             {/* Handle File/Image Fields */}
-                            {["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg", "copyOfPropertyTitle", "dtiRegistration", "isCCTV", "taxDeclaration", "approvedBldgPlan"].includes(field.key) ? (
+                            {["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg", "copyOfPropertyTitle", "dtiRegistration", "isCCTV", "taxDeclaration", "approvedBldgPlan","deathCertificate"].includes(field.key) ? (
                                 fieldValue && typeof fieldValue === "string" ? (
                                     <div className="resident-id-container">
-                                        {/*
-                                        <img src={fieldValue} alt={field.label} className="resident-id-image" />
+                                        
                                         <a href={fieldValue} target="_blank" rel="noopener noreferrer" className="view-image-link">
-                                            {fieldValue}
+                                            <img src={fieldValue} alt={field.label} className="resident-id-image"  />
                                         </a>
-                                        */}
-
-                                        <p>N/A</p>
+                                        
+                                       
                                     </div>
                                 ) : (
                                     <p>No File Uploaded</p>
