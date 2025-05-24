@@ -132,7 +132,7 @@
     color: rgba(0, 0, 0, 0.4);
     opacity: 1;
     padding: 8px;
-    width: 70%;
+    width: 85%;
     margin-top: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -516,7 +516,7 @@ input[type="checkbox"] {
   height: 50px;
   border-radius: 5px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  z-index: 1002;
   text-align: center;
   font-size: 16px;
   display: flex;
@@ -696,7 +696,7 @@ input[type="checkbox"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999; 
+  z-index: 1000; 
   background: rgba(0, 0, 0, 0.4); 
 }
 
@@ -711,6 +711,7 @@ input[type="checkbox"] {
   max-height: 90vh;
   display: flex;
   flex-direction: column;
+  border: 2px solid rgb(168, 161, 158);
 }
 .kasambahay-employer-popup h2 {
   margin-top: 1rem;
@@ -755,8 +756,9 @@ input[type="checkbox"] {
 }
 
 .employers-table th {
-  background-color: #f6f5f5;
+  background-color: #214666;
   font-weight: 600;
+  color: #ffffff;
 }
 
 
@@ -773,7 +775,7 @@ input[type="checkbox"] {
 
   position: sticky;
   top: 0;
-  background-color: rgb(232, 228, 228);
+  background-color: #042a4b;
   z-index: 10; 
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
   height: 60px;
@@ -786,6 +788,14 @@ input[type="checkbox"] {
   width: 100%;
   border: 1px solid #ccc;
   border-radius: 4px;
+  text-align: center;
+  border: 1.5px solid #f49028;
+}
+
+.employer-search-input:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
 
 
@@ -803,7 +813,7 @@ FOR INFO
   justify-content: center;
   gap: 15px;
   margin-top: 5px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   border-bottom: 2px solid #e0e0e0;
 }
 
@@ -914,6 +924,20 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   width: 100%;
 }
 
+.fields-section-precinct{
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+  width: 100%;
+}
+
+.fields-section-precinct p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 25%;
+}
 
 
 .fields-section p{
@@ -921,7 +945,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   color: #2C3E50;
   font-weight: bold;
   align-self: flex-start; /* Left-aligns the label */
-  margin-left: 15%;
+  margin-left: 8%;
 }
 
 
@@ -931,14 +955,19 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   padding-left: 35px;
   padding-right: 35px;
   height: 100%;
-  /*background-color: yellow;*/
+}
+
+.add-voter-bottom-section{
+  padding-top: 20px;
+  padding-left: 35px;
+  padding-right: 35px;
+  height: 100%;
 }
 
 .add-resident-bottom-section-scroll{
   overflow-y: auto;
   height: 400px;
   padding-bottom: 40px;
-  /*background-color: pink;*/
 }
 
 .add-jobseeker-bottom-section-scroll{
@@ -970,7 +999,6 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   display: flex;
   flex-direction: row;
   width: 100%;
-  background-color: yellow;
 }
 
 .edit-voter-section-2-full-top{
@@ -982,39 +1010,28 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 .add-main-resident-section-2-full-bottom{
   width: 50%;
-  background-color: pink;
 }
 
-  .add-resident-input-field {
-    padding: 8px;
-    width: 70%;
-    margin-top: 10px;
-    border: 1px solid rgba(36, 53, 76, 0.7);
-    border-radius: 5px;
-    color: #000000;
-    text-align: left;
-    
-  }
-
-  .select-resident-input-field {
-    padding: 8px;
-    width: 100%;
-    margin-top: 10px;
-    border: 1px solid rgba(36, 53, 76, 0.7);
-    border-radius: 5px;
-    color: #000000;
-    text-align: left;
-    
-  }
+.add-voter-section-2-full-bottom{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
 
   .select-resident-input-field{
     padding: 8px;
     width: 100%;
     margin-top: 10px;
-    border: 1px solid rgba(36, 53, 76, 0.7);
+    border: 1.5px solid #f49028;
     border-radius: 5px;
     color: #000000;
     text-align: center;
+  }
+
+  .select-resident-input-field:focus {
+    border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
 .remarks-input-field {
     padding: 8px;
@@ -1036,13 +1053,28 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
   .add-resident-input-field {
     padding: 8px;
-    width: 70%;
+    width: 85%;
     margin-top: 10px;
     border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
     color: #000000;
-    text-align: left;
-    
+    text-align: left; 
+  }
+
+  .add-voterprecinct-input-field {
+    padding: 8px;
+    width: 50%;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left; 
+  }
+
+  .add-voterprecinct-input-field:focus {
+    border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
 
   .add-resident-input-field option:disabled {
@@ -1050,6 +1082,10 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   }
 
   .fields-section input,select{
+  align-self: center; 
+}
+
+.fields-section-precinct input,select{
   align-self: center; 
 }
 
@@ -1070,12 +1106,12 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 .box-container-remarks {
   position: relative;
-  width: 320px;
+  width: 350px;
   border: 1px solid #5a6b7c;
   border-radius: 10px;
   background-color: #ffffff;
   margin-top: 30px;
-  height: 200px;
+  height: 340px;
 }
 
 /* Resident Classification Box */
@@ -1094,6 +1130,22 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   position: absolute;
   left: 50%; 
   top: 0; 
+  transform: translate(-50%, -50%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 210px;
+  text-align: center;
+}
+
+.title-remarks {
+  position: absolute;
+  left: 50%; 
+  top: 30px; 
   transform: translate(-50%, -50%);
   background-color: #1f3b57;
   color: white;
@@ -1253,10 +1305,9 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   }
 
   .add-voter-main-content{
-  background-color: yellow;
-  height: 80%;
-  display: flex;
-  flex-direction: row;
+    height: 80%;
+    display: flex;
+    flex-direction: row;
   }
 
   .resident-photo-section-voter {
@@ -1266,7 +1317,19 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     padding-left: 30px;
     padding-bottom: 50px;
     width: 100%;
-    padding-top: 30px;
+    padding-right: 15px;
+    padding-top: 50px;
+  }
+
+  .jobseeker-photo-section-voter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-left: 30px;
+    padding-bottom: 20px;
+    width: 100%;
+    padding-right: 15px;
+
   }
 
   .resident-details-label-voter {
@@ -1275,7 +1338,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     padding: 8px 16px;
     border-radius: 10px;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 15px;
     position: relative;
     top: 12px; /* Pushes it closer to the card */
     z-index: 1;
@@ -1320,7 +1383,6 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
   .addvoter-outer-top{
     display: flex;
-    background-color: blue;
   }
 
 
@@ -1331,7 +1393,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
   .addvoter-top-details-section{
     display: flex;
-    /*background-color: red;*/
+    width: 100%;
   }
 
   .addvoter-outer-container{
@@ -1341,10 +1403,10 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
   .addvoter-outer-container-left{
     width: 30%;
-    /*background-color: red;*/
   }
 
   .addvoter-outer-container-right{
+    display: flex;
+    flex-direction: column;
     width: 70%;
-    /*background-color: blue;*/
   }

@@ -13,6 +13,8 @@ interface VoterFormData {
   middleName: string;
   homeAddress: string;
   precinctNumber: string;
+  residentId: string
+  identificationFileURL: string
 
 }
 
@@ -28,6 +30,8 @@ export default function EditVoter() {
     middleName: "",
     homeAddress: "",
     precinctNumber: "",
+    residentId: "",
+    identificationFileURL: "",
   });
 
   const fieldSectionMap: { [key: string]: "details"} = {
@@ -92,6 +96,8 @@ export default function EditVoter() {
             middleName: docSnap.data().middleName || "",
             homeAddress: docSnap.data().homeAddress || "",
             precinctNumber: docSnap.data().precinctNumber || "",
+            residentId: docSnap.data().residentId || "",
+            identificationFileURL: docSnap.data().identificationFileURL || "",
           };
 
           setFormData(data);
@@ -259,42 +265,58 @@ export default function EditVoter() {
             </nav>  
             <form id="editVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
             {activeSection === "details" && (
-                <>
-              <div className="add-main-resident-section-2-full-top">
-                <div className="add-main-resident-section-2-left-side">
-                  
-                    <div className="fields-section">
-                      <p>Voter Number</p>
-                      <input type="text" name="voterNumber" value={formData.voterNumber} onChange={handleChange} disabled className="add-resident-input-field-disabled" />
+              <>
+                <div className="addvoter-outer-container">
+                  <div className="addvoter-outer-container-left">
+                    <div className="resident-photo-section-voter">
+                      <span className="resident-details-label-voter">Identification Picture</span>
+                      <div className="resident-profile-container-voter">
+                        <img
+                            src={formData.identificationFileURL || "/Images/default-identificationpic.jpg"}
+                            alt="Resident"
+                            className={
+                              formData.identificationFileURL
+                                ? "resident-picture uploaded-picture"
+                                : "resident-picture default-picture"
+                            }
+                        /> 
+                      </div>
                     </div>
+                  </div>
 
-                    <div className="fields-section">
-                      <p>First Name<span className="required">*</span></p>
-                      <input type="text" className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`} name="firstName" value={formData.firstName} onChange={handleChange} required />
-                    </div>
-
-                    <div className="fields-section">
-                      <p>Middle Name</p>
-                      <input type="text" className="add-resident-input-field" name="middleName" value={formData.middleName} onChange={handleChange} />
-                    </div>
+                  <div className="addvoter-outer-container-right">
+                        <div className="addvoter-top-details-section">
+                          <div className="add-main-resident-section-2-left-side">
+                            <div className="fields-section">
+                              <p>Last Name<span className="required">*</span></p>
+                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`} placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                            </div>
+                            <div className="fields-section">
+                              <p>First Name<span className="required">*</span></p>
+                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`} placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                            </div>
+                          </div>
+                          <div className="add-main-resident-section-2-right-side">
+                            <div className="fields-section">
+                              <p>Middle Name</p>
+                              <input type="text"  className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} />
+                            </div>
+                            <div className="fields-section">
+                              <p>Home Address<span className="required">*</span></p>
+                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="add-voter-section-2-full-bottom">
+                          
+                            <div className="fields-section-precinct">
+                              <p>Precinct Number<span className="required">*</span></p>
+                              <input type="text" className={`add-voterprecinct-input-field ${invalidFields.includes("precinctNumber") ? "input-error" : ""}`} placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required/>
+                            </div>
+                         
+                        </div>  
+                      </div>
                 </div>
-                <div className="add-main-resident-section-2-right-side">
-                  <div className="fields-section">
-                    <p>Last Name<span className="required">*</span></p>
-                    <input type="text" className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`} name="lastName" value={formData.lastName} onChange={handleChange} required />
-                  </div>
-                    
-                  <div className="fields-section">
-                    <p>Home Address<span className="required">*</span></p>
-                    <input type="text" className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
-                  </div>
-
-                  <div className="fields-section">
-                    <p>Precinct Number<span className="required">*</span></p>
-                    <input type="text" className={`add-resident-input-field ${invalidFields.includes("precinctNumber") ? "input-error" : ""}`} placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required />
-                  </div>
-                </div>
-              </div>  
               </>
             )}
             </form>
