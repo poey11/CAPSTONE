@@ -60,7 +60,7 @@ export default function reasonForRejection() {
             if(!id) return
             const docRef = doc(db, "ServiceRequests", id);
             const updatedData = {
-                status: "rejected",
+                status: "Rejected",
                 statusPriority: 4,
                 rejectionReason: rejectionReason.reason,                
 

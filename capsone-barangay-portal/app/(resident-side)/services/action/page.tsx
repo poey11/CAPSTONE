@@ -8,6 +8,8 @@ import { db, storage, auth } from "@/app/db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/navigation";
 import {getLocalDateString} from "@/app/helpers/helpers";
+import {customAlphabet} from "nanoid";
+import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 
 
 
@@ -18,14 +20,15 @@ export default function Action() {
   const searchParam = useSearchParams();
   const docType = searchParam.get("doc");
   const router = useRouter();
-  console.log(docType);
+  const [nos, setNos] = useState(0);
   const [clearanceInput, setClearanceInput] =  useState<any>({
     accountId: user?.uid || "Guest",
+    docType: docType ,
+    requestId: "",
     purpose: "",
     dateRequested: new Date().toLocaleString(),
-    firstName: "",
+    fullName: "",
     appointmentDate: "",
-    lastName: "",
     dateOfResidency: "",
     dateofdeath: "",
     address: "",//will be also the home address
@@ -55,15 +58,13 @@ export default function Action() {
     occupation:"",
     precinctnumber:"",
     emergencyDetails:{
-      firstName: "",
-      lastName: "",
+      fullName: "",
       address: "",
       relationship: "",
       contactNumber: "",
     },
     requestorMrMs: "",
     requestorFname: "",
-    requestorLname: "",
     signaturejpg: null,
     barangayIDjpg:null,
     validIDjpg: null,
@@ -77,6 +78,43 @@ export default function Action() {
   })
 
 
+
+
+  useEffect(() => {
+    if(!user) return;
+    const fetchCount = async () => {
+      try {
+        const count = await getSpecificCountofCollection("ServiceRequests", "accountId", user.uid);
+        setNos(count || 1);
+      } catch (error) {
+        console.error("Error fetching count:", error);
+      }
+    }
+    fetchCount();
+
+  },[user]);
+
+  useEffect(() => {
+    const getServiceRequestId =  () => {
+      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const randomId = customAlphabet(alphabet, 6);
+      const requestId = randomId();
+      const number = String(nos+1).padStart(4, '0'); // Ensure 3 digits
+      let format = `${user?.uid.substring(0,6).toUpperCase()|| "GUEST"} - ${requestId} - ${number}`;
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        requestId: format,
+      }));
+      console.log("format", format);
+    }
+    getServiceRequestId();
+
+  }, [user]);
+
+
+ 
+
+
  
 
   useEffect(() => {
@@ -84,24 +122,34 @@ export default function Action() {
       /*if the user requesting has an accountt and is logined*/
       const user = auth.currentUser;
       if (user) {
+        
         const docRef = doc(db, "ResidentUsers", user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
+          const gender = data.sex;
+          console.log(gender);
+          let mrms = "";
+          if(gender === "male")mrms = "Mr.";
+          else mrms = "Ms.";
+          console.log( mrms);
           setClearanceInput((prev: any) => ({
             ...prev,
-            firstName: `${data.first_name} ${data.middle_name}`  || "",
-            lastName: data.last_name || "",
+            fullName: `${data.first_name} ${data.middle_name} ${data.last_name}`  || "",
             contact: data.phone || "",
             address: data.address || "",
             gender: data.sex || "",
-          }));
+            requestorFname: `${data.first_name} ${data.middle_name} ${data.last_name}` || "",
+            requestorMrMs: mrms,
+          }
+        
+        ));
         }
       }
     };
 
     fetchUserData();
-  }, []);
+  }, [user]);
   
 // State for all file containers
 const [files, setFiles] = useState<{ name: string, preview: string | undefined }[]>([]);
@@ -304,15 +352,15 @@ const handleFileChange = (
         }
     
         const clearanceVars = {
-          requestDate: clearanceInput.dateRequested,
+          createdAt: clearanceInput.dateRequested,
+          requestId: clearanceInput.requestId,
           status: "Pending",
           statusPriority: 1,
-          requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
+          requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
           accID: clearanceInput.accountId,
           docType: docType,
           purpose: clearanceInput.purpose,
-          firstName: clearanceInput.firstName,
-          lastName: clearanceInput.lastName,
+          fullName: clearanceInput.fullName,
           dateOfResidency: clearanceInput.dateOfResidency,
           address: clearanceInput.address,
           birthday: clearanceInput.birthday,
@@ -358,7 +406,8 @@ const handleFileChange = (
       // 📌 Handling for Temporary Business Permit & Business Permit
       if (docType === "Temporary Business Permit" || docType === "Business Permit") {
         const clearanceVars = {
-          requestDate: clearanceInput.dateRequested,
+          createdAt: clearanceInput.dateRequested,
+          requestId: clearanceInput.requestId,
           status: "Pending",
           statusPriority: 1,
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
@@ -369,8 +418,7 @@ const handleFileChange = (
           businessLocation: clearanceInput.businessLocation,
           businessNature: clearanceInput.businessNature,
           estimatedCapital: clearanceInput.estimatedCapital,
-          firstName: clearanceInput.firstName,
-          lastName: clearanceInput.lastName,
+          fullName: clearanceInput.fullName,
           contact: clearanceInput.contact,
           homeAddress: clearanceInput.address,
           copyOfPropertyTitle: filenames.copyOfPropertyTitle,
@@ -387,7 +435,8 @@ const handleFileChange = (
       // 📌 Handling for Construction Permit
       if (docType === "Construction Permit") {
         const clearanceVars = {
-          requestDate: clearanceInput.dateRequested,
+          createdAt: clearanceInput.dateRequested,
+          requestId: clearanceInput.requestId,
           status: "Pending",
           statusPriority: 1,
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
@@ -399,21 +448,14 @@ const handleFileChange = (
           projectLocation: clearanceInput.businessLocation,
           taxDeclaration: filenames.taxDeclaration,
           approvedBldgPlan: filenames.approvedBldgPlan,
-          firstName: clearanceInput.firstName,
-          lastName: clearanceInput.lastName,
+          fullName: clearanceInput.fullName,
           contact: clearanceInput.contact,
           homeAddress: clearanceInput.address,
           copyOfPropertyTitle: filenames.copyOfPropertyTitle,
           signaturejpg: filenames.signaturejpg,
           endorsementLetter: filenames.letterjpg,
           ...(clearanceInput.typeofbldg === "Others" && {othersTypeofbldg: clearanceInput.othersTypeofbldg}),
-          //othersTypeofbldg: ""
         };
-
-        // ✅ Add othersTypeofbldg if typeofbldg is "Others"
-        // if (clearanceInput.typeofbldg === "Others") {
-        //   clearanceVars.othersTypeofbldg = clearanceInput.othersTypeofbldg;
-        // }
         console.log(clearanceVars, storageRefs);
         handleReportUpload(clearanceVars, storageRefs);
       }
@@ -479,13 +521,6 @@ const handleFileChange = (
               <option value="Maynilad">Maynilad</option>
               <option value="Meralco">Meralco</option>
               <option value="Bail Bond">Bail Bond</option>
-              {/* <option value="Character Reputation">Character Reputation</option> */}
-              {/* <option value="Request for Referral">Request for Referral</option> */}
-              {/* <option value="Issuance of Postal ID">Issuance of Postal ID</option> */}
-              {/* <option value="MWSI connection">MWSI connection</option> */}
-              {/* <option value="Business Clearance">Business Clearance</option> */}
-              {/* <option value="Firearms License">Police Clearance</option> */}
-              {/* <option value="Others">Others</option> */}
             </>):docType === "Barangay Indigency" ? ( <>
               <option value="No Income">No Income</option>
               <option value="Public Attorneys Office">Public Attorneys Office</option>
@@ -564,34 +599,21 @@ const handleFileChange = (
           )}
 
             <div className="form-group">
-              <label htmlFor="firstName" className="form-label">First Name<span className="required">*</span></label>
+              <label htmlFor="fullName" className="form-label">Full Name<span className="required">*</span></label>
               <input 
                 type="text"  
-                id="firstName"  
-                name="firstName"  
+                id="fullName"  
+                name="fullName"  
                 className="form-input"  
                 required  
-                placeholder="Enter First Name" 
-                value={clearanceInput.firstName}
+                placeholder="Enter Full Name" 
+                value={clearanceInput.fullName}
                 onChange={handleChange}
               />
             </div>
 
          
 
-            <div className="form-group">
-              <label htmlFor="lastName" className="form-label">Last Name<span className="required">*</span></label>
-              <input 
-                type="text"  
-                id="lastName"  
-                name="lastName"  
-                className="form-input"  
-                required 
-                value={clearanceInput.lastName}
-                onChange={handleChange}
-                placeholder="Enter Last Name"  
-              />
-            </div>
             {(docType ==="Temporary Business Permit"||docType ==="Business Permit") ? (
               <>  
                 <div className="form-group">
@@ -1042,46 +1064,20 @@ const handleFileChange = (
               <h1 className="form-requirements-title">Emergency Details</h1>
 
               <div className="form-group">
-                <label htmlFor="firstname" className="form-label">First Name<span className="required">*</span></label>
+                <label htmlFor="fullName" className="form-label">First Name<span className="required">*</span></label>
                 <input 
                   type="text"  
-                  id="firstname"  
+                  id="fullName"  
                   className="form-input"  
-                  name="emergencyDetails.firstName"  
-                  value={clearanceInput.emergencyDetails.firstName}
+                  name="emergencyDetails.fullName"  
+                  value={clearanceInput.emergencyDetails.fullName}
                   onChange={handleChange}
                   required  
                   placeholder="Enter First Name" 
                 />
               </div>`
 
-              <div className="form-group">
-                <label htmlFor="middlename" className="form-label">Middle Name<span className="required">*</span></label>
-                <input 
-                  type="text"  
-                  id="middlename"  
-                  name="emergencyDetails.middleName"  
-                  className="form-input" 
-                  value={clearanceInput.emergencyDetails.middleName}
-                  onChange={handleChange}
-                  required  
-                  placeholder="Enter Middle Name"  
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="lastname" className="form-label">Last Name<span className="required">*</span></label>
-                <input 
-                  type="text"  
-                  id="lastname"  
-                  name="emergencyDetails.lastName"  
-                  value={clearanceInput.emergencyDetails.lastName}
-                  onChange={handleChange}
-                  className="form-input"  
-                  required 
-                  placeholder="Enter Last Name"  
-                />
-              </div>
+             
 
               <div className="form-group">
                 <label htmlFor="address" className="form-label">Address<span className="required">*</span></label>
@@ -1205,13 +1201,12 @@ const handleFileChange = (
               <option value="" disabled>Select Requestor's Title</option>
               <option value="Mr.">Mr.</option>
               <option value="Ms.">Ms.</option>
-              <option value="Mrs.">Mrs.</option>
             </select>
           </div>
 
 
           <div className="form-group">
-            <label htmlFor="requestorFname" className="form-label">Requestor First Name<span className="required">*</span></label>
+            <label htmlFor="requestorFname" className="form-label">Requestor Full Name<span className="required">*</span></label>
             <input 
               type="text"  
               id="requestorFname"  
@@ -1220,21 +1215,7 @@ const handleFileChange = (
               value={clearanceInput.requestorFname}
               onChange={handleChange}
               required  
-              placeholder="Enter Requestor First Name"  
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="requestorLname" className="form-label">Requestor Last Name<span className="required">*</span></label>
-            <input 
-              type="text"  
-              id="requestorLname"  
-              name="requestorLname"  
-              className="form-input" 
-              value={clearanceInput.requestorLname}
-              onChange={handleChange}
-              required  
-              placeholder="Enter Requestor Last Name"  
+              placeholder="Enter Requestor Full Name"  
             />
           </div>
 

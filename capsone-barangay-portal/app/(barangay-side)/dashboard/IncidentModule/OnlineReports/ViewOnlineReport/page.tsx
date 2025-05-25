@@ -19,6 +19,7 @@ export default function ViewOnlineReports() {
     file: "",
     reportID: "",
     caseNumber: "",
+    time: "",
   });
   
   
@@ -70,6 +71,7 @@ export default function ViewOnlineReports() {
           file: data.file || "",
           reportID: data.reportID || "",
           caseNumber: data.caseNumber || "",
+          time: data.time || "",
         });
   
         // ✅ Fetch respondent details and files as an array
@@ -259,9 +261,9 @@ export default function ViewOnlineReports() {
         </div>
 
         <div className="online-report-details-section">
-          <div className="title-section"><p>Date Of Incident</p></div>
+          <div className="title-section"><p>Date and Time Of Incident</p></div>
           <div className="description-section">
-            <p>{formData.dateFiled}</p>
+            <p>{formData.dateFiled} {formData.time}</p>
           </div>
         </div>
 

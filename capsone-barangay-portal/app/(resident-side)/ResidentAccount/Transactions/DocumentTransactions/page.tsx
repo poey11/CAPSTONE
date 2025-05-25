@@ -30,7 +30,7 @@ interface BarangayDocument {
     middleName?: string; 
     lastName?: string; 
     gender?: string; 
-    requestDate?: string; 
+    createdAt?: string; 
     signaturejpg?: string[];
     barangayIDjpg?: string[];
     validIDjpg?: string[];
@@ -157,13 +157,15 @@ export default function DocumentTransactionsDetails() {
 
       const barangayDocumentFields = [
         /* General Fields*/
-        { label: "Request Date", key: "requestDate" },
+        { label: "Request Date", key: "createdAt" },
         { label: "Document Type", key: "docType" },
         { label: "Status", key: "status" },
-        { label: "First Name", key: "firstName" },
-        { label: "Middle Name", key: "middleName" },
-        { label: "Last Name", key: "lastName" },
+        { label: "Full Name", key: "fullName" },
         { label: "Contact Number", key: "contact" },
+        
+        ...(transactionData?.status === "Rejected"
+           ? [{ label: "Rejection Reason", key: "rejectionReason" }]
+           : []),
 
 
         /*Barangay Certificate, Barangay Indigency, Barangay Clearance & Business Permits */
@@ -268,6 +270,7 @@ export default function DocumentTransactionsDetails() {
                     <p className={`status-dropdown-transactions ${transactionData.status?.toLowerCase() || ""}`}>
                     {transactionData.status || "N/A"}
                     </p> 
+                    
                 </div>
 
             </div>

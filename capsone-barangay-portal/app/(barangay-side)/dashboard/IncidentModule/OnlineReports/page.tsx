@@ -25,6 +25,7 @@ export default function OnlineReports() {
         unsubscribe();
       }
     };
+    
   }, []);
 
   useEffect(() => {
@@ -238,7 +239,7 @@ export default function OnlineReports() {
               <td>{incident.isFiled === true ? "Filed" : "Not Yet Filed"}</td>
               <td>{incident.caseNumber || "N/A"}</td>
               <td>{fullName}</td>
-              <td>{incident.dateFiled}</td>
+              <td>{incident.dateFiled} {incident.time}</td>
               <td>{incident.concerns}</td>
               <td>
                 <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>

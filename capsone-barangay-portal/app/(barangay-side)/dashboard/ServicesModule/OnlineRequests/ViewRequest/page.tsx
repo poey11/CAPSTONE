@@ -157,8 +157,7 @@ const ViewOnlineRequest = () => {
         { key: "requestDate", label: "Date Requested" },
         { key: "docType", label: "Document Type" },
         { key: "purpose", label: "Purpose" },
-        { key: "firstName", label: "First Name" },
-        { key: "lastName", label: "Last Name" },
+        { key: "fullName", label: "Full Name" },
         { key: "address", label: "Address" },
         { key: "age", label: "Age" },
         { key: "dateOfResidency", label: "Date of Residency" },
@@ -225,9 +224,9 @@ const ViewOnlineRequest = () => {
             const docRef = doc(db, "ServiceRequests", id);
             const updatedData = {
                 status: status,
-                ...(status === "pending" && { statusPriority: 1 }),
-                ...(status === "pick-up" && { statusPriority: 2 }),
-                ...(status === "completed" && { statusPriority: 3 }),
+                ...(status === "Pending" && { statusPriority: 1 }),
+                ...(status === "Pick-up" && { statusPriority: 2 }),
+                ...(status === "Completed" && { statusPriority: 3 }),
             }
             await updateDoc(docRef, updatedData).then(() => {
                 alert("Status Updated");
