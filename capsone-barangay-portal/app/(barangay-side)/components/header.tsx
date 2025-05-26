@@ -47,7 +47,6 @@ export default function Header() {
           breadcrumb: ["User and Roles", "Barangay Users", "Edit Barangay User"],
       },
 
-
       
       //NEED PA AYUSIN VIEEWS FOR PENDING AND RESIDENT USEERS KASI SAME CSS SILA 
       //MAY BUG PA
@@ -62,6 +61,13 @@ export default function Header() {
         title: "Pending Resident Users",
         breadcrumb: ["User and Roles", "Pending Resident Users", "View Pending Resident Users"],
       },
+
+      // Reason For Reject
+      "/dashboard/admin/reasonForReject": {
+        title: "Pending Resident Users",
+        breadcrumb: ["User and Roles", "Pending Resident Users", "View Pending Resident Users", "Reason For Reject"],
+      },
+
 
     
 

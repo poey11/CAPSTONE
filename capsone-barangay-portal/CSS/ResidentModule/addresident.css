@@ -6,6 +6,9 @@
     margin-left: 3rem; 
     /*padding-top: 150px;*/
     padding-top: 11.2%;
+    padding-left:30px;
+  padding-right:30px;
+  padding-bottom:30px;
 }
 
 
@@ -694,9 +697,10 @@ input[type="checkbox"] {
   height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 1000; 
-  background: rgba(0, 0, 0, 0.4); 
+  justify-content: flex-end; 
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.4);
+  padding-right: 200px; 
 }
 
 .kasambahay-employer-popup {
@@ -715,13 +719,15 @@ input[type="checkbox"] {
 .kasambahay-employer-popup h2 {
   margin-top: 1rem;
   font-size: 1.80rem;
+  font-weight: bolder;
   text-align: center;
   font-weight: bold;
+  color: #214666;
 }
 
 .kasambahay-employer-popup h1 {
   margin-bottom: 30px;
-  font-size: 1.15rem;
+  font-size: 1.10rem;
   text-align: center;
   color: #dd3327;
 }
