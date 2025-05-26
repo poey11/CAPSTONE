@@ -33,7 +33,7 @@ export default function ViewUser() {
     const [showResidentsPopup, setShowResidentsPopup] = useState(false);
     const [showNoMatchResidentsPopup, setShowNoMatchResidentsPopup] = useState(false);
     const [linkedResidentName, setLinkedResidentName] = useState<string>("N/A");
-
+    const [activeSection, setActiveSection] = useState("basic");
 
     const handleRejectClick = (userId: string ) => {
         router.push(`/dashboard/admin/reasonForReject?id=${userId}`);
@@ -208,7 +208,263 @@ export default function ViewUser() {
     
 
     return (
-        <main className="viewresident-main-container">
+        <main className="view-user-main-container">
+            <div className="view-user-main-content">
+                <div className="view-user-main-section1">
+                    <div className="view-user-header-first-section">
+                        <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                    </div>
+
+                    <div className="view-user-header-second-section">
+                        <h2 className="gov-info">Republic of the Philippines</h2>
+                        <h2 className="gov-info">Quezon City</h2>
+                        <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+                        <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+                        <h2 className="contact">930-0040 / 428-9030</h2>
+                    </div>
+
+                    <div className="view-user-header-third-section">
+                        <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
+                    </div>
+                </div>
+
+                <div className="view-user-header-body">
+                    <div className="view-user-header-body-top-section">
+                        <div className="view-user-backbutton-container">
+                            <button onClick={handleBack}>
+                                <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident"/> 
+                            </button>
+                        </div>
+
+                        <div className="view-pendinguser-info-toggle-wrapper">
+                            {[ "basic" , "account", "others"].map((section) => (
+                            <button
+                                key={section}
+                                type="button"
+                                className={`user-info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                                onClick={() => setActiveSection(section)}
+                            >
+                    
+                                {section === "basic" && "Basic Info"}
+                                {section === "account" && "Account Info"}
+                                {section === "others" && "Others"}
+                            </button>
+                            ))}
+                        </div>
+                        <div className="action-btn-section-verify-section">
+                            {ResidentUserData?.status !== "Verified" && (
+                                <div className="action-btn-section-verify">
+                                    {isAuthorized ? (
+                                    <>
+                                    <button 
+                                        className="viewadmin-action-accept" 
+                                        onClick={() => handleVerifyClick(residentUserId)}
+                                    >
+                                        Verify
+                                    </button>
+                                    </>
+                                ) : (
+                                    <>
+                                    <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
+                                        Edit
+                                    </button>
+                                    <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
+                                        Reject
+                                    </button>
+                                    </>
+                                )}
+                                </div>
+                            )}
+
+                        </div>
+
+
+                    </div>
+
+                    <div className="view-pendinguser-header-body-bottom-section">
+                        <div className="view-pendinguser-info-main-container">
+                            <div className="view-pendinguser-info-container-scrollable">
+                                <div className="view-user-info-main-content">
+                                {activeSection === "basic" && (
+                                    <>
+                                        <div className="view-main-user-content-left-side">
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Last Name</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="first_name"
+                                                    value={ResidentUserData?.last_name || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>First Name</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="first_name"
+                                                    value={ResidentUserData?.first_name || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Middle Name</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="middle_name"
+                                                    value={ResidentUserData?.middle_name || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Address</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="address"
+                                                    value={ResidentUserData?.address || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+
+
+                                        </div>
+
+                                        <div className="view-main-user-content-right-side">
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Sex</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="sex"
+                                                    value={ResidentUserData?.sex || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Birthday</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="dateOfBirth"
+                                                    value={ResidentUserData?.dateOfBirth || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Contact Number</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="phone"
+                                                    value={ResidentUserData?.phone || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Email Address</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="email"
+                                                    value={ResidentUserData?.email || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+
+                                        </div>
+                                    </>
+                                )}
+
+                                {activeSection === "account" && (
+                                    <>
+                                        <div className="view-main-user-content-left-side">
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Status</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="status"
+                                                    value={ResidentUserData?.status || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Created At</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="createdAt"
+                                                    value={ResidentUserData?.createdAt || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Reason For Reject</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="reasonForReject"
+                                                    value={ResidentUserData?.rejectionReason || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="view-main-user-content-right-side">
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Role</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="role"
+                                                    value={ResidentUserData?.role || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Linked Resident</p>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="residentID"
+                                                    value={ResidentUserData?.residentID || "N/A"}
+                                                    readOnly
+                                                />
+                                            </div>
+                                        </div>
+
+                                          
+                                    </>
+                                )}
+
+                                {activeSection === "others" && (
+                                    <>
+                                        insert valid ID
+                                    </>
+                                )}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    
+                        
+                </div>
+
+            </div>
 
                {/*
             <div className="path-section">
@@ -240,130 +496,7 @@ export default function ViewUser() {
             </div>
             */}
 
-
-            <div className="viewresident-main-content">
-                <div className="viewresident-section-1">
-                    <div className="viewresident-main-section1-left">
-                        <button onClick={handleBack}>
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
-                        </button>
-                        <h1>Resident User Details</h1>
-                    </div>
-
-                    {ResidentUserData?.status !== "Verified" && (
-                        <div className="action-btn-section">
-                            {isAuthorized ? (
-                            <>
-                            <button 
-                                className="viewadmin-action-accept" 
-                                onClick={() => handleVerifyClick(residentUserId)}
-                            >
-                                Verify
-                            </button>
-                            </>
-                        ) : (
-                            <>
-                            <button className="residentmodule-action-edit opacity-0 cursor-not-allowed" disabled>
-                                Edit
-                            </button>
-                            <button className="residentmodule-action-delete opacity-0 cursor-not-allowed" disabled>
-                                Reject
-                            </button>
-                            </>
-                        )}
-                        </div>
-                    )}
-                </div>
-
-                    {residentUserFields.map((field) => (
-                        <div className="viewresident-details-section" key={field.key}>
-                            <div className="viewresident-title">
-                                <p>{field.label}</p>
-                            </div>
-                            <div className={`viewresident-description ${field.key === "residentNumber" ? "disabled-field" : ""}`}>
-                                {field.key === "residentID" ? (
-                                    ResidentUserData.residentID ? (
-                                        <a 
-                                            href={`/dashboard/ResidentModule/ViewResident?id=${ResidentUserData.residentID}`} 
-                                            className="linked-resident-link" 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                        >
-                                            {linkedResidentName}
-                                        </a>
-                                    ) : (
-                                        <p>N/A</p>
-                                    )
-                                ) : (
-                                    <p>{ResidentUserData[field.key] ?? "N/A"}</p>
-                                )}
-                            </div>
-                        </div>
-                    ))}
-
-                {ResidentUserData.status === "Resubmission" && (
-                    <div className="viewresident-details-section">
-                        <div className="viewresident-title">
-                            <p>Reason for Rejection</p>
-                        </div>
-                        <div className="viewresident-description">
-                            <p>{ResidentUserData.rejectionReason ?? "N/A"}</p>
-                        </div>
-                    </div>
-                )}
-
-                <div className="viewresident-details-section">
-                    <div className="viewresident-title">
-                        <p>Valid ID</p>
-                    </div>
-                    <div className="viewresident-description">
-                        {ResidentUserData.upload ? (
-                            <div className="resident-id-container">
-                                <img
-                                    src={ResidentUserData.upload}
-                                    alt="Resident's Valid ID"
-                                    className="resident-id-image"
-                                />
-                                <a
-                                    href={ResidentUserData.upload}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="view-image-link"
-                                >
-                                    View Image
-                                </a>
-                            </div>
-                        ) : (
-                            <p>No ID uploaded</p>
-                        )}
-                    </div>
-                </div>
-
-                {ResidentUserData.reupload && (
-                    <div className="viewresident-details-section">
-                        <div className="viewresident-title">
-                            <p>Reupload Valid ID</p>
-                        </div>
-                        <div className="viewresident-description">
-                            <div className="resident-id-container">
-                                <img
-                                    src={ResidentUserData.reupload}
-                                    alt="Resident's Reuploaded ID"
-                                    className="resident-id-image"
-                                />
-                                <a
-                                    href={ResidentUserData.reupload}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="view-image-link"
-                                >
-                                    View Image
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
+    
 
 
             {/* Popup for No match Residents */}
