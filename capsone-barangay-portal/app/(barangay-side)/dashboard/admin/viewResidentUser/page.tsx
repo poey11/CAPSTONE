@@ -1,6 +1,6 @@
 "use client";
 import "@/CSS/User&Roles/ViewUser.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "../../../../db/firebase";
 import { useRouter } from "next/navigation";
@@ -34,10 +34,30 @@ export default function ViewUser() {
     const [showNoMatchResidentsPopup, setShowNoMatchResidentsPopup] = useState(false);
     const [linkedResidentName, setLinkedResidentName] = useState<string>("N/A");
     const [activeSection, setActiveSection] = useState("basic");
+    const residentPopupRef = useRef<HTMLDivElement>(null);
 
     const handleRejectClick = (userId: string ) => {
         router.push(`/dashboard/admin/reasonForReject?id=${userId}`);
     };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                residentPopupRef.current &&
+                !residentPopupRef.current.contains(event.target as Node)
+            ) {
+                setShowResidentsPopup(false);
+            }
+        };
+    
+        if (showResidentsPopup) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+    
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showResidentsPopup]);
 
     useEffect(() => {
         if (!residentUserId) return;
@@ -125,6 +145,8 @@ export default function ViewUser() {
         }
     };
 
+
+
     const handleVerifyClick = async (userId: string) => {
         setSelectedUserId(userId);
         try {
@@ -164,11 +186,6 @@ export default function ViewUser() {
         }
     };
 
-    const handleAcceptClick = (userId: string) => {
-        setShowAcceptPopup(true);
-        setSelectedUserId(userId);
-    };
-
 
     const confirmAccept = async () => {
         if (!selectedUserId) return;
@@ -203,6 +220,11 @@ export default function ViewUser() {
             setShowAcceptPopup(false);
             setSelectedUserId(null);
         }
+    };
+
+    const handleAcceptClick = (userId: string) => {
+        setShowAcceptPopup(true);
+        setSelectedUserId(userId);
     };
 
     
@@ -522,9 +544,9 @@ export default function ViewUser() {
               <table className="resident-table">
                 <thead>
                   <tr>
-                    <th>First Name</th>
-                    <th>Middle Name</th>
-                    <th>Last Name</th>
+                    <th className="verification-table-firsttitle">First Name</th>
+                    <th className="verification-table-firsttitle">Middle Name</th>
+                    <th className="verification-table-firsttitle">Last Name</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -578,7 +600,7 @@ export default function ViewUser() {
             {/* Popup for With Resident Match */}
             {showResidentsPopup && (
                 <div className="view-residentuser-confirmation-popup-overlay">
-                    <div className="resident-table-popup">
+                    <div className="resident-table-popup" ref={residentPopupRef}>
     
                         <h2>
                             Resident Database Verification
@@ -606,9 +628,9 @@ export default function ViewUser() {
                             <table className="resident-table">
                             <thead>
                                 <tr>
-                                <th>First Name</th>
-                                <th>Middle Name</th>
-                                <th>Last Name</th>
+                                <th className="verification-table-firsttitle">First Name</th>
+                                <th className="verification-table-firsttitle">Middle Name</th>
+                                <th className="verification-table-firsttitle">Last Name</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -805,13 +827,6 @@ export default function ViewUser() {
 
                             </div>
 
-                            <button
-                                onClick={() => setShowResidentsPopup(false)}
-                                className="viewadmin-action-cancel"
-                            >
-                                Cancel
-                            </button>
-
                         </div>
                     </div>
                 </div>
@@ -819,7 +834,7 @@ export default function ViewUser() {
 
   
             {showAcceptPopup && (
-                        <div className="view-residentuser-confirmation-popup-overlay">
+                        <div className="view-residentuser-confirmation-popup-overlay-yesno">
                             <div className="view-residentuser-confirmation-popup">
                                 <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to accept this user?</p>
