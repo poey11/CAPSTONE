@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { getDownloadURL, ref } from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
-import { doc, updateDoc } from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { getLocalDateString } from "@/app/helpers/helpers";
 import { Timestamp } from "firebase-admin/firestore";
 
@@ -21,7 +21,8 @@ interface EmergencyDetails {
   }
   
   interface OnlineRequest {
-    accountId: string;
+    accID: string;
+    requestId: string;
     requestor: string;
     docType: string;
     status: string;
@@ -89,7 +90,8 @@ const ViewOnlineRequest = () => {
     
    
     useEffect(() => {
-     setStatus(requestData?.status?.toLowerCase().replace(" ", "-") || "");
+    
+     setStatus(requestData?.status || "");
    }, [requestData]);
   
     const handleDownloadUrl = async (data: OnlineRequest): Promise<OnlineRequest> => {
@@ -150,7 +152,7 @@ const ViewOnlineRequest = () => {
     
     if(loading) return <p>......</p>
     const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setStatus(e.target.value.toLowerCase().replace(" ", "-"));
+        setStatus(e.target.value);
     };
 
     const requestField = [
@@ -228,6 +230,17 @@ const ViewOnlineRequest = () => {
                 ...(status === "Pick-up" && { statusPriority: 2 }),
                 ...(status === "Completed" && { statusPriority: 3 }),
             }
+             const notificationRef = doc(collection(db, "Notifications"));
+                  await setDoc(notificationRef, {
+                    residentID: requestData?.accID, // reportID == user id
+                    requestID: requestData?.requestId,
+                    message: `Your Document Request (${requestData?.requestId}) has been updated to "${status}".`,
+                    timestamp: new Date(),
+                    transactionType: "Online Request",
+                    isRead: false,
+                  });
+
+
             await updateDoc(docRef, updatedData).then(() => {
                 alert("Status Updated");
             });
@@ -261,7 +274,6 @@ const ViewOnlineRequest = () => {
       return n + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
     }
 
-    
     
     const handlePrint = async() => {
         if(!requestData) return
@@ -305,7 +317,7 @@ const ViewOnlineRequest = () => {
 
     }
 
-
+    console.log(`${status.charAt(0).toLowerCase()} ${status.slice(1)}`);
     return (
         <main className="viewonlinereq-main-container">
 
@@ -315,24 +327,33 @@ const ViewOnlineRequest = () => {
             {(userPosition === "Assistant Secretary" || userPosition === "Admin Staff")&& (<>
                 <div className="viewonlinereq-actions-content">
                     <div className="viewonlinereq-actions-content-section1">
-                        <button type="button" className="actions-button-reject" onClick ={handlerejection}>Reject</button>
-                        <button type="button" className="actions-button" onClick={handlePrint}>Print</button>
+                        {(requestData?.status !== "Completed" && requestData?.status !== "Rejected")&& (
+                            <>
+                                <button type="button" className="actions-button-reject" onClick ={handlerejection} >Reject</button>
+                                <button type="button" className="actions-button" onClick={handlePrint}>Print</button>
+                        
+                            </>
+                        )}
                         {requestData?.appointmentDate && (<>
                             <button type="button" className="actions-button" onClick ={handleviewappointmentdetails}>View Appointment Details</button>
                         </>)}
 
                         <select
                             id="status"
-                            className={`status-dropdown-viewonlinereq ${status}`}
+                            className={`status-dropdown-viewonlinereq ${status ? status[0].toLowerCase() + status.slice(1):""}`}
                             name="status"
                             value={status}
                             onChange={handleStatusChange}
+                            disabled={requestData?.status === "Completed" || requestData?.status === "Rejected"} // Disable if already completed or rejected
                         >
-                            <option value="pending">Pending</option>
-                            <option value="pick-up">Pick-up</option>
-                            <option value="completed">Completed</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Pick-up">Pick-up</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Rejected" disabled>Rejected</option>
                         </select>
-                        <button type="button" className="status-dropdown-viewonlinereq completed" onClick={handleSave}>Save</button> {/* to update the status*/}
+                        {(requestData?.status !== "Completed" && requestData?.status !== "Rejected")&& (
+                            <button type="button" className="status-dropdown-viewonlinereq completed" onClick={handleSave}>Save</button> 
+                        )}
                     </div>
 
                     <div className="viewonlinereq-actions-content-section2">
