@@ -8,6 +8,9 @@ import { doc, getDoc } from "firebase/firestore";
 
 
 interface VoterFormData {
+  firstName: string;
+  middleName: string;
+  lastName: string;
   voterNumber: string;
   fullName: string;
   homeAddress: string;
@@ -23,6 +26,9 @@ export default function ViewVoter() {
 
 
   const [formData, setFormData] = useState<VoterFormData>({
+    firstName:  "",
+    middleName: "",
+    lastName: "",
     voterNumber: "",
     fullName: "",
     homeAddress: "",
@@ -43,6 +49,9 @@ export default function ViewVoter() {
 
         if (docSnap.exists()) {
           const data = {
+            firstName: docSnap.data().firstName || "",
+            middleName: docSnap.data().middleName || "",
+            lastName: docSnap.data().lastName || "",
             voterNumber: docSnap.data().voterNumber || "",
             fullName: docSnap.data().fullName || "",
             homeAddress: docSnap.data().homeAddress || "",
@@ -64,7 +73,7 @@ export default function ViewVoter() {
   }, [voterId]);
 
 
-  const [activeSection, setActiveSection] = useState("basic");
+  const [activeSection, setActiveSection] = useState("details");
 
 
   const handleBack = () => {
@@ -121,14 +130,14 @@ export default function ViewVoter() {
           </div>
               
           <div className="view-resident-info-toggle-wrapper">
-            {["basic"].map((section) => (
+            {["details"].map((section) => (
               <button
                 key={section}
                 type="button"
                 className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
                 onClick={() => setActiveSection(section)}
               >
-                {section === "basic" && "Basic Info"}
+                {section === "details" && "Details"}
                
               </button>
             ))}
@@ -177,30 +186,61 @@ export default function ViewVoter() {
                     <div className="view-resident-info-container-scrollable">
                           
                           <div className="view-resident-info-main-content">
-                          {activeSection === "basic" && (
+                          {activeSection === "details" && (
                             <>
 
-                            <div className="voters-details-container-center ">
+                           
+                           <div className="resident-details-container-left-side">
 
-                                <div className="view-resident-fields-section">
+                                  <div className="view-resident-fields-section">
                                   <p>Voter Number</p>
                                   <input type="text" name="voterNumber" value={formData.voterNumber} 
                                   className="view-resident-input-field" readOnly />
                                 </div>
 
-                                <div className="view-resident-fields-section">
-                                  <p>Precint Number</p>
-                                  <input type="text" name="precintNumber" value={formData.precinctNumber} 
-                                  className="view-resident-input-field" readOnly />
-                                </div>
+                                  <div className="view-resident-fields-section">
+                                    <p>Last Name</p>
+                                    <input type="text" name="last_name" value={formData.lastName} 
+                                    className="view-resident-input-field" readOnly />
+                                  </div>
 
+                                  <div className="view-resident-fields-section">
+                                    <p>Precint Number</p>
+                                    <input type="text" name="precintNumber" value={formData.precinctNumber} 
+                                    className="view-resident-input-field" readOnly />
+                                  </div>
+
+                           </div>
+
+
+                           <div className="resident-details-container-right-side">
                                 <div className="view-resident-fields-section">
+                                    <p>First Name</p>
+                                    <input type="text" name="first_name" value={formData.firstName} 
+                                    className="view-resident-input-field" readOnly />
+                                  </div>
+
+                                  <div className="view-resident-fields-section">
+                                    <p>Middle Name</p>
+                                    <input type="text" name="middle_name" value={formData.middleName} 
+                                    className="view-resident-input-field" readOnly />
+                                  </div>
+
+                                  <div className="view-resident-fields-section">
                                   <p>Home Address</p>
                                   <input type="text" name="homeAddress" value={formData.homeAddress} 
                                   className="view-resident-input-field" readOnly />
                                 </div>
 
-                            </div>
+                           </div>
+
+                                
+
+                        
+
+                               
+
+                           
 
                             
 
