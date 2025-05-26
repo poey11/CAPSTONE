@@ -243,6 +243,9 @@ export default function EditBarangayAccount() {
         }
     };
 
+    const [activeSection, setActiveSection] = useState("account details");
+
+
     
 
     return (
@@ -263,14 +266,14 @@ export default function EditBarangayAccount() {
             </div>
               */}
 
-            <div className="editbrgyacc-main-content">
-                <div className="editbrgyacc-main-section1">
-                    <div className="editbrgyacc-main-section1-left">
+            <div className="editbrgyuser-main-content">
+                <div className="editbrgyuser-main-section1">
+                    <div className="editbrgyuser-main-section1-left">
                         <button onClick={handleBack}>
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
+                        <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
-                        <h1>Edit Barangay User</h1>
+                        <h1> Edit Barangay User </h1>
                     </div>
 
                     <div className="action-btn-section">
@@ -294,312 +297,233 @@ export default function EditBarangayAccount() {
                         )}
                     </div>
                 </div>
+                
+                <div className="add-resident-bottom-section">
+                    <nav className="editbrgyuser-info-toggle-wrapper">
+                    {["account details", "password details"].map((section) => (
+                        <button
+                        key={section}
+                        type="button"
+                        className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                        onClick={() => setActiveSection(section)}
+                        >
+                        {section === "account details" && "Account Details"}
+                        {section === "password details" && "Password Details"}
+                        </button>
+                    ))}
+                    </nav>
 
-                <hr/>
-
-                <div className="editbrgyacc-main-fields-container">
-
-                    <div className="account-details-section">
-
-                        <h1>Account Details</h1>
-                        <hr/>
-
-                        <div className="editbrgyacc-main-fields-container-section1">
-                            <div className="editbrgyacc-section-left">
-                                <div className="editbrgyacc-fields-container">
-                                    <div className="editbrgyacc-fields-section">
-                                        <p>User ID</p>
-                                        <input
-                                            type="number"
-                                            className="editbrgyacc-input-field"
-                                            placeholder="User ID"
-                                            value={formData.userid}
-                                            disabled
-                                            name="userID"
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-
-                                    <div className="editbrgyacc-fields-section">
-                                        <p>Official First Name</p>
-                                        <input
-                                            type="text"
-                                            className="editbrgyacc-input-field"
-                                            placeholder="Official First Name"
-                                            name="firstName"
-                                            value={formData.firstName}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-
-                                    <div className="editbrgyacc-fields-section">
-                                        <p>Official Middle Name</p>
-                                        <input
-                                            type="text"
-                                            className="editbrgyacc-input-field"
-                                            placeholder="Official First Name"
-                                            name="middleName"
-                                            value={formData.middleName}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-
-                                    <div className="editbrgyacc-fields-section">
-                                        <p>Official Last Name</p>
-                                        <input
-                                            type="text"
-                                            className="editbrgyacc-input-field"
-                                            placeholder="Official Last Name"
-                                            name="lastName"
-                                            value={formData.lastName}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="editbrgyacc-section-right">
-                                <div className="editbrgyacc-fields-container">
-
-                                    <div className="editbrgyacc-fields-section">
-                                        <p>Position</p>
-
-                                        <select
-                                            name="position"
-                                            className="editbrgyacc-input-field-dropdown"
-                                            required
-                                            value={formData.position}
-                                            onChange={handleChange}
-                                        >
-                                            
-                                            <option value="" disabled>Select a Position</option>
-                                            <option value="Punong Barangay">Punong Barangay</option>
-                                            <option value="Secretary">Secretary</option>
-                                            <option value="Assistant Secretary">Asst Secretary</option>
-                                            <option value="Admin Staff">Admin Staff</option>
-                                            <option value="LF Staff">LF Staff</option>
-                                        </select>
-                                    </div>
-
-                                    
-
-                                    {formData.position === "LF Staff" && (
-                                        <div className="editbrgyacc-fields-section">
-                                            <p>Department:</p>
-
-                                            <select 
-                                                name="department" 
-                                                value={formData.department} 
+                    <div className="editbrgyuser-bottom-section-scroll">
+                        {activeSection === "account details" && (
+                            <>
+                                <div className="editbrgyuser-section-2-full-top">
+                                    <div className="editbrgyuser-section-2-left-side">
+                                        <div className="fields-section">
+                                            <p>User ID</p>
+                                            <input
+                                                type="number"
+                                                className="editbrgyuser-input-field-disabled"
+                                                placeholder="User ID"
+                                                value={formData.userid}
+                                                disabled
+                                                name="userID"
                                                 onChange={handleChange}
-                                                className="editbrgyacc-input-field-dropdown"
+                                            />
+                                        </div>
+
+                                        <div className="fields-section">
+                                            <p>Official First Name</p>
+                                            <input
+                                                type="text"
+                                                className="editbrgyuser-input-field"
+                                                placeholder="Official First Name"
+                                                name="firstName"
+                                                value={formData.firstName}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+
+                                        <div className="fields-section">
+                                            <p>Official Middle Name</p>
+                                            <input
+                                                type="text"
+                                                className="editbrgyuser-input-field"
+                                                placeholder="Official First Name"
+                                                name="middleName"
+                                                value={formData.middleName}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+
+                                        <div className="fields-section">
+                                            <p>Birthday</p>
+                                            <input
+                                                type="date"
+                                                className="editbrgyuser-input-field"
+                                                placeholder="Birthday"
+                                                name="birthDate"
+                                                value={formData.birthDate}
+                                                onChange={handleChange}
+                                                max={new Date().toISOString().split("T")[0]}
+                                            />
+                                        </div>
+
+                                        <div className="fields-section">
+                                            <p>Position</p>
+
+                                            <select
+                                                name="position"
+                                                className="editbrgyuser-input-field"
                                                 required
+                                                value={formData.position}
+                                                onChange={handleChange}
                                             >
-                                                <option value="">Select a Department</option>
-                                                <option value="GAD">GAD</option>
-                                                <option value="Lupon">Lupon</option>
-                                                <option value="VAWC">VAWC</option>
-                                                <option value="BCPC">BCPC</option>
+                                                
+                                                <option value="" disabled>Select a Position</option>
+                                                <option value="Punong Barangay">Punong Barangay</option>
+                                                <option value="Secretary">Secretary</option>
+                                                <option value="Assistant Secretary">Asst Secretary</option>
+                                                <option value="Admin Staff">Admin Staff</option>
+                                                <option value="LF Staff">LF Staff</option>
                                             </select>
                                         </div>
-                                    )}
-                                    
-                                    <div className="editbrgyacc-fields-section">
-                                        <p>Birthday</p>
-                                        <input
-                                            type="date"
-                                            className="editbrgyacc-input-field"
-                                            placeholder="Birthday"
-                                            name="birthDate"
-                                            value={formData.birthDate}
-                                            onChange={handleChange}
-                                            max={new Date().toISOString().split("T")[0]}
-                                        />
                                     </div>
 
-                                    <div className="editbrgyacc-fields-section">
-                                        <p>Sex</p>
-                                        <select
-                                            name="gender"
-                                            className="editbrgyacc-input-field-dropdown"
-                                            required
-                                            value={formData.sex}
-                                            onChange={handleChange}
-                                        >
-                                            <option value="" disabled>Select gender</option>
-                                            <option value="Male">Male</option>
-                                            <option value="Female">Female</option>
-                                        </select>
-                                    </div> 
+                                    <div className="editbrgyuser-section-2-left-side">
+                                        <div className="fields-section">
+                                            <p>Official Last Name</p>
+                                            <input
+                                                type="text"
+                                                className="editbrgyuser-input-field"
+                                                placeholder="Official Last Name"
+                                                name="lastName"
+                                                value={formData.lastName}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
 
-                                    <div className="editbrgyacc-fields-section">
-                                        <p>Contact Number</p>
-                                        <input
-                                            type="tel"
-                                            id="phone"
-                                            name="phone"
-                                            className="editbrgyacc-input-field"
-                                            placeholder="Enter Contact Number"
-                                            maxLength={11}
-                                            pattern="^[0-9]{11}$" 
-                                            title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX "
-                                            value={formData.phone}
-                                            onChange={(e) => {
-                                                const input = e.target.value;
-                                                // Only allow digits and limit to 11 characters
-                                                if (/^\d{0,11}$/.test(input)) {
-                                                  handleChange(e);
-                                                }
-                                            }}
-                                        />
-                                    </div>  
-                            
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="editbrgyacc-main-fields-container-section2">
-                            <div className="editbrgyacc-fields-container">
-                                <div className="editbrgyacc-fields-section">
-                                    <p>Address</p>
-                                    <input
-                                        type="text"
-                                        className="editbrgyacc-input-field"
-                                        placeholder="Address"
-                                        name="address"
-                                        value={formData.address}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-
-                            </div>
-                        </div>
-
-                    </div>
-                    
-
-
-                    <div className="record-details-section">
-
-                        <div className="record-details">
-                            <div className="record-details-topsection">
-                                <button type="button" 
-                                        className={showRecordDetails ? "record-details-minus-button" : "record-details-plus-button"} 
-                                        onClick={handleToggleClickRecordDetails}>
-                                </button>
-                                <h1>Record Details</h1>
-                            </div>
-
-                            <hr/>
-
-                            {showRecordDetails && (
-                            <>
-                                <div className="editbrgyacc-main-fields-container-section1">
-                                    <div className="editbrgyacc-section-left">
                                         <div className="editbrgyacc-fields-container">
-                                            <div className="editbrgyacc-fields-section">
-                                                <p>Created By</p>
+                                            <div className="fields-section">
+                                                <p>Address</p>
                                                 <input
                                                     type="text"
-                                                    className="editbrgyacc-input-field"
-                                                    placeholder="Created By"
-                                                    value={formData.createdBy}
-                                                    disabled
-                                                    name="createdBy"
+                                                    className="editbrgyuser-input-field"
+                                                    placeholder="Address"
+                                                    name="address"
+                                                    value={formData.address}
                                                     onChange={handleChange}
                                                 />
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="editbrgyacc-section-right">
-                                        <div className="editbrgyacc-fields-container">
-                                            <div className="editbrgyacc-fields-section">
-                                                <p>Created At</p>
-                                                <input
-                                                    type="number"
-                                                    className="editbrgyacc-input-field"
-                                                    placeholder="Created At"
-                                                    value={formData.createdAt}
-                                                    disabled
-                                                    name="createdAt"
+
+                                        <div className="fields-section">
+                                            <p>Sex</p>
+                                            <select
+                                                name="gender"
+                                                className="editbrgyuser-input-field"
+                                                required
+                                                value={formData.sex}
+                                                onChange={handleChange}
+                                            >
+                                                <option value="" disabled>Select gender</option>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                            </select>
+                                        </div> 
+
+                                        <div className="fields-section">
+                                            <p>Contact Number</p>
+                                            <input
+                                                type="tel"
+                                                id="phone"
+                                                name="phone"
+                                                className="editbrgyuser-input-field"
+                                                placeholder="Enter Contact Number"
+                                                maxLength={11}
+                                                pattern="^[0-9]{11}$" 
+                                                title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX "
+                                                value={formData.phone}
+                                                onChange={(e) => {
+                                                    const input = e.target.value;
+                                                    // Only allow digits and limit to 11 characters
+                                                    if (/^\d{0,11}$/.test(input)) {
+                                                    handleChange(e);
+                                                    }
+                                                }}
+                                            />
+                                        </div>  
+
+                                        {formData.position === "LF Staff" && (
+                                            <div className="fields-section">
+                                                <p>Department:</p>
+
+                                                <select 
+                                                    name="department" 
+                                                    value={formData.department} 
                                                     onChange={handleChange}
-                                                />
+                                                    className="editbrgyuser-input-field"
+                                                    required
+                                                >
+                                                    <option value="">Select a Department</option>
+                                                    <option value="GAD">GAD</option>
+                                                    <option value="Lupon">Lupon</option>
+                                                    <option value="VAWC">VAWC</option>
+                                                    <option value="BCPC">BCPC</option>
+                                                </select>
                                             </div>
-                                        </div>
+                                        )}
+
                                     </div>
                                 </div>
                             </>
+                        )}
 
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="password-details-section">
-
-                        <div className="password-details">
-
-                            <div className="password-details-topsection">
-                                <button type="button" 
-                                        className={showPasswordDetails ? "record-details-minus-button" : "record-details-plus-button"} 
-                                        onClick={handleToggleClickPasswordDetails} 
-                                        >
-                                        
-                                </button>
-
-                                <h1>Password Details</h1>
-                            </div>
-
-                            <hr/>
-
-
-                            {showPasswordDetails && (
-                                <>
-                                    <div className="editbrgyacc-main-fields-container-section2">
-                                            <div className="editbrgyacc-fields-container">
-                                                <div className="editbrgyacc-fields-section">
-                                                    <p>New Password</p>
-                                                    <div className="relative">
-                                                        <input
-                                                            type={showNewPassword ? "text" : "password"}
-                                                            className="editbrgyacc-input-field"
-                                                            onChange={handleChange}
-                                                            name="password"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            className="toggle-password-btn"
-                                                            onClick={() => setShowNewPassword(!showNewPassword)}
-                                                        >
-                                                            {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                <div className="editbrgyacc-fields-section">
-                                                    <p>Confirm Password</p>
-                                                    <div className="relative">
-                                                        <input
-                                                            type={showConfirmPassword ? "text" : "password"}
-                                                            className="editbrgyacc-input-field"
-                                                            onChange={handleChange}
-                                                            name="confirmPassword"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            className="toggle-password-btn"
-                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                        >
-                                                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
+                        {activeSection === "password details" && (
+                            <>
+                                <div className="editbrgyuser-section-2-full-top">
+                                    <div className="editbrgyuser-section-2-left-side">
+                                        <div className="password-input-wrapper">
+                                            <p>New Password</p>
+                                            <input
+                                                type={showNewPassword ? "text" : "password"}
+                                                className="editbrgyuser-input-field-pass"
+                                                onChange={handleChange}
+                                                name="password"
+                                            />
+                                            <button
+                                                type="button"
+                                                className="editbrgyuser-toggle-password-btn"
+                                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                            >
+                                                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                            </button>
+                                        </div>
                                     </div>
 
-                                </>
+                                    <div className="editbrgyuser-section-2-left-side">
+                                        <div className="password-input-wrapper">
+                                            <p>Confirm Password</p>
+                                            <input
+                                                type={showConfirmPassword ? "text" : "password"}
+                                                className="editbrgyuser-input-field-pass"
+                                                onChange={handleChange}
+                                                name="confirmPassword"
+                                            />
+                                            <button
+                                                type="button"
+                                                className="editbrgyuser-toggle-password-btn"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            >
+                                                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                            </button>
+                                        </div> 
+                                    </div>
+                                </div>
+                            </>
+                        )}          
+                    </div>       
 
-                            )}
-                        </div>
-                    </div>
-                </div>
+                </div>       
 
             </div>
 

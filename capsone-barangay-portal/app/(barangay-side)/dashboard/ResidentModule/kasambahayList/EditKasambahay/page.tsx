@@ -472,7 +472,7 @@ export default function EditKasambahay() {
         </div>
 
         <div className="add-resident-bottom-section">
-          <nav className="info-toggle-wrapper">
+          <nav className="kasambahay-info-toggle-wrapper">
             {["basic", "full", "others"].map((section) => (
               <button
                 key={section}

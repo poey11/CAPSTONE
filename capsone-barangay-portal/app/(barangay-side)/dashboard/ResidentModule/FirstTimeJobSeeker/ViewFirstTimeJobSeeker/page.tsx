@@ -205,7 +205,10 @@ export default function ViewFirstTimeJobSeeker() {
                           </div>
 
                         {activeSection === "history" && (
+                          
                            <>
+
+                    <div className="voters-details-container-center ">
                                  <div className="view-resident-fields-section">
                           <p>Created By</p>
                           <input
@@ -238,7 +241,7 @@ export default function ViewFirstTimeJobSeeker() {
                             readOnly
                           />
                         </div>
-
+                          </div>
 
                             </>
                               
