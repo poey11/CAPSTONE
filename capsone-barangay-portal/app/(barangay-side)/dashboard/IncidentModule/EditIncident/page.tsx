@@ -22,7 +22,6 @@ export default function EditLuponIncident() {
 
 
 
-
     const [loading , setLoading] = useState(true);
     const router = useRouter();
     const searchParam = useSearchParams();
@@ -186,6 +185,10 @@ export default function EditLuponIncident() {
           status: mergeData(reportData.status, toUpdate.status),
           nosofFemaleChildren: mergeData(reportData.nosofFemaleChildren, toUpdate.nosofFemaleChildren),
           nosofMaleChildren: mergeData(reportData.nosofMaleChildren, toUpdate.nosofMaleChildren),
+
+          isMediation: toUpdate.isMediation ?? false,
+          isConciliation: toUpdate.isConciliation ?? false,
+          isArbitration: toUpdate.isArbitration ?? false,
         });
        
         await updateDoc(docRef, cleanedData);
@@ -766,17 +769,92 @@ const confirmSubmit = async () => {
 
 
 
-      {showSubmitPopup && (
-                        <div className="confirmation-popup-overlay-add">
-                            <div className="confirmation-popup-add">
-                                <p>Are you sure you want to submit?</p>
-                                <div className="yesno-container-add">
-                                    <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
-                                    <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
-                                </div> 
-                            </div>
-                        </div>
-        )}
+{showSubmitPopup && (
+  <div className="confirmation-popup-overlay-add">
+    <div className="confirmation-popup-add">
+
+      {toUpdate.status === "settled" ? (
+        <>
+          <p>How was the case settled?</p>
+          <div className="settlement-options">
+            <label>
+              <input
+                type="radio"
+                name="settlementMethod"
+                checked={toUpdate.isMediation === true}
+                onChange={() => setToUpdate((prev: any) => ({
+                  ...prev,
+                  isMediation: true,
+                  isConciliation: false,
+                  isArbitration: false,
+                }))}
+              />
+              Mediation
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="settlementMethod"
+                checked={toUpdate.isConciliation === true}
+                onChange={() => setToUpdate((prev: any) => ({
+                  ...prev,
+                  isMediation: false,
+                  isConciliation: true,
+                  isArbitration: false,
+                }))}
+              />
+              Conciliation
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="settlementMethod"
+                checked={toUpdate.isArbitration === true}
+                onChange={() => setToUpdate((prev: any) => ({
+                  ...prev,
+                  isMediation: false,
+                  isConciliation: false,
+                  isArbitration: true,
+                }))}
+              />
+              Arbitration
+            </label>
+          </div>
+
+          <div className="yesno-container-add">
+            <button
+              onClick={() => setShowSubmitPopup(false)}
+              className="no-button-add"
+            >
+              Cancel
+            </button>
+            <button onClick={confirmSubmit} className="yes-button-add">
+              Submit
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p>Are you sure you want to submit?</p>
+          <div className="yesno-container-add">
+            <button
+              onClick={() => setShowSubmitPopup(false)}
+              className="no-button-add"
+            >
+              No
+            </button>
+            <button onClick={confirmSubmit} className="yes-button-add">
+              Yes
+            </button>
+          </div>
+        </>
+      )}
+
+    </div>
+  </div>
+)}
+
+
         {showPopup && (
                 <div className={`popup-overlay-add show`}>
                     <div className="popup-add">
