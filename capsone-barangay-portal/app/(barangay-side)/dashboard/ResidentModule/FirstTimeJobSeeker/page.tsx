@@ -126,19 +126,6 @@ export default function JobSeekerListModule() {
     return `${month}/${day}/${year}`;
   };
 
-  /*
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this job seeker?")) {
-      try {
-        await deleteDoc(doc(db, "JobSeekerList", id));
-        setJobSeekers((prev) => prev.filter(seeker => seeker.id !== id));
-        alert("Job seeker deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting job seeker:", error);
-        alert("Failed to delete job seeker.");
-      }
-    }
-  };*/
 
   const handleAddResidentClick = () => {
   
@@ -295,7 +282,7 @@ export default function JobSeekerListModule() {
     </tr>
   </thead>
   <tbody>
-    {filteredJobSeekers.map((seeker) => {
+    {currentResidents.map((seeker) => {
       const fullName = `${seeker.lastName || ""}, ${seeker.firstName || ""} ${seeker.middleName || ""}`.trim();
       return (
         <tr

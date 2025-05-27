@@ -1,5 +1,4 @@
 "use client"
-
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -223,9 +222,6 @@ export default function SettingsPage() {
 
     return (
         <main className="modifyaccsettings-main-container-settings">
-            <div className="section-1-settings">
-                <h1>Account Settings</h1>
-            </div>
 
             <div className="modifyaccsettings-main-section-settings">
 
@@ -244,7 +240,7 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-                <hr />
+             
 
                 <form  id ="settings-form" onSubmit={handleSubmit}>
 

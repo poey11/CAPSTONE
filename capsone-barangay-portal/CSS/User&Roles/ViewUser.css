@@ -2,13 +2,13 @@
 
     width: 100%;
     height: 100vh;
-    background-color: #f9f9f9;
+    background-color: #F0F2F8; 
     margin-left: 3rem;
     overflow-y: auto; 
     padding-left:30px;
   padding-right:30px;
   padding-bottom:30px;
-  padding-top: 150px;
+  padding-top: 11.2%;
    
 }
 
@@ -219,9 +219,24 @@ margin-top: 20px;
   height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 9999; 
-  background: rgba(0, 0, 0, 0.4); /* Slight dark overlay */
+  justify-content: flex-end; 
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.4);
+  padding-right: 200px; 
+
+}
+
+.view-residentuser-confirmation-popup-overlay-yesno {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .view-residentuser-confirmation-popup {
@@ -229,7 +244,7 @@ margin-top: 20px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 200px;
+  height: 220px;
   width: 400px;
   background-color: #f9f9f9;
   border-radius: 20px;
@@ -240,7 +255,6 @@ margin-top: 20px;
   font-size: 18px;
   font-weight: lighter;
   position: fixed;
-  /*left: 43%; /* Adjust the value */
 }
 
 .view-residentuser-confirmation-popup p{
@@ -319,13 +333,15 @@ margin-top: 20px;
 .resident-table-popup h2 {
   margin-top: 1rem;
   font-size: 1.80rem;
+  font-weight: bolder;
   text-align: center;
   font-weight: bold;
+  color: #214666;
 }
 
 .resident-table-popup h1 {
   margin-bottom: 30px;
-  font-size: 1.25rem;
+  font-size: 1.0rem;
   text-align: center;
   color: #dd3327;
 }
@@ -370,9 +386,19 @@ margin-top: 20px;
   border-left: 1px solid #e2e2e2;
 }
 
+/*
 .resident-table th {
-  background-color: #f6f5f5;
+
+  background-color: #214666;
   font-weight: 600;
+  color: #ffffff;
+}*/
+
+.resident-table th:not(.verification-table-title, .verification-table-firsttitle) {
+  background-color: #f0f2f8;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
 }
 
 /* Row hover effect */
@@ -454,6 +480,19 @@ margin-top: 20px;
   gap: 20px;
 }
 
+.action-btn-section-verify{
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.action-btn-section-verify-section{
+  width: 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .viewadmin-action-accept,
 .viewadmin-action-reject,
 .viewadmin-action-cancel {   
@@ -492,10 +531,23 @@ color: white;
 }
 
 .verification-table-title {
-  font-size: 1.2rem;
+  /*font-size: 1.2rem;
   font-weight: bold;
   padding: 10px;
+*/
+  background-color: #214666;
+  color: #ffffff;
+  font-size: 1.2rem;
+  text-align: center;
 }
+
+.verification-table-firsttitle {
+  background-color: #214666;
+  color: #ffffff;
+  font-size: 1rem;
+  text-align: center;
+}
+
 
 .resident-table-container thead{
 
@@ -526,7 +578,7 @@ VIEW BARANGAY USER
 .view-user-main-container{
   width: 100%;
   height: 100vh;
-  background-color: #f9f9f9;
+  background-color: #f0f2f8;
   /*padding-top: 150px;*/
   padding-top: 11.2%;
   margin-left: 3rem;
@@ -624,6 +676,15 @@ VIEW BARANGAY USER
   align-items: center;
 }
 
+.view-pendinguser-info-toggle-wrapper {
+  display: flex;
+  justify-content: center; 
+  gap: 30px;
+  margin-bottom: 20px;
+  width: 70%;
+  align-items: center;
+}
+
 .view-user-backbutton-container{
   width: 30%;
   display: flex;
@@ -660,6 +721,13 @@ VIEW BARANGAY USER
 .view-user-header-body-bottom-section{
   display: flex;
   flex-direction: row;
+}
+
+.view-pendinguser-header-body-bottom-section{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+
 }
 
 
@@ -725,12 +793,29 @@ VIEW BARANGAY USER
   padding-bottom: 20px;
 }
 
+.view-pendinguser-info-main-container{
+  width: 80%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 20px;
+}
+
 .view-user-info-container-scrollable{
   width: 100%;
   height: 325px;
   border: 1px solid rgba(44, 62, 80, 0.7);
   border-radius: 8px;
   margin-right: 45px;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+.view-pendinguser-info-container-scrollable{
+  width: 100%;
+  height: 325px;
+  border: 1px solid rgba(44, 62, 80, 0.7);
+  border-radius: 8px;
   padding: 15px;
   overflow-y: auto;
 }
@@ -782,6 +867,24 @@ VIEW BARANGAY USER
   margin-left: 20px;
 }
 
+.view-pendinguser-fields-section{
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 13px;
+}
+
+.view-pendinguser-fields-section p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 30px;
+}
+
 .view-user-input-field {
   padding: 8px;
   width: 85%;
@@ -790,6 +893,12 @@ VIEW BARANGAY USER
   border-radius: 5px;
   color: #000000;
   text-align: left;
+}
+
+.view-user-input-field:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
 
 
@@ -801,5 +910,3 @@ VIEW BARANGAY USER
   align-items: center;
 
 }
-
-
