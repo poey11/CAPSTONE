@@ -3,12 +3,14 @@ import "@/CSS/IncidentModule/AddNewIncident.css";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ref, uploadBytes } from "firebase/storage";
-import { addDoc, collection} from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
 import {getAllSpecificDocument} from "@/app/helpers/firestorehelper";
 import {isPastDate,isToday,isPastOrCurrentTime, getLocalDateString, isValidPhilippineMobileNumber, getLocalTimeString} from "@/app/helpers/helpers";
 import { useSession } from "next-auth/react";
 import {customAlphabet} from "nanoid";
+import { useRef } from "react";
+
 
 
  interface userProps{
@@ -19,6 +21,8 @@ import {customAlphabet} from "nanoid";
   civilStatus: string;
   address: string;
   contact: string;
+  residentId: string,
+
 }
 
 
@@ -45,6 +49,8 @@ export default function AddIncident() {
     contact: "",
     civilStatus: "",
     address: "",
+    residentId: "",
+
   });
   const [respondent, setRespondent] = useState<userProps>({
     fname: "",
@@ -54,6 +60,8 @@ export default function AddIncident() {
     contact: "",
     civilStatus: "",
     address: "",
+    residentId: "",
+
   });
   const [reportInfo, setReportInfo] = useState<any>({
     caseNumber: "",
@@ -83,7 +91,106 @@ export default function AddIncident() {
       lname: user.fullName.split(" ")[1],
     })
   },[user]);
- 
+
+  const [showComplainantResidentsPopup, setShowComplainantResidentsPopup] = useState(false);
+  const [showRespondentResidentsPopup, setShowRespondentResidentsPopup] = useState(false);
+  const [residents, setResidents] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const employerPopupRef = useRef<HTMLDivElement>(null);
+
+  const [isComplainantResidentSelected, setIsComplainantResidentSelected] = useState(false);
+  const [isRespondentResidentSelected, setIsRespondentResidentSelected] = useState(false);
+
+
+  // for fetching residents
+  useEffect(() => {
+    const fetchResidents = async () => {
+      try {
+        const residentsCollection = collection(db, "Residents");
+            const residentsSnapshot = await getDocs(residentsCollection);
+            const residentsList = residentsSnapshot.docs.map(doc => {
+                const data = doc.data() as {
+                    residentNumber: string;
+                    firstName: string;
+                    middleName: string;
+                    lastName: string;
+                    address: string;
+                    sex: string;
+                    dateOfBirth: string;
+                    age: number;
+                    identificationFileURL: string
+                };
+    
+                return {
+                    id: doc.id,
+                    ...data
+                };
+            });
+    
+            setResidents(residentsList);
+      } catch (error) {
+        console.error("Error fetching residents:", error);
+      }
+    };
+  
+    fetchResidents();
+  }, []);
+
+    // Show complainant resident popup on input focus
+    const handleComplainantsClick = () => {
+      setShowComplainantResidentsPopup(true);
+    };
+  
+    // Close popup when clicking outside
+    useEffect(() => {
+      const handleClickComplainantOutside = (event: MouseEvent) => {
+        if (
+          employerPopupRef.current &&
+          !employerPopupRef.current.contains(event.target as Node)
+        ) {
+          setShowComplainantResidentsPopup(false);
+        }
+      };
+  
+      document.addEventListener("mousedown", handleClickComplainantOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickComplainantOutside);
+      };
+    }, []);
+
+    const filteredComplainantResidents = residents.filter((resident) =>
+    `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
+  // respondent resident search pop up
+  const handleRespondentsClick = () => {
+    setShowRespondentResidentsPopup(true);
+  };
+
+  // Close popup when clicking outside
+  useEffect(() => {
+    const handleClickRespondentOutside = (event: MouseEvent) => {
+      if (
+        employerPopupRef.current &&
+        !employerPopupRef.current.contains(event.target as Node)
+      ) {
+        setShowRespondentResidentsPopup(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickRespondentOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickRespondentOutside);
+    };
+  }, []);
+
+  const filteredRespondentResidents = residents.filter((resident) =>
+  `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+    .toLowerCase()
+    .includes(searchTerm.toLowerCase())
+);
 
 
   const [reportCollection, setReportCollection] = useState<any[]>([]);
@@ -398,6 +505,7 @@ export default function AddIncident() {
         contact: "",
         civilStatus: "",
         address: "",
+        residentId: "",
       });
       setRespondent({
         fname: "",
@@ -407,6 +515,7 @@ export default function AddIncident() {
         contact: "",
         civilStatus: "",
         address: "",
+        residentId: "",
       });
   }
 
@@ -450,6 +559,36 @@ export default function AddIncident() {
                 <div className="section-2-left-side-add">
 
                     <p >Complainant's Information</p>
+
+                      {/* complainant search pop up */}
+                    <div className="residents-search-section">
+                      <input type="text"  className="select-resident-input-field" placeholder="Select Complainant" onClick={handleComplainantsClick} />
+                    </div>
+
+                      {/* button to clear if the complainant is from residents */}
+                    {isComplainantResidentSelected && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setComplainant({
+                            residentId: '',
+                            fname: '',
+                            lname: '',
+                            sex: '',
+                            age: '',
+                            civilStatus: '',
+                            address: '',
+                            contact: '',
+                          });
+                          setIsComplainantResidentSelected(false);
+                        }}
+                        className="clear-button-add"
+                      >
+                        Clear Complainant
+                      </button>
+                    )}
+
+
                     <p>First Name</p>
 
                     <input 
@@ -461,6 +600,7 @@ export default function AddIncident() {
                     id="complainant"
                     onChange={handleFormChange}
                     required
+                    disabled={isComplainantResidentSelected}
                     />
                   <p>Last Name</p>
 
@@ -473,6 +613,8 @@ export default function AddIncident() {
                     id="complainant"
                     onChange={handleFormChange}
                     required
+                    disabled={isComplainantResidentSelected}
+
                     />
 
                   <p>Sex</p>
@@ -483,6 +625,7 @@ export default function AddIncident() {
                     id="complainant"
                     value={complainant.sex}
                     onChange={handleFormChange}
+                    disabled={isComplainantResidentSelected}
                     >
                     <option value="" disabled>Choose A Sex</option>
                     <option value="Male">Male</option>
@@ -501,6 +644,8 @@ export default function AddIncident() {
                     id="complainant"
                     onChange={handleFormChange}
                     required
+                    disabled={isComplainantResidentSelected}
+
                     />
 
                     <p>Civil Status</p>
@@ -510,6 +655,7 @@ export default function AddIncident() {
                     name="civilStatus"
                     id="complainant"
                     onChange={handleFormChange}
+                    disabled={isComplainantResidentSelected}
                     required>
                       <option value="" disabled>Choose A Civil Status</option>
                       <option value="Single">Single</option>
@@ -519,6 +665,7 @@ export default function AddIncident() {
                       <option value="Divorced">Divorced</option>
                       
                     </select>
+
 
                     <p>Address</p>
 
@@ -531,6 +678,8 @@ export default function AddIncident() {
                     id="complainant"
                     required
                     onChange={handleFormChange}
+                    disabled={isComplainantResidentSelected}
+
                     />
 
                     <p>Contact Information</p>
@@ -544,6 +693,8 @@ export default function AddIncident() {
                     id="complainant"
                     required
                     onChange={handleFormChange}
+                    disabled={isComplainantResidentSelected}
+
                     />
 
                 </div>
@@ -551,6 +702,36 @@ export default function AddIncident() {
                 <div className="section-2-right-side-add">
                   
                 <p >Respondent's Information</p>
+
+                        {/* respondent search pop up */}
+                    <div className="residents-search-section">
+                      <input type="text"  className="select-resident-input-field" placeholder="Select Respondent" onClick={handleRespondentsClick} />
+                    </div>
+
+                      {/* button to clear if the respondent is from residents */}
+                      {isRespondentResidentSelected && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRespondent({
+                            residentId: '',
+                            fname: '',
+                            lname: '',
+                            sex: '',
+                            age: '',
+                            civilStatus: '',
+                            address: '',
+                            contact: '',
+                          });
+                          setIsRespondentResidentSelected(false);
+                        }}
+                        className="clear-button-add"
+                      >
+                        Clear Respondent
+                      </button>
+                    )}
+
+
                     <p>First Name</p>
 
                     <input 
@@ -562,6 +743,8 @@ export default function AddIncident() {
                     id="respondent"  
                     required
                     onChange={handleFormChange}
+                    disabled={isRespondentResidentSelected}
+
                     />
                   <p>Last Name</p>
 
@@ -574,6 +757,8 @@ export default function AddIncident() {
                     id="respondent"
                     required
                     onChange={handleFormChange}
+                    disabled={isRespondentResidentSelected}
+
                     />
 
                   <p>Sex</p>
@@ -584,6 +769,7 @@ export default function AddIncident() {
                     required
                     value={respondent.sex}
                     onChange={handleFormChange}
+                    disabled={isRespondentResidentSelected}
                     >
                     <option value="" disabled>Choose A Sex</option>
                     <option value="Male">Male</option>
@@ -602,6 +788,8 @@ export default function AddIncident() {
                     name="age"
                     required
                     onChange={handleFormChange}
+                    disabled={isRespondentResidentSelected}
+
                     />
 
                     <p>Civil Status</p>
@@ -611,7 +799,9 @@ export default function AddIncident() {
                     name="civilStatus"
                     id="respondent"
                     onChange={handleFormChange}
-                    required>
+                    required
+                    disabled={isRespondentResidentSelected}
+                    >
                       <option value="" disabled>Choose A Civil Status</option>
                       <option value="Single">Single</option>
                       <option value="Married">Married</option>
@@ -632,6 +822,8 @@ export default function AddIncident() {
                     name="address"
                     required
                     onChange={handleFormChange}
+                    disabled={isRespondentResidentSelected}
+
                     />
 
                     <p>Contact Information</p>
@@ -646,6 +838,8 @@ export default function AddIncident() {
                     required
    
                     onChange={handleFormChange}
+                    disabled={isRespondentResidentSelected}
+
                     />
                 
 
@@ -942,6 +1136,155 @@ export default function AddIncident() {
                     </div>
                 </div>
                 )}
+
+
+ {/* for complainant search popup */}
+{showComplainantResidentsPopup && (
+      <div className="kasambahay-employer-popup-overlay">
+        <div className="kasambahay-employer-popup" ref={employerPopupRef}>
+          <h2>Residents List</h2>
+          <h1>* Please select Resident's Name *</h1>
+
+          <input
+            type="text"
+            placeholder="Search Resident's Name"
+            className="employer-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <div className="employers-list">
+            {residents.length === 0 ? (
+              <p>No residents found.</p>
+            ) : (
+              <table className="employers-table">
+                <thead>
+                  <tr>
+                    <th>Resident Number</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Last Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {filteredComplainantResidents.map((resident) => (
+            <tr
+              key={resident.id}
+              className="employers-table-row"
+              onClick={async () => {
+                try {
+                  
+                  setComplainant({
+                    ...complainant,
+                    residentId: resident.id,
+                    lname: resident.lastName || '',
+                    fname: resident.firstName || '',
+                    sex: resident.sex || '',
+                    age: resident.age || '',
+                    civilStatus: resident.civilStatus || '',
+                    address: resident.address || '',
+                    contact: resident.contactNumber || '',
+                  });
+                  setIsComplainantResidentSelected(true);
+                  setShowComplainantResidentsPopup(false);
+                } catch (error) {
+                  setPopupErrorMessage("An error occurred. Please try again.");
+                  setShowErrorPopup(true);
+                  setTimeout(() => {
+                    setShowErrorPopup(false);
+                  }, 3000);
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <td>{resident.residentNumber}</td>
+              <td>{resident.firstName}</td>
+              <td>{resident.middleName}</td>
+              <td>{resident.lastName}</td>
+            </tr>
+          ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+
+ {/* for respondent search popup */}
+      {showRespondentResidentsPopup && (
+      <div className="kasambahay-employer-popup-overlay">
+        <div className="kasambahay-employer-popup" ref={employerPopupRef}>
+          <h2>Residents List</h2>
+          <h1>* Please select Respondent's Name *</h1>
+
+          <input
+            type="text"
+            placeholder="Search Resident's Name"
+            className="employer-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <div className="employers-list">
+            {residents.length === 0 ? (
+              <p>No residents found.</p>
+            ) : (
+              <table className="employers-table">
+                <thead>
+                  <tr>
+                    <th>Resident Number</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Last Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {filteredRespondentResidents.map((resident) => (
+            <tr
+              key={resident.id}
+              className="employers-table-row"
+              onClick={async () => {
+                try {
+                  
+                  setRespondent({
+                    ...respondent,
+                    residentId: resident.id,
+                    lname: resident.lastName || '',
+                    fname: resident.firstName || '',
+                    sex: resident.sex || '',
+                    age: resident.age || '',
+                    civilStatus: resident.civilStatus || '',
+                    address: resident.address || '',
+                    contact: resident.contactNumber || '',
+                  });
+                  setIsRespondentResidentSelected(true);
+                  setShowRespondentResidentsPopup(false);
+                } catch (error) {
+                  setPopupErrorMessage("An error occurred. Please try again.");
+                  setShowErrorPopup(true);
+                  setTimeout(() => {
+                    setShowErrorPopup(false);
+                  }, 3000);
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <td>{resident.residentNumber}</td>
+              <td>{resident.firstName}</td>
+              <td>{resident.middleName}</td>
+              <td>{resident.lastName}</td>
+            </tr>
+          ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+      
+
 
 
     
