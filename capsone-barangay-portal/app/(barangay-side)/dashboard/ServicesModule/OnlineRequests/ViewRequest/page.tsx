@@ -256,8 +256,27 @@ const ViewOnlineRequest = () => {
         }
     }
 
-    const handleSMS = () => {
+    const handleSMS = async() => {
         //window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
+        try{
+          const response = await fetch("/api/clickSendApi", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                  to: requestData?.contact,
+                  message: `Hello Mr/Ms. ${requestData?.fullName}, your document request with ID ${requestData?.requestId} is now ready for pick-up. Please visit the barangay hall to collect your document. Thank you!`,
+              })
+          });
+          if (!response.ok) throw new Error("Failed to send SMS");
+        
+          const data = await response.json();
+          console.log(data);
+        }
+        catch(err) {
+          console.log(err);
+        }  
     };
     
     
@@ -379,7 +398,7 @@ const ViewOnlineRequest = () => {
 
                     <div className="viewonlinereq-actions-content-section2">
                         {status === "pick-up" && (
-                            <button type="button" className="actions-button" onClick={handleSMS}>Send Pick-up Notif</button>
+                            <button type="button" className="actions-button" >Send Pick-up Notif</button>
                         )}
                     </div>
 
