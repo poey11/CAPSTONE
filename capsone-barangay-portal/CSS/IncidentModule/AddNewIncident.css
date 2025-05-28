@@ -751,3 +751,75 @@
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
 
+
+p .required {
+  color: red;
+  margin-left: 5px;
+}
+
+.required-asterisk {
+  color: red;
+position: absolute;
+top: 8px;
+right: 12px;
+font-size: 20px;
+}
+
+
+.error-popup-overlay-add-resident,
+.error-popup-overlay-add-voter,
+.error-popup-overlay-add-kasambahay,
+.error-popup-overlay-add-jobseeker{
+  background: #cc3434;
+  border-left: 10px solid #8a0f0f;
+}
+
+.popup-add-resident,
+.popup-add-voter,
+.popup-add-kasambahay,
+.popup-add-jobseeker{
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 20px;
+}
+
+
+/* for inputs */
+
+.add-resident-input-field {
+  padding: 8px;
+  width: 85%;
+  margin-top: 10px;
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  color: #000000;
+  text-align: left; 
+}
+
+.add-resident-input-field:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+}
+
+.input-error {
+  border: 2px solid red !important;
+  background-color: #ffe5e5 !important;
+  animation: shake 0.3s ease-in-out;
+  transition: background-color 0.3s ease, border 0.3s ease;
+  box-shadow: 0 0 5px red;
+}
+
+/* Shake animation */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
+.input-error:hover {
+  background-color: #ffd6d6 !important;
+}
