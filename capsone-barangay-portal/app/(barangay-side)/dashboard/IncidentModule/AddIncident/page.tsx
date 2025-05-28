@@ -92,6 +92,8 @@ export default function AddIncident() {
     })
   },[user]);
 
+  const [showFieldErrors, setShowFieldErrors] = useState(false);
+
   const [showComplainantResidentsPopup, setShowComplainantResidentsPopup] = useState(false);
   const [showRespondentResidentsPopup, setShowRespondentResidentsPopup] = useState(false);
   const [residents, setResidents] = useState<any[]>([]);
@@ -365,56 +367,148 @@ export default function AddIncident() {
     }
 };
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault(); 
+const delayedSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  setTimeout(() => {
+    handleSubmit(e);
+  }, 0); 
+};
+
+const handleSubmit = (event: React.FormEvent) => {
+  event.preventDefault(); 
+
+  console.log("Complainant at submit:", complainant);
+  console.log("Respondent at submit:", respondent);
+  console.log("Report at submit:", reportInfo);
+  console.log("desk staff at submit:", deskStaff);
+
+  setShowFieldErrors(true);
 
 
- 
-    const form = event.target as HTMLFormElement;
-    if (form.checkValidity()) {
-      if(!isValidPhilippineMobileNumber(complainant.contact)|| !isValidPhilippineMobileNumber(respondent.contact)){
-        setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
-        setShowErrorPopup(true);
-        setTimeout(() => setShowErrorPopup(false), 3000);
-        return;
-      }
-      const dateFiled = reportInfo.dateFiled;
-      const dateReceived = reportInfo.dateReceived;
-      const timeFiled = reportInfo.timeFiled;
-      const timeReceived = reportInfo.timeReceived;
+  const form = event.target as HTMLFormElement;
+  if (form.checkValidity()) {
 
-      const dateIsFiledToday= isToday(dateFiled);
-      const timeIsFiledPastOrNow = isPastOrCurrentTime(timeFiled);
-      const dateFiledIsPast = isPastDate(dateFiled);
+    setShowFieldErrors(true); // Activate red borders for invalid fields
 
-      const isInvalid = !dateFiledIsPast &&(!dateIsFiledToday || !timeIsFiledPastOrNow);
-      if (isInvalid) {
-        setPopupErrorMessage("Date and/or Time in Filed Section is Invalid.");
-        setShowErrorPopup(true);
-        setTimeout(() => setShowErrorPopup(false), 3000);
-        return;
-      }
-
-      const dateIsReceivedToday = isToday(dateReceived);
-      const timeIsRecievedPastOrNow = isPastOrCurrentTime(timeReceived);
-      const dateReceivedIsPast = isPastDate(dateReceived);
-      const isInvalidReceived = !dateReceivedIsPast &&(!dateIsReceivedToday || !timeIsRecievedPastOrNow);
-      if (isInvalidReceived) {
-        setPopupErrorMessage("Date and/or Time in Received Section is Invalid.");
-        setShowErrorPopup(true);
-        setTimeout(() => setShowErrorPopup(false), 3000);
-        return;
-      }
-
-
-    
-        setShowSubmitPopup(true);
-     
-    } else {
-     
-      form.reportValidity();
+    // Helper to check if a value is empty (null, undefined, or empty string)
+    const isEmpty = (value: any) =>
+    value === null || value === undefined || value.toString().trim() === "";
+  
+  const isValidPerson = (person: typeof complainant | typeof respondent) =>
+    !isEmpty(person.fname) &&
+    !isEmpty(person.lname) &&
+    !isEmpty(person.sex) &&
+    !isEmpty(person.age) &&
+    !isEmpty(person.civilStatus) &&
+    !isEmpty(person.address) &&
+    !isEmpty(person.contact);
+  
+  // Validate Complainant
+  if (!isValidPerson(complainant)) {
+    setPopupErrorMessage("Please fill out all required complainant fields.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+  
+  // Validate Respondent
+  if (!isValidPerson(respondent)) {
+    setPopupErrorMessage("Please fill out all required respondent fields.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+  
+  
+    // Validate Report Info
+    if (
+      isEmpty(reportInfo.caseNumber) ||
+      isEmpty(reportInfo.dateFiled) ||
+      isEmpty(reportInfo.timeFiled) ||
+      isEmpty(reportInfo.location) ||
+      isEmpty(reportInfo.nature) ||
+      isEmpty(reportInfo.concern) ||
+      isEmpty(reportInfo.status) ||
+      isEmpty(reportInfo.dateReceived) ||
+      isEmpty(reportInfo.timeReceived)
+    ) {
+      setPopupErrorMessage("Please fill out all required fields.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
     }
-  };
+  
+    // If nature is "Other", make sure specifyNature is filled
+    if (reportInfo.nature === "Other" && isEmpty(reportInfo.specifyNature)) {
+      setPopupErrorMessage("Please specify the nature of the concern.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
+  
+    // Validate GAD-specific child counts
+    if (reportInfo.departmentId === "GAD") {
+      if (isEmpty(reportInfo.nosofMaleChildren) || isEmpty(reportInfo.nosofFemaleChildren)) {
+        setPopupErrorMessage("Please provide the number of children for GAD reports.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
+    }
+  
+    // Validate Desk Staff
+    if (isEmpty(deskStaff.fname) || isEmpty(deskStaff.lname)) {
+      setPopupErrorMessage("Please provide the desk staff's full name.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
+
+    if(!isValidPhilippineMobileNumber(complainant.contact)|| !isValidPhilippineMobileNumber(respondent.contact)){
+      setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
+    const dateFiled = reportInfo.dateFiled;
+    const dateReceived = reportInfo.dateReceived;
+    const timeFiled = reportInfo.timeFiled;
+    const timeReceived = reportInfo.timeReceived;
+
+    const dateIsFiledToday= isToday(dateFiled);
+    const timeIsFiledPastOrNow = isPastOrCurrentTime(timeFiled);
+    const dateFiledIsPast = isPastDate(dateFiled);
+
+    const isInvalid = !dateFiledIsPast &&(!dateIsFiledToday || !timeIsFiledPastOrNow);
+    if (isInvalid) {
+      setPopupErrorMessage("Date and/or Time in Filed Section is Invalid.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
+
+    const dateIsReceivedToday = isToday(dateReceived);
+    const timeIsRecievedPastOrNow = isPastOrCurrentTime(timeReceived);
+    const dateReceivedIsPast = isPastDate(dateReceived);
+    const isInvalidReceived = !dateReceivedIsPast &&(!dateIsReceivedToday || !timeIsRecievedPastOrNow);
+    if (isInvalidReceived) {
+      setPopupErrorMessage("Date and/or Time in Received Section is Invalid.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
+
+
+  
+      setShowSubmitPopup(true);
+   
+  } else {
+   
+    form.reportValidity();
+  }
+};
+
+
 
   const handleConfirmSubmit = async () => {
     try {
@@ -534,7 +628,7 @@ export default function AddIncident() {
 
         <button type="button" className="back-button-add" onClick={handleBack}></button>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={delayedSubmit}>
             <div className="section-1-add">
                 <p className="NewOfficial-add"> New Incident</p>
 
@@ -589,11 +683,11 @@ export default function AddIncident() {
                     )}
 
 
-                    <p>First Name</p>
+                    <p>First Name<span className="required">*</span></p>
 
                     <input 
                     type="text" 
-                    className="search-bar-add" 
+                    className={`search-bar-add ${showFieldErrors && !complainant.fname.trim() ? "input-error" : ""}`}
                     placeholder="Enter Complaint's First Name" 
                     value={complainant.fname}
                     name="fname"
@@ -602,12 +696,12 @@ export default function AddIncident() {
                     required
                     disabled={isComplainantResidentSelected}
                     />
-                  <p>Last Name</p>
+                  <p>Last Name<span className="required">*</span></p>
 
                     <input 
                     type="text" 
-                    className="search-bar-add" 
-                    placeholder="Enter Complaint's First Name" 
+                    className={`search-bar-add ${showFieldErrors && !complainant.lname.trim() ? "input-error" : ""}`}
+                    placeholder="Enter Complaint's Last Name" 
                     value={complainant.lname}
                     name="lname"
                     id="complainant"
@@ -617,10 +711,10 @@ export default function AddIncident() {
 
                     />
 
-                  <p>Sex</p>
+                  <p>Sex<span className="required">*</span></p>
                   <select 
                     name="sex" 
-                    className="featuredStatus-add" 
+                    className={`search-bar-add ${showFieldErrors && !complainant.sex.trim() ? "input-error" : ""}`}
                     required
                     id="complainant"
                     value={complainant.sex}
@@ -633,11 +727,11 @@ export default function AddIncident() {
                   </select>
 
 
-                    <p>Age</p>
+                    <p>Age<span className="required">*</span></p>
 
                     <input 
-                    type="text" 
-                    className="search-bar-add" 
+                    type="number" 
+                    className={`search-bar-add`}
                     placeholder="Enter Age" 
                     value={complainant.age}
                     name="age"
@@ -648,9 +742,10 @@ export default function AddIncident() {
 
                     />
 
-                    <p>Civil Status</p>
+                    <p>Civil Status<span className="required">*</span></p>
                  
-                    <select   className="search-bar-add"    
+                    <select   
+                    className={`search-bar-add ${showFieldErrors && !complainant.civilStatus.trim() ? "input-error" : ""}`}   
                     value={complainant.civilStatus} 
                     name="civilStatus"
                     id="complainant"
@@ -667,11 +762,11 @@ export default function AddIncident() {
                     </select>
 
 
-                    <p>Address</p>
+                    <p>Address<span className="required">*</span></p>
 
                     <input 
                     type="text" 
-                    className="search-bar-add" 
+                    className={`search-bar-add ${showFieldErrors && !complainant.address.trim() ? "input-error" : ""}`}    
                     placeholder="Enter Address" 
                     value={complainant.address}
                     name="address"
@@ -682,11 +777,11 @@ export default function AddIncident() {
 
                     />
 
-                    <p>Contact Information</p>
+                    <p>Contact Information<span className="required">*</span></p>
 
                     <input 
                     type="text" 
-                    className="search-bar-add" 
+                    className={`search-bar-add ${showFieldErrors && !complainant.contact.trim() ? "input-error" : ""}`}   
                     placeholder="Enter Contact Number" 
                     value={complainant.contact}
                     name="contact"
@@ -732,11 +827,11 @@ export default function AddIncident() {
                     )}
 
 
-                    <p>First Name</p>
+                    <p>First Name<span className="required">*</span></p>
 
                     <input 
                     type="text" 
-                    className="search-bar-add" 
+                    className={`search-bar-add ${showFieldErrors && !respondent.fname.trim() ? "input-error" : ""}`}   
                     placeholder="Enter Respondent's First Name" 
                     value={respondent.fname}
                     name="fname"
@@ -746,11 +841,11 @@ export default function AddIncident() {
                     disabled={isRespondentResidentSelected}
 
                     />
-                  <p>Last Name</p>
+                  <p>Last Name<span className="required">*</span></p>
 
                     <input 
                     type="text" 
-                    className="search-bar-add" 
+                    className={`search-bar-add ${showFieldErrors && !respondent.lname.trim() ? "input-error" : ""}`}   
                     placeholder="Enter Respondent's Last Name" 
                     value={respondent.lname}
                     name="lname"
@@ -761,11 +856,11 @@ export default function AddIncident() {
 
                     />
 
-                  <p>Sex</p>
+                  <p>Sex<span className="required">*</span></p>
                   <select 
                     id="respondent"
                     name="sex" 
-                    className="featuredStatus-add" 
+                    className={`search-bar-add ${showFieldErrors && !respondent.sex.trim() ? "input-error" : ""}`}   
                     required
                     value={respondent.sex}
                     onChange={handleFormChange}
@@ -777,12 +872,12 @@ export default function AddIncident() {
                   </select>
 
 
-                    <p>Age</p>
+                    <p>Age<span className="required">*</span></p>
 
                     <input 
-                    type="text" 
+                    type="number" 
                     id="respondent"
-                    className="search-bar-add" 
+                    className={`search-bar-add`}   
                     placeholder="Enter Age" 
                     value={respondent.age}
                     name="age"
@@ -792,9 +887,10 @@ export default function AddIncident() {
 
                     />
 
-                    <p>Civil Status</p>
+                    <p>Civil Status<span className="required">*</span></p>
 
-                    <select   className="search-bar-add"    
+                    <select   
+                    className={`search-bar-add ${showFieldErrors && !respondent.civilStatus.trim() ? "input-error" : ""}`}   
                     value={respondent.civilStatus} 
                     name="civilStatus"
                     id="respondent"
@@ -811,12 +907,12 @@ export default function AddIncident() {
                       
                     </select>
 
-                    <p>Address</p>
+                    <p>Address<span className="required">*</span></p>
 
                     <input 
                     type="text" 
                     id="respondent"
-                    className="search-bar-add" 
+                    className={`search-bar-add ${showFieldErrors && !respondent.address.trim() ? "input-error" : ""}`}   
                     placeholder="Enter Address" 
                     value={respondent.address}
                     name="address"
@@ -826,12 +922,12 @@ export default function AddIncident() {
 
                     />
 
-                    <p>Contact Information</p>
+                    <p>Contact Information<span className="required">*</span></p>
 
                     <input 
                     type="text" 
                     id="respondent"
-                    className="search-bar-add" 
+                    className={`search-bar-add ${showFieldErrors && !respondent.contact.trim() ? "input-error" : ""}`}   
                     placeholder="Enter Contact Number" 
                     value={respondent.contact}
                     name="contact"
@@ -854,7 +950,7 @@ export default function AddIncident() {
                 <div className="bars-add">
                   
                 <div className="input-group-add">
-                    <p>Nature of Complaint</p>
+                    <p>Nature of Complaint<span className="required">*</span></p>
                     <select 
                     className="featuredStatus-add" 
                     required
@@ -865,9 +961,8 @@ export default function AddIncident() {
                     <option value="" disabled>Choose A Nature of Incident</option>
                     {departmentId === "Lupon" ? 
                     (<>
-                      <option value="Conciliation">Conciliation</option>
-                      <option value="Mediation">Mediation</option>
-                      <option value="Arbitration">Arbitration</option>
+                      <option value="Civil">Civil</option>
+                      <option value="Criminal">Criminal</option>
                       <option value="Others">Others</option>
                     </>): 
                     departmentId === "GAD" ?
@@ -910,26 +1005,26 @@ export default function AddIncident() {
                    {reportInfo.nature === "Others" && 
                    (<>
                     <div className="input-group-add">
-                        <p>Specify Nature of Complaint</p>
+                        <p>Specify Nature of Complaint<span className="required">*</span></p>
                         <input type="text" className="search-bar-add" placeholder="Enter Nature of Complaint" id="specifyNature" name="specifyNature" 
                         value = {reportInfo.specifyNature} onChange={handleFormChange} required/>
                     </div>
                    </>)}
 
                     <div className="input-group-add">
-                        <p>Date Filed</p>
+                        <p>Date Filed<span className="required">*</span></p>
                         <input type="date" className="search-bar-add" max={currentDate} id="dateFiled" name="dateFiled" 
                         value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
                     </div>
 
                     <div className="input-group-add">
-                        <p>Time Filed</p>
+                        <p>Time Filed<span className="required">*</span></p>
                         <input type="time" className="search-bar-add" id="timeFiled" name="timeFiled" 
                         value = {reportInfo.timeFiled} onChange={handleFormChange} required />
                     </div>
 
                     <div className="input-group-add">
-                        <p>Location</p>
+                        <p>Location<span className="required">*</span></p>
                         <input type="text" className="search-bar-add" placeholder="Enter Location" id="location" name="location" 
                         value = {reportInfo.location} onChange={handleFormChange} required />
                     </div>
@@ -937,7 +1032,7 @@ export default function AddIncident() {
                     {departmentId === "GAD" && (
                       <div>
                         <div className="input-group-add">
-                          <p>Nos of Male Children Victim/s</p>
+                          <p>Nos of Male Children Victim/s<span className="required">*</span></p>
                           <input type="number" 
                           className="search-bar-add"
                           min="0"
@@ -948,7 +1043,7 @@ export default function AddIncident() {
                         </div>
 
                         <div className="input-group-add">
-                          <p>Nos of Female Children Victim/s</p>
+                          <p>Nos of Female Children Victim/s<span className="required">*</span></p>
                           <input type="number"
                             className="search-bar-add"
                             min="0"
@@ -962,12 +1057,12 @@ export default function AddIncident() {
                     )}
                 </div>
                 
-                <p className="title-add">Complainant/s Recieved By</p>
+                <p className="title-add">Complainant/s Received By</p>
                 <div className="bars-add">
                 
                   <div className="input-group-add">
 
-                    <p>Desk Officer First Name</p>
+                    <p>Desk Officer First Name<span className="required">*</span></p>
 
                     <input 
                     type="text" 
@@ -983,7 +1078,7 @@ export default function AddIncident() {
 
                    <div className="input-group-add">
 
-                    <p>Desk Officer Last Name</p>
+                    <p>Desk Officer Last Name<span className="required">*</span></p>
 
                     <input 
                     type="text" 
@@ -998,13 +1093,13 @@ export default function AddIncident() {
                   </div> 
                             
                   <div className="input-group-add">
-                        <p>Date Received</p>
+                        <p>Date Received<span className="required">*</span></p>
                         <input type="date" className="search-bar-add" max={currentDate}  id="dateReceived" name="dateReceived" 
                         value = {reportInfo.dateReceived} onChange={handleFormChange} disabled/>
                     </div>
 
                     <div className="input-group-add">
-                        <p>Time Received</p>
+                        <p>Time Received<span className="required">*</span></p>
                         <input type="time" className="search-bar-add" id="timeReceived" name="timeReceived" 
                         value = {reportInfo.timeReceived} onChange={handleFormChange} disabled />
                     </div>
@@ -1021,7 +1116,7 @@ export default function AddIncident() {
                 <div className="section-4-left-side-add">
 
                   <div className="fields-section-add">
-                              <p>Nature of Facts</p>
+                              <p>Nature of Facts<span className="required">*</span></p>
                                   <textarea 
                                       className="description-add" 
                                       required
@@ -1187,6 +1282,10 @@ export default function AddIncident() {
                   });
                   setIsComplainantResidentSelected(true);
                   setShowComplainantResidentsPopup(false);
+
+                  setTimeout(() => {
+                    console.log("Complainant updated:", resident);
+                  }, 0);
                 } catch (error) {
                   setPopupErrorMessage("An error occurred. Please try again.");
                   setShowErrorPopup(true);
@@ -1260,6 +1359,10 @@ export default function AddIncident() {
                   });
                   setIsRespondentResidentSelected(true);
                   setShowRespondentResidentsPopup(false);
+
+                  setTimeout(() => {
+                    console.log("Respondent updated:", resident);
+                  }, 0);
                 } catch (error) {
                   setPopupErrorMessage("An error occurred. Please try again.");
                   setShowErrorPopup(true);
@@ -1284,8 +1387,6 @@ export default function AddIncident() {
       </div>
     )}
       
-
-
 
     
     </main>
