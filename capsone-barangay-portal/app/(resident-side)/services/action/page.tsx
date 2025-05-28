@@ -32,6 +32,7 @@ export default function Action() {
     dateOfResidency: "",
     dateofdeath: "",
     address: "",//will be also the home address
+    toAddress: "",// will be also the home address
     businessLocation: "",// will be project location
     businessNature: "",
     estimatedCapital: "",
@@ -365,6 +366,9 @@ const handleFileChange = (
           fullName: clearanceInput.fullName,
           dateOfResidency: clearanceInput.dateOfResidency,
           address: clearanceInput.address,
+          ...(docType === "Barangay Certificate" && clearanceInput.purpose === "Occupancy /  Moving Out" && {
+            toAddress: clearanceInput.toAddress, // Include toAddress only for this specific purpose
+          }),
           birthday: clearanceInput.birthday,
           age: clearanceInput.age,
           gender: clearanceInput.gender,
@@ -472,9 +476,12 @@ const handleFileChange = (
     };
     const [addOn, setAddOn] = useState<string>("");
     
+    
     useEffect(() => {
       if (clearanceInput.purpose === "Death Residency" && docType === "Barangay Certificate") setAddOn("Deceased ");
+      if(clearanceInput.purpose === "Occupancy /  Moving Out" && docType === "Barangay Certificate")setAddOn("From ");
       else setAddOn("");
+      
         
     }, [clearanceInput.purpose, docType]);
 
@@ -754,7 +761,7 @@ const handleFileChange = (
              </div>
 
             <div className="form-group">
-              <label htmlFor="address" className="form-label">Address<span className="required">*</span></label>
+              <label htmlFor="address" className="form-label">{addOn}Address<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="address"  
@@ -763,9 +770,27 @@ const handleFileChange = (
                 onChange={handleChange}
                 className="form-input"  
                 required 
-                placeholder="Enter Address"  
+                placeholder={`Enter ${addOn}Address`}
               />
             </div>
+
+            {(docType === "Barangay Certificate" && clearanceInput.purpose === "Occupancy /  Moving Out") && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="toAddress" className="form-label">To Address<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="toAddress"  
+                    name="toAddress"  
+                    value={clearanceInput.toAddress}
+                    onChange={handleChange}
+                    className="form-input"  
+                    required 
+                    placeholder="Enter To Address"  
+                  />
+                </div>
+              </>
+            )}
 
             <div className="form-group">
               <label htmlFor="birthday" className="form-label">Birthday<span className="required">*</span></label>

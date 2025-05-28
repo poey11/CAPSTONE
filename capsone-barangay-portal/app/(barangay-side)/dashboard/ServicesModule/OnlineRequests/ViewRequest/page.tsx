@@ -35,6 +35,7 @@ interface EmergencyDetails {
     appointmentDate: string;
     dateOfResidency: string;
     address: string; // Will also be the home address
+    toAddress: string; // Will be the home address
     businessLocation: string; // Will be the project location
     businessNature: string;
     estimatedCapital: string;
@@ -167,6 +168,7 @@ const ViewOnlineRequest = () => {
         { key: "cohabitationStartDate", label: "Start of Cohabitation" },
         { key: "cohabitationRelationship", label: "Cohabitation Relationship"},
         { key: "address", label: "Address" },
+        { key: "toAddress", label: "To Address" },
         { key: "age", label: "Age" },
         { key: "dateOfResidency", label: "Date of Residency" },
         { key: "businessLocation", label: "Business Location" },
@@ -270,7 +272,7 @@ const ViewOnlineRequest = () => {
               })
           });
           if (!response.ok) throw new Error("Failed to send SMS");
-        
+
           const data = await response.json();
           console.log(data);
         }
@@ -330,6 +332,17 @@ const ViewOnlineRequest = () => {
                 "Text5": requestData?.requestor.toUpperCase(),
                 "Text6": dayToday,
                 "Text7": `${monthToday} ${yearToday}`,
+            }
+        }
+        else if(requestData?.purpose === "Occupancy /  Moving Out"){
+            locationPath = "certficate of moving out.pdf";
+            reqData = {
+                "Text1":`${requestData?.fullName.toUpperCase()}`,
+                "Text2": requestData?.address,
+                "Text3": requestData?.toAddress,
+                "Text4": requestData?.requestor.toUpperCase(),
+                "Text5": dayToday,
+                "Text6": `${monthToday} ${yearToday}`,
             }
         }
 

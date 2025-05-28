@@ -41,6 +41,7 @@ interface BarangayDocument {
     cohabitationRelationship?:string;
     appointmentDate?: string;
 
+    toAddress?: string;
     birthpalce?: string;
     religion?: string;
     nationality?: string;
@@ -174,7 +175,10 @@ export default function DocumentTransactionsDetails() {
                 { label: "Cohabitation Start Date", key: "cohabitationStartDate" },
                 { label: "Cohabitation Relationship", key: "cohabitationRelationship" }
             ]:[]),
-
+        ...(transactionData?.purpose === "Occupancy /  Moving Out" ?
+            [{ label: "To Address", key: "toAddress" }]
+            : []
+        ),
 
         /*Barangay Certificate, Barangay Indigency, Barangay Clearance & Business Permits */
         ...(transactionData?.docType !== "Business Permit" && transactionData?.docType !== "Temporary Business Permit" && transactionData?.docType !== "Construction Permit"
