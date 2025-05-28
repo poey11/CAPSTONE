@@ -45,8 +45,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
                         console.warn(`⚠️ Skipping non-text field: ${key} (Type: ${field.constructor.name})`);
                     }
                 }
-            
-            
+                form.flatten();
+                   
                 const pdfBytes = await pdfDoc.save();
             
                 return new NextResponse(pdfBytes, {

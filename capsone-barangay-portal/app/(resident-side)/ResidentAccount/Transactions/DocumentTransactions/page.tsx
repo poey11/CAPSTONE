@@ -36,7 +36,9 @@ interface BarangayDocument {
     validIDjpg?: string[];
     endorsementLetter?: string[];
     status?: string; 
-
+    partnerWifeHusbandFullName?: string;
+    cohabitationStartDate?: string;
+    cohabitationRelationship?:string;
     appointmentDate?: string;
 
     birthpalce?: string;
@@ -166,6 +168,12 @@ export default function DocumentTransactionsDetails() {
         ...(transactionData?.status === "Rejected"
            ? [{ label: "Rejection Reason", key: "rejectionReason" }]
            : []),
+        ...(transactionData?.purpose === "Cohabitation"
+            ? [
+                { label: "Partner/Wife/Husband Full Name", key: "partnerWifeHusbandFullName" },
+                { label: "Cohabitation Start Date", key: "cohabitationStartDate" },
+                { label: "Cohabitation Relationship", key: "cohabitationRelationship" }
+            ]:[]),
 
 
         /*Barangay Certificate, Barangay Indigency, Barangay Clearance & Business Permits */

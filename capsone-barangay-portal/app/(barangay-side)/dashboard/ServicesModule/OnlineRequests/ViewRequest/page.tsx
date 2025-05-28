@@ -24,13 +24,15 @@ interface EmergencyDetails {
     accID: string;
     requestId: string;
     requestor: string;
+    partnerWifeHusbandFullName: string;
+    cohabitationStartDate: string;
+    cohabitationRelationship:string;
     docType: string;
     status: string;
     purpose: string;
     requestDate: string;
-    firstName: string;
+    fullName: string;
     appointmentDate: string;
-    lastName: string;
     dateOfResidency: string;
     address: string; // Will also be the home address
     businessLocation: string; // Will be the project location
@@ -155,11 +157,15 @@ const ViewOnlineRequest = () => {
         setStatus(e.target.value);
     };
 
+
     const requestField = [
         { key: "requestDate", label: "Date Requested" },
         { key: "docType", label: "Document Type" },
         { key: "purpose", label: "Purpose" },
         { key: "fullName", label: "Full Name" },
+        { key: "partnerWifeHusbandFullName", label: "Partner's/Wife's/Husband's Full Name" },
+        { key: "cohabitationStartDate", label: "Start of Cohabitation" },
+        { key: "cohabitationRelationship", label: "Cohabitation Relationship"},
         { key: "address", label: "Address" },
         { key: "age", label: "Age" },
         { key: "dateOfResidency", label: "Date of Residency" },
@@ -273,7 +279,7 @@ const ViewOnlineRequest = () => {
       const v = n % 100;
       return n + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
     }
-
+    
     
     const handlePrint = async() => {
         if(!requestData) return
@@ -282,8 +288,30 @@ const ViewOnlineRequest = () => {
         const monthToday = getMonthName(parseInt(dateToday.split("-")[1]));
         const yearToday = dateToday.split("-")[0];
         let locationPath = "";
+        let reqData = {};
         if(requestData?.purpose === "Death Residency"){
             locationPath = "DeathResidency.pdf";
+            reqData = {
+                    "Text1":`${requestData?.fullName.toUpperCase()} (Deceased),`,
+                    "Text2": requestData?.address,
+                    "Text3": `${getMonthName(parseInt(requestData?.dateofdeath.split("-")[1]))} ${requestData?.dateofdeath.split("-")[2]}, ${requestData?.dateofdeath.split("-")[0]}`,
+                    "Text4": requestData?.requestor.toUpperCase(),
+                    "Text5": dayToday,
+                    "Text6": `${monthToday} ${yearToday}`,  
+                }
+        }
+        else if(requestData?.purpose === "Cohabitation" ){
+            if(requestData?.cohabitationRelationship ==="Husband And Wife")locationPath = "Certificate of cohab_marriage.pdf";
+            else locationPath = "Certificate of cohab_partners.pdf";
+            reqData = {
+                "Text1":`${requestData?.fullName.toUpperCase()}`,
+                "Text2": `${requestData?.partnerWifeHusbandFullName.toUpperCase()}`,
+                "Text3": requestData?.address,
+                "Text4": `${getMonthName(parseInt(requestData?.cohabitationStartDate.split("-")[1]))} ${requestData?.cohabitationStartDate.split("-")[2]}, ${requestData?.cohabitationStartDate.split("-")[0]}`,
+                "Text5": requestData?.requestor.toUpperCase(),
+                "Text6": dayToday,
+                "Text7": `${monthToday} ${yearToday}`,
+            }
         }
 
         const response = await fetch("/api/fillPDF", {
@@ -294,14 +322,7 @@ const ViewOnlineRequest = () => {
             body: JSON.stringify({
                 location: "/ServiceRequests/templates",
                 pdfTemplate: locationPath,
-                data: {
-                    "Text1":`${requestData?.firstName.toUpperCase()} ${requestData?.lastName.toUpperCase()} (Deceased),`,
-                    "Text2": requestData?.address,
-                    "Text3": `${getMonthName(parseInt(requestData?.dateofdeath.split("-")[1]))} ${requestData?.dateofdeath.split("-")[2]}, ${requestData?.dateofdeath.split("-")[0]}`,
-                    "Text4": requestData?.requestor,
-                    "Text5": dayToday,
-                    "Text6": `${monthToday} ${yearToday}`,  
-                },
+                data: reqData,
             })
         });
         if(!response.ok)throw new Error("Failed to generate PDF");

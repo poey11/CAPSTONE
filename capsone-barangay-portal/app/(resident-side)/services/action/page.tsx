@@ -65,6 +65,9 @@ export default function Action() {
     },
     requestorMrMs: "",
     requestorFname: "",
+    partnerWifeHusbandFullName: "",
+    cohabitationStartDate: "",
+    cohabitationRelationship: "",
     signaturejpg: null,
     barangayIDjpg:null,
     validIDjpg: null,
@@ -76,7 +79,6 @@ export default function Action() {
     approvedBldgPlan:null,
     deathCertificate: null,
   })
-
 
 
 
@@ -370,6 +372,11 @@ const handleFileChange = (
           contact: clearanceInput.contact,
           citizenship: clearanceInput.citizenship,
           signaturejpg: filenames.signaturejpg, // Store filename instead of file object
+          ...(docType === "Barangay Certificate" && clearanceInput.purpose === "Cohabitation" && {
+            partnerWifeHusbandFullName: clearanceInput.partnerWifeHusbandFullName,
+            cohabitationStartDate: clearanceInput.cohabitationStartDate,
+            cohabitationRelationship: clearanceInput.cohabitationRelationship,
+          }),
           ...((docType === "Barangay Certificate" && clearanceInput.purpose === "Death Residency")  && {
             dateofdeath: clearanceInput.dateofdeath,
             deathCertificate: filenames.deathCertificate,
@@ -463,8 +470,13 @@ const handleFileChange = (
       router.push('/services/notification'); 
     //  router.push("/services");
     };
+    const [addOn, setAddOn] = useState<string>("");
     
-    
+    useEffect(() => {
+      if (clearanceInput.purpose === "Death Residency" && docType === "Barangay Certificate") setAddOn("Deceased ");
+      else setAddOn("");
+        
+    }, [clearanceInput.purpose, docType]);
 
 
   return (
@@ -500,7 +512,7 @@ const handleFileChange = (
           >
             <option value="" disabled>Select purpose</option>
             {docType === "Barangay Certificate" ? (<>
-              <option value="Residency">Residency</option>
+              {/* <option value="Residency">Residency</option> */}
               <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
               <option value="Estate Tax">Estate Tax</option>
               <option value="Death Residency">Death Residency</option>
@@ -551,6 +563,7 @@ const handleFileChange = (
                 name="appointmentDate" 
                 value={clearanceInput.appointmentDate||""}
                 onChange={handleChange}
+                
                 className="form-input" 
                 required
               />
@@ -599,7 +612,7 @@ const handleFileChange = (
           )}
 
             <div className="form-group">
-              <label htmlFor="fullName" className="form-label">Full Name<span className="required">*</span></label>
+              <label htmlFor="fullName" className="form-label">{addOn}Full Name<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="fullName"  
@@ -612,7 +625,55 @@ const handleFileChange = (
               />
             </div>
 
-         
+            {(docType === "Barangay Certificate" && clearanceInput.purpose === "Cohabitation") && (<>
+              <div className="form-group">
+                <label htmlFor="partnerWifeHusbandFullName" className="form-label">Partner's/Wife's/Husband's Full Name<span className="required">*</span></label>
+                <input 
+                  type="text"  
+                  id="partnerWifeHusbandFullName"  
+                  name="partnerWifeHusbandFullName"  
+                  className="form-input"  
+                  required  
+                  placeholder="Enter Full Name" 
+                  value={clearanceInput.partnerWifeHusbandFullName}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="cohabitationRelationship" className="form-label">
+                  Type Of Relationship<span className="required">*</span>
+                </label>
+                <select
+                  id="cohabitationRelationship"
+                  name="cohabitationRelationship"
+                  className="form-input"
+                  value={clearanceInput.cohabitationRelationship}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>Select Type of Relationship</option>
+                  <option value="Husband And Wife">Husband And Wife</option>
+                  <option value="Partners">Partners</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="cohabitationStartDate" className="form-label">
+                  Start Of Cohabitation<span className="required">*</span>
+                </label>
+                <input 
+                type = "date" 
+                id="cohabitationStartDate"
+                name="cohabitationStartDate"
+                className="form-input"
+                value={clearanceInput.cohabitationStartDate}
+                onChange={handleChange}
+                onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                required
+                max = {getLocalDateString(new Date())} // Set max date to today
+                />
+              </div>
+            </>)}
 
             {(docType ==="Temporary Business Permit"||docType ==="Business Permit") ? (
               <>  
@@ -685,6 +746,8 @@ const handleFileChange = (
                   value={clearanceInput.dateOfResidency}
                   onChange={handleChange}
                   className="form-input" 
+                  onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+
                   required 
                   max={getLocalDateString(new Date())}
                 />
@@ -712,6 +775,7 @@ const handleFileChange = (
                 name="birthday" 
                 className="form-input" 
                 value={clearanceInput.birthday}
+                onKeyDown={(e) => e.preventDefault()} // Prevent manual input
                 onChange={handleChange}
                 required 
                 max={getLocalDateString(new Date())}
@@ -728,6 +792,8 @@ const handleFileChange = (
                   name="dateofdeath" 
                   className="form-input" 
                   value={clearanceInput.dateofdeath}
+                  onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+
                   onChange={handleChange}
                   required 
                   max={getLocalDateString(new Date())} // Set max date to today
@@ -937,7 +1003,7 @@ const handleFileChange = (
                 <option value="Single">Single</option>
                 <option value="Married">Married</option>
                 <option value="Widow">Widow</option>
-                <option value="Separated">Separated</option>
+                <option value="Separated">Separated</option>                
               </select>
             </div></>)}
            
