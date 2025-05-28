@@ -4,44 +4,24 @@ import { useRouter } from "next/navigation";
 import type { Metadata } from "next";
 import "@/CSS/barangaySide/ServicesModule/Appointments.css";
 import { useEffect, useState } from "react";
-
-
+import Calendar from "@/app/(barangay-side)/components/calender";
 const metadata: Metadata = {
     title: "Appointments",
     description: "Appointments in Services Module",
   };
+  type Appointment = {
+      id: string;
+      title: string;
+      date: string; // format: 'YYYY-MM-DD'
+  }
 
 
   export default function Appointments() {
-    const requestData = [
-        {
-            appointmentType: "Barangay Indigency",
-            purpose: "No Income",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            time: "09:00 AM - 09:30 AM",
-            status: "Completed",
-        },
-        {
-            appointmentType: "Barangay Certificate",
-            purpose: "Certificate of Residency",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            time: "10:00 AM - 10:30 AM",
-            status: "Pending",
-        },
-        {
-            appointmentType: "Barangay Certificate",
-            purpose: "Certificate of Residency",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            time: "11:00 AM - 11:30 AM",
-            status: "Pending",
-        },
-    ];
+    const fakeData: Appointment[] = [
+      {id: "1", title: "Meeting with John", date: "2025-05-29"},
+      {id: "2", title: "Doctor's Appointment", date: "2025-05-29"},
+      {id: "3", title: "Conference Call", date: "2025-05-29"},
+    ]
 
     const router = useRouter();
 
@@ -151,59 +131,9 @@ const getPageNumbers = () => {
             <option value="inactive">Show 10</option>
           </select>
          </div>
+          <Calendar appointments={fakeData} />
 
-         <div className="appointments-main-section">
-          <table>
-            <thead>
-              <tr>
-                <th>Appointment Type</th>
-                <th>Purpose</th>
-                <th>Name</th>
-                <th>Contact</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-            {requestData.map((request, index) => (
-              <tr key={index}>
-                <td>{request.appointmentType}</td>
-                <td>{request.purpose}</td>
-                <td>{request.name}</td>
-                <td>{request.contact}</td>
-                <td>{request.date}</td>
-                <td>{request.time}</td>
-                <td>
-                    <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
-                        {request.status}
-                    </span>
-                </td>
-                <td>
-                  <div className="actions">
-                    <button
-                        className="action-view"
-                        onClick={handleView}
-                    >
-                        View
-                    </button>
-                    <button
-                        className="action-edit"
-                        onClick={handleEdit}
-                    >
-                        Edit
-                    </button>
-                    <button className="action-delete">Delete</button>
-                    <button type="button" className="action-view" onClick={handleSMS}>SMS</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            </tbody>
-          </table>
-        </div>
-
+         
         <div className="redirection-section">
         <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
         {getPageNumbers().map((number, index) => (
@@ -217,7 +147,6 @@ const getPageNumbers = () => {
         ))}
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
-
       </main>
         
     );
