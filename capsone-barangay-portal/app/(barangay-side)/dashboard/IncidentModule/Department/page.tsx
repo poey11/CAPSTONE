@@ -311,11 +311,11 @@ useEffect(() => {
             </td>
             <td>
               <div className="actions-departments-main">
-                <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}>View</button>
+                <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}><img src="/Images/view.png" alt="View" /></button>
                 {isAuthorized && (
                   <>
-                    <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}>Edit</button>
-                    <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}>Delete</button>
+                    <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}> <img src="/Images/edit.png" alt="Edit" /></button>
+                    <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}><img src="/Images/delete.png" alt="Delete" /></button>
 
                   </>
                 )}
