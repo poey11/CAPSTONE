@@ -230,12 +230,10 @@ useEffect(() => {
   return (
     <main className="main-container-departments">
       <div className="section-1-departments">
-        <h1>Lupon Tagapamayapa: {departmentId} Table</h1>
         {isAuthorized && (
           <button className="add-announcement-btn-departments" onClick={() => router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`)}>
           Add New Incident
           </button>
-
         )}
         
       </div>
