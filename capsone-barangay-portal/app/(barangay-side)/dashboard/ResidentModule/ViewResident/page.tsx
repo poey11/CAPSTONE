@@ -352,8 +352,8 @@ useEffect(() => {
                                 </div>
 
                                 <div className="view-resident-fields-section">
-                                  <p>Student</p>
-                                  <input type="text" className="view-resident-input-field" name="isStudent"  value={formData.isStudent ? 'Yes' : 'No'} readOnly/>
+                                  <p>Senior Citizen</p>
+                                  <input type="text" className="view-resident-input-field" name="isStudent"  value={formData.isSeniorCitizen ? 'Yes' : 'No'} readOnly/>
                                 </div>
 
                             </div>
@@ -416,7 +416,7 @@ useEffect(() => {
                     <>
                       <div className="view-resident-incident-table-container">
                         {incidentReports.length === 0 ? (
-                          <p>No incident reports found for this resident.</p>
+                          <p className="no-incident-message">No incident reports found for this resident.</p>
                         ) : (
                           // different widths for each column to make it center and easier to read
                           <table className="incident-table-section">
