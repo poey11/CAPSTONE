@@ -665,7 +665,7 @@ const handleSubmit = (event: React.FormEvent) => {
 
        
                 <nav className="add-incident-info-toggle-wrapper">
-                {["complainant", "respondent", "others"].map((section) => (
+                {["complainant", "respondent", "others","desk"].map((section) => (
                     <button
                       key={section}
                       type="button"
@@ -675,6 +675,7 @@ const handleSubmit = (event: React.FormEvent) => {
                       {section === "complainant" && "Complainant Info"}
                       {section === "respondent" && "Respondent Info"}
                       {section === "others" && "Other Info"}
+                      {section === "desk" && "Desk Officer Info"}
                     </button>
                   ))}
                 </nav>
@@ -971,7 +972,7 @@ const handleSubmit = (event: React.FormEvent) => {
                   <p>Nature of Complaint<span className="required">*</span></p>
 
                   <select 
-                    className="featuredStatus-add" 
+                    className="add-incident-input-field" 
                     required
                     id="nature" name="nature" 
                     value={reportInfo.nature}
@@ -1018,71 +1019,72 @@ const handleSubmit = (event: React.FormEvent) => {
                       <option value="Others">Others: (Trafficking, Prostitution, Violaiton of RA9208)</option>
                     </>)}
                   </select>
+
+                  </div>
+
+                  {reportInfo.nature === "Others" && 
+                   (<>
+                  
+                  <div className="fields-section-add">
+                      <p>Specify Nature of Complaint<span className="required">*</span></p>
+                      <input type="text" className="add-incident-input-field" placeholder="Enter Nature of Complaint" id="specifyNature" name="specifyNature" 
+                      value = {reportInfo.specifyNature} onChange={handleFormChange} required/>
+                  </div>
+                       
+                   </>)}
+
+                   <div className="fields-section-add">
+                        <p>Time Filed<span className="required">*</span></p>
+                        <input type="time" className="add-incident-input-field" id="timeFiled" name="timeFiled" 
+                        value = {reportInfo.timeFiled} onChange={handleFormChange} required />
+                   </div>
+
+                  <div className="fields-section-add">
+                      <p>Nature of Facts<span className="required">*</span></p>
+                       <textarea 
+                            className="description-add" 
+                            required
+                            placeholder="Enter Nature of Facts of the Complaint"
+                            value={reportInfo.concern}
+                            id="concern"
+                            name="concern"
+                            onChange={handleFormChange}
+                            rows={15}
+                  ></textarea>
+
+
+                  </div>
                     
 
-              </div>
+
 
           
           </div>
 
 
             <div className="add-incident-section-right-side">
-               
 
-           </div>
+              <div className="fields-section-add">
+                  <p>Date Filed<span className="required">*</span></p>
+                  <input type="date" className="add-incident-input-field" max={currentDate} id="dateFiled" name="dateFiled" 
+                    value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
+              </div>
 
+              <div className="fields-section-add">
+                  <p>Location<span className="required">*</span></p>
+                  <input type="text" className="add-incident-input-field" placeholder="Enter Location" id="location" name="location" 
+                  value = {reportInfo.location} onChange={handleFormChange} required />
 
+              </div>
 
-          </div>
+              <div className="fields-section-add">
 
-
-
-          </>
-        )}
-              
-                
-
-         
-
-
-              
-               
-                
-                <div className="bars-add">
-              
-                   {reportInfo.nature === "Others" && 
-                   (<>
-                    <div className="input-group-add">
-                        <p>Specify Nature of Complaint<span className="required">*</span></p>
-                        <input type="text" className="search-bar-add" placeholder="Enter Nature of Complaint" id="specifyNature" name="specifyNature" 
-                        value = {reportInfo.specifyNature} onChange={handleFormChange} required/>
-                    </div>
-                   </>)}
-
-                    <div className="input-group-add">
-                        <p>Date Filed<span className="required">*</span></p>
-                        <input type="date" className="search-bar-add" max={currentDate} id="dateFiled" name="dateFiled" 
-                        value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
-                    </div>
-
-                    <div className="input-group-add">
-                        <p>Time Filed<span className="required">*</span></p>
-                        <input type="time" className="search-bar-add" id="timeFiled" name="timeFiled" 
-                        value = {reportInfo.timeFiled} onChange={handleFormChange} required />
-                    </div>
-
-                    <div className="input-group-add">
-                        <p>Location<span className="required">*</span></p>
-                        <input type="text" className="search-bar-add" placeholder="Enter Location" id="location" name="location" 
-                        value = {reportInfo.location} onChange={handleFormChange} required />
-                    </div>
-
-                    {departmentId === "GAD" && (
+              {departmentId === "GAD" && (
                       <div>
-                        <div className="input-group-add">
+                        <div className="fields-section-add">
                           <p>Nos of Male Children Victim/s<span className="required">*</span></p>
                           <input type="number" 
-                          className="search-bar-add"
+                          className="add-incident-input-field"
                           min="0"
                           value={reportInfo.nosofMaleChildren}
                           name="nosofMaleChildren"
@@ -1090,10 +1092,10 @@ const handleSubmit = (event: React.FormEvent) => {
                           required />    
                         </div>
 
-                        <div className="input-group-add">
+                        <div className="fields-section-add">
                           <p>Nos of Female Children Victim/s<span className="required">*</span></p>
                           <input type="number"
-                            className="search-bar-add"
+                            className="add-incident-input-field"
                             min="0"
                             value={reportInfo.nosofFemaleChildren}
                             name="nosofFemaleChildren"
@@ -1103,90 +1105,14 @@ const handleSubmit = (event: React.FormEvent) => {
 
                       </div>
                     )}
-                </div>
-                
-                <p className="title-add">Complainant/s Received By</p>
-                <div className="bars-add">
-                
-                  <div className="input-group-add">
 
-                    <p>Desk Officer First Name<span className="required">*</span></p>
+              </div>
 
-                    <input 
-                    type="text" 
-                    className="search-bar-add" 
-                    placeholder="Enter Desk Officer First Name" 
-                    id="staff"
-                    disabled
-                    name="fname"
-                    value = {deskStaff.fname} onChange={handleFormChange}
-                    />
+              <div className="fields-section-add">
 
-                  </div>
+              <p> Photo of the Incident (if Applicable)</p>
 
-                   <div className="input-group-add">
-
-                    <p>Desk Officer Last Name<span className="required">*</span></p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar-add" 
-                    placeholder="Enter Desk Officer Last Name" 
-                    id="staff"
-                    disabled
-                    name="lname"
-                    value = {deskStaff.lname} onChange={handleFormChange}
-                    />
-
-                  </div> 
-                            
-                  <div className="input-group-add">
-                        <p>Date Received<span className="required">*</span></p>
-                        <input type="date" className="search-bar-add" max={currentDate}  id="dateReceived" name="dateReceived" 
-                        value = {reportInfo.dateReceived} onChange={handleFormChange} disabled/>
-                    </div>
-
-                    <div className="input-group-add">
-                        <p>Time Received<span className="required">*</span></p>
-                        <input type="time" className="search-bar-add" id="timeReceived" name="timeReceived" 
-                        value = {reportInfo.timeReceived} onChange={handleFormChange} disabled />
-                    </div>
-
-
-                </div>
-                   
-          
-
-
-
-            <div className="section-4-add">
-
-                <div className="section-4-left-side-add">
-
-                  <div className="fields-section-add">
-                              <p>Nature of Facts<span className="required">*</span></p>
-                                  <textarea 
-                                      className="description-add" 
-                                      required
-                                      placeholder="Enter Nature of Facts of the Complaint"
-                                      value={reportInfo.concern}
-                                      id="concern"
-                                      name="concern"
-                                      onChange={handleFormChange}
-                                      rows={15}
-                               ></textarea>
-                    </div>
-
-                 </div>
-
-            <div className="section-4-right-side-add">
-              
-              
-            <div className="title-add">
-                     <p> Photo of the Incident (if Applicable)</p>
-               </div> 
- 
-               <div className="file-upload-container-add">
+              <div className="file-upload-container-add">
                  <label htmlFor="file-upload1" className="upload-link-add">Click to Upload File</label>
                  <input
                    id="file-upload1"
@@ -1236,12 +1162,87 @@ const handleSubmit = (event: React.FormEvent) => {
                     )}
                  </div>
                </div>
+
+              </div>
                
 
-            </div>
-                
+           </div>
+
+
 
           </div>
+
+
+
+          </>
+        )}
+
+      {activeSection === "desk" && (
+          <>
+
+      <div className="add-incident-full-top">
+
+          <div className="add-incident-section-left-side">
+
+              <div className="fields-section-add">
+                  <p>Desk Officer First Name<span className="required">*</span></p>
+                  <input 
+                    type="text" 
+                    className="add-incident-input-field" 
+                    placeholder="Enter Desk Officer First Name" 
+                    id="staff"
+                    disabled
+                    name="fname"
+                    value = {deskStaff.fname} onChange={handleFormChange}
+                    />
+
+              </div>
+
+              <div className="fields-section-add">
+                  <p>Date Received<span className="required">*</span></p>                    
+                  <input type="date" className="add-incident-input-field" max={currentDate}  id="dateReceived" name="dateReceived" 
+                  value = {reportInfo.dateReceived} onChange={handleFormChange} disabled/>
+
+              </div>
+
+          </div>
+
+
+            <div className="add-incident-section-right-side">
+
+                <div className="fields-section-add">
+                    <p>Desk Officer Last Name<span className="required">*</span></p>
+                    <input 
+                    type="text" 
+                    className="add-incident-input-field" 
+                    placeholder="Enter Desk Officer Last Name" 
+                    id="staff"
+                    disabled
+                    name="lname"
+                    value = {deskStaff.lname} onChange={handleFormChange}
+                    />
+
+                </div>
+
+
+                <div className="fields-section-add">
+                     <p>Time Received<span className="required">*</span></p>
+                     <input type="time" className="add-incident-input-field" id="timeReceived" name="timeReceived" 
+                        value = {reportInfo.timeReceived} onChange={handleFormChange} disabled />
+                </div>
+
+            </div>
+
+
+      </div>
+
+
+        </>
+        )}
+              
+      
+  
+          
            
           </div>
                          </div> 
