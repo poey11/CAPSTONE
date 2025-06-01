@@ -691,35 +691,47 @@ const handleSubmit = (event: React.FormEvent) => {
             {activeSection === "complainant" && (
              <>
 
-              <div className="add-incident-section-top-side">
-
-                  <div className="fields-section-add">
-                      <input type="text"  className="select-resident-input-field" placeholder="Select Complainant" onClick={handleComplainantsClick} />
-                  </div>
-
-                          {/* button to clear if the complainant is from residents */}
-                          {isComplainantResidentSelected && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setComplainant({
-                            residentId: '',
-                            fname: '',
-                            lname: '',
-                            sex: '',
-                            age: '',
-                            civilStatus: '',
-                            address: '',
-                            contact: '',
-                          });
-                          setIsComplainantResidentSelected(false);
-                        }}
-                        className="clear-button-add"
-                      >
-                        Clear Complainant
-                      </button>
-                    )}
+         <div className="input-wrapper">
+              <div className="input-with-clear">
+                <input
+                  type="text"
+                  className="select-resident-input-field"
+                  placeholder="Select Complainant"
+                  onClick={handleComplainantsClick}
+                  value={
+                    isComplainantResidentSelected
+                      ? `${complainant.fname} ${complainant.lname}`
+                      : ''
+                  }
+                  readOnly
+                />
+                {isComplainantResidentSelected && (
+                  <span
+                    className="clear-icon"
+                    title="Click to clear selected complainant"
+                    onClick={() => {
+                      setComplainant({
+                        residentId: '',
+                        fname: '',
+                        lname: '',
+                        sex: '',
+                        age: '',
+                        civilStatus: '',
+                        address: '',
+                        contact: '',
+                      });
+                      setIsComplainantResidentSelected(false);
+                    }}
+                  >
+                    ×
+                  </span>
+                )}
               </div>
+              {isComplainantResidentSelected && (
+                <p className="help-text">Click the <strong>×</strong> to clear the selected complainant.</p>
+              )}
+            </div>
+
 
             <div className="add-incident-full-top">
 
@@ -865,36 +877,49 @@ const handleSubmit = (event: React.FormEvent) => {
 
             {activeSection === "respondent" && (
              <>
-              <div className="add-incident-section-top-side">
-
-                  <div className="fields-section-add">
-                      <input type="text"  className="select-resident-input-field" placeholder="Select Respondent" onClick={handleRespondentsClick} />
-                  </div>
-
-                    {/* button to clear if the respondent is from residents */}
-                    {isRespondentResidentSelected && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setRespondent({
-                            residentId: '',
-                            fname: '',
-                            lname: '',
-                            sex: '',
-                            age: '',
-                            civilStatus: '',
-                            address: '',
-                            contact: '',
-                          });
-                          setIsRespondentResidentSelected(false);
-                        }}
-                        className="clear-button-add"
-                      >
-                        Clear Respondent
-                      </button>
-                    )}
-
+           <div className="input-wrapper">
+              <div className="input-with-clear">
+                <input
+                  type="text"
+                  className="select-resident-input-field"
+                  placeholder="Select Respondent"
+                  onClick={handleRespondentsClick}
+                  value={
+                    isRespondentResidentSelected
+                      ? `${respondent.fname} ${respondent.lname}`
+                      : ''
+                  }
+                  readOnly
+                />
+                {isRespondentResidentSelected && (
+                  <span
+                    className="clear-icon"
+                    title="Click to clear selected respondent"
+                    onClick={() => {
+                      setRespondent({
+                        residentId: '',
+                        fname: '',
+                        lname: '',
+                        sex: '',
+                        age: '',
+                        civilStatus: '',
+                        address: '',
+                        contact: '',
+                      });
+                      setIsRespondentResidentSelected(false);
+                    }}
+                  >
+                    ×
+                  </span>
+                )}
               </div>
+              {isRespondentResidentSelected && (
+                <p className="help-text">
+                  Click the <strong>×</strong> to clear the selected respondent.
+                </p>
+              )}
+            </div>
+
 
 
                 <div className="add-incident-full-top">
