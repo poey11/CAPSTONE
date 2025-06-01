@@ -3051,11 +3051,341 @@ const ReportsPage = () => {
       setLoadingVAWCReport(false);
     }
   };
+
+  // lupon settled cases
+
+  const generateLuponSettledReport = async () => {
+    setLoadingLuponSettledReport(true);
+    try {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = currentDate.toLocaleString("default", { month: "long" });
+      const reportTitle = `FOR THE MONTH OF ${month.toUpperCase()} ${year}`;
   
+      //  Get Lupon Settled IncidentReports
+      const reportsRef = collection(db, "IncidentReports");
+      const q = query(
+        reportsRef,
+        where("department", "==", "Lupon"),
+        where("status", "==", "settled")
+      );
+      const querySnapshot = await getDocs(q);
+      const luponSettledReports = querySnapshot.docs.map((doc) => doc.data());
+  
+      if (luponSettledReports.length === 0) {
+        alert("No Lupon Settled reports found.");
+        return;
+      }
+  
+      //  Load Excel template
+      const templateRef = ref(storage, "ReportsModule/Lupon Tagapamayapa Report Template.xlsx");
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+  
+      //  Update report title
+      worksheet.getCell("A3").value = reportTitle;
+  
+      const headerEndRow = 3;
+      const dataStartRow = 7;
+      const footerStartRow = 23;
+  
+      //  Handle header/footer images
+      const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow < dataStartRow);
+      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= footerStartRow);
+  
+      // to save footer
+      worksheet.insertRows(footerStartRow - 1, new Array(luponSettledReports.length).fill([]));
+  
+      //  Insert dynamic data
+      luponSettledReports.forEach((report, index) => {
+        const rowIndex = dataStartRow + index;
+        const row = worksheet.getRow(rowIndex);
+        row.height = 55;
+  
+        const complainant = report.complainant || {};
+        const respondent = report.respondent || {};
+  
+        const complainantFullName = `${complainant.fname || ""} ${complainant.lname || ""}`.trim();
+        const respondentFullName = `${respondent.fname || ""} ${respondent.lname || ""}`.trim();
+
+        const specificNature = report.specifyNature;
+
+  
+        const cells = [
+          report.caseNumber || "",
+          `C- ${complainantFullName}\nR- ${respondentFullName}`,
+          report.nature === "Criminal" ? "*" : "",
+          report.nature === "Civil" ? "*" : "",
+          report.specifyNature || "",
+          report.isMediation ? "*" : "",
+          report.isConciliation ? "*" : "",
+          report.isArbitration ? "*" : "",
+          "", // blank
+          "", // blank
+          "", // blank
+          "", // blank
+          report.remarks || "",
+        ];
+        cells.forEach((val, colIdx) => {
+          const cell = row.getCell(colIdx + 1);
+          cell.value = val;
+          cell.font = { name: "Calibri", size: 12 };
+          cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+          cell.border = {
+            top: { style: "medium" },
+            bottom: { style: "medium" },
+            left: { style: "medium" },
+            right: { style: "medium" },
+          };
+        });
+  
+        row.commit();
+      });
+  
+      //  Move footer images
+      footerDrawings.forEach(drawing => {
+        const offset = luponSettledReports.length;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+      });
+  
+      //  Save and upload
+
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const fileName = `Lupon_Settled_Report_${month}_${year}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+      const fileUrl = await getDownloadURL(storageRef);
+  
+      alert("Lupon Settled Report generated successfully! Please wait for the downloadable file!");
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating Lupon Settled report:", error);
+      alert("Failed to generate Lupon Settled Report.");
+    } finally {
+      setLoadingLuponSettledReport(false);
+    }
+  };
+  
+  
+  const handleGenerateLuponSettledPDF = async () => {
+    setLoadingLuponSettledReport(true);
+    try {
+      const fileUrl = await generateLuponSettledReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+  
+      saveAs(blob, `Lupon_Settled_Report_${year}.pdf`);
+  
+      alert("Lupon Settled Report successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingLuponSettledReport(false);
+    }
+  };
+  
+  
+  // lupon pending
+
+  const generateLuponPendingReport = async () => {
+    setLoadingLuponPendingReport(true);
+    try {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = currentDate.toLocaleString("default", { month: "long" });
+      const reportTitle = `FOR THE MONTH OF ${month.toUpperCase()} ${year}`;
+  
+      //  Get Lupon Pending IncidentReports
+      const reportsRef = collection(db, "IncidentReports");
+      const q = query(
+        reportsRef,
+        where("department", "==", "Lupon"),
+        where("status", "in", ["Pending", "pending"])
+      );
+      const querySnapshot = await getDocs(q);
+      const luponSettledReports = querySnapshot.docs.map((doc) => doc.data());
+  
+      if (luponSettledReports.length === 0) {
+        alert("No Lupon Pending reports found.");
+        return;
+      }
+  
+      //  Load Excel template
+      const templateRef = ref(storage, "ReportsModule/Lupon Tagapamayapa Report Template.xlsx");
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+  
+      //  Update report title
+      worksheet.getCell("A3").value = reportTitle;
+  
+      const headerEndRow = 3;
+      const dataStartRow = 7;
+      const footerStartRow = 23;
+  
+      //  Handle header/footer images
+      const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow < dataStartRow);
+      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= footerStartRow);
+  
+      // to save footer
+      worksheet.insertRows(footerStartRow - 1, new Array(luponSettledReports.length).fill([]));
+  
+      //  Insert dynamic data
+      luponSettledReports.forEach((report, index) => {
+        const rowIndex = dataStartRow + index;
+        const row = worksheet.getRow(rowIndex);
+        row.height = 55;
+  
+        const complainant = report.complainant || {};
+        const respondent = report.respondent || {};
+  
+        const complainantFullName = `${complainant.fname || ""} ${complainant.lname || ""}`.trim();
+        const respondentFullName = `${respondent.fname || ""} ${respondent.lname || ""}`.trim();
+
+
+  
+        const cells = [
+          report.caseNumber || "",
+          `C- ${complainantFullName}\nR- ${respondentFullName}`,
+          report.nature === "Criminal" ? "*" : "",
+          report.nature === "Civil" ? "*" : "",
+          !["Civil", "Criminal"].includes(report.nature) ? report.nature : "",
+          report.isMediation ? "*" : "",
+          report.isConciliation ? "*" : "",
+          report.isArbitration ? "*" : "",
+          "", // blank
+          "*", // blank
+          "", // blank
+          "", // blank
+          report.remarks || "",
+        ];
+        cells.forEach((val, colIdx) => {
+          const cell = row.getCell(colIdx + 1);
+          cell.value = val;
+          cell.font = { name: "Calibri", size: 12 };
+          cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+          cell.border = {
+            top: { style: "medium" },
+            bottom: { style: "medium" },
+            left: { style: "medium" },
+            right: { style: "medium" },
+          };
+        });
+  
+        row.commit();
+      });
+  
+      //  Move footer images
+      footerDrawings.forEach(drawing => {
+        const offset = luponSettledReports.length;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+      });
+  
+      //  Save and upload
+
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9, 
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, 
+      };
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const fileName = `Lupon_Pending_Report_${month}_${year}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+      const fileUrl = await getDownloadURL(storageRef);
+  
+      alert("Lupon Pending Report generated successfully! Please wait for the downloadable file!");
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating Lupon Pending report:", error);
+      alert("Failed to generate Lupon Pending Report.");
+    } finally {
+      setLoadingLuponPendingReport(false);
+    }
+  };
+  
+  
+  const handleGenerateLuponPendingPDF = async () => {
+    setLoadingLuponPendingReport(true);
+    try {
+      const fileUrl = await generateLuponPendingReport();
+      if (!fileUrl) return alert("Failed to generate Excel report.");
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+  
+      saveAs(blob, `Lupon_Pending_Report_${year}.pdf`);
+  
+      alert("Lupon Pending Report successfully converted to PDF!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate PDF.");
+    } finally {
+      setLoadingLuponPendingReport(false);
+    }
+  };
+  
+  
+
   // summary of incident statuses
 
   const generateIncidentStatusSummaryReport = async () => {
-    setLoadingIncidentSummary(true);
+    setLoadingIncidentStatuses(true);
     try {
       const currentDate = new Date();
       const monthYear = currentDate.toLocaleDateString("en-US", {
@@ -3162,12 +3492,12 @@ const ReportsPage = () => {
       console.error("Error generating incident summary report:", error);
       alert("Failed to generate Incident Summary Report.");
     } finally {
-      setLoadingIncidentSummary(false);
+      setLoadingIncidentStatuses(false);
     }
   };
 
   const handleGenerateIncidentStatusSummaryPDF = async () => {
-    setLoadingIncidentSummary(true);
+    setLoadingIncidentStatuses(true);
     try {
       const fileUrl = await generateIncidentStatusSummaryReport();
       if (!fileUrl) return alert("Failed to generate Excel report.");
@@ -3194,7 +3524,7 @@ const ReportsPage = () => {
       console.error("Error:", error);
       alert("Failed to generate Incident Summary PDF.");
     } finally {
-      setLoadingIncidentSummary(false);
+      setLoadingIncidentStatuses(false);
     }
   };
   
@@ -3316,8 +3646,12 @@ const ReportsPage = () => {
               </button>             
           {session?.user?.department === "Lupon" || session?.user?.position === "Assistant Secretary" && (
             <>
-              <button className="report-button">Lupon Settled Report</button>
-              <button className="report-button">Lupon Pending Report</button>
+              <button onClick={handleGenerateLuponSettledPDF} disabled={loadingLuponSettledReport} className="report-button">
+                {loadingLuponSettledReport ? "Generating..." : "Lupon Settled Report"}
+              </button>   
+              <button onClick={handleGenerateLuponPendingPDF} disabled={loadingLuponPendingReport} className="report-button">
+                {loadingLuponPendingReport ? "Generating..." : "Lupon Pending Report"}
+              </button>   
             </>
           )}
           {session?.user?.department === "VAWC" || session?.user?.position === "Assistant Secretary" && (
