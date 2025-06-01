@@ -16,7 +16,7 @@ export default  function ViewLupon() {
   const [dialogueData, setDialogueData] = useState<any>(null);
   const [generatedSummonLetter, setGeneratedSummonLetter] = useState<any>();
   const [generatedDialogueLetter, setGeneratedDialogueLetter] = useState<any | null[]>([]);
-  const [activeSection, setActiveSection] = useState("complainant");
+  
 
   useEffect(()=>{
     if(!docId) return;
@@ -237,7 +237,7 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
 
   const getStatusClass = (status: string) => {
     switch (status) {
-      case "pending":
+      case "Pending":
         return "pending";
       case "resolved":
         return "resolved";
@@ -254,6 +254,20 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
     const handleViewLupon = () => {
       router.back();
     };
+
+    const sections = [
+      "complainant",
+      "respondent",
+      "incident",
+      "barangay desk",
+      "dialogue",
+      "hearing",
+    ];
+
+  const [activeSection, setActiveSection] = useState("complainant");
+  const [page, setPage] = useState(0); 
+  const visibleSections = sections.slice(page * 3, page * 3 + 3);
+
 
   return (
     <main className="main-container-view">
@@ -286,8 +300,20 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
               </button>
             </div>
 
+            
+
             <div className="view-incident-info-toggle-wrapper">
-              {["complainant", "respondent", "barangay desk" , "incident"].map((section) => (
+              {/* Back button on the left */}
+              <button
+                onClick={() => setPage(0)}
+                type="button"
+                disabled={page === 0}
+                style={{ background: "none", border: "none", cursor: page === 0 ? "default" : "pointer" }}
+              >
+                <img src="/Images/back.png" alt="Back" style={{ width: "20px", opacity: page === 0 ? 0.3 : 1 }} />
+              </button>
+
+              {visibleSections.map((section) => (
                 <button
                   key={section}
                   type="button"
@@ -296,18 +322,31 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
                 >
                   {section === "complainant" && "Complainant"}
                   {section === "respondent" && "Respondent"}
-                  {section === "barangay desk" && "Barangay Desk Officer"}
                   {section === "incident" && "Incident"}
+                  {section === "barangay desk" && "Barangay Desk Officer"}
+                  {section === "dialogue" && "Dialogue"}
+                  {section === "hearing" && "Hearing"}
                 </button>
               ))}
-            </div>  
+
+              {/* Right button on the right */}
+              <button
+                onClick={() => setPage(1)}
+                type="button"
+                disabled={page === 1}
+                style={{ background: "none", border: "none", cursor: page === 1 ? "default" : "pointer" }}
+              >
+                <img src="/Images/next.png" alt="Next" style={{ width: "20px", opacity: page === 1 ? 0.3 : 1 }} />
+              </button>
+            </div>
+     
           </div>
 
           <div className="view-incident-header-body-bottom-section">
             <div className="incident-main-details-container">
               <div className="incident-main-details-section">
                 <div className="incident-main-details-topsection">
-                  <h1>LPN - CHJGDQ - 0015</h1>
+                  <h1>{reportData?.caseNumber}</h1>
                 </div>
                 <div className="incident-main-details-statussection">
                   <h1> Status</h1>
@@ -365,30 +404,30 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
                       <div className="view-incident-content-left-side">
                         <div className="view-incident-fields-section">
                           <p>Full Name</p>
-                          <input type="text" className="view-incident-input-field" name="complainantName" value={complainantsData.name || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="complainantName" value={complainantsData.name || "N/A"} readOnly />
                         </div>
                         <div className="view-incident-fields-section">
                           <p>Civil Status</p>
-                          <input type="text" className="view-incident-input-field" name="complainantCivilStatus" value={complainantsData.civilStatus || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="complainantCivilStatus" value={complainantsData.civilStatus || "N/A"} readOnly />
                         </div>
                         <div className="view-incident-fields-section">
                           <p>Age</p>
-                          <input type="text" className="view-incident-input-field" name="complainantAge" value={complainantsData.age || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="complainantAge" value={complainantsData.age || "N/A"} readOnly />
                         </div>
                       </div>
 
                       <div className="view-incident-content-right-side">
                         <div className="view-incident-fields-section">
                           <p>Sex</p>
-                          <input type="text" className="view-incident-input-field" name="complainantSex" value={complainantsData.sex || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="complainantSex" value={complainantsData.sex || "N/A"} readOnly />
                         </div>
                         <div className="view-incident-fields-section">
                           <p>Address</p>
-                          <input type="text" className="view-incident-input-field" name="complainantAddress" value={complainantsData.address || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="complainantAddress" value={complainantsData.address || "N/A"} readOnly />
                         </div>
                         <div className="view-incident-fields-section">
                           <p>Contact Number</p>
-                          <input type="text" className="view-incident-input-field" name="complainantContact" value={complainantsData.contact || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="complainantContact" value={complainantsData.contact || "N/A"} readOnly />
                         </div>
                       </div>
                     </>
@@ -399,30 +438,30 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
                       <div className="view-incident-content-left-side">
                         <div className="view-incident-fields-section">
                           <p>Full Name</p>
-                          <input type="text" className="view-incident-input-field" name="respondentName" value={respondent.name || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="respondentName" value={respondent.name || "N/A"} readOnly />
                         </div>
                         <div className="view-incident-fields-section">
                           <p>Civil Status</p>
-                          <input type="text" className="view-incident-input-field" name="respondentCivilStatus" value={respondent.civilStatus || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="respondentCivilStatus" value={respondent.civilStatus || "N/A"} readOnly />
                         </div>
                         <div className="view-incident-fields-section">
                           <p>Age</p>
-                          <input type="text" className="view-incident-input-field" name="respondentAge" value={respondent.age || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="respondentAge" value={respondent.age || "N/A"} readOnly />
                         </div>
                       </div>
 
                       <div className="view-incident-content-right-side">
                         <div className="view-incident-fields-section">
                           <p>Sex</p>
-                          <input type="text" className="view-incident-input-field" name="respondentSex" value={respondent.sex || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="respondentSex" value={respondent.sex || "N/A"} readOnly />
                         </div>
                         <div className="view-incident-fields-section">
                           <p>Address</p>
-                          <input type="text" className="view-incident-input-field" name="respondentAddress" value={respondent.address || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="respondentAddress" value={respondent.address || "N/A"} readOnly />
                         </div>
                         <div className="view-incident-fields-section">
                           <p>Contact Number</p>
-                          <input type="text" className="view-incident-input-field" name="respondentContact" value={respondent.contact || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="respondentContact" value={respondent.contact || "N/A"} readOnly />
                         </div>
                       </div>
                     </>
@@ -432,14 +471,14 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
                       <div className="view-incident-content-left-side">
                         <div className="view-incident-fields-section">
                           <p>Full Name</p>
-                          <input type="text" className="view-incident-input-field" name="deskOfficerName" value={deskOfficerData.name || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="deskOfficerName" value={deskOfficerData.name || "N/A"} readOnly />
                         </div>
                       </div>
 
                       <div className="view-incident-content-right-side">
                         <div className="view-incident-fields-section">
                           <p>Date & Time Signed</p>
-                          <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={deskOfficerData.dateTimeReceived || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={deskOfficerData.dateTimeReceived || "N/A"} readOnly />
                         </div>
                       </div>
 
@@ -451,20 +490,59 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
                       <div className="view-incident-content-left-side">
                         <div className="view-incident-fields-section">
                           <p>Nature</p>
-                          <input type="text" className="view-incident-input-field" name="deskOfficerName" value={otherinformation.nature || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="deskOfficerName" value={otherinformation.nature || "N/A"} readOnly />
                         </div>
                         <div className="view-incident-fields-section">
                           <p>Date & Time Signed</p>
-                          <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.date || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.date || "N/A"} readOnly />
                         </div>
                         <div className="view-incident-fields-section">
                           <p>Location</p>
-                          <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.location || "N/A"} required readOnly />
+                          <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.location || "N/A"} readOnly />
                         </div>
+                        {departId === "GAD" && (
+                          <>
+                            <div className="view-incident-fields-section">
+                              <p>Nos of Male Children Victim/s</p>
+                              <input type="text" className="view-incident-input-field" name="nosofMaleChildren" value={reportData?.nosofMaleChildren || "N/A"} readOnly
+                              />
+                            </div>
+
+                            <div className="view-incident-fields-section">
+                              <p>Nos of Female Children Victim/s</p>
+                              <input type="text" className="view-incident-input-field" name="nosofFemaleChildren" value={reportData?.nosofFemaleChildren || "N/A"} readOnly
+                              />
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       <div className="view-incident-content-right-side">
-                        
+                        <div className="box-container-outer-natureoffacts">
+                          <div className="title-remarks">
+                            Nature of Facts
+                          </div>
+                          <div className="box-container-natureoffacts">
+                            <textarea className="natureoffacts-input-field" name="concern" value={otherinformation.concern} readOnly/>
+                          </div>
+                        </div>
+
+                        <div className="box-container-outer-images">
+                          <div className="title-remarks">
+                            Incident Image
+                          </div>
+                          <div className="box-container-images">
+                            {otherinformation.image ? (
+                              <img
+                                src={otherinformation.image}
+                                alt="Incident Image"
+                                style={{ maxWidth: "260px", maxHeight: "300px", borderRadius: "10px" }}
+                              />
+                            ) : (
+                              <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "85px" }}>No image available</p>
+                            )}
+                          </div>
+                        </div>
                       </div>
 
                     </>
