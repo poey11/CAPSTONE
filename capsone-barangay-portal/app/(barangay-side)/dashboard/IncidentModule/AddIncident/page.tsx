@@ -781,20 +781,7 @@ const handleSubmit = (event: React.FormEvent) => {
 
                   </div>
 
-                  <div className="fields-section-add">
-                       <p>Contact Information<span className="required">*</span></p>
-                       <input 
-                        type="text" 
-                        className={`add-incident-input-field ${showFieldErrors && !complainant.contact.trim() ? "input-error" : ""}`}   
-                        placeholder="Enter Contact Number" 
-                        value={complainant.contact}
-                        name="contact"
-                        id="complainant"
-                        required
-                        onChange={handleFormChange}
-                        disabled={isComplainantResidentSelected}
-                        />
-                  </div>
+               
 
                 </div>
 
@@ -847,7 +834,31 @@ const handleSubmit = (event: React.FormEvent) => {
 
                 </div>
 
+
                 </div>
+
+                <div className="add-incident-section-bottom-side-2">
+
+                     <div className="fields-section-add">
+                       <p>Contact Information<span className="required">*</span></p>
+                       <input 
+                        type="text" 
+                        className={`add-incident-input-field ${showFieldErrors && !complainant.contact.trim() ? "input-error" : ""}`}   
+                        placeholder="Enter Contact Number" 
+                        value={complainant.contact}
+                        name="contact"
+                        id="complainant"
+                        required
+                        onChange={handleFormChange}
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
+                  
+                </div>
+
+
+
+
                 </>
                       )}
 
@@ -946,23 +957,7 @@ const handleSubmit = (event: React.FormEvent) => {
                           </select>
                       </div>
 
-                      <div className="fields-section-add">
-                          <p>Contact Information<span className="required">*</span></p>
-                          <input 
-                          type="text" 
-                          id="respondent"
-                          className={`add-incident-input-field ${showFieldErrors && !respondent.contact.trim() ? "input-error" : ""}`}   
-                          placeholder="Enter Contact Number" 
-                          value={respondent.contact}
-                          name="contact"
-                          required
-        
-                          onChange={handleFormChange}
-                          disabled={isRespondentResidentSelected}
-
-                          />
-
-                      </div>
+                   
 
                     </div>
 
@@ -1022,6 +1017,29 @@ const handleSubmit = (event: React.FormEvent) => {
 
 
 
+                </div>
+
+
+                 <div className="add-incident-section-bottom-side-2">
+                         <div className="fields-section-add">
+                          <p>Contact Information<span className="required">*</span></p>
+                          <input 
+                          type="text" 
+                          id="respondent"
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.contact.trim() ? "input-error" : ""}`}   
+                          placeholder="Enter Contact Number" 
+                          value={respondent.contact}
+                          name="contact"
+                          required
+        
+                          onChange={handleFormChange}
+                          disabled={isRespondentResidentSelected}
+
+                          />
+
+                      </div>
+              
+                  
                 </div>
               </>
             )}
