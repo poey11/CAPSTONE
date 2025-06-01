@@ -256,6 +256,7 @@ padding-bottom:30px;
   display: flex;
   align-items: center;
   margin-top: 20px;
+  align-self: center;
 }
 
 
@@ -298,6 +299,19 @@ padding-bottom:30px;
   justify-content: space-between;
   width: 80%;
 }
+
+
+.add-incident-GAD-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+}
+
+
+
+
+
 
 
 .case-number-display {

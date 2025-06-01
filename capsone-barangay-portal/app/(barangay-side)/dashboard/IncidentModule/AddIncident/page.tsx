@@ -1121,38 +1121,6 @@ const handleSubmit = (event: React.FormEvent) => {
 
               </div>
 
-              <div className="fields-section-add">
-
-              {departmentId === "GAD" && (
-                      <div>
-                        <div className="fields-section-add">
-                          <p>Nos of Male Children Victim/s<span className="required">*</span></p>
-                          <input type="number" 
-                          className="add-incident-input-field"
-                          min="0"
-                          value={reportInfo.nosofMaleChildren}
-                          name="nosofMaleChildren"
-                          onChange={handleFormChange}
-                          required />    
-                        </div>
-
-                        <div className="fields-section-add">
-                          <p>Nos of Female Children Victim/s<span className="required">*</span></p>
-                          <input type="number"
-                            className="add-incident-input-field"
-                            min="0"
-                            value={reportInfo.nosofFemaleChildren}
-                            name="nosofFemaleChildren"
-                            onChange={handleFormChange}
-                            required />    
-                        </div>
-
-                      </div>
-                    )}
-
-              </div>
-
-
 
           
           </div>
@@ -1227,6 +1195,34 @@ const handleSubmit = (event: React.FormEvent) => {
           </div>
 
           </div>
+
+
+        {departmentId === "GAD" && (
+                  <div className="add-incident-GAD-section">
+            
+                                <div className="fields-section-add">
+                                  <p>Nos of Male Children Victim/s<span className="required">*</span></p>
+                                  <input type="number" 
+                                  className="add-incident-input-field"
+                                  min="0"
+                                  value={reportInfo.nosofMaleChildren}
+                                  name="nosofMaleChildren"
+                                  onChange={handleFormChange}
+                                  required />    
+                                </div>
+
+                                <div className="fields-section-add">
+                                  <p>Nos of Female Children Victim/s<span className="required">*</span></p>
+                                  <input type="number"
+                                    className="add-incident-input-field"
+                                    min="0"
+                                    value={reportInfo.nosofFemaleChildren}
+                                    name="nosofFemaleChildren"  
+                                    onChange={handleFormChange}
+                                    required />    
+                                </div>
+                  </div>
+        )}
 
 
           <div className="add-incident-section-bottom-side">
