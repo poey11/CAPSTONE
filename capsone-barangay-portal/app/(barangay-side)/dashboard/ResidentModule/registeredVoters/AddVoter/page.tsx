@@ -293,10 +293,11 @@ export default function addVoter() {
                   </button>
                 ))}
               </nav>  
-              <div className="residents-search-section">
-                <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleVotersClick} />
-              </div>
+            
               <div className="add-resident-bottom-section-scroll">
+                <div className="residents-search-section">
+                  <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleVotersClick} />
+                </div>
 
                 <form id="addVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
                 {activeSection === "details" && (
