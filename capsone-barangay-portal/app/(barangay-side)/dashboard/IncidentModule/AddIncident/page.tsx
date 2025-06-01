@@ -1030,6 +1030,7 @@ const handleSubmit = (event: React.FormEvent) => {
           <>
 
           <div className="add-incident-full-top">
+            
 
           <div className="add-incident-section-left-side">
 
@@ -1105,39 +1106,7 @@ const handleSubmit = (event: React.FormEvent) => {
                    </div>
 
 
-
-                  <div className="box-container-outer-resclassification-add">
-                    <div className="title-remarks-add">
-                        <p>Nature of Facts<span className="required">*</span></p>
-                    </div>
-
-                    <div className="box-container-remarks-add">
-                    <textarea 
-                            required
-                            placeholder="Enter Nature of Facts of the Complaint"
-                            value={reportInfo.concern}
-                            id="concern"
-                            name="concern"
-                            onChange={handleFormChange}
-                            rows={15}
-                  ></textarea>
-
-                    </div>
-                      
-                      
-
-                  </div>
-                    
-
-
-
-          
-          </div>
-
-
-            <div className="add-incident-section-right-side">
-
-              <div className="fields-section-add">
+                   <div className="fields-section-add">
                   <p>Date Filed<span className="required">*</span></p>
                   <input type="date" className="add-incident-input-field" max={currentDate} id="dateFiled" name="dateFiled" 
                     value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
@@ -1181,69 +1150,109 @@ const handleSubmit = (event: React.FormEvent) => {
 
               </div>
 
-              <div className="fields-section-add">
 
-              <p> Photo of the Incident (if Applicable)</p>
 
-              <div className="file-upload-container-add">
-                 <label htmlFor="file-upload1" className="upload-link-add">Click to Upload File</label>
-                 <input
-                   id="file-upload1"
-                   type="file"
-                   className="file-upload-input-add"
-                   accept=".jpg,.jpeg,.png"
-                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                     handleFileChangeContainer1(e);
-                     handleFormChange(e);
-                   }} // Handle file selection
-                 />
-                 <div className="uploadedFiles-container-add">
-                    {filesContainer1.length > 0 && (
-                      <div className="file-name-image-display-add">
-                        <ul>
-                          {filesContainer1.map((file, index) => (
-                            <div className="file-name-image-display-indiv-add" key={index}>
-                              <li>
-                                {file.preview && (
-                                  <div className="filename-image-container-add">
-                                    <img
-                                      src={file.preview}
-                                      alt={file.name}
-                                      style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                    />
-                                  </div>
-                                )}
-                                {file.name}
-                                <div className="delete-container-add">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleFileDeleteContainer1()}
-                                    className="delete-button-add"
-                                  >
-                                    <img
-                                      src="/images/trash.png"
-                                      alt="Delete"
-                                      className="delete-icon-add"
-                                    />
-                                  </button>
+          
+          </div>
+
+
+          <div className="add-incident-section-right-side">
+
+
+          <div className="box-container-outer-proof">
+                    <div className="title-proof">
+                          Proof of Incident
+                    </div>
+
+                    <div className="box-container-proof">
+
+                    <div className="file-upload-container-add">
+                          <label htmlFor="file-upload1" className="upload-link-add">Click to Upload File</label>
+                          <input
+                            id="file-upload1"
+                            type="file"
+                            className="file-upload-input-add"
+                            accept=".jpg,.jpeg,.png"
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              handleFileChangeContainer1(e);
+                              handleFormChange(e);
+                            }} // Handle file selection
+                          />
+                          <div className="uploadedFiles-container-add">
+                              {filesContainer1.length > 0 && (
+                                <div className="file-name-image-display-add">
+                                  <ul>
+                                    {filesContainer1.map((file, index) => (
+                                      <div className="file-name-image-display-indiv-add" key={index}>
+                                        <li>
+                                          {file.preview && (
+                                            <div className="filename-image-container-add">
+                                              <img
+                                                src={file.preview}
+                                                alt={file.name}
+                                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                              />
+                                            </div>
+                                          )}
+                                          {file.name}
+                                          <div className="delete-container-add">
+                                            <button
+                                              type="button"
+                                              onClick={() => handleFileDeleteContainer1()}
+                                              className="delete-button-add"
+                                            >
+                                              <img
+                                                src="/images/trash.png"
+                                                alt="Delete"
+                                                className="delete-icon-add"
+                                              />
+                                            </button>
+                                          </div>
+                                        </li>
+                                      </div>
+                                    ))}
+                                  </ul>
                                 </div>
-                              </li>
-                            </div>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                 </div>
-               </div>
+                              )}
+                          </div>
+                        </div>
+
+                    </div>
+
 
               </div>
-               
-
-           </div>
-
-
 
           </div>
+
+          </div>
+
+
+          <div className="add-incident-section-bottom-side">
+
+            <div className="box-container-outer-resclassification-add">
+                    <div className="title-remarks-add">
+                        <p>Nature of Facts<span className="required">*</span></p>
+                    </div>
+
+                    <div className="box-container-remarks-add">
+                    <textarea 
+                            required
+                            placeholder="Enter Nature of Facts of the Complaint"
+                            value={reportInfo.concern}
+                            id="concern"
+                            name="concern"
+                            onChange={handleFormChange}
+                            rows={15}
+                  ></textarea>
+
+                    </div>
+                      
+                      
+
+            </div>
+                  
+
+            </div>
 
 
 
