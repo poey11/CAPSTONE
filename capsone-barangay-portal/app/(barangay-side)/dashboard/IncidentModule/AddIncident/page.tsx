@@ -1104,10 +1104,15 @@ const handleSubmit = (event: React.FormEvent) => {
                         value = {reportInfo.timeFiled} onChange={handleFormChange} required />
                    </div>
 
-                  <div className="fields-section-add">
-                      <p>Nature of Facts<span className="required">*</span></p>
-                       <textarea 
-                            className="description-add" 
+
+
+                  <div className="box-container-outer-resclassification-add">
+                    <div className="title-remarks-add">
+                        <p>Nature of Facts<span className="required">*</span></p>
+                    </div>
+
+                    <div className="box-container-remarks-add">
+                    <textarea 
                             required
                             placeholder="Enter Nature of Facts of the Complaint"
                             value={reportInfo.concern}
@@ -1117,6 +1122,9 @@ const handleSubmit = (event: React.FormEvent) => {
                             rows={15}
                   ></textarea>
 
+                    </div>
+                      
+                      
 
                   </div>
                     
