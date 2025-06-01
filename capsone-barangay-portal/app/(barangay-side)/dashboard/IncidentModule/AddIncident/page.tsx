@@ -316,6 +316,7 @@ export default function AddIncident() {
                 contact: complainant.contact,
                 civilStatus: complainant.civilStatus,
                 address: complainant.address,
+                residentId: complainant.residentId,
             },
             respondent: {
                 fname: respondent.fname,
@@ -325,6 +326,7 @@ export default function AddIncident() {
                 contact: respondent.contact,
                 civilStatus: respondent.civilStatus,
                 address: respondent.address,
+                residentId: respondent.residentId,
             }
         };
 
@@ -652,7 +654,7 @@ const handleSubmit = (event: React.FormEvent) => {
 
              <input 
                     type="text" 
-                    className="search-bar-add" 
+                    className="search-bar-add-case" 
                     value={reportInfo.caseNumber}
                     name="caseNumber"
                     id="caseNumber"
