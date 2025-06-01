@@ -16,6 +16,7 @@ export default  function ViewLupon() {
   const [dialogueData, setDialogueData] = useState<any>(null);
   const [generatedSummonLetter, setGeneratedSummonLetter] = useState<any>();
   const [generatedDialogueLetter, setGeneratedDialogueLetter] = useState<any | null[]>([]);
+  const [activeSection, setActiveSection] = useState("complainant");
 
   useEffect(()=>{
     if(!docId) return;
@@ -236,13 +237,13 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
 
   const getStatusClass = (status: string) => {
     switch (status) {
-      case "Pending":
+      case "pending":
         return "pending";
-      case "Resolved":
+      case "resolved":
         return "resolved";
-      case "Settled":
+      case "settled":
         return "settled";
-      case "Archived":
+      case "archived":
         return "archived";
       default:
         return "";
@@ -257,12 +258,234 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
   return (
     <main className="main-container-view">
       {/* should also include hearing and dialogue info*/}
+
+      <div className="view-incident-main-content">
+        <div className="view-incident-main-section1">
+            <div className="view-incident-header-first-section">
+              <img src="/Images/QClogo.png" alt="QC Logo" className="logo1-image-side-bar-1" />
+            </div>
+
+            <div className="view-incident-header-second-section">
+              <h2 className="gov-info">Republic of the Philippines</h2>
+              <h2 className="gov-info">Quezon City</h2>
+              <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+              <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+              <h2 className="contact">930-0040 / 428-9030</h2>
+            </div>
+
+            <div className="view-incident-header-third-section">
+              <img src="/Images/logo.png" alt="Brgy Logo" className="logo2-image-side-bar-1" />
+            </div>
+        </div>
+
+        <div className="view-incident-header-body">
+          <div className="view-incident-header-body-top-section">
+            <div className="view-incident-backbutton-container">
+              <button onClick={handleViewLupon}>
+                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-main-resident"/> 
+              </button>
+            </div>
+
+            <div className="view-incident-info-toggle-wrapper">
+              {["complainant", "respondent", "barangay desk" , "incident"].map((section) => (
+                <button
+                  key={section}
+                  type="button"
+                  className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                  onClick={() => setActiveSection(section)}
+                >
+                  {section === "complainant" && "Complainant"}
+                  {section === "respondent" && "Respondent"}
+                  {section === "barangay desk" && "Barangay Desk Officer"}
+                  {section === "incident" && "Incident"}
+                </button>
+              ))}
+            </div>  
+          </div>
+
+          <div className="view-incident-header-body-bottom-section">
+            <div className="incident-main-details-container">
+              <div className="incident-main-details-section">
+                <div className="incident-main-details-topsection">
+                  <h1>LPN - CHJGDQ - 0015</h1>
+                </div>
+                <div className="incident-main-details-statussection">
+                  <h1> Status</h1>
+
+                  <div className="status-section-view">
+                      <p className={`status-badge-view ${getStatusClass(status)}`}>{status}</p> 
+                  </div>
+                </div>
+                <div className="incident-main-details-description">
+                  <div className="incident-date-section">
+                    <div className="incident-date-topsection">
+                      <div className="incident-main-details-icons-section">
+                        <img src="/Images/calendar.png" alt="calendar icon" className="view-incident-description-icon-calendar" />
+                      </div>
+                      <div className="incident-main-details-title-section">
+                        <h1>Date Filed</h1>
+                      </div>
+                    </div>
+                    <p>{reportData?.dateFiled || "N/A"}</p>
+                  </div>
+
+                  <div className="incident-location-section">
+                    <div className="incident-loc-topsection">
+                      <div className="incident-main-details-icons-section">
+                        <img src="/Images/loc.png" alt="location icon" className="view-incident-description-icon-loc" />
+                      </div>
+                      <div className="incident-main-details-title-section">
+                        <h1>Location</h1>
+                      </div>
+                    </div>
+                    <p>{reportData?.location || "N/A"}</p>
+                  </div>
+
+                  <div className="incident-description-section">
+                    <div className="incident-desc-topsection">
+                      <div className="incident-main-details-icons-section">
+                        <img src="/Images/description.png" alt="description icon" className="view-incident-description-icon-desc" />
+                      </div>
+                      <div className="incident-main-details-title-section">
+                        <h1>Description</h1>
+                      </div>
+                    </div>
+                    <p>{reportData?.nature || "N/A"}</p>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+
+            <div className="view-incident-info-main-container">
+              <div className="view-incident-info-container-scrollable">
+                <div className="view-incident-info-main-content">
+                  {activeSection === "complainant" && (
+                    <>
+                      <div className="view-incident-content-left-side">
+                        <div className="view-incident-fields-section">
+                          <p>Full Name</p>
+                          <input type="text" className="view-incident-input-field" name="complainantName" value={complainantsData.name || "N/A"} required readOnly />
+                        </div>
+                        <div className="view-incident-fields-section">
+                          <p>Civil Status</p>
+                          <input type="text" className="view-incident-input-field" name="complainantCivilStatus" value={complainantsData.civilStatus || "N/A"} required readOnly />
+                        </div>
+                        <div className="view-incident-fields-section">
+                          <p>Age</p>
+                          <input type="text" className="view-incident-input-field" name="complainantAge" value={complainantsData.age || "N/A"} required readOnly />
+                        </div>
+                      </div>
+
+                      <div className="view-incident-content-right-side">
+                        <div className="view-incident-fields-section">
+                          <p>Sex</p>
+                          <input type="text" className="view-incident-input-field" name="complainantSex" value={complainantsData.sex || "N/A"} required readOnly />
+                        </div>
+                        <div className="view-incident-fields-section">
+                          <p>Address</p>
+                          <input type="text" className="view-incident-input-field" name="complainantAddress" value={complainantsData.address || "N/A"} required readOnly />
+                        </div>
+                        <div className="view-incident-fields-section">
+                          <p>Contact Number</p>
+                          <input type="text" className="view-incident-input-field" name="complainantContact" value={complainantsData.contact || "N/A"} required readOnly />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {activeSection === "respondent" && (
+                    <>
+                      <div className="view-incident-content-left-side">
+                        <div className="view-incident-fields-section">
+                          <p>Full Name</p>
+                          <input type="text" className="view-incident-input-field" name="respondentName" value={respondent.name || "N/A"} required readOnly />
+                        </div>
+                        <div className="view-incident-fields-section">
+                          <p>Civil Status</p>
+                          <input type="text" className="view-incident-input-field" name="respondentCivilStatus" value={respondent.civilStatus || "N/A"} required readOnly />
+                        </div>
+                        <div className="view-incident-fields-section">
+                          <p>Age</p>
+                          <input type="text" className="view-incident-input-field" name="respondentAge" value={respondent.age || "N/A"} required readOnly />
+                        </div>
+                      </div>
+
+                      <div className="view-incident-content-right-side">
+                        <div className="view-incident-fields-section">
+                          <p>Sex</p>
+                          <input type="text" className="view-incident-input-field" name="respondentSex" value={respondent.sex || "N/A"} required readOnly />
+                        </div>
+                        <div className="view-incident-fields-section">
+                          <p>Address</p>
+                          <input type="text" className="view-incident-input-field" name="respondentAddress" value={respondent.address || "N/A"} required readOnly />
+                        </div>
+                        <div className="view-incident-fields-section">
+                          <p>Contact Number</p>
+                          <input type="text" className="view-incident-input-field" name="respondentContact" value={respondent.contact || "N/A"} required readOnly />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {activeSection === "barangay desk" && (
+                    <>
+                      <div className="view-incident-content-left-side">
+                        <div className="view-incident-fields-section">
+                          <p>Full Name</p>
+                          <input type="text" className="view-incident-input-field" name="deskOfficerName" value={deskOfficerData.name || "N/A"} required readOnly />
+                        </div>
+                      </div>
+
+                      <div className="view-incident-content-right-side">
+                        <div className="view-incident-fields-section">
+                          <p>Date & Time Signed</p>
+                          <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={deskOfficerData.dateTimeReceived || "N/A"} required readOnly />
+                        </div>
+                      </div>
+
+                    </>
+                  )}
+
+                  {activeSection === "incident" && (
+                    <>
+                      <div className="view-incident-content-left-side">
+                        <div className="view-incident-fields-section">
+                          <p>Nature</p>
+                          <input type="text" className="view-incident-input-field" name="deskOfficerName" value={otherinformation.nature || "N/A"} required readOnly />
+                        </div>
+                        <div className="view-incident-fields-section">
+                          <p>Date & Time Signed</p>
+                          <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.date || "N/A"} required readOnly />
+                        </div>
+                        <div className="view-incident-fields-section">
+                          <p>Location</p>
+                          <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.location || "N/A"} required readOnly />
+                        </div>
+                      </div>
+
+                      <div className="view-incident-content-right-side">
+                        
+                      </div>
+
+                    </>
+                  )}
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        
+      </div>
           
 
      
       <div className="main-content-view">
-
-
 
         <div className="section-1-view">
 
