@@ -316,6 +316,7 @@ export default function AddIncident() {
                 contact: complainant.contact,
                 civilStatus: complainant.civilStatus,
                 address: complainant.address,
+                residentId: complainant.residentId,
             },
             respondent: {
                 fname: respondent.fname,
@@ -325,6 +326,7 @@ export default function AddIncident() {
                 contact: respondent.contact,
                 civilStatus: respondent.civilStatus,
                 address: respondent.address,
+                residentId: respondent.residentId,
             }
         };
 
@@ -617,6 +619,7 @@ const handleSubmit = (event: React.FormEvent) => {
     router.back();
   };
 
+  const [activeSection, setActiveSection] = useState("complainant");
 
 
   return (
@@ -626,41 +629,76 @@ const handleSubmit = (event: React.FormEvent) => {
 
         <div className="main-content-add">
 
-        <button type="button" className="back-button-add" onClick={handleBack}></button>
+       
 
         <form onSubmit={delayedSubmit}>
-            <div className="section-1-add">
-                <p className="NewOfficial-add"> New Incident</p>
 
-                    <div className="actions-add">
-                        <button  type="button" onClick={deleteForm} className="action-delete-add">Delete</button>
-                        <button type="submit" className="action-view-add" >Save</button>
-                    </div>
-                
+            <div className="section-1-add">
+
+              <div className="section-1-left-side-add">
+
+                <button onClick={handleBack}>
+                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-add"/> 
+                </button>
+
+                <h1> Add New Incident </h1>
+              </div>
+
+                <div className="actions-add">
+                   <button  type="button" onClick={deleteForm} className="action-delete-add">Delete</button>
+                   <button type="submit" className="action-view-add" >Save</button>
+                 </div>
+          
              </div>
+
+
              <input 
                     type="text" 
-                    className="search-bar-add" 
+                    className="search-bar-add-case" 
                     value={reportInfo.caseNumber}
                     name="caseNumber"
                     id="caseNumber"
                     disabled
                     
-                    />
+              />
+              
+            
+            <div className="add-incident-bottom-section">
 
-             <div className="section-2-add">
+       
+                <nav className="add-incident-info-toggle-wrapper">
+                {["complainant", "respondent", "others","desk"].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn-add ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "complainant" && "Complainant Info"}
+                      {section === "respondent" && "Respondent Info"}
+                      {section === "others" && "Other Info"}
+                      {section === "desk" && "Desk Officer Info"}
+                    </button>
+                  ))}
+                </nav>
 
-                <div className="section-2-left-side-add">
 
-                    <p >Complainant's Information</p>
+            <div className="add-incindent-bottom-section-scroll">
 
-                      {/* complainant search pop up */}
-                    <div className="residents-search-section">
+            <div className="add-incident-section-2">
+
+
+            {activeSection === "complainant" && (
+             <>
+
+              <div className="add-incident-section-top-side">
+
+                  <div className="fields-section-add">
                       <input type="text"  className="select-resident-input-field" placeholder="Select Complainant" onClick={handleComplainantsClick} />
-                    </div>
+                  </div>
 
-                      {/* button to clear if the complainant is from residents */}
-                    {isComplainantResidentSelected && (
+                          {/* button to clear if the complainant is from residents */}
+                          {isComplainantResidentSelected && (
                       <button
                         type="button"
                         onClick={() => {
@@ -681,130 +719,149 @@ const handleSubmit = (event: React.FormEvent) => {
                         Clear Complainant
                       </button>
                     )}
+              </div>
 
+            <div className="add-incident-full-top">
 
-                    <p>First Name<span className="required">*</span></p>
+  
 
-                    <input 
-                    type="text" 
-                    className={`search-bar-add ${showFieldErrors && !complainant.fname.trim() ? "input-error" : ""}`}
-                    placeholder="Enter Complaint's First Name" 
-                    value={complainant.fname}
-                    name="fname"
-                    id="complainant"
-                    onChange={handleFormChange}
-                    required
-                    disabled={isComplainantResidentSelected}
-                    />
-                  <p>Last Name<span className="required">*</span></p>
+  
+                <div className="add-incident-section-left-side">
+         
+                  <div className="fields-section-add">
+                     <p>Last Name<span className="required">*</span></p>
+                      <input 
+                      type="text" 
+                      className={`add-incident-input-field ${showFieldErrors && !complainant.lname.trim() ? "input-error" : ""}`}
+                      placeholder="Enter Complaint's Last Name" 
+                      value={complainant.lname}
+                      name="lname"
+                      id="complainant"
+                      onChange={handleFormChange}
+                      required
+                      disabled={isComplainantResidentSelected}
+                      />
+                 </div>
 
-                    <input 
-                    type="text" 
-                    className={`search-bar-add ${showFieldErrors && !complainant.lname.trim() ? "input-error" : ""}`}
-                    placeholder="Enter Complaint's Last Name" 
-                    value={complainant.lname}
-                    name="lname"
-                    id="complainant"
-                    onChange={handleFormChange}
-                    required
-                    disabled={isComplainantResidentSelected}
-
-                    />
-
-                  <p>Sex<span className="required">*</span></p>
-                  <select 
-                    name="sex" 
-                    className={`search-bar-add ${showFieldErrors && !complainant.sex.trim() ? "input-error" : ""}`}
-                    required
-                    id="complainant"
-                    value={complainant.sex}
-                    onChange={handleFormChange}
-                    disabled={isComplainantResidentSelected}
-                    >
-                    <option value="" disabled>Choose A Sex</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-
-
-                    <p>Age<span className="required">*</span></p>
-
-                    <input 
-                    type="number" 
-                    className={`search-bar-add`}
-                    placeholder="Enter Age" 
-                    value={complainant.age}
-                    name="age"
-                    id="complainant"
-                    onChange={handleFormChange}
-                    required
-                    disabled={isComplainantResidentSelected}
-
-                    />
-
-                    <p>Civil Status<span className="required">*</span></p>
-                 
-                    <select   
-                    className={`search-bar-add ${showFieldErrors && !complainant.civilStatus.trim() ? "input-error" : ""}`}   
-                    value={complainant.civilStatus} 
-                    name="civilStatus"
-                    id="complainant"
-                    onChange={handleFormChange}
-                    disabled={isComplainantResidentSelected}
-                    required>
-                      <option value="" disabled>Choose A Civil Status</option>
-                      <option value="Single">Single</option>
-                      <option value="Married">Married</option>
-                      <option value="Widowed">Widowed</option>
-                      <option value="Separated">Separated</option>
-                      <option value="Divorced">Divorced</option>
-                      
+                  <div className="fields-section-add">
+                    <p>Sex<span className="required">*</span></p>
+                      <select 
+                      name="sex" 
+                      className={`add-incident-input-field ${showFieldErrors && !complainant.sex.trim() ? "input-error" : ""}`}
+                      required
+                      id="complainant"
+                      value={complainant.sex}
+                      onChange={handleFormChange}
+                      disabled={isComplainantResidentSelected}
+                      >
+                      <option value="" disabled>Choose A Sex</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
                     </select>
+                  </div>
 
+                  <div className="fields-section-add">
+                      <p>Civil Status<span className="required">*</span></p>              
+                      <select   
+                      className={`add-incident-input-field  ${showFieldErrors && !complainant.civilStatus.trim() ? "input-error" : ""}`}   
+                      value={complainant.civilStatus} 
+                      name="civilStatus"
+                      id="complainant"
+                      onChange={handleFormChange}
+                      disabled={isComplainantResidentSelected}
+                      required>
+                        <option value="" disabled>Choose A Civil Status</option>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Widowed">Widowed</option>
+                        <option value="Separated">Separated</option>
+                        <option value="Divorced">Divorced</option>
+                        
+                      </select>
 
-                    <p>Address<span className="required">*</span></p>
+                  </div>
 
-                    <input 
-                    type="text" 
-                    className={`search-bar-add ${showFieldErrors && !complainant.address.trim() ? "input-error" : ""}`}    
-                    placeholder="Enter Address" 
-                    value={complainant.address}
-                    name="address"
-                    id="complainant"
-                    required
-                    onChange={handleFormChange}
-                    disabled={isComplainantResidentSelected}
-
-                    />
-
-                    <p>Contact Information<span className="required">*</span></p>
-
-                    <input 
-                    type="text" 
-                    className={`search-bar-add ${showFieldErrors && !complainant.contact.trim() ? "input-error" : ""}`}   
-                    placeholder="Enter Contact Number" 
-                    value={complainant.contact}
-                    name="contact"
-                    id="complainant"
-                    required
-                    onChange={handleFormChange}
-                    disabled={isComplainantResidentSelected}
-
-                    />
+                  <div className="fields-section-add">
+                       <p>Contact Information<span className="required">*</span></p>
+                       <input 
+                        type="text" 
+                        className={`add-incident-input-field ${showFieldErrors && !complainant.contact.trim() ? "input-error" : ""}`}   
+                        placeholder="Enter Contact Number" 
+                        value={complainant.contact}
+                        name="contact"
+                        id="complainant"
+                        required
+                        onChange={handleFormChange}
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
 
                 </div>
-              
-                <div className="section-2-right-side-add">
-                  
-                <p >Respondent's Information</p>
 
-                        {/* respondent search pop up */}
-                    <div className="residents-search-section">
+                <div className="add-incident-section-right-side">
+
+                  <div className="fields-section-add">
+                       <p>First Name<span className="required">*</span></p>
+                       <input 
+                        type="text" 
+                        className={`add-incident-input-field ${showFieldErrors && !complainant.fname.trim() ? "input-error" : ""}`}
+                        placeholder="Enter Complaint's First Name" 
+                        value={complainant.fname}
+                        name="fname"
+                        id="complainant"
+                        onChange={handleFormChange}
+                        required
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
+
+                  <div className="fields-section-add">
+                       <p>Age<span className="required">*</span></p>
+                       <input 
+                        type="number" 
+                        className={`add-incident-input-field`}
+                        placeholder="Enter Age" 
+                        value={complainant.age}
+                        name="age"
+                        id="complainant"
+                        onChange={handleFormChange}
+                        required
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
+
+                  <div className="fields-section-add">
+                       <p>Address<span className="required">*</span></p>
+                       <input 
+                        type="text" 
+                        className={`add-incident-input-field ${showFieldErrors && !complainant.address.trim() ? "input-error" : ""}`}    
+                        placeholder="Enter Address" 
+                        value={complainant.address}
+                        name="address"
+                        id="complainant"
+                        required
+                        onChange={handleFormChange}
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
+
+                </div>
+
+                </div>
+                </>
+                      )}
+
+
+            {activeSection === "respondent" && (
+             <>
+              <div className="add-incident-section-top-side">
+
+                  <div className="fields-section-add">
                       <input type="text"  className="select-resident-input-field" placeholder="Select Respondent" onClick={handleRespondentsClick} />
-                    </div>
+                  </div>
 
-                      {/* button to clear if the respondent is from residents */}
-                      {isRespondentResidentSelected && (
+                    {/* button to clear if the respondent is from residents */}
+                    {isRespondentResidentSelected && (
                       <button
                         type="button"
                         onClick={() => {
@@ -826,133 +883,164 @@ const handleSubmit = (event: React.FormEvent) => {
                       </button>
                     )}
 
-
-                    <p>First Name<span className="required">*</span></p>
-
-                    <input 
-                    type="text" 
-                    className={`search-bar-add ${showFieldErrors && !respondent.fname.trim() ? "input-error" : ""}`}   
-                    placeholder="Enter Respondent's First Name" 
-                    value={respondent.fname}
-                    name="fname"
-                    id="respondent"  
-                    required
-                    onChange={handleFormChange}
-                    disabled={isRespondentResidentSelected}
-
-                    />
-                  <p>Last Name<span className="required">*</span></p>
-
-                    <input 
-                    type="text" 
-                    className={`search-bar-add ${showFieldErrors && !respondent.lname.trim() ? "input-error" : ""}`}   
-                    placeholder="Enter Respondent's Last Name" 
-                    value={respondent.lname}
-                    name="lname"
-                    id="respondent"
-                    required
-                    onChange={handleFormChange}
-                    disabled={isRespondentResidentSelected}
-
-                    />
-
-                  <p>Sex<span className="required">*</span></p>
-                  <select 
-                    id="respondent"
-                    name="sex" 
-                    className={`search-bar-add ${showFieldErrors && !respondent.sex.trim() ? "input-error" : ""}`}   
-                    required
-                    value={respondent.sex}
-                    onChange={handleFormChange}
-                    disabled={isRespondentResidentSelected}
-                    >
-                    <option value="" disabled>Choose A Sex</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
+              </div>
 
 
-                    <p>Age<span className="required">*</span></p>
+                <div className="add-incident-full-top">
 
-                    <input 
-                    type="number" 
-                    id="respondent"
-                    className={`search-bar-add`}   
-                    placeholder="Enter Age" 
-                    value={respondent.age}
-                    name="age"
-                    required
-                    onChange={handleFormChange}
-                    disabled={isRespondentResidentSelected}
 
-                    />
 
-                    <p>Civil Status<span className="required">*</span></p>
+                    <div className="add-incident-section-left-side">
 
-                    <select   
-                    className={`search-bar-add ${showFieldErrors && !respondent.civilStatus.trim() ? "input-error" : ""}`}   
-                    value={respondent.civilStatus} 
-                    name="civilStatus"
-                    id="respondent"
-                    onChange={handleFormChange}
-                    required
-                    disabled={isRespondentResidentSelected}
-                    >
-                      <option value="" disabled>Choose A Civil Status</option>
-                      <option value="Single">Single</option>
-                      <option value="Married">Married</option>
-                      <option value="Widowed">Widowed</option>
-                      <option value="Separated">Separated</option>
-                      <option value="Divorced">Divorced</option>
-                      
-                    </select>
+                      <div className="fields-section-add">
+                        <p>Last Name<span className="required">*</span></p>
+                          <input 
+                            type="text" 
+                            className={`add-incident-input-field ${showFieldErrors && !respondent.lname.trim() ? "input-error" : ""}`}   
+                            placeholder="Enter Respondent's Last Name" 
+                            value={respondent.lname}
+                            name="lname"
+                            id="respondent"
+                            required
+                            onChange={handleFormChange}
+                            disabled={isRespondentResidentSelected}
+                            />
+                      </div>
 
-                    <p>Address<span className="required">*</span></p>
+                      <div className="fields-section-add">
+                         <p>Sex<span className="required">*</span></p>
+                         <select 
+                          id="respondent"
+                          name="sex" 
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.sex.trim() ? "input-error" : ""}`}   
+                          required
+                          value={respondent.sex}
+                          onChange={handleFormChange}
+                          disabled={isRespondentResidentSelected}
+                          >
+                          <option value="" disabled>Choose A Sex</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                        </select>
 
-                    <input 
-                    type="text" 
-                    id="respondent"
-                    className={`search-bar-add ${showFieldErrors && !respondent.address.trim() ? "input-error" : ""}`}   
-                    placeholder="Enter Address" 
-                    value={respondent.address}
-                    name="address"
-                    required
-                    onChange={handleFormChange}
-                    disabled={isRespondentResidentSelected}
+                      </div>
 
-                    />
+                      <div className="fields-section-add">
+                          <p>Civil Status<span className="required">*</span></p>
+                          <select   
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.civilStatus.trim() ? "input-error" : ""}`}   
+                          value={respondent.civilStatus} 
+                          name="civilStatus"
+                          id="respondent"
+                          onChange={handleFormChange}
+                          required
+                          disabled={isRespondentResidentSelected}
+                          >
+                            <option value="" disabled>Choose A Civil Status</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Widowed">Widowed</option>
+                            <option value="Separated">Separated</option>
+                            <option value="Divorced">Divorced</option>
+                            
+                          </select>
+                      </div>
 
-                    <p>Contact Information<span className="required">*</span></p>
+                      <div className="fields-section-add">
+                          <p>Contact Information<span className="required">*</span></p>
+                          <input 
+                          type="text" 
+                          id="respondent"
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.contact.trim() ? "input-error" : ""}`}   
+                          placeholder="Enter Contact Number" 
+                          value={respondent.contact}
+                          name="contact"
+                          required
+        
+                          onChange={handleFormChange}
+                          disabled={isRespondentResidentSelected}
 
-                    <input 
-                    type="text" 
-                    id="respondent"
-                    className={`search-bar-add ${showFieldErrors && !respondent.contact.trim() ? "input-error" : ""}`}   
-                    placeholder="Enter Contact Number" 
-                    value={respondent.contact}
-                    name="contact"
-                    required
-   
-                    onChange={handleFormChange}
-                    disabled={isRespondentResidentSelected}
+                          />
 
-                    />
-                
+                      </div>
+
+                    </div>
+
+
+                    <div className="add-incident-section-right-side">
+
+                      <div className="fields-section-add">
+                         <p>First Name<span className="required">*</span></p>
+                         <input 
+                          type="text" 
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.fname.trim() ? "input-error" : ""}`}   
+                          placeholder="Enter Respondent's First Name" 
+                          value={respondent.fname}
+                          name="fname"
+                          id="respondent"  
+                          required
+                          onChange={handleFormChange}
+                          disabled={isRespondentResidentSelected}
+                          />
+                      </div>
+
+                      <div className="fields-section-add">
+                          <p>Age<span className="required">*</span></p>
+                          <input 
+                            type="number" 
+                            id="respondent"
+                            className={`add-incident-input-field`}   
+                            placeholder="Enter Age" 
+                            value={respondent.age}
+                            name="age"
+                            required
+                            onChange={handleFormChange}
+                            disabled={isRespondentResidentSelected}
+
+                            />
+                      </div>
+
+                      <div className="fields-section-add">
+                          <p>Address<span className="required">*</span></p>
+                          <input 
+                            type="text" 
+                            id="respondent"
+                            className={`add-incident-input-field ${showFieldErrors && !respondent.address.trim() ? "input-error" : ""}`}   
+                            placeholder="Enter Address" 
+                            value={respondent.address}
+                            name="address"
+                            required
+                            onChange={handleFormChange}
+                            disabled={isRespondentResidentSelected}
+                            />
+
+
+                      </div>
+                        
+                        
+                    </div>
+
+
 
                 </div>
+              </>
+            )}
 
-            </div>
+              
 
+        {activeSection === "others" && (
+          <>
 
-              <div className="section-3-add">
-                <p className="title-add">Other Information</p>
-                
-                <div className="bars-add">
-                  
-                <div className="input-group-add">
-                    <p>Nature of Complaint<span className="required">*</span></p>
-                    <select 
-                    className="featuredStatus-add" 
+          <div className="add-incident-full-top">
+            
+
+          <div className="add-incident-section-left-side">
+
+              <div className="fields-section-add">
+                  <p>Nature of Complaint<span className="required">*</span></p>
+
+                  <select 
+                    className="add-incident-input-field" 
                     required
                     id="nature" name="nature" 
                     value={reportInfo.nature}
@@ -999,42 +1087,48 @@ const handleSubmit = (event: React.FormEvent) => {
                       <option value="Others">Others: (Trafficking, Prostitution, Violaiton of RA9208)</option>
                     </>)}
                   </select>
-                    
 
                   </div>
-                   {reportInfo.nature === "Others" && 
+
+                  {reportInfo.nature === "Others" && 
                    (<>
-                    <div className="input-group-add">
-                        <p>Specify Nature of Complaint<span className="required">*</span></p>
-                        <input type="text" className="search-bar-add" placeholder="Enter Nature of Complaint" id="specifyNature" name="specifyNature" 
-                        value = {reportInfo.specifyNature} onChange={handleFormChange} required/>
-                    </div>
+                  
+                  <div className="fields-section-add">
+                      <p>Specify Nature of Complaint<span className="required">*</span></p>
+                      <input type="text" className="add-incident-input-field" placeholder="Enter Nature of Complaint" id="specifyNature" name="specifyNature" 
+                      value = {reportInfo.specifyNature} onChange={handleFormChange} required/>
+                  </div>
+                       
                    </>)}
 
-                    <div className="input-group-add">
-                        <p>Date Filed<span className="required">*</span></p>
-                        <input type="date" className="search-bar-add" max={currentDate} id="dateFiled" name="dateFiled" 
-                        value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
-                    </div>
-
-                    <div className="input-group-add">
+                   <div className="fields-section-add">
                         <p>Time Filed<span className="required">*</span></p>
-                        <input type="time" className="search-bar-add" id="timeFiled" name="timeFiled" 
+                        <input type="time" className="add-incident-input-field" id="timeFiled" name="timeFiled" 
                         value = {reportInfo.timeFiled} onChange={handleFormChange} required />
-                    </div>
+                   </div>
 
-                    <div className="input-group-add">
-                        <p>Location<span className="required">*</span></p>
-                        <input type="text" className="search-bar-add" placeholder="Enter Location" id="location" name="location" 
-                        value = {reportInfo.location} onChange={handleFormChange} required />
-                    </div>
 
-                    {departmentId === "GAD" && (
+                   <div className="fields-section-add">
+                  <p>Date Filed<span className="required">*</span></p>
+                  <input type="date" className="add-incident-input-field" max={currentDate} id="dateFiled" name="dateFiled" 
+                    value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
+              </div>
+
+              <div className="fields-section-add">
+                  <p>Location<span className="required">*</span></p>
+                  <input type="text" className="add-incident-input-field" placeholder="Enter Location" id="location" name="location" 
+                  value = {reportInfo.location} onChange={handleFormChange} required />
+
+              </div>
+
+              <div className="fields-section-add">
+
+              {departmentId === "GAD" && (
                       <div>
-                        <div className="input-group-add">
+                        <div className="fields-section-add">
                           <p>Nos of Male Children Victim/s<span className="required">*</span></p>
                           <input type="number" 
-                          className="search-bar-add"
+                          className="add-incident-input-field"
                           min="0"
                           value={reportInfo.nosofMaleChildren}
                           name="nosofMaleChildren"
@@ -1042,10 +1136,10 @@ const handleSubmit = (event: React.FormEvent) => {
                           required />    
                         </div>
 
-                        <div className="input-group-add">
+                        <div className="fields-section-add">
                           <p>Nos of Female Children Victim/s<span className="required">*</span></p>
                           <input type="number"
-                            className="search-bar-add"
+                            className="add-incident-input-field"
                             min="0"
                             value={reportInfo.nosofFemaleChildren}
                             name="nosofFemaleChildren"
@@ -1055,18 +1149,130 @@ const handleSubmit = (event: React.FormEvent) => {
 
                       </div>
                     )}
-                </div>
-                
-                <p className="title-add">Complainant/s Received By</p>
-                <div className="bars-add">
-                
-                  <div className="input-group-add">
 
-                    <p>Desk Officer First Name<span className="required">*</span></p>
+              </div>
 
-                    <input 
+
+
+          
+          </div>
+
+
+          <div className="add-incident-section-right-side">
+
+
+          <div className="box-container-outer-proof">
+                    <div className="title-proof">
+                          Proof of Incident
+                    </div>
+
+                    <div className="box-container-proof">
+
+                    <div className="file-upload-container-add">
+                          <label htmlFor="file-upload1" className="upload-link-add">Click to Upload File</label>
+                          <input
+                            id="file-upload1"
+                            type="file"
+                            className="file-upload-input-add"
+                            accept=".jpg,.jpeg,.png"
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              handleFileChangeContainer1(e);
+                              handleFormChange(e);
+                            }} // Handle file selection
+                          />
+                          <div className="uploadedFiles-container-add">
+                              {filesContainer1.length > 0 && (
+                                <div className="file-name-image-display-add">
+                                  <ul>
+                                    {filesContainer1.map((file, index) => (
+                                      <div className="file-name-image-display-indiv-add" key={index}>
+                                        <li>
+                                          {file.preview && (
+                                            <div className="filename-image-container-add">
+                                              <img
+                                                src={file.preview}
+                                                alt={file.name}
+                                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                              />
+                                            </div>
+                                          )}
+                                          {file.name}
+                                          <div className="delete-container-add">
+                                            <button
+                                              type="button"
+                                              onClick={() => handleFileDeleteContainer1()}
+                                              className="delete-button-add"
+                                            >
+                                              <img
+                                                src="/images/trash.png"
+                                                alt="Delete"
+                                                className="delete-icon-add"
+                                              />
+                                            </button>
+                                          </div>
+                                        </li>
+                                      </div>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                          </div>
+                        </div>
+
+                    </div>
+
+
+              </div>
+
+          </div>
+
+          </div>
+
+
+          <div className="add-incident-section-bottom-side">
+
+            <div className="box-container-outer-resclassification-add">
+                    <div className="title-remarks-add">
+                        <p>Nature of Facts<span className="required">*</span></p>
+                    </div>
+
+                    <div className="box-container-remarks-add">
+                    <textarea 
+                            required
+                            placeholder="Enter Nature of Facts of the Complaint"
+                            value={reportInfo.concern}
+                            id="concern"
+                            name="concern"
+                            onChange={handleFormChange}
+                            rows={15}
+                  ></textarea>
+
+                    </div>
+                      
+                      
+
+            </div>
+                  
+
+            </div>
+
+
+
+          </>
+        )}
+
+      {activeSection === "desk" && (
+          <>
+
+      <div className="add-incident-full-top">
+
+          <div className="add-incident-section-left-side">
+
+              <div className="fields-section-add">
+                  <p>Desk Officer First Name<span className="required">*</span></p>
+                  <input 
                     type="text" 
-                    className="search-bar-add" 
+                    className="add-incident-input-field" 
                     placeholder="Enter Desk Officer First Name" 
                     id="staff"
                     disabled
@@ -1074,15 +1280,25 @@ const handleSubmit = (event: React.FormEvent) => {
                     value = {deskStaff.fname} onChange={handleFormChange}
                     />
 
-                  </div>
+              </div>
 
-                   <div className="input-group-add">
+              <div className="fields-section-add">
+                  <p>Date Received<span className="required">*</span></p>                    
+                  <input type="date" className="add-incident-input-field" max={currentDate}  id="dateReceived" name="dateReceived" 
+                  value = {reportInfo.dateReceived} onChange={handleFormChange} disabled/>
 
+              </div>
+
+          </div>
+
+
+            <div className="add-incident-section-right-side">
+
+                <div className="fields-section-add">
                     <p>Desk Officer Last Name<span className="required">*</span></p>
-
                     <input 
                     type="text" 
-                    className="search-bar-add" 
+                    className="add-incident-input-field" 
                     placeholder="Enter Desk Officer Last Name" 
                     id="staff"
                     disabled
@@ -1090,114 +1306,31 @@ const handleSubmit = (event: React.FormEvent) => {
                     value = {deskStaff.lname} onChange={handleFormChange}
                     />
 
-                  </div> 
-                            
-                  <div className="input-group-add">
-                        <p>Date Received<span className="required">*</span></p>
-                        <input type="date" className="search-bar-add" max={currentDate}  id="dateReceived" name="dateReceived" 
-                        value = {reportInfo.dateReceived} onChange={handleFormChange} disabled/>
-                    </div>
-
-                    <div className="input-group-add">
-                        <p>Time Received<span className="required">*</span></p>
-                        <input type="time" className="search-bar-add" id="timeReceived" name="timeReceived" 
-                        value = {reportInfo.timeReceived} onChange={handleFormChange} disabled />
-                    </div>
-
-
                 </div>
-                   
-            </div>
 
 
-
-            <div className="section-4-add">
-
-                <div className="section-4-left-side-add">
-
-                  <div className="fields-section-add">
-                              <p>Nature of Facts<span className="required">*</span></p>
-                                  <textarea 
-                                      className="description-add" 
-                                      required
-                                      placeholder="Enter Nature of Facts of the Complaint"
-                                      value={reportInfo.concern}
-                                      id="concern"
-                                      name="concern"
-                                      onChange={handleFormChange}
-                                      rows={15}
-                               ></textarea>
-                    </div>
-
-                 </div>
-
-            <div className="section-4-right-side-add">
-              
-              
-            <div className="title-add">
-                     <p> Photo of the Incident (if Applicable)</p>
-               </div> 
- 
-               <div className="file-upload-container-add">
-                 <label htmlFor="file-upload1" className="upload-link-add">Click to Upload File</label>
-                 <input
-                   id="file-upload1"
-                   type="file"
-                   className="file-upload-input-add"
-                   accept=".jpg,.jpeg,.png"
-                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                     handleFileChangeContainer1(e);
-                     handleFormChange(e);
-                   }} // Handle file selection
-                 />
-                 <div className="uploadedFiles-container-add">
-                    {filesContainer1.length > 0 && (
-                      <div className="file-name-image-display-add">
-                        <ul>
-                          {filesContainer1.map((file, index) => (
-                            <div className="file-name-image-display-indiv-add" key={index}>
-                              <li>
-                                {file.preview && (
-                                  <div className="filename-image-container-add">
-                                    <img
-                                      src={file.preview}
-                                      alt={file.name}
-                                      style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                    />
-                                  </div>
-                                )}
-                                {file.name}
-                                <div className="delete-container-add">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleFileDeleteContainer1()}
-                                    className="delete-button-add"
-                                  >
-                                    <img
-                                      src="/images/trash.png"
-                                      alt="Delete"
-                                      className="delete-icon-add"
-                                    />
-                                  </button>
-                                </div>
-                              </li>
-                            </div>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                 </div>
-               </div>
-               
+                <div className="fields-section-add">
+                     <p>Time Received<span className="required">*</span></p>
+                     <input type="time" className="add-incident-input-field" id="timeReceived" name="timeReceived" 
+                        value = {reportInfo.timeReceived} onChange={handleFormChange} disabled />
+                </div>
 
             </div>
-                
 
-          </div>
+
+      </div>
+
+
+        </>
+        )}
+              
+      
+  
+          
            
-
-
-
+          </div>
+                         </div> 
+          </div>
         </form>
 
         </div> 
