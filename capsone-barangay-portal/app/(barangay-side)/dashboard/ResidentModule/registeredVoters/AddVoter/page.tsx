@@ -280,12 +280,7 @@ export default function addVoter() {
           </div>
 
           <div className="add-voter-bottom-section">
-            <div className="residents-search-section">
-              <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleVotersClick} />
-            </div>
 
-            
-          
               <nav className="voters-info-toggle-wrapper">
                 {["details"].map((section) => (
                   <button
@@ -298,6 +293,9 @@ export default function addVoter() {
                   </button>
                 ))}
               </nav>  
+              <div className="residents-search-section">
+                <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleVotersClick} />
+              </div>
               <div className="add-resident-bottom-section-scroll">
 
                 <form id="addVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
