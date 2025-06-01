@@ -1029,7 +1029,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
   .select-resident-input-field{
     padding: 8px;
-    width: 100%;
+    width: 80%;
     margin-top: 10px;
     border: 1.5px solid #f49028;
     border-radius: 5px;
@@ -1311,6 +1311,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 20px;
   }
 
   .add-voter-main-content{

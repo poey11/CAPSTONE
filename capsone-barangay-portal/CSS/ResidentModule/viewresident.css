@@ -724,6 +724,11 @@ background-color: #214666;
   text-align: left;
 }
 
+.view-resident-input-field:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
 .box-container-outer-resident-picture {
   position: relative; 
   margin-top: 20px;
