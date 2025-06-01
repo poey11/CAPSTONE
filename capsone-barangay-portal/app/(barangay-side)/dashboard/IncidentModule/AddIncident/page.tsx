@@ -617,6 +617,7 @@ const handleSubmit = (event: React.FormEvent) => {
     router.back();
   };
 
+  const [activeSection, setActiveSection] = useState("complainant");
 
 
   return (
@@ -626,18 +627,29 @@ const handleSubmit = (event: React.FormEvent) => {
 
         <div className="main-content-add">
 
-        <button type="button" className="back-button-add" onClick={handleBack}></button>
+       
 
         <form onSubmit={delayedSubmit}>
-            <div className="section-1-add">
-                <p className="NewOfficial-add"> New Incident</p>
 
-                    <div className="actions-add">
-                        <button  type="button" onClick={deleteForm} className="action-delete-add">Delete</button>
-                        <button type="submit" className="action-view-add" >Save</button>
-                    </div>
-                
+            <div className="section-1-add">
+
+              <div className="section-1-left-side-add">
+
+                <button onClick={handleBack}>
+                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-add"/> 
+                </button>
+
+                <h1> Add New Incident </h1>
+              </div>
+
+                <div className="actions-add">
+                   <button  type="button" onClick={deleteForm} className="action-delete-add">Delete</button>
+                   <button type="submit" className="action-view-add" >Save</button>
+                 </div>
+          
              </div>
+
+
              <input 
                     type="text" 
                     className="search-bar-add" 
@@ -646,312 +658,319 @@ const handleSubmit = (event: React.FormEvent) => {
                     id="caseNumber"
                     disabled
                     
-                    />
-
-             <div className="section-2-add">
-
-                <div className="section-2-left-side-add">
-
-                    <p >Complainant's Information</p>
-
-                      {/* complainant search pop up */}
-                    <div className="residents-search-section">
-                      <input type="text"  className="select-resident-input-field" placeholder="Select Complainant" onClick={handleComplainantsClick} />
-                    </div>
-
-                      {/* button to clear if the complainant is from residents */}
-                    {isComplainantResidentSelected && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setComplainant({
-                            residentId: '',
-                            fname: '',
-                            lname: '',
-                            sex: '',
-                            age: '',
-                            civilStatus: '',
-                            address: '',
-                            contact: '',
-                          });
-                          setIsComplainantResidentSelected(false);
-                        }}
-                        className="clear-button-add"
-                      >
-                        Clear Complainant
-                      </button>
-                    )}
-
-
-                    <p>First Name<span className="required">*</span></p>
-
-                    <input 
-                    type="text" 
-                    className={`search-bar-add ${showFieldErrors && !complainant.fname.trim() ? "input-error" : ""}`}
-                    placeholder="Enter Complaint's First Name" 
-                    value={complainant.fname}
-                    name="fname"
-                    id="complainant"
-                    onChange={handleFormChange}
-                    required
-                    disabled={isComplainantResidentSelected}
-                    />
-                  <p>Last Name<span className="required">*</span></p>
-
-                    <input 
-                    type="text" 
-                    className={`search-bar-add ${showFieldErrors && !complainant.lname.trim() ? "input-error" : ""}`}
-                    placeholder="Enter Complaint's Last Name" 
-                    value={complainant.lname}
-                    name="lname"
-                    id="complainant"
-                    onChange={handleFormChange}
-                    required
-                    disabled={isComplainantResidentSelected}
-
-                    />
-
-                  <p>Sex<span className="required">*</span></p>
-                  <select 
-                    name="sex" 
-                    className={`search-bar-add ${showFieldErrors && !complainant.sex.trim() ? "input-error" : ""}`}
-                    required
-                    id="complainant"
-                    value={complainant.sex}
-                    onChange={handleFormChange}
-                    disabled={isComplainantResidentSelected}
-                    >
-                    <option value="" disabled>Choose A Sex</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-
-
-                    <p>Age<span className="required">*</span></p>
-
-                    <input 
-                    type="number" 
-                    className={`search-bar-add`}
-                    placeholder="Enter Age" 
-                    value={complainant.age}
-                    name="age"
-                    id="complainant"
-                    onChange={handleFormChange}
-                    required
-                    disabled={isComplainantResidentSelected}
-
-                    />
-
-                    <p>Civil Status<span className="required">*</span></p>
-                 
-                    <select   
-                    className={`search-bar-add ${showFieldErrors && !complainant.civilStatus.trim() ? "input-error" : ""}`}   
-                    value={complainant.civilStatus} 
-                    name="civilStatus"
-                    id="complainant"
-                    onChange={handleFormChange}
-                    disabled={isComplainantResidentSelected}
-                    required>
-                      <option value="" disabled>Choose A Civil Status</option>
-                      <option value="Single">Single</option>
-                      <option value="Married">Married</option>
-                      <option value="Widowed">Widowed</option>
-                      <option value="Separated">Separated</option>
-                      <option value="Divorced">Divorced</option>
-                      
-                    </select>
-
-
-                    <p>Address<span className="required">*</span></p>
-
-                    <input 
-                    type="text" 
-                    className={`search-bar-add ${showFieldErrors && !complainant.address.trim() ? "input-error" : ""}`}    
-                    placeholder="Enter Address" 
-                    value={complainant.address}
-                    name="address"
-                    id="complainant"
-                    required
-                    onChange={handleFormChange}
-                    disabled={isComplainantResidentSelected}
-
-                    />
-
-                    <p>Contact Information<span className="required">*</span></p>
-
-                    <input 
-                    type="text" 
-                    className={`search-bar-add ${showFieldErrors && !complainant.contact.trim() ? "input-error" : ""}`}   
-                    placeholder="Enter Contact Number" 
-                    value={complainant.contact}
-                    name="contact"
-                    id="complainant"
-                    required
-                    onChange={handleFormChange}
-                    disabled={isComplainantResidentSelected}
-
-                    />
-
-                </div>
+              />
               
-                <div className="section-2-right-side-add">
-                  
-                <p >Respondent's Information</p>
+            
+            <div className="add-incident-bottom-section">
 
-                        {/* respondent search pop up */}
-                    <div className="residents-search-section">
-                      <input type="text"  className="select-resident-input-field" placeholder="Select Respondent" onClick={handleRespondentsClick} />
-                    </div>
+       
+                <nav className="add-incident-info-toggle-wrapper">
+                {["complainant", "respondent", "others"].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn-add ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "complainant" && "Complainant Info"}
+                      {section === "respondent" && "Respondent Info"}
+                      {section === "others" && "Other Info"}
+                    </button>
+                  ))}
+                </nav>
 
-                      {/* button to clear if the respondent is from residents */}
-                      {isRespondentResidentSelected && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setRespondent({
-                            residentId: '',
-                            fname: '',
-                            lname: '',
-                            sex: '',
-                            age: '',
-                            civilStatus: '',
-                            address: '',
-                            contact: '',
-                          });
-                          setIsRespondentResidentSelected(false);
-                        }}
-                        className="clear-button-add"
+
+            <div className="add-incindent-bottom-section-scroll">
+
+            <div className="add-incident-section-2">
+
+
+            {activeSection === "complainant" && (
+             <>
+            <div className="add-incident-full-top">
+
+  
+                <div className="add-incident-section-left-side">
+         
+                  <div className="fields-section-add">
+                     <p>Last Name<span className="required">*</span></p>
+                      <input 
+                      type="text" 
+                      className={`add-incident-input-field ${showFieldErrors && !complainant.lname.trim() ? "input-error" : ""}`}
+                      placeholder="Enter Complaint's Last Name" 
+                      value={complainant.lname}
+                      name="lname"
+                      id="complainant"
+                      onChange={handleFormChange}
+                      required
+                      disabled={isComplainantResidentSelected}
+                      />
+                 </div>
+
+                  <div className="fields-section-add">
+                    <p>Sex<span className="required">*</span></p>
+                      <select 
+                      name="sex" 
+                      className={`add-incident-input-field ${showFieldErrors && !complainant.sex.trim() ? "input-error" : ""}`}
+                      required
+                      id="complainant"
+                      value={complainant.sex}
+                      onChange={handleFormChange}
+                      disabled={isComplainantResidentSelected}
                       >
-                        Clear Respondent
-                      </button>
-                    )}
-
-
-                    <p>First Name<span className="required">*</span></p>
-
-                    <input 
-                    type="text" 
-                    className={`search-bar-add ${showFieldErrors && !respondent.fname.trim() ? "input-error" : ""}`}   
-                    placeholder="Enter Respondent's First Name" 
-                    value={respondent.fname}
-                    name="fname"
-                    id="respondent"  
-                    required
-                    onChange={handleFormChange}
-                    disabled={isRespondentResidentSelected}
-
-                    />
-                  <p>Last Name<span className="required">*</span></p>
-
-                    <input 
-                    type="text" 
-                    className={`search-bar-add ${showFieldErrors && !respondent.lname.trim() ? "input-error" : ""}`}   
-                    placeholder="Enter Respondent's Last Name" 
-                    value={respondent.lname}
-                    name="lname"
-                    id="respondent"
-                    required
-                    onChange={handleFormChange}
-                    disabled={isRespondentResidentSelected}
-
-                    />
-
-                  <p>Sex<span className="required">*</span></p>
-                  <select 
-                    id="respondent"
-                    name="sex" 
-                    className={`search-bar-add ${showFieldErrors && !respondent.sex.trim() ? "input-error" : ""}`}   
-                    required
-                    value={respondent.sex}
-                    onChange={handleFormChange}
-                    disabled={isRespondentResidentSelected}
-                    >
-                    <option value="" disabled>Choose A Sex</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-
-
-                    <p>Age<span className="required">*</span></p>
-
-                    <input 
-                    type="number" 
-                    id="respondent"
-                    className={`search-bar-add`}   
-                    placeholder="Enter Age" 
-                    value={respondent.age}
-                    name="age"
-                    required
-                    onChange={handleFormChange}
-                    disabled={isRespondentResidentSelected}
-
-                    />
-
-                    <p>Civil Status<span className="required">*</span></p>
-
-                    <select   
-                    className={`search-bar-add ${showFieldErrors && !respondent.civilStatus.trim() ? "input-error" : ""}`}   
-                    value={respondent.civilStatus} 
-                    name="civilStatus"
-                    id="respondent"
-                    onChange={handleFormChange}
-                    required
-                    disabled={isRespondentResidentSelected}
-                    >
-                      <option value="" disabled>Choose A Civil Status</option>
-                      <option value="Single">Single</option>
-                      <option value="Married">Married</option>
-                      <option value="Widowed">Widowed</option>
-                      <option value="Separated">Separated</option>
-                      <option value="Divorced">Divorced</option>
-                      
+                      <option value="" disabled>Choose A Sex</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
                     </select>
+                  </div>
 
-                    <p>Address<span className="required">*</span></p>
+                  <div className="fields-section-add">
+                      <p>Civil Status<span className="required">*</span></p>              
+                      <select   
+                      className={`add-incident-input-field  ${showFieldErrors && !complainant.civilStatus.trim() ? "input-error" : ""}`}   
+                      value={complainant.civilStatus} 
+                      name="civilStatus"
+                      id="complainant"
+                      onChange={handleFormChange}
+                      disabled={isComplainantResidentSelected}
+                      required>
+                        <option value="" disabled>Choose A Civil Status</option>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Widowed">Widowed</option>
+                        <option value="Separated">Separated</option>
+                        <option value="Divorced">Divorced</option>
+                        
+                      </select>
 
-                    <input 
-                    type="text" 
-                    id="respondent"
-                    className={`search-bar-add ${showFieldErrors && !respondent.address.trim() ? "input-error" : ""}`}   
-                    placeholder="Enter Address" 
-                    value={respondent.address}
-                    name="address"
-                    required
-                    onChange={handleFormChange}
-                    disabled={isRespondentResidentSelected}
+                  </div>
 
-                    />
-
-                    <p>Contact Information<span className="required">*</span></p>
-
-                    <input 
-                    type="text" 
-                    id="respondent"
-                    className={`search-bar-add ${showFieldErrors && !respondent.contact.trim() ? "input-error" : ""}`}   
-                    placeholder="Enter Contact Number" 
-                    value={respondent.contact}
-                    name="contact"
-                    required
-   
-                    onChange={handleFormChange}
-                    disabled={isRespondentResidentSelected}
-
-                    />
-                
+                  <div className="fields-section-add">
+                       <p>Contact Information<span className="required">*</span></p>
+                       <input 
+                        type="text" 
+                        className={`add-incident-input-field ${showFieldErrors && !complainant.contact.trim() ? "input-error" : ""}`}   
+                        placeholder="Enter Contact Number" 
+                        value={complainant.contact}
+                        name="contact"
+                        id="complainant"
+                        required
+                        onChange={handleFormChange}
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
 
                 </div>
 
-            </div>
+                <div className="add-incident-section-right-side">
+
+                  <div className="fields-section-add">
+                       <p>First Name<span className="required">*</span></p>
+                       <input 
+                        type="text" 
+                        className={`add-incident-input-field ${showFieldErrors && !complainant.fname.trim() ? "input-error" : ""}`}
+                        placeholder="Enter Complaint's First Name" 
+                        value={complainant.fname}
+                        name="fname"
+                        id="complainant"
+                        onChange={handleFormChange}
+                        required
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
+
+                  <div className="fields-section-add">
+                       <p>Age<span className="required">*</span></p>
+                       <input 
+                        type="number" 
+                        className={`add-incident-input-field`}
+                        placeholder="Enter Age" 
+                        value={complainant.age}
+                        name="age"
+                        id="complainant"
+                        onChange={handleFormChange}
+                        required
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
+
+                  <div className="fields-section-add">
+                       <p>Address<span className="required">*</span></p>
+                       <input 
+                        type="text" 
+                        className={`add-incident-input-field ${showFieldErrors && !complainant.address.trim() ? "input-error" : ""}`}    
+                        placeholder="Enter Address" 
+                        value={complainant.address}
+                        name="address"
+                        id="complainant"
+                        required
+                        onChange={handleFormChange}
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
+
+                </div>
+
+                </div>
+                </>
+                      )}
 
 
-              <div className="section-3-add">
-                <p className="title-add">Other Information</p>
-                
-                <div className="bars-add">
-                  
-                <div className="input-group-add">
-                    <p>Nature of Complaint<span className="required">*</span></p>
-                    <select 
+            {activeSection === "respondent" && (
+             <>
+                <div className="add-incident-full-top">
+
+
+
+                    <div className="add-incident-section-left-side">
+
+                      <div className="fields-section-add">
+                        <p>Last Name<span className="required">*</span></p>
+                          <input 
+                            type="text" 
+                            className={`add-incident-input-field ${showFieldErrors && !respondent.lname.trim() ? "input-error" : ""}`}   
+                            placeholder="Enter Respondent's Last Name" 
+                            value={respondent.lname}
+                            name="lname"
+                            id="respondent"
+                            required
+                            onChange={handleFormChange}
+                            disabled={isRespondentResidentSelected}
+                            />
+                      </div>
+
+                      <div className="fields-section-add">
+                         <p>Sex<span className="required">*</span></p>
+                         <select 
+                          id="respondent"
+                          name="sex" 
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.sex.trim() ? "input-error" : ""}`}   
+                          required
+                          value={respondent.sex}
+                          onChange={handleFormChange}
+                          disabled={isRespondentResidentSelected}
+                          >
+                          <option value="" disabled>Choose A Sex</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                        </select>
+
+                      </div>
+
+                      <div className="fields-section-add">
+                          <p>Civil Status<span className="required">*</span></p>
+                          <select   
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.civilStatus.trim() ? "input-error" : ""}`}   
+                          value={respondent.civilStatus} 
+                          name="civilStatus"
+                          id="respondent"
+                          onChange={handleFormChange}
+                          required
+                          disabled={isRespondentResidentSelected}
+                          >
+                            <option value="" disabled>Choose A Civil Status</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Widowed">Widowed</option>
+                            <option value="Separated">Separated</option>
+                            <option value="Divorced">Divorced</option>
+                            
+                          </select>
+                      </div>
+
+                      <div className="fields-section-add">
+                          <p>Contact Information<span className="required">*</span></p>
+                          <input 
+                          type="text" 
+                          id="respondent"
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.contact.trim() ? "input-error" : ""}`}   
+                          placeholder="Enter Contact Number" 
+                          value={respondent.contact}
+                          name="contact"
+                          required
+        
+                          onChange={handleFormChange}
+                          disabled={isRespondentResidentSelected}
+
+                          />
+
+                      </div>
+
+                    </div>
+
+
+                    <div className="add-incident-section-right-side">
+
+                      <div className="fields-section-add">
+                         <p>First Name<span className="required">*</span></p>
+                         <input 
+                          type="text" 
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.fname.trim() ? "input-error" : ""}`}   
+                          placeholder="Enter Respondent's First Name" 
+                          value={respondent.fname}
+                          name="fname"
+                          id="respondent"  
+                          required
+                          onChange={handleFormChange}
+                          disabled={isRespondentResidentSelected}
+                          />
+                      </div>
+
+                      <div className="fields-section-add">
+                          <p>Age<span className="required">*</span></p>
+                          <input 
+                            type="number" 
+                            id="respondent"
+                            className={`add-incident-input-field`}   
+                            placeholder="Enter Age" 
+                            value={respondent.age}
+                            name="age"
+                            required
+                            onChange={handleFormChange}
+                            disabled={isRespondentResidentSelected}
+
+                            />
+                      </div>
+
+                      <div className="fields-section-add">
+                          <p>Address<span className="required">*</span></p>
+                          <input 
+                            type="text" 
+                            id="respondent"
+                            className={`add-incident-input-field ${showFieldErrors && !respondent.address.trim() ? "input-error" : ""}`}   
+                            placeholder="Enter Address" 
+                            value={respondent.address}
+                            name="address"
+                            required
+                            onChange={handleFormChange}
+                            disabled={isRespondentResidentSelected}
+                            />
+
+
+                      </div>
+                        
+                        
+                    </div>
+
+
+
+                </div>
+              </>
+            )}
+
+              
+
+        {activeSection === "others" && (
+          <>
+
+          <div className="add-incident-full-top">
+
+          <div className="add-incident-section-left-side">
+
+              <div className="fields-section-add">
+                  <p>Nature of Complaint<span className="required">*</span></p>
+
+                  <select 
                     className="featuredStatus-add" 
                     required
                     id="nature" name="nature" 
@@ -1001,7 +1020,36 @@ const handleSubmit = (event: React.FormEvent) => {
                   </select>
                     
 
-                  </div>
+              </div>
+
+          
+          </div>
+
+
+            <div className="add-incident-section-right-side">
+               
+
+           </div>
+
+
+
+          </div>
+
+
+
+          </>
+        )}
+              
+                
+
+         
+
+
+              
+               
+                
+                <div className="bars-add">
+              
                    {reportInfo.nature === "Others" && 
                    (<>
                     <div className="input-group-add">
@@ -1107,7 +1155,7 @@ const handleSubmit = (event: React.FormEvent) => {
 
                 </div>
                    
-            </div>
+          
 
 
 
@@ -1195,9 +1243,9 @@ const handleSubmit = (event: React.FormEvent) => {
 
           </div>
            
-
-
-
+          </div>
+                         </div> 
+          </div>
         </form>
 
         </div> 
