@@ -182,8 +182,27 @@ padding-bottom:30px;
   width: 100%;
 }
 
+.add-incident-section-top-side {
+  width: 70%;
+}
 
+.clear-button-add {
+  margin: 20px auto 0 auto;  
+  padding: 8px 16px;
+  background-color: #f44336; 
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: block;
+  text-align: center;
+}
 
+.clear-button-add:hover {
+  background-color: #d32f2f;
+}
 
 
 

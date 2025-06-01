@@ -688,7 +688,40 @@ const handleSubmit = (event: React.FormEvent) => {
 
             {activeSection === "complainant" && (
              <>
+
+              <div className="add-incident-section-top-side">
+
+                  <div className="fields-section-add">
+                      <input type="text"  className="select-resident-input-field" placeholder="Select Complainant" onClick={handleComplainantsClick} />
+                  </div>
+
+                          {/* button to clear if the complainant is from residents */}
+                          {isComplainantResidentSelected && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setComplainant({
+                            residentId: '',
+                            fname: '',
+                            lname: '',
+                            sex: '',
+                            age: '',
+                            civilStatus: '',
+                            address: '',
+                            contact: '',
+                          });
+                          setIsComplainantResidentSelected(false);
+                        }}
+                        className="clear-button-add"
+                      >
+                        Clear Complainant
+                      </button>
+                    )}
+              </div>
+
             <div className="add-incident-full-top">
+
+  
 
   
                 <div className="add-incident-section-left-side">
@@ -819,6 +852,38 @@ const handleSubmit = (event: React.FormEvent) => {
 
             {activeSection === "respondent" && (
              <>
+              <div className="add-incident-section-top-side">
+
+                  <div className="fields-section-add">
+                      <input type="text"  className="select-resident-input-field" placeholder="Select Respondent" onClick={handleRespondentsClick} />
+                  </div>
+
+                    {/* button to clear if the respondent is from residents */}
+                    {isRespondentResidentSelected && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRespondent({
+                            residentId: '',
+                            fname: '',
+                            lname: '',
+                            sex: '',
+                            age: '',
+                            civilStatus: '',
+                            address: '',
+                            contact: '',
+                          });
+                          setIsRespondentResidentSelected(false);
+                        }}
+                        className="clear-button-add"
+                      >
+                        Clear Respondent
+                      </button>
+                    )}
+
+              </div>
+
+
                 <div className="add-incident-full-top">
 
 
