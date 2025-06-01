@@ -256,6 +256,7 @@ padding-bottom:30px;
   display: flex;
   align-items: center;
   margin-top: 20px;
+  align-self: center;
 }
 
 
@@ -298,6 +299,31 @@ padding-bottom:30px;
   justify-content: space-between;
   width: 80%;
 }
+
+
+
+
+
+
+.add-incident-section-bottom-side-2 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+}
+
+.add-incident-GAD-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+}
+
+
+
+
+
 
 
 .case-number-display {
@@ -818,15 +844,6 @@ padding-bottom:30px;
   justify-content: center;
 }
 
-.select-resident-input-field{
-  padding: 8px;
-  width: 100%;
-  margin-top: 10px;
-  border: 1.5px solid #f49028;
-  border-radius: 5px;
-  color: #000000;
-  text-align: center;
-}
 
 .kasambahay-employer-popup-overlay {
   position: fixed;
@@ -1010,3 +1027,59 @@ gap: 20px;
 .input-error:hover {
   background-color: #ffd6d6 !important;
 }
+
+
+
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.input-with-clear {
+  position: relative;
+  width: 500px; /* updated width */
+}
+
+.select-resident-input-field {
+  width: 100%;
+  padding-right: 50px; /* enough space for larger icon */
+  height: 45px;
+  font-size: 17px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding-left: 14px;
+  box-sizing: border-box;
+  margin-top: 10px;
+  border: 1.5px solid #f49028;
+  color: #000000;
+  text-align: center;
+}
+
+.clear-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 30px; /* even more noticeable */
+  color: #f44336;
+  font-weight: bold;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.clear-icon:hover {
+  transform: translateY(-50%) scale(1.2);
+  color: #d32f2f;
+}
+
+.help-text {
+  font-size: 14px;
+  color: #666;
+  margin-top: 8px;
+  text-align: center;
+}
+
+
+
