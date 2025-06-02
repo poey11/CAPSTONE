@@ -72,6 +72,10 @@ interface EmergencyDetails {
     approvedBldgPlan: string;
     deathCertificate: string;
     dateofdeath: string;
+    wardFname: string;
+    wardRelationship: string;
+    guardianshipType: string;
+    
   }
 
 
@@ -168,6 +172,9 @@ const ViewOnlineRequest = () => {
         { key: "cohabitationStartDate", label: "Start of Cohabitation" },
         { key: "cohabitationRelationship", label: "Cohabitation Relationship"},
         { key: "address", label: "Address" },
+        { key: "guardianshipType", label: "Guardianship Type" },
+        { key: "wardRelationship", label: "Ward's Relationship" },
+        { key: "wardFname", label: "Ward's Full Name" },
         { key: "toAddress", label: "To Address" },
         { key: "age", label: "Age" },
         { key: "dateOfResidency", label: "Date of Residency" },
@@ -345,6 +352,19 @@ const ViewOnlineRequest = () => {
                 "Text6": `${monthToday} ${yearToday}`,
             }
         }
+        else if(requestData?.purpose === "Guardianship"){
+            if(requestData?.guardianshipType === "Legal Purpose") locationPath = "certifiacte of guardianship_legal.pdf";
+            else locationPath = "certifiacte of guardianship_school.pdf";
+            reqData = {
+                "Text1":`${requestData?.fullName.toUpperCase()}`,
+                "Text2": requestData?.address,
+                "Text3": requestData?.wardRelationship,
+                "Text4": `${requestData?.wardFname.toUpperCase()}`,
+                "Text5": requestData?.requestor.toUpperCase(),
+                "Text6": dayToday,
+                "Text7": `${monthToday} ${yearToday}`,
+            }
+        }
 
         const response = await fetch("/api/fillPDF", {
             method: "POST",
@@ -370,7 +390,6 @@ const ViewOnlineRequest = () => {
 
     }
 
-    console.log(`${status.charAt(0).toLowerCase()} ${status.slice(1)}`);
     return (
         <main className="viewonlinereq-main-container">
 

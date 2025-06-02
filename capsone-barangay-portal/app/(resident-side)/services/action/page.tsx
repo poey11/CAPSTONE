@@ -69,6 +69,9 @@ export default function Action() {
     partnerWifeHusbandFullName: "",
     cohabitationStartDate: "",
     cohabitationRelationship: "",
+    wardFname: "",
+    wardRelationship: "",
+    guardianshipType: "",
     signaturejpg: null,
     barangayIDjpg:null,
     validIDjpg: null,
@@ -87,7 +90,7 @@ export default function Action() {
     if(!user) return;
     const fetchCount = async () => {
       try {
-        const count = await getSpecificCountofCollection("ServiceRequests", "accountId", user.uid);
+        const count = await getSpecificCountofCollection("ServiceRequests", "accID", user.uid);
         setNos(count || 1);
       } catch (error) {
         console.error("Error fetching count:", error);
@@ -112,7 +115,7 @@ export default function Action() {
     }
     getServiceRequestId();
 
-  }, [user]);
+  }, [user,nos]);
 
 
  
@@ -366,6 +369,11 @@ const handleFileChange = (
           fullName: clearanceInput.fullName,
           dateOfResidency: clearanceInput.dateOfResidency,
           address: clearanceInput.address,
+          ...(clearanceInput.purpose === "Guardianship" && {
+            wardFname: clearanceInput.wardFname,
+            wardRelationship: clearanceInput.wardRelationship,
+            guardianshipType: clearanceInput.guardianshipType,
+          }),
           ...(docType === "Barangay Certificate" && clearanceInput.purpose === "Occupancy /  Moving Out" && {
             toAddress: clearanceInput.toAddress, // Include toAddress only for this specific purpose
           }),
@@ -480,6 +488,7 @@ const handleFileChange = (
     useEffect(() => {
       if (clearanceInput.purpose === "Death Residency" && docType === "Barangay Certificate") setAddOn("Deceased ");
       if(clearanceInput.purpose === "Occupancy /  Moving Out" && docType === "Barangay Certificate")setAddOn("From ");
+      if(clearanceInput.purpose === "Guardianship" && docType === "Barangay Certificate") setAddOn("Guardian's ");
       else setAddOn("");
       
         
@@ -519,13 +528,12 @@ const handleFileChange = (
           >
             <option value="" disabled>Select purpose</option>
             {docType === "Barangay Certificate" ? (<>
-              {/* <option value="Residency">Residency</option> */}
+              <option value="Residency">Residency</option>
               <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
               <option value="Estate Tax">Estate Tax</option>
               <option value="Death Residency">Death Residency</option>
               <option value="No Income (Scholarship)">No Income (Scholarship)</option>
               <option value="No Income (ESC)">No Income (ESC)</option>
-              <option value="No Income (For Discount)">No Income (For Discount)</option>
               <option value="Cohabitation">Cohabitation</option>
               <option value="Guardianship">Guardianship</option>
               <option value="Good Moral and Probation">Good Moral and Probation</option>
@@ -773,6 +781,64 @@ const handleFileChange = (
                 placeholder={`Enter ${addOn}Address`}
               />
             </div>
+
+            {clearanceInput.purpose === "Guardianship" && (
+              <>
+
+                <div className="form-group">
+                <label htmlFor="guardianshipType" className="form-label">Type of Guardianship Certificate<span className="required">*</span></label>
+                    <select
+                      id="guardianshipType"  
+                      name="guardianshipType"  
+                      className="form-input"  
+                      value={clearanceInput.guardianshipType}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="" disabled>Select Type of Guardianship</option>
+                      <option value="School Purpose">For School Purpose</option>
+                      <option value="Legal Purpose">For Other Legal Purpose</option>
+                    </select>
+                </div>
+              
+                <div className="form-group">
+                <label htmlFor="wardRelationship" className="form-label">Guardian's Relationship Towards the Ward<span className="required">*</span></label>
+                    <select
+                      id="wardRelationship"  
+                      name="wardRelationship"  
+                      className="form-input"  
+                      value={clearanceInput.wardRelationship}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="" disabled>Select Type of Relationship</option>
+                      <option value="Grandmother">Grandmother</option>
+                      <option value="Grandfather">Grandfather</option>
+                      <option value="Father">Father</option>
+                      <option value="Mother">Mother</option>
+                      <option value="Aunt">Aunt</option>
+                      <option value="Uncle">Uncle</option>
+                      <option value="Sister">Sister</option>
+                      <option value="Brother">Brother</option>
+                    </select>
+                </div>
+
+                <div className="form-group">
+                <label htmlFor="wardFname" className="form-label">Ward's Full Name<span className="required">*</span></label>
+                    <input 
+                      type="text"  
+                      id="wardFname"  
+                      name="wardFname"  
+                      value={clearanceInput.wardFname}
+                      onChange={handleChange}
+                      className="form-input"  
+                      required 
+                      placeholder={`Enter Ward's Full Name`}
+                    />
+                </div>
+
+              </>
+            )}
 
             {(docType === "Barangay Certificate" && clearanceInput.purpose === "Occupancy /  Moving Out") && (
               <>
