@@ -518,7 +518,11 @@ const handleSubmit = (event: React.FormEvent) => {
   
       setTimeout(() => {
         setShowPopup(false);
-        router.push(`/dashboard/IncidentModule/Department?id=${departmentId}`);
+        
+        if (docId) {
+          router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
+
+        } 
       }, 3000);
   
     } catch (error) {
