@@ -807,7 +807,6 @@ input[type="checkbox"] {
 
 
 
-
 /*
 FOR INFO
 */
@@ -1029,7 +1028,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
   .select-resident-input-field{
     padding: 8px;
-    width: 80%;
+    width: 100%;
     margin-top: 10px;
     border: 1.5px solid #f49028;
     border-radius: 5px;
@@ -1419,4 +1418,40 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     display: flex;
     flex-direction: column;
     width: 70%;
+  }
+
+  .input-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .input-with-clear {
+    position: relative;
+    width: 500px; /* updated width */
+  }
+
+  .clear-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 30px; /* even more noticeable */
+    color: #f44336;
+    font-weight: bold;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  
+  .clear-icon:hover {
+    transform: translateY(-50%) scale(1.2);
+    color: #d32f2f;
+  }
+
+  .help-text {
+    font-size: 14px;
+    color: #666;
+    margin-top: 8px;
+    text-align: center;
   }
