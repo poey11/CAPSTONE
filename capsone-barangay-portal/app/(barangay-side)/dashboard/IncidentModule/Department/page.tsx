@@ -349,7 +349,8 @@ useEffect(() => {
     
       {showDeletePopup && (
       <div className="confirmation-popup-overlay-add">
-        <div className="confirmation-popup-add">
+        <div className="confirmation-popup-incident">
+          <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
           <p>Are you sure you want to delete this Incident Record?</p>
           <h2>Incident Number: {selectedIncidentNumber}</h2>
           <div className="yesno-container-add">

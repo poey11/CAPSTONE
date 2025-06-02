@@ -335,20 +335,20 @@ color: rgb(44, 42, 42);
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.076); 
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999; 
 }
 
-.confirmation-popup-add {
+.confirmation-popup-incident {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 200px;
-  width: 400px;
+  height: 240px;
+  width: 450px;
   background-color: #f9f9f9;
   border-radius: 20px;
   border: 2px solid rgb(168, 161, 158);
@@ -358,16 +358,15 @@ color: rgb(44, 42, 42);
   font-size: 18px;
   font-weight: lighter;
   position: fixed;
-  left: 43%; /* Adjust the value */
 }
 
-.confirmation-popup-add h2{
+.confirmation-popup-incident h2{
   margin-top: 10px;
   color: #f44336;
   font-size: 15px;
 }
 
-.confirmation-popup-add p{
+.confirmation-popup-incident p{
   color: rgb(97, 97, 97);
 }
 
@@ -410,11 +409,14 @@ color: rgb(44, 42, 42);
   height: 27px;
 }
 
-
-
-
-
 .highlighted-row {
   background-color: #bdf8a0ba !important;
   transition: background-color 0.5s ease;
 }
+
+.successful-icon-popup {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
