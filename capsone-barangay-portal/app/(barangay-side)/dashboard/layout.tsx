@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"; 
 import { redirect } from "next/navigation";
 import Menu from "@/app/(barangay-side)/components/topMenu"
-//import Header from "@/app/(barangay-side)/components/header"
+import Header from "@/app/(barangay-side)/components/header"
 export const metadata:Metadata = { 
   title: "Barangay Dashboard",
 };

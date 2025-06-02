@@ -354,10 +354,6 @@ export default function AddFirstTimeJobSeeker() {
           </div>
 
           <div className="add-resident-bottom-section">
-            <div className="residents-search-section">
-              <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleVotersClick} />
-            </div>
-
             <nav className="jobseeker-info-toggle-wrapper">
               {["full", "others"].map((section) => (
                 <button
@@ -373,6 +369,10 @@ export default function AddFirstTimeJobSeeker() {
             </nav>
 
             <div className="add-jobseeker-bottom-section-scroll">
+
+            <div className="residents-search-section">
+              <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleVotersClick} />
+            </div>
             <form id="addJobSeekerForm" onSubmit={handleSubmit} className="add-resident-section-2">
 
               {activeSection === "full" && (
