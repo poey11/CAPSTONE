@@ -652,15 +652,18 @@ const handleSubmit = (event: React.FormEvent) => {
              </div>
 
 
-             <input 
-                    type="text" 
-                    className="search-bar-add-case" 
-                    value={reportInfo.caseNumber}
-                    name="caseNumber"
-                    id="caseNumber"
-                    disabled
+              <div className="section-1-add-title">
+                  <input 
+                            type="text" 
+                            className="search-bar-add-case" 
+                            value={reportInfo.caseNumber}
+                            name="caseNumber"
+                            id="caseNumber"
+                            disabled
+                            
+                      />
+              </div>
                     
-              />
               
             
             <div className="add-incident-bottom-section">
