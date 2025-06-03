@@ -256,6 +256,14 @@ const confirmSubmit = async () => {
       router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}?action=${action}`);
     };
 
+    const handleDialogueSection = () => {
+      router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
+    };
+
+    const handleHearingSection = () => {
+      router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
+    };
+
       
 
     const handleDeleteForm=()=>{
@@ -299,13 +307,198 @@ const confirmSubmit = async () => {
   const toggleInvestigatedDetails = () => setShowInvestigatedDetails(prev => !prev);
   const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
 
-
+  const [activeSection, setActiveSection] = useState("complainant");
 
   return (
     <>
       {loading ? (       <p></p> ) : (
         <main className="main-container-edit">
+
+          {/* NEW CODE */}
+          <div className="edit-incident-redirectionpage-section">
+            <button className="edit-incident-redirection-buttons" disabled>
+              <div className="edit-incident-redirection-icons-section">
+                <img src="/images/profile-user.png" alt="user info" className="redirection-icons-info"/> 
+              </div>
+              <h1>Incident Information</h1>
+            </button>
+
+            {/*<button className="edit-incident-redirection-buttons">
+              <div className="edit-incident-redirection-icons-section">
+                <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
+              </div>
+              <h1>Dialogue Meeting</h1>
+            </button>*/}
+
+            <div className="dialogue-dropdown">
+              <button className="edit-incident-redirection-buttons">
+                <div className="edit-incident-redirection-icons-section">
+                  <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
+                </div>
+                <h1>Dialogue Meeting</h1>
+              </button>
+
+              <div className="dialogue-submenu">
+                <button className="submenu-button" name="dialogue" onClick={handleGenerateLetterAndInvitation}>
+                  <h1>Generate Dialogue Letters</h1>
+                </button>
+                <button className="submenu-button" name="section" onClick={handleDialogueSection}>
+                  <h1>Dialogue Section</h1>
+                </button>
+              </div>
+            </div>
+
+            <div className="hearing-dropdown">
+              <button className="edit-incident-redirection-buttons">
+                <div className="edit-incident-redirection-icons-section">
+                  <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing"/> 
+                </div>
+                <h1>Hearing Section</h1>
+              </button>
+
+              <div className="hearing-submenu">
+                {reportData.isDialogue ? (
+                  <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
+                    <h1>Generate Summon Letters</h1>
+                  </button>
+                ) : (
+                  <button
+                    className="submenu-button"
+                    name="summon"
+                    onClick={() => {
+                      setPopupErrorMessage("Generate A Dialogue Letter First");
+                      setShowErrorPopup(true);
+                      setTimeout(() => setShowErrorPopup(false), 3000);
+                    }}
+                  >
+                    <h1>Generate Summon Letters</h1>
+                  </button>
+                )}
+                <button className="submenu-button" name="section" onClick={handleHearingSection}>
+                  <h1>Hearing Section</h1>
+                </button>
+              </div>
+            </div>
+
+          </div>
+          <div className="edit-incident-main-content">
+            <div className="edit-incident-main-section1">
+              <div className="edit-incident-main-section1-left">
+                <button onClick={handleBack}>
+                  <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                </button>
+
+                <h1> Edit Incident </h1>
+              </div>
+
+              <div className="action-btn-section">
+                
+              <button type="submit" className="action-view-edit" onClick={handleSubmit}>
+                  {loading ? "Saving..." : "Save"}
+                </button>
+              </div>
+              
+            </div>
+
+            <div className="edit-incident-header-body">
+              <div className="edit-incident-header-body-top-section">
+                <div className="edit-incident-info-toggle-wrapper">
+                  {["complainant", "respondent", "incident" , "barangay desk" ].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "complainant" && "Complainant"}
+                      {section === "respondent" && "Respondent"}
+                      {section === "incident" && "Incident"}
+                      {section === "barangay desk" && "Desk Officer"}
+                    </button>
+                  ))}
+                </div> 
+              </div>
+
+              <div className="edit-incident-header-body-bottom-section">
+                <div className="edit-incident-main-details-container">
+                  <div className="edit-incident-main-details-section">
+                    <div className="edit-incident-main-details-topsection">
+                      <h1>{reportData?.caseNumber}</h1>
+                    </div>
+                    <div className="edit-incident-main-details-statussection">
+                      <h1> Status</h1>
+
+                      <div className="status-section-view">
+                        <select
+                          id="status"
+                          className={`status-dropdown-edit ${toUpdate.status?.toLowerCase() || reportData.status?.toLowerCase() || "pending"}`}
+                          name="status"
+                          value={toUpdate.status ?? reportData.status ?? "pending"}  // changed to small
+                          onChange={handleFormChange}               
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="resolved">Resolved</option>
+                          <option value="settled">Settled</option>
+                          <option value="archived">Archived</option>
+                        </select>
+                      </div> 
+                    </div>
+
+                    <div className="edit-incident-main-details-description">
+                      <div className="incident-date-section">
+                        <div className="incident-date-topsection">
+                          <div className="incident-main-details-icons-section">
+                            <img src="/Images/calendar.png" alt="calendar icon" className="view-incident-description-icon-calendar" />
+                          </div>
+                          <div className="incident-main-details-title-section">
+                            <h1>Date Filed</h1>
+                          </div>
+                        </div>
+                        <p>{reportData?.dateFiled || "N/A"}</p>
+                      </div>
+
+                      <div className="incident-location-section">
+                        <div className="incident-loc-topsection">
+                          <div className="incident-main-details-icons-section">
+                            <img src="/Images/loc.png" alt="location icon" className="view-incident-description-icon-loc" />
+                          </div>
+                          <div className="incident-main-details-title-section">
+                            <h1>Location</h1>
+                          </div>
+                        </div>
+                        <p>{reportData?.location || "N/A"}</p>
+                      </div>
+                        
+                      <div className="incident-description-section">
+                        <div className="incident-desc-topsection">
+                          <div className="incident-main-details-icons-section">
+                            <img src="/Images/description.png" alt="description icon" className="view-incident-description-icon-desc" />
+                          </div>
+                          <div className="incident-main-details-title-section">
+                            <h1>Nature</h1>
+                          </div>
+                        </div>
+                        <p>{reportData?.nature || "N/A"}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="edit-incident-info-main-container">
+                  <div className="edit-incident-info-container-scrollable">
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          
      
+
+          {/* EXISTING CODE */}
           <div className="letters-content-edit">
                <button className="letter-announcement-btn-edit" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialogue Letter</button>
 
