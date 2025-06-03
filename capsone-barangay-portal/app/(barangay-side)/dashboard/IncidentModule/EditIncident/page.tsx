@@ -375,7 +375,7 @@ const confirmSubmit = async () => {
                   </button>
                 )}
                 <button className="submenu-button" name="section" onClick={handleHearingSection}>
-                  <h1>Hearing Section</h1>
+                 <h1>Hearing Section</h1>
                 </button>
               </div>
             </div>
