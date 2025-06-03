@@ -3,7 +3,7 @@ import "@/CSS/ResidentModule/addresident.css";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { db, storage } from "../../../../db/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, where, query, getDocs } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
@@ -374,6 +374,39 @@ export default function EditResident() {
         identificationFileURL: uploadedIdentificationURL,
         updatedBy: session?.user?.position || "",
       });
+
+      // Update in JobSeekerList
+        const jobSeekerQuery = query(
+          collection(db, "JobSeekerList"),
+          where("residentId", "==", residentId)
+        );
+        const jobSeekerSnapshot = await getDocs(jobSeekerQuery);
+
+        jobSeekerSnapshot.forEach(async (docSnap) => {
+          const jobSeekerRef = doc(db, "JobSeekerList", docSnap.id);
+          await updateDoc(jobSeekerRef, {
+            firstName: formData.firstName,
+            middleName: formData.middleName,
+            lastName: formData.lastName,
+          });
+        });
+
+        // Update in VotersList
+        const votersQuery = query(
+          collection(db, "VotersList"),
+          where("residentId", "==", residentId)
+        );
+        const votersSnapshot = await getDocs(votersQuery);
+
+        votersSnapshot.forEach(async (docSnap) => {
+          const voterRef = doc(db, "VotersList", docSnap.id);
+          await updateDoc(voterRef, {
+            firstName: formData.firstName,
+            middleName: formData.middleName,
+            lastName: formData.lastName,
+            homeAddress: formData.address,
+          });
+        });
 
       return docRef.id; // return ID
 
