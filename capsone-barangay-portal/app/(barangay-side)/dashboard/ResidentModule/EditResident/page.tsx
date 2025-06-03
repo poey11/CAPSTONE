@@ -408,6 +408,62 @@ export default function EditResident() {
           });
         });
 
+          // Update IncidentReports
+          const complainantQuery = query(
+            collection(db, "IncidentReports"),
+            where("complainant.residentId", "==", residentId)
+          );
+          const respondentQuery = query(
+            collection(db, "IncidentReports"),
+            where("respondent.residentId", "==", residentId)
+          );
+
+          const [complainantSnapshot, respondentSnapshot] = await Promise.all([
+            getDocs(complainantQuery),
+            getDocs(respondentQuery),
+          ]);
+
+          const incidentDocsMap = new Map();
+          [...complainantSnapshot.docs, ...respondentSnapshot.docs].forEach((docSnap) => {
+            incidentDocsMap.set(docSnap.id, docSnap);
+          });
+
+          const updatedResidentData = {
+            fname: formData.firstName,
+            lname: formData.lastName,
+            address: formData.address,
+            contact: formData.contactNumber || "",
+            sex: formData.sex,
+            age: formData.age,
+            civilStatus: formData.civilStatus,
+            residentId: residentId!,
+          };
+
+          for (const [id, docSnap] of incidentDocsMap.entries()) {
+            const data = docSnap.data();
+            const updates: any = {};
+
+            if (data.complainant?.residentId === residentId) {
+              updates.complainant = {
+                ...data.complainant,
+                ...updatedResidentData,
+              };
+            }
+
+            if (data.respondent?.residentId === residentId) {
+              updates.respondent = {
+                ...data.respondent,
+                ...updatedResidentData,
+              };
+            }
+
+            if (Object.keys(updates).length > 0) {
+              const incidentRef = doc(db, "IncidentReports", docSnap.id);
+              await updateDoc(incidentRef, updates);
+            }
+          }
+                      
+
       return docRef.id; // return ID
 
     } catch (err) {
