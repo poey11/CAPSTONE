@@ -216,6 +216,7 @@ export default function AddFirstTimeJobSeeker() {
         yearOfBirth,
         dateApplied: formattedDateApplied,
         verificationFilesURLs,
+        identificationFileURL: formData.identificationFileURL,
         createdAt: currentDate,
         createdBy: session?.user?.position || "Unknown",
       });
