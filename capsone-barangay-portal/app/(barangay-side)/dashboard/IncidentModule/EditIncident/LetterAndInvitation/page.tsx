@@ -17,7 +17,9 @@ export default function GenerateDialougeLetter() {
     const [listOfStaffs, setListOfStaffs] = useState<any[]>([]);
     const [userInfo, setUserInfo] = useState<any | null>(null);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
-    const [showSubmitPopup, setShowSubmitPopup] = useState(false);
+    const [showSubmitPopup, setShowSubmitPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+
+  
     const [isLoading, setIsLoading] = useState(false);
 
 
@@ -295,8 +297,11 @@ export default function GenerateDialougeLetter() {
             a.click();
             window.URL.revokeObjectURL(url);
 
-            setShowSubmitPopup(true); 
-            
+            setShowSubmitPopup({
+                show: true,
+                message: "Dialogue Letter has been generated successfully!",
+            });
+                        
         } catch (error) {
             console.error(error)
         } finally {  //ADDED
@@ -383,7 +388,12 @@ export default function GenerateDialougeLetter() {
         a.download = "SummonLetter.pdf";
         a.click();
         window.URL.revokeObjectURL(url);
-          setShowSubmitPopup(true); 
+
+          setShowSubmitPopup({
+                show: true,
+                message: "Summon Letter has been generated successfully!",
+            });
+
        }
        catch(e:any){
         console.log()
@@ -458,7 +468,7 @@ export default function GenerateDialougeLetter() {
         const action = e.nativeEvent.submitter.name;
         
         if(delivery > meeting){
-            setErrorPopup({ show: true, message: "Date of Delivery must be earlier than Date of Meeting" });
+            setErrorPopup({ show: true, message: "Delivery Date must be before Meeting Date." });
             return;
         }
         if (action === "print") {
@@ -525,24 +535,25 @@ console.log(safeData);
 console.log(safeData.length)
   return (
     <main className="main-container-letter">
+
+
         {errorPopup.show && (
-              <div className="popup-overlay error">
-                  <div className="popup">
+              <div className={'popup-overlay-error show'}>
+                  <div className="popup-letter">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert-letter"/>
                       <p>{errorPopup.message}</p>
-                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
                   </div>
               </div>
         )}
 
 
-            {showSubmitPopup && (
-            
-        
+
+            {showSubmitPopup.show && (
                  <div className="popup-backdrop">
                     <div className="popup-content">
                         <img src="/Images/check.png" alt="warning icon" className="successful-icon-popup-letter" />
-                        <p>Letter has been generated successfully!</p>
-                        <button onClick={() => setShowSubmitPopup(false)} className="close-button-letter">Close</button>
+                        <p> {showSubmitPopup.message}</p>
+                        <button onClick={() => setShowSubmitPopup({ show: false, message: "" })} className="close-button-letter">Close</button>
                     </div>
                 </div>
   
