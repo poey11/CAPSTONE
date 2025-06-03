@@ -504,7 +504,7 @@ export default function GenerateDialougeLetter() {
 console.log(safeData);
 console.log(safeData.length)
   return (
-    <main className="main-container">
+    <main className="main-container-letter">
         {errorPopup.show && (
               <div className="popup-overlay error">
                   <div className="popup">
@@ -513,56 +513,100 @@ console.log(safeData.length)
                   </div>
               </div>
         )}
-        <div className="main-content">
-            <div className="section-1">
-                <button type="button" className="back-button" onClick={handleAddLupon}></button>
-                {actionId === "summon" ? <p className="NewOfficial">Summon Letter ({hearing} Hearing)</p> : <p className="NewOfficial">Dialouge Letter</p>}
+
+        {/*
+               <div className="main-content-title-section">
+            <div className="main-content-title-section-1">
+                <h1>Generate Letter</h1>
+            </div>
+          
+       </div> 
+        */}
+    
+
+
+        <div className="main-content-letter">
+            <div className="section-1-letter">
+
+                <div className="section-left-side-letter">
+                    <button type="button" onClick={handleAddLupon}>
+                        <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-letter"/> 
+                    </button>
+
+                      {actionId === "summon" ? <h1 className="NewOfficial">Summon Letter ({hearing} Hearing)</h1> : <h1 className="NewOfficial">Dialouge Letter</h1>}
+                </div>
+            
 
              </div>
 
              <form onSubmit={onSubmit}>
-             <div className="section-2">
+             <div className="section-2-letter">
 
-                <div className="section-2-left-side">
+            
+                <div className="section-2-information-section">
 
-                    <p >Complainant's Information</p>
-                    <p>Name</p>
+                    <div className="section-2-information-top">
 
-                    <input 
-                        type="text" 
-                        className="search-bar" 
-                        placeholder={otherInfo.complainant.fname}
-                        value={otherInfo.complainant.fname}
-                        id="complainant.fname"
-                        name="complainant.fname"
-                        disabled
-                    />
+                          <div className="section-title-letter">
+                                <h1>Complainant’s Information</h1>
+                        </div>
+                    </div>
 
-                    <p>Address</p>
+                 <div className="section-2-information-bottom">
 
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder= {otherInfo.complainant.address}
-                    value={otherInfo.complainant.address}
-                    id="complainant.address"
-                    name="complainant.address"
-                    disabled
-                    />
-                    
-                    <p>Contact Nos</p>
+                          <div className="fields-section-letter">
+                          <p>Name</p>
+                             <input 
+                            type="text" 
+                            className="generate-letter-input-field" 
+                            placeholder={otherInfo.complainant.fname}
+                            value={otherInfo.complainant.fname}
+                            id="complainant.fname"
+                            name="complainant.fname"
+                            disabled
+                        />
+                        </div>
 
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder= {otherInfo.complainant.contact}
-                    value={otherInfo.complainant.contact}
-                    id="complainant.contact"
-                    name="complainant.contact"
-                    disabled
-                    />
+                        <div className="fields-section-letter">
+                            <p>Address</p>
+                                <input 
+                                type="text" 
+                                className="generate-letter-input-field" 
+                                placeholder= {otherInfo.complainant.address}
+                                value={otherInfo.complainant.address}
+                                id="complainant.address"
+                                name="complainant.address"
+                                disabled
+                                />
+                        </div>
 
+                        <div className="fields-section-letter">
+                            <p>Contact Nos</p>
+                            <input 
+                            type="text" 
+                            className="generate-letter-input-field" 
+                            placeholder= {otherInfo.complainant.contact}
+                            value={otherInfo.complainant.contact}
+                            id="complainant.contact"
+                            name="complainant.contact"
+                            disabled
+                            />
+
+                        </div>
+                 
+                 </div>       
+              
+
+                 
+
+                 
+                  
+
+              
                 </div>
+
+ 
+               
 
                 <div className="section-2-right-side">
 
