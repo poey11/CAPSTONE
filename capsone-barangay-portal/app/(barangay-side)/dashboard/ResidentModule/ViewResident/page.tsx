@@ -231,7 +231,7 @@ useEffect(() => {
               />
               <div className="resident-name-section">
                   <h2>
-                    {formData.firstName || "N/A"} {formData.lastName || "N/A"}
+                  {formData?.firstName || "N/A"} {formData?.lastName || "N/A"}
                   </h2>
                 </div>
             </div>

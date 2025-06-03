@@ -102,22 +102,25 @@ export default function ViewFirstTimeJobSeeker() {
                   <span className="resident-details-label">Resident Details</span>
 
                   <div className="resident-profile-container">
-                      {/*
-                    <img
-                        src={formData.identificationFileURL || "/Images/default-identificationpic.jpg"}
-                        alt="Resident"
-                        className={
-                          formData.identificationFileURL
-                            ? "resident-picture uploaded-picture"
-                            : "resident-picture default-picture"
-                        }
-                    />
-                    <div className="resident-name-section">
-                        <h2>
-                          {formData.firstName || "N/A"} {formData.lastName || "N/A"}
-                        </h2>
+                      
+                    {formData && (
+                      <div className="resident-profile-container-voter">
+                        <img
+                          src={formData.identificationFileURL || "/Images/default-identificationpic.jpg"}
+                          alt="Resident"
+                          className={
+                            formData.identificationFileURL
+                              ? "resident-picture uploaded-picture"
+                              : "resident-picture default-picture"
+                          }
+                        />
                       </div>
-                      */}
+                    )}
+                    <div className="resident-name-section">
+                      <h2>
+                      {formData?.firstName || "N/A"} {formData?.lastName || "N/A"}
+                      </h2>
+                    </div>
                   </div>
                 </div>
 

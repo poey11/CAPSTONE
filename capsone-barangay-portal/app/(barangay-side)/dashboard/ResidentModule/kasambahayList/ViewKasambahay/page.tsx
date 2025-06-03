@@ -31,6 +31,7 @@ interface KasambahayFormData {
   updatedBy: string;
   createdBy: string;
   createdAt: string;
+  identificationFileURL: string;
 }
 
 
@@ -63,6 +64,7 @@ export default function ViewKasambahay() {
       sssMember: false,
       philhealthMember: false,
       pagibigMember: false,
+      identificationFileURL: "",
       fileURL: "",
       updatedBy: "",
       createdBy: "",
@@ -104,6 +106,8 @@ export default function ViewKasambahay() {
               updatedBy: docSnap.data().updatedBy || "",
               createdBy: docSnap.data().createdBy || "",
               createdAt: docSnap.data().createdAt || "",
+              identificationFileURL: docSnap.data().identificationFileURL || "",
+
             };
   
             setFormData(data);
@@ -255,7 +259,7 @@ export default function ViewKasambahay() {
             <span className="resident-details-label">Resident Details</span>
 
             <div className="resident-profile-container">
-                {/*
+                
               <img
                   src={formData.identificationFileURL || "/Images/default-identificationpic.jpg"}
                   alt="Resident"
@@ -267,10 +271,10 @@ export default function ViewKasambahay() {
               />
               <div className="resident-name-section">
                   <h2>
-                    {formData.firstName || "N/A"} {formData.lastName || "N/A"}
+                  {formData?.firstName || "N/A"} {formData?.lastName || "N/A"}
                   </h2>
                 </div>
-                */}
+               
             </div>
           </div>
 
