@@ -93,15 +93,16 @@ padding-bottom:30px;
 .section-2-information-section {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    width: 90%;
     justify-content: space-between;
-    padding: 2rem;
+     border: 1px solid rgba(36, 53, 76, 0.7);
+     margin-top: 2rem;
 }
 
 .fields-section-letter {
   display: flex;
   flex-direction: column;
-  margin-top: 30px;
+  margin-top: 10px;
   width: 100%;
 }
 .fields-section-letter p{
@@ -134,22 +135,74 @@ padding-bottom:30px;
 }
 
 .section-2-information-top {
+ background-color: #214666; 
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-left: 60px;
   display: flex;
-  width: 100%;
+  flex-direction: row;
+  align-items: center;
 }
 .section-2-information-bottom {
   display: flex;
   width: 100%;
+  padding: 25px;
 }
 
 .section-title-letter {
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #2C3E50;
-  width: 100%;
-  text-align: left;
-  padding-left: 2.0rem;
+   width: 90%;
+  text-align: center;
+  color: #ffffff;
+  font-weight: bolder;
+  font-size: 20px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.actions-letter {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-right: 30px;
+}
+
+
+.section-4 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    padding: 3rem;
+}
+
+
+.letter-announcement-btn {
+    background-color:#e56723;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 150px;
+  }
+  
+  .letter-announcement-btn:hover {
+    background-color:#cc591b;
+  }
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -508,32 +561,6 @@ padding-bottom:30px;
   font-size: 1rem;
   padding: 1rem;
 }
-
-.section-4 {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-    padding: 3rem;
-}
-
-
-.letter-announcement-btn {
-    background-color:#e56723;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 5px;
-    width: 200px;
-  }
-  
-  .letter-announcement-btn:hover {
-    background-color:#cc591b;
-  }
-
-
 
   
   

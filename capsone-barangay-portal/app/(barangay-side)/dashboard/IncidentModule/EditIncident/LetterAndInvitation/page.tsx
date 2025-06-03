@@ -536,11 +536,25 @@ console.log(safeData.length)
                       {actionId === "summon" ? <h1 className="NewOfficial">Summon Letter ({hearing} Hearing)</h1> : <h1 className="NewOfficial">Dialouge Letter</h1>}
                 </div>
             
+                <div className="actions-letter">
+                          {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
+                        {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Generate Letter</button>)}
+                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
+                </div>
 
              </div>
 
              <form onSubmit={onSubmit}>
              <div className="section-2-letter">
+
+            {/*
+              <div className="section-4">
+                        {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
+                        {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
+                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> 
+             </div>
+            */}
+                  
 
             
                 <div className="section-2-information-section">
@@ -595,204 +609,221 @@ console.log(safeData.length)
                         </div>
                  
                  </div>       
-              
-
-                 
-
-                 
-                  
+            
 
               
                 </div>
+                
+                  <div className="section-2-information-section">
+
+                    <div className="section-2-information-top">
+
+                          <div className="section-title-letter">
+                                <h1>Respondent’s Information</h1>
+                        </div>
+                    </div>
+
+                 <div className="section-2-information-bottom">
+
+                          <div className="fields-section-letter">
+                          <p>Name</p>
+                            
+                            <input 
+                            type="text" 
+                            className="generate-letter-input-field" 
+                            placeholder={otherInfo.respondent.fname}
+                            value={otherInfo.respondent.fname}
+                            id="respondent.fname"
+                            name="respondent.fname"
+                            disabled
+                            />
+
+                        </div>
+
+                        <div className="fields-section-letter">
+                            <p>Address</p>
+                                   <input 
+                                type="text" 
+                                className="generate-letter-input-field" 
+                                placeholder= {otherInfo.respondent.address}
+                                value={otherInfo.respondent.address}
+                                id="respondent.address"
+                                name="respondent.address"
+                                disabled
+                                />
+                
+                        </div>
+
+                        <div className="fields-section-letter">
+                            <p>Contact Nos</p>
+                            <input 
+                            type="text" 
+                            className="generate-letter-input-field" 
+                            placeholder= {otherInfo.respondent.contact}
+                            value={otherInfo.respondent.contact}
+                            id="respondent.contact"
+                            name="respondent.contact"
+                            disabled
+                            />
+
+                        </div>
+                 
+                 </div>       
+            
+
+              
+                </div>
+
+
+                   <div className="section-2-information-section">
+                        <div className="section-2-information-top">
+                            <div className="section-title-letter">
+                            <h1>Other Information</h1>
+                            </div>
+                        </div>
+
+                        <div className="section-2-information-bottom">
+                            {actionId === "dialogue" ? (
+                            <>
+                                <div className="fields-section-letter">
+                                      <p>Date of Delivery</p>
+                                    <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
+                                    value={safeData[0]?.DateOfDelivery||otherInfo.DateOfDelivery}
+                                    id="DateOfDelivery"
+                                    name="DateOfDelivery"
+                                    min={today}
+                                    onKeyDown={(e) => e.preventDefault()}
+                                    onChange={handleChange}
+                                    required
+                                    disabled = {safeData[0]?.DateOfDelivery ? true : false}
+                                    />
+                                </div>
+                                <div className="fields-section-letter">
+                                     <p>Date and Time of Meeting</p>
+                                    <input type="datetime-local" className="generate-letter-input-field" 
+                                    value={safeData[0]?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
+                                    onKeyDown={(e) => e.preventDefault()}
+                                    id="DateTimeOfMeeting"
+                                    name="DateTimeOfMeeting"
+                                    onChange={handleChange}
+                                    min={todayWithTime}
+                                    required
+                                    disabled = {safeData[0]?.DateTimeOfMeeting ? true : false}
+                                    />
+
+                                </div>
+                                <div className="fields-section-letter">
+                                      <p>Delivered By</p>      
+                                    <select className="generate-letter-input-field" value={safeData[0]?.LuponStaff||otherInfo.LuponStaff}
+                                    id="LuponStaff"
+                                    name="LuponStaff"
+                                    onChange={handleChange}
+                                    required
+                                    disabled = {safeData[0]?.LuponStaff ? true : false}
+                                    >
+                                        <option value="">Select Official/Kagawad</option>
+                                        {listOfStaffs.map((staff, index) => (
+                                            <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
+                                                {staff.firstName} {staff.lastName}
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                </div>
+
+                                <div className="fields-section-letter">
+                                    <p>Date Filed</p>
+                                 <input type="date" className="generate-letter-input-field" 
+                                    value={otherInfo.DateFiled}
+                                    max={today}
+                                    id="DateFiled"
+                                    name="DateFiled"
+                                    onKeyDown={(e) => e.preventDefault()}
+                                    onChange={handleChange}
+                                    disabled
+                                    />
+                                </div>
+                            </>
+                            ) : (
+                            <>
+                                <div className="fields-section-letter">
+                                     <p>Date of Delivery</p>
+                                     <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
+                                    value={otherInfo.DateOfDelivery}
+                                    id="DateOfDelivery"
+                                    name="DateOfDelivery"
+                                    min={today}
+                                    onKeyDown={(e) => e.preventDefault()}
+                                    onChange={handleChange}
+                                    required
+                                
+                                    />
+
+                                </div>
+
+                                <div className="fields-section-letter">
+                                     <p>Date and Time of Meeting</p>
+                                        <input type="datetime-local" className="generate-letter-input-field" 
+                                        value={otherInfo.DateTimeOfMeeting}
+                                        onKeyDown={(e) => e.preventDefault()}
+                                        id="DateTimeOfMeeting"
+                                        name="DateTimeOfMeeting"
+                                        onChange={handleChange}
+                                        min={todayWithTime}
+                                        required              />
+
+                                </div>
+
+                                 <div className="fields-section-letter">
+                                    <p>Delivered By</p>
+                                     <select className="generate-letter-input-field" value={otherInfo.LuponStaff}
+                                id="LuponStaff"
+                                name="LuponStaff"
+                                onChange={handleChange}
+                                required
+                                >
+                                    <option value="">Select Official/Kagawad</option>
+                                    {listOfStaffs.map((staff, index) => (
+                                        <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
+                                            {staff.firstName} {staff.lastName}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                </div>
+
+                                 <div className="fields-section-letter">
+                                    <p>Date Filed</p>
+                                    <input type="date" className="generate-letter-input-field" 
+                                    value={otherInfo.DateFiled}
+                                    max={today}
+                                    id="DateFiled"
+                                    name="DateFiled"
+                                    onKeyDown={(e) => e.preventDefault()}
+                                    onChange={handleChange}
+                                    disabled
+                                    />
+
+                                </div>
+                            </>
+                            )}
+                        </div>
+                        </div>
+
+
+
+
+
+
+
 
  
                
 
-                <div className="section-2-right-side">
-
-                    <p>Respondent's Information</p>
-                    
-                    <p>Name</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder={otherInfo.respondent.fname}
-                    value={otherInfo.respondent.fname}
-                    id="respondent.fname"
-                    name="respondent.fname"
-                    disabled
-                    />
-
-                    <p>Address</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder= {otherInfo.respondent.address}
-                    value={otherInfo.respondent.address}
-                    id="respondent.address"
-                    name="respondent.address"
-                    disabled
-                    />
-                
-
-                    <p>Contact Nos</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder= {otherInfo.respondent.contact}
-                    value={otherInfo.respondent.contact}
-                    id="respondent.contact"
-                    name="respondent.contact"
-                    disabled
-                    />
-                </div>
+               
             </div>
 
-
-              <div className="section-3">
-                <p className="title">Other Information</p>
-                {actionId === "dialogue" ? (<>
-                    <div className="bars">
-                        <div className="input-group">
-                            <p>Date of Delivery</p>
-                            <input type="date" className="search-bar" placeholder="Enter Date of Delivery" 
-                            value={safeData[0]?.DateOfDelivery||otherInfo.DateOfDelivery}
-                            id="DateOfDelivery"
-                            name="DateOfDelivery"
-                            min={today}
-                            onKeyDown={(e) => e.preventDefault()}
-                            onChange={handleChange}
-                            required
-                            disabled = {safeData[0]?.DateOfDelivery ? true : false}
-                            />
-                        </div>
-                        
-                        <div className="input-group">
-                            <p>Date and Time of Meeting</p>
-                            <input type="datetime-local" className="search-bar" 
-                            value={safeData[0]?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
-                            onKeyDown={(e) => e.preventDefault()}
-                            id="DateTimeOfMeeting"
-                            name="DateTimeOfMeeting"
-                            onChange={handleChange}
-                            min={todayWithTime}
-                            required
-                            disabled = {safeData[0]?.DateTimeOfMeeting ? true : false}
-                            />
-                            
-                        </div>
-
-                    </div>
-
-                    <div className="bars">
-                        <div className="input-group">
-                            {/* change into drop box */}
-                            <p>Delivered By</p>
-                            <select className="search-bar" value={safeData[0]?.LuponStaff||otherInfo.LuponStaff}
-                            id="LuponStaff"
-                            name="LuponStaff"
-                            onChange={handleChange}
-                            required
-                            disabled = {safeData[0]?.LuponStaff ? true : false}
-                            >
-                                <option value="">Select Official/Kagawad</option>
-                                {listOfStaffs.map((staff, index) => (
-                                    <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
-                                        {staff.firstName} {staff.lastName}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="input-group">
-                            <p>Date Filed</p>
-                            <input type="date" className="search-bar" 
-                            value={otherInfo.DateFiled}
-                            max={today}
-                            id="DateFiled"
-                            name="DateFiled"
-                            onKeyDown={(e) => e.preventDefault()}
-                            onChange={handleChange}
-                            disabled
-                            />
-                        </div>
-                    </div>
-                
-                </>) : 
-                (<>
-                    <div className="bars">
-                        <div className="input-group">
-                            <p>Date of Delivery</p>
-                            <input type="date" className="search-bar" placeholder="Enter Date of Delivery" 
-                            value={otherInfo.DateOfDelivery}
-                            id="DateOfDelivery"
-                            name="DateOfDelivery"
-                            min={today}
-                            onKeyDown={(e) => e.preventDefault()}
-                            onChange={handleChange}
-                            required
-                           
-                            />
-                        </div>
-                        
-                        <div className="input-group">
-                            <p>Date and Time of Meeting</p>
-                            <input type="datetime-local" className="search-bar" 
-                            value={otherInfo.DateTimeOfMeeting}
-                            onKeyDown={(e) => e.preventDefault()}
-                            id="DateTimeOfMeeting"
-                            name="DateTimeOfMeeting"
-                            onChange={handleChange}
-                            min={todayWithTime}
-                            required                            />
-                            
-                        </div>
-
-                    </div>
-
-                    <div className="bars">
-                        <div className="input-group">
-                            {/* change into drop box */}
-                            <p>Delivered By</p>
-                            <select className="search-bar" value={otherInfo.LuponStaff}
-                            id="LuponStaff"
-                            name="LuponStaff"
-                            onChange={handleChange}
-                            required
-                            >
-                                <option value="">Select Official/Kagawad</option>
-                                {listOfStaffs.map((staff, index) => (
-                                    <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
-                                        {staff.firstName} {staff.lastName}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="input-group">
-                            <p>Date Filed</p>
-                            <input type="date" className="search-bar" 
-                            value={otherInfo.DateFiled}
-                            max={today}
-                            id="DateFiled"
-                            name="DateFiled"
-                            onKeyDown={(e) => e.preventDefault()}
-                            onChange={handleChange}
-                            disabled
-                            />
-                        </div>
-                    </div>
-                </>)}
-                    
-                    <div className="section-4">
-                        {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
-                        {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
-                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
-                    </div>
-            </div>
+          
            </form>
 
         </div> 
@@ -819,7 +850,13 @@ console.log(safeData.length)
                     />
                 ))
         )} */}
-        {actionId === "summon" && (
+
+
+        {/*
+
+            CINOMMENT NI DERICK NOT SUR IF NEED PA IDISPLAY 
+
+          {actionId === "summon" && (
             Array.from({ length: safeData.length }, (_, i) => (
                 <Letter 
                 key={i}
@@ -831,6 +868,8 @@ console.log(safeData.length)
                 />
             ))
         )}
+        */}
+      
 
 
 
