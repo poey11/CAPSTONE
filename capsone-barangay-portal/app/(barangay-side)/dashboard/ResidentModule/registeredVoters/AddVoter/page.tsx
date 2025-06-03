@@ -169,6 +169,7 @@ export default function addVoter() {
       const docRef = await addDoc(voterCollection, {
         ...formData,
         voterNumber: latestNumber,
+        identificationFileURL: formData.identificationFileURL,
         createdAt: currentDate,
       });
       return docRef.id; // return ID
