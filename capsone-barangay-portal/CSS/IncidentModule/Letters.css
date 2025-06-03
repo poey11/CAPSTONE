@@ -58,6 +58,9 @@ padding-bottom:30px;
   background-color: #214666;
   padding-top: 20px;
   padding-bottom: 20px;
+   position: sticky;
+  top: 0;
+  z-index: 10; 
 }
 
 
@@ -196,6 +199,78 @@ padding-bottom:30px;
 
 
 
+
+  
+
+
+/*
+POP UPS
+*/
+
+
+
+
+.popup-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+}
+
+.popup-content {
+ display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  width: 400px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+  left: 43%; /* Adjust the value */
+
+}
+
+.popup-content p {
+    color: rgb(97, 97, 97);
+  
+}
+
+.successful-icon-popup-letter {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+
+.close-button-letter{
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 150px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+   background-color: #f44336;
+}
+
+.close-button-letter:hover {
+   background-color:  #c2352b; 
+}
 
 
 

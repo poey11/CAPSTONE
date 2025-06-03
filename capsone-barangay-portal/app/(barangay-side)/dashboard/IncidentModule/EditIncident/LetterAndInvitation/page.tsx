@@ -17,6 +17,10 @@ export default function GenerateDialougeLetter() {
     const [listOfStaffs, setListOfStaffs] = useState<any[]>([]);
     const [userInfo, setUserInfo] = useState<any | null>(null);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+    const [showSubmitPopup, setShowSubmitPopup] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+
     
     const [otherInfo, setOtherInfo] = useState({
         DateOfDelivery: "",
@@ -227,6 +231,9 @@ export default function GenerateDialougeLetter() {
   
 
     const printDialouge = async () => {
+         setIsLoading(true); // Start loading
+
+
         const day = otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[2];    
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const monthIndex = parseInt(otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[1], 10) - 1;
@@ -251,7 +258,6 @@ export default function GenerateDialougeLetter() {
             collective = "Gabi"; // Evening
         }
         
-
         try {
             const response = await fetch("/api/fillPDF", {
                 method: "POST",
@@ -288,12 +294,21 @@ export default function GenerateDialougeLetter() {
             a.download = "DialogueLetter.pdf";
             a.click();
             window.URL.revokeObjectURL(url);
+
+            setShowSubmitPopup(true); 
             
         } catch (error) {
             console.error(error)
-        }
+        } finally {  //ADDED
+             setTimeout(() => {
+            setIsLoading(false); // End loading after 2 seconds
+        }, 2000);
+       }
     }
     const printSummon = async () => {
+
+        setIsLoading(true); // Start loading
+
         const day = otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[2];
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const monthIndex = parseInt(otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[1], 10) - 1;
@@ -368,10 +383,15 @@ export default function GenerateDialougeLetter() {
         a.download = "SummonLetter.pdf";
         a.click();
         window.URL.revokeObjectURL(url);
+          setShowSubmitPopup(true); 
        }
        catch(e:any){
         console.log()
-       } 
+       } finally {  //ADDED
+             setTimeout(() => {
+            setIsLoading(false); // End loading after 2 seconds
+        }, 2000);
+       }
     
     }
     
@@ -444,13 +464,13 @@ export default function GenerateDialougeLetter() {
         if (action === "print") {
             if(actionId === "summon"){
                 handleIsHearing();
-                // printSummon()
+                 printSummon()
             }
             else{
                 handleIsDialogue();
-                // printDialouge()
+                 printDialouge()
             }
-            //clearForm();
+            clearForm();
         } else if (action === "sendSMS") {
             if(actionId === "summon"){
                 //sendSMSForSummons();
@@ -514,6 +534,32 @@ console.log(safeData.length)
               </div>
         )}
 
+
+            {showSubmitPopup && (
+            
+        
+                 <div className="popup-backdrop">
+                    <div className="popup-content">
+                        <img src="/Images/check.png" alt="warning icon" className="successful-icon-popup-letter" />
+                        <p>Letter has been generated successfully!</p>
+                        <button onClick={() => setShowSubmitPopup(false)} className="close-button-letter">Close</button>
+                    </div>
+                </div>
+  
+               
+            )}
+
+            {isLoading && (
+                    <div className="popup-backdrop">
+                        <div className="popup-content">
+                            <img src="/Images/loading.png" alt="loading..." className="successful-icon-popup-letter" />
+                            <p>Generating letter, please wait...</p>
+                        </div>
+                    </div>
+                )}
+
+
+
         {/*
                <div className="main-content-title-section">
             <div className="main-content-title-section-1">
@@ -526,6 +572,8 @@ console.log(safeData.length)
 
 
         <div className="main-content-letter">
+        <form onSubmit={onSubmit}>
+
             <div className="section-1-letter">
 
                 <div className="section-left-side-letter">
@@ -536,6 +584,7 @@ console.log(safeData.length)
                       {actionId === "summon" ? <h1 className="NewOfficial">Summon Letter ({hearing} Hearing)</h1> : <h1 className="NewOfficial">Dialouge Letter</h1>}
                 </div>
             
+            
                 <div className="actions-letter">
                           {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                         {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Generate Letter</button>)}
@@ -544,7 +593,7 @@ console.log(safeData.length)
 
              </div>
 
-             <form onSubmit={onSubmit}>
+       
              <div className="section-2-letter">
 
             {/*
