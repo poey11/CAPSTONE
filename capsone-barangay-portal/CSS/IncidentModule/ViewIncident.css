@@ -125,7 +125,7 @@ margin-top: 3rem;
     display: inline-block;        
     text-transform: capitalize;   
     text-align: center;    
-
+  
     border: none;
     padding: 8px 12px;
     font-size: 13px;
@@ -650,7 +650,7 @@ margin-top: 3rem;
     border-radius: 10px;
     font-weight: bold;
     font-size: 16px;
-    z-index: 10;
+    z-index: 5;
     width: 210px;
     text-align: center;
   }

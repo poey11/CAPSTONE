@@ -582,7 +582,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                         </div>
                         <div className="bottom-middle-section">
                           <div className="bottom-middle-incidentfields">
-                              <p>Date & Time Signed</p>
+                              <p>Date & Time Filed</p>
                               <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.date || "N/A"} readOnly />
                             </div>
                         </div>
@@ -612,7 +612,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                                     style={{ maxWidth: "100%", maxHeight: "260px", borderRadius: "10px" }}
                                   />
                                 ) : (
-                                  <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "85px" }}>No image available</p>
+                                  <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>No image available</p>
                                 )}
                               </div>
                             </div>
