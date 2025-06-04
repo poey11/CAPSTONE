@@ -5,8 +5,6 @@
  background-color: #F0F2F8; 
  margin-left: 3rem; 
  padding-top: 11.2%;
- padding-left:30px;
- padding-right:30px;
  padding-bottom:30px;
 }
 
@@ -1404,7 +1402,6 @@ padding: 1rem;
 .edit-incident-info-main-container{
   width: 75%;
   display: flex;
- 
 }
 
 .edit-incident-info-container-scrollable{
@@ -1414,6 +1411,9 @@ padding: 1rem;
   border-radius: 8px;
   margin-right: 45px;
   overflow-y: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 20px;
 }
 
 
@@ -1519,8 +1519,202 @@ padding: 1rem;
   transform: scale(1.1);
 }
 
+.edit-incident-info-main-content{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  margin-top: 60px;
+}
+
+.edit-incident-dialogue-content {
+  width: 100%;
+}
+
+.edit-incident-content-topsection {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
 
 
+.edit-incident-content-left-side{
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+} 
+
+.edit-incident-content-right-side {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+} 
+
+.edit-incident-content-left-side p,
+.edit-incident-content-right-side p {
+ color: grey;
+ font-weight: bold;
+ font-size: 1rem;
+}
+
+.edit-incident-fields-section{
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 13px;
+}
+
+.edit-incident-fields-section p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 20px;
+}
+
+.edit-incident-input-field {
+  padding: 8px;
+  width: 85%;
+  margin-top: 10px;
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  color: #000000;
+  text-align: left;
+}
+
+.edit-incident-input-field:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+
+
+  .bottom-middle-section{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    text-align: left;
+  }
+
+  .bottom-middle-incidentfields{
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    width: 50%;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 13px;
+  }
+  
+  .bottom-middle-incidentfields p{
+    font-size: 15px;
+    color: #2C3E50;
+    font-weight: bold;
+    align-self: flex-start; 
+    margin-left: 20px;
+  }
+
+  .edit-incident-content-bottomsection{
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .view-incident-partyA-container {
+    width: 100%;
+  }
+
+  .box-container-outer-natureoffacts {
+    position: relative; 
+    margin-bottom: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .title-remarks-partyA {
+    position: absolute;
+    left: 50%; 
+    top: 30px; 
+    transform: translate(-50%, -50%);
+    background-color: #1f3b57;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    z-index: 5;
+    width: 210px;
+    text-align: center;
+  }
+
+  .box-container-partyA {
+    position: relative;
+    width: 100%;
+    border: 1px solid #5a6b7c;
+    border-radius: 10px;
+    background-color: #ffffff;
+    margin-top: 30px;
+    height: 250px;
+  }
+
+
+  .natureoffacts-input-field {
+    padding: 8px;
+    width: 100%;
+    border-radius: 5px;
+    color: #000000;
+    text-align: left;
+    height: 120px;
+    margin-top: 20px;
+    resize: none;
+  }
+
+  .natureoffacts-input-field:focus {
+    outline: none;
+    border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
+    box-shadow: none;
+  }
+
+
+  .box-container-incidentimage {
+    position: relative;
+    width: 60%;
+    border: 1px solid #5a6b7c;
+    border-radius: 10px;
+    background-color: #ffffff;
+    margin-top: 30px;
+    height: 260px;
+  }
+  
+
+  .barangay-desk-officer-section{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .edit-incident-fields-section-deskofficer{
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 13px;
+  }
+  
+  .edit-incident-fields-section-deskofficer p{
+    font-size: 15px;
+    color: #2C3E50;
+    font-weight: bold;
+    align-self: flex-start; /* Left-aligns the label */
+    margin-left: 45px;
+  }
 
 /* TESTING FOR DIALOGUE AND HEARING SECTION PAGE */
 

@@ -297,6 +297,44 @@ const confirmSubmit = async () => {
     }
 
 
+    useEffect(() => {
+      if (reportData) {
+        setToUpdate({
+          complainant: {
+            fname: reportData.complainant?.fname || "",
+            lname: reportData.complainant?.lname || "",
+            sex: reportData.complainant?.sex || "",
+            age: reportData.complainant?.age || "",
+            civilStatus: reportData.complainant?.civilStatus || "",
+            address: reportData.complainant?.address || "",
+            contact: reportData.complainant?.contact || "",
+          },
+          respondent: {
+            fname: reportData.respondent?.fname || "",
+            lname: reportData.respondent?.lname || "",
+            sex: reportData.respondent?.sex || "",
+            age: reportData.respondent?.age || "",
+            civilStatus: reportData.respondent?.civilStatus || "",
+            address: reportData.respondent?.address || "",
+            contact: reportData.respondent?.contact || "",
+          },
+          fname: reportData.receivedBy?.split(" ")[0] || "",
+          lname: reportData.receivedBy?.split(" ")[1] || "",
+          nature: reportData.nature || "",
+          location: reportData.location || "",
+          status: reportData.status || "pending",
+          nosofMaleChildren: reportData.nosofMaleChildren || "",
+          nosofFemaleChildren: reportData.nosofFemaleChildren || "",
+          isMediation: reportData.isMediation || false,
+          isConciliation: reportData.isConciliation || false,
+          isArbitration: reportData.isArbitration || false,
+          timeReceived: reportData.timeReceived || "",
+          dateReceived: reportData.dateReceived || ""
+        });
+      }
+    }, [reportData]);
+
+
   const [showRecordDetails, setShowRecordDetails] = useState(false);
   const [showComplainantDetails, setShowComplainantDetails] = useState(false);
   const [showInvestigatedDetails, setShowInvestigatedDetails] = useState(false);
@@ -322,13 +360,6 @@ const confirmSubmit = async () => {
               </div>
               <h1>Incident Information</h1>
             </button>
-
-            {/*<button className="edit-incident-redirection-buttons">
-              <div className="edit-incident-redirection-icons-section">
-                <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
-              </div>
-              <h1>Dialogue Meeting</h1>
-            </button>*/}
 
             <div className="dialogue-dropdown">
               <button className="edit-incident-redirection-buttons">
@@ -486,6 +517,310 @@ const confirmSubmit = async () => {
 
                 <div className="edit-incident-info-main-container">
                   <div className="edit-incident-info-container-scrollable">
+                    <div className="edit-incident-info-main-content">
+                      {activeSection === "complainant" && (
+                        <>
+                          <div className="edit-incident-dialogue-content">
+                            <div className="edit-incident-content-topsection">
+                              <div className="edit-incident-content-left-side">
+                                <div className="edit-incident-fields-section">
+                                  <p>Last Name</p>
+                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.complainant.lname} value={toUpdate.complainant.lname} name="complainant.lname" id="complainant.lname" onChange={handleFormChange} />
+                                </div>
+
+                                <div className="edit-incident-fields-section">
+                                  <p>First Name</p>
+                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.complainant.fname} value={toUpdate.complainant.fname} name="complainant.fname" id="complainant.fname" onChange={handleFormChange} />
+                                </div>
+
+                                <div className="edit-incident-fields-section">
+                                  <p>Civil Status</p>
+                                  <select   className="edit-incident-input-field"    
+                                    value={toUpdate.complainant.civilStatus || reportData.complainant.civilStatus || ""} // Show db value or user-updated value
+                                    name="complainant.civilStatus"
+                                    id="complainant.civilStatus"
+                                    onChange={handleFormChange}
+                                    required>
+                                    <option value="" disabled>Choose A Civil Status</option>
+                                    <option value="Single">Single</option>
+                                    <option value="Married">Married</option>
+                                    <option value="Widowed">Widowed</option>
+                                    <option value="Separated">Separated</option>
+                                    <option value="Divorced">Divorced</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              <div className="edit-incident-content-right-side">
+                                <div className="edit-incident-fields-section">
+                                  <p>Age</p>
+                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.complainant.age} value={toUpdate.complainant.age} name="complainant.age" id="complainant.age" onChange={handleFormChange} />
+                                </div>
+
+                                <div className="edit-incident-fields-section">
+                                  <p>Sex</p>
+                                  <select 
+                                    className="edit-incident-input-field"                     
+                                    name="complainant.sex" 
+                                    id="complainant.sex"
+                                    value={toUpdate.complainant.sex || reportData.complainant.sex || ""} // Show db value or user-updated value
+                                    onChange={handleFormChange}
+                                    >
+                                    <option value="" disabled>Choose A Sex</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                  </select>
+                                </div>
+
+                                <div className="edit-incident-fields-section">
+                                  <p>Address</p>
+                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.complainant.address} value={toUpdate.complainant.address} name="complainant.address" id="complainant.address" onChange={handleFormChange} />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bottom-middle-section">
+                              <div className="bottom-middle-incidentfields">
+                                <p>Contact Number</p>
+                                <input type="text" className="edit-incident-input-field" placeholder={reportData.complainant.contact} value={toUpdate.complainant.contact} name="complainant.contact" id="complainant.contact" onChange={handleFormChange} />
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {activeSection === "respondent" && (
+                        <>
+                        <div className="edit-incident-dialogue-content">
+                            <div className="edit-incident-content-topsection">
+                              <div className="edit-incident-content-left-side">
+                                <div className="edit-incident-fields-section">
+                                  <p>Last Name</p>
+                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.respondent.lname} value={toUpdate.respondent.lname} name="respondent.lname" id="respondent.lname" onChange={handleFormChange} />
+                                </div>
+
+                                <div className="edit-incident-fields-section">
+                                  <p>First Name</p>
+                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.respondent.fname} value={toUpdate.respondent.fname} name="respondent.fname" id="respondent.fname" onChange={handleFormChange} />
+                                </div>
+
+                                <div className="edit-incident-fields-section">
+                                  <p>Civil Status</p>
+                                  <select   className="edit-incident-input-field"    
+                                    value={toUpdate.respondent.civilStatus || reportData.respondent.civilStatus || ""} // Show db value or user-updated value
+                                    name="respondent.civilStatus"
+                                    id="respondent.civilStatus"
+                                    onChange={handleFormChange}
+                                    required>
+                                    <option value="" disabled>Choose A Civil Status</option>
+                                    <option value="Single">Single</option>
+                                    <option value="Married">Married</option>
+                                    <option value="Widowed">Widowed</option>
+                                    <option value="Separated">Separated</option>
+                                    <option value="Divorced">Divorced</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              <div className="edit-incident-content-right-side">
+                                <div className="edit-incident-fields-section">
+                                  <p>Age</p>
+                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.respondent.age} value={toUpdate.respondent.age} name="respondent.age" id="respondent.age" onChange={handleFormChange} />
+                                </div>
+
+                                <div className="edit-incident-fields-section">
+                                  <p>Sex</p>
+                                  <select 
+                                    className="edit-incident-input-field"                     
+                                    name="respondent.sex" 
+                                    id="respondent.sex"
+                                    value={toUpdate.respondent.sex || reportData.respondent.sex || ""} // Show db value or user-updated value
+                                    onChange={handleFormChange}
+                                    >
+                                    <option value="" disabled>Choose A Sex</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                  </select>
+                                </div>
+
+                                <div className="edit-incident-fields-section">
+                                  <p>Address</p>
+                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.respondent.address} value={toUpdate.respondent.address} name="respondent.address" id="respondent.address" onChange={handleFormChange} />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bottom-middle-section">
+                              <div className="bottom-middle-incidentfields">
+                                <p>Contact Number</p>
+                                <input type="text" className="edit-incident-input-field" placeholder={reportData.respondent.contact} value={toUpdate.respondent.contact} name="respondent.contact" id="respondent.contact" onChange={handleFormChange} />
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {activeSection === "incident" && (
+                        <>
+                          <div className="edit-incident-dialogue-content">
+                            <div className="edit-incident-content-topsection">
+                              <div className="edit-incident-content-left-side">
+                                <div className="edit-incident-fields-section">
+                                  <p>Nature of Complaint</p>
+                                  {reportData?.nature === "Others" ? (<>
+                                    <input type="text" className="edit-incident-input-field" 
+                                    placeholder={reportData.specifyNature}
+                                    value={toUpdate.nature}
+                                    name="nature"
+                                    id="nature"
+                                    onChange={handleFormChange} disabled/>
+                                  </>):(<>
+                                    <input type="text" className="edit-incident-input-field" 
+                                    placeholder={reportData.nature}
+                                    value={toUpdate.nature}
+                                    name="nature"
+                                    id="nature"
+                                    onChange={handleFormChange} disabled/>
+                                  </>)}
+                                </div>
+                                {department === "GAD" && (
+                                  <>
+                                    <div className="edit-incident-fields-section">
+                                      <p>Nos of Male Children Victim/s</p>
+                                      <input 
+                                        type="number" 
+                                        className="edit-incident-input-field"
+                                        value={toUpdate.nosofMaleChildren || reportData.nosofMaleChildren}
+                                        onChange={handleFormChange}
+                                        name="nosofMaleChildren"
+                                        required 
+                                      />   
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                              <div className="edit-incident-content-right-side">
+                                <div className="edit-incident-fields-section">
+                                  <p>Location</p>
+                                  <input type="text" className="edit-incident-input-field" 
+                                    placeholder={reportData.location} 
+                                    value={toUpdate.location}
+                                    name="location"
+                                    id="location"
+                                    onChange={handleFormChange} disabled
+                                  />
+                                </div>
+
+                                {department === "GAD" && (
+                                  <>
+                                    <div className="edit-incident-fields-section">
+                                      <p>Nos of Female Children Victim/s</p>
+                                      <input 
+                                        type="number" 
+                                        className="edit-incident-input-field"
+                                        value={toUpdate.nosofFemaleChildren||reportData.nosofFemaleChildren}
+                                        name="nosofFemaleChildren"
+                                        onChange={handleFormChange}
+                                        required 
+                                      />   
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="bottom-middle-section">
+                              <div className="bottom-middle-incidentfields">
+                                <p>Date & Time Filed</p>
+                                <input type="text" className="edit-incident-input-field" placeholder={`${reportData.dateFiled} ${reportData.timeFiled}`} disabled/>
+                              </div>
+                            </div>
+
+                            <div className="edit-incident-content-bottomsection">
+                              <div className="view-incident-partyA-container">
+                                <div className="box-container-outer-natureoffacts">
+                                  <div className="title-remarks-partyA">
+                                    Nature of Facts
+                                  </div>
+
+                                  <div className="box-container-partyA">
+                                    <textarea className="natureoffacts-input-field" name="concern" id="concern" value={reportData.concern} onChange={handleFormChange} onFocusCapture={(e) => {e.target.blur();}} />
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="view-incident-partyA-container">
+                                <div className="box-container-outer-natureoffacts">
+                                  <div className="title-remarks-partyA">
+                                    Incident Image
+                                  </div>
+
+                                  <div className="box-container-incidentimage">
+                                    {concernImageUrl ? (
+                                      <img
+                                        src={concernImageUrl}
+                                        alt="Incident Image"
+                                        style={{ maxWidth: "100%", maxHeight: "260px", borderRadius: "10px" }}
+                                      />
+                                    ) : (
+                                      <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>No image available</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {activeSection === "barangay desk" && (
+                        <>
+                          <div className="barangay-desk-officer-section">
+                            <div className="edit-incident-fields-section-deskofficer">
+                              <p>Full Name</p>
+                              <input 
+                                type="text" 
+                                className="edit-incident-input-field" 
+                                placeholder={reportData.receivedBy} 
+                                value={toUpdate.fname||""}
+                                name="fname"
+                                id="fname"
+                                disabled
+                                onChange={handleFormChange}
+                              />
+                            </div>
+
+                            <div className="edit-incident-fields-section-deskofficer">
+                              <p>Date Signed</p>
+                              <input 
+                                type="text" 
+                                className="edit-incident-input-field" 
+                                placeholder={reportData.dateReceived} 
+                                value={toUpdate.dateReceived||""} 
+                                id="dateReceived" 
+                                name="dateReceived"
+                                disabled 
+                                onChange={handleFormChange}
+                              />
+                            </div>
+
+                            <div className="edit-incident-fields-section-deskofficer">
+                              <p>Time Signed</p>
+                              <input 
+                                type="text" 
+                                className="edit-incident-input-field" 
+                                placeholder={reportData.timeReceived} 
+                                value={toUpdate.timeReceived||""} 
+                                id="timeReceived" 
+                                name="time  Received" 
+                                disabled
+                                onChange={handleFormChange}
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -496,7 +831,7 @@ const confirmSubmit = async () => {
           </div>
 
           
-     
+                  
 
           {/* EXISTING CODE */}
           <div className="letters-content-edit">
