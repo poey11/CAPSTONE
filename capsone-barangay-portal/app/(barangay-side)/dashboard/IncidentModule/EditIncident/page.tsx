@@ -3,7 +3,7 @@ import "@/CSS/IncidentModule/EditIncident.css";
 import { ChangeEvent,useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/firestorehelper";
-import { doc, updateDoc} from "firebase/firestore";
+import { doc, updateDoc, collection, where, getDocs, query} from "firebase/firestore";
 import { db } from "../../../../db/firebase";
 import { isValidPhilippineMobileNumber } from "@/app/helpers/helpers";
 import React from "react";
@@ -21,7 +21,7 @@ export default function EditLuponIncident() {
     const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
 
-
+    const [hasSummonLetter, setHasSummonLetter] = useState(false);
     const [loading , setLoading] = useState(true);
     const router = useRouter();
     const searchParam = useSearchParams();
@@ -77,6 +77,7 @@ export default function EditLuponIncident() {
 
 
     const department =  reportData?.department;
+    const caseNumber = reportData?.caseNumber;
     
     const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       const { name, value, type } = e.target;
@@ -296,6 +297,8 @@ const confirmSubmit = async () => {
         });
     }
 
+    
+
 
     useEffect(() => {
       if (reportData) {
@@ -346,6 +349,31 @@ const confirmSubmit = async () => {
   const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
 
   const [activeSection, setActiveSection] = useState("complainant");
+
+
+  useEffect(() => {
+    const fetchSummonLetterStatus = async () => {
+      try {
+        if (!docId) return; // Ensure docId is loaded
+  
+        const lettersRef = collection(db, "IncidentReports", docId, "GeneratedLetters");
+  
+        const q = query(lettersRef, where("letterType", "==", "summon"));
+        const snapshot = await getDocs(q);
+  
+        if (!snapshot.empty) {
+          setHasSummonLetter(true);
+        } else {
+          setHasSummonLetter(false); // Optional fallback
+        }
+      } catch (error) {
+        console.error("Error checking summon letters:", error);
+      }
+    };
+  
+    fetchSummonLetterStatus();
+  }, [docId]);
+  
 
   return (
     <>
@@ -423,12 +451,9 @@ const confirmSubmit = async () => {
                     <h1>Generate Summon Letters</h1>
                   </button>
                 )}
-                {/*<button className="submenu-button" name="section" onClick={handleHearingSection}>
-                 <h1>Hearing Section</h1>
-                </button>*/}
 
-                {reportData.isHearing ? (
-                  <button className="submenu-button" name="section" onClick={handleDialogueSection}>
+                {hasSummonLetter ? (
+                  <button className="submenu-button" name="section" onClick={handleHearingSection}>
                     <h1>Hearing Section</h1>
                   </button>
                 ) : (
@@ -870,6 +895,7 @@ const confirmSubmit = async () => {
                   
 
           {/* EXISTING CODE */}
+          {/*
           <div className="letters-content-edit">
                <button className="letter-announcement-btn-edit" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialogue Letter</button>
 
@@ -1330,6 +1356,7 @@ const confirmSubmit = async () => {
         {Array.from({ length: reportData.hearing }, (_, i) => (
           <Hearing key={i}  index={i} generatedHearingSummons={reportData?.generatedHearingSummons} id={docId||""}/>
         ))}
+          */}
 
 
 
