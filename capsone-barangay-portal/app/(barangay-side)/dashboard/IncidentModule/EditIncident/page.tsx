@@ -373,9 +373,27 @@ const confirmSubmit = async () => {
                 <button className="submenu-button" name="dialogue" onClick={handleGenerateLetterAndInvitation}>
                   <h1>Generate Dialogue Letters</h1>
                 </button>
-                <button className="submenu-button" name="section" onClick={handleDialogueSection}>
-                  <h1>Dialogue Section</h1>
-                </button>
+
+                {reportData.isDialogue ? (
+                  <button className="submenu-button" name="section" onClick={handleDialogueSection}>
+                    <h1>Dialogue Section</h1>
+                  </button>
+                ) : (
+                  <button
+                    className="submenu-button"
+                    name="section"
+                    onClick={() => {
+                      setPopupErrorMessage("Generate A Dialogue Letter First");
+                      setShowErrorPopup(true);
+                      setTimeout(() => setShowErrorPopup(false), 3000);
+                    }}
+                  >
+                    <h1>Dialogue Section</h1>
+                  </button>
+                )}
+
+                
+                
               </div>
             </div>
 
@@ -405,9 +423,27 @@ const confirmSubmit = async () => {
                     <h1>Generate Summon Letters</h1>
                   </button>
                 )}
-                <button className="submenu-button" name="section" onClick={handleHearingSection}>
+                {/*<button className="submenu-button" name="section" onClick={handleHearingSection}>
                  <h1>Hearing Section</h1>
-                </button>
+                </button>*/}
+
+                {reportData.isHearing ? (
+                  <button className="submenu-button" name="section" onClick={handleDialogueSection}>
+                    <h1>Hearing Section</h1>
+                  </button>
+                ) : (
+                  <button
+                    className="submenu-button"
+                    name="section"
+                    onClick={() => {
+                      setPopupErrorMessage("Generate A Summon Letter First");
+                      setShowErrorPopup(true);
+                      setTimeout(() => setShowErrorPopup(false), 3000);
+                    }}
+                  >
+                    <h1>Dialogue Section</h1>
+                  </button>
+                )}
               </div>
             </div>
 
