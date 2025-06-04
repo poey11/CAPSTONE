@@ -79,6 +79,8 @@ interface EmergencyDetails {
     CYTo: string;
     attestedBy: string;
     goodMoralPurpose: string;
+    noIncomeChildFName: string;
+    noIncomePurpose: string;
   }
 
 
@@ -174,6 +176,8 @@ const ViewOnlineRequest = () => {
         { key: "partnerWifeHusbandFullName", label: "Partner's/Wife's/Husband's Full Name" },
         { key: "cohabitationStartDate", label: "Start of Cohabitation" },
         { key: "cohabitationRelationship", label: "Cohabitation Relationship"},
+        { key: "noIncomePurpose", label: "Purpose Of No Income" },
+        { key: "noIncomeChildFName", label: "Son/Daughther's Name For No Income" },
         { key: "address", label: "Address" },
         { key: "guardianshipType", label: "Guardianship Type" },
         { key: "wardRelationship", label: "Ward's Relationship" },
@@ -400,7 +404,20 @@ const ViewOnlineRequest = () => {
                 })
             };
         }
-
+        else if(requestData?.purpose === "No Income"){
+            if(requestData?.noIncomePurpose === "SPES Scholarship") locationPath = "certificate of no income (scholarship).pdf";
+            else locationPath = "certificate of no income (esc).pdf";
+            reqData = {
+                "Text1":`${requestData?.fullName.toUpperCase()}`,
+                "Text2": requestData?.address,
+                "Text3": requestData?.fullName.toUpperCase(),
+                "Text4": requestData?.requestor.toUpperCase(),
+                "Text5": requestData?.noIncomeChildFName.toUpperCase(),
+                "Text6": dayToday,
+                "Text7": `${monthToday} ${yearToday}`,
+            }
+        }
+        // Estate tax and  Garage PUV/TRU,
         const response = await fetch("/api/fillPDF", {
             method: "POST",
             headers: {

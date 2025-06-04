@@ -77,6 +77,8 @@ export default function Action() {
     attestedBy: "",
     goodMoralPurpose: "",
     goodMoralOtherPurpose: "",
+    noIncomePurpose: "",
+    noIncomeChildFName: "",
     signaturejpg: null,
     barangayIDjpg:null,
     validIDjpg: null,
@@ -408,6 +410,10 @@ const handleFileChange = (
               { goodMoralPurpose: clearanceInput.goodMoralOtherPurpose }:
               { goodMoralPurpose: clearanceInput.goodMoralPurpose }),
           }),
+          ...(clearanceInput.purpose === "No Income" && {
+            noIncomePurpose: clearanceInput.noIncomePurpose,
+            noIncomeChildFName: clearanceInput.noIncomeChildFName,
+          }),
           ...(clearanceInput.barangayIDjpg && { barangayIDjpg: filenames.barangayIDjpg }),
           ...(clearanceInput.validIDjpg && { validIDjpg: filenames.validIDjpg }),
           ...(clearanceInput.letterjpg && { endorsementLetter: filenames.letterjpg }),
@@ -548,8 +554,7 @@ const handleFileChange = (
               <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
               <option value="Estate Tax">Estate Tax</option>
               <option value="Death Residency">Death Residency</option>
-              <option value="No Income (Scholarship)">No Income (Scholarship)</option>
-              <option value="No Income (ESC)">No Income (ESC)</option>
+              <option value="No Income">No Income</option>
               <option value="Cohabitation">Cohabitation</option>
               <option value="Guardianship">Guardianship</option>
               <option value="Good Moral and Probation">Good Moral and Probation</option>
@@ -796,6 +801,40 @@ const handleFileChange = (
                 placeholder={`Enter ${addOn}Address`}
               />
             </div>
+            {clearanceInput.purpose === "No Income" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="noIncomePurpose" className="form-label">Purpose Of No Income:<span className="required">*</span></label>
+                    <select 
+                      id="noIncomePurpose"  
+                      name="noIncomePurpose"  
+                      value={clearanceInput.noIncomePurpose}
+                      onChange={handleChange}
+                      className="form-input"  
+                      required 
+                    >
+                      <option value="" disabled>Select Purpose</option>
+                      <option value="SPES Scholarship">SPES Scholarship</option>
+                      <option value="ESC Voucher">DEPED Educational Services Contracting (ESC) Voucher</option>
+                    </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="noIncomeChildFName" className="form-label">Son/Daugther's Name<span className="required">*</span></label>
+                    <input 
+                      type="text"  
+                      id="noIncomeChildFName"  
+                      name="noIncomeChildFName"  
+                      value={clearanceInput.noIncomeChildFName}
+                      onChange={handleChange}
+                      className="form-input"  
+                      required 
+                      placeholder={`Enter Child's Full Name`}
+                    />
+                </div>
+
+              </>
+            )}
             {clearanceInput.purpose === "Good Moral and Probation" && (
               <>
                 <div className="form-group">
@@ -833,6 +872,7 @@ const handleFileChange = (
 
               </>
             )}
+            {}
             {clearanceInput.purpose === "Guardianship" && (
               <>
                 <div className="form-group">
@@ -987,9 +1027,8 @@ const handleFileChange = (
               />
             </div>
             
-            
-
-            {(docType ==="Barangay Certificate" && clearanceInput.purpose === "Death Residency" ) && (
+          
+            {clearanceInput.purpose === "Death Residency" && (
               <div className="form-group">
                 <label htmlFor="dateofdeath" className="form-label">Date Of Death<span className="required">*</span></label>
                 <input 
