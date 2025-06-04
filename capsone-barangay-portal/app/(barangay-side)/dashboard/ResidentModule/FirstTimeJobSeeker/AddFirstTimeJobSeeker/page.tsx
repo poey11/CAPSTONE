@@ -290,7 +290,7 @@ export default function AddFirstTimeJobSeeker() {
   }, []);
 
   // Show popup on input focus
-    const handleVotersClick = () => {
+    const handleJobseekerClick = () => {
       setShowResidentsPopup(true);
     };
   
@@ -318,7 +318,7 @@ export default function AddFirstTimeJobSeeker() {
     );
 
   const [activeSection, setActiveSection] = useState("full");
-  // options: "basic", "full", "others"
+  const [isResidentSelected, setIsResidentSelected] = useState(false);
 
   return (
     <main className="add-resident-main-container">
@@ -371,9 +371,52 @@ export default function AddFirstTimeJobSeeker() {
 
             <div className="add-jobseeker-bottom-section-scroll">
 
-            <div className="residents-search-section">
-              <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleVotersClick} />
-            </div>
+            <div className="input-wrapper">
+                  <div className="input-with-clear">
+                    <input
+                      type="text"
+                      className="select-resident-input-field"
+                      placeholder="Select Complainant"
+                      onClick={handleJobseekerClick}
+                      value={
+                        isResidentSelected
+                          ? `${formData.firstName} ${formData.middleName} ${formData.lastName}`
+                          : ''
+                      }
+                      readOnly
+                    />
+                    {isResidentSelected && (
+                      <span
+                        className="clear-icon"
+                        title="Click to clear selected complainant"
+                        onClick={() => {
+                          setFormData({
+                            dateApplied: "",
+                            lastName: "",
+                            firstName: "", 
+                            middleName: "",
+                            age: 0,
+                            dateOfBirth: "",
+                            monthOfBirth: "",
+                            dayOfBirth: "",
+                            yearOfBirth: "",
+                            sex: "",
+                            remarks: "",
+                            residentId: "",
+                            identificationFileURL: "",
+                          });
+                          setIsResidentSelected(false);
+                        }}
+                      >
+                        ×
+                      </span>
+                    )}
+                  </div>
+                  {isResidentSelected && (
+                    <p className="help-text">Click the <strong>×</strong> to clear the selected complainant.</p>
+                  )}
+                </div>
+
             <form id="addJobSeekerForm" onSubmit={handleSubmit} className="add-resident-section-2">
 
               {activeSection === "full" && (
@@ -697,6 +740,7 @@ export default function AddFirstTimeJobSeeker() {
                     age: resident.age || '',
                     identificationFileURL: resident.identificationFileURL || '',
                   });
+                  setIsResidentSelected(true);
                   setShowResidentsPopup(false);
                 } catch (error) {
                   console.error("Error checking for duplicates:", error);

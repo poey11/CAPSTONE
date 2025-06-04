@@ -486,12 +486,16 @@ padding-bottom:30px;
     background-color: #f0f4f8; 
     border: 2px solid #2c3e50; 
     padding: 8px;
-    width: 100%;
+    width: 70%;
     margin-top: 10px; 
-
+    border-radius: 15px;
   }
 
-
+.section-1-add-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
   
 
 
@@ -713,7 +717,7 @@ padding-bottom:30px;
 
 
 
-.popup-overlay-add,
+.popup-overlay-add-incident,
 .error-popup-overlay-add{
     position: fixed;
     top: 13%;
@@ -732,8 +736,8 @@ padding-bottom:30px;
     justify-content: center;
   }
 
-  .popup-overlay-add{
-    background: #8fa98d;
+  .popup-overlay-add-incident{
+    background: #777575;
     border-left: 10px solid #403f3e;
   }
 
@@ -749,12 +753,12 @@ padding-bottom:30px;
   gap: 20px;
 }
 
-.popup-overlay-add.show,
+.popup-overlay-add-incident.show,
 .error-popup-overlay-add.show {
   animation: slideIn 0.5s ease-out;
 }
 
-.popup-overlay-add.hide,
+.popup-overlay-add-indicent.hide,
 .error-popup-overlay-add.hide {
   animation: slideOut 0.5s ease-out;
 }
@@ -766,7 +770,7 @@ padding-bottom:30px;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.076); 
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1082,4 +1086,14 @@ gap: 20px;
 }
 
 
+.successful-icon-popup {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
 
+
+.highlighted-row {
+  background-color: #bdf8a0ba !important;
+  transition: background-color 0.5s ease;
+}

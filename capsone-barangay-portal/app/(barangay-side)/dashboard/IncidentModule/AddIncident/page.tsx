@@ -359,11 +359,7 @@ export default function AddIncident() {
        setShowSubmitPopup(false);
             // Save filtered data to Firestore and get the reference
         const docRef = await addDoc(collection(db, "IncidentReports"), filteredData);
-
- 
-    router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&highlight=${docRef.id}`);
-
-
+        return docRef.id;
     } catch (e: any) {
         console.log(e);
     }
@@ -514,7 +510,7 @@ const handleSubmit = (event: React.FormEvent) => {
 
   const handleConfirmSubmit = async () => {
     try {
-      await handleUpload(); // Save to Firestore only when confirmed
+      const docId = await handleUpload();
   
       setPopupMessage("Incident Successfully Submitted!");
       setShowPopup(true);
@@ -523,6 +519,10 @@ const handleSubmit = (event: React.FormEvent) => {
       setTimeout(() => {
         setShowPopup(false);
         
+        if (docId) {
+          router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
+
+        } 
       }, 3000);
   
     } catch (error) {
@@ -645,22 +645,24 @@ const handleSubmit = (event: React.FormEvent) => {
               </div>
 
                 <div className="actions-add">
-                   <button  type="button" onClick={deleteForm} className="action-delete-add">Delete</button>
                    <button type="submit" className="action-view-add" >Save</button>
                  </div>
           
              </div>
 
 
-             <input 
-                    type="text" 
-                    className="search-bar-add-case" 
-                    value={reportInfo.caseNumber}
-                    name="caseNumber"
-                    id="caseNumber"
-                    disabled
+              <div className="section-1-add-title">
+                  <input 
+                            type="text" 
+                            className="search-bar-add-case" 
+                            value={reportInfo.caseNumber}
+                            name="caseNumber"
+                            id="caseNumber"
+                            disabled
+                            
+                      />
+              </div>
                     
-              />
               
             
             <div className="add-incident-bottom-section">
@@ -1377,6 +1379,7 @@ const handleSubmit = (event: React.FormEvent) => {
         {showSubmitPopup && (
                         <div className="confirmation-popup-overlay-add">
                             <div className="confirmation-popup-add">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to submit?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
@@ -1387,7 +1390,7 @@ const handleSubmit = (event: React.FormEvent) => {
         )}
 
         {showPopup && (
-                <div className={`popup-overlay-add show`}>
+                <div className={`popup-overlay-add-incident show`}>
                     <div className="popup-add">
                       <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                       <p>{popupMessage}</p>

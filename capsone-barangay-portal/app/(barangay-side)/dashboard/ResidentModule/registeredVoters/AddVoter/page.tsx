@@ -246,6 +246,7 @@ export default function addVoter() {
 
   
   const [activeSection, setActiveSection] = useState("details");
+  const [isResidentSelected, setIsResidentSelected] = useState(false);
 
   return (
     <main className="add-resident-main-container">
@@ -296,9 +297,50 @@ export default function addVoter() {
               </nav>  
             
               <div className="add-resident-bottom-section-scroll">
-                <div className="residents-search-section">
-                  <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleVotersClick} />
+
+                <div className="input-wrapper">
+                  <div className="input-with-clear">
+                    <input
+                      type="text"
+                      className="select-resident-input-field"
+                      placeholder="Select Complainant"
+                      onClick={handleVotersClick}
+                      value={
+                        isResidentSelected
+                          ? `${formData.firstName} ${formData.middleName} ${formData.lastName}`
+                          : ''
+                      }
+                      readOnly
+                    />
+                    {isResidentSelected && (
+                      <span
+                        className="clear-icon"
+                        title="Click to clear selected complainant"
+                        onClick={() => {
+                          setFormData({
+                            voterNumber: "",
+                            firstName: '',
+                            lastName: '',
+                            middleName: '',
+                            homeAddress: '',
+                            precinctNumber: "",
+                            createdAt:"",
+                            residentId: "",
+                            identificationFileURL: "",
+                          });
+                          setIsResidentSelected(false);
+                        }}
+                      >
+                        ×
+                      </span>
+                    )}
+                  </div>
+                  {isResidentSelected && (
+                    <p className="help-text">Click the <strong>×</strong> to clear the selected complainant.</p>
+                  )}
                 </div>
+
+                
 
                 <form id="addVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
                 {activeSection === "details" && (
@@ -328,11 +370,11 @@ export default function addVoter() {
                           <div className="add-main-resident-section-2-left-side">
                             <div className="fields-section">
                               <p>Last Name<span className="required">*</span></p>
-                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`} placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} readOnly required />
+                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`} placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} disabled={isResidentSelected} required />
                             </div>
                             <div className="fields-section">
                               <p>First Name<span className="required">*</span></p>
-                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`} placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} readOnly required />
+                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`} placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} disabled={isResidentSelected} required />
                             </div>
                           </div>
                           <div className="add-main-resident-section-2-right-side">
@@ -342,7 +384,7 @@ export default function addVoter() {
                             </div>
                             <div className="fields-section">
                               <p>Home Address<span className="required">*</span></p>
-                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} readOnly required />
+                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} disabled={isResidentSelected} required />
                             </div>
                           </div>
                         </div>
@@ -470,6 +512,7 @@ export default function addVoter() {
                     homeAddress: resident.address || '',
                     identificationFileURL: resident.identificationFileURL || '',
                   });
+                  setIsResidentSelected(true);
                   setShowResidentsPopup(false);
                 } catch (error) {
                   console.error("Error checking for duplicates:", error);
