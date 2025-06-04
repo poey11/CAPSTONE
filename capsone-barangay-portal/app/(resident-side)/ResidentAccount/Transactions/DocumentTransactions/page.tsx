@@ -179,6 +179,14 @@ export default function DocumentTransactionsDetails() {
             [{ label: "To Address", key: "toAddress" }]
             : []
         ),
+        ...(transactionData?.purpose === "Residency" ?
+            [{ label: "Attested By Hon Kagawad:", key: "attestedBy" },
+            { label: "Cohabitation Year From", key: "CYFrom" },
+            { label: "Cohabitation Year To", key: "CYTo" },
+            ]:
+            []
+
+        ),
 
         /*Barangay Certificate, Barangay Indigency, Barangay Clearance & Business Permits */
         ...(transactionData?.docType !== "Business Permit" && transactionData?.docType !== "Temporary Business Permit" && transactionData?.docType !== "Construction Permit"

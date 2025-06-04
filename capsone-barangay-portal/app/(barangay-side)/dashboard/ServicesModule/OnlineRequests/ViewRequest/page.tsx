@@ -75,7 +75,9 @@ interface EmergencyDetails {
     wardFname: string;
     wardRelationship: string;
     guardianshipType: string;
-    
+    CYFrom: string;
+    CYTo: string;
+    attestedBy: string;
   }
 
 
@@ -176,6 +178,9 @@ const ViewOnlineRequest = () => {
         { key: "wardRelationship", label: "Ward's Relationship" },
         { key: "wardFname", label: "Ward's Full Name" },
         { key: "toAddress", label: "To Address" },
+        { key: "attestedBy", label: "Attested By" },
+        { key: "CYFrom", label: "Cohabitation Year From" },
+        { key: "CYTo", label: "Cohabitation Year To" },
         { key: "age", label: "Age" },
         { key: "dateOfResidency", label: "Date of Residency" },
         { key: "businessLocation", label: "Business Location" },
@@ -326,7 +331,7 @@ const ViewOnlineRequest = () => {
                     "Text4": requestData?.requestor.toUpperCase(),
                     "Text5": dayToday,
                     "Text6": `${monthToday} ${yearToday}`,  
-                }
+                };
         }
         else if(requestData?.purpose === "Cohabitation" ){
             if(requestData?.cohabitationRelationship ==="Husband And Wife")locationPath = "Certificate of cohab_marriage.pdf";
@@ -339,7 +344,7 @@ const ViewOnlineRequest = () => {
                 "Text5": requestData?.requestor.toUpperCase(),
                 "Text6": dayToday,
                 "Text7": `${monthToday} ${yearToday}`,
-            }
+            };
         }
         else if(requestData?.purpose === "Occupancy /  Moving Out"){
             locationPath = "certficate of moving out.pdf";
@@ -350,7 +355,7 @@ const ViewOnlineRequest = () => {
                 "Text4": requestData?.requestor.toUpperCase(),
                 "Text5": dayToday,
                 "Text6": `${monthToday} ${yearToday}`,
-            }
+            };
         }
         else if(requestData?.purpose === "Guardianship"){
             if(requestData?.guardianshipType === "Legal Purpose") locationPath = "certifiacte of guardianship_legal.pdf";
@@ -363,7 +368,19 @@ const ViewOnlineRequest = () => {
                 "Text5": requestData?.requestor.toUpperCase(),
                 "Text6": dayToday,
                 "Text7": `${monthToday} ${yearToday}`,
-            }
+            };
+        }
+        else if(requestData?.purpose === "Residency"){
+            locationPath = "certificate of residency.pdf";
+            reqData = {
+                "Text1":`${requestData?.fullName.toUpperCase()}`,
+                "Text2": requestData?.CYFrom,
+                "Text3": requestData?.CYTo,
+                "Text4": requestData?.address,
+                "Text5": requestData?.attestedBy.toUpperCase(),
+                "Text6": dayToday,
+                "Text7": `${monthToday} ${yearToday}`,
+            };
         }
 
         const response = await fetch("/api/fillPDF", {

@@ -72,6 +72,9 @@ export default function Action() {
     wardFname: "",
     wardRelationship: "",
     guardianshipType: "",
+    CYFrom: "",
+    CYTo: "",
+    attestedBy: "",
     signaturejpg: null,
     barangayIDjpg:null,
     validIDjpg: null,
@@ -369,6 +372,11 @@ const handleFileChange = (
           fullName: clearanceInput.fullName,
           dateOfResidency: clearanceInput.dateOfResidency,
           address: clearanceInput.address,
+          ...(clearanceInput.purpose === "Residency" && {
+            CYFrom: clearanceInput.CYFrom,
+            CYTo: clearanceInput.CYTo,
+            attestedBy: clearanceInput.attestedBy,
+          }),
           ...(clearanceInput.purpose === "Guardianship" && {
             wardFname: clearanceInput.wardFname,
             wardRelationship: clearanceInput.wardRelationship,
@@ -839,7 +847,71 @@ const handleFileChange = (
 
               </>
             )}
+            {clearanceInput.purpose === "Residency" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="attestedBy" className="form-label">Attested By Hon Kagawad: <span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="attestedBy"  
+                    name="attestedBy"  
+                    value={clearanceInput.attestedBy}
+                    onChange={handleChange}
+                    className="form-input"  
+                    required 
+                    placeholder="Enter Hon Kagawad's Full Name"  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="CYFrom" className="form-label">Cohabitation Year From:<span className="required">*</span></label>
+                  <select
+                    id="CYFrom"
+                    name="CYFrom"
+                    value={clearanceInput.CYFrom}
+                    onChange={handleChange}
+                    className="form-input"
+                    required
+                  >
+                    <option value="" disabled>Select Year</option>
+                    {[...Array(100)].map((_, i) => {
+                      const year = new Date().getFullYear() - i;
+                      const cyTo = parseInt(clearanceInput.CYTo);
+                      const isDisabled = !isNaN(cyTo) && year >= cyTo;
+                      return (
+                        <option key={year} value={year} disabled={isDisabled}>
+                          {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
 
+                <div className="form-group">
+                  <label htmlFor="CYTo" className="form-label">Cohabitation Year To:<span className="required">*</span></label>
+                  <select
+                    id="CYTo"
+                    name="CYTo"
+                    value={clearanceInput.CYTo}
+                    onChange={handleChange}
+                    className="form-input"
+                    required
+                  >
+                    <option value="" disabled>Select Year</option>
+                    {[...Array(100)].map((_, i) => {
+                      const year = new Date().getFullYear() - i;
+                      const cyFrom = parseInt(clearanceInput.CYFrom);
+                      const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
+                      return (
+                        <option key={year} value={year} disabled={isDisabled}>
+                          {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+              </div>
+
+              </>
+            )}
             {(docType === "Barangay Certificate" && clearanceInput.purpose === "Occupancy /  Moving Out") && (
               <>
                 <div className="form-group">
