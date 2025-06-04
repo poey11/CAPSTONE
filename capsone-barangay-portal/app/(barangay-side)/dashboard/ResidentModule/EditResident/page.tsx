@@ -388,6 +388,7 @@ export default function EditResident() {
             firstName: formData.firstName,
             middleName: formData.middleName,
             lastName: formData.lastName,
+            identificationFileURL: uploadedIdentificationURL,
           });
         });
 
@@ -405,6 +406,7 @@ export default function EditResident() {
             middleName: formData.middleName,
             lastName: formData.lastName,
             homeAddress: formData.address,
+            identificationFileURL: uploadedIdentificationURL,
           });
         });
 
