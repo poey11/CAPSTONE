@@ -33,7 +33,7 @@ import { db } from "@/app/db/firebase";
             }
           
             // Convert string dates to timestamps
-            return new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime();
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
           });
         
           setRequestData(reports);

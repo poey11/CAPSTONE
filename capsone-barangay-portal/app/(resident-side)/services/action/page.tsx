@@ -75,6 +75,8 @@ export default function Action() {
     CYFrom: "",
     CYTo: "",
     attestedBy: "",
+    goodMoralPurpose: "",
+    goodMoralOtherPurpose: "",
     signaturejpg: null,
     barangayIDjpg:null,
     validIDjpg: null,
@@ -382,7 +384,7 @@ const handleFileChange = (
             wardRelationship: clearanceInput.wardRelationship,
             guardianshipType: clearanceInput.guardianshipType,
           }),
-          ...(docType === "Barangay Certificate" && clearanceInput.purpose === "Occupancy /  Moving Out" && {
+          ...(clearanceInput.purpose === "Occupancy /  Moving Out" && {
             toAddress: clearanceInput.toAddress, // Include toAddress only for this specific purpose
           }),
           birthday: clearanceInput.birthday,
@@ -392,14 +394,19 @@ const handleFileChange = (
           contact: clearanceInput.contact,
           citizenship: clearanceInput.citizenship,
           signaturejpg: filenames.signaturejpg, // Store filename instead of file object
-          ...(docType === "Barangay Certificate" && clearanceInput.purpose === "Cohabitation" && {
+          ...(clearanceInput.purpose === "Cohabitation" && {
             partnerWifeHusbandFullName: clearanceInput.partnerWifeHusbandFullName,
             cohabitationStartDate: clearanceInput.cohabitationStartDate,
             cohabitationRelationship: clearanceInput.cohabitationRelationship,
           }),
-          ...((docType === "Barangay Certificate" && clearanceInput.purpose === "Death Residency")  && {
+          ...( clearanceInput.purpose === "Death Residency"  && {
             dateofdeath: clearanceInput.dateofdeath,
             deathCertificate: filenames.deathCertificate,
+          }),
+          ...(clearanceInput.purpose === "Good Moral and Probation" && {
+           ...(clearanceInput.goodMoralPurpose ==="Others" ? 
+              { goodMoralPurpose: clearanceInput.goodMoralOtherPurpose }:
+              { goodMoralPurpose: clearanceInput.goodMoralPurpose }),
           }),
           ...(clearanceInput.barangayIDjpg && { barangayIDjpg: filenames.barangayIDjpg }),
           ...(clearanceInput.validIDjpg && { validIDjpg: filenames.validIDjpg }),
@@ -408,6 +415,7 @@ const handleFileChange = (
             appointmentDate: clearanceInput.appointmentDate,
             purpose: clearanceInput.purpose,
           }),
+
           ...(docType === "Barangay ID" && {
             birthplace: clearanceInput.birthplace,
             religion: clearanceInput.religion,
@@ -633,7 +641,7 @@ const handleFileChange = (
             </div>
             </>
           )}
-
+          
             <div className="form-group">
               <label htmlFor="fullName" className="form-label">{addOn}Full Name<span className="required">*</span></label>
               <input 
@@ -741,7 +749,7 @@ const handleFileChange = (
                   />
                 </div>
               </>
-            ):docType ==="Construction Permit"?(
+            ):docType ==="Construction Permit"&&(
             <>
               <div className="form-group">
               <label htmlFor="address" className="form-label">Home/Office Address<span className="required">*</span></label>
@@ -757,9 +765,8 @@ const handleFileChange = (
               />
             </div>
             </>
-            ):(
+            )}
             
-            <>
               <div className="form-group">
                 <label htmlFor="dateOfResidency" className="form-label">Date of Residency in Barangay Fairview<span className="required">*</span></label>
                 <input 
@@ -789,10 +796,45 @@ const handleFileChange = (
                 placeholder={`Enter ${addOn}Address`}
               />
             </div>
+            {clearanceInput.purpose === "Good Moral and Probation" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="goodMoralPurpose" className="form-label">Purpose of Good Moral and Probation:<span className="required">*</span></label>
+                  <select
+                    id="goodMoralPurpose"
+                    name="goodMoralPurpose"
+                    className="form-input"
+                    value={clearanceInput.goodMoralPurpose}
+                    onChange={handleChange}
+                    required
+                    >
+                    <option value="" disabled>Select Purpose</option>
+                    <option value = "Legal Purpose and Intent">Legal Purpose and Intent</option>
+                    <option value = "Others">Others</option>
+                  </select>
+                </div>
+                {clearanceInput.goodMoralPurpose === "Others" && (
+                  <>
+                    <div className="form-group">
+                      <label htmlFor="goodMoralOtherPurpose" className="form-label">Please Specify Other Purpose:<span className="required">*</span></label>
+                      <input 
+                        type="text"  
+                        id="goodMoralOtherPurpose"  
+                        name="goodMoralOtherPurpose"  
+                        value={clearanceInput.goodMoralOtherPurpose}
+                        onChange={handleChange}
+                        className="form-input"  
+                        required 
+                        placeholder="Enter Other Purpose"
+                      />
+                    </div>
+                  </>
+                )}
 
+              </>
+            )}
             {clearanceInput.purpose === "Guardianship" && (
               <>
-
                 <div className="form-group">
                 <label htmlFor="guardianshipType" className="form-label">Type of Guardianship Certificate<span className="required">*</span></label>
                     <select
@@ -912,7 +954,7 @@ const handleFileChange = (
 
               </>
             )}
-            {(docType === "Barangay Certificate" && clearanceInput.purpose === "Occupancy /  Moving Out") && (
+            {clearanceInput.purpose === "Occupancy /  Moving Out" && (
               <>
                 <div className="form-group">
                   <label htmlFor="toAddress" className="form-label">To Address<span className="required">*</span></label>
@@ -945,7 +987,8 @@ const handleFileChange = (
               />
             </div>
             
-            </>)}
+            
+
             {(docType ==="Barangay Certificate" && clearanceInput.purpose === "Death Residency" ) && (
               <div className="form-group">
                 <label htmlFor="dateofdeath" className="form-label">Date Of Death<span className="required">*</span></label>

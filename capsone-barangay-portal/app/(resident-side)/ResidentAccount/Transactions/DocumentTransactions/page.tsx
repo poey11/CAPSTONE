@@ -187,7 +187,10 @@ export default function DocumentTransactionsDetails() {
             []
 
         ),
-
+        ...(transactionData?.purpose === "Good Moral and Probation" ? 
+            [{label: "Purpose of Good Moral and Probation",key:"goodMoralPurpose"}]
+            :[]
+        ),  
         /*Barangay Certificate, Barangay Indigency, Barangay Clearance & Business Permits */
         ...(transactionData?.docType !== "Business Permit" && transactionData?.docType !== "Temporary Business Permit" && transactionData?.docType !== "Construction Permit"
                 ? [

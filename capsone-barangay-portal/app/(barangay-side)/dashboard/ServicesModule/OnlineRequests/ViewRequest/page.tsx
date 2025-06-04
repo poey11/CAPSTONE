@@ -78,6 +78,7 @@ interface EmergencyDetails {
     CYFrom: string;
     CYTo: string;
     attestedBy: string;
+    goodMoralPurpose: string;
   }
 
 
@@ -181,6 +182,7 @@ const ViewOnlineRequest = () => {
         { key: "attestedBy", label: "Attested By" },
         { key: "CYFrom", label: "Cohabitation Year From" },
         { key: "CYTo", label: "Cohabitation Year To" },
+        { key: "goodMoralPurpose", label: "Purpose Of Good Moral" },
         { key: "age", label: "Age" },
         { key: "dateOfResidency", label: "Date of Residency" },
         { key: "businessLocation", label: "Business Location" },
@@ -380,6 +382,22 @@ const ViewOnlineRequest = () => {
                 "Text5": requestData?.attestedBy.toUpperCase(),
                 "Text6": dayToday,
                 "Text7": `${monthToday} ${yearToday}`,
+            };
+        }
+        else if(requestData?.purpose === "Good Moral and Probation"){
+            if(requestData?.goodMoralPurpose === "Other Legal Purpose and Intent") locationPath = "certificate of goodmoral_a.pdf";
+            else locationPath = "certificate of goodmoral_b.pdf";
+            reqData = {
+                "Text1":`${requestData?.fullName.toUpperCase()}`,
+                "Text2": requestData?.address,
+                ...(requestData?.goodMoralPurpose === "Other Legal Purpose and Intent" ? {
+                    "Text3": dayToday,
+                    "Text4": `${monthToday} ${yearToday}`,
+                }:{
+                    "Text3": requestData?.goodMoralPurpose.toUpperCase(),
+                    "Text4": dayToday,
+                    "Text5": `${monthToday} ${yearToday}`,
+                })
             };
         }
 
