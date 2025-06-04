@@ -441,7 +441,7 @@ const confirmSubmit = async () => {
                       setTimeout(() => setShowErrorPopup(false), 3000);
                     }}
                   >
-                    <h1>Dialogue Section</h1>
+                    <h1>Hearing Section</h1>
                   </button>
                 )}
               </div>
