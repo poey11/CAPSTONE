@@ -4,7 +4,7 @@ import {getLocalDateTimeString} from "@/app/helpers/helpers";
 import { doc, onSnapshot,collection, setDoc, query, where } from "firebase/firestore";
 import { useState,useEffect } from "react";
 import { useSession } from "next-auth/react";
-
+import { useRouter } from "next/navigation";
 
 
 
@@ -190,10 +190,188 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     setDetails(updatedDetails);
     }, [details.Cstatus, details.Rstatus]);
 
+    const router = useRouter();
+    const [loading , setLoading] = useState(true);
+
+    const handleBack = () => {
+        router.back();
+      };
+
+    const [activeSection, setActiveSection] = useState("meeting");
+
 
     
     return (
         <>
+            
+
+            <div className="edit-incident-main-content">
+                <div className="edit-incident-main-section1">
+                    <div className="edit-incident-main-section1-left">
+                        <button onClick={handleBack}>
+                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                        </button>
+
+                        <h1> Dialogue Section  </h1>
+                    </div>
+
+                    <div className="action-btn-section">
+                        
+                        <button type="submit" className="action-view-edit" >
+                            <p>Save</p>
+                        </button>
+                    </div>
+                </div>
+
+                <div className="edit-incident-header-body">
+                    <div className="dialogue-header-body-top-section">
+                        <div className="edit-incident-info-toggle-wrapper">
+                            {["meeting", "minutes" ].map((section) => (
+                                <button
+                                key={section}
+                                type="button"
+                                className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                                onClick={() => setActiveSection(section)}
+                                >
+                                {section === "meeting" && "Meeting Information"}
+                                {section === "minutes" && "Minutes Information"}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="dialogue-header-body-bottom-section">
+                        <div className="dialogue-info-main-container">
+                            <div className="dialogue-info-container-scrollable">
+                                <div className="edit-incident-info-main-content-dialogue">
+                                    {activeSection === "meeting" && (
+                                        <>
+                                            <div className="edit-incident-dialoguesection-content">
+                                                <div className="edit-incident-content-dialogue-leftsection">
+                                                    <div className="edit-incident-content-left-side">
+                                                        <div className="edit-incident-fields-section">
+                                                            <p>Complainant's Name</p>
+                                                            <input 
+                                                                type="text" 
+                                                                className="edit-incident-input-field" 
+                                                                name="complainant.fname"
+                                                                id="complainant.fname"
+                                                                value={complainantName}
+                                                                disabled
+                                                            />
+                                                        </div>
+
+                                                        <div className="checkbox-container-dialogue">
+  <label className="checkbox-label-dialogue">
+    <input
+      type="checkbox"
+      name="Cstatus"
+      disabled={existingData}
+      checked={details.Cstatus !== "Absent"} // true if status is "", false if "Absent"
+      onChange={(e) =>
+        setDetails((prev: any) => ({
+          ...prev,
+          Cstatus: e.target.checked ? "" : "Absent"
+        }))
+      }
+    />
+    Present
+  </label>
+</div>
+
+
+                                                        <div className="edit-incident-fields-section">
+                                                            <p>Date and Time</p>
+                                                            <input 
+                                                                type="datetime-local"  
+                                                                className="edit-incident-input-field" 
+                                                                name="DateTimeOfMeeting"
+                                                                id="DateTimeOfMeeting"
+                                                                value={dialogueLetterData?.DateTimeOfMeeting||""}
+                                                                disabled
+                                                            />
+
+                                                            
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="edit-incident-content-right-side">
+                                                        <div className="edit-incident-fields-section">
+                                                            <p>Respondent's Name</p>
+                                                            <input 
+                                                                type="text" 
+                                                                className="edit-incident-input-field" 
+                                                                name="respondent.fname"
+                                                                id="respondent.fname"
+                                                                value={respondentName}
+                                                                disabled
+                                                            />
+
+                                                            
+                                                        </div>
+
+                                                        <div className="checkbox-container-dialogue">
+                                                            <label className="checkbox-label-dialogue">
+                                                            <input type="checkbox" name="isStudent" disabled={existingData} />
+                                                                Present
+                                                            </label>
+                                                        </div>
+
+                                                        <div className="edit-incident-fields-section">
+                                                            <p>Hearing Officer</p>
+                                                            <input 
+                                                                type="text" 
+                                                                className="edit-incident-input-field" 
+                                                                name="HearingOfficer"
+                                                                id="HearingOfficer"
+                                                                value={details.HearingOfficer||""}
+                                                                onChange={handleChange}
+                                                                disabled
+                                                            />
+
+                                                            
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="edit-incident-content-dialogue-rightsection">
+                                                    <div className="view-incident-dialogue-remarks-container">
+                                                        <div className="box-container-outer-remarks-dialogue">
+                                                            <div className="title-remarks-dialogue">
+                                                                Remarks
+                                                            </div>
+                                                            <div className="box-container-remarks-dialogue">
+                                                                <textarea 
+                                                                    className="remarks-input-field-dialogue" 
+                                                                    name="remarks" 
+                                                                    id="remarks"
+                                                                    value={details.remarks||""}
+                                                                    onChange={handleChange}
+                                                                    placeholder="Enter Remarks" 
+                                                                    onFocus={existingData || usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                                                                    required={!existingData|| usersAbsent() ? false : true}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+                
+
+
+            {/* OLD CODE */}
+            
             <div className="dialouge-meeting-section-edit">    
                 <div className="title-section-edit">
                   <button type="button" className={showDialogueContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
@@ -201,9 +379,9 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 {(!isDialogue && <span className="text-red-500 ml-4">In order to create a Dialogue Meeting, you must generate a Dialogue Letter first</span>)}
                 </div>
           
-            <hr/>
+                <hr/>
           
-            {(showDialogueContent && isDialogue) && (
+            {(isDialogue) && (
                     <>
                         <form onSubmit={handleSubmit}>
                           <div className="section-2-dialouge-edit">
@@ -346,6 +524,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                     </>
             )}
             </div>
+            
+            
         </>
     )
 }
