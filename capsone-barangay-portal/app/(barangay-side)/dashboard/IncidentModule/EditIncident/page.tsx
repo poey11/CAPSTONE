@@ -473,6 +473,7 @@ const confirmSubmit = async () => {
             </div>
 
           </div>
+          
           <div className="edit-incident-main-content">
             <div className="edit-incident-main-section1">
               <div className="edit-incident-main-section1-left">
@@ -894,8 +895,7 @@ const confirmSubmit = async () => {
           
                   
 
-          {/* EXISTING CODE */}
-          {/*
+   
           <div className="letters-content-edit">
                <button className="letter-announcement-btn-edit" name="dialogue" onClick={handleGenerateLetterAndInvitation}>Generate Dialogue Letter</button>
 
@@ -1356,7 +1356,7 @@ const confirmSubmit = async () => {
         {Array.from({ length: reportData.hearing }, (_, i) => (
           <Hearing key={i}  index={i} generatedHearingSummons={reportData?.generatedHearingSummons} id={docId||""}/>
         ))}
-          */}
+      
 
 
 

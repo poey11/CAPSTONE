@@ -4,6 +4,11 @@ import { db } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 import {getLocalDateTimeString} from "@/app/helpers/helpers";
 import { fill } from "pdf-lib";
+import { useRouter, useSearchParams } from "next/navigation";
+
+
+
+
 
 interface HearingFormProps {
     index: number;
@@ -32,7 +37,10 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
     const user = useSession().data?.user;
     const [showHearingContent, setShowHearingContent] = useState(false); // Initially hidden
     const [hearingDetails, setHearingDetails] = useState<HearingDetails[]>([]);
+        const [loading , setLoading] = useState(true);
 
+
+        const router = useRouter();
     let nos ="";
     switch (index) {
         case 0:
@@ -230,9 +238,49 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
     setDetails(updatedDetails);
 }, [details.Cstatus, details.Rstatus]);
 
+const handleBack = () => {
+    router.back();
+  };
+  
 
     return (
         <>
+
+         <main className="main-container-hearing">
+
+                <div className="hearing-section-main-content">
+                    <div className="hearing-section-main-section1">
+
+                    <div className="hearing-section-main-section-1-left ">
+
+                    <button onClick={handleBack}>
+                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-hearing"/> 
+                    </button>
+
+                    <h1> Edit Incident </h1>
+
+                    </div>
+
+                    <div className="action-btn-section-hearing">
+
+                    <button type="submit" className="action-view-edit"> {/*onClick={handleSubmit}*/}
+                        {loading ? "Saving..." : "Save"}
+                    </button>
+
+                    </div>
+
+                    </div>
+
+
+                </div>
+
+
+                </main>
+
+
+
+
+
             <div className="hearing-section-edit">    
                 <div className="title-section-edit">
                     <button type="button" className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
