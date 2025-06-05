@@ -34,27 +34,96 @@ export default function HearingSection() {
           });
         }
       },[reportData]);
+
+
+      const handleBack = () => {
+        router.back();
+      };
+
+
+  const [activeSection, setActiveSection] = useState("complainant");
+
     return (
-        <div className="">
+        <main className="main-container-hearing">
+
+            <div className="hearing-section-main-content">
 
 
-            {/*
-            {Array.from({ length: reportData.hearing }, (_, i) => (
-          <Hearing key={i}  index={i} generatedHearingSummons={reportData?.generatedHearingSummons} id={docId||""}/>
-            ))}
-            */}
 
-            {reportData?.hearing && Array.from({ length: reportData.hearing }, (_, i) => (
-            <Hearing
-                key={i}
-                index={i}
-                generatedHearingSummons={reportData.generatedHearingSummons}
-                id={docId || ""}
-            />
-            ))}
+            <div className="hearing-section-main-section1">
+                
+                <div className="hearing-section-main-section-1-left ">
+                    <button onClick={handleBack}>
+                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-hearing"/> 
+                    </button>
+
+                    <h1> Edit Incident </h1>
+                </div>
+
+                <button type="submit" className="action-view-edit"> {/*onClick={handleSubmit}*/}
+                        {loading ? "Saving..." : "Save"}
+                </button>
 
 
-        </div>
+            </div>
+
+            <div className="hearing-section-header-body">
+
+                <div className="hearing-section-body-top-section">
+
+                    <div className="hearing-section-info-toggle-wrapper">
+                    {["complainant", "respondent", "incident"  ].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "complainant" && "Complainant"}
+                      {section === "respondent" && "Respondent"}
+                      {section === "incident" && "Incident"}
+                    </button>
+                  ))}
+                    </div>
+
+                </div>
+
+
+                <div className="hearing-section-header-body-bottom-section">
+
+                    <div className="hearing-section-info-main-container">
+
+                        <div className="hearing-section-info-container-scrollable">
+
+                                {/*
+                                {Array.from({ length: reportData.hearing }, (_, i) => (
+                            <Hearing key={i}  index={i} generatedHearingSummons={reportData?.generatedHearingSummons} id={docId||""}/>
+                                ))}
+                                */}
+
+                                {reportData?.hearing && Array.from({ length: reportData.hearing }, (_, i) => (
+                                <Hearing
+                                    key={i}
+                                    index={i}
+                                    generatedHearingSummons={reportData.generatedHearingSummons}
+                                    id={docId || ""}
+                                />
+                                ))}
+
+                        </div>
+
+                    </div>
+
+                    
+
+                </div>
+
+            </div>
+
+
+
+            </div>
+        </main>
     );
 
 }

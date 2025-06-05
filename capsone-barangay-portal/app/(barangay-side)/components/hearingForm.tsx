@@ -246,42 +246,11 @@ const handleBack = () => {
     return (
         <>
 
-         <main className="main-container-hearing">
-
-                <div className="hearing-section-main-content">
-                    <div className="hearing-section-main-section1">
-
-                    <div className="hearing-section-main-section-1-left ">
-
-                    <button onClick={handleBack}>
-                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-hearing"/> 
-                    </button>
-
-                    <h1> Edit Incident </h1>
-
-                    </div>
-
-                    <div className="action-btn-section-hearing">
-
-                    <button type="submit" className="action-view-edit"> {/*onClick={handleSubmit}*/}
-                        {loading ? "Saving..." : "Save"}
-                    </button>
-
-                    </div>
-
-                    </div>
-
-
-                </div>
-
-
-                </main>
+      
 
 
 
-
-
-            <div className="hearing-section-edit">    
+            <div className="hearing-section-info-main-content">    
                 <div className="title-section-edit">
                     <button type="button" className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
                 <h1>{nos} Hearing Section</h1>
@@ -295,7 +264,7 @@ const handleBack = () => {
                   In order to fill up the current Hearing Section, you must fill up the previous Hearing and/or also generate a Summons Letter
                   </span>
                 )}
-            </div>
+                </div>
             <hr/>
             {showHearingContent && (
                 <>
