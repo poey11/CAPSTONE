@@ -303,7 +303,7 @@ export default function addVoter() {
                     <input
                       type="text"
                       className="select-resident-input-field"
-                      placeholder="Select Complainant"
+                      placeholder="Select Resident"
                       onClick={handleVotersClick}
                       value={
                         isResidentSelected
