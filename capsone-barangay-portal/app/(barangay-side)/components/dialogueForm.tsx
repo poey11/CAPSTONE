@@ -4,7 +4,7 @@ import {getLocalDateTimeString} from "@/app/helpers/helpers";
 import { doc, onSnapshot,collection, setDoc, query, where } from "firebase/firestore";
 import { useState,useEffect } from "react";
 import { useSession } from "next-auth/react";
-
+import { useRouter } from "next/navigation";
 
 
 
@@ -32,6 +32,12 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     const [isDialogue, setIsDialogue] = useState(false);
     const today = getLocalDateTimeString(new Date());
     const [dialogueLetterData, setDialogueLetterData] = useState<any>(null);
+
+    const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
     const [details, setDetails] = useState<DialogueDetails>({
         HearingOfficer: "",
@@ -143,57 +149,377 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     const usersAbsent = () => details.Cstatus === "Absent" || details.Rstatus === "Absent";
 
     useEffect(() => {
-    const updatedDetails = { ...details };
-
-    let minutes = details.minutesOfDialogue || "";
-    let remarks = details.remarks || "";
-
-    // Handle Complainant status change
-    if (details.Cstatus === "Absent") {
-        updatedDetails.partyA = "Complainant Absent";
-
-        if (!minutes.includes("Complainant Absent")) {
-            minutes += (minutes ? " " : "") + "Complainant Absent.";
+        const updatedDetails = { ...details };
+    
+        let minutes = details.minutesOfDialogue || "";
+        let remarks = details.remarks || "";
+    
+        // Handle Complainant status
+        if (details.Cstatus === "Absent") {
+            updatedDetails.partyA = "Complainant Absent.";
+    
+            if (!minutes.includes("Complainant Absent")) {
+                minutes += (minutes ? " " : "") + "Complainant Absent.";
+            }
+    
+            if (!remarks.includes("Complainant Absent")) {
+                remarks += (remarks ? " " : "") + "Complainant Absent.";
+            }
+        } else {
+            // Treat both "" and "Present" as present
+            updatedDetails.partyA = "";
+            minutes = minutes.replace(/Complainant Absent\.?\s*/g, "").trim();
+            remarks = remarks.replace(/Complainant Absent\.?\s*/g, "").trim();
         }
-
-        if (!remarks.includes("Complainant Absent")) {
-            remarks += (remarks ? " " : "") + "Complainant Absent.";
+    
+        // Handle Respondent status
+        if (details.Rstatus === "Absent") {
+            updatedDetails.partyB = "Respondent Absent";
+    
+            if (!minutes.includes("Respondent Absent")) {
+                minutes += (minutes ? " " : "") + "Respondent Absent.";
+            }
+    
+            if (!remarks.includes("Respondent Absent")) {
+                remarks += (remarks ? " " : "") + "Respondent Absent.";
+            }
+        } else {
+            updatedDetails.partyB = "";
+            minutes = minutes.replace(/Respondent Absent\.?\s*/g, "").trim();
+            remarks = remarks.replace(/Respondent Absent\.?\s*/g, "").trim();
         }
-    } else if (details.Cstatus === "Present") {
-        updatedDetails.partyA = "";
-
-        minutes = minutes.replace(/Complainant Absent\.?\s*/g, "").trim();
-        remarks = remarks.replace(/Complainant Absent\.?\s*/g, "").trim();
-    }
-
-    // Handle Respondent status change
-    if (details.Rstatus === "Absent") {
-        updatedDetails.partyB = "Respondent Absent";
-
-        if (!minutes.includes("Respondent Absent")) {
-            minutes += (minutes ? " " : "") + "Respondent Absent.";
-        }
-
-        if (!remarks.includes("Respondent Absent")) {
-            remarks += (remarks ? " " : "") + "Respondent Absent.";
-        }
-    } else if (details.Rstatus === "Present") {
-        updatedDetails.partyB = "";
-
-        minutes = minutes.replace(/Respondent Absent\.?\s*/g, "").trim();
-        remarks = remarks.replace(/Respondent Absent\.?\s*/g, "").trim();
-    }
-
-    updatedDetails.minutesOfDialogue = minutes;
-    updatedDetails.remarks = remarks;
-
-    setDetails(updatedDetails);
+    
+        updatedDetails.minutesOfDialogue = minutes;
+        updatedDetails.remarks = remarks;
+    
+        setDetails(updatedDetails);
     }, [details.Cstatus, details.Rstatus]);
+
+    // New handler to show confirmation popup on Save click
+    const handleSaveClick = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setShowSubmitPopup(true);
+    };
+
+    const saveDialogue = async () => {
+        try {
+          const subColRef = collection(db, "IncidentReports", id, "DialogueMeeting");
+          const docRef = doc(subColRef, id);
+          await setDoc(docRef, {
+            ...details,
+            filled:true,
+          });
+          console.log("Document written with ID: ", docRef.id);
+        } catch (error: any) {
+          console.error("Error saving data:", error.message);
+          throw error;
+        }
+      };
+    
+    const confirmSubmit = async () => {
+        setShowSubmitPopup(false);
+      
+        try {
+          await saveDialogue(); 
+      
+          setPopupMessage("Dialogue Successfully Saved!");
+          setShowPopup(true);
+      
+          setTimeout(() => {
+            setShowPopup(false);
+           handleBack();
+          }, 1000);
+        } catch (error) {
+          console.error("Error during confirmation submit:", error);
+          setPopupErrorMessage("Error saving dialogue. Please try again.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+        }
+      };
+
+    const router = useRouter();
+    const [loading , setLoading] = useState(true);
+
+    const handleBack = () => {
+        router.back();
+      };
+
+    const [activeSection, setActiveSection] = useState("meeting");
 
 
     
     return (
         <>
+            
+        <form onSubmit={handleSaveClick}>
+            <div className="edit-incident-main-content">
+                <div className="edit-incident-main-section1">
+                    <div className="edit-incident-main-section1-left">
+                        <button onClick={handleBack}>
+                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                        </button>
+
+                        <h1> Dialogue Section  </h1>
+                    </div>
+
+                    <div className="action-btn-section">  
+                        {!existingData && (
+                        <button type="submit" className="action-view-edit">
+                            <p>Save</p>
+                        </button>
+                        )}
+                    </div>
+                    
+                </div>
+
+                <div className="edit-incident-header-body">
+                    <div className="dialogue-header-body-top-section">
+                        <div className="edit-incident-info-toggle-wrapper">
+                            {["meeting", "minutes" ].map((section) => (
+                                <button
+                                key={section}
+                                type="button"
+                                className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                                onClick={() => setActiveSection(section)}
+                                >
+                                {section === "meeting" && "Meeting Information"}
+                                {section === "minutes" && "Minutes Information"}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="dialogue-header-body-bottom-section">
+                        <div className="dialogue-info-main-container">
+                            <div className="dialogue-info-container-scrollable">
+                                <div className="edit-incident-info-main-content-dialogue">
+                                    {activeSection === "meeting" && (
+                                        <>
+                                            <div className="edit-incident-dialoguesection-content">
+                                                <div className="edit-incident-content-dialogue-leftsection">
+                                                    <div className="edit-incident-content-left-side">
+                                                        <div className="edit-incident-fields-section">
+                                                            <p>Complainant's Name</p>
+                                                            <input 
+                                                                type="text" 
+                                                                className="edit-incident-input-field" 
+                                                                name="complainant.fname"
+                                                                id="complainant.fname"
+                                                                value={complainantName}
+                                                                disabled
+                                                            />
+                                                        </div>
+
+                                                        <div className="checkbox-container-dialogue">
+                                                            <label className="custom-checkbox-label">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    name="Cstatus"
+                                                                    disabled={existingData}
+                                                                    checked={details.Cstatus === "" || details.Cstatus === "Present"}
+                                                                    onChange={(e) =>
+                                                                    setDetails((prev: any) => ({
+                                                                        ...prev,
+                                                                        Cstatus: e.target.checked ? "" : "Absent"
+                                                                    }))
+                                                                    }
+                                                                />
+                                                                <span className="checkmark"></span>
+                                                                Present
+                                                            </label>
+                                                        </div>
+
+
+                                                        <div className="edit-incident-fields-section">
+                                                            <p>Date and Time</p>
+                                                            <input 
+                                                                type="datetime-local"  
+                                                                className="edit-incident-input-field" 
+                                                                name="DateTimeOfMeeting"
+                                                                id="DateTimeOfMeeting"
+                                                                value={dialogueLetterData?.DateTimeOfMeeting||""}
+                                                                disabled
+                                                            />
+
+                                                            
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="edit-incident-content-right-side">
+                                                        <div className="edit-incident-fields-section">
+                                                            <p>Respondent's Name</p>
+                                                            <input 
+                                                                type="text" 
+                                                                className="edit-incident-input-field" 
+                                                                name="respondent.fname"
+                                                                id="respondent.fname"
+                                                                value={respondentName}
+                                                                disabled
+                                                            />
+
+                                                            
+                                                        </div>
+
+                                                        <div className="checkbox-container-dialogue">
+                                                            <label className="custom-checkbox-label">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    name="Rstatus"
+                                                                    disabled={existingData}
+                                                                    checked={details.Rstatus === "" || details.Rstatus === "Present"}
+                                                                    onChange={(e) =>
+                                                                    setDetails((prev: any) => ({
+                                                                        ...prev,
+                                                                        Rstatus: e.target.checked ? "" : "Absent"
+                                                                    }))
+                                                                    }
+                                                                />
+                                                                <span className="checkmark"></span>
+                                                                Present
+                                                            </label>
+                                                        </div>
+
+
+                                                        
+
+                                                        <div className="edit-incident-fields-section">
+                                                            <p>Hearing Officer</p>
+                                                            <input 
+                                                                type="text" 
+                                                                className="edit-incident-input-field" 
+                                                                name="HearingOfficer"
+                                                                id="HearingOfficer"
+                                                                value={details.HearingOfficer||""}
+                                                                onChange={handleChange}
+                                                                disabled
+                                                            />
+
+                                                            
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="edit-incident-content-dialogue-rightsection">
+                                                    <div className="view-incident-dialogue-remarks-container">
+                                                        <div className="box-container-outer-remarks-dialogue">
+                                                            <div className="title-remarks-dialogue">
+                                                                Remarks
+                                                            </div>
+                                                            <div className="box-container-remarks-dialogue">
+                                                                <textarea 
+                                                                    className="remarks-input-field-dialogue" 
+                                                                    name="remarks" 
+                                                                    id="remarks"
+                                                                    value={details.remarks||""}
+                                                                    onChange={handleChange}
+                                                                    placeholder="Enter Remarks" 
+                                                                    onFocus={existingData || usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                                                                    required={!existingData|| usersAbsent() ? false : true}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {activeSection === "minutes" && (
+                                        <>
+                                            <div className="edit-incident-dialoguesection-content">
+                                                <div className="edit-incident-dialoguesection-minutes-content">
+                                                    <div className="minutes-content-topsection">
+                                                        <div className="edit-incident-content-left-side">
+
+                                                            <div className="view-incident-dialogue-partyA-container">
+                                                                <div className="box-container-outer-partyA-dialogue">
+                                                                    <div className="title-remarks-dialogue">
+                                                                        Party A
+                                                                    </div>
+                                                                    <div className="box-container-partyA-dialogue">
+                                                                        <textarea 
+                                                                            className="remarks-input-field-partyA" 
+                                                                            placeholder="Enter Party A" 
+                                                                            name="partyA"
+                                                                            id="partyA"
+                                                                            value={details.partyA||""}
+                                                                            onChange={handleChange}
+                                                                            onFocus={existingData || usersAbsent()? (e => e.target.blur()):(() => {}) }
+                                                                            required={!existingData || usersAbsent() ? false : true}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                                    
+                                                        </div>
+
+                                                        <div className="edit-incident-content-right-side">
+                                                            <div className="view-incident-dialogue-partyA-container">
+                                                                <div className="box-container-outer-partyA-dialogue">
+                                                                    <div className="title-remarks-dialogue">
+                                                                        Party B
+                                                                    </div>
+                                                                    <div className="box-container-partyA-dialogue">
+                                                                        <textarea 
+                                                                            className="remarks-input-field-partyA" 
+                                                                            placeholder="Enter Party B"
+                                                                            id="partyB"
+                                                                            name="partyB"
+                                                                            value={details.partyB||""}
+                                                                            onChange={handleChange}
+                                                                            onFocus={existingData || usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                                                                            required={!existingData || usersAbsent() ? false : true}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                                
+                                                        </div>
+
+                                                    </div>
+                                                    <div className="minutes-content-bottomsection">
+                                                        <div className="view-incident-dialogue-partyA-container">
+                                                                <div className="box-container-outer-partyA-dialogue">
+                                                                    <div className="title-remarks-dialogue">
+                                                                        Minutes of Dialogue
+                                                                    </div>
+                                                                    <div className="box-container-partyA-dialogue">
+                                                                        <textarea 
+                                                                            className="remarks-input-field-partyA" 
+                                                                            placeholder="Enter Minutes of Dialogue"
+                                                                            name="minutesOfDialogue"
+                                                                            id="minutesOfDialogue"
+                                                                            value={details.minutesOfDialogue||""}
+                                                                            onChange={handleChange}
+                                                                            onFocus={existingData || usersAbsent() ? (e => e.target.blur()) : (() => {})}
+                                                                            required={!existingData || usersAbsent() ? false : true}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+                
+
+
+
+
+            {/* OLD CODE */}
+            
+            {/*
             <div className="dialouge-meeting-section-edit">    
                 <div className="title-section-edit">
                   <button type="button" className={showDialogueContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
@@ -201,9 +527,9 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 {(!isDialogue && <span className="text-red-500 ml-4">In order to create a Dialogue Meeting, you must generate a Dialogue Letter first</span>)}
                 </div>
           
-            <hr/>
+                <hr/>
           
-            {(showDialogueContent && isDialogue) && (
+            {(isDialogue) && (
                     <>
                         <form onSubmit={handleSubmit}>
                           <div className="section-2-dialouge-edit">
@@ -346,6 +672,50 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                     </>
             )}
             </div>
+
+            */}
+            
+        </form>
+
+        {showSubmitPopup && (
+            <div className="confirmation-popup-overlay-add">
+                <div className="confirmation-popup-add">
+                    <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                    <p>Are you sure you want to submit?</p>
+                    <div className="yesno-container-add">
+                        <button
+                        onClick={() => setShowSubmitPopup(false)}
+                        className="no-button-add"
+                        >
+                        No
+                        </button>
+                        <button onClick={confirmSubmit} className="yes-button-add">
+                        Yes
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            )}
+
+
+        {showPopup && (
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+            )}
+
+            {showErrorPopup && (
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+            )}
         </>
     )
 }

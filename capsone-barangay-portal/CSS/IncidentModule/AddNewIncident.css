@@ -351,7 +351,6 @@ padding-bottom:30px;
 
 
 .actions-add {
-  
   display: flex;
   align-items: center;
   gap: 20px;
@@ -718,7 +717,8 @@ padding-bottom:30px;
 
 
 .popup-overlay-add-incident,
-.error-popup-overlay-add{
+.error-popup-overlay-add,
+.popup-overlay-error{
     position: fixed;
     top: 13%;
     right: -3px;
@@ -741,7 +741,8 @@ padding-bottom:30px;
     border-left: 10px solid #403f3e;
   }
 
-  .error-popup-overlay-add{
+  .error-popup-overlay-add,
+  .popup-overlay-error{
     background: #cc3434;
     border-left: 10px solid #8a0f0f;
   }
@@ -754,12 +755,14 @@ padding-bottom:30px;
 }
 
 .popup-overlay-add-incident.show,
-.error-popup-overlay-add.show {
+.error-popup-overlay-add.show,
+.popup-overlay-error.show {
   animation: slideIn 0.5s ease-out;
 }
 
 .popup-overlay-add-indicent.hide,
-.error-popup-overlay-add.hide {
+.error-popup-overlay-add.hide,
+.popup-overlay-error.hide {
   animation: slideOut 0.5s ease-out;
 }
 
@@ -793,7 +796,6 @@ padding-bottom:30px;
   font-size: 18px;
   font-weight: lighter;
   position: fixed;
-  left: 43%; /* Adjust the value */
 }
 
 .confirmation-popup-add p{

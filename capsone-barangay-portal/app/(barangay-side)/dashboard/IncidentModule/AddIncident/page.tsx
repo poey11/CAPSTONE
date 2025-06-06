@@ -1399,7 +1399,7 @@ const handleSubmit = (event: React.FormEvent) => {
                 )}
 
         {showErrorPopup && (
-                <div className={`error-popup-overlay-add show`}>
+                <div className={`popup-overlay-error show`}>
                     <div className="popup-add">
                       <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                       <p>{popupErrorMessage}</p>

@@ -2,6 +2,7 @@ import {  useEffect, useState } from "react";
 import { collection, addDoc, doc, onSnapshot,updateDoc,query, orderBy, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {getLocalDateTimeString} from "@/app/helpers/helpers";
 import { fill } from "pdf-lib";
 
@@ -159,15 +160,20 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
     
   
     const prevFilledHearing = hearingDetails[index - 1]?.filled || false;
+
+    {/*
     const handleToggleClick = () => {
         if(index === 0 && generatedHearingSummons === 0 || !dialogue) return;
         if( index !== 0 && (index >= generatedHearingSummons||!prevFilledHearing)) return;
         
         
         setShowHearingContent(prev => !prev);
-    };
-   
+    };*/}
 
+    const handleToggleClick = () => {
+        setShowHearingContent(prev => !prev);
+    };    
+   
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -230,24 +236,36 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
     setDetails(updatedDetails);
 }, [details.Cstatus, details.Rstatus]);
 
+    const router = useRouter();
+
+    const handleBack = () => {
+        router.back();
+    };
+
 
     return (
         <>
-            <div className="hearing-section-edit">    
+            
+
+        
+         <div className="hearing-section-edit">    
+            
                 <div className="title-section-edit">
                     <button type="button" className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
-                <h1>{nos} Hearing Section</h1>
-                {(index === 0 && (generatedHearingSummons === 0 || !dialogue)) && (
+                    <h1>{nos} Hearing Section</h1>
+
+                    {/*
+                    {(index === 0 && (generatedHearingSummons === 0 || !dialogue)) && (
+                        <span className="text-red-500 ml-4">
+                            In order to fill up the current Hearing Section, you must fill up the Dialogue Letter and/or also generate a Summons Letter
+                        </span>
+                    )}
+                    {( index !== 0 && (index >= generatedHearingSummons||!prevFilledHearing) ) && (
                     <span className="text-red-500 ml-4">
-                        In order to fill up the current Hearing Section, you must fill up the Dialogue Letter and/or also generate a Summons Letter
+                    In order to fill up the current Hearing Section, you must fill up the previous Hearing and/or also generate a Summons Letter
                     </span>
-                )}
-                {( index !== 0 && (index >= generatedHearingSummons||!prevFilledHearing) ) && (
-                  <span className="text-red-500 ml-4">
-                  In order to fill up the current Hearing Section, you must fill up the previous Hearing and/or also generate a Summons Letter
-                  </span>
-                )}
-            </div>
+                    )}*/}
+                </div>
             <hr/>
             {showHearingContent && (
                 <>
