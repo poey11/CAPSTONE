@@ -33,6 +33,12 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     const today = getLocalDateTimeString(new Date());
     const [dialogueLetterData, setDialogueLetterData] = useState<any>(null);
 
+    const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
+
     const [details, setDetails] = useState<DialogueDetails>({
         HearingOfficer: "",
         minutesOfDialogue: "",
@@ -189,7 +195,47 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         setDetails(updatedDetails);
     }, [details.Cstatus, details.Rstatus]);
 
+    // New handler to show confirmation popup on Save click
+    const handleSaveClick = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setShowSubmitPopup(true);
+    };
+
+    const saveDialogue = async () => {
+        try {
+          const subColRef = collection(db, "IncidentReports", id, "DialogueMeeting");
+          const docRef = doc(subColRef, id);
+          await setDoc(docRef, {
+            ...details,
+            filled:true,
+          });
+          console.log("Document written with ID: ", docRef.id);
+        } catch (error: any) {
+          console.error("Error saving data:", error.message);
+          throw error;
+        }
+      };
     
+    const confirmSubmit = async () => {
+        setShowSubmitPopup(false);
+      
+        try {
+          await saveDialogue(); 
+      
+          setPopupMessage("Dialogue Successfully Saved!");
+          setShowPopup(true);
+      
+          setTimeout(() => {
+            setShowPopup(false);
+           handleBack();
+          }, 1000);
+        } catch (error) {
+          console.error("Error during confirmation submit:", error);
+          setPopupErrorMessage("Error saving dialogue. Please try again.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+        }
+      };
 
     const router = useRouter();
     const [loading , setLoading] = useState(true);
@@ -205,7 +251,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     return (
         <>
             
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSaveClick}>
             <div className="edit-incident-main-content">
                 <div className="edit-incident-main-section1">
                     <div className="edit-incident-main-section1-left">
@@ -630,6 +676,46 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             */}
             
         </form>
+
+        {showSubmitPopup && (
+            <div className="confirmation-popup-overlay-add">
+                <div className="confirmation-popup-add">
+                    <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                    <p>Are you sure you want to submit?</p>
+                    <div className="yesno-container-add">
+                        <button
+                        onClick={() => setShowSubmitPopup(false)}
+                        className="no-button-add"
+                        >
+                        No
+                        </button>
+                        <button onClick={confirmSubmit} className="yes-button-add">
+                        Yes
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            )}
+
+
+        {showPopup && (
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+            )}
+
+            {showErrorPopup && (
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+            )}
         </>
     )
 }
