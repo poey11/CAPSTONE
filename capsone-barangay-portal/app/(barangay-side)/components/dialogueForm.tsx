@@ -143,52 +143,53 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     const usersAbsent = () => details.Cstatus === "Absent" || details.Rstatus === "Absent";
 
     useEffect(() => {
-    const updatedDetails = { ...details };
-
-    let minutes = details.minutesOfDialogue || "";
-    let remarks = details.remarks || "";
-
-    // Handle Complainant status change
-    if (details.Cstatus === "Absent") {
-        updatedDetails.partyA = "Complainant Absent";
-
-        if (!minutes.includes("Complainant Absent")) {
-            minutes += (minutes ? " " : "") + "Complainant Absent.";
+        const updatedDetails = { ...details };
+    
+        let minutes = details.minutesOfDialogue || "";
+        let remarks = details.remarks || "";
+    
+        // Handle Complainant status
+        if (details.Cstatus === "Absent") {
+            updatedDetails.partyA = "Complainant Absent.";
+    
+            if (!minutes.includes("Complainant Absent")) {
+                minutes += (minutes ? " " : "") + "Complainant Absent.";
+            }
+    
+            if (!remarks.includes("Complainant Absent")) {
+                remarks += (remarks ? " " : "") + "Complainant Absent.";
+            }
+        } else {
+            // Treat both "" and "Present" as present
+            updatedDetails.partyA = "";
+            minutes = minutes.replace(/Complainant Absent\.?\s*/g, "").trim();
+            remarks = remarks.replace(/Complainant Absent\.?\s*/g, "").trim();
         }
-
-        if (!remarks.includes("Complainant Absent")) {
-            remarks += (remarks ? " " : "") + "Complainant Absent.";
+    
+        // Handle Respondent status
+        if (details.Rstatus === "Absent") {
+            updatedDetails.partyB = "Respondent Absent";
+    
+            if (!minutes.includes("Respondent Absent")) {
+                minutes += (minutes ? " " : "") + "Respondent Absent.";
+            }
+    
+            if (!remarks.includes("Respondent Absent")) {
+                remarks += (remarks ? " " : "") + "Respondent Absent.";
+            }
+        } else {
+            updatedDetails.partyB = "";
+            minutes = minutes.replace(/Respondent Absent\.?\s*/g, "").trim();
+            remarks = remarks.replace(/Respondent Absent\.?\s*/g, "").trim();
         }
-    } else if (details.Cstatus === "Present") {
-        updatedDetails.partyA = "";
-
-        minutes = minutes.replace(/Complainant Absent\.?\s*/g, "").trim();
-        remarks = remarks.replace(/Complainant Absent\.?\s*/g, "").trim();
-    }
-
-    // Handle Respondent status change
-    if (details.Rstatus === "Absent") {
-        updatedDetails.partyB = "Respondent Absent";
-
-        if (!minutes.includes("Respondent Absent")) {
-            minutes += (minutes ? " " : "") + "Respondent Absent.";
-        }
-
-        if (!remarks.includes("Respondent Absent")) {
-            remarks += (remarks ? " " : "") + "Respondent Absent.";
-        }
-    } else if (details.Rstatus === "Present") {
-        updatedDetails.partyB = "";
-
-        minutes = minutes.replace(/Respondent Absent\.?\s*/g, "").trim();
-        remarks = remarks.replace(/Respondent Absent\.?\s*/g, "").trim();
-    }
-
-    updatedDetails.minutesOfDialogue = minutes;
-    updatedDetails.remarks = remarks;
-
-    setDetails(updatedDetails);
+    
+        updatedDetails.minutesOfDialogue = minutes;
+        updatedDetails.remarks = remarks;
+    
+        setDetails(updatedDetails);
     }, [details.Cstatus, details.Rstatus]);
+
+    
 
     const router = useRouter();
     const [loading , setLoading] = useState(true);
@@ -204,7 +205,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     return (
         <>
             
-
+        <form onSubmit={handleSubmit}>
             <div className="edit-incident-main-content">
                 <div className="edit-incident-main-section1">
                     <div className="edit-incident-main-section1-left">
@@ -215,12 +216,14 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                         <h1> Dialogue Section  </h1>
                     </div>
 
-                    <div className="action-btn-section">
-                        
-                        <button type="submit" className="action-view-edit" >
+                    <div className="action-btn-section">  
+                        {!existingData && (
+                        <button type="submit" className="action-view-edit">
                             <p>Save</p>
                         </button>
+                        )}
                     </div>
+                    
                 </div>
 
                 <div className="edit-incident-header-body">
@@ -262,22 +265,23 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                                         </div>
 
                                                         <div className="checkbox-container-dialogue">
-  <label className="checkbox-label-dialogue">
-    <input
-      type="checkbox"
-      name="Cstatus"
-      disabled={existingData}
-      checked={details.Cstatus !== "Absent"} // true if status is "", false if "Absent"
-      onChange={(e) =>
-        setDetails((prev: any) => ({
-          ...prev,
-          Cstatus: e.target.checked ? "" : "Absent"
-        }))
-      }
-    />
-    Present
-  </label>
-</div>
+                                                            <label className="custom-checkbox-label">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    name="Cstatus"
+                                                                    disabled={existingData}
+                                                                    checked={details.Cstatus === "" || details.Cstatus === "Present"}
+                                                                    onChange={(e) =>
+                                                                    setDetails((prev: any) => ({
+                                                                        ...prev,
+                                                                        Cstatus: e.target.checked ? "" : "Absent"
+                                                                    }))
+                                                                    }
+                                                                />
+                                                                <span className="checkmark"></span>
+                                                                Present
+                                                            </label>
+                                                        </div>
 
 
                                                         <div className="edit-incident-fields-section">
@@ -311,11 +315,26 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                                         </div>
 
                                                         <div className="checkbox-container-dialogue">
-                                                            <label className="checkbox-label-dialogue">
-                                                            <input type="checkbox" name="isStudent" disabled={existingData} />
+                                                            <label className="custom-checkbox-label">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    name="Rstatus"
+                                                                    disabled={existingData}
+                                                                    checked={details.Rstatus === "" || details.Rstatus === "Present"}
+                                                                    onChange={(e) =>
+                                                                    setDetails((prev: any) => ({
+                                                                        ...prev,
+                                                                        Rstatus: e.target.checked ? "" : "Absent"
+                                                                    }))
+                                                                    }
+                                                                />
+                                                                <span className="checkmark"></span>
                                                                 Present
                                                             </label>
                                                         </div>
+
+
+                                                        
 
                                                         <div className="edit-incident-fields-section">
                                                             <p>Hearing Officer</p>
@@ -358,6 +377,86 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                             </div>
                                         </>
                                     )}
+
+                                    {activeSection === "minutes" && (
+                                        <>
+                                            <div className="edit-incident-dialoguesection-content">
+                                                <div className="edit-incident-dialoguesection-minutes-content">
+                                                    <div className="minutes-content-topsection">
+                                                        <div className="edit-incident-content-left-side">
+
+                                                            <div className="view-incident-dialogue-partyA-container">
+                                                                <div className="box-container-outer-partyA-dialogue">
+                                                                    <div className="title-remarks-dialogue">
+                                                                        Party A
+                                                                    </div>
+                                                                    <div className="box-container-partyA-dialogue">
+                                                                        <textarea 
+                                                                            className="remarks-input-field-partyA" 
+                                                                            placeholder="Enter Party A" 
+                                                                            name="partyA"
+                                                                            id="partyA"
+                                                                            value={details.partyA||""}
+                                                                            onChange={handleChange}
+                                                                            onFocus={existingData || usersAbsent()? (e => e.target.blur()):(() => {}) }
+                                                                            required={!existingData || usersAbsent() ? false : true}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                                    
+                                                        </div>
+
+                                                        <div className="edit-incident-content-right-side">
+                                                            <div className="view-incident-dialogue-partyA-container">
+                                                                <div className="box-container-outer-partyA-dialogue">
+                                                                    <div className="title-remarks-dialogue">
+                                                                        Party B
+                                                                    </div>
+                                                                    <div className="box-container-partyA-dialogue">
+                                                                        <textarea 
+                                                                            className="remarks-input-field-partyA" 
+                                                                            placeholder="Enter Party B"
+                                                                            id="partyB"
+                                                                            name="partyB"
+                                                                            value={details.partyB||""}
+                                                                            onChange={handleChange}
+                                                                            onFocus={existingData || usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                                                                            required={!existingData || usersAbsent() ? false : true}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                                
+                                                        </div>
+
+                                                    </div>
+                                                    <div className="minutes-content-bottomsection">
+                                                        <div className="view-incident-dialogue-partyA-container">
+                                                                <div className="box-container-outer-partyA-dialogue">
+                                                                    <div className="title-remarks-dialogue">
+                                                                        Minutes of Dialogue
+                                                                    </div>
+                                                                    <div className="box-container-partyA-dialogue">
+                                                                        <textarea 
+                                                                            className="remarks-input-field-partyA" 
+                                                                            placeholder="Enter Minutes of Dialogue"
+                                                                            name="minutesOfDialogue"
+                                                                            id="minutesOfDialogue"
+                                                                            value={details.minutesOfDialogue||""}
+                                                                            onChange={handleChange}
+                                                                            onFocus={existingData || usersAbsent() ? (e => e.target.blur()) : (() => {})}
+                                                                            required={!existingData || usersAbsent() ? false : true}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -370,8 +469,11 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 
 
 
+
+
             {/* OLD CODE */}
             
+            {/*
             <div className="dialouge-meeting-section-edit">    
                 <div className="title-section-edit">
                   <button type="button" className={showDialogueContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
@@ -524,8 +626,10 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                     </>
             )}
             </div>
+
+            */}
             
-            
+        </form>
         </>
     )
 }
