@@ -88,6 +88,8 @@ export default function HearingSection() {
 
     return (
         <main className="main-container-edit">
+
+            {/* TO DO: will add logic pa for the redirection and pop ups */}
             <div className="edit-incident-redirectionpage-section">
                 <button className="edit-incident-redirection-buttons" onClick={handleInformationSection}>
                     <div className="edit-incident-redirection-icons-section">
@@ -204,7 +206,7 @@ export default function HearingSection() {
 
                     <div className="dialogue-header-body-bottom-section">
                         <div className="dialogue-info-main-container">
-                            <div className="hearing-info-container-scrollable">
+                            <div className="dialogue-info-container-scrollable">
                                 <div className="edit-incident-info-main-content-dialogue">
 
                                     {/* NOTE: separated per hearing */}

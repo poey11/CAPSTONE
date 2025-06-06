@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
 import { getLocalDateString, getLocalDateTimeString } from "@/app/helpers/helpers";
 import Letter from "@/app/(barangay-side)/components/letterForm"
+import { getSpecificDocument, generateDownloadLink } from "../../../../../helpers/firestorehelper";
 
 export default function GenerateDialougeLetter() {
     const user = useSession().data?.user;
@@ -18,6 +19,15 @@ export default function GenerateDialougeLetter() {
     const [userInfo, setUserInfo] = useState<any | null>(null);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
     const [showSubmitPopup, setShowSubmitPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+
+
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
+    const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
+    const [hasSummonLetter, setHasSummonLetter] = useState(false);
+    const [reportData, setReportData] = useState<any>();
 
   
     const [isLoading, setIsLoading] = useState(false);
@@ -531,8 +541,45 @@ export default function GenerateDialougeLetter() {
         })
     }
     
-console.log(safeData);
-console.log(safeData.length)
+    console.log(safeData);
+    console.log(safeData.length)
+
+
+    useEffect(() => {
+        if(docId){
+          getSpecificDocument("IncidentReports", docId, setReportData).then(() => setLoading(false));
+        }
+        else{
+          console.log("No document ID provided.");
+          setReportData(null);
+         
+        }
+      }, [docId]);
+  
+      useEffect(() => {
+        if(reportData?.file){
+          generateDownloadLink(reportData?.file, "IncidentReports").then(url => {
+            if (url) setconcernImageUrl(url);
+          });
+        }
+      },[reportData]);
+
+    const handleInformationSection = (e:any) => {
+        router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
+    };
+
+    const handleGenerateLetterAndInvitation = (e:any) => {
+        const action = e.currentTarget.name;
+        router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}?action=${action}`);
+    };
+  
+    const handleDialogueSection = () => {
+        router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
+    };
+
+    const handleHearingSection = () => {
+        router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
+    };
   return (
     <main className="main-container-letter">
 
@@ -582,6 +629,83 @@ console.log(safeData.length)
           
        </div> 
         */}
+
+            {/* TO DO: will add logic pa for the redirection and pop ups */}
+            <div className="edit-incident-redirectionpage-section">
+                <button className="edit-incident-redirection-buttons" onClick={handleInformationSection}>
+                    <div className="edit-incident-redirection-icons-section">
+                        <img src="/images/profile-user.png" alt="user info" className="redirection-icons-info"/> 
+                    </div>
+                    <h1>Incident Information</h1>
+                </button>
+
+                <div className="dialogue-dropdown">
+                    <button className="edit-incident-redirection-buttons">
+                        <div className="edit-incident-redirection-icons-section">
+                        <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
+                        </div>
+                        <h1>Dialogue Meeting</h1>
+                    </button>
+
+                    <div className="dialogue-submenu">
+                        <button className="submenu-button" name="dialogue" onClick={handleGenerateLetterAndInvitation}>
+                            <h1>Generate Dialogue Letters</h1>
+                        </button>
+
+                        <button className="submenu-button" name="section" onClick={handleDialogueSection}>
+                            <h1>Dialogue Section</h1>
+                        </button>
+                    </div>
+                </div>
+
+                <div className="hearing-dropdown">
+                    <button className="edit-incident-redirection-buttons">
+                        <div className="edit-incident-redirection-icons-section">
+                            <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing"/> 
+                        </div>
+                        <h1>Hearing Section</h1>
+                    </button>
+
+                    <div className="hearing-submenu">
+                        {reportData?.isDialogue ? (
+                        <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
+                            <h1>Generate Summon Letters</h1>
+                        </button>
+                        ) : (
+                        <button
+                            className="submenu-button"
+                            name="summon"
+                            onClick={() => {
+                            setPopupErrorMessage("Generate A Dialogue Letter First");
+                            setShowErrorPopup(true);
+                            setTimeout(() => setShowErrorPopup(false), 3000);
+                            }}
+                        >
+                            <h1>Generate Summon Letters</h1>
+                        </button>
+                        )}
+
+                        {hasSummonLetter ? (
+                            <button className="submenu-button" name="section" onClick={handleHearingSection}>
+                                <h1>Hearing Section</h1>
+                            </button>
+                        ) : (
+                        <button
+                            className="submenu-button"
+                            name="section"
+                            onClick={() => {
+                            setPopupErrorMessage("Generate A Summon Letter First");
+                            setShowErrorPopup(true);
+                            setTimeout(() => setShowErrorPopup(false), 3000);
+                            }}
+                        >
+                            <h1>Hearing Section</h1>
+                        </button>
+                        )}
+                    </div>
+                </div>
+
+            </div>
     
 
 
@@ -595,7 +719,7 @@ console.log(safeData.length)
                         <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-letter"/> 
                     </button>
 
-                      {actionId === "summon" ? <h1 className="NewOfficial">Summon Letter ({hearing} Hearing)</h1> : <h1 className="NewOfficial">Dialouge Letter</h1>}
+                      {actionId === "summon" ? <h1 className="NewOfficial">Summon Letter ({hearing} Hearing)</h1> : <h1 className="NewOfficial">Dialogue Letter</h1>}
                 </div>
             
             
