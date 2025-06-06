@@ -15,6 +15,7 @@ interface VoterFormData {
   fullName: string;
   homeAddress: string;
   precinctNumber: string;
+  identificationFileURL: string;
 
 }
 
@@ -33,6 +34,7 @@ export default function ViewVoter() {
     fullName: "",
     homeAddress: "",
     precinctNumber: "",
+    identificationFileURL: "",
   });
 
   const [originalData, setOriginalData] = useState({ ...formData });
@@ -56,6 +58,7 @@ export default function ViewVoter() {
             fullName: docSnap.data().fullName || "",
             homeAddress: docSnap.data().homeAddress || "",
             precinctNumber: docSnap.data().precinctNumber || "",
+            identificationFileURL: docSnap.data().identificationFileURL || "",
           };
 
           setFormData(data);
@@ -152,10 +155,7 @@ export default function ViewVoter() {
               <span className="resident-details-label">Voter Details</span>
 
               <div className="resident-profile-container">
-                {
-                /* 
-
-                  <img
+              <img
                   src={formData.identificationFileURL || "/Images/default-identificationpic.jpg"}
                   alt="Resident"
                   className={
@@ -164,19 +164,12 @@ export default function ViewVoter() {
                       : "resident-picture default-picture"
                   }
               />
-                
-                */}
-            
-            {/* 
               <div className="resident-name-section">
                   <h2>
-                   {formData.fullName || "N/A"}
+                  {formData?.firstName || "N/A"} {formData?.lastName || "N/A"}
                   </h2>
                 </div>
-            */}
-            
             </div>
-
               </div>
 
 

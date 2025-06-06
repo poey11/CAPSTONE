@@ -169,6 +169,7 @@ export default function addVoter() {
       const docRef = await addDoc(voterCollection, {
         ...formData,
         voterNumber: latestNumber,
+        identificationFileURL: formData.identificationFileURL,
         createdAt: currentDate,
       });
       return docRef.id; // return ID
@@ -302,7 +303,7 @@ export default function addVoter() {
                     <input
                       type="text"
                       className="select-resident-input-field"
-                      placeholder="Select Complainant"
+                      placeholder="Select Resident"
                       onClick={handleVotersClick}
                       value={
                         isResidentSelected

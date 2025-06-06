@@ -3,7 +3,7 @@ import "@/CSS/ResidentModule/addresident.css";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { db, storage } from "../../../../db/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, where, query, getDocs } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
@@ -374,6 +374,127 @@ export default function EditResident() {
         identificationFileURL: uploadedIdentificationURL,
         updatedBy: session?.user?.position || "",
       });
+
+      // Update in JobSeekerList
+        const jobSeekerQuery = query(
+          collection(db, "JobSeekerList"),
+          where("residentId", "==", residentId)
+        );
+        const jobSeekerSnapshot = await getDocs(jobSeekerQuery);
+
+        jobSeekerSnapshot.forEach(async (docSnap) => {
+          const jobSeekerRef = doc(db, "JobSeekerList", docSnap.id);
+          await updateDoc(jobSeekerRef, {
+            firstName: formData.firstName,
+            middleName: formData.middleName,
+            lastName: formData.lastName,
+            identificationFileURL: uploadedIdentificationURL,
+          });
+        });
+
+
+        // Update KasambahayList
+        const kasambahaySnapshot = await getDocs(collection(db, "KasambahayList"));
+    
+        for (const docSnap of kasambahaySnapshot.docs) {
+          const data = docSnap.data();
+          const updates: any = {};
+    
+          if (data.residentId === residentId) {
+            // Update kasambahay name & address
+            updates.firstName = formData.firstName;
+            updates.middleName = formData.middleName;
+            updates.lastName = formData.lastName;
+            updates.homeAddress = formData.address;
+            updates.identificationFileURL = uploadedIdentificationURL;
+
+          }
+    
+          if (data.employerId === residentId) {
+            // Update employer info
+            updates.employerName = `${formData.firstName} ${formData.middleName || ""} ${formData.lastName}`.trim();
+            updates.employerAddress = formData.address;
+          }
+    
+          if (Object.keys(updates).length > 0) {
+            await updateDoc(doc(db, "KasambahayList", docSnap.id), updates);
+          }
+        }
+    
+
+        // Update in VotersList
+        const votersQuery = query(
+          collection(db, "VotersList"),
+          where("residentId", "==", residentId)
+        );
+        const votersSnapshot = await getDocs(votersQuery);
+
+        votersSnapshot.forEach(async (docSnap) => {
+          const voterRef = doc(db, "VotersList", docSnap.id);
+          await updateDoc(voterRef, {
+            firstName: formData.firstName,
+            middleName: formData.middleName,
+            lastName: formData.lastName,
+            homeAddress: formData.address,
+            identificationFileURL: uploadedIdentificationURL,
+          });
+        });
+
+          // Update IncidentReports
+          const complainantQuery = query(
+            collection(db, "IncidentReports"),
+            where("complainant.residentId", "==", residentId)
+          );
+          const respondentQuery = query(
+            collection(db, "IncidentReports"),
+            where("respondent.residentId", "==", residentId)
+          );
+
+          const [complainantSnapshot, respondentSnapshot] = await Promise.all([
+            getDocs(complainantQuery),
+            getDocs(respondentQuery),
+          ]);
+
+          const incidentDocsMap = new Map();
+          [...complainantSnapshot.docs, ...respondentSnapshot.docs].forEach((docSnap) => {
+            incidentDocsMap.set(docSnap.id, docSnap);
+          });
+
+          const updatedResidentData = {
+            fname: formData.firstName,
+            lname: formData.lastName,
+            address: formData.address,
+            contact: formData.contactNumber || "",
+            sex: formData.sex,
+            age: formData.age,
+            civilStatus: formData.civilStatus,
+            residentId: residentId!,
+          };
+
+          for (const [id, docSnap] of incidentDocsMap.entries()) {
+            const data = docSnap.data();
+            const updates: any = {};
+
+            if (data.complainant?.residentId === residentId) {
+              updates.complainant = {
+                ...data.complainant,
+                ...updatedResidentData,
+              };
+            }
+
+            if (data.respondent?.residentId === residentId) {
+              updates.respondent = {
+                ...data.respondent,
+                ...updatedResidentData,
+              };
+            }
+
+            if (Object.keys(updates).length > 0) {
+              const incidentRef = doc(db, "IncidentReports", docSnap.id);
+              await updateDoc(incidentRef, updates);
+            }
+          }
+                      
 
       return docRef.id; // return ID
 

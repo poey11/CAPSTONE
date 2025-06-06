@@ -442,7 +442,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                             </div>
                             <div className="view-incident-fields-section">
                               <p>First Name</p>
-                              <input type="text" className="view-incident-input-field" name="complainantName" value={complainantsData.lname || "N/A"} readOnly />
+                              <input type="text" className="view-incident-input-field" name="complainantName" value={complainantsData.fname || "N/A"} readOnly />
                             </div>
                             <div className="view-incident-fields-section">
                               <p>Civil Status</p>
@@ -486,7 +486,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                             </div>
                             <div className="view-incident-fields-section">
                               <p>First Name</p>
-                              <input type="text" className="view-incident-input-field" name="respondentName" value={respondent.lname || "N/A"} readOnly />
+                              <input type="text" className="view-incident-input-field" name="respondentName" value={respondent.fname || "N/A"} readOnly />
                             </div>
                             <div className="view-incident-fields-section">
                               <p>Civil Status</p>

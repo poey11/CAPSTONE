@@ -3,7 +3,7 @@ import "@/CSS/ResidentModule/addresident.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { db, storage } from "../../../../../db/firebase";
-import { collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp, updateDoc, doc } from "firebase/firestore";
 import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useSession } from "next-auth/react";
@@ -15,6 +15,7 @@ import { useRef } from "react";
 export default function AddKasambahay() {
   const router = useRouter();
   const [formData, setFormData] = useState({
+    residentId: "",
     registrationControlNumber: "", 
     lastName: "", 
     firstName: "", 
@@ -36,6 +37,7 @@ export default function AddKasambahay() {
     employerName: "",
     employerAddress: "",
     createdAt:"",
+    identificationFileURL: "",
   });
 
   const fieldSectionMap: { [key: string]: "basic" | "full" | "others" } = {
@@ -73,11 +75,15 @@ export default function AddKasambahay() {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
   const [showResidentsPopup, setShowResidentsPopup] = useState(false);
+  const [showEmployersPopUp, setShowEmployersPopup] = useState(false);
+  const residentPopUpRef = useRef<HTMLDivElement>(null);
   const employerPopupRef = useRef<HTMLDivElement>(null);
 
   const [residents, setResidents] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchEmployerTerm, setSearchEmployerTerm] = useState("");
   const [identificationFile, setIdentificationFile] = useState<File | null>(null);
   const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
   const [verificationFiles, setVerificationFiles] = useState<File[]>([]);
@@ -113,9 +119,31 @@ export default function AddKasambahay() {
     fetchResidents();
   }, []);
 
+    // Show popup on input focus
+    const handleResidentClick = () => {
+      setShowResidentsPopup(true);
+    };
+
+      // Close popup when clicking outside
+  useEffect(() => {
+    const handleClickResidentOutside = (event: MouseEvent) => {
+      if (
+        residentPopUpRef.current &&
+        !residentPopUpRef.current.contains(event.target as Node)
+      ) {
+        setShowResidentsPopup(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickResidentOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickResidentOutside);
+    };
+  }, []);
+
   // Show popup on input focus
   const handleEmployerClick = () => {
-    setShowResidentsPopup(true);
+    setShowEmployersPopup(true);
   };
 
   // Close popup when clicking outside
@@ -125,7 +153,7 @@ export default function AddKasambahay() {
         employerPopupRef.current &&
         !employerPopupRef.current.contains(event.target as Node)
       ) {
-        setShowResidentsPopup(false);
+        setShowEmployersPopup(false);
       }
     };
 
@@ -305,12 +333,15 @@ export default function AddKasambahay() {
         }
       }
 
-      let identificationFileURL = "";
+      let identificationFileURL = formData.identificationFileURL || "";
+
+      let finalIdentificationFileURL = formData.identificationFileURL; // default to existing
       if (identificationFile) {
-        const storageRef = ref(storage, `ResidentsFiles/IndentificationFile/${identificationFile.name}`);
-        await uploadBytes(storageRef, identificationFile);
-        identificationFileURL = await getDownloadURL(storageRef);
+        const idRef = ref(storage, `ResidentsFiles/Identification/${identificationFile.name}`);
+        await uploadBytes(idRef, identificationFile);
+        finalIdentificationFileURL = await getDownloadURL(idRef);
       }
+  
   
       // Ensure the latest registration number is assigned
       const kasambahayCollection = collection(db, "KasambahayList");
@@ -330,18 +361,38 @@ export default function AddKasambahay() {
         registrationControlNumber: latestNumber,
         createdAt: currentDate,
         verificationFilesURLs,
-        identificationFileURL,
+        identificationFileURL: finalIdentificationFileURL,
         createdBy: session?.user?.position || "Unknown",
       });
-      return docRef.id; // return ID
-  
-    } catch (err) {
-      setError("Failed to add kasambahay");
-      console.error(err);
+
+    // Update the resident's occupation if residentId exists
+    if (formData.residentId) {
+      const natureOfWorkMap: { [key: string]: string } = {
+        "1": "Kasambahay (Gen. House Help)",
+        "2": "Kasambahay (Yaya)",
+        "3": "Kasambahay (Cook)",
+        "4": "Kasambahay (Gardener)",
+        "5": "Kasambahay (Laundry Person)",
+        "6": "Kasambahay (Others)",
+      };
+
+      const occupation = natureOfWorkMap[formData.natureOfWork] || "Kasambahay";
+
+      const residentDocRef = doc(db, "Residents", formData.residentId);
+      await updateDoc(residentDocRef, {
+        occupation: occupation,
+      });
     }
-  
-    setLoading(false);
-  };
+
+    return docRef.id;
+
+  } catch (err) {
+    setError("Failed to add kasambahay");
+    console.error(err);
+  }
+
+  setLoading(false);
+};
   
 
   const handleBack = () => {
@@ -381,6 +432,13 @@ export default function AddKasambahay() {
     setVerificationFiles((prev) => prev.filter((_, i) => i !== index));
     setVerificationPreviews((prev) => prev.filter((_, i) => i !== index));
   };
+
+  const filteredResidents = residents.filter((resident) =>
+  `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+    .toLowerCase()
+    .includes(searchTerm.toLowerCase())
+);
+
 
   const [activeSection, setActiveSection] = useState("basic");
 // options: "basic", "full", "others"
@@ -439,6 +497,9 @@ export default function AddKasambahay() {
       
 
       <div className="add-resident-bottom-section-scroll">
+        <div className="residents-search-section">
+              <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleResidentClick} />
+            </div>
         <form id="addKasambahayForm" onSubmit={handleSubmit} className="add-resident-section-2">
 
         {activeSection === "basic" && (
@@ -715,21 +776,35 @@ export default function AddKasambahay() {
                       <label htmlFor="identification-file-upload" className="upload-link">Click to Upload File</label>
                       <input id="identification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleIdentificationFileChange} />
 
-                      {identificationFile && (
-                        <div className="file-name-image-display">
-                          <div className="file-name-image-display-indiv">
-                            {identificationPreview && <img src={identificationPreview} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />}
-                            <span>{identificationFile.name}</span>
-                            <div className="delete-container">
-                              <button type="button" onClick={handleIdentificationFileDelete} className="delete-button">
-                                <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                              </button>
-                            </div>
+                    {(identificationFile || formData.identificationFileURL) && (
+                      <div className="file-name-image-display">
+                        <div className="file-name-image-display-indiv">
+                          {identificationPreview ? (
+                            <img
+                              src={identificationPreview}
+                              alt="Preview"
+                              style={{ width: "50px", height: "50px", marginRight: "5px" }}
+                            />
+                          ) : formData.identificationFileURL ? (
+                            <img
+                              src={formData.identificationFileURL}
+                              alt="Uploaded ID"
+                              style={{ width: "50px", height: "50px", marginRight: "5px" }}
+                            />
+                          ) : null}
+
+                          <span>{identificationFile?.name || "Uploaded Identification File"}</span>
+
+                          <div className="delete-container">
+                            <button type="button" onClick={handleIdentificationFileDelete} className="delete-button">
+                              <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                            </button>
                           </div>
                         </div>
-                      )}
-                    </div>              
+                      </div>
+                    )}
                   </div>
+                </div>
                 </div>
 
                 <div className="box-container-outer-verificationdocs">
@@ -776,16 +851,15 @@ export default function AddKasambahay() {
   </div>
 
 
-
-      {showResidentsPopup && (
+  {showResidentsPopup && (
       <div className="kasambahay-employer-popup-overlay">
-        <div className="kasambahay-employer-popup" ref={employerPopupRef}>
-          <h2>Employers List</h2>
-          <h1>* Please select Employer's Name *</h1>
+        <div className="kasambahay-employer-popup" ref={residentPopUpRef}>
+          <h2>Residents List</h2>
+          <h1>* Please select Resident's Name *</h1>
 
           <input
             type="text"
-            placeholder="Search Employer's Name"
+            placeholder="Search Resident's Name"
             className="employer-search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -805,10 +879,102 @@ export default function AddKasambahay() {
                   </tr>
                 </thead>
                 <tbody>
+                {filteredResidents.map((resident) => (
+            <tr
+              key={resident.id}
+              className="employers-table-row"
+              onClick={async () => {
+                try {
+                  const votersSnapshot = await getDocs(collection(db, "KasambahayList"));
+                  const isDuplicate = votersSnapshot.docs.some((doc) => {
+                    const data = doc.data();
+                    return (
+                      data.lastName?.toLowerCase() === resident.lastName?.toLowerCase() &&
+                      data.firstName?.toLowerCase() === resident.firstName?.toLowerCase() &&
+                      data.middleName?.toLowerCase() === resident.middleName?.toLowerCase()
+                    );
+                  });
+
+                  if (isDuplicate) {
+                    setPopupErrorMessage("Resident is already in the Kasambahay Database.");
+                    setShowErrorPopup(true);
+                    setTimeout(() => {
+                      setShowErrorPopup(false);
+                    }, 3000);
+                    return;
+                  }
+
+                  // Not a duplicate, proceed to set the form
+                  setFormData({
+                    ...formData,
+                    residentId: resident.id,
+                    lastName: resident.lastName || '',
+                    firstName: resident.firstName || '',
+                    middleName: resident.middleName || '',
+                    sex: resident.sex || '',
+                    homeAddress: resident.address ||'',
+                    dateOfBirth: resident.dateOfBirth || '',
+                    age: resident.age || '',
+                    identificationFileURL: resident.identificationFileURL || '',
+                  });
+                  setShowResidentsPopup(false);
+                } catch (error) {
+                  console.error("Error checking for duplicates:", error);
+                  setPopupErrorMessage("An error occurred. Please try again.");
+                  setShowErrorPopup(true);
+                  setTimeout(() => {
+                    setShowErrorPopup(false);
+                  }, 3000);
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <td>{resident.residentNumber}</td>
+              <td>{resident.firstName}</td>
+              <td>{resident.middleName}</td>
+              <td>{resident.lastName}</td>
+            </tr>
+          ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+
+      {showEmployersPopUp && (
+      <div className="kasambahay-employer-popup-overlay">
+        <div className="kasambahay-employer-popup" ref={employerPopupRef}>
+          <h2>Employers List</h2>
+          <h1>* Please select Employer's Name *</h1>
+
+          <input
+            type="text"
+            placeholder="Search Employer's Name"
+            className="employer-search-input"
+            value={searchEmployerTerm}
+            onChange={(e) => setSearchEmployerTerm(e.target.value)}
+          />
+
+          <div className="employers-list">
+            {residents.length === 0 ? (
+              <p>No residents found.</p>
+            ) : (
+              <table className="employers-table">
+                <thead>
+                  <tr>
+                    <th>Resident Number</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Last Name</th>
+                  </tr>
+                </thead>
+                <tbody>
                 {residents
                 .filter((resident) => {
                   const fullName = `${resident.firstName} ${resident.middleName || ""} ${resident.lastName}`.toLowerCase();
-                  return fullName.includes(searchTerm.toLowerCase());
+                  return fullName.includes(searchEmployerTerm.toLowerCase());
                 })
                 .map((resident) => (
                     <tr
@@ -821,7 +987,7 @@ export default function AddKasambahay() {
                           employerName: `${resident.lastName}, ${resident.firstName} ${resident.middleName || ''}`,
                           employerAddress: resident.address || '',
                         });
-                        setShowResidentsPopup(false);
+                        setShowEmployersPopup(false);
                       }}
                       style={{ cursor: 'pointer' }}
                     >
