@@ -553,7 +553,10 @@ console.log(safeData.length)
                     <div className="popup-content">
                         <img src="/Images/check.png" alt="warning icon" className="successful-icon-popup-letter" />
                         <p> {showSubmitPopup.message}</p>
-                        <button onClick={() => setShowSubmitPopup({ show: false, message: "" })} className="close-button-letter">Close</button>
+                        <button onClick={() => {
+                            setShowSubmitPopup({ show: false, message: "" });
+                            router.back();
+                        }} className="close-button-letter">Close</button>
                     </div>
                 </div>
   
