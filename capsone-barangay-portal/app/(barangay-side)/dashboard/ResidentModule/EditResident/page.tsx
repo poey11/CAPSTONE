@@ -392,6 +392,36 @@ export default function EditResident() {
           });
         });
 
+
+        // Update KasambahayList
+        const kasambahaySnapshot = await getDocs(collection(db, "KasambahayList"));
+    
+        for (const docSnap of kasambahaySnapshot.docs) {
+          const data = docSnap.data();
+          const updates: any = {};
+    
+          if (data.residentId === residentId) {
+            // Update kasambahay name & address
+            updates.firstName = formData.firstName;
+            updates.middleName = formData.middleName;
+            updates.lastName = formData.lastName;
+            updates.homeAddress = formData.address;
+            updates.identificationFileURL = uploadedIdentificationURL;
+
+          }
+    
+          if (data.employerId === residentId) {
+            // Update employer info
+            updates.employerName = `${formData.firstName} ${formData.middleName || ""} ${formData.lastName}`.trim();
+            updates.employerAddress = formData.address;
+          }
+    
+          if (Object.keys(updates).length > 0) {
+            await updateDoc(doc(db, "KasambahayList", docSnap.id), updates);
+          }
+        }
+    
+
         // Update in VotersList
         const votersQuery = query(
           collection(db, "VotersList"),
