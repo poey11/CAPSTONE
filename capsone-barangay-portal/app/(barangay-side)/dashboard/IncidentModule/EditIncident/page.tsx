@@ -25,8 +25,10 @@ export default function EditLuponIncident() {
     const [loading , setLoading] = useState(true);
     const router = useRouter();
     const searchParam = useSearchParams();
+    
     const docId = searchParam.get("id");
     const [reportData, setReportData] = useState<any>();
+    const departmentId = reportData?.department;
     const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
     const [toUpdate, setToUpdate] = useState<any|null>({
       complainant: {
@@ -237,7 +239,9 @@ const confirmSubmit = async () => {
 
     setTimeout(() => {
       setShowPopup(false);
-     handleBack();
+      if (docId && departmentId) {
+        router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
+      }
     }, 1000);
   } catch (error) {
     console.error("Error during confirmation submit:", error);
@@ -1426,6 +1430,7 @@ const confirmSubmit = async () => {
         </>
       ) : (
         <>
+         <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
           <p>Are you sure you want to submit?</p>
           <div className="yesno-container-add">
             <button
