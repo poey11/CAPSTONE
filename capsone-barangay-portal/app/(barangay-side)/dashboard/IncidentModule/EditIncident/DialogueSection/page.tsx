@@ -66,6 +66,8 @@ export default function DialogueSection() {
 
     return (
         <main className="main-container-edit">
+
+            {/* TO DO: will add logic pa for the redirection and pop ups */}
             <div className="edit-incident-redirectionpage-section">
                 <button className="edit-incident-redirection-buttons" onClick={handleInformationSection}>
                     <div className="edit-incident-redirection-icons-section">
@@ -150,24 +152,6 @@ export default function DialogueSection() {
                 />
             )}
             
-
-            {showPopup && (
-                <div className={`popup-overlay-add show`}>
-                    <div className="popup-add">
-                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
-                      <p>{popupMessage}</p>
-                    </div>
-                </div>
-            )}
-
-            {showErrorPopup && (
-                <div className={`error-popup-overlay-add show`}>
-                    <div className="popup-add">
-                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
-                      <p>{popupErrorMessage}</p>
-                    </div>
-                </div>
-            )}
 
 
         </main>

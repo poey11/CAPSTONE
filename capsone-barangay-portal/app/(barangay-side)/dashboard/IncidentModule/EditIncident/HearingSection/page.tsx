@@ -1,12 +1,287 @@
 "use client";
 import "@/CSS/IncidentModule/EditIncident.css";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ChangeEvent, useEffect, useState } from "react";
+import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { db } from '@/app/db/firebase';
+import { getSpecificDocument, generateDownloadLink } from "../../../../../helpers/firestorehelper";
 
-export default function DialogueSection() {
+import Hearing from "@/app/(barangay-side)/components/hearingForm";
+
+export default function HearingSection() {
+
+    const router = useRouter();
+    const searchParam = useSearchParams();
+    const docId = searchParam.get("id");
+    const [reportData, setReportData] = useState<any>();
+
+    const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
+
+    const [hasSummonLetter, setHasSummonLetter] = useState(false);
+    const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
+    const [loading , setLoading] = useState(true);
+
+    const handleInformationSection = (e:any) => {
+        router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
+    };
+
+    const handleGenerateLetterAndInvitation = (e:any) => {
+        const action = e.currentTarget.name;
+        router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}?action=${action}`);
+    };
+  
+    const handleDialogueSection = () => {
+        router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
+    };
+  
+    const handleHearingSection = () => {
+        router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
+    };
+
+    useEffect(() => {
+        if(docId){
+          getSpecificDocument("IncidentReports", docId, setReportData).then(() => setLoading(false));
+        }
+        else{
+          console.log("No document ID provided.");
+          setReportData(null);
+         
+        }
+      }, [docId]);
+  
+      useEffect(() => {
+        if(reportData?.file){
+          generateDownloadLink(reportData?.file, "IncidentReports").then(url => {
+            if (url) setconcernImageUrl(url);
+          });
+        }
+      },[reportData]);
+
+
+        const handleBack = () => {
+            router.back();
+        };
+
+
+    const [summonCount, setSummonCount] = useState(0);
+
+        useEffect(() => {
+            const fetchSummonCount = async () => {
+              if (!docId) return;
+          
+              const colRef = query(
+                collection(db, "IncidentReports", docId, "GeneratedLetters"),
+                where("letterType", "==", "summon")
+              );
+              const snapshot = await getDocs(colRef);
+              setSummonCount(snapshot.size);
+            };
+          
+            fetchSummonCount();
+          }, [docId]);
+
+    const [activeSection, setActiveSection] = useState("firsthearing");
 
     return (
-        <div className="testing">
-            <p>HEARING SECTION</p>
-        </div>
+        <main className="main-container-edit">
+
+            {/* TO DO: will add logic pa for the redirection and pop ups */}
+            <div className="edit-incident-redirectionpage-section">
+                <button className="edit-incident-redirection-buttons" onClick={handleInformationSection}>
+                    <div className="edit-incident-redirection-icons-section">
+                        <img src="/images/profile-user.png" alt="user info" className="redirection-icons-info"/> 
+                    </div>
+                    <h1>Incident Information</h1>
+                </button>
+
+                <div className="dialogue-dropdown">
+                    <button className="edit-incident-redirection-buttons">
+                        <div className="edit-incident-redirection-icons-section">
+                        <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
+                        </div>
+                        <h1>Dialogue Meeting</h1>
+                    </button>
+
+                    <div className="dialogue-submenu">
+                        <button className="submenu-button" name="dialogue" onClick={handleGenerateLetterAndInvitation}>
+                            <h1>Generate Dialogue Letters</h1>
+                        </button>
+
+                        <button className="submenu-button" name="section" onClick={handleDialogueSection}>
+                            <h1>Dialogue Section</h1>
+                        </button>
+                    </div>
+                </div>
+
+                <div className="hearing-dropdown">
+                    <button className="edit-incident-redirection-buttons">
+                        <div className="edit-incident-redirection-icons-section">
+                            <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing"/> 
+                        </div>
+                        <h1>Hearing Section</h1>
+                    </button>
+
+                    <div className="hearing-submenu">
+                        {reportData?.isDialogue ? (
+                        <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
+                            <h1>Generate Summon Letters</h1>
+                        </button>
+                        ) : (
+                        <button
+                            className="submenu-button"
+                            name="summon"
+                            onClick={() => {
+                            setPopupErrorMessage("Generate A Dialogue Letter First");
+                            setShowErrorPopup(true);
+                            setTimeout(() => setShowErrorPopup(false), 3000);
+                            }}
+                        >
+                            <h1>Generate Summon Letters</h1>
+                        </button>
+                        )}
+
+                        {hasSummonLetter ? (
+                            <button className="submenu-button" name="section" onClick={handleHearingSection}>
+                                <h1>Hearing Section</h1>
+                            </button>
+                        ) : (
+                        <button
+                            className="submenu-button"
+                            name="section"
+                            onClick={() => {
+                            setPopupErrorMessage("Generate A Summon Letter First");
+                            setShowErrorPopup(true);
+                            setTimeout(() => setShowErrorPopup(false), 3000);
+                            }}
+                        >
+                            <h1>Hearing Section</h1>
+                        </button>
+                        )}
+                    </div>
+                </div>
+
+            </div>
+
+            <div className="edit-incident-main-content">
+                <div className="edit-incident-main-section1">
+                    <div className="edit-incident-main-section1-left">
+                        <button onClick={handleBack}>
+                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                        </button>
+
+                        <h1> Hearing Section  </h1>
+                    </div>
+
+                    {/* TO DO: add functionality for the save button */}
+                    <div className="action-btn-section">  
+                        
+                        <button type="submit" className="action-view-edit">
+                            <p>Save</p>
+                        </button>
+                        
+                    </div>
+                    
+                </div>
+
+                <div className="edit-incident-header-body">
+                    <div className="hearing-header-body-top-section">
+
+                        {["firsthearing", "secondhearing", "thirdhearing" ].map((section) => (
+                            <button
+                            key={section}
+                            type="button"
+                            className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                            onClick={() => setActiveSection(section)}
+                            >
+                            {section === "firsthearing" && "First Hearing"}
+                            {section === "secondhearing" && "Second Hearing"}
+                            {section === "thirdhearing" && "Third Hearing"}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="dialogue-header-body-bottom-section">
+                        <div className="dialogue-info-main-container">
+                            <div className="dialogue-info-container-scrollable">
+                                <div className="edit-incident-info-main-content-dialogue">
+
+                                    {/* NOTE: separated per hearing */}
+
+                                    {activeSection === "firsthearing" && (
+                                        <>
+                                            {[0].map(i => (
+                                                <Hearing
+                                                    key={i}
+                                                    index={i}
+                                                    generatedHearingSummons={reportData?.generatedHearingSummons || 0}
+                                                    id={docId || ""}
+                                                />
+                                            ))}
+                                        </>
+                                    )}
+
+                                    {activeSection === "secondhearing" && (
+                                        <>
+                                            {[1].map(i => (
+                                                <Hearing
+                                                    key={i}
+                                                    index={i}
+                                                    generatedHearingSummons={reportData?.generatedHearingSummons || 0}
+                                                    id={docId || ""}
+                                                />
+                                            ))}
+                                        </>
+                                    )}
+
+                                    {activeSection === "thirdhearing" && (
+                                        <>
+                                            {[2].map(i => (
+                                                <Hearing
+                                                    key={i}
+                                                    index={i}
+                                                    generatedHearingSummons={reportData?.generatedHearingSummons || 0}
+                                                    id={docId || ""}
+                                                />
+                                            ))}
+                                        </>
+                                    )}
+                                
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                
+
+                
+
+
+
+
+                {/*
+                {reportData?.hearing && Array.from({ length: reportData.hearing }, (_, i) => (
+                    <Hearing
+                        key={i}
+                        index={i}
+                        generatedHearingSummons={reportData.generatedHearingSummons}
+                        id={docId || ""}
+                    />
+                ))}*/}
+                
+
+                
+            </div>
+
+
+
+
+        </main>
     );
 
 }

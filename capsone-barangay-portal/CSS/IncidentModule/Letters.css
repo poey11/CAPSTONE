@@ -32,7 +32,7 @@ padding-bottom:30px;
 
 
 .main-content-letter {
-   display: flex;
+  display: flex;
   flex-direction: column;
   width: 80%;
   border-radius: 1rem;
@@ -60,7 +60,6 @@ padding-bottom:30px;
   padding-bottom: 20px;
    position: sticky;
   top: 0;
-  z-index: 10; 
 }
 
 
@@ -239,7 +238,6 @@ POP UPS
   font-size: 18px;
   font-weight: lighter;
   position: fixed;
-  left: 43%; /* Adjust the value */
 
 }
 
@@ -729,4 +727,200 @@ POP UPS
 
 .continue-button:hover {
   background-color: #e56723;
+}
+
+
+/* redirection section */
+.edit-incident-redirectionpage-section {
+  width: 80%;
+  height: 100px;
+  margin:  auto;
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.edit-incident-redirection-buttons {
+  width: 270px;
+  height: 50px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.edit-incident-redirection-buttons:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+}
+
+.edit-incident-redirection-icons-section img {
+  width: 30px;
+  height: 30px;
+  transition: transform 0.25s ease;
+}
+
+.edit-incident-redirection-buttons:not(:disabled):hover .edit-incident-redirection-icons-section img {
+  transform: scale(1.1);
+}
+
+.edit-incident-redirection-buttons h1{
+  color: #2C3E50;
+  font-weight: bolder;
+  font-size: 16px;
+}
+
+.redirection-icons-info
+ {
+  width: 26px;
+  height: 26px;
+  filter: invert(53%) sepia(89%) saturate(2143%) hue-rotate(1deg) brightness(90%) contrast(95%);
+}
+
+.redirection-icons-dialogue
+ {
+  width: 25px;
+  height: 25px;
+  filter: invert(53%) sepia(89%) saturate(2143%) hue-rotate(1deg) brightness(90%) contrast(95%);
+}
+
+.redirection-icons-hearing
+ {
+  width: 33px;
+  height: 33px;
+  filter: invert(53%) sepia(89%) saturate(2143%) hue-rotate(1deg) brightness(90%) contrast(95%);
+}
+
+.edit-incident-redirection-icons-section {
+  width: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-incident-redirection-buttons:disabled {
+  background-color: #f2f2f2;
+  color: #a0a0a0;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  opacity: 10;
+}
+
+.edit-incident-redirection-buttons:disabled h1 {
+  color: #a0a0a0;
+}
+
+.edit-incident-redirection-buttons:disabled {
+  cursor: default;
+}
+
+.dialogue-dropdown,
+.hearing-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+
+.dialogue-submenu,
+.hearing-submenu {
+  position: absolute;
+  top: 100%;
+  left: -4;
+  z-index: 10;
+  background-color: white;
+  border-top: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  padding: 0.5rem 0;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  min-width: 278px;
+  opacity: 0;
+  transform: scale(0.95);
+  transform-origin: top;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  pointer-events: none;
+  visibility: hidden;
+  color: #214666;
+  font-weight: bolder;
+}
+
+.dialogue-dropdown:hover .dialogue-submenu,
+.hearing-dropdown:hover .hearing-submenu {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* Submenu button style */
+.submenu-button {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.95rem;
+  cursor: pointer;
+  color: #214666;
+  transition: background-color 0.2s, color 0.4s;
+  
+}
+
+.submenu-button:hover {
+  background-color: #BC5F1C;
+  color: #ffffff;
+}
+
+
+.edit-incident-redirection-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-radius 0.2s ease;
+  cursor: pointer;
+}
+
+
+.dialogue-dropdown:hover .edit-incident-redirection-buttons,
+.hearing-dropdown:hover .edit-incident-redirection-buttons
+ {
+  transform: scale(1.03);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+
+.redirection-icons-dialogue,
+.redirection-icons-hearing {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+}
+
+
+.dialogue-dropdown:hover .redirection-icons-dialogue {
+  transform: scale(1.1);
+}
+
+
+.hearing-dropdown:hover .redirection-icons-hearing {
+  transform: scale(1.1);
 }
