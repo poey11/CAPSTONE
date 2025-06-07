@@ -147,7 +147,7 @@ import { db } from "@/app/db/firebase";
                 <th>Document Type</th>
                 <th>Request ID</th>
                 <th>Request Date</th>
-                <th>Name</th>
+                <th>Requestor</th>
                 <th>Purpose</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -159,7 +159,7 @@ import { db } from "@/app/db/firebase";
                 <td>{request.docType}</td>
                 <td>{request.requestId}</td>
                 <td>{request.createdAt}</td>
-                <td>{request.fullName}</td>
+                <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
                 <td>
                     <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>

@@ -81,6 +81,8 @@ interface EmergencyDetails {
     goodMoralPurpose: string;
     noIncomeChildFName: string;
     noIncomePurpose: string;
+    deceasedEstateName: string;
+    estateSince: string;
   }
 
 
@@ -179,6 +181,7 @@ const ViewOnlineRequest = () => {
         { key: "noIncomePurpose", label: "Purpose Of No Income" },
         { key: "noIncomeChildFName", label: "Son/Daughther's Name For No Income" },
         { key: "address", label: "Address" },
+        { key: "estateSince", label: "Estate Since" },
         { key: "guardianshipType", label: "Guardianship Type" },
         { key: "wardRelationship", label: "Ward's Relationship" },
         { key: "wardFname", label: "Ward's Full Name" },
@@ -417,7 +420,23 @@ const ViewOnlineRequest = () => {
                 "Text7": `${monthToday} ${yearToday}`,
             }
         }
+        else if(requestData?.purpose === "Estate Tax"){
+            locationPath = "certificate of estate tax.pdf";
+            reqData = {
+                "Text1":`${requestData?.fullName.toUpperCase()}`,
+                "Text2": requestData?.address,
+                "Text3": requestData?.dateOfResidency.split("-")[0],
+                "Text4": requestData?.fullName.toUpperCase(),
+                "Text5": `${getMonthName(parseInt(requestData?.dateofdeath.split("-")[1]))} ${requestData?.dateofdeath.split("-")[2]}, ${requestData?.dateofdeath.split("-")[0]}`,
+                "Text6": requestData?.estateSince.toUpperCase(),
+                "Text7": requestData?.requestor.toUpperCase(),
+                "Text8": dayToday,
+                "Text9": `${monthToday} ${yearToday}`,
+            }
+        }
         // Estate tax and  Garage PUV/TRU,
+
+
         const response = await fetch("/api/fillPDF", {
             method: "POST",
             headers: {

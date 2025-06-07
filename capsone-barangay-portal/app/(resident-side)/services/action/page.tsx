@@ -79,6 +79,8 @@ export default function Action() {
     goodMoralOtherPurpose: "",
     noIncomePurpose: "",
     noIncomeChildFName: "",
+    deceasedEstateName: "",
+    estateSince: "",
     signaturejpg: null,
     barangayIDjpg:null,
     validIDjpg: null,
@@ -401,6 +403,10 @@ const handleFileChange = (
             cohabitationStartDate: clearanceInput.cohabitationStartDate,
             cohabitationRelationship: clearanceInput.cohabitationRelationship,
           }),
+          ...(clearanceInput.purpose === "Estate Tax" && {
+            dateofdeath: clearanceInput.dateofdeath,
+            estateSince: clearanceInput.estateSince,
+          }),
           ...( clearanceInput.purpose === "Death Residency"  && {
             dateofdeath: clearanceInput.dateofdeath,
             deathCertificate: filenames.deathCertificate,
@@ -508,12 +514,11 @@ const handleFileChange = (
     
     
     useEffect(() => {
-      if (clearanceInput.purpose === "Death Residency" && docType === "Barangay Certificate") setAddOn("Deceased ");
-      if(clearanceInput.purpose === "Occupancy /  Moving Out" && docType === "Barangay Certificate")setAddOn("From ");
-      if(clearanceInput.purpose === "Guardianship" && docType === "Barangay Certificate") setAddOn("Guardian's ");
+      if ((clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax" ) && docType === "Barangay Certificate") setAddOn("Deceased ");
+      else if(clearanceInput.purpose === "Occupancy /  Moving Out" && docType === "Barangay Certificate")setAddOn("From ");
+      else if(clearanceInput.purpose === "Guardianship" && docType === "Barangay Certificate") setAddOn("Guardian's ");
       else setAddOn("");
       
-        
     }, [clearanceInput.purpose, docType]);
 
 
@@ -1028,7 +1033,7 @@ const handleFileChange = (
             </div>
             
           
-            {clearanceInput.purpose === "Death Residency" && (
+            {(clearanceInput.purpose === "Death Residency"|| clearanceInput.purpose === "Estate Tax") && (
               <div className="form-group">
                 <label htmlFor="dateofdeath" className="form-label">Date Of Death<span className="required">*</span></label>
                 <input 
@@ -1044,6 +1049,32 @@ const handleFileChange = (
                   max={getLocalDateString(new Date())} // Set max date to today
                 />
               </div>
+            )}
+
+            {clearanceInput.purpose === "Estate Tax" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="estateSince" className="form-label">Estate Since:<span className="required">*</span></label>
+                  <select
+                    id="estateSince"
+                    name="estateSince"
+                    value={clearanceInput.estateSince}
+                    onChange={handleChange}
+                    className="form-input"
+                    required
+                  >
+                    <option value="" disabled>Select Year</option>
+                    {[...Array(150)].map((_, i) => {
+                      const year = new Date().getFullYear() - i;
+                      return (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              </>
             )}
 
             {docType ==="Barangay ID" && (

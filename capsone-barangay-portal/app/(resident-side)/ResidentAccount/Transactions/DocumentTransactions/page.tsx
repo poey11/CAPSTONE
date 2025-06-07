@@ -165,7 +165,7 @@ export default function DocumentTransactionsDetails() {
         { label: "Status", key: "status" },
         { label: "Full Name", key: "fullName" },
         { label: "Contact Number", key: "contact" },
-        
+        {label: "Requestor Name", key: "requestor" },
         ...(transactionData?.status === "Rejected"
            ? [{ label: "Rejection Reason", key: "rejectionReason" }]
            : []),
@@ -197,6 +197,13 @@ export default function DocumentTransactionsDetails() {
             ]
             :[]
         ),  
+        ...(transactionData?.purpose === "Estate Tax" ? 
+            [
+            { label: "Date of Death", key: "dateofdeath" },
+            { label: "Estate Since", key: "estateSince" }
+            ]
+            :[]
+        ),
         /*Barangay Certificate, Barangay Indigency, Barangay Clearance & Business Permits */
         ...(transactionData?.docType !== "Business Permit" && transactionData?.docType !== "Temporary Business Permit" && transactionData?.docType !== "Construction Permit"
                 ? [
