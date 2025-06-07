@@ -25,6 +25,8 @@ export default function HearingSection() {
     const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
     const [loading , setLoading] = useState(true);
 
+    const [filledHearings, setFilledHearings] = useState<boolean[]>([false, false, false]);
+
     const handleInformationSection = (e:any) => {
         router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
     };
@@ -62,10 +64,32 @@ export default function HearingSection() {
       },[reportData]);
 
 
-        const handleBack = () => {
+    const handleBack = () => {
             router.back();
-        };
+    };
 
+    useEffect(() => {
+        const fetchSummonLetterStatus = async () => {
+          try {
+            if (!docId) return; // Ensure docId is loaded
+      
+            const lettersRef = collection(db, "IncidentReports", docId, "GeneratedLetters");
+      
+            const q = query(lettersRef, where("letterType", "==", "summon"));
+            const snapshot = await getDocs(q);
+      
+            if (!snapshot.empty) {
+              setHasSummonLetter(true);
+            } else {
+              setHasSummonLetter(false); // Optional fallback
+            }
+          } catch (error) {
+            console.error("Error checking summon letters:", error);
+          }
+        };
+      
+        fetchSummonLetterStatus();
+      }, [docId]);
 
     const [summonCount, setSummonCount] = useState(0);
 
@@ -82,6 +106,30 @@ export default function HearingSection() {
             };
           
             fetchSummonCount();
+          }, [docId]);
+
+          useEffect(() => {
+            if (!docId) return;
+          
+            const fetchFilledHearings = async () => {
+              const colRef = query(
+                collection(db, "IncidentReports", docId, "SummonsMeeting"),
+                orderBy("nosHearing", "asc")
+              );
+              const snapshot = await getDocs(colRef);
+              const filledArray = [false, false, false];
+          
+              snapshot.forEach(doc => {
+                const data = doc.data();
+                if (typeof data.nosHearing === "number" && data.filled) {
+                  filledArray[data.nosHearing] = true;
+                }
+              });
+          
+              setFilledHearings(filledArray);
+            };
+          
+            fetchFilledHearings();
           }, [docId]);
 
     const [activeSection, setActiveSection] = useState("firsthearing");
@@ -190,6 +238,7 @@ export default function HearingSection() {
                 <div className="edit-incident-header-body">
                     <div className="hearing-header-body-top-section">
 
+                    {/*
                         {["firsthearing", "secondhearing", "thirdhearing" ].map((section) => (
                             <button
                             key={section}
@@ -202,6 +251,52 @@ export default function HearingSection() {
                             {section === "thirdhearing" && "Third Hearing"}
                             </button>
                         ))}
+                    */}
+                        {["firsthearing", "secondhearing", "thirdhearing"].map((section, i) => {
+                            const isDisabled =
+                                !hasSummonLetter ||                         // Summon letter not generated
+                                filledHearings.slice(0, i).some(h => !h);   // Any previous hearing not filled
+
+                                const handleClick = () => {
+                                    if (!hasSummonLetter) {
+                                        setPopupErrorMessage("Generate a Summon Letter first.");
+                                        setShowErrorPopup(true);
+                                        setTimeout(() => setShowErrorPopup(false), 3000);
+                                        return;
+                                    }
+                                
+                                    if (isDisabled) {
+                                        let message = "";
+                                
+                                        for (let j = 0; j < i; j++) {
+                                            if (!filledHearings[j]) {
+                                                const hearingNames = ["First", "Second", "Third"];
+                                                message = `Fill up ${hearingNames[j]} Hearing first`;
+                                                break;
+                                            }
+                                        }
+                                
+                                        setPopupErrorMessage(message);
+                                        setShowErrorPopup(true);
+                                        setTimeout(() => setShowErrorPopup(false), 3000);
+                                    } else {
+                                        setActiveSection(section);
+                                    }
+                                };
+
+                            return (
+                                <button
+                                    key={section}
+                                    type="button"
+                                    className={`info-toggle-btn ${activeSection === section ? "active" : ""} ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    onClick={handleClick}
+                                >
+                                    {section === "firsthearing" && "First Hearing"}
+                                    {section === "secondhearing" && "Second Hearing"}
+                                    {section === "thirdhearing" && "Third Hearing"}
+                                </button>
+                            );
+                        })}
                     </div>
 
                     <div className="dialogue-header-body-bottom-section">
@@ -277,6 +372,27 @@ export default function HearingSection() {
 
                 
             </div>
+
+
+
+
+            {showPopup && (
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+        {showErrorPopup && (
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
 
 
 

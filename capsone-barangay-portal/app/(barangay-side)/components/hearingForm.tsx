@@ -205,7 +205,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
 
     // Handle Complainant status
     if (details.Cstatus === "Absent") {
-        updatedDetails.partyA = "Complainant Absent";
+        updatedDetails.partyA = "Complainant Absent.";
         absentMinutes.push("Complainant Absent.");
         absentRemarks.push("Complainant Absent.");
     } else {
@@ -214,7 +214,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
 
     // Handle Respondent status
     if (details.Rstatus === "Absent") {
-        updatedDetails.partyB = "Respondent Absent";
+        updatedDetails.partyB = "Respondent Absent.";
         absentMinutes.push("Respondent Absent.");
         absentRemarks.push("Respondent Absent.");
     } else {
@@ -251,7 +251,13 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
          <div className="hearing-section-edit">    
             
                 <div className="title-section-edit">
+
+                    {/*
+                    
                     <button type="button" className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
+
+                        */}
+
                     <h1>{nos} Hearing Section</h1>
 
                     {/*
@@ -267,9 +273,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                     )}*/}
                 </div>
             <hr/>
-            {showHearingContent && (
-                <>
-                <form onSubmit={handleSubmit}>
+            
+            <form onSubmit={handleSubmit}>
                   <div className="section-2-dialouge-edit">
                   <p>Hearing  Information</p>
                     <div className="bars-edit">
@@ -296,9 +301,17 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                     </select>
                       <div className="bars-edit">
                           <div className="input-group-edit">
+
+                            {/*
                                 <input type="text" 
                                 className="search-bar-edit" 
-                                value={`${data.complainant.fname} ${data.complainant.lname} `|| ""}
+                                value={`${data.complainant.fname} ${data.complainant.lname} `|| ""}               
+                                disabled/>
+                            */}
+
+                                <input type="text" 
+                                className="search-bar-edit" 
+                                value={`${data?.complainant?.fname || ""} ${data?.complainant?.lname || ""}`}
                                 disabled/>
                           </div>
                       </div>
@@ -317,9 +330,17 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                       <div className="bars-edit">
                         <div className="input-group-edit">
                             
+                            {/*
                                 <input type="text" 
                                 className="search-bar-edit" 
                                 value={`${data.respondent.fname} ${data.respondent.lname} `|| ""}
+                                disabled
+                                />
+                            */}
+
+                                <input type="text" 
+                                className="search-bar-edit" 
+                                value={`${data?.respondent?.fname || ""} ${data?.respondent?.lname || ""}`}
                                 disabled
                                 />
                           </div>
@@ -423,9 +444,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                   <div className="flex justify-center items-center mt-10">
                         {!hearingDetails[index]?.filled && (<button type="submit" className="action-view-edit">Save</button>)}
                   </div>
-                </form>
-            </>
-            )}
+            </form>
+           
             </div>
 
 
