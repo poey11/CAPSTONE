@@ -177,6 +177,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
     const [popupMessage, setPopupMessage] = useState("");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [popupErrorMessage, setPopupErrorMessage] = useState("");
+    const [invalidFields, setInvalidFields] = useState<string[]>([]);
     const prevFilledHearing = hearingDetails[index - 1]?.filled || false;
 
     {/*
@@ -217,6 +218,27 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
      // New handler to show confirmation popup on Save click
      const handleSaveClick = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        const requiredFields: (keyof HearingDetails)[] = [
+        "remarks",
+        "partyA",
+        "partyB",
+        "minutesOfCaseProceedings",
+    ];
+
+
+        const missingFields: string[] = requiredFields.filter(field => !details[field]);
+
+        if (missingFields.length > 0) {
+            setInvalidFields(missingFields);
+            setPopupErrorMessage("Please fill up all required fields.");
+            setShowErrorPopup(true);
+            setTimeout(() => setShowErrorPopup(false), 3000);
+            return;
+        }
+
+
+          setInvalidFields([]);
         setShowSubmitPopup(true);
     };
     
@@ -271,6 +293,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
     // Handle Complainant status
     if (details.Cstatus === "Absent") {
         updatedDetails.partyA = "Complainant Absent.";
+         updatedDetails.partyB = "Respondent Present.";
         absentMinutes.push("Complainant Absent.");
         absentRemarks.push("Complainant Absent.");
     } else {
@@ -280,6 +303,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
     // Handle Respondent status
     if (details.Rstatus === "Absent") {
         updatedDetails.partyB = "Respondent Absent.";
+        updatedDetails.partyA = "Complainant Present";
         absentMinutes.push("Respondent Absent.");
         absentRemarks.push("Respondent Absent.");
     } else {
@@ -471,7 +495,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                             <div className="title-remarks-dialogue">
                                 Remarks
                             </div>
-                            <div className="box-container-remarks-dialogue">
+                             <div className={`box-container-remarks-dialogue ${invalidFields.includes("remarks") ? "input-error" : ""}`}>
+                                <span className="required-asterisk-incident">*</span>
                                  <textarea className="remarks-input-field-dialogue" 
                                     name="remarks"
                                     id="remarks"
@@ -506,7 +531,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                                         Party A
                                     </div>
 
-                                    <div className="box-container-partyA-dialogue">
+                                  <div className={`box-container-partyA-dialogue ${invalidFields.includes("partyA") ? "input-error" : ""}`}>
+                                    <span className="required-asterisk-incident">*</span>
                                     <textarea className="remarks-input-field-partyA" 
                                     placeholder="Enter Party A" 
                                     name="partyA"
@@ -533,7 +559,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                                         Party B
                                     </div>
 
-                                    <div className="box-container-partyA-dialogue">
+                                    <div className={`box-container-partyA-dialogue ${invalidFields.includes("partyB") ? "input-error" : ""}`}>
+                                        <span className="required-asterisk-incident">*</span>
                                            <textarea className="remarks-input-field-partyA" 
                                             placeholder="Enter Party"
                                             id="partyB"
@@ -562,7 +589,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                                     Minutes of Case Proceeedings
                                 </div>
 
-                                <div className="box-container-partyA-dialogue">
+                                <div className={`box-container-partyA-dialogue ${invalidFields.includes("minutesOfCaseProceedings") ? "input-error" : ""}`}>
+                                    <span className="required-asterisk-incident">*</span>
                                       <textarea className="remarks-input-field-partyA" 
                                     placeholder="Enter Minutes of Case Proceedings" 
                                     name="minutesOfCaseProceedings"
