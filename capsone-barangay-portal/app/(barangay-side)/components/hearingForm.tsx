@@ -2,7 +2,7 @@ import {  useEffect, useState } from "react";
 import { collection, addDoc, doc, onSnapshot,updateDoc,query, orderBy, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {getLocalDateTimeString} from "@/app/helpers/helpers";
 import { fill } from "pdf-lib";
 
@@ -169,8 +169,14 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
         });
     };
     
-    
-  
+    const searchParam = useSearchParams();
+        const docId = searchParam.get("id");
+
+    const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
     const prevFilledHearing = hearingDetails[index - 1]?.filled || false;
 
     {/*
@@ -206,6 +212,53 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
             console.error("Error saving data:", error.message);
         }
     }
+
+
+     // New handler to show confirmation popup on Save click
+     const handleSaveClick = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setShowSubmitPopup(true);
+    };
+    
+    const saveSummon = async () => {
+        try {
+            const docRef = collection(db, "IncidentReports", id, "SummonsMeeting");
+            await addDoc(docRef, {
+                ...details,
+                nosHearing: index,
+                nos: nos,
+                filled: true
+            });
+            
+            const UpdateRef = doc(db, "IncidentReports", id,);
+            await updateDoc(UpdateRef, {
+            ...(data?.hearing !=3   && { hearing: data?.hearing + 1 })
+            });
+        } catch (error:any) {
+            console.error("Error saving data:", error.message);
+        }
+          };
+
+          const confirmSubmit = async () => {
+            setShowSubmitPopup(false);
+          
+            try {
+              await saveSummon(); 
+          
+              setPopupMessage("Summon Successfully Saved!");
+              setShowPopup(true);
+          
+              setTimeout(() => {
+                setShowPopup(false);
+              }, 3000);
+            } catch (error) {
+              console.error("Error during confirmation submit:", error);
+              setPopupErrorMessage("Error saving summon. Please try again.");
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+            }
+          };
+
 
     const usersAbsent = () => details.Cstatus === "Absent" || details.Rstatus === "Absent";
 
@@ -259,7 +312,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
     return (
         <>
             
-   <form onSubmit={handleSubmit} className="hearing-main-section">
+   <form onSubmit={handleSaveClick} className="hearing-main-section">
 
        <div className="dialogue-header-body-top-section">
                         <div className="hearing-incident-info-toggle-wrapper">
@@ -608,6 +661,47 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
 
                   </div>
          */}
+
+
+        {showSubmitPopup && (
+            <div className="confirmation-popup-overlay-add">
+                <div className="confirmation-popup-add">
+                    <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                    <p>Are you sure you want to submit?</p>
+                    <div className="yesno-container-add">
+                        <button
+                        onClick={() => setShowSubmitPopup(false)}
+                        className="no-button-add"
+                        >
+                        No
+                        </button>
+                        <button onClick={confirmSubmit} className="yes-button-add">
+                        Yes
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            )}
+
+
+            {showPopup && (
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+            )}
+
+            {showErrorPopup && (
+                <div className={`error-popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+            )}
 
         </>
     )
