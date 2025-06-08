@@ -38,6 +38,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     const [popupMessage, setPopupMessage] = useState("");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [popupErrorMessage, setPopupErrorMessage] = useState("");
+    const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
 
     const searchParam = useSearchParams();
     const docId = searchParam.get("id");
@@ -199,10 +201,40 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     }, [details.Cstatus, details.Rstatus]);
 
     // New handler to show confirmation popup on Save click
-    const handleSaveClick = (e: React.FormEvent<HTMLFormElement>) => {
+    {/*
+            const handleSaveClick = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setShowSubmitPopup(true);
     };
+    */}
+
+    const handleSaveClick = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const requiredFields: (keyof DialogueDetails)[] = [
+        "minutesOfDialogue",
+        "remarks",
+        "partyA",
+        "partyB",
+    ];
+
+    const missingFields: string[] = requiredFields.filter(field => !details[field]);
+
+    if (missingFields.length > 0) {
+        setInvalidFields(missingFields);
+        setPopupErrorMessage("Please fill up all required fields.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+    }
+
+    setInvalidFields([]);
+    setShowSubmitPopup(true);
+};
+
+
+
+
 
     const saveDialogue = async () => {
         try {
@@ -400,14 +432,16 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                                             
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </div> 
                                                 <div className="edit-incident-content-dialogue-rightsection">
                                                     <div className="view-incident-dialogue-remarks-container">
                                                         <div className="box-container-outer-remarks-dialogue">
                                                             <div className="title-remarks-dialogue">
                                                                 Remarks
                                                             </div>
-                                                            <div className="box-container-remarks-dialogue">
+                                                         {/*<div className="box-container-remarks-dialogue">*/}   
+                                                             <div className={`box-container-remarks-dialogue ${invalidFields.includes("remarks") ? "input-error" : ""}`}>
+                                                                <span className="required-asterisk-incident">*</span>    
                                                                 <textarea 
                                                                     className="remarks-input-field-dialogue" 
                                                                     name="remarks" 
@@ -439,7 +473,9 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                                                     <div className="title-remarks-dialogue">
                                                                         Party A
                                                                     </div>
-                                                                    <div className="box-container-partyA-dialogue">
+                                                                   {/* <div className="box-container-partyA-dialogue">*/} 
+                                                                         <div className={`box-container-partyA-dialogue ${invalidFields.includes("partyA") ? "input-error" : ""}`}>
+                                                                        <span className="required-asterisk-incident">*</span>
                                                                         <textarea 
                                                                             className="remarks-input-field-partyA" 
                                                                             placeholder="Enter Party A" 
@@ -462,7 +498,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                                                     <div className="title-remarks-dialogue">
                                                                         Party B
                                                                     </div>
-                                                                    <div className="box-container-partyA-dialogue">
+                                                                    <div className={`box-container-partyA-dialogue ${invalidFields.includes("partyB") ? "input-error" : ""}`}>
+                                                                        <span className="required-asterisk-incident">*</span>
                                                                         <textarea 
                                                                             className="remarks-input-field-partyA" 
                                                                             placeholder="Enter Party B"
@@ -486,7 +523,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                                                     <div className="title-remarks-dialogue">
                                                                         Minutes of Dialogue
                                                                     </div>
-                                                                    <div className="box-container-partyA-dialogue">
+                                                                   <div className={`box-container-partyA-dialogue ${invalidFields.includes("minutesOfDialogue") ? "input-error" : ""}`}>
+                                                                        <span className="required-asterisk-incident">*</span>
                                                                         <textarea 
                                                                             className="remarks-input-field-partyA" 
                                                                             placeholder="Enter Minutes of Dialogue"
