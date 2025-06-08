@@ -242,13 +242,31 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
         router.back();
     };
 
+      const [activeSection, setActiveSection] = useState("meeting");
 
     return (
         <>
             
    <form onSubmit={handleSubmit} className="hearing-main-section">
+
+       <div className="dialogue-header-body-top-section">
+                        <div className="hearing-incident-info-toggle-wrapper">
+                            {["meeting", "minutes" ].map((section) => (
+                                <button
+                                key={section}
+                                type="button"
+                                className={`info-toggle-btn-hearing ${activeSection === section ? "active" : ""}`}
+                                onClick={() => setActiveSection(section)}
+                                >
+                                {section === "meeting" && "Meeting Information"}
+                                {section === "minutes" && "Minutes Information"}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
  
-       
+        {activeSection === "meeting" && (
+        <>
 
             <div className="edit-incident-dialoguesection-content">
             
@@ -375,10 +393,12 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                 </div>
 
             </div>
+                 </>
+                     )}
 
-           
 
-
+           {activeSection === "minutes" && (
+                <>
             <div className="edit-incident-dialoguesection-content">
                 <div className="edit-incident-dialoguesection-minutes-content">
                     <div className="minutes-content-topsection">
@@ -468,7 +488,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
 
             </div>
 
-
+                </>
+            )}
 
             
                   <div className="flex justify-center items-center mt-10">
