@@ -263,13 +263,23 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                         </div>
 
                         <div className="checkbox-container-dialogue">
-                            <label className="custom-checkbox-label">
-
-                            {/*
-                                WILL ADD LATER
-                            */}
-                                
+                          <label className="custom-checkbox-label">
+                            <input
+                                type="checkbox"
+                                name="Cstatus"
+                                disabled={hearingDetails[index]?.filled}
+                                checked={details.Cstatus === "" || details.Cstatus === "Present"}
+                                onChange={(e) =>
+                                setDetails((prev: any) => ({
+                                    ...prev,
+                                    Cstatus: e.target.checked ? "" : "Absent"
+                                }))
+                                }
+                            />
+                            <span className="checkmark"></span>
+                            Present
                             </label>
+
                         </div>
 
                         <div className="edit-incident-fields-section">
@@ -301,13 +311,24 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
 
                           <div className="checkbox-container-dialogue">
                             <label className="custom-checkbox-label">
-
-                            {/*
-                                WILL ADD LATER
-                            */}
-                                
+                                <input
+                                    type="checkbox"
+                                    name="Rstatus"
+                                    disabled={hearingDetails[index]?.filled}
+                                    checked={details.Rstatus === "" || details.Rstatus === "Present"}
+                                    onChange={(e) =>
+                                    setDetails((prev: any) => ({
+                                        ...prev,
+                                        Rstatus: e.target.checked ? "" : "Absent"
+                                    }))
+                                    }
+                                />
+                                <span className="checkmark"></span>
+                                Present
                             </label>
-                        </div>
+
+                          
+                         </div>
 
                         <div className="edit-incident-fields-section">
                             <p>Hearing Officer</p>
