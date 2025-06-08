@@ -82,7 +82,19 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
         const unsubscribe = onSnapshot(docRef, (snapshot) => {
             const fetchedDetails = snapshot.docs.map(doc => doc.data());
             setHearingDetails(fetchedDetails as HearingDetails[]);
+
+            const currentHearing = fetchedDetails[index];
+        if (currentHearing) {
+            setDetails(prevDetails => ({
+                ...prevDetails,
+                firstHearingOfficer: currentHearing.firstHearingOfficer || user?.fullName || ""
+            }));
+        }
+
         });
+
+        
+
     
         return () => unsubscribe();
     }, [id]);
@@ -242,53 +254,302 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
         router.back();
     };
 
+      const [activeSection, setActiveSection] = useState("meeting");
 
     return (
         <>
             
+   <form onSubmit={handleSubmit} className="hearing-main-section">
 
-        
-         <div className="hearing-section-edit">    
+       <div className="dialogue-header-body-top-section">
+                        <div className="hearing-incident-info-toggle-wrapper">
+                            {["meeting", "minutes" ].map((section) => (
+                                <button
+                                key={section}
+                                type="button"
+                                className={`info-toggle-btn-hearing ${activeSection === section ? "active" : ""}`}
+                                onClick={() => setActiveSection(section)}
+                                >
+                                {section === "meeting" && "Meeting Information"}
+                                {section === "minutes" && "Minutes Information"}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+ 
+        {activeSection === "meeting" && (
+        <>
+
+            <div className="edit-incident-dialoguesection-content">
             
-                <div className="title-section-edit">
+                <div className="edit-incident-content-dialogue-leftsection">
+                    <div className="edit-incident-content-left-side">
+                        <div className="edit-incident-fields-section">
+                             <p>Complainant's Name</p>
+                              <input type="text" 
+                                className="edit-incident-input-field" 
+                                value={`${data?.complainant?.fname || ""} ${data?.complainant?.lname || ""}`}
+                                disabled/>
+                        </div>
 
-                    {/*
-                    
-                    <button type="button" className={showHearingContent ? "record-details-minus-button" : "record-details-plus-button"}  onClick={handleToggleClick}></button>
+                        <div className="checkbox-container-dialogue">
+                          <label className="custom-checkbox-label">
+                            <input
+                                type="checkbox"
+                                name="Cstatus"
+                                disabled={hearingDetails[index]?.filled}
+                                checked={details.Cstatus === "" || details.Cstatus === "Present"}
+                                onChange={(e) =>
+                                setDetails((prev: any) => ({
+                                    ...prev,
+                                    Cstatus: e.target.checked ? "" : "Absent"
+                                }))
+                                }
+                            />
+                            <span className="checkmark"></span>
+                            Present
+                            </label>
 
-                        */}
+                        </div>
 
-                    <h1>{nos} Hearing Section</h1>
-
-                    {/*
-                    {(index === 0 && (generatedHearingSummons === 0 || !dialogue)) && (
-                        <span className="text-red-500 ml-4">
-                            In order to fill up the current Hearing Section, you must fill up the Dialogue Letter and/or also generate a Summons Letter
-                        </span>
-                    )}
-                    {( index !== 0 && (index >= generatedHearingSummons||!prevFilledHearing) ) && (
-                    <span className="text-red-500 ml-4">
-                    In order to fill up the current Hearing Section, you must fill up the previous Hearing and/or also generate a Summons Letter
-                    </span>
-                    )}*/}
-                </div>
-            <hr/>
-            
-            <form onSubmit={handleSubmit}>
-                  <div className="section-2-dialouge-edit">
-                  <p>Hearing  Information</p>
-                    <div className="bars-edit">
-                        <div className="input-group-edit">
-                                <p>Hearing Meeting Date and Time</p>
-                                <input type="datetime-local" 
-                                className="search-bar-edit" 
+                        <div className="edit-incident-fields-section">
+                            <p>Date and Time</p>
+                            
+                              <input type="datetime-local" 
+                                className="edit-incident-input-field" 
                                 name="hearingMeetingDateTime"
                                 id="hearingMeetingDateTime"
                                 value={summonLetterData[index]?.DateTimeOfMeeting||""}
                                 disabled
                             />
+
                         </div>
-                    </div>  
+
+
+                    </div>
+
+                    <div className="edit-incident-content-right-side">
+                        <div className="edit-incident-fields-section">
+                            <p>Respondent's Name</p>
+                              <input type="text" 
+                                className="edit-incident-input-field" 
+                                value={`${data?.respondent?.fname || ""} ${data?.respondent?.lname || ""}`}
+                                disabled
+                                />
+
+                        </div>
+
+                          <div className="checkbox-container-dialogue">
+                            <label className="custom-checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    name="Rstatus"
+                                    disabled={hearingDetails[index]?.filled}
+                                    checked={details.Rstatus === "" || details.Rstatus === "Present"}
+                                    onChange={(e) =>
+                                    setDetails((prev: any) => ({
+                                        ...prev,
+                                        Rstatus: e.target.checked ? "" : "Absent"
+                                    }))
+                                    }
+                                />
+                                <span className="checkmark"></span>
+                                Present
+                            </label>
+
+                          
+                         </div>
+
+                        <div className="edit-incident-fields-section">
+                                <p>
+                                    {index === 0
+                                    ? "First Hearing Officer"
+                                    : index === 1
+                                    ? "Second Hearing Officer"
+                                    : "Third Hearing Officer"}
+                                </p>
+                                <input
+                                    type="text"
+                                    name={
+                                    index === 0
+                                        ? "firstHearingOfficer"
+                                        : index === 1
+                                        ? "secondHearingOfficer"
+                                        : "thirdHearingOfficer"
+                                    }
+                                    id={
+                                    index === 0
+                                        ? "firstHearingOfficer"
+                                        : index === 1
+                                        ? "secondHearingOfficer"
+                                        : "thirdHearingOfficer"
+                                    }
+                                    value={
+                                    (index === 0
+                                        ? details.firstHearingOfficer
+                                        : index === 1
+                                        ? details.secondHearingOfficer
+                                        : details.thirdHearingOfficer) ||
+                                    hearingDetails[index]?.[
+                                        index === 0
+                                        ? "firstHearingOfficer"
+                                        : index === 1
+                                        ? "secondHearingOfficer"
+                                        : "thirdHearingOfficer"
+                                    ] ||
+                                    ""
+                                    }
+                                    onChange={handleChange}
+                                    className="edit-incident-input-field"
+                                    placeholder="Enter Hearing Officer"
+                                    disabled={hearingDetails[index]?.filled || false}
+                                />
+                                </div>
+
+
+                    </div>
+
+
+                </div>
+
+                <div className="edit-incident-content-dialogue-rightsection">
+                    <div className="view-incident-dialogue-remarks-container">
+                        <div className="box-container-outer-remarks-dialogue">
+                            <div className="title-remarks-dialogue">
+                                Remarks
+                            </div>
+                            <div className="box-container-remarks-dialogue">
+                                 <textarea className="remarks-input-field-dialogue" 
+                                    name="remarks"
+                                    id="remarks"
+                                    value={details.remarks||hearingDetails[index]?.remarks||""}
+                                    onFocus={hearingDetails[index]?.filled||usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                                    required={!hearingDetails[index]?.filled||usersAbsent() ? false : true}
+                                    onChange={handleChange}
+                                    placeholder="Enter Remarks" 
+                                />
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+                 </>
+                     )}
+
+
+           {activeSection === "minutes" && (
+                <>
+            <div className="edit-incident-dialoguesection-content">
+                <div className="edit-incident-dialoguesection-minutes-content">
+                    <div className="minutes-content-topsection">
+                        <div className="edit-incident-content-left-side">
+                            <div className="view-incident-dialogue-partyA-container">
+                                <div className="box-container-outer-partyA-dialogue">
+                                    <div className="title-remarks-dialogue">
+                                        Party A
+                                    </div>
+
+                                    <div className="box-container-partyA-dialogue">
+                                    <textarea className="remarks-input-field-partyA" 
+                                    placeholder="Enter Party A" 
+                                    name="partyA"
+                                    id="partyA"
+                                    value={details.partyA||hearingDetails[index]?.partyA||""}
+                                    onChange={handleChange}
+                                    rows={10}
+                                    onFocus={hearingDetails[index]?.filled|| usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                                    required={!hearingDetails[index]?.filled||usersAbsent() ? false : true}
+                                    />
+
+                                    </div>
+
+                                </div>
+                                
+                            </div>
+
+                        </div>
+
+                        <div className="edit-incident-content-right-side">
+                            <div className="view-incident-dialogue-partyA-container">
+                                <div className="box-container-outer-partyA-dialogue">
+                                    <div className="title-remarks-dialogue">
+                                        Party B
+                                    </div>
+
+                                    <div className="box-container-partyA-dialogue">
+                                           <textarea className="remarks-input-field-partyA" 
+                                            placeholder="Enter Party"
+                                            id="partyB"
+                                            name="partyB"
+                                            value={details.partyB||hearingDetails[index]?.partyB||""}
+                                            onChange={handleChange}
+                                            rows={10}
+                                            onFocus={hearingDetails[index]?.filled|| usersAbsent()? (e => e.target.blur()):(() => {}) }
+                                            required={!hearingDetails[index]?.filled|| usersAbsent() ? false : true}
+                                            />
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="minutes-content-bottomsection">
+                        <div className="view-incident-dialogue-partyA-container">
+                            <div className="box-container-outer-partyA-dialogue">
+                                <div className="title-remarks-dialogue">
+                                    Minutes of Case Proceeedings
+                                </div>
+
+                                <div className="box-container-partyA-dialogue">
+                                      <textarea className="remarks-input-field-partyA" 
+                                    placeholder="Enter Minutes of Case Proceedings" 
+                                    name="minutesOfCaseProceedings"
+                                    id="minutesOfCaseProceedings"
+                                    value={details.minutesOfCaseProceedings||hearingDetails[index]?.minutesOfCaseProceedings||""}
+                                    onChange={handleChange}
+                                    onFocus={hearingDetails[index]?.filled|| usersAbsent() ? (e => e.target.blur()):(() => {}) }
+                                    required={!hearingDetails[index]?.filled|| usersAbsent()? false : true}
+                                    rows={13}/>
+            
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+                </>
+            )}
+
+            
+                  <div className="flex justify-center items-center mt-10">
+                        {!hearingDetails[index]?.filled && (<button type="submit" className="action-view-edit">Save</button>)}
+                  </div>
+
+               
+            </form>
+           
+            
+            
+         {/*
+            
+                  <div className="section-2-dialouge-edit">
+                  <p>Hearing  Information</p>
+                
                     <p>Complainant's Name</p>
                     <select className="input-group-edit" disabled={hearingDetails[index]?.filled}
                     name="Cstatus"
@@ -299,22 +560,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                         <option value="Present">Present</option>
                         <option value="Absent">Absent</option>
                     </select>
-                      <div className="bars-edit">
-                          <div className="input-group-edit">
-
-                            {/*
-                                <input type="text" 
-                                className="search-bar-edit" 
-                                value={`${data.complainant.fname} ${data.complainant.lname} `|| ""}               
-                                disabled/>
-                            */}
-
-                                <input type="text" 
-                                className="search-bar-edit" 
-                                value={`${data?.complainant?.fname || ""} ${data?.complainant?.lname || ""}`}
-                                disabled/>
-                          </div>
-                      </div>
+                     
                   </div>
                   <div className="section-2-dialouge-edit">
                       <p>Respondents' Name</p>
@@ -327,96 +573,16 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                             <option value="Present">Present</option>
                             <option value="Absent">Absent</option>
                       </select>
-                      <div className="bars-edit">
-                        <div className="input-group-edit">
-                            
-                            {/*
-                                <input type="text" 
-                                className="search-bar-edit" 
-                                value={`${data.respondent.fname} ${data.respondent.lname} `|| ""}
-                                disabled
-                                />
-                            */}
 
-                                <input type="text" 
-                                className="search-bar-edit" 
-                                value={`${data?.respondent?.fname || ""} ${data?.respondent?.lname || ""}`}
-                                disabled
-                                />
-                          </div>
-                      </div>
                   </div>
         
-                  <div className="section-3-dialouge-edit">
-                      <div className="fields-section-edit">
-                            <p>Minutes of Case Proceedings</p>
-                            <textarea className="description-edit resize-none" 
-                            placeholder="Enter Minutes of Case Proceedings" 
-                            name="minutesOfCaseProceedings"
-                            id="minutesOfCaseProceedings"
-                            value={details.minutesOfCaseProceedings||hearingDetails[index]?.minutesOfCaseProceedings||""}
-                            onChange={handleChange}
-                            onFocus={hearingDetails[index]?.filled|| usersAbsent() ? (e => e.target.blur()):(() => {}) }
-                            required={!hearingDetails[index]?.filled|| usersAbsent()? false : true}
-                            rows={13}/>
-                      </div>
-                  </div>
+             
         
+               
                   <div className="section-4-dialouge-edit">
+                 
                       <div className="fields-section-edit">
-                            <p>Party A</p>
-                            <textarea className="description-edit resize-none" 
-                            placeholder="Enter Party A" 
-                            name="partyA"
-                            id="partyA"
-                            value={details.partyA||hearingDetails[index]?.partyA||""}
-                            onChange={handleChange}
-                            rows={10}
-                            onFocus={hearingDetails[index]?.filled|| usersAbsent() ? (e => e.target.blur()):(() => {}) }
-                            required={!hearingDetails[index]?.filled||usersAbsent() ? false : true}
-                            />
-                      </div>
-                      <div className="fields-section-edit">
-                            <p>Party B</p>
-                            <textarea className="description-edit resize-none" 
-                            placeholder="Enter Party"
-                            id="partyB"
-                            name="partyB"
-                            value={details.partyB||hearingDetails[index]?.partyB||""}
-                            onChange={handleChange}
-                            rows={10}
-                            onFocus={hearingDetails[index]?.filled|| usersAbsent()? (e => e.target.blur()):(() => {}) }
-                            required={!hearingDetails[index]?.filled|| usersAbsent() ? false : true}
-                            />
-                      </div>
-
-                  </div>
-                  <div className="section-4-dialouge-edit">
-                      <div className="fields-section-edit">
-                            <p>Remarks</p>
-                            <textarea className="description-edit resize-none" 
-                            name="remarks"
-                            id="remarks"
-                            value={details.remarks||hearingDetails[index]?.remarks||""}
-                            onFocus={hearingDetails[index]?.filled||usersAbsent() ? (e => e.target.blur()):(() => {}) }
-                            required={!hearingDetails[index]?.filled||usersAbsent() ? false : true}
-                            onChange={handleChange}
-                            placeholder="Enter Remarks" 
-                            rows={10}
-                            />
-                      </div>
-                      <div className="fields-section-edit">
-                            <p>First Hearing Officer</p>
-                            <input type="text" 
-                            name="firstHearingOfficer"
-                            id="firstHearingOfficer"
-                            value={details.firstHearingOfficer||""}
-                            onChange={handleChange}
-                            className="search-bar-edit" 
-                            placeholder="Enter Hearing Officer"
-                            disabled
-                            />
-
+                     
                             <p>Second Hearing Officer</p>
                             <input type="text" 
                             name="secondHearingOfficer"
@@ -441,13 +607,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                       </div>
 
                   </div>
-                  <div className="flex justify-center items-center mt-10">
-                        {!hearingDetails[index]?.filled && (<button type="submit" className="action-view-edit">Save</button>)}
-                  </div>
-            </form>
-           
-            </div>
-
+         */}
 
         </>
     )
