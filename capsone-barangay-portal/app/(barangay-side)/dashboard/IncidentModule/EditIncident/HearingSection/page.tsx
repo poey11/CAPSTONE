@@ -166,7 +166,7 @@ export default function HearingSection() {
                 </div>
 
                 <div className="hearing-dropdown">
-                    <button className="edit-incident-redirection-buttons">
+                    <button className="edit-incident-redirection-buttons-selected-dialogue-hearing">
                         <div className="edit-incident-redirection-icons-section">
                             <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing"/> 
                         </div>

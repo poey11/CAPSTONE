@@ -4,7 +4,7 @@ import {getLocalDateTimeString} from "@/app/helpers/helpers";
 import { doc, onSnapshot,collection, setDoc, query, where } from "firebase/firestore";
 import { useState,useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 
 
@@ -38,6 +38,9 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     const [popupMessage, setPopupMessage] = useState("");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [popupErrorMessage, setPopupErrorMessage] = useState("");
+
+    const searchParam = useSearchParams();
+    const docId = searchParam.get("id");
 
     const [details, setDetails] = useState<DialogueDetails>({
         HearingOfficer: "",
@@ -227,7 +230,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
       
           setTimeout(() => {
             setShowPopup(false);
-           handleBack();
+            router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
           }, 1000);
         } catch (error) {
           console.error("Error during confirmation submit:", error);
