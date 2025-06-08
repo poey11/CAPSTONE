@@ -1897,6 +1897,7 @@ padding: 1rem;
   display: flex;
   flex-direction: row;
   margin-top: 40px;
+
 }
 
 .checkbox-container-dialogue{
@@ -1990,3 +1991,7 @@ s
   margin-bottom: 10px;
 }
 
+
+.hearing-main-section {
+  width: 100%;
+}
