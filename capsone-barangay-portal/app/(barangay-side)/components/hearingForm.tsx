@@ -82,7 +82,19 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
         const unsubscribe = onSnapshot(docRef, (snapshot) => {
             const fetchedDetails = snapshot.docs.map(doc => doc.data());
             setHearingDetails(fetchedDetails as HearingDetails[]);
+
+            const currentHearing = fetchedDetails[index];
+        if (currentHearing) {
+            setDetails(prevDetails => ({
+                ...prevDetails,
+                firstHearingOfficer: currentHearing.firstHearingOfficer || user?.fullName || ""
+            }));
+        }
+
         });
+
+        
+
     
         return () => unsubscribe();
     }, [id]);
@@ -349,19 +361,51 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                          </div>
 
                         <div className="edit-incident-fields-section">
-                            <p>Hearing Officer</p>
-                              <input type="text" 
-                            name="firstHearingOfficer"
-                            id="firstHearingOfficer"
-                            value={details.firstHearingOfficer||""}
-                            onChange={handleChange}
-                            className="edit-incident-input-field" 
-                            placeholder="Enter Hearing Officer"
-                            disabled
-                            />
+                                <p>
+                                    {index === 0
+                                    ? "First Hearing Officer"
+                                    : index === 1
+                                    ? "Second Hearing Officer"
+                                    : "Third Hearing Officer"}
+                                </p>
+                                <input
+                                    type="text"
+                                    name={
+                                    index === 0
+                                        ? "firstHearingOfficer"
+                                        : index === 1
+                                        ? "secondHearingOfficer"
+                                        : "thirdHearingOfficer"
+                                    }
+                                    id={
+                                    index === 0
+                                        ? "firstHearingOfficer"
+                                        : index === 1
+                                        ? "secondHearingOfficer"
+                                        : "thirdHearingOfficer"
+                                    }
+                                    value={
+                                    (index === 0
+                                        ? details.firstHearingOfficer
+                                        : index === 1
+                                        ? details.secondHearingOfficer
+                                        : details.thirdHearingOfficer) ||
+                                    hearingDetails[index]?.[
+                                        index === 0
+                                        ? "firstHearingOfficer"
+                                        : index === 1
+                                        ? "secondHearingOfficer"
+                                        : "thirdHearingOfficer"
+                                    ] ||
+                                    ""
+                                    }
+                                    onChange={handleChange}
+                                    className="edit-incident-input-field"
+                                    placeholder="Enter Hearing Officer"
+                                    disabled={hearingDetails[index]?.filled || false}
+                                />
+                                </div>
 
-
-                        </div>
 
                     </div>
 
