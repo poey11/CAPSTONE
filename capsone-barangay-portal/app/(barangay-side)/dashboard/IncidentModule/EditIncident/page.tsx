@@ -243,7 +243,7 @@ const confirmSubmit = async () => {
       if (docId && departmentId) {
         router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
       }
-    }, 1000);
+    }, 3000);
   } catch (error) {
     console.error("Error during confirmation submit:", error);
     setPopupErrorMessage("Error updating incident. Please try again.");
