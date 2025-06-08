@@ -153,6 +153,9 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
 
     const usersAbsent = () => details.Cstatus === "Absent" || details.Rstatus === "Absent";
 
+    /*
+
+    */
     useEffect(() => {
         const updatedDetails = { ...details };
     
@@ -162,6 +165,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         // Handle Complainant status
         if (details.Cstatus === "Absent") {
             updatedDetails.partyA = "Complainant Absent.";
+            updatedDetails.partyB = "Respondent Present.";
+
     
             if (!minutes.includes("Complainant Absent")) {
                 minutes += (minutes ? " " : "") + "Complainant Absent.";
@@ -180,6 +185,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         // Handle Respondent status
         if (details.Rstatus === "Absent") {
             updatedDetails.partyB = "Respondent Absent";
+             updatedDetails.partyA = "Complainant Present";
+    
     
             if (!minutes.includes("Respondent Absent")) {
                 minutes += (minutes ? " " : "") + "Respondent Absent.";
