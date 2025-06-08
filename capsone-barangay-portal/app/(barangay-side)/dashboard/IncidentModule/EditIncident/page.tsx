@@ -3,7 +3,7 @@ import "@/CSS/IncidentModule/EditIncident.css";
 import { ChangeEvent,useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/firestorehelper";
-import { doc, updateDoc, collection, where, getDocs, query} from "firebase/firestore";
+import { doc, updateDoc, collection, where, getDocs, query, onSnapshot} from "firebase/firestore";
 import { db } from "../../../../db/firebase";
 import { isValidPhilippineMobileNumber } from "@/app/helpers/helpers";
 import React from "react";
@@ -22,6 +22,7 @@ export default function EditLuponIncident() {
 
 
     const [hasSummonLetter, setHasSummonLetter] = useState(false);
+    const [isDialogueSectionFilled, setIsDialogueSectionFilled] = useState(false);
     const [loading , setLoading] = useState(true);
     const router = useRouter();
     const searchParam = useSearchParams();
@@ -377,6 +378,23 @@ const confirmSubmit = async () => {
   
     fetchSummonLetterStatus();
   }, [docId]);
+
+
+  useEffect(() => {
+    if (!docId) return; // or use `id` or whatever your incident ID is called
+    const docRef = doc(db, "IncidentReports", docId, "DialogueMeeting", docId);
+  
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.filled === true) {
+          setIsDialogueSectionFilled(true);
+        }
+      }
+    });
+  
+    return () => unsubscribe();
+  }, [docId]);
   
 
   return (
@@ -386,7 +404,7 @@ const confirmSubmit = async () => {
 
           {/* NEW CODE */}
           <div className="edit-incident-redirectionpage-section">
-            <button className="edit-incident-redirection-buttons" disabled>
+            <button className="edit-incident-redirection-buttons-selected">
               <div className="edit-incident-redirection-icons-section">
                 <img src="/images/profile-user.png" alt="user info" className="redirection-icons-info"/> 
               </div>
@@ -439,15 +457,29 @@ const confirmSubmit = async () => {
 
               <div className="hearing-submenu">
                 {reportData.isDialogue ? (
-                  <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
-                    <h1>Generate Summon Letters</h1>
-                  </button>
+                  isDialogueSectionFilled ? (
+                    <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
+                      <h1>Generate Summon Letters</h1>
+                    </button>
+                  ) : (
+                    <button
+                      className="submenu-button"
+                      name="summon"
+                      onClick={() => {
+                        setPopupErrorMessage("Fill out the Dialogue Section first.");
+                        setShowErrorPopup(true);
+                        setTimeout(() => setShowErrorPopup(false), 3000);
+                      }}
+                    >
+                      <h1>Generate Summon Letters</h1>
+                    </button>
+                  )
                 ) : (
                   <button
                     className="submenu-button"
                     name="summon"
                     onClick={() => {
-                      setPopupErrorMessage("Generate A Dialogue Letter First");
+                      setPopupErrorMessage("Generate a Dialogue Letter first.");
                       setShowErrorPopup(true);
                       setTimeout(() => setShowErrorPopup(false), 3000);
                     }}
@@ -465,7 +497,7 @@ const confirmSubmit = async () => {
                     className="submenu-button"
                     name="section"
                     onClick={() => {
-                      setPopupErrorMessage("Generate A Summon Letter First");
+                      setPopupErrorMessage("Generate a Summon Letter First");
                       setShowErrorPopup(true);
                       setTimeout(() => setShowErrorPopup(false), 3000);
                     }}
@@ -474,6 +506,7 @@ const confirmSubmit = async () => {
                   </button>
                 )}
               </div>
+
             </div>
 
           </div>
