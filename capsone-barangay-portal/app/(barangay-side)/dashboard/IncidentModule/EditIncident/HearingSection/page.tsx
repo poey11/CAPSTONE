@@ -264,15 +264,6 @@ export default function HearingSection() {
 
                         <h1> Hearing Section  </h1>
                     </div>
-
-                    {/* TO DO: add functionality for the save button */}
-                    <div className="action-btn-section">  
-                        
-                        <button type="submit" className="action-view-edit">
-                            <p>Save</p>
-                        </button>
-                        
-                    </div>
                     
                 </div>
 

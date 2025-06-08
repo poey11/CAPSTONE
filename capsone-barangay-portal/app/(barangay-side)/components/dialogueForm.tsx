@@ -231,7 +231,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
           setTimeout(() => {
             setShowPopup(false);
             router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
-          }, 1000);
+          }, 3000);
         } catch (error) {
           console.error("Error during confirmation submit:", error);
           setPopupErrorMessage("Error saving dialogue. Please try again.");
