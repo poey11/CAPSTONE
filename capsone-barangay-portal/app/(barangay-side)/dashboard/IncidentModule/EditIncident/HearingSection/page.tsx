@@ -2,7 +2,7 @@
 import "@/CSS/IncidentModule/EditIncident.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { collection, doc, query, where, orderBy, getDocs,  onSnapshot} from "firebase/firestore";
 import { db } from '@/app/db/firebase';
 import { getSpecificDocument, generateDownloadLink } from "../../../../../helpers/firestorehelper";
 
@@ -22,6 +22,8 @@ export default function HearingSection() {
     const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
     const [hasSummonLetter, setHasSummonLetter] = useState(false);
+    const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+    const [isDialogueSectionFilled, setIsDialogueSectionFilled] = useState(false);
     const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
     const [loading , setLoading] = useState(true);
 
@@ -132,6 +134,22 @@ export default function HearingSection() {
             fetchFilledHearings();
           }, [docId]);
 
+    useEffect(() => {
+                  if (!docId) return; // or use `id` or whatever your incident ID is called
+                  const docRef = doc(db, "IncidentReports", docId, "DialogueMeeting", docId);
+                
+                  const unsubscribe = onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                      const data = docSnap.data();
+                      if (data.filled === true) {
+                        setIsDialogueSectionFilled(true);
+                      }
+                    }
+                  });
+                
+                  return () => unsubscribe();
+                }, [docId]);
+
     const [activeSection, setActiveSection] = useState("firsthearing");
 
     return (
@@ -141,7 +159,7 @@ export default function HearingSection() {
             <div className="edit-incident-redirectionpage-section">
                 <button className="edit-incident-redirection-buttons" onClick={handleInformationSection}>
                     <div className="edit-incident-redirection-icons-section">
-                        <img src="/images/profile-user.png" alt="user info" className="redirection-icons-info"/> 
+                    <img src="/images/profile-user.png" alt="user info" className="redirection-icons-info" /> 
                     </div>
                     <h1>Incident Information</h1>
                 </button>
@@ -149,32 +167,46 @@ export default function HearingSection() {
                 <div className="dialogue-dropdown">
                     <button className="edit-incident-redirection-buttons">
                         <div className="edit-incident-redirection-icons-section">
-                        <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
+                            <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue" /> 
                         </div>
                         <h1>Dialogue Meeting</h1>
                     </button>
 
                     <div className="dialogue-submenu">
-                        <button className="submenu-button" name="dialogue" onClick={handleGenerateLetterAndInvitation}>
-                            <h1>Generate Dialogue Letters</h1>
-                        </button>
+                    <button className="submenu-button" name="dialogue" onClick={handleGenerateLetterAndInvitation}>
+                        <h1>Generate Dialogue Letters</h1>
+                    </button>
 
+                    {reportData?.isDialogue ? (
                         <button className="submenu-button" name="section" onClick={handleDialogueSection}>
-                            <h1>Dialogue Section</h1>
+                        <h1>Dialogue Section</h1>
                         </button>
+                    ) : (
+                        <button
+                        className="submenu-button"
+                        name="section"
+                        onClick={() => {
+                            setErrorPopup({ show: true, message: "Generate a Dialogue Letter First." });
+                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                        }}
+                        >
+                        <h1>Dialogue Section</h1>
+                        </button>
+                    )}
                     </div>
                 </div>
 
                 <div className="hearing-dropdown">
                     <button className="edit-incident-redirection-buttons-selected-dialogue-hearing">
-                        <div className="edit-incident-redirection-icons-section">
-                            <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing"/> 
-                        </div>
-                        <h1>Hearing Section</h1>
+                    <div className="edit-incident-redirection-icons-section">
+                        <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing" /> 
+                    </div>
+                    <h1>Hearing Section</h1>
                     </button>
 
                     <div className="hearing-submenu">
-                        {reportData?.isDialogue ? (
+                    {reportData?.isDialogue ? (
+                        isDialogueSectionFilled ? (
                         <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
                             <h1>Generate Summon Letters</h1>
                         </button>
@@ -183,35 +215,44 @@ export default function HearingSection() {
                             className="submenu-button"
                             name="summon"
                             onClick={() => {
-                            setPopupErrorMessage("Generate A Dialogue Letter First");
-                            setShowErrorPopup(true);
-                            setTimeout(() => setShowErrorPopup(false), 3000);
+                            setErrorPopup({ show: true, message: "Fill out the Dialogue Section first." });
+                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
                             }}
                         >
                             <h1>Generate Summon Letters</h1>
                         </button>
-                        )}
-
-                        {hasSummonLetter ? (
-                            <button className="submenu-button" name="section" onClick={handleHearingSection}>
-                                <h1>Hearing Section</h1>
-                            </button>
-                        ) : (
+                        )
+                    ) : (
                         <button
-                            className="submenu-button"
-                            name="section"
-                            onClick={() => {
-                            setPopupErrorMessage("Generate A Summon Letter First");
-                            setShowErrorPopup(true);
-                            setTimeout(() => setShowErrorPopup(false), 3000);
-                            }}
+                        className="submenu-button"
+                        name="summon"
+                        onClick={() => {
+                            setErrorPopup({ show: true, message: "Generate a Dialogue Letter First." });
+                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                        }}
                         >
-                            <h1>Hearing Section</h1>
+                        <h1>Generate Summon Letters</h1>
                         </button>
-                        )}
+                    )}
+
+                    {hasSummonLetter ? (
+                        <button className="submenu-button" name="section" onClick={handleHearingSection}>
+                        <h1>Hearing Section</h1>
+                        </button>
+                    ) : (
+                        <button
+                        className="submenu-button"
+                        name="section"
+                        onClick={() => {
+                            setErrorPopup({ show: true, message: "Generate a Summon Letter First." });
+                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                        }}
+                        >
+                        <h1>Hearing Section</h1>
+                        </button>
+                    )}
                     </div>
                 </div>
-
             </div>
 
             <div className="edit-incident-main-content">
@@ -385,14 +426,23 @@ export default function HearingSection() {
                 </div>
                 )}
 
-        {showErrorPopup && (
+            {showErrorPopup && (
                 <div className={`error-popup-overlay-add show`}>
                     <div className="popup-add">
                       <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                       <p>{popupErrorMessage}</p>
                     </div>
                 </div>
-                )}
+            )}
+
+            {errorPopup.show && (
+              <div className={'popup-overlay-error show'}>
+                  <div className="popup-letter">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert-letter"/>
+                      <p>{errorPopup.message}</p>
+                  </div>
+              </div>
+            )}
 
 
 
