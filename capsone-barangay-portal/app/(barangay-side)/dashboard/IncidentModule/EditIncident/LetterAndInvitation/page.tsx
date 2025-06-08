@@ -688,7 +688,6 @@ export default function GenerateDialougeLetter() {
        </div> 
         */}
 
-            {/* TO DO: will add logic pa for the redirection and pop ups */}
             <div className="edit-incident-redirectionpage-section">
                 <button className="edit-incident-redirection-buttons" onClick={handleInformationSection}>
                     <div className="edit-incident-redirection-icons-section">
@@ -786,7 +785,7 @@ export default function GenerateDialougeLetter() {
                     )}
                     </div>
                 </div>
-                </div>
+            </div>
     
 
 
