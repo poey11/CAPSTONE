@@ -9,7 +9,8 @@ import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { getLocalDateString } from "@/app/helpers/helpers";
-import { Timestamp } from "firebase-admin/firestore";
+import { toWords } from 'number-to-words';
+
 
 interface EmergencyDetails {
     firstName: string;
@@ -83,7 +84,16 @@ interface EmergencyDetails {
     noIncomePurpose: string;
     deceasedEstateName: string;
     estateSince: string;
-  }
+    noOfTRU: string;
+    tricycleMake: string;
+    tricycleType: string;
+    tricyclePlateNo: string;
+    tricycleSerialNo: string;
+    tricycleChassisNo: string;
+    tricycleEngineNo: string;
+    tricycleFileNo: string;
+   
+}
 
 
 const ViewOnlineRequest = () => {
@@ -176,6 +186,17 @@ const ViewOnlineRequest = () => {
         { key: "purpose", label: "Purpose" },
         { key: "fullName", label: "Full Name" },
         { key: "partnerWifeHusbandFullName", label: "Partner's/Wife's/Husband's Full Name" },
+        { key: "businessName", label: "Business Name" },
+        { key: "businessNature", label: "Business Nature" },
+        { key: "businessLocation", label: "Business Location" },
+        { key: "noOfTRU", label: "No Of Tricycle" },
+        { key: "tricycleMake", label: "Tricycle Make" },
+        { key: "tricycleType", label: "Tricycle Type"  },
+        { key: "tricyclePlateNo", label: "Tricycle Plate No"  },
+        { key: "tricycleSerialNo", label: "Tricycle Serial No"  },
+        { key: "tricycleChassisNo", label: "Tricycle Chassis No" },
+        { key: "tricycleEngineNo", label: "Tricycle Engine No" },
+        { key: "tricycleFileNo", label: "Tricycle File No"  },
         { key: "cohabitationStartDate", label: "Start of Cohabitation" },
         { key: "cohabitationRelationship", label: "Cohabitation Relationship"},
         { key: "noIncomePurpose", label: "Purpose Of No Income" },
@@ -192,7 +213,6 @@ const ViewOnlineRequest = () => {
         { key: "goodMoralPurpose", label: "Purpose Of Good Moral" },
         { key: "age", label: "Age" },
         { key: "dateOfResidency", label: "Date of Residency" },
-        { key: "businessLocation", label: "Business Location" },
         { key: "occupation", label: "Occupation" },
         { key: "civilStatus", label: "Civil Status" },
         { key: "citizenship", label: "Citizenship" },
@@ -200,9 +220,7 @@ const ViewOnlineRequest = () => {
         { key: "contact", label: "Contact" },
         { key: "birthday", label: "Birthday" },
         { key: "dateofdeath", label: "Date Of Death" },
-        { key: "businessNature", label: "Business Nature" },
         { key: "estimatedCapital", label: "Estimated Capital" },
-        { key: "businessName", label: "Business Name" },
         { key: "typeofconstruction", label: "Type of Construction" },
         { key: "typeofbldg", label: "Type of Building" },
         { key: "projectName", label: "Project Name" },
@@ -434,7 +452,27 @@ const ViewOnlineRequest = () => {
                 "Text9": `${monthToday} ${yearToday}`,
             }
         }
-        // Estate tax and  Garage PUV/TRU,
+        //Garage PUV/TRU,
+        else if(requestData?.purpose === "Garage/TRU"){
+            locationPath = "certificate of tru.pdf";
+            reqData = {
+                "Text1":`${requestData?.fullName.toUpperCase()}`,
+                "Text2": requestData?.businessName.toUpperCase(),
+                "Text3": requestData?.businessLocation,
+                "Text4": `${toWords(parseInt(requestData?.noOfTRU)).toUpperCase()} (${requestData?.noOfTRU})`,
+                "Text5": requestData?.businessNature,
+                "Text6": requestData?.tricycleMake.toUpperCase(),
+                "Text7": requestData?.tricycleType,
+                "Text8": requestData?.tricyclePlateNo,
+                "Text9": requestData?.tricycleSerialNo,
+                "Text10": requestData?.tricycleChassisNo,
+                "Text11": requestData?.tricycleEngineNo,
+                "Text12": requestData?.tricycleFileNo,
+                "Text13": requestData?.requestor.toUpperCase(),
+                "Text14": dayToday,
+                "Text15": `${monthToday} ${yearToday}`,
+            };
+        }
 
 
         const response = await fetch("/api/fillPDF", {

@@ -40,7 +40,6 @@ interface BarangayDocument {
     cohabitationStartDate?: string;
     cohabitationRelationship?:string;
     appointmentDate?: string;
-
     toAddress?: string;
     birthpalce?: string;
     religion?: string;
@@ -169,6 +168,23 @@ export default function DocumentTransactionsDetails() {
         ...(transactionData?.status === "Rejected"
            ? [{ label: "Rejection Reason", key: "rejectionReason" }]
            : []),
+
+        ...(transactionData?.purpose === "Garage/TRU" ? 
+            [
+                { label: "Business Name", key: "businessName" },
+                { label: "Business Nature", key: "businessNature" },
+                { label: "Business Location", key: "businessLocation" },
+                { label: "No Of Tricycle", key: "noOfTRU" },
+                { label: "Tricycle Make", key: "tricycleMake" },
+                { label: "Tricycle Type", key: "tricycleType" },
+                { label: "Tricycle Plate No", key: "tricyclePlateNo" },
+                { label: "Tricycle Serial No", key: "tricycleSerialNo" },
+                { label: "Tricycle Chassis No", key: "tricycleChassisNo" },
+                { label: "Tricycle Engine No", key: "tricycleEngineNo" },
+                { label: "Tricycle File No", key: "tricycleFileNo" },
+            ]
+            :[]
+        ),
         ...(transactionData?.purpose === "Cohabitation"
             ? [
                 { label: "Partner/Wife/Husband Full Name", key: "partnerWifeHusbandFullName" },

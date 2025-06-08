@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import {getLocalDateString} from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
+import { clear } from "console";
 
 
 
@@ -35,6 +36,14 @@ export default function Action() {
     toAddress: "",// will be also the home address
     businessLocation: "",// will be project location
     businessNature: "",
+    noOfVechicles: "1",
+    vechileMake: "",
+    vechileType: "",
+    vechilePlateNo: "",
+    vechileSerialNo: "",
+    vechileChassisNo: "",
+    vechileEngineNo: "",
+    vechileFileNo: "",
     estimatedCapital: "",
     businessName: "",
     birthday: "",
@@ -391,6 +400,19 @@ const handleFileChange = (
           ...(clearanceInput.purpose === "Occupancy /  Moving Out" && {
             toAddress: clearanceInput.toAddress, // Include toAddress only for this specific purpose
           }),
+          ...(clearanceInput.purpose === "Garage/TRU" && {
+            businessName: clearanceInput.businessName,
+            businessLocation: clearanceInput.businessLocation,
+            noOfTRU: clearanceInput.noOfVechicles,
+            businessNature: clearanceInput.businessNature,
+            tricycleMake: clearanceInput.vechileMake,
+            tricycleType: clearanceInput.vechileType,
+            tricyclePlateNo: clearanceInput.vechilePlateNo,
+            tricycleSerialNo: clearanceInput.vechileSerialNo,
+            tricycleChassisNo: clearanceInput.vechileChassisNo,
+            tricycleEngineNo: clearanceInput.vechileEngineNo,
+            tricycleFileNo: clearanceInput.vechileFileNo,
+          }),
           birthday: clearanceInput.birthday,
           age: clearanceInput.age,
           gender: clearanceInput.gender,
@@ -715,6 +737,163 @@ const handleFileChange = (
                 />
               </div>
             </>)}
+            { clearanceInput.purpose === "Garage/TRU" && (
+              <>  
+                <div className="form-group">
+                  <label htmlFor="businessname" className="form-label">Business Name<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="businessname"  
+                    name="businessName"  
+                    className="form-input"  
+                    required 
+                    placeholder="Enter Business Name"  
+                    value={clearanceInput.businessName}
+                    onChange={handleChange}
+                  />
+                </div>            
+                <div className="form-group">
+                  <label htmlFor="businessloc" className="form-label">Business Location<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="businessloc"  
+                    name="businessLocation"  
+                    className="form-input"  
+                    value={clearanceInput.businessLocation}
+                    onChange={handleChange}
+                    required 
+                    placeholder="Enter Business Location"  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="noOfVechicles" className="form-label">Nos Of Tricycle<span className="required">*</span></label>
+                  <input 
+                    type="number"  
+                    id="noOfVechicles"  
+                    name="noOfVechicles"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.noOfVechicles}
+                    onChange={handleChange}
+                    min={1}
+                    onKeyDown={(e)=> {
+                      if (e.key === 'e' || e.key === '-' || e.key === '+') {
+                        e.preventDefault(); // Prevent scientific notation and negative/positive signs
+                      }
+                    }
+                    } // Prevent manual input
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="businessnature" className="form-label">Nature of Business<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="businessnature"  
+                    name="businessNature"  
+                    value={clearanceInput.businessNature}
+                    onChange={handleChange}
+                    className="form-input"  
+                    required 
+                    placeholder="Enter Business Nature"  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vechileMake" className="form-label">Tricycle Make<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="vechileMake"  
+                    name="vechileMake"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vechileMake}
+                    onChange={handleChange}
+                    placeholder="Enter Tricycle Make"  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vechileType" className="form-label">Tricycle Type<span className="required">*</span></label>
+                  <select
+                    id="vechileType"  
+                    name="vechileType"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vechileType}
+                    onChange={handleChange}
+                    
+                  >
+                    <option value="" disabled>Select Tricycle Type</option>
+                    <option value="Motorcycle w/ Sidecar">Motorcycle w/ Sidecar</option>
+                    <option value="Motorcycle w/o Sidecar">Motorcycle w/o Sidecar</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vechilePlateNo" className="form-label">Tricycle Plate No.<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="vechilePlateNo"  
+                    name="vechilePlateNo"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vechilePlateNo}
+                    onChange={handleChange}
+                    placeholder="Enter Tricycle Plate No."  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vechileSerialNo" className="form-label">Tricycle Serial No.<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="vechileSerialNo"  
+                    name="vechileSerialNo"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vechileSerialNo}
+                    onChange={handleChange}
+                    placeholder="Enter Tricycle Serial No."  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vechileChassisNo" className="form-label">Tricycle Chassis No.<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="vechileChassisNo"  
+                    name="vechileChassisNo"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vechileChassisNo}
+                    onChange={handleChange}
+                    placeholder="Enter Tricycle Chassis No."  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vechileEngineNo" className="form-label">Tricycle Engine No.<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="vechileEngineNo"  
+                    name="vechileEngineNo"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vechileEngineNo}
+                    onChange={handleChange}
+                    placeholder="Enter Tricycle Engine No."  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vechileFileNo" className="form-label">Tricycle File No.<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="vechileFileNo"  
+                    name="vechileFileNo"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vechileFileNo}
+                    onChange={handleChange}
+                    placeholder="Enter Tricycle File No."  
+                  />
+                </div>
+                
+              </>
+            )}
 
             {(docType ==="Temporary Business Permit"||docType ==="Business Permit") ? (
               <>  
