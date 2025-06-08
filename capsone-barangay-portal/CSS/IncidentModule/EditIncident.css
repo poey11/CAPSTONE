@@ -1155,6 +1155,20 @@ padding: 1rem;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
+.edit-incident-redirection-buttons-selected {
+  width: 270px;
+  height: 50px;
+  background-color: #F0F2F8;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: auto;
+}
+
 .edit-incident-redirection-buttons:hover {
   transform: scale(1.05);
   box-shadow: 0 6px 15px rgba(0,0,0,0.4);
@@ -1170,7 +1184,9 @@ padding: 1rem;
   transform: scale(1.1);
 }
 
-.edit-incident-redirection-buttons h1{
+.edit-incident-redirection-buttons h1,
+.edit-incident-redirection-buttons-selected h1,
+.edit-incident-redirection-buttons-selected-dialogue-hearing h1 {
   color: #2C3E50;
   font-weight: bolder;
   font-size: 16px;
@@ -1474,22 +1490,11 @@ padding: 1rem;
 }
 
 
-.edit-incident-redirection-buttons {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background-color: #ffffff;
-  border: 1px solid #ccc;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-radius 0.2s ease;
-  cursor: pointer;
-}
-
 
 .dialogue-dropdown:hover .edit-incident-redirection-buttons,
-.hearing-dropdown:hover .edit-incident-redirection-buttons
+.hearing-dropdown:hover .edit-incident-redirection-buttons,
+.dialogue-dropdown:hover .edit-incident-redirection-buttons-selected-dialogue-hearing,
+.hearing-dropdown:hover .edit-incident-redirection-buttons-selected-dialogue-hearing
  {
   transform: scale(1.03);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -2035,4 +2040,19 @@ border-left: 10px solid #8a0f0f;
 .icon-alert-letter {
   width: 27px;
   height: 27px;
+}
+
+
+.edit-incident-redirection-buttons-selected-dialogue-hearing {
+  width: 270px;
+  height: 50px;
+  background-color: #F0F2F8;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
 }

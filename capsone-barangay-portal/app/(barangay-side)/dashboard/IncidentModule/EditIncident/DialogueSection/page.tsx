@@ -116,11 +116,11 @@ export default function DialogueSection() {
                 </button>
 
                 <div className="dialogue-dropdown">
-                    <button className="edit-incident-redirection-buttons">
-                    <div className="edit-incident-redirection-icons-section">
-                        <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue" /> 
-                    </div>
-                    <h1>Dialogue Meeting</h1>
+                    <button className="edit-incident-redirection-buttons-selected-dialogue-hearing">
+                        <div className="edit-incident-redirection-icons-section">
+                            <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue" /> 
+                        </div>
+                        <h1>Dialogue Meeting</h1>
                     </button>
 
                     <div className="dialogue-submenu">
