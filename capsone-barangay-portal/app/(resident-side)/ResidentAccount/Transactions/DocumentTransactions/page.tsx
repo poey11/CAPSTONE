@@ -185,6 +185,15 @@ export default function DocumentTransactionsDetails() {
             ]
             :[]
         ),
+        ...(transactionData?.purpose === "Garage/PUV" ? 
+            [
+                { label: "Purpose of Certificate", key: "puvPurpose" },
+                { label: "Vehicle Description", key: "vehicleType" },
+                { label: "No of Vehicles", key: "nosOfPUV" },
+                
+            ]
+            :[]
+        ),
         ...(transactionData?.purpose === "Cohabitation"
             ? [
                 { label: "Partner/Wife/Husband Full Name", key: "partnerWifeHusbandFullName" },

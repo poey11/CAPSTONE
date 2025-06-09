@@ -37,13 +37,13 @@ export default function Action() {
     businessLocation: "",// will be project location
     businessNature: "",
     noOfVechicles: "1",
-    vechileMake: "",
-    vechileType: "",
-    vechilePlateNo: "",
-    vechileSerialNo: "",
-    vechileChassisNo: "",
-    vechileEngineNo: "",
-    vechileFileNo: "",
+    vehicleMake: "",
+    vehicleType: "",
+    vehiclePlateNo: "",
+    vehicleSerialNo: "",
+    vehicleChassisNo: "",
+    vehicleEngineNo: "",
+    vehicleFileNo: "",
     estimatedCapital: "",
     businessName: "",
     birthday: "",
@@ -405,13 +405,18 @@ const handleFileChange = (
             businessLocation: clearanceInput.businessLocation,
             noOfTRU: clearanceInput.noOfVechicles,
             businessNature: clearanceInput.businessNature,
-            tricycleMake: clearanceInput.vechileMake,
-            tricycleType: clearanceInput.vechileType,
-            tricyclePlateNo: clearanceInput.vechilePlateNo,
-            tricycleSerialNo: clearanceInput.vechileSerialNo,
-            tricycleChassisNo: clearanceInput.vechileChassisNo,
-            tricycleEngineNo: clearanceInput.vechileEngineNo,
-            tricycleFileNo: clearanceInput.vechileFileNo,
+            tricycleMake: clearanceInput.vehicleMake,
+            tricycleType: clearanceInput.vehicleType,
+            tricyclePlateNo: clearanceInput.vehiclePlateNo,
+            tricycleSerialNo: clearanceInput.vehicleSerialNo,
+            tricycleChassisNo: clearanceInput.vehicleChassisNo,
+            tricycleEngineNo: clearanceInput.vehicleEngineNo,
+            tricycleFileNo: clearanceInput.vehicleFileNo,
+          }),
+          ...(clearanceInput.purpose === "Garage/PUV" && {
+            vehicleType: clearanceInput.vehicleType,
+            nosOfPUV: clearanceInput.noOfVechicles,
+            puvPurpose: clearanceInput.goodMoralOtherPurpose,
           }),
           birthday: clearanceInput.birthday,
           age: clearanceInput.age,
@@ -798,26 +803,26 @@ const handleFileChange = (
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="vechileMake" className="form-label">Tricycle Make<span className="required">*</span></label>
+                  <label htmlFor="vehicleMake" className="form-label">Tricycle Make<span className="required">*</span></label>
                   <input 
                     type="text"  
-                    id="vechileMake"  
-                    name="vechileMake"  
+                    id="vehicleMake"  
+                    name="vehicleMake"  
                     className="form-input"  
                     required 
-                    value={clearanceInput.vechileMake}
+                    value={clearanceInput.vehicleMake}
                     onChange={handleChange}
                     placeholder="Enter Tricycle Make"  
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="vechileType" className="form-label">Tricycle Type<span className="required">*</span></label>
+                  <label htmlFor="vehicleType" className="form-label">Tricycle Type<span className="required">*</span></label>
                   <select
-                    id="vechileType"  
-                    name="vechileType"  
+                    id="vehicleType"  
+                    name="vehicleType"  
                     className="form-input"  
                     required 
-                    value={clearanceInput.vechileType}
+                    value={clearanceInput.vehicleType}
                     onChange={handleChange}
                     
                   >
@@ -827,66 +832,66 @@ const handleFileChange = (
                   </select>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="vechilePlateNo" className="form-label">Tricycle Plate No.<span className="required">*</span></label>
+                  <label htmlFor="vehiclePlateNo" className="form-label">Tricycle Plate No.<span className="required">*</span></label>
                   <input 
                     type="text"  
-                    id="vechilePlateNo"  
-                    name="vechilePlateNo"  
+                    id="vehiclePlateNo"  
+                    name="vehiclePlateNo"  
                     className="form-input"  
                     required 
-                    value={clearanceInput.vechilePlateNo}
+                    value={clearanceInput.vehiclePlateNo}
                     onChange={handleChange}
                     placeholder="Enter Tricycle Plate No."  
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="vechileSerialNo" className="form-label">Tricycle Serial No.<span className="required">*</span></label>
+                  <label htmlFor="vehicleSerialNo" className="form-label">Tricycle Serial No.<span className="required">*</span></label>
                   <input 
                     type="text"  
-                    id="vechileSerialNo"  
-                    name="vechileSerialNo"  
+                    id="vehicleSerialNo"  
+                    name="vehicleSerialNo"  
                     className="form-input"  
                     required 
-                    value={clearanceInput.vechileSerialNo}
+                    value={clearanceInput.vehicleSerialNo}
                     onChange={handleChange}
                     placeholder="Enter Tricycle Serial No."  
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="vechileChassisNo" className="form-label">Tricycle Chassis No.<span className="required">*</span></label>
+                  <label htmlFor="vehicleChassisNo" className="form-label">Tricycle Chassis No.<span className="required">*</span></label>
                   <input 
                     type="text"  
-                    id="vechileChassisNo"  
-                    name="vechileChassisNo"  
+                    id="vehicleChassisNo"  
+                    name="vehicleChassisNo"  
                     className="form-input"  
                     required 
-                    value={clearanceInput.vechileChassisNo}
+                    value={clearanceInput.vehicleChassisNo}
                     onChange={handleChange}
                     placeholder="Enter Tricycle Chassis No."  
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="vechileEngineNo" className="form-label">Tricycle Engine No.<span className="required">*</span></label>
+                  <label htmlFor="vehicleEngineNo" className="form-label">Tricycle Engine No.<span className="required">*</span></label>
                   <input 
                     type="text"  
-                    id="vechileEngineNo"  
-                    name="vechileEngineNo"  
+                    id="vehicleEngineNo"  
+                    name="vehicleEngineNo"  
                     className="form-input"  
                     required 
-                    value={clearanceInput.vechileEngineNo}
+                    value={clearanceInput.vehicleEngineNo}
                     onChange={handleChange}
                     placeholder="Enter Tricycle Engine No."  
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="vechileFileNo" className="form-label">Tricycle File No.<span className="required">*</span></label>
+                  <label htmlFor="vehicleFileNo" className="form-label">Tricycle File No.<span className="required">*</span></label>
                   <input 
                     type="text"  
-                    id="vechileFileNo"  
-                    name="vechileFileNo"  
+                    id="vehicleFileNo"  
+                    name="vehicleFileNo"  
                     className="form-input"  
                     required 
-                    value={clearanceInput.vechileFileNo}
+                    value={clearanceInput.vehicleFileNo}
                     onChange={handleChange}
                     placeholder="Enter Tricycle File No."  
                   />
@@ -895,6 +900,54 @@ const handleFileChange = (
               </>
             )}
 
+            {clearanceInput.purpose === "Garage/PUV" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="goodMoralOtherPurpose" className="form-label">Certificate Purpose<span className="required">*</span></label>
+                  <input 
+                    type="text"
+                    id="goodMoralOtherPurpose"  
+                    name="goodMoralOtherPurpose"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.goodMoralOtherPurpose}
+                    onChange={handleChange}
+                    
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vehicleType" className="form-label">Vehicle Description<span className="required">*</span></label>
+                  <input 
+                    type="text"
+                    id="vehicleType"  
+                    name="vehicleType"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vehicleType}
+                    onChange={handleChange}   
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="noOfVechicles" className="form-label">Nos Of Vehicle/s<span className="required">*</span></label>
+                  <input 
+                    type="number"  
+                    id="noOfVechicles"  
+                    name="noOfVechicles"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.noOfVechicles}
+                    onChange={handleChange}
+                    min={1}
+                    onKeyDown={(e)=> {
+                      if (e.key === 'e' || e.key === '-' || e.key === '+') {
+                        e.preventDefault(); // Prevent scientific notation and negative/positive signs
+                      }
+                    }
+                    } // Prevent manual input
+                  />
+                </div>
+              </>
+            )}
             {(docType ==="Temporary Business Permit"||docType ==="Business Permit") ? (
               <>  
                 <div className="form-group">

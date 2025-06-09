@@ -33,6 +33,9 @@ interface EmergencyDetails {
     purpose: string;
     requestDate: string;
     fullName: string;
+    nosOfPUV: string;
+    puvPurpose: string;
+    vehicleType: string;
     appointmentDate: string;
     dateOfResidency: string;
     address: string; // Will also be the home address
@@ -189,6 +192,9 @@ const ViewOnlineRequest = () => {
         { key: "businessName", label: "Business Name" },
         { key: "businessNature", label: "Business Nature" },
         { key: "businessLocation", label: "Business Location" },
+        { key: "puvPurpose", label: "Purpose of Certificate" },
+        { key: "vehicleType", label: "Vehicle Description"  },            
+        { key: "nosOfPUV", label: "No of Vehicles"  },
         { key: "noOfTRU", label: "No Of Tricycle" },
         { key: "tricycleMake", label: "Tricycle Make" },
         { key: "tricycleType", label: "Tricycle Type"  },
@@ -472,6 +478,19 @@ const ViewOnlineRequest = () => {
                 "Text14": dayToday,
                 "Text15": `${monthToday} ${yearToday}`,
             };
+        }
+        else if(requestData?.purpose === "Garage/PUV"){
+            locationPath = "certificate of puv.pdf";
+            reqData = {
+                "Text1":`${requestData?.vehicleType.toUpperCase()}`,
+                "Text2": requestData?.fullName.toUpperCase(),
+                "Text3": requestData?.address.toUpperCase(),
+                "Text4": `${toWords(parseInt(requestData?.nosOfPUV)).toUpperCase()} (${requestData?.nosOfPUV})`,
+                "Text5": requestData?.puvPurpose,
+                "Text6": dayToday,
+                "Text7": `${monthToday} ${yearToday}`,
+            }
+
         }
 
 
