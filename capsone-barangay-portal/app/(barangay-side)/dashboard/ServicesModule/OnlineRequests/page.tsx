@@ -17,7 +17,7 @@ import { db } from "@/app/db/firebase";
       try {
         const Collection = query(
           collection(db, "ServiceRequests"),
-          orderBy("requestDate", "desc") // First, sort by latest
+          orderBy("createdAt", "desc") // First, sort by latest
         );
       
         const unsubscribe = onSnapshot(Collection, (snapshot) => {
@@ -33,7 +33,7 @@ import { db } from "@/app/db/firebase";
             }
           
             // Convert string dates to timestamps
-            return new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime();
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
           });
         
           setRequestData(reports);
@@ -145,10 +145,10 @@ import { db } from "@/app/db/firebase";
             <thead>
               <tr>
                 <th>Document Type</th>
-                <th>Purpose</th>
-                <th>Name</th>
-                <th>Contact</th>
+                <th>Request ID</th>
                 <th>Request Date</th>
+                <th>Requestor</th>
+                <th>Purpose</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -157,10 +157,10 @@ import { db } from "@/app/db/firebase";
             {requestData.map((request, index) => (
               <tr key={index}>
                 <td>{request.docType}</td>
+                <td>{request.requestId}</td>
+                <td>{request.createdAt}</td>
+                <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
-                <td>{request.firstName} {request.middleName} {request.lastName}</td>
-                <td>{request.contact}</td>
-                <td>{request.requestDate}</td>
                 <td>
                     <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
                         {request.status}
@@ -174,9 +174,6 @@ import { db } from "@/app/db/firebase";
                     >
                         View
                     </button>
-
-
-                    
 
                   </div>
                 </td>

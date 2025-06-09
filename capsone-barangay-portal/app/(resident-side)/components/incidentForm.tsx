@@ -272,7 +272,7 @@ const incidentForm:React.FC = () => {
           status: incidentReport.status,
           isFiled: false,
           addInfo: incidentReport.addInfo,
-          createdAt: new Date(),
+          createdAt: new Date().toLocaleString(),
         }];
         console.log(toAdd);
         handleReportUpload(toAdd, storageRef);

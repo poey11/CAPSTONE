@@ -18,9 +18,10 @@ export default function GenerateDialougeLetter() {
     const [listOfStaffs, setListOfStaffs] = useState<any[]>([]);
     const [userInfo, setUserInfo] = useState<any | null>(null);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
-    const [showSubmitPopup, setShowSubmitPopup] = useState<{ show: boolean; message: string; letterType?: "dialogue" | "summon" }>({
+    const [showSubmitPopup, setShowSubmitPopup] = useState<{ show: boolean; message: string; message2: string; letterType?: "dialogue" | "summon" }>({
         show: false,
         message: "",
+        message2: "",
         letterType: undefined,
     });
 
@@ -180,6 +181,8 @@ export default function GenerateDialougeLetter() {
  
     const sendSMSForDialogue = async () => {
      //dont forget to add the assing staff contact number
+       setIsLoading(true); // Start loading
+
 
       try{
         const response = await fetch("/api/clickSendApi", {
@@ -189,8 +192,7 @@ export default function GenerateDialougeLetter() {
             },
             body: JSON.stringify({
                 to: otherInfo.complainant.contact,
-                message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, a dialogue invitation will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
-                Please wait for the invitation. Thank you!`
+                message: `Good day Mr./Ms. ${otherInfo.complainant.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a dialogue invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled dialogue between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.\n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
             })
         });
         if (!response.ok) throw new Error("Failed to send SMS");
@@ -206,18 +208,29 @@ export default function GenerateDialougeLetter() {
             },
             body: JSON.stringify({
                 to: otherInfo.respondent.contact,
-                message: `Hello Mr/Ms. ${otherInfo.respondent.fname}, a dialogue invitation will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
-                Please wait for the invitation. Thank you!`
+               message: `Good day Mr./Ms. ${otherInfo.respondent.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a dialogue invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled dialogue between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.\n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
             })
         });
         if (!responseB.ok) throw new Error("Failed to send SMS");
+
+           setShowSubmitPopup({
+                show: true,
+                message: "SMS message for both parties sent succesfuly!",
+                message2: "",
+                letterType: "dialogue",
+            });
+
 
         const dataB = await responseB.json();
         console.log(dataB);
       }
       catch(err) {
         console.log(err);
-      }  
+      }  finally {  //ADDED
+             setTimeout(() => {
+            setIsLoading(false); // End loading after 2 seconds
+        }, 2000);
+       }
       
     }
 
@@ -230,8 +243,7 @@ export default function GenerateDialougeLetter() {
               },
               body: JSON.stringify({
                   to: otherInfo.respondent.contact,
-                  message: `Hello Mr/Ms. ${otherInfo.respondent.fname}, a summons will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
-                Please wait for the invitation. Thank you!`
+                     message: `Good day Mr./Ms. ${otherInfo.respondent.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a Hearing invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled hearing between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.\n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
               })
           });
           if (!response.ok) throw new Error("Failed to send SMS");
@@ -246,18 +258,29 @@ export default function GenerateDialougeLetter() {
             },
             body: JSON.stringify({
                 to: otherInfo.complainant.contact,
-                message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, a summons will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
-              Please wait for the invitation. Thank you!`
+                 message: `Good day Mr./Ms. ${otherInfo.complainant.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a Hearing invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled hearing between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.\n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
             })
         });
         if (!responseB.ok) throw new Error("Failed to send SMS");
+
+              setShowSubmitPopup({
+                show: true,
+                message: "SMS message for both parties sent succesfuly!",
+                message2: "",
+                letterType: "summon",
+            });
+
 
         const dataB = await responseB.json();
         console.log(dataB);
         }
         catch(err) {
           console.log(err);
-        }  
+        }   finally {  //ADDED
+             setTimeout(() => {
+            setIsLoading(false); // End loading after 2 seconds
+        }, 2000);
+       }
     }
   
 
@@ -329,6 +352,7 @@ export default function GenerateDialougeLetter() {
             setShowSubmitPopup({
                 show: true,
                 message: "Dialogue Letter has been generated successfully!",
+                message2: "Next: Complete the dialogue section after the meeting.",
                 letterType: "dialogue",
             });
 
@@ -424,6 +448,7 @@ export default function GenerateDialougeLetter() {
           setShowSubmitPopup({
                 show: true,
                 message: "Summon Letter has been generated successfully!",
+                message2: "Next: Complete the hearing section after the meeting",
                 letterType: "summon",
             });
 
@@ -643,15 +668,18 @@ export default function GenerateDialougeLetter() {
             {showSubmitPopup.show && (
             <div className="popup-backdrop">
                 <div className="popup-content">
-                <img
-                    src="/Images/check.png"
-                    alt="warning icon"
-                    className="successful-icon-popup-letter"
-                />
-                <p>{showSubmitPopup.message}</p>
+                    
+                        <img
+                            src="/Images/check.png"
+                            alt="warning icon"
+                            className="successful-icon-popup-letter"
+                        />
+                        <p>{showSubmitPopup.message}</p>
+                        <h2>{showSubmitPopup.message2}</h2>
+        
                 <button
                     onClick={() => {
-                    setShowSubmitPopup({ show: false, message: "", letterType: undefined });
+                    setShowSubmitPopup({ show: false, message: "", message2: "",letterType: undefined });
                     if (showSubmitPopup.letterType === "dialogue") {
                         router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
                     } else if (showSubmitPopup.letterType === "summon") {
@@ -1131,23 +1159,6 @@ export default function GenerateDialougeLetter() {
         )} */}
 
 
-        {/*
-
-            CINOMMENT NI DERICK NOT SUR IF NEED PA IDISPLAY 
-
-          {actionId === "summon" && (
-            Array.from({ length: safeData.length }, (_, i) => (
-                <Letter 
-                key={i}
-                DateOfDelivery={safeData[i].DateOfDelivery}
-                DateFiled={safeData[i].DateFiled}
-                DateTimeOfMeeting={safeData[i].DateTimeOfMeeting}
-                LuponStaff={safeData[i].LuponStaff}
-                hearingNumber={safeData[i].hearingNumber}
-                />
-            ))
-        )}
-        */}
       
 
 

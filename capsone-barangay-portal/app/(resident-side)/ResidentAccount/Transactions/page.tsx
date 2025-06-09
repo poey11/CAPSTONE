@@ -44,8 +44,8 @@ export default function Transactions() {
                 }));
     
                 const combined = [...incidents, ...services].sort((a, b) => {
-                    const dateA = new Date((a as any).dateFiled || (a as any).requestDate || 0);
-                    const dateB = new Date((b as any).dateFiled || (b as any).requestDate || 0);
+                    const dateA = new Date((a as any).createdAt);
+                    const dateB = new Date((b as any).createdAt);
                     return dateB.getTime() - dateA.getTime(); // Latest first
                 });
     
@@ -123,8 +123,8 @@ export default function Transactions() {
                             <thead>
                                 <tr>
                                     <th>Date</th>
-                                    <th>Type</th>
                                     <th>Reference ID</th>
+                                    <th>Type</th>
                                     <th>Details</th>
                                     <th>Purpose</th>
                                     <th>Status</th>
@@ -133,13 +133,15 @@ export default function Transactions() {
                             <tbody>
                                 {filteredTransactions.map((item) => (
                                     <tr key={item.id} onClick={() => handleTransactionClick(item)}>
-                                        <td>{item.dateFiled || item.requestDate || "N/A"}</td>
-                                        <td>{item.type === "IncidentReport" ? "Incident Report" : "Document Request"}</td>
+                                        <td>{item.createdAt || item.requestDate ||"N/A"}</td>
                                         <td>
                                             {item.caseNumber && item.caseNumber.split(" - ").length >= 3
                                                 ? `${item.caseNumber.split(" - ")[1]} - ${item.caseNumber.split(" - ")[2]}`
+                                                : item.requestId && item.requestId.split(" - ").length >= 3
+                                                ? `${item.requestId.split(" - ")[1]} - ${item.requestId.split(" - ")[2]}`
                                                 : "N/A"}
                                         </td>
+                                        <td>{item.type === "IncidentReport" ? "Incident Report" : "Document Request"}</td>
                                         <td>{item.concerns || item.docType || "N/A"}</td>
                                         <td>{item.purpose || "N/A"}</td>
                                         <td>
