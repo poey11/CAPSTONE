@@ -18,9 +18,10 @@ export default function GenerateDialougeLetter() {
     const [listOfStaffs, setListOfStaffs] = useState<any[]>([]);
     const [userInfo, setUserInfo] = useState<any | null>(null);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
-    const [showSubmitPopup, setShowSubmitPopup] = useState<{ show: boolean; message: string; letterType?: "dialogue" | "summon" }>({
+    const [showSubmitPopup, setShowSubmitPopup] = useState<{ show: boolean; message: string; message2: string; letterType?: "dialogue" | "summon" }>({
         show: false,
         message: "",
+        message2: "",
         letterType: undefined,
     });
 
@@ -329,6 +330,7 @@ export default function GenerateDialougeLetter() {
             setShowSubmitPopup({
                 show: true,
                 message: "Dialogue Letter has been generated successfully!",
+                message2: "Next: Complete the dialogue section after the meeting.",
                 letterType: "dialogue",
             });
 
@@ -424,6 +426,7 @@ export default function GenerateDialougeLetter() {
           setShowSubmitPopup({
                 show: true,
                 message: "Summon Letter has been generated successfully!",
+                message2: "Next: Complete the hearing section after the meeting",
                 letterType: "summon",
             });
 
@@ -643,15 +646,18 @@ export default function GenerateDialougeLetter() {
             {showSubmitPopup.show && (
             <div className="popup-backdrop">
                 <div className="popup-content">
-                <img
-                    src="/Images/check.png"
-                    alt="warning icon"
-                    className="successful-icon-popup-letter"
-                />
-                <p>{showSubmitPopup.message}</p>
+                    
+                        <img
+                            src="/Images/check.png"
+                            alt="warning icon"
+                            className="successful-icon-popup-letter"
+                        />
+                        <p>{showSubmitPopup.message}</p>
+                        <h2>{showSubmitPopup.message2}</h2>
+        
                 <button
                     onClick={() => {
-                    setShowSubmitPopup({ show: false, message: "", letterType: undefined });
+                    setShowSubmitPopup({ show: false, message: "", message2: "",letterType: undefined });
                     if (showSubmitPopup.letterType === "dialogue") {
                         router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
                     } else if (showSubmitPopup.letterType === "summon") {
