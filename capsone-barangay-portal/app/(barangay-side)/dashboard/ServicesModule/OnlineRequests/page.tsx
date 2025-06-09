@@ -12,6 +12,8 @@ import { db } from "@/app/db/firebase";
   export default function OnlineRequests() {
     const [requestData, setRequestData] = useState<any[]>([]);
     const router = useRouter();
+
+    
     
     useEffect(() => {
       try {
@@ -94,30 +96,37 @@ import { db } from "@/app/db/firebase";
     return (
 
         <main className="onlinereq-main-container">
-         <div className="onlinereq-section-1">
-          <h1>Online Document Requests</h1>
-          
-         </div>
+
+
+              {/*}
+      <div className="path-section">
+          <h1 className="breadcrumb">Serivices Managemnt<span className="chevron">/</span></h1>
+          <h2 className="breadcrumb">Online Requests<span className="chevron"></span></h2>
+      </div>*/}
+
+
+
+
          <div className="onlinereq-section-2">
           <input 
               type="text" 
-              className="search-bar" 
+              className="online-services-module-filter" 
               placeholder="Enter Document Type" 
           />
           <input 
                 type="date" 
-                className="search-bar" 
+                className="online-services-module-filter" 
                 placeholder="Select Date From" 
             />
             <input 
                 type="date" 
-                className="search-bar" 
+                className="online-services-module-filter" 
                 placeholder="Select Date To" 
             />
           <select 
             id="featuredStatus" 
             name="featuredStatus" 
-            className="featuredStatus" 
+            className="online-services-module-filter" 
             required
             defaultValue=""  
           >
@@ -130,7 +139,7 @@ import { db } from "@/app/db/firebase";
           <select 
             id="featuredStatus" 
             name="featuredStatus" 
-            className="featuredStatus" 
+            className="online-services-module-filter" 
             required
             defaultValue=""  
           >

@@ -1,10 +1,12 @@
 .onlinereq-main-container{
-    width: 100%;
+     width: 100%;
     height: 100vh;
-    background-color: #f9f9f9;
-    padding:30px;
-    margin-left: 3rem;
-    overflow-y: auto; 
+   background-color: #F0F2F8; 
+    padding-left:30px;
+    padding-right:30px;
+    padding-bottom:30px;
+    padding-top: 150px;
+    margin-left: 3rem; 
 }
 
 .onlinereq-section-1{
@@ -38,22 +40,35 @@
     display: flex;
     gap: 20px;
     padding: 0;
-    margin-top: 25px;
+    margin-top: 5px; /*ADDDED TANDAAN MO TO DERICK*/
   }
 
-  .search-bar, .featuredStatus{
+
+.online-services-module-filter{
     padding: 8px;
     width: 100%;
     max-width: 400px;
     margin-top: 10px;
-    border: 1px solid #ccc;
+     border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
-    color: rgba(0, 0, 0, 0.4);
+    color: #000000;
+    text-align: left;
   }
 
-  .featuredStatus option {
+
+
+  .online-services-module-filter:focus {
+    border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+
+  .online-services-module-filter option {
     color: rgba(0, 0, 0, 0.4); 
   }
+
+
+
 
   .section-3{
     display: flex;
@@ -70,17 +85,29 @@
 
 
 .onlinereq-main-section {
-    flex: 1; /* Makes it take up remaining space */
-    display: flex; /* Ensures proper alignment */
+    flex: 1; 
+    display: flex; 
     flex-direction: column;
     padding: 0;
     margin: 0; /* Remove default margin */
     overflow: auto; /* Allow scrolling if content overflows */
     width: 100%;
-    height: 100%; /* Full height */
-    margin-top: 2rem;
-    border: 2px solid  #ddd;
+    height: 100%; 
     max-height: 70%;
+    margin-top: 2rem;
+     border: 2px solid rgba(36, 53, 76, 0.7);
+     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
+    border-radius: 6px;
+}
+
+.onlinereq-main-section thead {
+  position: sticky;
+  top: 0;
+  background-color: #214666; 
+  z-index: 10; /* Ensures it stays above other content */
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
+  height: 80px;
 }
 
 .onlinereq-main-section table {
@@ -92,18 +119,19 @@
     padding: 1rem; 
     text-align: center; 
     border-bottom: 2px solid #ddd;
-    color: grey;
-    font-weight: lighter;
+ color: rgb(44, 42, 42);
+    font-weight: normal;
 }
 
 .onlinereq-main-section th {
-    padding: 1rem; 
+   padding: 1rem; 
     text-align: left; 
     border-bottom: 2px solid #ddd;
-    color: grey;
+    color: #FFFFFF;
     text-align: center;
-    
 }
+
+
 
 .onlinereq-main-section .announcement-info {
     display: flex;
@@ -210,19 +238,18 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 2rem auto;
-    width: fit-content;
-    padding: 10px;
-    border: 2px solid #ddd;
+    padding: 5px;
     border-radius: 5px;
-    background: #f8f8f8;
     gap: 5px;
+      border: 2px solid rgba(36, 53, 76, 0.7);
+     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
   }
   
   .redirection-section button {
     padding: 4px 8px;
     border: none;
-    background-color: #007bff;
+    background-color: #2C3E50;
     color: white;
     cursor: pointer;
     border-radius: 4px;
@@ -230,7 +257,7 @@
   }
   
   .redirection-section button:hover {
-    background-color: #0056b3;
+    background-color: #214666;
   }
   
   .redirection-section button:disabled {
@@ -239,16 +266,41 @@
   }
   
   .redirection-section .active {
-    background-color: #0056b3;
+     background-color: #214666;
     font-weight: bold;
   }
-
-.main-section tr:hover {
-    background-color: #e0e0e0; 
-    cursor: pointer; 
-    transition: background-color 0.2s ease; 
-  }
   
+
+
+  /*
+.path-section {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.path-section h1 {
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.path-section h2 {
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: rgba(61, 61, 61, 0.5);
+}
+
+.breadcrumb {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.chevron {
+  color: #888;
+  margin-left: 10px;
+}*/
+
 
 
 
