@@ -1,47 +1,67 @@
 "use client"
 
 import { useRouter } from "next/navigation";
-import type { Metadata } from "next";
 import "@/CSS/barangaySide/ServicesModule/Appointments.css";
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
+import Calendar from "@/app/(barangay-side)/components/calender";
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { db } from "@/app/db/firebase";
+import { request } from "http";
 
 
-const metadata: Metadata = {
-    title: "Appointments",
-    description: "Appointments in Services Module",
-  };
+type Appointment = {
+    id: string;
+    title: string;
+    date: string; // format: 'YYYY-MM-DD'
+    requestStatus?: string; // Optional field for sorting
+
+  }
 
 
   export default function Appointments() {
-    const requestData = [
-        {
-            appointmentType: "Barangay Indigency",
-            purpose: "No Income",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            time: "09:00 AM - 09:30 AM",
-            status: "Completed",
-        },
-        {
-            appointmentType: "Barangay Certificate",
-            purpose: "Certificate of Residency",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            time: "10:00 AM - 10:30 AM",
-            status: "Pending",
-        },
-        {
-            appointmentType: "Barangay Certificate",
-            purpose: "Certificate of Residency",
-            name: "Jonnell Quebal",
-            contact: "09171218101",
-            date: "2024-01-17",
-            time: "11:00 AM - 11:30 AM",
-            status: "Pending",
-        },
-    ];
+
+    const [data, setData] = useState<any[]>([]);
+
+    useEffect(() => {
+      try {
+        const Collection = query(collection(db, "ServiceRequests"));
+      
+        const unsubscribe = onSnapshot(Collection, (snapshot) => {
+          const reports = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+        
+          setData(reports); // don't sort here
+        });
+      
+        return unsubscribe;
+      } catch (error: any) {
+        console.error(error.message);
+      }
+    }, []);
+
+
+
+    const appointmentData: Appointment[] = useMemo(() => {
+      return [...data]
+        .sort((a, b) => {
+          if (a.statusPriority !== b.statusPriority) {
+            return a.statusPriority - b.statusPriority;
+          }
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        })
+        .map((item) => ({
+          id: item.id,
+          title: `${item.docType} - ${item.purpose}`,
+          date:
+            item.appointmentDate,
+          requestStatus: item.status,
+          statusPriority: item.statusPriority,
+        }));
+    }, [data]);
+
+    console.log(appointmentData);
 
     const router = useRouter();
 
@@ -151,59 +171,9 @@ const getPageNumbers = () => {
             <option value="inactive">Show 10</option>
           </select>
          </div>
+          <Calendar appointments={appointmentData} />
 
-         <div className="appointments-main-section">
-          <table>
-            <thead>
-              <tr>
-                <th>Appointment Type</th>
-                <th>Purpose</th>
-                <th>Name</th>
-                <th>Contact</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-            {requestData.map((request, index) => (
-              <tr key={index}>
-                <td>{request.appointmentType}</td>
-                <td>{request.purpose}</td>
-                <td>{request.name}</td>
-                <td>{request.contact}</td>
-                <td>{request.date}</td>
-                <td>{request.time}</td>
-                <td>
-                    <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
-                        {request.status}
-                    </span>
-                </td>
-                <td>
-                  <div className="actions">
-                    <button
-                        className="action-view"
-                        onClick={handleView}
-                    >
-                        View
-                    </button>
-                    <button
-                        className="action-edit"
-                        onClick={handleEdit}
-                    >
-                        Edit
-                    </button>
-                    <button className="action-delete">Delete</button>
-                    <button type="button" className="action-view" onClick={handleSMS}>SMS</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            </tbody>
-          </table>
-        </div>
-
+         
         <div className="redirection-section">
         <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
         {getPageNumbers().map((number, index) => (
@@ -217,7 +187,6 @@ const getPageNumbers = () => {
         ))}
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
-
       </main>
         
     );
