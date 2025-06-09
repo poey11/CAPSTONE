@@ -9,9 +9,18 @@ import { db } from "@/app/db/firebase";
 
 
 
+
   export default function OnlineRequests() {
     const [requestData, setRequestData] = useState<any[]>([]);
     const router = useRouter();
+    const [searchType, setSearchType] = useState("");
+    const [dateFrom, setDateFrom] = useState("");
+    const [dateTo, setDateTo] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+
+    const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [onlineRequests, setOnlineRequests] = useState([]);
 
     
     
@@ -39,6 +48,10 @@ import { db } from "@/app/db/firebase";
           });
         
           setRequestData(reports);
+           setFilteredOnlineRequests(reports); 
+
+        setLoading(false);
+        setError(null);
         });
       
         return unsubscribe;
@@ -46,6 +59,37 @@ import { db } from "@/app/db/firebase";
         console.log(error.message);
       }
     }, []);
+
+
+    useEffect(() => {
+      let filtered = requestData;
+
+      // Filter by Document Type
+      if (searchType.trim() !== "") {
+        filtered = filtered.filter((req) =>
+          req.docType.toLowerCase().includes(searchType.toLowerCase())
+        );
+      }
+
+      // Filter by Date Range
+      if (dateFrom && dateTo) {
+        filtered = filtered.filter((req) => {
+          const requestDate = new Date(req.createdAt);
+          return requestDate >= new Date(dateFrom) && requestDate <= new Date(dateTo);
+        });
+      }
+
+      // Filter by Status
+      if (statusFilter !== "") {
+        filtered = filtered.filter(
+          (req) => req.status.toLowerCase() === statusFilter.toLowerCase()
+        );
+      }
+
+      setFilteredOnlineRequests(filtered);
+      setCurrentPage(1); // reset to first page when filters change
+    }, [searchType, dateFrom, dateTo, statusFilter, requestData]);
+
 
 
     console.log(requestData);
@@ -108,48 +152,55 @@ import { db } from "@/app/db/firebase";
 
 
          <div className="onlinereq-section-2">
-          <input 
-              type="text" 
-              className="online-services-module-filter" 
-              placeholder="Enter Document Type" 
-          />
-          <input 
-                type="date" 
-                className="online-services-module-filter" 
-                placeholder="Select Date From" 
+              <input
+              type="text"
+              className="online-services-module-filter"
+              placeholder="Enter Document Type"
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
             />
-            <input 
-                type="date" 
-                className="online-services-module-filter" 
-                placeholder="Select Date To" 
+
+            <input
+              type="date"
+              className="online-services-module-filter"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
             />
-          <select 
-            id="featuredStatus" 
-            name="featuredStatus" 
-            className="online-services-module-filter" 
-            required
-            defaultValue=""  
-          >
-            <option value="" disabled>Select Status</option>
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-            <option value="rejected">Rejected</option>
-            <option value="forpickup">For Pick Up</option>
-          </select>
-          <select 
-            id="featuredStatus" 
-            name="featuredStatus" 
-            className="online-services-module-filter" 
-            required
-            defaultValue=""  
-          >
-            <option value="" disabled>Show...</option>
-            <option value="active">Show 5</option>
-            <option value="inactive">Show 10</option>
-          </select>
+
+            <input
+              type="date"
+              className="online-services-module-filter"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+            />
+
+            <select
+              className="online-services-module-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="" disabled>Select Status</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="rejected">Rejected</option>
+              <option value="forpickup">For Pick Up</option>
+            </select>
+
          </div>
 
          <div className="onlinereq-main-section">
+          
+              {loading ? (
+            <p>Loading Online Requests...</p>
+          ) : error ? (
+            <p className="error">{error}</p>
+          ) : currentOnlineRequests.length === 0 ? (
+            <div className="no-result-card-services">
+              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-services" />
+              <p className="no-results-services">No Results Found</p>
+            </div>
+          ) : (
+
           <table>
             <thead>
               <tr>
@@ -163,7 +214,7 @@ import { db } from "@/app/db/firebase";
               </tr>
             </thead>
             <tbody>
-            {requestData.map((request, index) => (
+          {currentOnlineRequests.map((request, index) => (
               <tr key={index}>
                 <td>{request.docType}</td>
                 <td>{request.requestId}</td>
@@ -176,12 +227,12 @@ import { db } from "@/app/db/firebase";
                     </span>
                 </td>
                 <td>
-                  <div className="actions">
+                  <div className="-services-actions">
                     <button
                         className="action-view"
                         onClick={() => handleView(request.id)}
                     >
-                        View
+                       <img src="/Images/view.png" alt="View" />
                     </button>
 
                   </div>
@@ -190,6 +241,7 @@ import { db } from "@/app/db/firebase";
             ))}
             </tbody>
           </table>
+            )}
         </div>
 
         <div className="redirection-section">
