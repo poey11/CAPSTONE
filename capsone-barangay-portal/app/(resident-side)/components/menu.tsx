@@ -144,7 +144,7 @@ const Menu = () => {
 
       const q = query(
         collection(db, "Notifications"),
-        where("residentID", "==", user.uid)
+        where("residentID", "==", user.uid), orderBy("timestamp", "desc")
       );  
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const fetchedNotifications: Notification[] = snapshot.docs.map((doc) => ({

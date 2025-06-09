@@ -8,6 +8,9 @@ import { db, storage, auth } from "@/app/db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/navigation";
 import {getLocalDateString} from "@/app/helpers/helpers";
+import {customAlphabet} from "nanoid";
+import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
+import { clear } from "console";
 
 
 
@@ -18,19 +21,29 @@ export default function Action() {
   const searchParam = useSearchParams();
   const docType = searchParam.get("doc");
   const router = useRouter();
-  console.log(docType);
+  const [nos, setNos] = useState(0);
   const [clearanceInput, setClearanceInput] =  useState<any>({
     accountId: user?.uid || "Guest",
+    docType: docType ,
+    requestId: "",
     purpose: "",
     dateRequested: new Date().toLocaleString(),
-    firstName: "",
+    fullName: "",
     appointmentDate: "",
-    lastName: "",
     dateOfResidency: "",
     dateofdeath: "",
     address: "",//will be also the home address
+    toAddress: "",// will be also the home address
     businessLocation: "",// will be project location
     businessNature: "",
+    noOfVechicles: "1",
+    vehicleMake: "",
+    vehicleType: "",
+    vehiclePlateNo: "",
+    vehicleSerialNo: "",
+    vehicleChassisNo: "",
+    vehicleEngineNo: "",
+    vehicleFileNo: "",
     estimatedCapital: "",
     businessName: "",
     birthday: "",
@@ -55,15 +68,28 @@ export default function Action() {
     occupation:"",
     precinctnumber:"",
     emergencyDetails:{
-      firstName: "",
-      lastName: "",
+      fullName: "",
       address: "",
       relationship: "",
       contactNumber: "",
     },
     requestorMrMs: "",
     requestorFname: "",
-    requestorLname: "",
+    partnerWifeHusbandFullName: "",
+    cohabitationStartDate: "",
+    cohabitationRelationship: "",
+    wardFname: "",
+    wardRelationship: "",
+    guardianshipType: "",
+    CYFrom: "",
+    CYTo: "",
+    attestedBy: "",
+    goodMoralPurpose: "",
+    goodMoralOtherPurpose: "",
+    noIncomePurpose: "",
+    noIncomeChildFName: "",
+    deceasedEstateName: "",
+    estateSince: "",
     signaturejpg: null,
     barangayIDjpg:null,
     validIDjpg: null,
@@ -77,6 +103,54 @@ export default function Action() {
   })
 
 
+
+  useEffect(() => {
+    if(user){;
+      const fetchCount = async () => {
+        try {
+          const count = await getSpecificCountofCollection("ServiceRequests", "accID", user.uid);
+          setNos(count || 1);
+        } catch (error) {
+          console.error("Error fetching count:", error);
+        }
+      }
+      fetchCount();
+    }
+    else{
+      const fetchCount = async () => {
+        try {
+          const count = await getSpecificCountofCollection("ServiceRequests", "accID", "Guest");
+          setNos(count || 1);
+        } catch (error) {
+          console.error("Error fetching count:", error);
+        }
+      }
+      fetchCount();
+    }
+
+  },[user]);
+
+  useEffect(() => {
+    const getServiceRequestId =  () => {
+      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const randomId = customAlphabet(alphabet, 6);
+      const requestId = randomId();
+      const number = String(nos+1).padStart(4, '0'); // Ensure 3 digits
+      let format = `${user?.uid.substring(0,6).toUpperCase()|| "GUEST"} - ${requestId} - ${number}`;
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        requestId: format,
+      }));
+      console.log("format", format);
+    }
+    getServiceRequestId();
+
+  }, [user,nos]);
+
+
+ 
+
+
  
 
   useEffect(() => {
@@ -84,24 +158,34 @@ export default function Action() {
       /*if the user requesting has an accountt and is logined*/
       const user = auth.currentUser;
       if (user) {
+        
         const docRef = doc(db, "ResidentUsers", user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
+          const gender = data.sex;
+          console.log(gender);
+          let mrms = "";
+          if(gender === "male")mrms = "Mr.";
+          else mrms = "Ms.";
+          console.log( mrms);
           setClearanceInput((prev: any) => ({
             ...prev,
-            firstName: `${data.first_name} ${data.middle_name}`  || "",
-            lastName: data.last_name || "",
+            fullName: `${data.first_name} ${data.middle_name} ${data.last_name}`  || "",
             contact: data.phone || "",
             address: data.address || "",
             gender: data.sex || "",
-          }));
+            requestorFname: `${data.first_name} ${data.middle_name} ${data.last_name}` || "",
+            requestorMrMs: mrms,
+          }
+        
+        ));
         }
       }
     };
 
     fetchUserData();
-  }, []);
+  }, [user]);
   
 // State for all file containers
 const [files, setFiles] = useState<{ name: string, preview: string | undefined }[]>([]);
@@ -304,17 +388,48 @@ const handleFileChange = (
         }
     
         const clearanceVars = {
-          requestDate: clearanceInput.dateRequested,
+          createdAt: clearanceInput.dateRequested,
+          requestId: clearanceInput.requestId,
           status: "Pending",
           statusPriority: 1,
-          requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
+          requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
           accID: clearanceInput.accountId,
           docType: docType,
           purpose: clearanceInput.purpose,
-          firstName: clearanceInput.firstName,
-          lastName: clearanceInput.lastName,
+          fullName: clearanceInput.fullName,
           dateOfResidency: clearanceInput.dateOfResidency,
           address: clearanceInput.address,
+          ...(clearanceInput.purpose === "Residency" && {
+            CYFrom: clearanceInput.CYFrom,
+            CYTo: clearanceInput.CYTo,
+            attestedBy: clearanceInput.attestedBy,
+          }),
+          ...(clearanceInput.purpose === "Guardianship" && {
+            wardFname: clearanceInput.wardFname,
+            wardRelationship: clearanceInput.wardRelationship,
+            guardianshipType: clearanceInput.guardianshipType,
+          }),
+          ...(clearanceInput.purpose === "Occupancy /  Moving Out" && {
+            toAddress: clearanceInput.toAddress, // Include toAddress only for this specific purpose
+          }),
+          ...(clearanceInput.purpose === "Garage/TRU" && {
+            businessName: clearanceInput.businessName,
+            businessLocation: clearanceInput.businessLocation,
+            noOfTRU: clearanceInput.noOfVechicles,
+            businessNature: clearanceInput.businessNature,
+            tricycleMake: clearanceInput.vehicleMake,
+            tricycleType: clearanceInput.vehicleType,
+            tricyclePlateNo: clearanceInput.vehiclePlateNo,
+            tricycleSerialNo: clearanceInput.vehicleSerialNo,
+            tricycleChassisNo: clearanceInput.vehicleChassisNo,
+            tricycleEngineNo: clearanceInput.vehicleEngineNo,
+            tricycleFileNo: clearanceInput.vehicleFileNo,
+          }),
+          ...(clearanceInput.purpose === "Garage/PUV" && {
+            vehicleType: clearanceInput.vehicleType,
+            nosOfPUV: clearanceInput.noOfVechicles,
+            puvPurpose: clearanceInput.goodMoralOtherPurpose,
+          }),
           birthday: clearanceInput.birthday,
           age: clearanceInput.age,
           gender: clearanceInput.gender,
@@ -322,9 +437,27 @@ const handleFileChange = (
           contact: clearanceInput.contact,
           citizenship: clearanceInput.citizenship,
           signaturejpg: filenames.signaturejpg, // Store filename instead of file object
-          ...((docType === "Barangay Certificate" && clearanceInput.purpose === "Death Residency")  && {
+          ...(clearanceInput.purpose === "Cohabitation" && {
+            partnerWifeHusbandFullName: clearanceInput.partnerWifeHusbandFullName,
+            cohabitationStartDate: clearanceInput.cohabitationStartDate,
+            cohabitationRelationship: clearanceInput.cohabitationRelationship,
+          }),
+          ...(clearanceInput.purpose === "Estate Tax" && {
+            dateofdeath: clearanceInput.dateofdeath,
+            estateSince: clearanceInput.estateSince,
+          }),
+          ...( clearanceInput.purpose === "Death Residency"  && {
             dateofdeath: clearanceInput.dateofdeath,
             deathCertificate: filenames.deathCertificate,
+          }),
+          ...(clearanceInput.purpose === "Good Moral and Probation" && {
+           ...(clearanceInput.goodMoralPurpose ==="Others" ? 
+              { goodMoralPurpose: clearanceInput.goodMoralOtherPurpose }:
+              { goodMoralPurpose: clearanceInput.goodMoralPurpose }),
+          }),
+          ...(clearanceInput.purpose === "No Income" && {
+            noIncomePurpose: clearanceInput.noIncomePurpose,
+            noIncomeChildFName: clearanceInput.noIncomeChildFName,
           }),
           ...(clearanceInput.barangayIDjpg && { barangayIDjpg: filenames.barangayIDjpg }),
           ...(clearanceInput.validIDjpg && { validIDjpg: filenames.validIDjpg }),
@@ -333,6 +466,7 @@ const handleFileChange = (
             appointmentDate: clearanceInput.appointmentDate,
             purpose: clearanceInput.purpose,
           }),
+
           ...(docType === "Barangay ID" && {
             birthplace: clearanceInput.birthplace,
             religion: clearanceInput.religion,
@@ -358,7 +492,8 @@ const handleFileChange = (
       // 📌 Handling for Temporary Business Permit & Business Permit
       if (docType === "Temporary Business Permit" || docType === "Business Permit") {
         const clearanceVars = {
-          requestDate: clearanceInput.dateRequested,
+          createdAt: clearanceInput.dateRequested,
+          requestId: clearanceInput.requestId,
           status: "Pending",
           statusPriority: 1,
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
@@ -369,8 +504,7 @@ const handleFileChange = (
           businessLocation: clearanceInput.businessLocation,
           businessNature: clearanceInput.businessNature,
           estimatedCapital: clearanceInput.estimatedCapital,
-          firstName: clearanceInput.firstName,
-          lastName: clearanceInput.lastName,
+          fullName: clearanceInput.fullName,
           contact: clearanceInput.contact,
           homeAddress: clearanceInput.address,
           copyOfPropertyTitle: filenames.copyOfPropertyTitle,
@@ -387,7 +521,8 @@ const handleFileChange = (
       // 📌 Handling for Construction Permit
       if (docType === "Construction Permit") {
         const clearanceVars = {
-          requestDate: clearanceInput.dateRequested,
+          createdAt: clearanceInput.dateRequested,
+          requestId: clearanceInput.requestId,
           status: "Pending",
           statusPriority: 1,
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
@@ -399,21 +534,14 @@ const handleFileChange = (
           projectLocation: clearanceInput.businessLocation,
           taxDeclaration: filenames.taxDeclaration,
           approvedBldgPlan: filenames.approvedBldgPlan,
-          firstName: clearanceInput.firstName,
-          lastName: clearanceInput.lastName,
+          fullName: clearanceInput.fullName,
           contact: clearanceInput.contact,
           homeAddress: clearanceInput.address,
           copyOfPropertyTitle: filenames.copyOfPropertyTitle,
           signaturejpg: filenames.signaturejpg,
           endorsementLetter: filenames.letterjpg,
           ...(clearanceInput.typeofbldg === "Others" && {othersTypeofbldg: clearanceInput.othersTypeofbldg}),
-          //othersTypeofbldg: ""
         };
-
-        // ✅ Add othersTypeofbldg if typeofbldg is "Others"
-        // if (clearanceInput.typeofbldg === "Others") {
-        //   clearanceVars.othersTypeofbldg = clearanceInput.othersTypeofbldg;
-        // }
         console.log(clearanceVars, storageRefs);
         handleReportUpload(clearanceVars, storageRefs);
       }
@@ -421,8 +549,16 @@ const handleFileChange = (
       router.push('/services/notification'); 
     //  router.push("/services");
     };
+    const [addOn, setAddOn] = useState<string>("");
     
     
+    useEffect(() => {
+      if ((clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax" ) && docType === "Barangay Certificate") setAddOn("Deceased ");
+      else if(clearanceInput.purpose === "Occupancy /  Moving Out" && docType === "Barangay Certificate")setAddOn("From ");
+      else if(clearanceInput.purpose === "Guardianship" && docType === "Barangay Certificate") setAddOn("Guardian's ");
+      else setAddOn("");
+      
+    }, [clearanceInput.purpose, docType]);
 
 
   return (
@@ -462,9 +598,7 @@ const handleFileChange = (
               <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
               <option value="Estate Tax">Estate Tax</option>
               <option value="Death Residency">Death Residency</option>
-              <option value="No Income (Scholarship)">No Income (Scholarship)</option>
-              <option value="No Income (ESC)">No Income (ESC)</option>
-              <option value="No Income (For Discount)">No Income (For Discount)</option>
+              <option value="No Income">No Income</option>
               <option value="Cohabitation">Cohabitation</option>
               <option value="Guardianship">Guardianship</option>
               <option value="Good Moral and Probation">Good Moral and Probation</option>
@@ -479,13 +613,6 @@ const handleFileChange = (
               <option value="Maynilad">Maynilad</option>
               <option value="Meralco">Meralco</option>
               <option value="Bail Bond">Bail Bond</option>
-              {/* <option value="Character Reputation">Character Reputation</option> */}
-              {/* <option value="Request for Referral">Request for Referral</option> */}
-              {/* <option value="Issuance of Postal ID">Issuance of Postal ID</option> */}
-              {/* <option value="MWSI connection">MWSI connection</option> */}
-              {/* <option value="Business Clearance">Business Clearance</option> */}
-              {/* <option value="Firearms License">Police Clearance</option> */}
-              {/* <option value="Others">Others</option> */}
             </>):docType === "Barangay Indigency" ? ( <>
               <option value="No Income">No Income</option>
               <option value="Public Attorneys Office">Public Attorneys Office</option>
@@ -516,6 +643,7 @@ const handleFileChange = (
                 name="appointmentDate" 
                 value={clearanceInput.appointmentDate||""}
                 onChange={handleChange}
+                
                 className="form-input" 
                 required
               />
@@ -562,36 +690,276 @@ const handleFileChange = (
             </div>
             </>
           )}
-
+          
             <div className="form-group">
-              <label htmlFor="firstName" className="form-label">First Name<span className="required">*</span></label>
+              <label htmlFor="fullName" className="form-label">{addOn}Full Name<span className="required">*</span></label>
               <input 
                 type="text"  
-                id="firstName"  
-                name="firstName"  
+                id="fullName"  
+                name="fullName"  
                 className="form-input"  
                 required  
-                placeholder="Enter First Name" 
-                value={clearanceInput.firstName}
+                placeholder="Enter Full Name" 
+                value={clearanceInput.fullName}
                 onChange={handleChange}
               />
             </div>
 
-         
+            {(docType === "Barangay Certificate" && clearanceInput.purpose === "Cohabitation") && (<>
+              <div className="form-group">
+                <label htmlFor="partnerWifeHusbandFullName" className="form-label">Partner's/Wife's/Husband's Full Name<span className="required">*</span></label>
+                <input 
+                  type="text"  
+                  id="partnerWifeHusbandFullName"  
+                  name="partnerWifeHusbandFullName"  
+                  className="form-input"  
+                  required  
+                  placeholder="Enter Full Name" 
+                  value={clearanceInput.partnerWifeHusbandFullName}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="cohabitationRelationship" className="form-label">
+                  Type Of Relationship<span className="required">*</span>
+                </label>
+                <select
+                  id="cohabitationRelationship"
+                  name="cohabitationRelationship"
+                  className="form-input"
+                  value={clearanceInput.cohabitationRelationship}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>Select Type of Relationship</option>
+                  <option value="Husband And Wife">Husband And Wife</option>
+                  <option value="Partners">Partners</option>
+                </select>
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="lastName" className="form-label">Last Name<span className="required">*</span></label>
-              <input 
-                type="text"  
-                id="lastName"  
-                name="lastName"  
-                className="form-input"  
-                required 
-                value={clearanceInput.lastName}
+              <div className="form-group">
+                <label htmlFor="cohabitationStartDate" className="form-label">
+                  Start Of Cohabitation<span className="required">*</span>
+                </label>
+                <input 
+                type = "date" 
+                id="cohabitationStartDate"
+                name="cohabitationStartDate"
+                className="form-input"
+                value={clearanceInput.cohabitationStartDate}
                 onChange={handleChange}
-                placeholder="Enter Last Name"  
-              />
-            </div>
+                onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                required
+                max = {getLocalDateString(new Date())} // Set max date to today
+                />
+              </div>
+            </>)}
+            { clearanceInput.purpose === "Garage/TRU" && (
+              <>  
+                <div className="form-group">
+                  <label htmlFor="businessname" className="form-label">Business Name<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="businessname"  
+                    name="businessName"  
+                    className="form-input"  
+                    required 
+                    placeholder="Enter Business Name"  
+                    value={clearanceInput.businessName}
+                    onChange={handleChange}
+                  />
+                </div>            
+                <div className="form-group">
+                  <label htmlFor="businessloc" className="form-label">Business Location<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="businessloc"  
+                    name="businessLocation"  
+                    className="form-input"  
+                    value={clearanceInput.businessLocation}
+                    onChange={handleChange}
+                    required 
+                    placeholder="Enter Business Location"  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="noOfVechicles" className="form-label">Nos Of Tricycle<span className="required">*</span></label>
+                  <input 
+                    type="number"  
+                    id="noOfVechicles"  
+                    name="noOfVechicles"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.noOfVechicles}
+                    onChange={handleChange}
+                    min={1}
+                    onKeyDown={(e)=> {
+                      if (e.key === 'e' || e.key === '-' || e.key === '+') {
+                        e.preventDefault(); // Prevent scientific notation and negative/positive signs
+                      }
+                    }
+                    } // Prevent manual input
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="businessnature" className="form-label">Nature of Business<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="businessnature"  
+                    name="businessNature"  
+                    value={clearanceInput.businessNature}
+                    onChange={handleChange}
+                    className="form-input"  
+                    required 
+                    placeholder="Enter Business Nature"  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vehicleMake" className="form-label">Tricycle Make<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="vehicleMake"  
+                    name="vehicleMake"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vehicleMake}
+                    onChange={handleChange}
+                    placeholder="Enter Tricycle Make"  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vehicleType" className="form-label">Tricycle Type<span className="required">*</span></label>
+                  <select
+                    id="vehicleType"  
+                    name="vehicleType"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vehicleType}
+                    onChange={handleChange}
+                    
+                  >
+                    <option value="" disabled>Select Tricycle Type</option>
+                    <option value="Motorcycle w/ Sidecar">Motorcycle w/ Sidecar</option>
+                    <option value="Motorcycle w/o Sidecar">Motorcycle w/o Sidecar</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vehiclePlateNo" className="form-label">Tricycle Plate No.<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="vehiclePlateNo"  
+                    name="vehiclePlateNo"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vehiclePlateNo}
+                    onChange={handleChange}
+                    placeholder="Enter Tricycle Plate No."  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vehicleSerialNo" className="form-label">Tricycle Serial No.<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="vehicleSerialNo"  
+                    name="vehicleSerialNo"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vehicleSerialNo}
+                    onChange={handleChange}
+                    placeholder="Enter Tricycle Serial No."  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vehicleChassisNo" className="form-label">Tricycle Chassis No.<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="vehicleChassisNo"  
+                    name="vehicleChassisNo"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vehicleChassisNo}
+                    onChange={handleChange}
+                    placeholder="Enter Tricycle Chassis No."  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vehicleEngineNo" className="form-label">Tricycle Engine No.<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="vehicleEngineNo"  
+                    name="vehicleEngineNo"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vehicleEngineNo}
+                    onChange={handleChange}
+                    placeholder="Enter Tricycle Engine No."  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vehicleFileNo" className="form-label">Tricycle File No.<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="vehicleFileNo"  
+                    name="vehicleFileNo"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vehicleFileNo}
+                    onChange={handleChange}
+                    placeholder="Enter Tricycle File No."  
+                  />
+                </div>
+                
+              </>
+            )}
+
+            {clearanceInput.purpose === "Garage/PUV" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="goodMoralOtherPurpose" className="form-label">Certificate Purpose<span className="required">*</span></label>
+                  <input 
+                    type="text"
+                    id="goodMoralOtherPurpose"  
+                    name="goodMoralOtherPurpose"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.goodMoralOtherPurpose}
+                    onChange={handleChange}
+                    
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="vehicleType" className="form-label">Vehicle Description<span className="required">*</span></label>
+                  <input 
+                    type="text"
+                    id="vehicleType"  
+                    name="vehicleType"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.vehicleType}
+                    onChange={handleChange}   
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="noOfVechicles" className="form-label">Nos Of Vehicle/s<span className="required">*</span></label>
+                  <input 
+                    type="number"  
+                    id="noOfVechicles"  
+                    name="noOfVechicles"  
+                    className="form-input"  
+                    required 
+                    value={clearanceInput.noOfVechicles}
+                    onChange={handleChange}
+                    min={1}
+                    onKeyDown={(e)=> {
+                      if (e.key === 'e' || e.key === '-' || e.key === '+') {
+                        e.preventDefault(); // Prevent scientific notation and negative/positive signs
+                      }
+                    }
+                    } // Prevent manual input
+                  />
+                </div>
+              </>
+            )}
             {(docType ==="Temporary Business Permit"||docType ==="Business Permit") ? (
               <>  
                 <div className="form-group">
@@ -635,7 +1003,7 @@ const handleFileChange = (
                   />
                 </div>
               </>
-            ):docType ==="Construction Permit"?(
+            ):docType ==="Construction Permit"&&(
             <>
               <div className="form-group">
               <label htmlFor="address" className="form-label">Home/Office Address<span className="required">*</span></label>
@@ -651,9 +1019,8 @@ const handleFileChange = (
               />
             </div>
             </>
-            ):(
+            )}
             
-            <>
               <div className="form-group">
                 <label htmlFor="dateOfResidency" className="form-label">Date of Residency in Barangay Fairview<span className="required">*</span></label>
                 <input 
@@ -663,13 +1030,15 @@ const handleFileChange = (
                   value={clearanceInput.dateOfResidency}
                   onChange={handleChange}
                   className="form-input" 
+                  onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+
                   required 
                   max={getLocalDateString(new Date())}
                 />
              </div>
 
             <div className="form-group">
-              <label htmlFor="address" className="form-label">Address<span className="required">*</span></label>
+              <label htmlFor="address" className="form-label">{addOn}Address<span className="required">*</span></label>
               <input 
                 type="text"  
                 id="address"  
@@ -678,9 +1047,219 @@ const handleFileChange = (
                 onChange={handleChange}
                 className="form-input"  
                 required 
-                placeholder="Enter Address"  
+                placeholder={`Enter ${addOn}Address`}
               />
             </div>
+            {clearanceInput.purpose === "No Income" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="noIncomePurpose" className="form-label">Purpose Of No Income:<span className="required">*</span></label>
+                    <select 
+                      id="noIncomePurpose"  
+                      name="noIncomePurpose"  
+                      value={clearanceInput.noIncomePurpose}
+                      onChange={handleChange}
+                      className="form-input"  
+                      required 
+                    >
+                      <option value="" disabled>Select Purpose</option>
+                      <option value="SPES Scholarship">SPES Scholarship</option>
+                      <option value="ESC Voucher">DEPED Educational Services Contracting (ESC) Voucher</option>
+                    </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="noIncomeChildFName" className="form-label">Son/Daugther's Name<span className="required">*</span></label>
+                    <input 
+                      type="text"  
+                      id="noIncomeChildFName"  
+                      name="noIncomeChildFName"  
+                      value={clearanceInput.noIncomeChildFName}
+                      onChange={handleChange}
+                      className="form-input"  
+                      required 
+                      placeholder={`Enter Child's Full Name`}
+                    />
+                </div>
+
+              </>
+            )}
+            {clearanceInput.purpose === "Good Moral and Probation" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="goodMoralPurpose" className="form-label">Purpose of Good Moral and Probation:<span className="required">*</span></label>
+                  <select
+                    id="goodMoralPurpose"
+                    name="goodMoralPurpose"
+                    className="form-input"
+                    value={clearanceInput.goodMoralPurpose}
+                    onChange={handleChange}
+                    required
+                    >
+                    <option value="" disabled>Select Purpose</option>
+                    <option value = "Legal Purpose and Intent">Legal Purpose and Intent</option>
+                    <option value = "Others">Others</option>
+                  </select>
+                </div>
+                {clearanceInput.goodMoralPurpose === "Others" && (
+                  <>
+                    <div className="form-group">
+                      <label htmlFor="goodMoralOtherPurpose" className="form-label">Please Specify Other Purpose:<span className="required">*</span></label>
+                      <input 
+                        type="text"  
+                        id="goodMoralOtherPurpose"  
+                        name="goodMoralOtherPurpose"  
+                        value={clearanceInput.goodMoralOtherPurpose}
+                        onChange={handleChange}
+                        className="form-input"  
+                        required 
+                        placeholder="Enter Other Purpose"
+                      />
+                    </div>
+                  </>
+                )}
+
+              </>
+            )}
+            {}
+            {clearanceInput.purpose === "Guardianship" && (
+              <>
+                <div className="form-group">
+                <label htmlFor="guardianshipType" className="form-label">Type of Guardianship Certificate<span className="required">*</span></label>
+                    <select
+                      id="guardianshipType"  
+                      name="guardianshipType"  
+                      className="form-input"  
+                      value={clearanceInput.guardianshipType}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="" disabled>Select Type of Guardianship</option>
+                      <option value="School Purpose">For School Purpose</option>
+                      <option value="Legal Purpose">For Other Legal Purpose</option>
+                    </select>
+                </div>
+              
+                <div className="form-group">
+                <label htmlFor="wardRelationship" className="form-label">Guardian's Relationship Towards the Ward<span className="required">*</span></label>
+                    <select
+                      id="wardRelationship"  
+                      name="wardRelationship"  
+                      className="form-input"  
+                      value={clearanceInput.wardRelationship}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="" disabled>Select Type of Relationship</option>
+                      <option value="Grandmother">Grandmother</option>
+                      <option value="Grandfather">Grandfather</option>
+                      <option value="Father">Father</option>
+                      <option value="Mother">Mother</option>
+                      <option value="Aunt">Aunt</option>
+                      <option value="Uncle">Uncle</option>
+                      <option value="Sister">Sister</option>
+                      <option value="Brother">Brother</option>
+                    </select>
+                </div>
+
+                <div className="form-group">
+                <label htmlFor="wardFname" className="form-label">Ward's Full Name<span className="required">*</span></label>
+                    <input 
+                      type="text"  
+                      id="wardFname"  
+                      name="wardFname"  
+                      value={clearanceInput.wardFname}
+                      onChange={handleChange}
+                      className="form-input"  
+                      required 
+                      placeholder={`Enter Ward's Full Name`}
+                    />
+                </div>
+
+              </>
+            )}
+            {clearanceInput.purpose === "Residency" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="attestedBy" className="form-label">Attested By Hon Kagawad: <span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="attestedBy"  
+                    name="attestedBy"  
+                    value={clearanceInput.attestedBy}
+                    onChange={handleChange}
+                    className="form-input"  
+                    required 
+                    placeholder="Enter Hon Kagawad's Full Name"  
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="CYFrom" className="form-label">Cohabitation Year From:<span className="required">*</span></label>
+                  <select
+                    id="CYFrom"
+                    name="CYFrom"
+                    value={clearanceInput.CYFrom}
+                    onChange={handleChange}
+                    className="form-input"
+                    required
+                  >
+                    <option value="" disabled>Select Year</option>
+                    {[...Array(100)].map((_, i) => {
+                      const year = new Date().getFullYear() - i;
+                      const cyTo = parseInt(clearanceInput.CYTo);
+                      const isDisabled = !isNaN(cyTo) && year >= cyTo;
+                      return (
+                        <option key={year} value={year} disabled={isDisabled}>
+                          {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="CYTo" className="form-label">Cohabitation Year To:<span className="required">*</span></label>
+                  <select
+                    id="CYTo"
+                    name="CYTo"
+                    value={clearanceInput.CYTo}
+                    onChange={handleChange}
+                    className="form-input"
+                    required
+                  >
+                    <option value="" disabled>Select Year</option>
+                    {[...Array(100)].map((_, i) => {
+                      const year = new Date().getFullYear() - i;
+                      const cyFrom = parseInt(clearanceInput.CYFrom);
+                      const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
+                      return (
+                        <option key={year} value={year} disabled={isDisabled}>
+                          {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+              </div>
+
+              </>
+            )}
+            {clearanceInput.purpose === "Occupancy /  Moving Out" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="toAddress" className="form-label">To Address<span className="required">*</span></label>
+                  <input 
+                    type="text"  
+                    id="toAddress"  
+                    name="toAddress"  
+                    value={clearanceInput.toAddress}
+                    onChange={handleChange}
+                    className="form-input"  
+                    required 
+                    placeholder="Enter To Address"  
+                  />
+                </div>
+              </>
+            )}
 
             <div className="form-group">
               <label htmlFor="birthday" className="form-label">Birthday<span className="required">*</span></label>
@@ -690,14 +1269,15 @@ const handleFileChange = (
                 name="birthday" 
                 className="form-input" 
                 value={clearanceInput.birthday}
+                onKeyDown={(e) => e.preventDefault()} // Prevent manual input
                 onChange={handleChange}
                 required 
                 max={getLocalDateString(new Date())}
               />
             </div>
             
-            </>)}
-            {(docType ==="Barangay Certificate" && clearanceInput.purpose === "Death Residency" ) && (
+          
+            {(clearanceInput.purpose === "Death Residency"|| clearanceInput.purpose === "Estate Tax") && (
               <div className="form-group">
                 <label htmlFor="dateofdeath" className="form-label">Date Of Death<span className="required">*</span></label>
                 <input 
@@ -706,11 +1286,39 @@ const handleFileChange = (
                   name="dateofdeath" 
                   className="form-input" 
                   value={clearanceInput.dateofdeath}
+                  onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+
                   onChange={handleChange}
                   required 
                   max={getLocalDateString(new Date())} // Set max date to today
                 />
               </div>
+            )}
+
+            {clearanceInput.purpose === "Estate Tax" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="estateSince" className="form-label">Estate Since:<span className="required">*</span></label>
+                  <select
+                    id="estateSince"
+                    name="estateSince"
+                    value={clearanceInput.estateSince}
+                    onChange={handleChange}
+                    className="form-input"
+                    required
+                  >
+                    <option value="" disabled>Select Year</option>
+                    {[...Array(150)].map((_, i) => {
+                      const year = new Date().getFullYear() - i;
+                      return (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              </>
             )}
 
             {docType ==="Barangay ID" && (
@@ -915,7 +1523,7 @@ const handleFileChange = (
                 <option value="Single">Single</option>
                 <option value="Married">Married</option>
                 <option value="Widow">Widow</option>
-                <option value="Separated">Separated</option>
+                <option value="Separated">Separated</option>                
               </select>
             </div></>)}
            
@@ -1042,46 +1650,20 @@ const handleFileChange = (
               <h1 className="form-requirements-title">Emergency Details</h1>
 
               <div className="form-group">
-                <label htmlFor="firstname" className="form-label">First Name<span className="required">*</span></label>
+                <label htmlFor="fullName" className="form-label">First Name<span className="required">*</span></label>
                 <input 
                   type="text"  
-                  id="firstname"  
+                  id="fullName"  
                   className="form-input"  
-                  name="emergencyDetails.firstName"  
-                  value={clearanceInput.emergencyDetails.firstName}
+                  name="emergencyDetails.fullName"  
+                  value={clearanceInput.emergencyDetails.fullName}
                   onChange={handleChange}
                   required  
                   placeholder="Enter First Name" 
                 />
               </div>`
 
-              <div className="form-group">
-                <label htmlFor="middlename" className="form-label">Middle Name<span className="required">*</span></label>
-                <input 
-                  type="text"  
-                  id="middlename"  
-                  name="emergencyDetails.middleName"  
-                  className="form-input" 
-                  value={clearanceInput.emergencyDetails.middleName}
-                  onChange={handleChange}
-                  required  
-                  placeholder="Enter Middle Name"  
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="lastname" className="form-label">Last Name<span className="required">*</span></label>
-                <input 
-                  type="text"  
-                  id="lastname"  
-                  name="emergencyDetails.lastName"  
-                  value={clearanceInput.emergencyDetails.lastName}
-                  onChange={handleChange}
-                  className="form-input"  
-                  required 
-                  placeholder="Enter Last Name"  
-                />
-              </div>
+             
 
               <div className="form-group">
                 <label htmlFor="address" className="form-label">Address<span className="required">*</span></label>
@@ -1205,13 +1787,12 @@ const handleFileChange = (
               <option value="" disabled>Select Requestor's Title</option>
               <option value="Mr.">Mr.</option>
               <option value="Ms.">Ms.</option>
-              <option value="Mrs.">Mrs.</option>
             </select>
           </div>
 
 
           <div className="form-group">
-            <label htmlFor="requestorFname" className="form-label">Requestor First Name<span className="required">*</span></label>
+            <label htmlFor="requestorFname" className="form-label">Requestor Full Name<span className="required">*</span></label>
             <input 
               type="text"  
               id="requestorFname"  
@@ -1220,21 +1801,7 @@ const handleFileChange = (
               value={clearanceInput.requestorFname}
               onChange={handleChange}
               required  
-              placeholder="Enter Requestor First Name"  
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="requestorLname" className="form-label">Requestor Last Name<span className="required">*</span></label>
-            <input 
-              type="text"  
-              id="requestorLname"  
-              name="requestorLname"  
-              className="form-input" 
-              value={clearanceInput.requestorLname}
-              onChange={handleChange}
-              required  
-              placeholder="Enter Requestor Last Name"  
+              placeholder="Enter Requestor Full Name"  
             />
           </div>
 

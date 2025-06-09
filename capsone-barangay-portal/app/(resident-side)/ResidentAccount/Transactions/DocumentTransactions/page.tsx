@@ -30,15 +30,17 @@ interface BarangayDocument {
     middleName?: string; 
     lastName?: string; 
     gender?: string; 
-    requestDate?: string; 
+    createdAt?: string; 
     signaturejpg?: string[];
     barangayIDjpg?: string[];
     validIDjpg?: string[];
     endorsementLetter?: string[];
     status?: string; 
-
+    partnerWifeHusbandFullName?: string;
+    cohabitationStartDate?: string;
+    cohabitationRelationship?:string;
     appointmentDate?: string;
-
+    toAddress?: string;
     birthpalce?: string;
     religion?: string;
     nationality?: string;
@@ -157,15 +159,76 @@ export default function DocumentTransactionsDetails() {
 
       const barangayDocumentFields = [
         /* General Fields*/
-        { label: "Request Date", key: "requestDate" },
+        { label: "Request Date", key: "createdAt" },
         { label: "Document Type", key: "docType" },
         { label: "Status", key: "status" },
-        { label: "First Name", key: "firstName" },
-        { label: "Middle Name", key: "middleName" },
-        { label: "Last Name", key: "lastName" },
+        { label: "Full Name", key: "fullName" },
         { label: "Contact Number", key: "contact" },
+        {label: "Requestor Name", key: "requestor" },
+        ...(transactionData?.status === "Rejected"
+           ? [{ label: "Rejection Reason", key: "rejectionReason" }]
+           : []),
 
+        ...(transactionData?.purpose === "Garage/TRU" ? 
+            [
+                { label: "Business Name", key: "businessName" },
+                { label: "Business Nature", key: "businessNature" },
+                { label: "Business Location", key: "businessLocation" },
+                { label: "No Of Tricycle", key: "noOfTRU" },
+                { label: "Tricycle Make", key: "tricycleMake" },
+                { label: "Tricycle Type", key: "tricycleType" },
+                { label: "Tricycle Plate No", key: "tricyclePlateNo" },
+                { label: "Tricycle Serial No", key: "tricycleSerialNo" },
+                { label: "Tricycle Chassis No", key: "tricycleChassisNo" },
+                { label: "Tricycle Engine No", key: "tricycleEngineNo" },
+                { label: "Tricycle File No", key: "tricycleFileNo" },
+            ]
+            :[]
+        ),
+        ...(transactionData?.purpose === "Garage/PUV" ? 
+            [
+                { label: "Purpose of Certificate", key: "puvPurpose" },
+                { label: "Vehicle Description", key: "vehicleType" },
+                { label: "No of Vehicles", key: "nosOfPUV" },
+                
+            ]
+            :[]
+        ),
+        ...(transactionData?.purpose === "Cohabitation"
+            ? [
+                { label: "Partner/Wife/Husband Full Name", key: "partnerWifeHusbandFullName" },
+                { label: "Cohabitation Start Date", key: "cohabitationStartDate" },
+                { label: "Cohabitation Relationship", key: "cohabitationRelationship" }
+            ]:[]),
+        ...(transactionData?.purpose === "Occupancy /  Moving Out" ?
+            [{ label: "To Address", key: "toAddress" }]
+            : []
+        ),
+        ...(transactionData?.purpose === "Residency" ?
+            [{ label: "Attested By Hon Kagawad:", key: "attestedBy" },
+            { label: "Cohabitation Year From", key: "CYFrom" },
+            { label: "Cohabitation Year To", key: "CYTo" },
+            ]:
+            []
 
+        ),
+        ...(transactionData?.purpose === "Good Moral and Probation" ? 
+            [{label: "Purpose of Good Moral and Probation",key:"goodMoralPurpose"}]
+            :[]
+        ),
+        ...(transactionData?.purpose === "No Income" ? 
+            [{label: "Purpose Of No Income", key: "noIncomePurpose"},
+            { label: "Son/Daughter For No Income", key: "noIncomeChildFName" }
+            ]
+            :[]
+        ),  
+        ...(transactionData?.purpose === "Estate Tax" ? 
+            [
+            { label: "Date of Death", key: "dateofdeath" },
+            { label: "Estate Since", key: "estateSince" }
+            ]
+            :[]
+        ),
         /*Barangay Certificate, Barangay Indigency, Barangay Clearance & Business Permits */
         ...(transactionData?.docType !== "Business Permit" && transactionData?.docType !== "Temporary Business Permit" && transactionData?.docType !== "Construction Permit"
                 ? [
@@ -268,6 +331,7 @@ export default function DocumentTransactionsDetails() {
                     <p className={`status-dropdown-transactions ${transactionData.status?.toLowerCase() || ""}`}>
                     {transactionData.status || "N/A"}
                     </p> 
+                    
                 </div>
 
             </div>
