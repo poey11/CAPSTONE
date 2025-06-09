@@ -142,18 +142,26 @@
     justify-content: center;
 }
 
-.action-view {
+.action-view-services {
      border: none;
     cursor: pointer;
     width: 24px;
     height: 24px; 
 }
 
-.action-view img {
+.action-view-services img {
     filter: brightness(0) saturate(100%) invert(38%) sepia(78%) saturate(374%) hue-rotate(81deg) brightness(91%) contrast(92%);
 }
 
 
+.highlight-new-request {
+  background-color: #bdf8a0ba !important;
+  transition: background-color 0.5s ease;
+}
+
+.highlight-new-request:hover {
+  background-color: #a6e68d !important; /* slightly darker green on hover */
+}
 
 
 
@@ -195,7 +203,7 @@
 }
 
 
-.redirection-section {
+.redirection-section-services {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -207,7 +215,7 @@
     background-color: #ffffff;
   }
   
-  .redirection-section button {
+  .redirection-section-services button {
     padding: 4px 8px;
     border: none;
     background-color: #2C3E50;
@@ -217,16 +225,16 @@
     transition: 0.3s;
   }
   
-  .redirection-section button:hover {
+  .redirection-section-services button:hover {
     background-color: #214666;
   }
   
-  .redirection-section button:disabled {
+  .redirection-section-services button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
   }
   
-  .redirection-section .active {
+  .redirection-section-services .active {
      background-color: #214666;
     font-weight: bold;
   }
@@ -271,7 +279,6 @@
 
 
 
-  /*
 .path-section {
   display: flex;
   gap: 10px;
@@ -298,7 +305,7 @@
 .chevron {
   color: #888;
   margin-left: 10px;
-}*/
+}
 
 
 

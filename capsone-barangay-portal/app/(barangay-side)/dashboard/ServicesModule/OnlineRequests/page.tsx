@@ -23,6 +23,21 @@ import { db } from "@/app/db/firebase";
   const [onlineRequests, setOnlineRequests] = useState([]);
 
     
+
+  // Helpers to manage viewed requests
+const getViewedRequests = (): string[] => {
+  const data = localStorage.getItem("viewedRequests");
+  return data ? JSON.parse(data) : [];
+};
+
+const markAsViewed = (id: string) => {
+  const viewed = getViewedRequests();
+  if (!viewed.includes(id)) {
+    viewed.push(id);
+    localStorage.setItem("viewedRequests", JSON.stringify(viewed));
+  }
+};
+
     
     useEffect(() => {
       try {
@@ -30,11 +45,14 @@ import { db } from "@/app/db/firebase";
           collection(db, "ServiceRequests"),
           orderBy("createdAt", "desc") // First, sort by latest
         );
+
+          const viewed = getViewedRequests();
       
         const unsubscribe = onSnapshot(Collection, (snapshot) => {
           let reports: any[] = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
+             isNew: !viewed.includes(doc.id)  // Tag new ones
           }));
         
           // Now sort client-side: Pending (1) first, then Pickup (2), etc.
@@ -126,11 +144,15 @@ import { db } from "@/app/db/firebase";
 
     return pageNumbersToShow;
   };
-  const handleView = (id:string) => {
-    router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
- 
 
-  };
+  const handleView = (id: string) => {
+  markAsViewed(id); // mark before navigating
+  router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
+};
+
+
+
+
 
 
   const handleSMS = () => {
@@ -215,7 +237,8 @@ import { db } from "@/app/db/firebase";
             </thead>
             <tbody>
           {currentOnlineRequests.map((request, index) => (
-              <tr key={index}>
+            <tr key={index} className={request.isNew ? "highlight-new-request" : ""}>
+
                 <td>{request.docType}</td>
                 <td>{request.requestId}</td>
                 <td>{request.createdAt}</td>
@@ -229,7 +252,7 @@ import { db } from "@/app/db/firebase";
                 <td>
                   <div className="-services-actions">
                     <button
-                        className="action-view"
+                        className="action-view-services"
                         onClick={() => handleView(request.id)}
                     >
                        <img src="/Images/view.png" alt="View" />
@@ -244,7 +267,7 @@ import { db } from "@/app/db/firebase";
             )}
         </div>
 
-        <div className="redirection-section">
+        <div className="redirection-section-services">
         <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
         {getPageNumbers().map((number, index) => (
           <button
