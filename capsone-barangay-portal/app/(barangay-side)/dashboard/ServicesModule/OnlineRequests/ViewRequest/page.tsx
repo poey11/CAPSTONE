@@ -117,8 +117,9 @@ const ViewOnlineRequest = () => {
     
    
     useEffect(() => {
-    
-     setStatus(requestData?.status || "");
+        if (!requestData) return;
+        // Set status based on requestData
+        setStatus(requestData?.status);
    }, [requestData]);
   
     const handleDownloadUrl = async (data: OnlineRequest): Promise<OnlineRequest> => {
@@ -187,6 +188,7 @@ const ViewOnlineRequest = () => {
         { key: "requestDate", label: "Date Requested" },
         { key: "docType", label: "Document Type" },
         { key: "purpose", label: "Purpose" },
+        { key: "appointmentDate", label: "Appointment Date" },
         { key: "fullName", label: "Full Name" },
         { key: "partnerWifeHusbandFullName", label: "Partner's/Wife's/Husband's Full Name" },
         { key: "businessName", label: "Business Name" },
@@ -265,43 +267,54 @@ const ViewOnlineRequest = () => {
     };
 
     const handleviewappointmentdetails = () => {
-        //window.location.href = "/dashboard/ServicesModule/Appointments/View";
+        router.push("/dashboard/ServicesModule/Appointments")
     };
 
     const handlerejection = () => {
-        //window.location.href = "/dashboard/ServicesModule/OnlineRequests/ReasonForReject";
         router.push("/dashboard/ServicesModule/OnlineRequests/ReasonForReject/?id=" + id);
     };
 
-    const handleSave = async() => {
+    const handleSave = async () => {
         try {
-            if(!id) return
+            if (!id) return;
+        
             const docRef = doc(db, "ServiceRequests", id);
+        
             const updatedData = {
                 status: status,
                 ...(status === "Pending" && { statusPriority: 1 }),
                 ...(status === "Pick-up" && { statusPriority: 2 }),
                 ...(status === "Completed" && { statusPriority: 3 }),
-            }
-             const notificationRef = doc(collection(db, "Notifications"));
-                  await setDoc(notificationRef, {
-                    residentID: requestData?.accID, // reportID == user id
-                    requestID: requestData?.requestId,
-                    message: `Your Document Request (${requestData?.requestId}) has been updated to "${status}".`,
-                    timestamp: new Date(),
-                    transactionType: "Online Request",
-                    isRead: false,
-                  });
-
-
-            await updateDoc(docRef, updatedData).then(() => {
-                alert("Status Updated");
+            };
+        
+            // Create notification
+            const notificationRef = doc(collection(db, "Notifications"));
+            await setDoc(notificationRef, {
+                residentID: requestData?.accID,
+                requestID: requestData?.requestId,
+                message: `Your Document Request (${requestData?.requestId}) has been updated to "${status}".`,
+                timestamp: new Date(),
+                transactionType: "Online Request",
+                isRead: false,
             });
-            
+        
+            // Update Firestore document
+            await updateDoc(docRef, updatedData);
+        
+            // ✅ Manually update local requestData state so UI changes immediately
+            setRequestData((prev) => {
+                if (!prev) return prev;
+                return {
+                    ...prev,
+                    ...updatedData
+                } as OnlineRequest;
+            });
+        
+            alert("Status Updated");
         } catch (error) {
             console.error("Error updating status:", error);
         }
-    }
+    };
 
     const handleSMS = async() => {
         //window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
@@ -527,7 +540,7 @@ const ViewOnlineRequest = () => {
             {(userPosition === "Assistant Secretary" || userPosition === "Admin Staff")&& (<>
                 <div className="viewonlinereq-actions-content">
                     <div className="viewonlinereq-actions-content-section1">
-                        {(requestData?.status !== "Completed" && requestData?.status !== "Rejected")&& (
+                        {(status !== "Completed" && status !== "Rejected")&& (
                             <>
                                 <button type="button" className="actions-button-reject" onClick ={handlerejection} >Reject</button>
                                 <button type="button" className="actions-button" onClick={handlePrint}>Print</button>

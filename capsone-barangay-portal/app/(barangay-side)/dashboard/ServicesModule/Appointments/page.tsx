@@ -1,27 +1,67 @@
 "use client"
 
 import { useRouter } from "next/navigation";
-import type { Metadata } from "next";
 import "@/CSS/barangaySide/ServicesModule/Appointments.css";
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import Calendar from "@/app/(barangay-side)/components/calender";
-const metadata: Metadata = {
-    title: "Appointments",
-    description: "Appointments in Services Module",
-  };
-  type Appointment = {
-      id: string;
-      title: string;
-      date: string; // format: 'YYYY-MM-DD'
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { db } from "@/app/db/firebase";
+import { request } from "http";
+
+
+type Appointment = {
+    id: string;
+    title: string;
+    date: string; // format: 'YYYY-MM-DD'
+    requestStatus?: string; // Optional field for sorting
+
   }
 
 
   export default function Appointments() {
-    const fakeData: Appointment[] = [
-      {id: "1", title: "Meeting with John", date: "2025-05-29"},
-      {id: "2", title: "Doctor's Appointment", date: "2025-05-29"},
-      {id: "3", title: "Conference Call", date: "2025-05-29"},
-    ]
+
+    const [data, setData] = useState<any[]>([]);
+
+    useEffect(() => {
+      try {
+        const Collection = query(collection(db, "ServiceRequests"));
+      
+        const unsubscribe = onSnapshot(Collection, (snapshot) => {
+          const reports = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+        
+          setData(reports); // don't sort here
+        });
+      
+        return unsubscribe;
+      } catch (error: any) {
+        console.error(error.message);
+      }
+    }, []);
+
+
+
+    const appointmentData: Appointment[] = useMemo(() => {
+      return [...data]
+        .sort((a, b) => {
+          if (a.statusPriority !== b.statusPriority) {
+            return a.statusPriority - b.statusPriority;
+          }
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        })
+        .map((item) => ({
+          id: item.id,
+          title: `${item.docType} - ${item.purpose}`,
+          date:
+            item.appointmentDate,
+          requestStatus: item.status,
+          statusPriority: item.statusPriority,
+        }));
+    }, [data]);
+
+    console.log(appointmentData);
 
     const router = useRouter();
 
@@ -131,7 +171,7 @@ const getPageNumbers = () => {
             <option value="inactive">Show 10</option>
           </select>
          </div>
-          <Calendar appointments={fakeData} />
+          <Calendar appointments={appointmentData} />
 
          
         <div className="redirection-section">

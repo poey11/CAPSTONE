@@ -105,16 +105,28 @@ export default function Action() {
 
 
   useEffect(() => {
-    if(!user) return;
-    const fetchCount = async () => {
-      try {
-        const count = await getSpecificCountofCollection("ServiceRequests", "accID", user.uid);
-        setNos(count || 1);
-      } catch (error) {
-        console.error("Error fetching count:", error);
+    if(user){;
+      const fetchCount = async () => {
+        try {
+          const count = await getSpecificCountofCollection("ServiceRequests", "accID", user.uid);
+          setNos(count || 1);
+        } catch (error) {
+          console.error("Error fetching count:", error);
+        }
       }
+      fetchCount();
     }
-    fetchCount();
+    else{
+      const fetchCount = async () => {
+        try {
+          const count = await getSpecificCountofCollection("ServiceRequests", "accID", "Guest");
+          setNos(count || 1);
+        } catch (error) {
+          console.error("Error fetching count:", error);
+        }
+      }
+      fetchCount();
+    }
 
   },[user]);
 
