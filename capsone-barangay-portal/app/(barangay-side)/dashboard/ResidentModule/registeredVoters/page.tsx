@@ -229,6 +229,16 @@ export default function registeredVotersModule() {
 
       <div className="resident-module-section-1">
 
+
+        {/*<h1>Registered Voters</h1>*/}
+        {isAuthorized ? (
+            <Link href="/dashboard/ResidentModule/registeredVoters/AddVoter">
+              <button className="add-announcement-btn" onClick={handleAddResidentClick}>Import Voters from Excel</button>
+            </Link>
+          ) : (
+            <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Import Voters from Excel</button>
+          )}
+
         {/*<h1>Registered Voters</h1>*/}
           {isAuthorized ? (
             <Link href="/dashboard/ResidentModule/registeredVoters/AddVoter">
