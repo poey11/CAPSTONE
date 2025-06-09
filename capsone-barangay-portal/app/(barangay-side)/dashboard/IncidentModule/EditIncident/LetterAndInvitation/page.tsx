@@ -181,6 +181,8 @@ export default function GenerateDialougeLetter() {
  
     const sendSMSForDialogue = async () => {
      //dont forget to add the assing staff contact number
+       setIsLoading(true); // Start loading
+
 
       try{
         const response = await fetch("/api/clickSendApi", {
@@ -213,12 +215,24 @@ export default function GenerateDialougeLetter() {
         });
         if (!responseB.ok) throw new Error("Failed to send SMS");
 
+           setShowSubmitPopup({
+                show: true,
+                message: "SMS message for both parties sent succesfuly!",
+                message2: "",
+                letterType: "dialogue",
+            });
+
+
         const dataB = await responseB.json();
         console.log(dataB);
       }
       catch(err) {
         console.log(err);
-      }  
+      }  finally {  //ADDED
+             setTimeout(() => {
+            setIsLoading(false); // End loading after 2 seconds
+        }, 2000);
+       }
       
     }
 
@@ -253,12 +267,24 @@ export default function GenerateDialougeLetter() {
         });
         if (!responseB.ok) throw new Error("Failed to send SMS");
 
+              setShowSubmitPopup({
+                show: true,
+                message: "SMS message for both parties sent succesfuly!",
+                message2: "",
+                letterType: "summon",
+            });
+
+
         const dataB = await responseB.json();
         console.log(dataB);
         }
         catch(err) {
           console.log(err);
-        }  
+        }   finally {  //ADDED
+             setTimeout(() => {
+            setIsLoading(false); // End loading after 2 seconds
+        }, 2000);
+       }
     }
   
 
@@ -544,7 +570,7 @@ export default function GenerateDialougeLetter() {
                 //sendSMSForSummons();
             }
             else{
-                //sendSMSForDialogue();
+                sendSMSForDialogue();
             }
         }
         console.log(otherInfo);
