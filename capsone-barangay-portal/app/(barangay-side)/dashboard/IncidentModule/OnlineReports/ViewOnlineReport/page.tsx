@@ -255,6 +255,10 @@ export default function ViewOnlineReports() {
               </button>
               <h1>Online Report Details</h1>
             </div>
+
+            <div className="action-btn-section-online-report">
+                 <button className="action-add-report" onClick={handleSave}>Save</button>
+            </div>
         </div>
 
           <div className="section-1-reports-title">
@@ -603,89 +607,11 @@ export default function ViewOnlineReports() {
 
      
 
-    
-
+  
         
       </div>
 
-      {/* Respondent's Information Section */}
-      <div className="main-content-response-section">
-        <div className="title-section-response-section">
-          <h1 className="title-response-section">Respondent's Information</h1>
-        </div>
-
-        <div className="main-section-response-section">
-          <div className="section-1-response">
-            <div className="official-section-online-report">
-              <p>Respondent Officer</p>
-              <input type="text" className="online-report-input-field" placeholder="Enter Respondent Officer Name" name="respondentName" value={respondent.respondentName} onChange={handleChange} />
-            </div>
-
-            <div className="fields-section-online-report">
-              <p>Investigation Report</p>
-              <textarea className="online-report-input-field" placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange} rows={15} />
-            </div>
-          </div>
-
-          <div className="section-2-response">
-  <p>Investigation Photo</p>
-  <div className="file-upload-container">
-    <label htmlFor="file-upload2" className="upload-link">Click to Upload File</label>
-    <input
-      id="file-upload2"
-      type="file"
-      className="file-upload-input"
-      multiple
-      accept=".jpg,.jpeg,.png"
-      onChange={handleFileChange}
-    />
-
-    <div className="uploadedFiles-container">
-      {(files.length > 0 || respondent.file.length > 0) && (
-        <div className="file-name-image-display">
-          <ul>
-            {/* Display existing respondent files */}
-              {respondent.file.map((url: string, index: number) => (
-                <div className="file-name-image-display-indiv" key={`existing-${index}`}> 
-                  <li>
-                    <div className="filename&image-container">
-                      <img src={url} alt={`Investigation Photo ${index + 1}`} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
-                    </div>
-                    <a href={url} target="_blank" rel="noopener noreferrer">View</a>
-                  </li>
-                </div>
-              ))}
-
-
-            {/* Display newly uploaded files */}
-            {files.map((file, index) => (
-              <div className="file-name-image-display-indiv" key={`new-${index}`}> 
-                <li>
-                  {file.preview && (
-                    <div className="filename&image-container">
-                      <img src={file.preview} alt={file.name} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
-                    </div>
-                  )}
-                  {file.name}
-                  <button type="button" onClick={() => handleFileDelete(file.name)} className="delete-button">
-                    <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                  </button>
-                </li>
-              </div>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  </div>
-</div>
-
-        </div>
-
-        <div className="submit-response-section">
-          <button className="save-btn-online-report-response-section" onClick={handleSave}>Save</button>
-        </div>
-      </div>
+   
     </main>
   );
 }
