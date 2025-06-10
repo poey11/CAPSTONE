@@ -136,6 +136,22 @@ color: rgb(44, 42, 42);
   }
 
 
+.highlight-new-request {
+  background-color: #bdf8a0ba !important;
+  transition: background-color 0.5s ease;
+}
+
+.highlight-new-request:hover {
+  background-color: #a6e68d !important; /* slightly darker green on hover */
+}
+
+
+
+
+
+
+
+
   
  
 .status-badge {
