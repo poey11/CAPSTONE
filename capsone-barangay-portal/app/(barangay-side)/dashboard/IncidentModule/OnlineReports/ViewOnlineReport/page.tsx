@@ -273,7 +273,7 @@ export default function ViewOnlineReports() {
         <div className="online-report-incident-bottom-section">
 
               <nav className="online-report-info-toggle-wrapper">
-                {["complainant", "incident"].map((section) => (
+                {["complainant", "incident", "action"].map((section) => (
                     <button
                       key={section}
                       type="button"
@@ -282,6 +282,7 @@ export default function ViewOnlineReports() {
                     >
                       {section === "complainant" && "Complainant Info"}
                       {section === "incident" && "Incident Info"}
+                       {section === "action" && "Action Details*"}
                  
                     </button>
                   ))}
@@ -463,6 +464,58 @@ export default function ViewOnlineReports() {
 
                     </>
                     )}
+
+                    {activeSection === "action" && (
+                    <>
+
+                      <div className="online-report-full-top">
+
+                        <div className="online-report-section-left-side">
+
+                          <div className="fields-section-online">
+                                <p>Barangay Officer</p>
+                                <input 
+                                type="text" 
+                                className="online-incident-input-field" 
+                                placeholder="Enter Respondent Officer Name"
+                                 name="respondentName" value={respondent.respondentName}
+                                onChange={handleChange} 
+                                  />
+                            </div>
+
+                        
+                          <div className="online-report-box-container">
+                              <div className="box-container-outer-image">
+                                <div className="title-image">
+                                  Investigation Report
+                                </div>
+
+                                <div className="box-container-investigation-report">
+                                   <textarea className="investigation-report-input-field" placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange}  />
+                                     
+                                </div>
+
+                              </div>
+
+
+                            </div>
+                            
+
+                        </div>
+
+                        <div className="online-report-section-right-side">
+
+                          
+                        </div>
+                    
+                    
+
+                      </div>
+
+
+                      </>
+                    )}
+
 
                       
 
