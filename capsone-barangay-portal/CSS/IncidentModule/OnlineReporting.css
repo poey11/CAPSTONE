@@ -458,8 +458,37 @@ margin-top: 2rem;
 }
 
 
+.box-container-investigation{
+    position: relative;
+  width: 350px;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding-top: 30px;
+ padding-right: 20px;
+ padding-bottom: 50px;
+ padding-left: 20px;
+ padding-top: 40px;
+  margin-top: 20px;
+  display: flex;
+ justify-content: center;
+ align-items: center;
+}
 
-
+.file-upload-container-investigation {
+  margin-bottom: 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    display: block;
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    height: 220px; 
+    width: 350px;
+    overflow-y: auto;
+    margin-top: 50px;
+    align-self: center;
+}
 
 
 

@@ -505,6 +505,74 @@ export default function ViewOnlineReports() {
 
                         <div className="online-report-section-right-side">
 
+                           <div className="online-report-box-container">
+                              <div className="box-container-outer-image">
+                                <div className="title-image">
+                                    Investigation Photo
+                                </div>
+
+                                <div className="box-container-investigation">
+
+                                    <div className="file-upload-container-investigation">
+                                      <label htmlFor="file-upload2" className="upload-link">Click to Upload File</label>
+                                        <input
+                                          id="file-upload2"
+                                          type="file"
+                                          className="file-upload-input"
+                                          multiple
+                                          accept=".jpg,.jpeg,.png"
+                                          onChange={handleFileChange}
+                                        />
+                                         <div className="uploadedFiles-container">
+                                        {(files.length > 0 || respondent.file.length > 0) && (
+                                          <div className="file-name-image-display">
+                                            <ul>
+                                              {/* Display existing respondent files */}
+                                                {respondent.file.map((url: string, index: number) => (
+                                                  <div className="file-name-image-display-indiv" key={`existing-${index}`}> 
+                                                    <li>
+                                                      <div className="filename&image-container">
+                                                        <img src={url} alt={`Investigation Photo ${index + 1}`} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
+                                                      </div>
+                                                      <a href={url} target="_blank" rel="noopener noreferrer">View</a>
+                                                    </li>
+                                                  </div>
+                                                ))}
+
+
+                                              {/* Display newly uploaded files */}
+                                              {files.map((file, index) => (
+                                                <div className="file-name-image-display-indiv" key={`new-${index}`}> 
+                                                  <li>
+                                                    {file.preview && (
+                                                      <div className="filename&image-container">
+                                                        <img src={file.preview} alt={file.name} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
+                                                      </div>
+                                                    )}
+                                                    {file.name}
+                                                    <button type="button" onClick={() => handleFileDelete(file.name)} className="delete-button">
+                                                      <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                                    </button>
+                                                  </li>
+                                                </div>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      
+                                      
+                                          
+                                    </div>
+
+                                </div>
+
+                              </div>
+
+
+                            </div>
+
                           
                         </div>
                     
