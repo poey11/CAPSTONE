@@ -211,13 +211,15 @@ export default function ViewOnlineReports() {
     }
   };
   
+
+    const [activeSection, setActiveSection] = useState("basic");
   
   
 
   return (
-    <main className="main-container-report">
+    <main className="main-container-view-report">
 
-      
+      {/*}
         <div className="letters-content-edit">
                       
         <select
@@ -236,15 +238,121 @@ export default function ViewOnlineReports() {
 
         
           </div>
-
+*/}
 
       <div className="main-content-view-online-report">
         <div className="section-1-online-report">
-          <div className="section-1-online-report-left-side">
-            <button type="button" className="back-button" onClick={() => router.back()}></button>
-            <p>Online Report Details</p>
-          </div>
+         
+            <div className="section-1-online-report-left-side">
+              <button type="button" onClick={() => router.back()}>
+                 <img src="/images/left-arrow.png" alt="Left Arrow" className="back-button-reports"/>
+              </button>
+              <h1>Online Report Details</h1>
+            </div>
         </div>
+
+          <div className="section-1-reports-title">
+            <input 
+                            type="text" 
+                            className="search-bar-reports-case" 
+                            value= {formData.caseNumber}
+                            name="caseNumber"
+                            id="caseNumber"
+                            disabled
+                            
+                      />
+          
+        </div>
+
+        <div className="online-report-incident-bottom-section">
+
+              <nav className="online-report-info-toggle-wrapper">
+                {["basic", "respondent"].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn-online-report ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "basic" && "Incident Info"}
+                      {section === "respondent" && "Respondent Info"}
+                 
+                    </button>
+                  ))}
+                </nav>
+
+              <div className="online-report-bottom-section-scroll">
+
+                  <div className="online-report-section-2">
+
+                    <div className="online-report-full-top">
+
+                          <div className="online-report-section-left-side">
+
+                              <div className="fields-section-online">
+                                <p>First Name</p>
+                                 <input
+                                  type="text"
+                                  className="online-incident-input-field"
+                                  value={formData.firstname}  
+                                  disabled          
+                                 />
+                              </div>
+
+                                <div className="fields-section-online">
+                                <p>First Name</p>
+                                 <input
+                                  type="text"
+                                  className="online-incident-input-field"
+                                  value={formData.firstname}  
+                                  disabled          
+                                 />
+                              </div>
+
+                          </div>
+
+                          
+                          <div className="online-report-section-right-side">
+                              <div className="fields-section-online">
+                                <p>Date and Time Of Incident</p>
+                                 <input
+                                  type="text"
+                                  className="online-incident-input-field"
+                                   value={`${formData.dateFiled} ${formData.time}`}
+                                  disabled         
+                                 />
+                              </div>
+
+                              <div className="fields-section-online">
+                                  <p>Date and Time Of Incident</p>
+                                  <input
+                                    type="text"
+                                    className="online-incident-input-field"
+                                    value= {formData.concerns}
+                                    disabled         
+                                  />
+                              </div>
+
+                          </div>
+
+
+                    
+
+                    </div>
+
+                      
+
+                  </div>
+                    
+              </div>
+
+
+          
+        </div>
+
+      
+
+
 
         <div className="online-report-details-section">
           <div className="title-section"><p>First Name</p></div>
