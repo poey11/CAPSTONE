@@ -38,6 +38,13 @@ export default function ViewOnlineReports() {
   });
 
   const [initialRespondent, setInitialRespondent] = useState(respondent);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+   const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
+   const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
 
 
 
@@ -157,73 +164,170 @@ export default function ViewOnlineReports() {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
   };
 
-  const handleSave = async () => {
-    if (!formData.id) {
-      alert("Error: Missing incident ID.");
+
+
+    const [activeSection, setActiveSection] = useState("complainant");
+
+
+
+
+const handleSubmitClick = async () => {
+  const { respondentName, investigationReport, file } = respondent;
+
+  const invalidFields: string[] = [];
+
+  if (!respondentName.trim()) invalidFields.push("respondentName");
+  if (!investigationReport.trim()) invalidFields.push("investigationReport");
+ // if (!file || file.length === 0) invalidFields.push("file");
+
+  if (invalidFields.length > 0) {
+    setInvalidFields(invalidFields); // highlight invalid fields
+    setPopupErrorMessage("Please fill up all required fields.");
+    setShowErrorPopup(true);
+
+    setTimeout(() => {
+      setShowErrorPopup(false);
+    }, 3000);
+
+    return;
+  }
+
+  // Clear previous errors
+  setInvalidFields([]);
+  setShowConfirmation(true);
+};
+
+
+    
+  
+  const confirmSubmit = async () => {
+  setShowConfirmation(false);
+
+ // Create a fake event and call handleSubmit
+    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+    const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+
+    
+    if (!docId) {
+      setPopupErrorMessage("Failed to save record.");
+      setShowErrorPopup(true);
       return;
     }
+    
+    setPopupMessage("Online Report Submitted Succesfuly!!");
+    setShowPopup(true);
   
-    try {
-      const incidentRef = doc(db, "IncidentReports", formData.id);
-      const storage = getStorage();
-  
-      // Upload files and get their URLs
-      const uploadedFileUrls = await Promise.all(
-        files.map(async ({ file }) => { 
-          const fileRef = ref(storage, `IncidentReports/Respondents/${file.name}`);
-          await uploadBytes(fileRef, file);
-          return getDownloadURL(fileRef);
-        })
-      );
-  
-      // Update the IncidentReports document
-      await updateDoc(incidentRef, {
-        status: formData.status,
-        respondent: {  
-          respondentName: respondent.respondentName,
-          investigationReport: respondent.investigationReport,
-          file: uploadedFileUrls,
-        },
-      });
-  
-      //  Create a notification for the resident
-      const notificationRef = doc(collection(db, "Notifications"));
-      await setDoc(notificationRef, {
-        residentID: formData.reportID, // reportID == user id
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+      router.push(`/dashboard/IncidentModule/OnlineReports`);
+    }, 3000);
+
+};
+
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): Promise<string | undefined> => {
+  if (e) e.preventDefault();
+
+  if (!formData.id) {
+    alert("Error: Missing incident ID.");
+    return;
+  }
+
+  try {
+    const incidentRef = doc(db, "IncidentReports", formData.id);
+    const storage = getStorage();
+
+    const uploadedFileUrls = await Promise.all(
+      files.map(async ({ file }) => {
+        const fileRef = ref(storage, `IncidentReports/Respondents/${file.name}`);
+        await uploadBytes(fileRef, file);
+        return getDownloadURL(fileRef);
+      })
+    );
+
+    await updateDoc(incidentRef, {
+      status: formData.status,
+      respondent: {
+        respondentName: respondent.respondentName,
+        investigationReport: respondent.investigationReport,
+        file: uploadedFileUrls,
+      },
+    });
+
+    const notificationRef = doc(collection(db, "Notifications"));
+    await setDoc(notificationRef, {
+      residentID: formData.reportID,
+      incidentID: formData.id,
+      message: `Your incident report (${formData.caseNumber}) has been updated to "${formData.status}".`,
+      timestamp: new Date(),
+      transactionType: "Online Incident",
+      isRead: false,
+    });
+
+    if (hasRespondentChanged()) {
+      const respondentNotificationRef = doc(collection(db, "Notifications"));
+      await setDoc(respondentNotificationRef, {
+        residentID: formData.reportID,
         incidentID: formData.id,
-        message: `Your incident report (${formData.caseNumber}) has been updated to "${formData.status}".`,
+        message: `Respondent information for your incident report (${formData.caseNumber}) has been updated.`,
         timestamp: new Date(),
         transactionType: "Online Incident",
         isRead: false,
       });
-
-      if (hasRespondentChanged()) {
-        const respondentNotificationRef = doc(collection(db, "Notifications"));
-        await setDoc(respondentNotificationRef, {
-          residentID: formData.reportID,
-          incidentID: formData.id,
-          message: `Respondent information for your incident report (${formData.caseNumber}) has been updated.`,
-          timestamp: new Date(),
-          transactionType: "Online Incident",
-          isRead: false,
-        });
-      }
-  
-      alert("Incident status and respondent info updated!");
-      router.push("/dashboard/IncidentModule/OnlineReports");
-    } catch (error) {
-      console.error("Error updating:", error);
-      alert("Failed to update incident.");
     }
-  };
-  
 
-    const [activeSection, setActiveSection] = useState("complainant");
-  
-  
+  //  alert("Incident status and respondent info updated!");
+   // router.push("/dashboard/IncidentModule/OnlineReports");
+
+    return formData.id; // ✅ Return document ID
+  } catch (error) {
+    console.error("Error during submission:", error);
+    alert("Failed to update incident.");
+    return; // Return undefined on error
+  }
+};
+
+
 
   return (
     <main className="main-container-view-report">
+
+        {showConfirmation && (
+            <div className="confirmation-popup-overlay-online-reports">
+                             <div className="confirmation-popup-online-reports">
+                                 <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup-online-reports" />          
+                            <p>Are you sure you want to submit?</p>
+                                   <div className="yesno-container-add">
+                                 <button onClick={() => setShowConfirmation(false)} className="no-button-add">No</button>
+                                     <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
+                               </div> 
+                            </div>
+                  </div>
+          )}
+
+
+{/*
+NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
+*/}
+          {showErrorPopup && (
+                <div className={`error-popup-overlay-online-report show`}>
+                    <div className="popup-online-report">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                        <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
+
+            {showPopup && (
+                <div className={`popup-overlay-online-report show`}>
+                    <div className="popup-online-report">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+
 
       {/*}
         <div className="letters-content-edit">
@@ -257,7 +361,8 @@ export default function ViewOnlineReports() {
             </div>
 
             <div className="action-btn-section-online-report">
-                 <button className="action-add-report" onClick={handleSave}>Save</button>
+                <button className="action-add-report" onClick={handleSubmitClick} >Save</button>
+
             </div>
         </div>
 
@@ -469,6 +574,7 @@ export default function ViewOnlineReports() {
                     </>
                     )}
 
+              <form onSubmit={handleSubmit} className="online-report-section-2">
                     {activeSection === "action" && (
                     <>
 
@@ -477,10 +583,10 @@ export default function ViewOnlineReports() {
                         <div className="online-report-section-left-side">
 
                           <div className="fields-section-online">
-                                <p>Barangay Officer</p>
+                                <p>Barangay Officer<span className="required">*</span></p>
                                 <input 
                                 type="text" 
-                                className="online-incident-input-field" 
+                              className={`online-incident-input-field ${invalidFields.includes("respondentName") ? "input-error" : ""}`} 
                                 placeholder="Enter Respondent Officer Name"
                                  name="respondentName" value={respondent.respondentName}
                                 onChange={handleChange} 
@@ -495,7 +601,7 @@ export default function ViewOnlineReports() {
                                 </div>
 
                                 <div className="box-container-investigation-report">
-                                   <textarea className="investigation-report-input-field" placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange}  />
+                                   <textarea   className={`investigation-report-input-field ${invalidFields.includes("investigationReport") ? "input-error" : ""}`}  placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange}  />
                                      
                                 </div>
 
@@ -587,6 +693,7 @@ export default function ViewOnlineReports() {
 
                       </>
                     )}
+                    </form>
 
 
                       
@@ -598,18 +705,10 @@ export default function ViewOnlineReports() {
 
           
         </div>
-
-      
-
-
-
-   
-
-     
-
-  
         
       </div>
+
+    
 
    
     </main>
