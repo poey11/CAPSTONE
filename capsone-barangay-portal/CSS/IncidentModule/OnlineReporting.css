@@ -387,7 +387,43 @@ FOR ONLINE INCIDENT REPORTING CSS
 }
 
 
+.online-report-box-container{
+width: 100%;
+}
 
+.box-container-outer-image {
+     position: relative; 
+    margin-bottom: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.title-image {
+    position: absolute;
+    left: 50%; 
+    top: 30px; 
+    transform: translate(-50%, -50%);
+    background-color: #1f3b57;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    z-index: 5;
+    width: 210px;
+    text-align: center;
+}
+.box-container-incidentimage-online {
+   position: relative;
+    width: 60%;
+    border: 1px solid #5a6b7c;
+    border-radius: 10px;
+    background-color: #ffffff;
+    margin-top: 30px;
+    height: 260px;
+}
 
 
 

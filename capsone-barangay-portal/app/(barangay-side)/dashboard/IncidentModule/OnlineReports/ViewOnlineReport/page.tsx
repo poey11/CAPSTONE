@@ -356,27 +356,7 @@ export default function ViewOnlineReports() {
 
                     </div>
 
-                    <div className="online-report-section-bottom-side-2">
-
-                      {/*
-                        ADD YUNG VIEW FOR IMAGE
-
-                        <div className="online-report-details-section">
-                          <div className="title-section"><p>Proof Photo</p></div>
-                          <div className="description-section">
-                            {imageUrl ? (
-                              <>
-                                <img src={imageUrl} alt="Proof Photo" className="detail-section-image" />
-                                <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="view-full-image">View full image</a>
-                              </>
-                            ) : (
-                              <p>No file uploaded</p>
-                            )}
-                          </div>
-                        </div>
-                      */}
-
-                    </div>
+                
 
                     </>
                       )}
@@ -434,10 +414,52 @@ export default function ViewOnlineReports() {
                            
                          </div>
 
+                      </div>
 
+                        <div className="online-report-section-bottom-side-2">
+
+                      {/*
+                        ADD YUNG VIEW FOR IMAGE
+
+                        <div className="online-report-details-section">
+                          <div className="title-section"><p>Proof Photo</p></div>
+                          <div className="description-section">
+                            {imageUrl ? (
+                              <>
+                                <img src={imageUrl} alt="Proof Photo" className="detail-section-image" />
+                                <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="view-full-image">View full image</a>
+                              </>
+                            ) : (
+                              <p>No file uploaded</p>
+                            )}
+                          </div>
+                        </div>
+                      */}
+
+                      <div className="online-report-box-container">
+                        <div className="box-container-outer-image">
+                          <div className="title-image">
+                            Incident Image
+                          </div>
+
+                          <div className="box-container-incidentimage-online">
+                                {formData.file ? (
+                                  <img
+                                    src={formData.file}
+                                    alt="Incident Image"
+                                    style={{ maxWidth: "100%", maxHeight: "260px", borderRadius: "10px" }}
+                                  />
+                                ) : (
+                                  <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>No image available</p>
+                                )}
+                          </div>
+
+                        </div>
 
 
                       </div>
+
+                    </div>
 
                     </>
                     )}
