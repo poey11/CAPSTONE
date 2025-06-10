@@ -201,7 +201,7 @@ const markAsViewed = (id: string) => {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="" disabled>Select Status</option>
+              <option value="">Select Status</option>
               <option value="pending">Pending</option>
               <option value="completed">Completed</option>
               <option value="rejected">Rejected</option>

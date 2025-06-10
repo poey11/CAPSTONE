@@ -1,17 +1,19 @@
 
 
-.main-container{
-    width: 100%;
-    height: 100vh;
-    background-color: #f9f9f9;
-    padding:30px;
-    margin-left: 2rem; 
-    overflow-y: auto; 
+.main-container-online-reports{
+   width: 100%;
+  height: 100vh;
+ background-color: #F0F2F8; 
+  padding-left:30px;
+  padding-right:30px;
+  padding-bottom:30px;
+  padding-top: 150px;
+  margin-left: 3rem; 
 }
 
 
- .main-section {
-    flex: 1; /* Makes it take up remaining space */
+ .main-section-online-reports {
+  flex: 1; /* Makes it take up remaining space */
     display: flex; /* Ensures proper alignment */
     flex-direction: column;
     padding: 0;
@@ -21,85 +23,59 @@
     height: 100%; /* Full height */
     margin-top: 2rem;
     max-height: 70%;
-    border: 2px solid  #ddd;
+    border: 2px solid rgba(36, 53, 76, 0.7);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+   background-color: #ffffff;
+   border-radius: 6px;
 }
 
-.main-section table {
+.main-section-online-reports table {
     width: 100%; /* Ensures the table spans the full width */
     border-collapse: collapse; /* Removes unnecessary spacing between table cells */
 }
 
-.main-section td {
-    padding: 1rem; 
-    text-align: center; 
-    border-bottom: 2px solid #ddd;
-    color: grey;
-    font-weight: lighter;
+.main-section-online-reports td {
+   padding: 1rem; 
+  text-align: center; 
+  border-bottom: 2px solid #ddd;
+color: rgb(44, 42, 42);
+  font-weight: normal;
 }
 
-.main-section th {
-    padding: 1rem; 
-    text-align: left; 
-    border-bottom: 2px solid #ddd;
-    color: grey;
-    text-align: center;
-    
+.main-section-online-reports th {
+  padding: 1rem; 
+  text-align: left; 
+  border-bottom: 2px solid #ddd;
+  color: #FFFFFF;
+  text-align: center;
 }
 
-.main-section .official-info {
-    display: flex;
-    align-items: center; /* Center align the image and text */
-    gap: 1rem; /* Add space between the image and text */
+.main-section-online-reports thead {
+ position: sticky;
+  top: 0;
+  background-color: #214666; /* Ensures it's visible when scrolled */
+  z-index: 10; /* Ensures it stays above other content */
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
+  height: 80px;
 }
 
-.main-section .official-image {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%; /* Make the image circular */
-    object-fit: cover; /* Ensure the image is properly scaled */
-}
 
-.actions {
-    display: flex;
+
+.actions-services {
+     display: flex;
     gap: 0.5rem; /* Space between action buttons */
     justify-content: center;
 }
 
-.action-notify,
-.action-edit,
-.action-delete {
+.action-edit-services {
     border: none;
     cursor: pointer;
-    padding: 8px 12px;
-    font-size: 13px;
-    border-radius: 5px;
-    transition: background-color 0.2s ease;
-
+    width: 24px;
+    height: 24px;
 }
 
-.action-notify {
-    background-color: #4caf50; 
-    color: white;
-}
-
-.action-notify:hover {
-    background-color: #3e8f41;
-}
-
-.action-edit {
-    background-color: #ff9800;
-    color: white;
-}
-.action-edit:hover {
-    background-color: #d58102; 
-}
-
-.action-delete {
-    background-color: #f44336; 
-    color: white;
-}
-.action-delete:hover {
-    background-color: #d73c31; 
+.action-edit-services img {
+  filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-rotate(189deg) brightness(91%) contrast(101%);
 }
 
 .section-1{
@@ -131,27 +107,34 @@
     background-color:#cc591b;
   }
 
-  .section-2{
-    display: flex;
+  .section-2-online-reports{
+ display: flex;
     gap: 20px;
     padding: 0;
-    margin-top: 25px;
+    margin-top: 5px;
   }
 
-  .search-bar, .featuredStatus{
-    padding: 8px;
+  .online-reports-filter{
+     padding: 8px;
     width: 100%;
     max-width: 400px;
     margin-top: 10px;
-    border: 1px solid #ccc;
+     border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
-    color: rgba(0, 0, 0, 0.4);
-    text-align: center;
+    color: #000000;
+    text-align: left;
   }
 
-  .featuredStatus option {
+  .online-reports-filter option {
     color: rgba(0, 0, 0, 0.4); 
   }
+
+  .online-reports-filter:focus {
+    border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+
 
   
  
@@ -534,37 +517,36 @@ FILE UPLOAD SECTION DAMI KASI TANGINA!
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 2rem auto;
-  width: fit-content;
-  padding: 10px;
-  border: 2px solid #ddd;
-  border-radius: 5px;
-  background: #f8f8f8;
+  padding: 5px;
+  border-radius: 6px;
   gap: 5px;
+    border: 2px solid rgba(36, 53, 76, 0.7);
+   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background-color: #ffffff;
 }
 
 .redirection-section-online button {
   padding: 4px 8px;
-  border: none;
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: 0.3s;
+    border: none;
+    background-color: #2C3E50;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.3s;
 }
 
 .redirection-section-online button:hover {
-  background-color: #0056b3;
+      background-color: #214666;
 }
 
 .redirection-section-online button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+ background-color: #ccc;
+    cursor: not-allowed;
 }
 
 .redirection-section-online .active {
-  background-color: #0056b3;
-  font-weight: bold;
+    background-color: #214666;
+    font-weight: bold;
 }
 
 

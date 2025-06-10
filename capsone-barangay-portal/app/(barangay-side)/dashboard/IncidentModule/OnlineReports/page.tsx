@@ -167,28 +167,25 @@ export default function OnlineReports() {
     };
 
   return (
-    <main className="main-container">
-      <div className="section-1">
-        <h1>Online Reports</h1>
-      </div>
-
-      <div className="section-2">
+    <main className="main-container-online-reports">
+    
+      <div className="section-2-online-reports">
         <input
           type="text"
-          className="search-bar"
+          className="online-reports-filter"
           placeholder="Enter Case Number (e.g. 0001)"
           value={caseNumberSearch}
           onChange={(e) => setCaseNumberSearch(e.target.value)}
         />
         <input
           type="text"
-          className="search-bar"
+          className="online-reports-filter"
           placeholder="Enter Name"
           value={searchNameQuery}
           onChange={(e) => setSearchNameQuery(e.target.value)}
         />
         <select
-          className="featuredStatus"
+          className="online-reports-filter"
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
         >
@@ -198,7 +195,7 @@ export default function OnlineReports() {
         </select>
     
         <select
-          className="featuredStatus"
+          className="online-reports-filter"
           value={showCount}
           onChange={(e) => setShowCount(Number(e.target.value))}
         >
@@ -210,7 +207,7 @@ export default function OnlineReports() {
 
       </div>
 
-      <div className="main-section">
+      <div className="main-section-online-reports">
   {currentIncidents.length === 0 ? (
     <div className="no-result-card">
       <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
@@ -247,8 +244,8 @@ export default function OnlineReports() {
                 </span>
               </td>
               <td>
-                <div className="actions">
-                  <button className="action-edit" onClick={() => handleViewOnlineReport(incident.id)}>Edit</button>
+                <div className="actions-services">
+                  <button className="action-edit-services " onClick={() => handleViewOnlineReport(incident.id)}><img src="/Images/edit.png" alt="Edit" /></button>
                 </div>
               </td>
             </tr>
