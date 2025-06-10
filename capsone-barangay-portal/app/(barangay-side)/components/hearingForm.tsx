@@ -80,32 +80,20 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
     useEffect(() => { 
         const docRef = query(collection(db, "IncidentReports", id, "SummonsMeeting"), orderBy("nosHearing", "asc"));
         const unsubscribe = onSnapshot(docRef, (snapshot) => {
-            const fetchedDetails = snapshot.docs.map(doc => doc.data());
-            setHearingDetails(fetchedDetails as HearingDetails[]);
-
-            const currentHearing = fetchedDetails[index];
-        if (currentHearing) {
-            setDetails(prevDetails => ({
-                ...prevDetails,
-                firstHearingOfficer: currentHearing.firstHearingOfficer || user?.fullName || ""
-            }));
-        }
-
-        });
-
-        
-
-    
-        return () => unsubscribe();
-    }, [id]);
-
-    useEffect(() => {
-        setDetails(prevDetails => ({
+          const fetchedDetails = snapshot.docs.map(doc => doc.data());
+          setHearingDetails(fetchedDetails as HearingDetails[]);
+      
+          setDetails(prevDetails => ({
             ...prevDetails,
-            firstHearingOfficer: user?.fullName || ""
-        }));
-            
-    },[user])
+            firstHearingOfficer: (fetchedDetails[0]?.firstHearingOfficer) || user?.fullName || "",
+            secondHearingOfficer: (fetchedDetails[1]?.secondHearingOfficer) || user?.fullName || "",
+            thirdHearingOfficer: (fetchedDetails[2]?.thirdHearingOfficer) || user?.fullName || "",
+          }));
+        });
+      
+        return () => unsubscribe();
+      }, [id, user]);
+      
 
 
 
@@ -252,10 +240,6 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                 filled: true
             });
             
-            const UpdateRef = doc(db, "IncidentReports", id,);
-            await updateDoc(UpdateRef, {
-            ...(data?.hearing !=3   && { hearing: data?.hearing + 1 })
-            });
         } catch (error:any) {
             console.error("Error saving data:", error.message);
         }
@@ -285,45 +269,51 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
     const usersAbsent = () => details.Cstatus === "Absent" || details.Rstatus === "Absent";
 
     useEffect(() => {
-    const updatedDetails = { ...details };
+        const updatedDetails = { ...details };
+    
+        let absentMinutes: string[] = [];
+        let absentRemarks: string[] = [];
+    
+        // Initialize partyA and partyB as empty strings
+        let partyA = "";
+        let partyB = "";
+    
+        // Handle Complainant status
+        if (details.Cstatus === "Absent") {
+            partyA = "Complainant Absent.";
+            partyB = "Respondent Present.";
+            absentMinutes.push("Complainant Absent.");
+            absentRemarks.push("Complainant Absent.");
+        } else {
 
-    let absentMinutes: string[] = [];
-    let absentRemarks: string[] = [];
+        }
+    
+        // Handle Respondent status
+        if (details.Rstatus === "Absent") {
+            partyB = "Respondent Absent.";
+            partyA = "Complainant Present";  // If Respondent is absent, complainant is present
+            absentMinutes.push("Respondent Absent.");
+            absentRemarks.push("Respondent Absent.");
+        } else {
 
-    // Handle Complainant status
-    if (details.Cstatus === "Absent") {
-        updatedDetails.partyA = "Complainant Absent.";
-         updatedDetails.partyB = "Respondent Present.";
-        absentMinutes.push("Complainant Absent.");
-        absentRemarks.push("Complainant Absent.");
-    } else {
-        updatedDetails.partyA = "";
-    }
-
-    // Handle Respondent status
-    if (details.Rstatus === "Absent") {
-        updatedDetails.partyB = "Respondent Absent.";
-        updatedDetails.partyA = "Complainant Present";
-        absentMinutes.push("Respondent Absent.");
-        absentRemarks.push("Respondent Absent.");
-    } else {
-        updatedDetails.partyB = "";
-    }
-
-    // If any user is marked absent, overwrite with only absent messages
-    if (absentMinutes.length > 0 || absentRemarks.length > 0) {
-        updatedDetails.minutesOfCaseProceedings = absentMinutes.join(" ");
-        updatedDetails.remarks = absentRemarks.join(" ");
-    }
-
-    // If both are present, clear everything
-    if (details.Cstatus === "Present" && details.Rstatus === "Present") {
-        updatedDetails.minutesOfCaseProceedings = "";
-        updatedDetails.remarks = "";
-    }
-
-    setDetails(updatedDetails);
-}, [details.Cstatus, details.Rstatus]);
+        }
+    
+        updatedDetails.partyA = partyA;
+        updatedDetails.partyB = partyB;
+    
+        // If any user is marked absent, overwrite minutes and remarks with absent messages
+        if (absentMinutes.length > 0) {
+            updatedDetails.minutesOfCaseProceedings = absentMinutes.join(" ");
+            updatedDetails.remarks = absentRemarks.join(" ");
+        } else {
+            // If both are present, clear minutes and remarks
+            updatedDetails.minutesOfCaseProceedings = "";
+            updatedDetails.remarks = "";
+        }
+    
+        setDetails(updatedDetails);
+    }, [details.Cstatus, details.Rstatus]);
+    
 
     const router = useRouter();
 
