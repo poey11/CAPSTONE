@@ -162,45 +162,43 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         let minutes = details.minutesOfDialogue || "";
         let remarks = details.remarks || "";
     
+        let partyA = "";
+        let partyB = "";
+    
         // Handle Complainant status
         if (details.Cstatus === "Absent") {
-            updatedDetails.partyA = "Complainant Absent.";
-            updatedDetails.partyB = "Respondent Present.";
-
+            partyA = "Complainant Absent.";
+            partyB = "Respondent Present.";
     
             if (!minutes.includes("Complainant Absent")) {
                 minutes += (minutes ? " " : "") + "Complainant Absent.";
             }
-    
             if (!remarks.includes("Complainant Absent")) {
                 remarks += (remarks ? " " : "") + "Complainant Absent.";
             }
         } else {
-            // Treat both "" and "Present" as present
-            updatedDetails.partyA = "";
             minutes = minutes.replace(/Complainant Absent\.?\s*/g, "").trim();
             remarks = remarks.replace(/Complainant Absent\.?\s*/g, "").trim();
         }
     
         // Handle Respondent status
         if (details.Rstatus === "Absent") {
-            updatedDetails.partyB = "Respondent Absent";
-             updatedDetails.partyA = "Complainant Present";
-    
+            partyB = "Respondent Absent";
+            partyA = "Complainant Present";
     
             if (!minutes.includes("Respondent Absent")) {
                 minutes += (minutes ? " " : "") + "Respondent Absent.";
             }
-    
             if (!remarks.includes("Respondent Absent")) {
                 remarks += (remarks ? " " : "") + "Respondent Absent.";
             }
         } else {
-            updatedDetails.partyB = "";
             minutes = minutes.replace(/Respondent Absent\.?\s*/g, "").trim();
             remarks = remarks.replace(/Respondent Absent\.?\s*/g, "").trim();
         }
     
+        updatedDetails.partyA = partyA;
+        updatedDetails.partyB = partyB;
         updatedDetails.minutesOfDialogue = minutes;
         updatedDetails.remarks = remarks;
     
