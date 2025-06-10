@@ -13,6 +13,9 @@ export default function ViewOnlineReports() {
     id: "",
     firstname: "",
     lastname: "",
+    contactNos: "",
+    area: "",
+    address: "",
     dateFiled: "",
     concerns: "",
     status: "",
@@ -65,6 +68,9 @@ export default function ViewOnlineReports() {
           id,
           firstname: data.firstname || "",
           lastname: data.lastname || "",
+          contactNos: data.contactNos || "",
+          area: data.area || "",
+          address: data.address || "",
           dateFiled: data.dateFiled || "",
           concerns: data.concerns || "",
           status: data.status || "",
@@ -212,7 +218,7 @@ export default function ViewOnlineReports() {
   };
   
 
-    const [activeSection, setActiveSection] = useState("basic");
+    const [activeSection, setActiveSection] = useState("complainant");
   
   
 
@@ -267,15 +273,15 @@ export default function ViewOnlineReports() {
         <div className="online-report-incident-bottom-section">
 
               <nav className="online-report-info-toggle-wrapper">
-                {["basic", "respondent"].map((section) => (
+                {["complainant", "incident"].map((section) => (
                     <button
                       key={section}
                       type="button"
                       className={`info-toggle-btn-online-report ${activeSection === section ? "active" : ""}`}
                       onClick={() => setActiveSection(section)}
                     >
-                      {section === "basic" && "Incident Info"}
-                      {section === "respondent" && "Respondent Info"}
+                      {section === "complainant" && "Complainant Info"}
+                      {section === "incident" && "Incident Info"}
                  
                     </button>
                   ))}
@@ -284,6 +290,10 @@ export default function ViewOnlineReports() {
               <div className="online-report-bottom-section-scroll">
 
                   <div className="online-report-section-2">
+
+
+                {activeSection === "complainant" && (
+                <>
 
                     <div className="online-report-full-top">
 
@@ -299,39 +309,45 @@ export default function ViewOnlineReports() {
                                  />
                               </div>
 
-                                <div className="fields-section-online">
-                                <p>First Name</p>
+                              
+                              <div className="fields-section-online">
+                                <p>Contact Number</p>
                                  <input
                                   type="text"
                                   className="online-incident-input-field"
-                                  value={formData.firstname}  
+                                  value={formData.contactNos}  
                                   disabled          
                                  />
                               </div>
+
+                             
 
                           </div>
 
                           
                           <div className="online-report-section-right-side">
-                              <div className="fields-section-online">
-                                <p>Date and Time Of Incident</p>
+
+                               <div className="fields-section-online">
+                                <p>Last Name</p>
                                  <input
                                   type="text"
                                   className="online-incident-input-field"
-                                   value={`${formData.dateFiled} ${formData.time}`}
-                                  disabled         
+                                  value={formData.lastname}  
+                                  disabled          
                                  />
                               </div>
 
-                              <div className="fields-section-online">
-                                  <p>Date and Time Of Incident</p>
-                                  <input
-                                    type="text"
-                                    className="online-incident-input-field"
-                                    value= {formData.concerns}
-                                    disabled         
-                                  />
+                                 <div className="fields-section-online">
+                                <p>Contact Number</p>
+                                 <input
+                                  type="text"
+                                  className="online-incident-input-field"
+                                  value={formData.contactNos}  
+                                  disabled          
+                                 />
                               </div>
+
+                          
 
                           </div>
 
@@ -339,6 +355,92 @@ export default function ViewOnlineReports() {
                     
 
                     </div>
+
+                    <div className="online-report-section-bottom-side-2">
+
+                      {/*
+                        ADD YUNG VIEW FOR IMAGE
+
+                        <div className="online-report-details-section">
+                          <div className="title-section"><p>Proof Photo</p></div>
+                          <div className="description-section">
+                            {imageUrl ? (
+                              <>
+                                <img src={imageUrl} alt="Proof Photo" className="detail-section-image" />
+                                <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="view-full-image">View full image</a>
+                              </>
+                            ) : (
+                              <p>No file uploaded</p>
+                            )}
+                          </div>
+                        </div>
+                      */}
+
+                    </div>
+
+                    </>
+                      )}
+
+
+                   {activeSection === "incident" && (
+                    <>
+
+                      <div className="online-report-full-top">
+
+                         <div className="online-report-section-left-side">
+                            <div className="fields-section-online">
+                                <p>Concern</p>
+                                 <input
+                                  type="text"
+                                  className="online-incident-input-field"
+                                  value={formData.concerns}  
+                                  disabled          
+                                 />
+                              </div>
+
+                               <div className="fields-section-online">
+                                <p>Address Of Incident</p>
+                                 <input
+                                  type="text"
+                                  className="online-incident-input-field"
+                                  value={formData.address}  
+                                  disabled          
+                                 />
+                              </div>
+
+                         </div>
+
+                         <div className="online-report-section-right-side">
+                             <div className="fields-section-online">
+                                <p>Date and Time Of Incident</p>
+                                 <input
+                                  type="text"
+                                  className="online-incident-input-field"
+                                  value={`${formData.dateFiled} ${formData.time}`}
+                                  disabled          
+                                 />
+                              </div>
+
+                              <div className="fields-section-online">
+                                <p>Area Of Incident</p>
+                                 <input
+                                  type="text"
+                                  className="online-incident-input-field"
+                                  value={formData.area}  
+                                  disabled          
+                                 />
+                              </div>
+
+                           
+                         </div>
+
+
+
+
+                      </div>
+
+                    </>
+                    )}
 
                       
 
@@ -354,49 +456,13 @@ export default function ViewOnlineReports() {
 
 
 
-        <div className="online-report-details-section">
-          <div className="title-section"><p>First Name</p></div>
-          <div className="description-section">
-            <p>{formData.firstname}</p>
-          </div>
-        </div>
+   
 
-        <div className="online-report-details-section">
-          <div className="title-section"><p>Last Name</p></div>
-          <div className="description-section">
-            <p>{formData.lastname}</p>
-          </div>
-        </div>
-
-        <div className="online-report-details-section">
-          <div className="title-section"><p>Date and Time Of Incident</p></div>
-          <div className="description-section">
-            <p>{formData.dateFiled} {formData.time}</p>
-          </div>
-        </div>
-
-        <div className="online-report-details-section">
-          <div className="title-section"><p>Concern</p></div>
-          <div className="description-section">
-            <p>{formData.concerns}</p>
-          </div>
-        </div>
+     
 
     
 
-        <div className="online-report-details-section">
-          <div className="title-section"><p>Proof Photo</p></div>
-          <div className="description-section">
-            {imageUrl ? (
-              <>
-                <img src={imageUrl} alt="Proof Photo" className="detail-section-image" />
-                <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="view-full-image">View full image</a>
-              </>
-            ) : (
-              <p>No file uploaded</p>
-            )}
-          </div>
-        </div>
+        
       </div>
 
       {/* Respondent's Information Section */}

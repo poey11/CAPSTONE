@@ -378,6 +378,13 @@ FOR ONLINE INCIDENT REPORTING CSS
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
 
+.online-report-section-bottom-side-2 {
+   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+}
 
 
 
