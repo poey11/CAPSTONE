@@ -10,6 +10,8 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { getLocalDateString } from "@/app/helpers/helpers";
 import { toWords } from 'number-to-words';
+import OnlineRequests from "../page";
+import OnlineReports from "../../../IncidentModule/OnlineReports/page";
 
 
 interface EmergencyDetails {
@@ -31,7 +33,7 @@ interface EmergencyDetails {
     docType: string;
     status: string;
     purpose: string;
-    requestDate: string;
+    createdAt: string;
     fullName: string;
     nosOfPUV: string;
     puvPurpose: string;
@@ -107,6 +109,7 @@ const ViewOnlineRequest = () => {
     const id = searchParams.get("id");
     const  [loading, setLoading] = useState(true);
     const [requestData, setRequestData] = useState<OnlineRequest>();
+    const [activeSection, setActiveSection] = useState("complainant");
 
     useEffect(() => {
         if(!id) return
@@ -185,7 +188,7 @@ const ViewOnlineRequest = () => {
 
 
     const requestField = [
-        { key: "requestDate", label: "Date Requested" },
+        { key: "createdAt", label: "Date Requested" },
         { key: "docType", label: "Document Type" },
         { key: "purpose", label: "Purpose" },
         { key: "appointmentDate", label: "Appointment Date" },
@@ -261,6 +264,9 @@ const ViewOnlineRequest = () => {
         { key: "approvedBldgPlan", label: "Approved Building Plan" },
         { key: "deathCertificate", label: "Death Certificate" },
         ];
+
+
+    
      
     const handleBack = () => {
         router.back();
@@ -531,12 +537,196 @@ const ViewOnlineRequest = () => {
 
     }
 
-    return (
-        <main className="viewonlinereq-main-container">
+    
 
-            <div className="viewonlinereq-page-title-section-1">
-                <h1>Online Document Requests</h1>
+    return (
+        <main className="main-container-services-onlinereq">
+
+            {/* NEW CODE */}
+            {(userPosition === "Assistant Secretary" || userPosition === "Admin Staff") && (
+                <>
+                    {(status !== "Rejected" || (status === "Rejected" && requestData?.appointmentDate)) && (
+                        <div className="services-onlinereq-redirectionpage-section">
+                            {(status !== "Completed" && status !== "Rejected")&& (
+                                <>
+                                    <button className="services-onlinereq-redirection-buttons" onClick ={handlerejection}>
+                                        <div className="services-onlinereq-redirection-icons-section">
+                                            <img src="/images/rejected.png" alt="user info" className="redirection-icons-info"/> 
+                                        </div>
+                                        <h1>Reject Request</h1>
+                                    </button>
+
+                                    <button className="services-onlinereq-redirection-buttons" onClick={handlePrint}>
+                                        <div className="services-onlinereq-redirection-icons-section">
+                                            <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info"/> 
+                                        </div>
+                                        <h1>Generate Document</h1>
+                                    </button>
+                                </>
+                            )}
+                            
+                            {status === "Pick-up" && (
+                                    <button className="services-onlinereq-redirection-buttons">
+                                        <div className="services-onlinereq-redirection-icons-section">
+                                            <img src="/images/sendSMS.png" alt="user info" className="redirection-icons-info"/> 
+                                        </div>
+                                        <h1>Send SMS</h1>
+                                    </button>
+                            )}
+
+                            {requestData?.appointmentDate && (
+                                <>
+                                    <button className="services-onlinereq-redirection-buttons" onClick ={handleviewappointmentdetails}>
+                                        <div className="services-onlinereq-redirection-icons-section">
+                                            <img src="/images/appointment.png" alt="user info" className="redirection-icons-info"/> 
+                                        </div>
+                                        <h1>Appointment Details</h1>
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    )}
+                </>
+            )}
+
+            <div className="services-onlinereq-main-content">
+                <div className="services-onlinereq-main-section1">
+                    <div className="services-onlinereq-main-section1-left">
+                        <button onClick={handleBack}>
+                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                        </button>
+
+                        <h1> Online Request Details </h1>
+                    </div>
+                </div>
+
+                <div className="services-onlinereq-header-body">
+
+                    <div className="services-onlinereq-header-body-top-section">
+                        <div className="services-onlinereq-info-toggle-wrapper">
+                            {["basic", "full", "others" ].map((section) => (
+                                <button
+                                key={section}
+                                type="button"
+                                className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                                onClick={() => setActiveSection(section)}
+                                >
+                                {section === "basic" && "Basic Information"}
+                                {section === "full" && "Full Information"}
+                                {section === "others" && "Other Information"}
+                                </button>
+                            ))}
+                        </div> 
+                    </div>
+
+                    <div className="services-onlinereq-header-body-bottom-section">
+                        <div className="services-onlinereq-main-details-container">
+                            <div className="services-onlinereq-main-details-section">
+                                <div className="services-onlinereq-main-details-topsection">
+                                    <h1>{requestData?.requestId}</h1>
+                                </div>
+                                <div className="services-onlinereq-main-details-statussection">
+                                    <h1> Status</h1>
+
+                                    <div className="services-onlinereq-status-section-view">
+                                        <select
+                                            id="status"
+                                            className={`services-onlinereq-status-dropdown ${status ? status[0].toLowerCase() + status.slice(1):""}`}
+                                            name="status"
+                                            value={status}
+                                            onChange={handleStatusChange}
+                                            disabled={requestData?.status === "Completed" || requestData?.status === "Rejected"} // Disable if already completed or rejected 
+                                        >
+                                            <option value="Pending">Pending</option>
+                                            <option value="Pick-up">Pick-up</option>
+                                            <option value="Completed">Completed</option>
+                                            <option value="Rejected" disabled>Rejected</option>
+                                        </select>
+                                    </div> 
+                                </div>
+
+                                <div className="services-onlinereq-main-details-description">
+                                    <div className="onlinereq-purpose-section">
+                                        <div className="onlinereq-purpose-topsection">
+                                            <div className="onlinereq-main-details-icons-section">
+                                                <img src="/Images/purpose.png" alt="description icon" className="onlinereq-type-section-icon" />
+                                            </div>
+                                            <div className="onlinereq-main-details-title-section">
+                                                <h1>Document Type</h1>
+                                            </div>
+                                        </div>
+                                        <p>{requestData?.docType || "N/A"}</p>
+                                    </div>
+                                    <div className="onlinereq-purpose-section">
+                                        <div className="onlinereq-purpose-topsection">
+                                            <div className="onlinereq-main-details-icons-section">
+                                                <img src="/Images/description.png" alt="description icon" className="onlinereq-purpose-section-icon" />
+                                            </div>
+                                            <div className="onlinereq-main-details-title-section">
+                                                <h1>Purpose</h1>
+                                            </div>
+                                        </div>
+                                        <p>{requestData?.purpose || "N/A"}</p>
+                                    </div>
+
+                                    <div className="onlinereq-date-section">
+                                        <div className="onlinereq-date-topsection">
+                                            <div className="onlinereq-main-details-icons-section">
+                                                <img src="/Images/calendar.png" alt="calendar icon" className="onlinereq-calendar-section-icon" />
+                                            </div>
+                                            <div className="onlinereq-main-details-title-section">
+                                                <h1>Date Requested</h1>
+                                            </div>
+                                        </div>
+                                        <p>{requestData?.createdAt || "N/A"}</p>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="services-onlinereq-info-main-container">
+                            <div className="services-onlinereq-info-container-scrollable">
+                                <div className="services-onlinereq-info-main-content">
+
+                                    
+                                            {activeSection === "basic" && (
+                                                <>
+                                                    
+                                                </>
+                                            )}
+
+                                            {activeSection === "full" && (
+                                                <>
+                                                    
+                                                </>
+                                            )}
+
+                                            {activeSection === "others" && (
+                                                <>
+                                                    
+                                                </>
+                                            )}
+
+                                        
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
             </div>
+
+            
+
+
+        
+            {/* OLD CODE */}
+        
             {(userPosition === "Assistant Secretary" || userPosition === "Admin Staff")&& (<>
                 <div className="viewonlinereq-actions-content">
                     <div className="viewonlinereq-actions-content-section1">
@@ -570,13 +760,10 @@ const ViewOnlineRequest = () => {
                     </div>
 
                     <div className="viewonlinereq-actions-content-section2">
-                        {status === "pick-up" && (
+                        {status === "Pick-up" && (
                             <button type="button" className="actions-button" >Send Pick-up Notif</button>
                         )}
                     </div>
-
-                    
-                    
                 </div>
             </>)}
             
@@ -631,6 +818,10 @@ const ViewOnlineRequest = () => {
                             </div>
                          <div className="viewonlinereq-description">
                             {/* Handle File/Image Fields */}
+
+
+
+
                             {["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg", "copyOfPropertyTitle", "dtiRegistration", "isCCTV", "taxDeclaration", "approvedBldgPlan","deathCertificate"].includes(field.key) ? (
                                 fieldValue && typeof fieldValue === "string" ? (
                                     <div className="resident-id-container">
@@ -654,6 +845,7 @@ const ViewOnlineRequest = () => {
             })}
 
             </div>
+        
         </main>
     );
 }
