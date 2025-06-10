@@ -735,3 +735,231 @@
   margin-top: 60px;
 }
 
+.services-onlinereq-fields-section{
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 13px;
+}
+
+.services-onlinereq-fields-section p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 20px;
+}
+
+.services-onlinereq-input-field {
+  padding: 8px;
+  width: 85%;
+  margin-top: 10px;
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  color: #000000;
+  text-align: left;
+}
+
+.services-onlinereq-input-field:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+
+  .services-onlinereq-content {
+    width: 100%;
+  }
+
+  .services-onlinereq-content-left-side{
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+  } 
+  
+  .services-onlinereq-content-right-side {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+  } 
+  
+  .services-onlinereq-content-left-side p,
+  .services-onlinereq-content-right-side p {
+    font-size: 15px;
+    color: #2C3E50;
+    font-weight: bold;
+  }
+
+  .services-onlinereq-verification-requirements-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-left: 60px;
+    padding-bottom: 20px;
+    width: 100%;
+    padding-right: 60px;
+  }
+
+  .verification-requirements-label {
+    background-color: #1f3b57;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 18px;
+    position: relative;
+    top: 12px; /* Pushes it closer to the card */
+    z-index: 1;
+    left: 0px;
+    text-align: center;
+    width: 250px;
+  }
+
+  .services-onlinereq-verification-requirements-container {
+    border: 1px solid rgba(44, 62, 80, 0.7);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 100%;
+    text-align: center;
+    margin-top: -8px; /* Pulls the card up under the label */
+    height: 400px;
+  }
+
+  .verification-reqs-pic{
+    width: 255px;
+    height: 400px;
+  }
+
+  .uploaded-picture {
+    width: 100%;
+    height: 400px;
+  }
+
+.confirmation-popup-overlay-services-onlinereq-status {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+}
+
+.confirmation-popup-services-onlinereq-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  width: 450px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+}
+
+
+.confirmation-popup-services-onlinereq-status p{
+  color: rgb(97, 97, 97);
+}
+
+.successful-icon-popup {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.yesno-container-add{
+  display: flex;
+  gap: 20px;
+}
+
+.yes-button-add,
+.no-button-add{
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 150px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+}
+
+.yes-button-add {
+  background-color: #4caf50; 
+}
+
+.yes-button-add:hover {
+  background-color: #3d8c40; 
+} 
+
+.no-button-add {
+  background-color: #f44336;
+}
+
+.no-button-add:hover {
+  background-color:  #c2352b; 
+} 
+
+.pending-status-word {
+  color: #f44336;
+}
+
+.popup-overlay-services-onlinereq {
+  position: fixed;
+  top: 13%;
+  right: -3px;
+  background: #777575;
+  color: white;
+  width: 440px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1002;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 10px solid #403f3e;
+  }
+
+  .popup-overlay-services-onlinereq {
+    background: #777575;
+    border-left: 10px solid #403f3e;
+  }
+
+  .popup-overlay-services-onlinereq.show {
+  animation: slideIn 0.5s ease-out;
+}
+
+.popup-overlay-services-onlinereq.hide {
+  animation: slideOut 0.5s ease-out;
+}
+
+.icon-alert {
+  width: 27px;
+  height: 27px;
+}
+
+.popup-services-onlinereq {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}

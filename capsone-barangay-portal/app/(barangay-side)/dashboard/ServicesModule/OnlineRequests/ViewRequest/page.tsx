@@ -70,7 +70,7 @@ interface EmergencyDetails {
     signaturejpg: string;
     barangayIDjpg: string;
     validIDjpg:string ;
-    letterjpg: string;
+    endorsementLetter: string;
     copyOfPropertyTitle: string;
     dtiRegistration: string;
     isCCTV: string;
@@ -109,7 +109,12 @@ const ViewOnlineRequest = () => {
     const id = searchParams.get("id");
     const  [loading, setLoading] = useState(true);
     const [requestData, setRequestData] = useState<OnlineRequest>();
-    const [activeSection, setActiveSection] = useState("complainant");
+    const [activeSection, setActiveSection] = useState("basic");
+    const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+    const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+
 
     useEffect(() => {
         if(!id) return
@@ -130,7 +135,7 @@ const ViewOnlineRequest = () => {
         "signaturejpg",
         "barangayIDjpg",
         "validIDjpg",
-        "letterjpg",
+        "endorsementLetter",
         "copyOfPropertyTitle",
         "dtiRegistration",
         "isCCTV",
@@ -181,9 +186,41 @@ const ViewOnlineRequest = () => {
 
 
     
+    {/*}
     if(loading) return <p>......</p>
     const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setStatus(e.target.value);
+    };*/}
+
+    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedStatus = e.target.value;
+        setPendingStatus(selectedStatus);     // store temporary selection
+        setShowSubmitPopup(true);            // trigger confirmation popup
+    };
+
+    const confirmStatusChange = async () => {
+        if (!pendingStatus) return;
+    
+        setShowSubmitPopup(false);
+    
+        // Show success popup immediately
+        setPopupMessage("Status updated successfully!");
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 3000);
+    
+        await handleSave(pendingStatus); // still perform DB updates in the background
+        setPendingStatus(null);
+    };
+
+    useEffect(() => {
+        if (requestData?.status) {
+          setStatus(requestData.status);
+        }
+      }, [requestData?.status]);
+    
+    const cancelStatusChange = () => {
+        setShowSubmitPopup(false);
+        setPendingStatus(null);
     };
 
 
@@ -252,11 +289,13 @@ const ViewOnlineRequest = () => {
 
         {key: "requestor", label: "Requestor Name"},
 
+        {key: "rejectionReason", label: "Reason for Rejection"},
+
         // File Fields
         { key: "signaturejpg", label: "Signature" },
         { key: "barangayIDjpg", label: "Barangay ID" },
         { key: "validIDjpg", label: "Valid ID" },
-        { key: "letterjpg", label: "Letter" },
+        { key: "endorsementLetter", label: "Endorsement Letter" },
         { key: "copyOfPropertyTitle", label: "Copy of Property Title" },
         { key: "dtiRegistration", label: "DTI Registration" },
         { key: "isCCTV", label: "CCTV Requirement" },
@@ -266,7 +305,386 @@ const ViewOnlineRequest = () => {
         ];
 
 
-    
+        
+        const fieldSections: Record<string, {
+            basic?: string[];
+            full?: string[];
+            others?: string[];
+          }> = {
+            "Death Residency": {
+              basic: [
+                "createdAt",
+                "docType",
+                "purpose",
+                "fullName",
+                "dateofdeath",
+                "requestor",
+                "rejectionReason",
+              ],
+              full: [
+                "address",
+                "age",
+                "dateOfResidency",
+                "civilStatus",
+                "citizenship",
+                "gender",
+                "contact",
+                "birthday",
+              ],
+              others: [
+                "signaturejpg",
+                "deathCertificate",
+                "barangayIDjpg",
+                "validIDjpg",
+                "endorsementLetter",
+              ],
+            },
+            "Cohabitation": {
+              basic: [
+                "createdAt",
+                "docType",
+                "purpose",
+                "fullName",
+                "partnerWifeHusbandFullName",
+                "requestor",
+                "rejectionReason",
+              ],
+              full: [
+                "cohabitationStartDate",
+                "cohabitationRelationship",
+                "address",
+                "age",
+                "dateOfResidency",
+                "civilStatus",
+                "citizenship",
+                "gender",
+                "contact",
+                "birthday",
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "endorsementLetter",
+            ],  
+          },
+         "Occupancy /  Moving Out": {
+              basic: [
+                "createdAt",
+                "docType",
+                "purpose",
+                "fullName",
+                "requestor",
+                "toAddress",
+                "rejectionReason",
+              ],
+              full: [
+                "address",
+                "age",
+                "dateOfResidency",
+                "civilStatus",
+                "citizenship",
+                "gender",
+                "contact",
+                "birthday",
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "endorsementLetter",
+            ],
+          },
+          "Guardianship": {
+              basic: [
+                "createdAt",
+                "docType",
+                "purpose",
+                "fullName",
+                "guardianshipType",
+                "requestor",
+                "rejectionReason",
+              ],
+              full: [
+                "address",
+                "wardRelationship",
+                "wardFname",
+                "age",
+                "dateOfResidency",
+                "civilStatus",
+                "citizenship",
+                "gender",
+                "contact",
+                "birthday",
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "endorsementLetter",
+            ],
+          },
+          "Residency": {
+              basic: [
+                "createdAt", 
+                "docType", 
+                "purpose", 
+                "fullName", 
+                "requestor", 
+                "appointmentDate",
+                "rejectionReason",
+              ],
+              full: [
+                "attestedBy", 
+                "CYFrom", 
+                "CYTo", 
+                "address", 
+                "age", 
+                "dateOfResidency", 
+                "civilStatus", 
+                "citizenship", 
+                "gender", 
+                "contact",
+                "birthday",
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "endorsementLetter",
+            ],
+          },
+          "Good Moral and Probation": {
+              basic: [
+                "createdAt", 
+                "docType", 
+                "purpose", 
+                "fullName", 
+                "goodMoralPurpose",
+                "requestor", 
+                "rejectionReason",
+              ],
+              full: [
+                "address", 
+                "age", 
+                "dateOfResidency", 
+                "civilStatus", 
+                "citizenship", 
+                "gender", 
+                "contact",
+                "birthday",
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "endorsementLetter",
+            ],
+          },
+          "No Income": {
+              basic: [
+                "createdAt", 
+                "docType", 
+                "purpose", 
+                "fullName", 
+                "noIncomePurpose",
+                "requestor", 
+                "rejectionReason",
+              ],
+              full: [
+                "noIncomeChildFName",
+                "address", 
+                "age", 
+                "dateOfResidency", 
+                "civilStatus", 
+                "citizenship", 
+                "gender", 
+                "contact",
+                "birthday",
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "endorsementLetter",
+            ],
+          },
+          "Estate Tax": {
+              basic: [
+                "createdAt", 
+                "docType", 
+                "purpose", 
+                "fullName",
+                "estateSince", 
+                "requestor",
+                "rejectionReason",
+              ],
+              full: [
+                "address", 
+                "age", 
+                "dateOfResidency", 
+                "dateofdeath",
+                "civilStatus", 
+                "citizenship", 
+                "gender", 
+                "contact",
+                "birthday",
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "endorsementLetter",
+            ],
+          },
+          "Garage/TRU": {
+              basic: [
+               "createdAt", 
+                "docType", 
+                "purpose", 
+                "fullName",
+                "address", 
+                "requestor",
+                "rejectionReason",
+              ],
+              full: [
+                "businessName", 
+                "businessNature",
+                "businessLocation",
+                "noOfTRU",
+                "tricycleMake",
+                "tricycleType",
+                "tricyclePlateNo",
+                "tricycleSerialNo",
+                "tricycleChassisNo",
+                "tricycleEngineNo",
+                "tricycleFileNo",
+                "age", 
+                "dateOfResidency", 
+                "civilStatus", 
+                "citizenship", 
+                "gender", 
+                "contact",
+                "birthday",
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "endorsementLetter",
+            ],
+          },
+          "Garage/PUV": {
+              basic: [
+               "createdAt", 
+                "docType", 
+                "purpose", 
+                "fullName",
+                "puvPurpose",
+                "requestor",
+                "rejectionReason",
+              ],
+              full: [
+                "vehicleType",
+                "nosOfPUV",
+                "address",
+                "age", 
+                "dateOfResidency", 
+                "civilStatus", 
+                "citizenship", 
+                "gender", 
+                "contact",
+                "birthday",
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "endorsementLetter",
+            ],
+          },
+          
+
+          
+
+        
+        }
+        
+
+    const getLabel = (key: string): string =>
+        requestField.find((field) => field.key === key)?.label || key;
+      
+    const currentPurpose = requestData?.purpose as keyof typeof fieldSections;
+    const currentSections = fieldSections[currentPurpose] || {};
+      
+    const renderSection = (sectionName: "basic" | "full" | "others") => {
+        const fieldKeys = currentSections[sectionName] || [];
+      
+        // Render 'others' section differently (image display)
+        if (sectionName === "others") {
+            return (
+              <div className="others-image-section" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
+                {fieldKeys.map((key) => {
+                  const fileUrl = (requestData as any)?.[key];
+          
+                  // Skip if no image
+                  if (!fileUrl) return null;
+          
+                  return (
+                    <div key={key} className="services-onlinereq-verification-requirements-section">
+                      <span className="verification-requirements-label">{getLabel(key)}</span>
+                      <div className="services-onlinereq-verification-requirements-container">
+                        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                          <img
+                            src={fileUrl}
+                            alt={getLabel(key)}
+                            className="verification-reqs-pic uploaded-picture"
+                            style={{ cursor: 'pointer' }}
+                          />
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          }
+      
+        // Default layout for 'basic' and 'full'
+        const leftFields = fieldKeys.filter((_, i) => i % 2 === 0);
+        const rightFields = fieldKeys.filter((_, i) => i % 2 !== 0);
+      
+        const renderField = (key: string) => {
+          const value = key.includes(".")
+            ? key.split(".").reduce((obj, k) => (obj as any)?.[k], requestData)
+            : (requestData as any)?.[key];
+      
+          if (!value) return null;
+      
+          return (
+            <div key={key} className="services-onlinereq-fields-section">
+              <p>{getLabel(key)}</p>
+              <input
+                type="text"
+                className="services-onlinereq-input-field"
+                value={value}
+                readOnly
+              />
+            </div>
+          );
+        };
+      
+        return (
+          <div className="services-onlinereq-content" style={{ display: 'flex', gap: '2rem' }}>
+            <div className="services-onlinereq-content-left-side" style={{ flex: 1 }}>
+              {leftFields.map(renderField)}
+            </div>
+            <div className="services-onlinereq-content-right-side" style={{ flex: 1 }}>
+              {rightFields.map(renderField)}
+            </div>
+          </div>
+        );
+      };
      
     const handleBack = () => {
         router.back();
@@ -280,14 +698,14 @@ const ViewOnlineRequest = () => {
         router.push("/dashboard/ServicesModule/OnlineRequests/ReasonForReject/?id=" + id);
     };
 
-    const handleSave = async () => {
+    const handleSave = async (newStatus: string) => {
         try {
             if (!id) return;
         
             const docRef = doc(db, "ServiceRequests", id);
         
             const updatedData = {
-                status: status,
+                status: newStatus,
                 ...(status === "Pending" && { statusPriority: 1 }),
                 ...(status === "Pick-up" && { statusPriority: 2 }),
                 ...(status === "Completed" && { statusPriority: 3 }),
@@ -298,7 +716,7 @@ const ViewOnlineRequest = () => {
             await setDoc(notificationRef, {
                 residentID: requestData?.accID,
                 requestID: requestData?.requestId,
-                message: `Your Document Request (${requestData?.requestId}) has been updated to "${status}".`,
+                message: `Your Document Request (${requestData?.requestId}) has been updated to "${newStatus}".`,
                 timestamp: new Date(),
                 transactionType: "Online Request",
                 isRead: false,
@@ -316,7 +734,9 @@ const ViewOnlineRequest = () => {
                 } as OnlineRequest;
             });
         
-            alert("Status Updated");
+            setStatus(newStatus); // update local state after DB update
+
+            
         } catch (error) {
             console.error("Error updating status:", error);
         }
@@ -545,7 +965,7 @@ const ViewOnlineRequest = () => {
             {/* NEW CODE */}
             {(userPosition === "Assistant Secretary" || userPosition === "Admin Staff") && (
                 <>
-                    {(status !== "Rejected" || (status === "Rejected" && requestData?.appointmentDate)) && (
+                    {((status !== "Rejected" && status !== "Completed") || (status === "Rejected" && requestData?.appointmentDate)) && (
                         <div className="services-onlinereq-redirectionpage-section">
                             {(status !== "Completed" && status !== "Rejected")&& (
                                 <>
@@ -669,17 +1089,37 @@ const ViewOnlineRequest = () => {
                                         <p>{requestData?.purpose || "N/A"}</p>
                                     </div>
 
-                                    <div className="onlinereq-date-section">
-                                        <div className="onlinereq-date-topsection">
-                                            <div className="onlinereq-main-details-icons-section">
-                                                <img src="/Images/calendar.png" alt="calendar icon" className="onlinereq-calendar-section-icon" />
+                                    {!requestData?.appointmentDate && (
+                                        <>
+                                            <div className="onlinereq-date-section">
+                                                <div className="onlinereq-date-topsection">
+                                                    <div className="onlinereq-main-details-icons-section">
+                                                        <img src="/Images/calendar.png" alt="calendar icon" className="onlinereq-calendar-section-icon" />
+                                                    </div>
+                                                    <div className="onlinereq-main-details-title-section">
+                                                        <h1>Date Requested</h1>
+                                                    </div>
+                                                </div>
+                                                <p>{requestData?.createdAt || "N/A"}</p>
                                             </div>
-                                            <div className="onlinereq-main-details-title-section">
-                                                <h1>Date Requested</h1>
+                                        </>
+                                    )}
+
+                                    {requestData?.appointmentDate && (
+                                        <>
+                                            <div className="onlinereq-date-section">
+                                                <div className="onlinereq-date-topsection">
+                                                    <div className="onlinereq-main-details-icons-section">
+                                                        <img src="/Images/calendar.png" alt="calendar icon" className="onlinereq-calendar-section-icon" />
+                                                    </div>
+                                                    <div className="onlinereq-main-details-title-section">
+                                                        <h1>Appointment Date</h1>
+                                                    </div>
+                                                </div>
+                                                <p>{requestData?.appointmentDate || "N/A"}</p>
                                             </div>
-                                        </div>
-                                        <p>{requestData?.createdAt || "N/A"}</p>
-                                    </div>
+                                        </>
+                                    )}
 
                                 </div>
                             </div>
@@ -690,23 +1130,11 @@ const ViewOnlineRequest = () => {
                                 <div className="services-onlinereq-info-main-content">
 
                                     
-                                            {activeSection === "basic" && (
-                                                <>
-                                                    
-                                                </>
-                                            )}
+                                {activeSection === "basic" && <> {renderSection("basic")} </>}
+                                
+                                {activeSection === "full" && <> {renderSection("full")} </>}
 
-                                            {activeSection === "full" && (
-                                                <>
-                                                    
-                                                </>
-                                            )}
-
-                                            {activeSection === "others" && (
-                                                <>
-                                                    
-                                                </>
-                                            )}
+                                {activeSection === "others" && <> {renderSection("others")} </>}
 
                                         
 
@@ -725,8 +1153,10 @@ const ViewOnlineRequest = () => {
 
 
         
-            {/* OLD CODE */}
-        
+            {/* OLD CODE 
+                commented kasi baka may need pa here
+            */}
+{/*
             {(userPosition === "Assistant Secretary" || userPosition === "Admin Staff")&& (<>
                 <div className="viewonlinereq-actions-content">
                     <div className="viewonlinereq-actions-content-section1">
@@ -820,9 +1250,9 @@ const ViewOnlineRequest = () => {
                             {/* Handle File/Image Fields */}
 
 
+{/*
 
-
-                            {["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg", "copyOfPropertyTitle", "dtiRegistration", "isCCTV", "taxDeclaration", "approvedBldgPlan","deathCertificate"].includes(field.key) ? (
+                            {["signaturejpg", "barangayIDjpg", "validIDjpg", "endorsementLetter", "copyOfPropertyTitle", "dtiRegistration", "isCCTV", "taxDeclaration", "approvedBldgPlan","deathCertificate"].includes(field.key) ? (
                                 fieldValue && typeof fieldValue === "string" ? (
                                     <div className="resident-id-container">
                                         
@@ -845,9 +1275,35 @@ const ViewOnlineRequest = () => {
             })}
 
             </div>
+
         
+*/}
+
+            {showSubmitPopup && (
+                <div className="confirmation-popup-overlay-services-onlinereq-status">
+                    <div className="confirmation-popup-services-onlinereq-status">
+                        <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                        <p>Are you sure you want to change the status to <strong className="pending-status-word">{pendingStatus}</strong>?</p>
+                        <div className="yesno-container-add">
+                            <button onClick={cancelStatusChange} className="no-button-add">No</button>
+                            <button onClick={confirmStatusChange} className="yes-button-add">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showPopup && (
+                <div className={`popup-overlay-services-onlinereq show`}>
+                    <div className="popup-services-onlinereq">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
         </main>
     );
+
+    
 }
  
 export default ViewOnlineRequest;
