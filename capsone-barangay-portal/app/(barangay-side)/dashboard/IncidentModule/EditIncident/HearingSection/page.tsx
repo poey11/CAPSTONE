@@ -284,37 +284,30 @@ export default function HearingSection() {
                             </button>
                         ))}
                     */}
-                        {["firsthearing", "secondhearing", "thirdhearing"].map((section, i) => {
-                            const isDisabled =
-                                !hasSummonLetter ||                         // Summon letter not generated
-                                filledHearings.slice(0, i).some(h => !h);   // Any previous hearing not filled
+                {["firsthearing", "secondhearing", "thirdhearing"].map((section, i) => {
+                const isDisabled =
+                    summonCount <= i || // summon letter for this hearing NOT generated yet
+                    filledHearings.slice(0, i).some(filled => !filled); // previous hearings not filled
 
-                                const handleClick = () => {
-                                    if (!hasSummonLetter) {
-                                        setPopupErrorMessage("Generate a Summon Letter first.");
-                                        setShowErrorPopup(true);
-                                        setTimeout(() => setShowErrorPopup(false), 3000);
-                                        return;
-                                    }
-                                
-                                    if (isDisabled) {
-                                        let message = "";
-                                
-                                        for (let j = 0; j < i; j++) {
-                                            if (!filledHearings[j]) {
-                                                const hearingNames = ["First", "Second", "Third"];
-                                                message = `Fill up ${hearingNames[j]} Hearing first`;
-                                                break;
-                                            }
-                                        }
-                                
-                                        setPopupErrorMessage(message);
-                                        setShowErrorPopup(true);
-                                        setTimeout(() => setShowErrorPopup(false), 3000);
-                                    } else {
-                                        setActiveSection(section);
-                                    }
-                                };
+                const handleClick = () => {
+                    if (summonCount <= i) {
+                    setPopupErrorMessage(`Generate a Summon Letter for ${["First", "Second", "Third"][i]} Hearing first.`);
+                    setShowErrorPopup(true);
+                    setTimeout(() => setShowErrorPopup(false), 3000);
+                    return;
+                    }
+
+                    if (filledHearings.slice(0, i).some(filled => !filled)) {
+                    const hearingNames = ["First", "Second", "Third"];
+                    const firstUnfilledIndex = filledHearings.findIndex((filled, idx) => idx < i && !filled);
+                    setPopupErrorMessage(`Fill up ${hearingNames[firstUnfilledIndex]} Hearing first.`);
+                    setShowErrorPopup(true);
+                    setTimeout(() => setShowErrorPopup(false), 3000);
+                    return;
+                    }
+
+                    setActiveSection(section);
+                };
 
                             return (
                                 <button
