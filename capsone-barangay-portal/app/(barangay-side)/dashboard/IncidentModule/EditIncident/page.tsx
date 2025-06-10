@@ -11,8 +11,6 @@ import Dialogue from "@/app/(barangay-side)/components/dialogueForm"
 import Hearing from "@/app/(barangay-side)/components/hearingForm";
 
 
-
-
 export default function EditLuponIncident() {
     const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
@@ -510,6 +508,7 @@ const confirmSubmit = async () => {
             </div>
 
           </div>
+          
           <div className="edit-incident-main-content">
             <div className="edit-incident-main-section1">
               <div className="edit-incident-main-section1-left">
