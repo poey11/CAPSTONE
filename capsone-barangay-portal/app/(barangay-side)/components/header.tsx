@@ -177,12 +177,19 @@ export default function Header() {
 
 
 
-          // For Online Requests
+      // For Online Requests
 
       "/dashboard/ServicesModule/OnlineRequests": {
         title: "Online Documents Requests",
         breadcrumb: ["Services Management", "Online Requests"],
-      }
+      },
+
+      // Appointments
+
+      "/dashboard/ServicesModule/Appointments": {
+        title: "Scheduled Appointments",
+        breadcrumb: ["Services Management", "Appointments"],
+      },
 
 
 
