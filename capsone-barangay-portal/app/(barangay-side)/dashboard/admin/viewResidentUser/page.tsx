@@ -29,6 +29,7 @@ export default function ViewUser() {
     const [showAlertPopup, setshowAlertPopup] = useState(false);
 
     const [residents, setResidents] = useState<any[]>([]);
+    const [linkedResidentId, setLinkedResidentId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [showResidentsPopup, setShowResidentsPopup] = useState(false);
     const [showNoMatchResidentsPopup, setShowNoMatchResidentsPopup] = useState(false);
@@ -134,7 +135,7 @@ export default function ViewUser() {
         { label: "Created At", key: "createdAt" },
         { label: "Role", key: "role" },
         { label: "Status", key: "status" },
-        { label: "Linked Resident", key: "residentID" },
+        { label: "Linked Resident", key: "residentId" },
     ];
 
     const handleBack = () => {
@@ -175,6 +176,8 @@ export default function ViewUser() {
     
             if (matchingResident) {
                 // Open popup and prefill search term with matched name
+                // for the residentId
+                setLinkedResidentId(matchingResident.id);
                 setSearchTerm(`${matchingResident.firstName} ${matchingResident.middleName} ${matchingResident.lastName}`);
                 setShowResidentsPopup(true);
             } else {
@@ -193,6 +196,8 @@ export default function ViewUser() {
         try {
             await updateDoc(doc(db, "ResidentUsers", selectedUserId), {
                 status: "Verified",
+                residentId: linkedResidentId,
+                
             });
     
             setPopupMessage("User accepted and linked successfully!");
@@ -201,7 +206,7 @@ export default function ViewUser() {
             // Create a notification for the resident
             const notificationRef = doc(collection(db, "Notifications"));
             await setDoc(notificationRef, {
-            residentID: selectedUserId, // == user id
+            residentId: selectedUserId, // == user id
             message: `Your account is now VERIFIED and linked to your resident record.`,
             transactionType: "Verification",
             timestamp: new Date(),
@@ -460,8 +465,8 @@ export default function ViewUser() {
                                                 <input
                                                     type="text"
                                                     className="view-user-input-field"
-                                                    name="residentID"
-                                                    value={ResidentUserData?.residentID || "N/A"}
+                                                    name="residentId"
+                                                    value={ResidentUserData?.residentId || "N/A"}
                                                     readOnly
                                                 />
                                             </div>
@@ -642,9 +647,14 @@ export default function ViewUser() {
                                 )
                                 .map(resident => (
                                     <tr
-                                        key={resident.id}
-                                        className="resident-table-row"
-                                        onClick={() => router.push(`/dashboard/ResidentModule/ViewResident?id=${resident.id}`)}
+                                    key={resident.id}
+                                    className="resident-table-row"
+                                    onClick={() => {
+                                        setSelectedUserId(residentUserId);
+                                        setLinkedResidentId(resident.id);     // ✅ this is the critical part
+                                        setShowResidentsPopup(false);
+                                        setShowAcceptPopup(true);
+                                    }}
                                     >
                                     <td>{resident.firstName}</td>
                                     <td>{resident.middleName}</td>
@@ -729,7 +739,7 @@ export default function ViewUser() {
                             {/* Resident Users */}
                             <div className="resident-table-container">
                             <table
-                                key={ResidentUserData.residentID}
+                                key={ResidentUserData.residentId}
                                 className="resident-table individual-resident-table"
                             >
                                 <thead>
