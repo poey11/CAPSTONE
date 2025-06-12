@@ -3,6 +3,8 @@ import "@/CSS/IncidentModule/OnlineReporting.css";
 import { useState, useEffect } from "react";
 import { getAllSpecificDocument } from "@/app/helpers/firestorehelper";
 import { useRouter } from "next/navigation";
+import { doc, updateDoc } from "firebase/firestore";
+import {db} from "@/app/db/firebase";
 
 const statusOptions = ["All", "Acknowledged", "Pending"];
 
@@ -25,13 +27,16 @@ const getViewedRequests = (): string[] => {
   return data ? JSON.parse(data) : [];
 };
 
-const markAsViewed = (id: string) => {
-  const viewed = getViewedRequests();
-  if (!viewed.includes(id)) {
-    viewed.push(id);
-    localStorage.setItem("viewedRequests", JSON.stringify(viewed));
-  }
-};
+  // Mark as viewed in Firestore
+  const markAsViewed = async (id: string) => {
+    try {
+      const docRef = doc(db, "IncidentReports", id);
+      await updateDoc(docRef, { isViewed: true });
+    } catch (error) {
+      console.error("Error updating isViewed:", error);
+    }
+  };
+
 
 
 {/*}
@@ -50,9 +55,7 @@ const markAsViewed = (id: string) => {
 */}
 
 
- useEffect(() => {
-    const viewed = getViewedRequests();
-
+  useEffect(() => {
     const unsubscribe = getAllSpecificDocument(
       "IncidentReports",
       "department",
@@ -61,12 +64,12 @@ const markAsViewed = (id: string) => {
       (data: any[]) => {
         const processed = data.map((item) => ({
           ...item,
-          isNew: !viewed.includes(item.id),
+          isNew: item.isViewed === false,
         }));
 
-        // Optional: Sort or filter before setting state
         setIncidentData(processed);
         setFilteredData(processed);
+        
       }
     );
 
@@ -179,12 +182,11 @@ const markAsViewed = (id: string) => {
 
   const router = useRouter();
 
+  // Handle view action
   const handleViewOnlineReport = (id: string) => {
-     markAsViewed(id); 
+    markAsViewed(id);
     router.push(`/dashboard/IncidentModule/OnlineReports/ViewOnlineReport?id=${id}`);
   };
-
-
 
 
     // Pagination logic

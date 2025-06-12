@@ -26,7 +26,7 @@ export default async function DashboardLayout({
     return (
         <div className="ml-40  flex ">
             <Menu/>
-            {/*<Header/>*/}
+            <Header/>
             {children}
         </div>
     )         
