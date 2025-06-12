@@ -725,7 +725,7 @@ const handleSubmit = (event: React.FormEvent) => {
                       setIsComplainantResidentSelected(false);
                     }}
                   >
-                    ×
+                    
                   </span>
                 )}
               </div>

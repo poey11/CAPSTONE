@@ -174,7 +174,21 @@ export default function Header() {
         breadcrumb: ["Residents Management", "First-Time Job Seeker List", "View Job Seeker"],
       },
 
+
+
+
+          // For Online Requests
+
+      "/dashboard/ServicesModule/OnlineRequests": {
+        title: "Online Documents Requests",
+        breadcrumb: ["Services Management", "Online Requests"],
+      }
+
+
+
     };
+
+
 
     // Check for dynamic IncidentModule main page route
     if (pathname === "/dashboard/IncidentModule/Department" && departmentId) {

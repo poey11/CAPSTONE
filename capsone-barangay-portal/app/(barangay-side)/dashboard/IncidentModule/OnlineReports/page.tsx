@@ -17,15 +17,64 @@ export default function OnlineReports() {
   const [caseNumberSearch, setCaseNumberSearch] = useState("");
   const [showCount, setShowCount] = useState<number>(0);
 
+
+
+    // Helpers to manage viewed requests
+const getViewedRequests = (): string[] => {
+  const data = localStorage.getItem("viewedRequests");
+  return data ? JSON.parse(data) : [];
+};
+
+const markAsViewed = (id: string) => {
+  const viewed = getViewedRequests();
+  if (!viewed.includes(id)) {
+    viewed.push(id);
+    localStorage.setItem("viewedRequests", JSON.stringify(viewed));
+  }
+};
+
+
+{/*}
   useEffect(() => {
     const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", "Online", setIncidentData);
 
+
+     const viewed = getViewedRequests();
     return () => {
       if (unsubscribe) {
         unsubscribe();
       }
     };
     
+  }, []);
+*/}
+
+
+ useEffect(() => {
+    const viewed = getViewedRequests();
+
+    const unsubscribe = getAllSpecificDocument(
+      "IncidentReports",
+      "department",
+      "==",
+      "Online",
+      (data: any[]) => {
+        const processed = data.map((item) => ({
+          ...item,
+          isNew: !viewed.includes(item.id),
+        }));
+
+        // Optional: Sort or filter before setting state
+        setIncidentData(processed);
+        setFilteredData(processed);
+      }
+    );
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -131,8 +180,11 @@ export default function OnlineReports() {
   const router = useRouter();
 
   const handleViewOnlineReport = (id: string) => {
+     markAsViewed(id); 
     router.push(`/dashboard/IncidentModule/OnlineReports/ViewOnlineReport?id=${id}`);
   };
+
+
 
 
     // Pagination logic
@@ -167,28 +219,25 @@ export default function OnlineReports() {
     };
 
   return (
-    <main className="main-container">
-      <div className="section-1">
-        <h1>Online Reports</h1>
-      </div>
-
-      <div className="section-2">
+    <main className="main-container-online-reports">
+    
+      <div className="section-2-online-reports">
         <input
           type="text"
-          className="search-bar"
+          className="online-reports-filter"
           placeholder="Enter Case Number (e.g. 0001)"
           value={caseNumberSearch}
           onChange={(e) => setCaseNumberSearch(e.target.value)}
         />
         <input
           type="text"
-          className="search-bar"
+          className="online-reports-filter"
           placeholder="Enter Name"
           value={searchNameQuery}
           onChange={(e) => setSearchNameQuery(e.target.value)}
         />
         <select
-          className="featuredStatus"
+          className="online-reports-filter"
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
         >
@@ -198,7 +247,7 @@ export default function OnlineReports() {
         </select>
     
         <select
-          className="featuredStatus"
+          className="online-reports-filter"
           value={showCount}
           onChange={(e) => setShowCount(Number(e.target.value))}
         >
@@ -210,7 +259,7 @@ export default function OnlineReports() {
 
       </div>
 
-      <div className="main-section">
+      <div className="main-section-online-reports">
   {currentIncidents.length === 0 ? (
     <div className="no-result-card">
       <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
@@ -235,7 +284,7 @@ export default function OnlineReports() {
         {currentIncidents.map((incident, index) => {
           const fullName = `${incident.lastname || ""}, ${incident.firstname || ""}`.trim();
           return (
-            <tr key={index}>
+             <tr key={index} className={incident.isNew ? "highlight-new-request" : ""}>
               <td>{incident.isFiled === true ? "Filed" : "Not Yet Filed"}</td>
               <td>{incident.caseNumber || "N/A"}</td>
               <td>{fullName}</td>
@@ -247,8 +296,8 @@ export default function OnlineReports() {
                 </span>
               </td>
               <td>
-                <div className="actions">
-                  <button className="action-edit" onClick={() => handleViewOnlineReport(incident.id)}>Edit</button>
+                <div className="actions-services">
+                  <button className="action-edit-services " onClick={() => handleViewOnlineReport(incident.id)}><img src="/Images/edit.png" alt="Edit" /></button>
                 </div>
               </td>
             </tr>
