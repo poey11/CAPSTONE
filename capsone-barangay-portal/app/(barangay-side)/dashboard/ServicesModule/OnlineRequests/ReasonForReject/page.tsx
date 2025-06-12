@@ -23,6 +23,8 @@ export default function reasonForRejection() {
     const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setRejectionReason({
@@ -36,92 +38,94 @@ export default function reasonForRejection() {
 
     const handleSubmitClick = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
+    
+        if (rejectionReason.reason.trim() === "") {
+            setPopupErrorMessage("Please fill up all the fields.");
+            setShowErrorPopup(true);
+            setTimeout(() => {
+                setShowErrorPopup(false);
+            }, 3000);
+            return;
+        }
+    
         setShowSubmitPopup(true);
-    }
+    };
+    
 
 
     const confirmSubmit = () => {
         try {
             handleRejection();
+            setShowSubmitPopup(false)
             setPopupMessage("Reason for Rejection submitted successfully!");
             setShowPopup(true);
             setTimeout(() => {
                 setShowPopup(false);
-                router.push("/dashboard/ServicesModule/OnlineRequests");
+                router.push(`/dashboard/ServicesModule/OnlineRequests?highlight=${id}`);
             }, 3000);
         } catch (error) {
             console.error("Error updating rejection reason:", error);
         }
     };
 
-    const handleRejection = async() => {
+    const handleRejection = async () => {
         try {
-            if(!id) return
+            if (!id) return;
             const docRef = doc(db, "ServiceRequests", id);
             const updatedData = {
                 status: "Rejected",
                 statusPriority: 4,
-                rejectionReason: rejectionReason.reason,                
-
-            }
-            await updateDoc(docRef, updatedData).then(() => {
-                alert("Status Updated");
-            });
-            
+                rejectionReason: rejectionReason.reason,
+            };
+            await updateDoc(docRef, updatedData);
         } catch (error) {
             console.error("Error updating status:", error);
         }
-
-    }
+    };
    
 
     return (
-
+ 
         <main className="reasonforrejection-main-container">
-        <div className="reasonforrejection-section-1">
-            <h1>Reject Resident User</h1>
-        </div>
         <form onSubmit={handleSubmitClick}>
-            <div className="reasonforrejection-main-section">
-                <div className="reasonforrejection-main-section1">
-                    <div className="reasonforrejection-main-section1-left">
+            <div className="reasonforreject-main-content">
+                <div className="reasonforreject-main-section1">
+                    <div className="reasonforreject-main-section1-left">
                         <button onClick={handleBack}>
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
+                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
-                        <h1>Reason For Rejection</h1>
+                        <h1> Reason For Rejection </h1>
                     </div>
+
                     <div className="action-btn-section">
-                        <button className="submit-btn" type="submit">Submit</button>
+                        <button className="action-submit-reasonreject" type="submit">Submit</button>
                     </div>
                 </div>
 
-                <hr/>
-
-                <div className="main-fields-container">
-                    <div className="fields-container">
-                        <div className="fields-section">
-                            <p>State the Reason for Rejection</p>
-                                <textarea 
-                                    className="reason" 
-                                    name="reason"
-                                    id="reason"
-                                    placeholder="Enter Description"
-                                    rows={10}
-                                    value={rejectionReason.reason}
-                                    onChange={handleInputChange}
-                                />
+                <div className="reasonforreject-bottom-section">
+                    <div className="box-container-outer-reasonforreject">
+                        <div className="title-remarks-reasonforreject">
+                            Reason For Reject
+                        </div>
+                        <div className="box-container-reasonforreject">
+                            <textarea className="reasonforreject-input-field"
+                                name="reason"
+                                id="reason"
+                                placeholder="Enter Reason For Reject"
+                                value={rejectionReason.reason}
+                                onChange={handleInputChange}
+                            />
                         </div>
                     </div>
-
                 </div>
-
             </div>
         </form>
+        
         {showSubmitPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
+                        <div className="confirmation-popup-overlay-add-jobseeker">
+                            <div className="confirmation-popup-add-jobseeker">
+                            <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to submit?</p>
                                 <div className="yesno-container">
                                     <button onClick={() => setShowSubmitPopup(false)} className="no-button">No</button>
@@ -132,12 +136,23 @@ export default function reasonForRejection() {
         )}
 
         {showPopup && (
-                <div className={`popup-overlay show`}>
-                    <div className="popup">
+                <div className={`popup-overlay-add-jobseeker show`}>
+                    <div className="popup-add-jobseeker">
+                        <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                         <p>{popupMessage}</p>
                     </div>
                 </div>
         )}
+
+        {showErrorPopup && (
+                <div className={`error-popup-overlay-add-jobseeker show`}>
+                    <div className="popup-add-jobseeker">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                        <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+        )}
+
 
     </main>
 
