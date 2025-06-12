@@ -587,6 +587,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                         </div>
 
                         <div className="box-container-incidentimage-online">
+        
                         {imageUrl ? (
                         <a href={imageUrl} target="_blank" rel="noopener noreferrer">
                           <img
@@ -638,6 +639,8 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 </div>
 
                                 <div className="box-container-investigation-report">
+                                  <span className="required-asterisk">*</span>
+
                                    <textarea   className={`investigation-report-input-field ${invalidFields.includes("investigationReport") ? "input-error" : ""}`}  placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange} disabled = {formData.status === "Acknowledged"} />
                                      
                                 </div>

@@ -312,7 +312,7 @@ FOR ONLINE INCIDENT REPORTING CSS
   color: #ED7014;
 }
 
-.info-toggle-bt.active {
+.info-toggle-btn-online-report.active {
   color: #ED7014;
   border-bottom: 3px solid #ED7014;
   background-color: transparent;
