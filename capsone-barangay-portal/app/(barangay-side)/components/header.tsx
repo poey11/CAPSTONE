@@ -175,6 +175,25 @@ export default function Header() {
       },
 
 
+      //For Online Reports
+
+      "/dashboard/IncidentModule/OnlineReports": {
+        title: "Incident Online Reports",
+        breadcrumb: ["Incident Management", "Online Reports"],
+      },
+
+        "/dashboard/IncidentModule/OnlineReports/ViewOnlineReport": {
+        title: "View Online Reports",
+        breadcrumb: ["Incident Management", "Online Reports", "View Online Report"],
+      },
+
+
+         "/dashboard/IncidentModule": {
+        title: "Main Dashboard Incident Management",
+        breadcrumb: ["Incident Management", "Main Dashboard"],
+      },
+
+
 
 
           // For Online Requests
@@ -184,6 +203,8 @@ export default function Header() {
         breadcrumb: ["Services Management", "Online Requests"],
       }
 
+
+      
 
 
     };

@@ -17,6 +17,7 @@ export default function ViewOnlineReports() {
     area: "",
     address: "",
     dateFiled: "",
+    addInfo: "",
     concerns: "",
     status: "",
     file: "",
@@ -39,11 +40,12 @@ export default function ViewOnlineReports() {
 
   const [initialRespondent, setInitialRespondent] = useState(respondent);
   const [showConfirmation, setShowConfirmation] = useState(false);
-   const [showPopup, setShowPopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
-   const [invalidFields, setInvalidFields] = useState<string[]>([]);
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
 
 
 
@@ -79,6 +81,7 @@ export default function ViewOnlineReports() {
           area: data.area || "",
           address: data.address || "",
           dateFiled: data.dateFiled || "",
+          addInfo:data.addInfo || "",
           concerns: data.concerns || "",
           status: data.status || "",
           file: data.file || "",
@@ -191,6 +194,12 @@ const handleSubmitClick = async () => {
 
     return;
   }
+
+    setFormData((prevData) => ({
+    ...prevData,
+    status: "Acknowledged",
+  }));
+
 
   // Clear previous errors
   setInvalidFields([]);
@@ -361,8 +370,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
             </div>
 
             <div className="action-btn-section-online-report">
-                <button className="action-add-report" onClick={handleSubmitClick} >Save</button>
-
+                <button className="action-online-report" onClick={handleSubmitClick} >Save</button>                                                 
             </div>
         </div>
 
@@ -389,7 +397,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                       className={`info-toggle-btn-online-report ${activeSection === section ? "active" : ""}`}
                       onClick={() => setActiveSection(section)}
                     >
-                      {section === "complainant" && "Complainant Info"}
+                      {section === "complainant" && "Basic Info"}
                       {section === "incident" && "Incident Info"}
                        {section === "action" && "Action Details*"}
                  
@@ -448,21 +456,42 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                               </div>
 
                                  <div className="fields-section-online">
-                                <p>Contact Number</p>
+                                <p>Status</p>
                                  <input
                                   type="text"
                                   className="online-incident-input-field"
-                                  value={formData.contactNos}  
+                                  value={formData.status}  
                                   disabled          
                                  />
                               </div>
 
-                          
+                              
+
 
                           </div>
 
 
-                    
+                    </div>
+
+                    <div className="online-report-section-bottom-side-2">
+
+                        <div className="online-report-box-container">
+                              <div className="box-container-outer-image">
+                                <div className="title-image">
+                                  Summary of Concern
+                                </div>
+
+                                <div className="box-container-investigation-report">
+                                   <textarea   
+                                     className= "investigation-report-input-field"
+                                    value={formData.addInfo} 
+                                     disabled    
+                                    />
+                                     
+                                </div>
+
+                              </div>
+                            </div>                        
 
                     </div>
 
@@ -590,6 +619,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 placeholder="Enter Respondent Officer Name"
                                  name="respondentName" value={respondent.respondentName}
                                 onChange={handleChange} 
+                                   disabled = {formData.status === "Acknowledged"}
                                   />
                             </div>
 
@@ -601,13 +631,11 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 </div>
 
                                 <div className="box-container-investigation-report">
-                                   <textarea   className={`investigation-report-input-field ${invalidFields.includes("investigationReport") ? "input-error" : ""}`}  placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange}  />
+                                   <textarea   className={`investigation-report-input-field ${invalidFields.includes("investigationReport") ? "input-error" : ""}`}  placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange} disabled = {formData.status === "Acknowledged"} />
                                      
                                 </div>
 
                               </div>
-
-
                             </div>
                             
 
@@ -632,6 +660,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                           multiple
                                           accept=".jpg,.jpeg,.png"
                                           onChange={handleFileChange}
+                                          disabled = {formData.status === "Acknowledged"}
                                         />
                                          <div className="uploadedFiles-container">
                                         {(files.length > 0 || respondent.file.length > 0) && (
