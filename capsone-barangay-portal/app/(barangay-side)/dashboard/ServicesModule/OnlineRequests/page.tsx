@@ -271,8 +271,7 @@ useEffect(() => {
             </thead>
             <tbody>
           {currentOnlineRequests.map((request, index) => (
-              <tr key={index} className={`${request.isNew ? "highlight-new-request" : ""} ${highlightedId && request.id === highlightedId ? "highlighted-row" : ""}`}
->
+              <tr key={index} className={`${request.isNew ? "highlight-new-request" : ""} ${highlightedId && request.id === highlightedId ? "highlighted-row" : ""}`}>
 
                 <td>{request.docType}</td>
                 <td>{request.requestId}</td>
