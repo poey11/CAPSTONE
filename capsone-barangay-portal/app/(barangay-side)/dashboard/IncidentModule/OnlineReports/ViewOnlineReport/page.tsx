@@ -45,6 +45,8 @@ export default function ViewOnlineReports() {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
   
 
 
@@ -337,6 +339,8 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                 </div>
                 )}
 
+           
+
 
 
       {/*}
@@ -576,28 +580,30 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                         </div>
                       */}
 
-                      <div className="online-report-box-container">
-                        <div className="box-container-outer-image">
-                          <div className="title-image">
-                            Incident Image
-                          </div>
-
-                          <div className="box-container-incidentimage-online">
-                                {formData.file ? (
-                                  <img
-                                    src={formData.file}
-                                    alt="Incident Image"
-                                    style={{ maxWidth: "100%", maxHeight: "260px", borderRadius: "10px" }}
-                                  />
-                                ) : (
-                                  <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>No image available</p>
-                                )}
-                          </div>
-
+                  <div className="online-report-box-container">
+                      <div className="box-container-outer-image">
+                        <div className="title-image">
+                          Incident Image
                         </div>
 
-
+                        <div className="box-container-incidentimage-online">
+                        {imageUrl ? (
+                        <a href={imageUrl} target="_blank" rel="noopener noreferrer">
+                          <img
+                            src={imageUrl}
+                            alt="Incident Image"
+                            className="incident-img"
+                          />
+                        </a>
+                          ) : (
+                            <p className="no-image-text ">
+                              No image available
+                            </p>
+                          )}
+                        </div>
                       </div>
+                    </div>
+
 
                     </div>
 
