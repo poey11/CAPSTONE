@@ -2,47 +2,22 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { Metadata } from "next";
 import Link from "next/link";
 import "@/CSS/barangaySide/ServicesModule/GenerateDocument.css";
 
-const metadata: Metadata = {
-    title: "In Barangay Request",
-    description: "In Barangay Request in Services Module",
-};
 
 export default function GenerateDocument() {
     const router = useRouter();
-    const [selectedDocument, setSelectedDocument] = useState("");
-    const [showPermitType, setShowPermitType] = useState(false);
-    const [selectedPermitType, setSelectedPermitType] = useState("");
-    
+    console.log(router);
     const handleBackToInBarangay = () => {
-        router.push("/dashboard/ServicesModule/InBarangayRequests");
+        router.back();
     };
 
-    const handleDocumentChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = event.target.value;
-        setSelectedDocument(value);
-        setShowPermitType(value === "BarangayPermit");
-        setSelectedPermitType(""); // Reset permit type when changing document
-    };
 
-    const handlePermitTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedPermitType(event.target.value);
-    };
-
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-        const form = event.target as HTMLFormElement;
-
-        if (form.checkValidity() && selectedDocument && (!showPermitType || selectedPermitType)) {
-            const documentPath = selectedDocument === "BarangayPermit" ? `${selectedDocument}/${selectedPermitType}` : selectedDocument;
-            document.location.href = `/dashboard/ServicesModule/GenerateDocument/${documentPath}`;
-        } else {
-            form.reportValidity();
-        }
-    };
+    const handleSubmit = (e: any) => {
+        const action = e.currentTarget.id;
+        router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=${action}`);
+    }
 
     const [isDropdownVisible, setDropdownVisible] = useState(false);
 
@@ -71,24 +46,18 @@ export default function GenerateDocument() {
 
                         <div className="generate-documents-container">
 
-                            <div className="generate-documents-container-column">
-                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayCertificate">
-                                    <div className="generate-documents-documents-card">
-                                        <h1>Barangay Certificate</h1>
-                                    </div>
-                                </Link>
+                            <div className="generate-documents-container-column"  >
+                                <div className="generate-documents-documents-card" onClick={handleSubmit} id="Barangay Certificate">
+                                    <h1>Barangay Certificate</h1>
+                                </div>
 
-                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayIndigency">
-                                    <div className="generate-documents-documents-card">
-                                        <h1>Barangay Indigency</h1>
-                                    </div>
-                                </Link>
+                                <div className="generate-documents-documents-card" onClick={handleSubmit} id="Barangay Indigency">
+                                    <h1>Barangay Indigency</h1>
+                                </div>
 
-                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayID">
-                                    <div className="generate-documents-documents-card">
-                                        <h1>Barangay ID</h1>
-                                    </div>
-                                </Link>
+                                <div className="generate-documents-documents-card">
+                                    <h1>Barangay ID</h1>
+                                </div>
                             </div>
 
                             <div className="generate-documents-container-column">

@@ -10,7 +10,89 @@ import { useRouter } from "next/navigation";
 import {getLocalDateString} from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
-import { clear } from "console";
+
+interface EmergencyDetails {
+  fullName: string;
+  address: string;
+  relationship: string;
+  contactNumber: string;
+}
+
+interface ClearanceInput {
+  [key: string]: string | number | File | null | EmergencyDetails | undefined;
+  accountId: string;
+  docType: string;
+  requestId: string;
+  purpose: string;
+  dateRequested: string;
+  fullName: string;
+  appointmentDate: string;
+  dateOfResidency: string;
+  dateofdeath: string;
+  address: string;
+  toAddress: string;
+  businessLocation: string;
+  businessNature: string;
+  noOfVechicles: string;
+  vehicleMake: string;
+  vehicleType: string;
+  vehiclePlateNo: string;
+  vehicleSerialNo: string;
+  vehicleChassisNo: string;
+  vehicleEngineNo: string;
+  vehicleFileNo: string;
+  estimatedCapital: string;
+  businessName: string;
+  birthday: string;
+  age: string;
+  gender: string;
+  civilStatus: string;
+  contact: string;
+  typeofconstruction: string;
+  typeofbldg: string;
+  othersTypeofbldg: string;
+  projectName: string;
+  citizenship: string;
+  educationalAttainment: string;
+  course: string;
+  isBeneficiary: string;
+  birthplace: string;
+  religion: string;
+  nationality: string;
+  height: string;
+  weight: string;
+  bloodtype: string;
+  occupation: string;
+  precinctnumber: string;
+  emergencyDetails: EmergencyDetails;
+  requestorMrMs: string;
+  requestorFname: string;
+  partnerWifeHusbandFullName: string;
+  cohabitationStartDate: string;
+  cohabitationRelationship: string;
+  wardFname: string;
+  wardRelationship: string;
+  guardianshipType: string;
+  CYFrom: string;
+  CYTo: string;
+  attestedBy: string;
+  goodMoralPurpose: string;
+  goodMoralOtherPurpose: string;
+  noIncomePurpose: string;
+  noIncomeChildFName: string;
+  deceasedEstateName: string;
+  estateSince: string;
+  signaturejpg: File | null;
+  barangayIDjpg: File | null;
+  validIDjpg: File | null;
+  letterjpg: File | null;
+  copyOfPropertyTitle: File | null;
+  dtiRegistration: File | null;
+  isCCTV: File | null;
+  taxDeclaration: File | null;
+  approvedBldgPlan: File | null;
+  deathCertificate: File | null;
+}
 
 
 
@@ -22,9 +104,9 @@ export default function Action() {
   const docType = searchParam.get("doc");
   const router = useRouter();
   const [nos, setNos] = useState(0);
-  const [clearanceInput, setClearanceInput] =  useState<any>({
+  const [clearanceInput, setClearanceInput] =  useState<ClearanceInput>({
     accountId: user?.uid || "Guest",
-    docType: docType ,
+    docType: docType || "" ,
     requestId: "",
     purpose: "",
     dateRequested: new Date().toLocaleString(),
@@ -268,14 +350,14 @@ const handleFileChange = (
     const updates = { ...key };  // No filtering, just spread the object
 
     // Upload files to Firebase Storage if there are any
-    for (const [key, storageRef] of Object.entries(storageRefs)) {
-      const file = clearanceInput[key];
-      if (file && storageRef) {
-        // Upload each file to storage
-        await uploadBytes(storageRef, file);
-        console.log(`${key} uploaded successfully`);
-      }
-    }
+     for (const [key, storageRef] of Object.entries(storageRefs)) {
+          const file = clearanceInput[key];
+          if (file instanceof File && storageRef) {
+            // Upload each file to storage
+            await uploadBytes(storageRef, file);
+            console.log(`${key} uploaded successfully`);
+          }
+        }
 
     // Upload the report to Firestore
     const newDoc = await addDoc(docRef, updates);
@@ -358,9 +440,9 @@ const handleFileChange = (
     
       // Generate unique filenames for each uploaded file
       fileKeys.forEach((key) => {
-        if (clearanceInput[key]) {
+        const file = clearanceInput[key];
+        if (file && file instanceof File) {
           let timeStamp = Date.now().toString() + Math.floor(Math.random() * 1000); // Add random digits to prevent collisions
-          const file = clearanceInput[key];
           const fileExtension = file.name.split('.').pop();
           const filename = `service_request_${clearanceInput.accountId}.${key}.${timeStamp}.${fileExtension}`;
           filenames[key] = filename;
@@ -579,7 +661,7 @@ const handleFileChange = (
         <form className="doc-req-form" onSubmit={handleSubmit}>
         {(docType === "Barangay Certificate" || docType === "Barangay Clearance" 
         ||  docType === "Barangay Indigency" || docType === "Business Permit" || docType === "Temporary Business Permit" ) 
-      && (
+        && (
           <>
           <div className="form-group">
             
@@ -627,10 +709,12 @@ const handleFileChange = (
               <option value="New">New</option>
               <option value="Renewal">Renewal</option>
             </>)}
-            
           </select>
          
         </div>
+        </>
+        )}
+
         {(docType === "Barangay Indigency" || (clearanceInput.purpose === "Residency" && docType === "Barangay Certificate")) && (
           <>
             <div className="form-group">
@@ -650,8 +734,7 @@ const handleFileChange = (
             </div>
           </>
         )}
-        </>
-        )}
+        
          
           {docType === "Construction Permit" && (
             <>

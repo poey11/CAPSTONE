@@ -1,29 +1,30 @@
 "use client"
 
-import { useRouter } from "next/navigation";
-import type { Metadata } from "next";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayClearance.css";
+import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayCertificate.css";
 
 
-
-
-const metadata:Metadata = { 
-  title: "Add Announcements Barangay Side",
-  description: "Add Announcements for Barangay Side",
-};
-
-export default function addAnnouncements() {
+export default function action() {
 
     const router = useRouter();
-
-    const handleBackToGenerateDocument = () => {
-      router.push("/dashboard/ServicesModule/GenerateDocument");
-    };
+    const searchParam = useSearchParams();
+    const docType = searchParam.get("docType");
+    
+   
+    const [showDiscardPopup, setShowDiscardPopup] = useState(false);
+    const [showCreatePopup, setShowCreatePopup] = useState(false); 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
 
     const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
         container1: [],
     });
+
+
+    const handleBack = () => {
+      router.back();
+    };
 
     // Handle file selection for any container
     const handleFileChange = (container: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,11 +49,7 @@ export default function addAnnouncements() {
         }));
       };
 
-    const [showDiscardPopup, setShowDiscardPopup] = useState(false);
-    const [showCreatePopup, setShowCreatePopup] = useState(false); 
-    const [showPopup, setShowPopup] = useState(false);
-    const [popupMessage, setPopupMessage] = useState("");
-
+    
     const handleDiscardClick = async () => {
         setShowDiscardPopup(true);
     }
@@ -77,13 +74,13 @@ export default function addAnnouncements() {
     const confirmCreate = async () => {
         setShowCreatePopup(false);
 
-                setPopupMessage("Barangay Clearance created successfully!");
+                setPopupMessage("Barangay Certificate created successfully!");
                 setShowPopup(true);
 
                 // Hide the popup after 3 seconds
                 setTimeout(() => {
                     setShowPopup(false);
-                    router.push("/dashboard/ServicesModule/InBarangayRequests/View/BarangayClearance");
+                    router.push("/dashboard/ServicesModule/InBarangayRequests/View/BarangayCertificate");
                 }, 3000);
 
                 
@@ -98,11 +95,11 @@ export default function addAnnouncements() {
             <div className="addAnnouncement-main-section">
                 <div className="addAnnouncement-main-section1">
                     <div className="addAnnouncement-main-section1-left">
-                        <button onClick={handleBackToGenerateDocument}>
+                        <button onClick={handleBack}>
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/>
                         </button>
 
-                        <h1>Barangay Clearance</h1>
+                        <h1>{docType}</h1>
                     </div>
 
                     <div className="action-btn-section">
@@ -159,32 +156,20 @@ export default function addAnnouncements() {
                                         required
                                         defaultValue=""
                                     >
-                                        <option value="" disabled>Purpose</option>
-                                        <option value="Loan">Loan</option>
-                                        <option value="BankTransaction">Bank Transaction</option>
+                                        <option value="" disabled>Select purpose</option>
+                                        <option value="Occupancy/Moving Out">Occupancy / Moving Out</option>
+                                        <option value="Estate Tax">Estate Tax</option>
+                                        <option value="Death Residency">Death Residency</option>
+                                        <option value="No Income (Scholarship)">No Income (Scholarship)</option>
+                                        <option value="No Income (ESC)">No Income (ESC)</option>
+                                        <option value="Cohabitation">Cohabitation</option>
+                                        <option value="Guardianship">Guardianship</option>
+                                        <option value="Good Moral and Probation">Good Moral and Probation</option>
+                                        <option value="Garage/PUV">Garage/PUV</option>
+                                        <option value="Garage/TRU">Garage/TRU</option>
                                         <option value="Residency">Residency</option>
-                                        <option value="LocalEmployment">Local Employment</option>
-                                        <option value="Maynilad">Maynilad</option>
-                                        <option value="Meralco">Meralco</option>
-                                        <option value="BailBond">Bail Bond</option>
-                                        <option value="BankTransaction">Bank Transaction</option>
-                                        <option value="Residency">Residency</option>
-                                        <option value="Character">Character</option>
-                                        <option value="RequestForReferral">Request for Referral</option>
-                                        <option value="IssuanceOfPostalID">Issuance of Postal I.D.</option>
-                                        <option value="FirearmsLicense">Firearms License</option>
-                                        <option value="MWSIConnection">MWSI Connection</option>
-                                        <option value="BusinessClearance">Business Clearance</option>
+                                        <option value="Others">Others</option>
                                     </select>
-                                </div>
-
-                                <div className="fields-section">
-                                    <p>Other Purpose</p>
-                                    <input 
-                                        type="text" 
-                                        className="input-field" 
-                                        placeholder="Other Purpose" 
-                                    />
                                 </div>
 
                             </div>
@@ -193,15 +178,6 @@ export default function addAnnouncements() {
 
                             <div className="section-right">
                             <div className="fields-container">
-                                <div className="fields-section">
-                                    <p>Date Requested</p>
-                                    <input 
-                                        type="date" 
-                                        className="input-field" 
-                                        placeholder="Select Date From" 
-                                    />
-                                    
-                                </div>
                                 <div className="fields-section">
                                     <p>Resident Since</p>
                                     <input 
@@ -219,31 +195,23 @@ export default function addAnnouncements() {
                     <div className="main-fields-container-section2">
                         <div className="fields-container">
                             <div className="fields-section">
-                                <p>First Name</p>
-                                <input 
-                                    type="text" 
-                                    className="headline" 
-                                    placeholder="First Name" 
-                                />
+                                <p>Other Purpose</p>
+                                    <input 
+                                        type="text" 
+                                        className="headline" 
+                                        placeholder="Other Purpose" 
+                                    />
                             </div>
 
                             <div className="fields-section">
-                                <p>Middle Name</p>
+                                <p>Full Name</p>
                                 <input 
                                     type="text" 
                                     className="headline" 
-                                    placeholder="Middle Name" 
+                                    placeholder="Full Name" 
                                 />
                             </div>
 
-                            <div className="fields-section">
-                                <p>Last Name</p>
-                                <input 
-                                    type="text" 
-                                    className="headline" 
-                                    placeholder="Last Name" 
-                                />
-                            </div>
                             <div className="fields-section">
                                 <p>Address</p>
                                 <input 
