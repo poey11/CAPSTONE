@@ -706,9 +706,9 @@ const ViewOnlineRequest = () => {
         
             const updatedData = {
                 status: newStatus,
-                ...(status === "Pending" && { statusPriority: 1 }),
-                ...(status === "Pick-up" && { statusPriority: 2 }),
-                ...(status === "Completed" && { statusPriority: 3 }),
+                ...(newStatus === "Pending" && { statusPriority: 1 }),
+                ...(newStatus === "Pick-up" && { statusPriority: 2 }),
+                ...(newStatus === "Completed" && { statusPriority: 3 }),
             };
         
             // Create notification
