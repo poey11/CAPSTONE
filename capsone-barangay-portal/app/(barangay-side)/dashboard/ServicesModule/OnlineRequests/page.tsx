@@ -1,6 +1,6 @@
 "use client"
 import "@/CSS/barangaySide/ServicesModule/OnlineRequests.css";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getAllDocument } from "@/app/helpers/firestorehelper";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
@@ -19,10 +19,11 @@ import { db } from "@/app/db/firebase";
     const [statusFilter, setStatusFilter] = useState("");
 
     const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [onlineRequests, setOnlineRequests] = useState([]);
+    const [error, setError] = useState(null);
+    const [onlineRequests, setOnlineRequests] = useState([]);
 
-    
+
+
 
   // Helpers to manage viewed requests
 const getViewedRequests = (): string[] => {
@@ -151,8 +152,41 @@ const markAsViewed = (id: string) => {
 };
 
 
+// Highlighting Logic based on the URL parameter
+const searchParams = useSearchParams();
+const highlightResidentId = searchParams.get("highlight");
+const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
 
+useEffect(() => {
+  if (highlightResidentId && filteredOnlineRequests.length > 0) {
+    const targetIndex = filteredOnlineRequests.findIndex(resident => resident.id === highlightResidentId);
+    if (targetIndex !== -1) {
+      const targetPage = Math.floor(targetIndex / residentsPerPage) + 1;
+      setHighlightedId(highlightResidentId);
+      setCurrentPage(targetPage);
+
+      setTimeout(() => {
+        const targetElement = document.querySelector(`tr[data-id="${highlightResidentId}"]`);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 500);
+
+      const timeoutId = setTimeout(() => {
+        setHighlightedId(null);
+
+        const params = new URLSearchParams(window.location.search);
+        params.delete("highlight");
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        router.replace(newUrl, { scroll: false });
+      }, 3000);
+
+      return () => clearTimeout(timeoutId);
+
+    }
+  }
+}, [highlightResidentId, filteredOnlineRequests]);
 
 
   const handleSMS = () => {
@@ -237,7 +271,8 @@ const markAsViewed = (id: string) => {
             </thead>
             <tbody>
           {currentOnlineRequests.map((request, index) => (
-            <tr key={index} className={request.isNew ? "highlight-new-request" : ""}>
+              <tr key={index} className={`${request.isNew ? "highlight-new-request" : ""} ${highlightedId && request.id === highlightedId ? "highlighted-row" : ""}`}
+>
 
                 <td>{request.docType}</td>
                 <td>{request.requestId}</td>
