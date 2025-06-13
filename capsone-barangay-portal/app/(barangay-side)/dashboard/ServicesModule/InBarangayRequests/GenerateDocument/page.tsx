@@ -55,7 +55,7 @@ export default function GenerateDocument() {
                                     <h1>Barangay Indigency</h1>
                                 </div>
 
-                                <div className="generate-documents-documents-card">
+                                <div className="generate-documents-documents-card" onClick={handleSubmit} id="Barangay ID">
                                     <h1>Barangay ID</h1>
                                 </div>
                             </div>
@@ -69,31 +69,21 @@ export default function GenerateDocument() {
                                 <h1>Barangay Permits</h1>
                                 {isDropdownVisible && (
                                 <div className="generate-documents-dropdown">
-                                    <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/BusinessPermit">
-                                    <p className="dropdown-item">Business Permit</p>
-                                    </Link>
-                                    <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/TemporaryBusinessPermit">
-                                    <p className="dropdown-item">Temporary Business Permit</p>
-                                    </Link>
-                                    <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/ConstructionPermit">
-                                    <p className="dropdown-item">Construction Permit</p>
-                                    </Link>
+                                    <p className="dropdown-item" onClick={handleSubmit} id="Business Permit">Business Permit</p>
+                                    <p className="dropdown-item" onClick={handleSubmit} id="Temporary Business Permit">Temporary Business Permit</p>
+                                    <p className="dropdown-item" onClick={handleSubmit} id="Construction ">Construction Permit</p>
                                 </div>
                                 )}
                             </div>
                             
 
-                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayClearance">
-                                    <div className="generate-documents-documents-card">
-                                        <h1>Barangay Clearance</h1>
-                                    </div>
-                                </Link>
+                            <div className="generate-documents-documents-card" onClick={handleSubmit} id="Barangay Clearance">
+                                <h1>Barangay Clearance</h1>
+                            </div>
 
-                                <Link href="/dashboard/ServicesModule/GenerateDocument/BarangayPermit/FirstTimeJobseeker">
-                                    <div className="generate-documents-documents-card">
-                                        <h1>First Time Jobseeker</h1>
-                                    </div>
-                                </Link>
+                            <div className="generate-documents-documents-card" onClick={handleSubmit} id="First Time Jobseeker">
+                                <h1>First Time Jobseeker</h1>
+                            </div>
 
                             </div>
                         </div>
