@@ -260,6 +260,15 @@ export default function ResidentModule() {
 
       <div className="resident-module-section-1">
 
+        {/*<h1>Main Residents</h1>*/}
+        {isAuthorized ? (
+          <Link href="/dashboard/ResidentModule/AddResident">
+            <button className="add-announcement-btn" onClick={handleAddResidentClick}>Import Residents from Excel</button>
+          </Link>
+        ) : (
+          <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Import Residents from Excel</button>
+        )}
+
 
         {/*<h1>Main Residents</h1>*/}
         {isAuthorized ? (

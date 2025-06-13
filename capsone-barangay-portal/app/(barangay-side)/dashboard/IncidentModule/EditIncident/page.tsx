@@ -879,9 +879,9 @@ const confirmSubmit = async () => {
                                 type="text" 
                                 className="edit-incident-input-field" 
                                 placeholder={reportData.receivedBy} 
-                                value={toUpdate.fname||""}
-                                name="fname"
-                                id="fname"
+                                value={reportData.receivedBy||""}
+                                name="receivedBy"
+                                id="receivedBy"
                                 disabled
                                 onChange={handleFormChange}
                               />

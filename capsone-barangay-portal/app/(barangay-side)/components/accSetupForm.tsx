@@ -155,8 +155,8 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                         </div>
 
                         <div className="form-group-accsetup-form">
-                            <label htmlFor="mName">Middle Name:<span className="required">*</span></label>
-                            <input onChange={handleChange} value={user.mName} id="mName" type="text" name="mName" placeholder="Enter Middle Name" className="form-input-accsetup-form" required />
+                            <label htmlFor="mName">Middle Name:</label>
+                            <input onChange={handleChange} value={user.mName} id="mName" type="text" name="mName" placeholder="Enter Middle Name" className="form-input-accsetup-form" />
                         </div>   
                         
                         <div className="form-group-accsetup-form">

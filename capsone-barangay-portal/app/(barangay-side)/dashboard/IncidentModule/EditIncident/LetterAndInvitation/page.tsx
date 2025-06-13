@@ -9,7 +9,7 @@ import { getLocalDateString, getLocalDateTimeString } from "@/app/helpers/helper
 import Letter from "@/app/(barangay-side)/components/letterForm"
 import { getSpecificDocument, generateDownloadLink } from "../../../../../helpers/firestorehelper";
 
-export default function GenerateDialougeLetter() {
+export default function GenerateDialogueLetter() {
     const user = useSession().data?.user;
     const searchParam = useSearchParams();
     const docId = searchParam.get("id")?.split("?")[0];
@@ -284,7 +284,7 @@ export default function GenerateDialougeLetter() {
     }
   
 
-    const printDialouge = async () => {
+    const printDialogue = async () => {
          setIsLoading(true); // Start loading
 
 
@@ -558,7 +558,7 @@ export default function GenerateDialougeLetter() {
             }
             else{
                 handleIsDialogue();
-                 printDialouge()
+                 printDialogue()
             }
             clearForm();
         } else if (action === "sendSMS") {
@@ -650,6 +650,10 @@ export default function GenerateDialougeLetter() {
     const handleHearingSection = () => {
         router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
     };
+
+const hearingLabels = ["First", "Second", "Third"];
+const hearingB = hearingLabels[hearing] || "First";
+
   return (
     <main className="main-container-letter">
 
@@ -839,7 +843,7 @@ export default function GenerateDialougeLetter() {
                         <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-letter"/> 
                     </button>
 
-                      {actionId === "summon" ? <h1 className="NewOfficial">Summon Letter ({hearing} Hearing)</h1> : <h1 className="NewOfficial">Dialogue Letter</h1>}
+                      {actionId === "summon" ? <h1 className="NewOfficial">Summon Letter ({hearingB} Hearing)</h1> : <h1 className="NewOfficial">Dialogue Letter</h1>}
                 </div>
             
             

@@ -86,9 +86,11 @@ export default function AddIncident() {
 
   useEffect(() => {
     if(!user) return;
+
+    const nameParts = user.fullName.trim().split(" ");
     setdeskStaff({
-      fname: user.fullName.split(" ")[0],
-      lname: user.fullName.split(" ")[1],
+      fname: nameParts[0],
+      lname: nameParts.slice(1).join(" "),
     })
   },[user]);
 
@@ -301,7 +303,7 @@ export default function AddIncident() {
             department: departmentId,
             staffId: user?.id,
             isDialogue: false,
-            hearing:1,
+            hearing:0,
             generatedHearingSummons:0,
             createdAt: new Date(),
             ...(departmentId === "GAD" && { 
