@@ -344,6 +344,12 @@ useEffect(() => {
 
                     {activeSection === "others" && (
                           <>
+
+                          {/* add top bottom section div*/}
+                        <div className="view-main-resident-content-others">
+
+                        
+                          <div className="add-main-resident-section-2-full-top">  
                             <div className="view-main-resident-content-left-side">
 
                                 <div className="view-resident-fields-section">
@@ -355,7 +361,6 @@ useEffect(() => {
                                   <p>Senior Citizen</p>
                                   <input type="text" className="view-resident-input-field" name="isStudent"  value={formData.isSeniorCitizen ? 'Yes' : 'No'} readOnly/>
                                 </div>
-
                             </div>
 
                             <div className="view-main-resident-content-right-side">
@@ -371,8 +376,50 @@ useEffect(() => {
                                 <input type="text" className="view-resident-input-field" name="isSoloParent"  value={formData.isSoloParent ? 'Yes' : 'No'} readOnly/>
                               </div>
 
+                            </div>
+                          </div>
+
+                          <div className="add-main-resident-section-2-full-bottom-view">
+                            
+                          {formData.verificationFilesURLs.length > 0 ? (
+                            formData.verificationFilesURLs.map((url, index) => (
+                              <div key={index} className="services-onlinereq-verification-requirements-section">
+                                <span className="verification-requirements-label">
+                                  {formData.verificationFilesURLs.length === 1
+                                    ? 'Verification Requirement'
+                                    : `Verification Requirement ${index + 1}`}
+                                </span>
+
+                                <div className="services-onlinereq-verification-requirements-container">
+                                  <div className="file-name-image-display">
+                                    <a
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <img
+                                        src={url}
+                                        alt={`Verification Requirement ${index + 1}`}
+                                        className="verification-reqs-pic uploaded-pic"
+                                        style={{ cursor: 'pointer' }}
+                                      />
+                                    </a>
+                                  </div>
+                                </div>
                               </div>
-                          
+                            ))
+                          ) : (
+                            <div className="services-onlinereq-verification-requirements-section">
+                              <span className="verification-requirements-label">Verification Requirements</span>
+                              <div className="services-onlinereq-verification-requirements-container">
+                                <p className="no-verification-files-text">No verification requirements uploaded.</p>
+                              </div>
+                            </div>
+                          )}
+
+                          </div>
+
+                        </div>
                           </>
                           
                         )}
@@ -416,7 +463,9 @@ useEffect(() => {
                     <>
                       <div className="view-resident-incident-table-container">
                         {incidentReports.length === 0 ? (
-                          <p className="no-incident-message">No incident reports found for this resident.</p>
+                          <div className="no-incident-message">
+                            <p>No incident reports found for this resident.</p>
+                          </div>
                         ) : (
                           // different widths for each column to make it center and easier to read
                           <table className="incident-table-section">
