@@ -48,9 +48,9 @@ import { db } from "@/app/db/firebase";
       router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument");
     };
 
-    const handleView = (documentType: string, purpose: string) => {
-      router.push("/dashboard/ServicesModule/InBarangayRequests/View");
-  };
+    const handleView =(id: string) => {
+      router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
+    };
 
   const handleEdit = (documentType: string, purpose: string) => {
     const documentRoutes: { [key: string]: string } = {
@@ -189,10 +189,10 @@ const confirmDelete = () => {
             <thead>
               <tr>
                 <th>Document Type</th>
+                <th>Request ID</th>
+                <th>Request Date</th>
+                <th>Requestor</th>
                 <th>Purpose</th>
-                <th>Name</th>
-                <th>Contact</th>
-                <th>Date</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -200,31 +200,25 @@ const confirmDelete = () => {
             <tbody>
             {requestData.map((request, index) => (
               <tr key={index}>
-                <td>{request.documentType}</td>
+                <td>{request.docType}</td>
+                <td>{request.requestId}</td>
+                <td>{request.createdAt}</td>
+                <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
-                <td>{request.name}</td>
-                <td>{request.contact}</td>
-                <td>{request.date}</td>
                 <td>
                     <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
                         {request.status}
                     </span>
                 </td>
                 <td>
-                <div className="actions">
+                  <div className="actions">
                     <button
                         className="action-view"
-                        onClick={() => handleView(request.documentType, request.purpose)}
+                        onClick={() => handleView(request.id)}
                     >
                         View
                     </button>
-                    <button
-                        className="action-edit"
-                        onClick={() => handleEdit(request.documentType, request.purpose)}
-                    >
-                        Edit
-                    </button>
-                    <button className="action-delete" onClick={() => handleDeleteClick(request.documentType)}>Delete</button>
+
                   </div>
                 </td>
               </tr>

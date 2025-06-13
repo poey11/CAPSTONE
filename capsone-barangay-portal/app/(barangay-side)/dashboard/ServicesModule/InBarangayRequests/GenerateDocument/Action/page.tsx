@@ -1,8 +1,91 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayCertificate.css";
+
+interface EmergencyDetails {
+  fullName: string;
+  address: string;
+  relationship: string;
+  contactNumber: string;
+}
+
+interface ClearanceInput {
+  docType: string;
+  requestId: string;
+  purpose: string;
+  dateRequested: string;
+  fullName: string;
+  appointmentDate: string;
+  dateOfResidency: string;
+  dateofdeath: string;
+  address: string;
+  toAddress: string;
+  businessLocation: string;
+  businessNature: string;
+  noOfVechicles: string;
+  vehicleMake: string;
+  vehicleType: string;
+  vehiclePlateNo: string;
+  vehicleSerialNo: string;
+  vehicleChassisNo: string;
+  vehicleEngineNo: string;
+  vehicleFileNo: string;
+  estimatedCapital: string;
+  businessName: string;
+  birthday: string;
+  age: string;
+  gender: string;
+  civilStatus: string;
+  contact: string;
+  typeofconstruction: string;
+  typeofbldg: string;
+  othersTypeofbldg: string;
+  projectName: string;
+  citizenship: string;
+  educationalAttainment: string;
+  course: string;
+  isBeneficiary: string;
+  birthplace: string;
+  religion: string;
+  nationality: string;
+  height: string;
+  weight: string;
+  bloodtype: string;
+  occupation: string;
+  precinctnumber: string;
+  emergencyDetails: EmergencyDetails;
+  requestorMrMs: string;
+  requestorFname: string;
+  partnerWifeHusbandFullName: string;
+  cohabitationStartDate: string;
+  cohabitationRelationship: string;
+  wardFname: string;
+  wardRelationship: string;
+  guardianshipType: string;
+  CYFrom: string;
+  CYTo: string;
+  attestedBy: string;
+  goodMoralPurpose: string;
+  goodMoralOtherPurpose: string;
+  noIncomePurpose: string;
+  noIncomeChildFName: string;
+  deceasedEstateName: string;
+  estateSince: string;
+  signaturejpg: File | null;
+  barangayIDjpg: File | null;
+  validIDjpg: File | null;
+  letterjpg: File | null;
+  copyOfPropertyTitle: File | null;
+  dtiRegistration: File | null;
+  isCCTV: boolean | null;
+  taxDeclaration: File | null;
+  approvedBldgPlan: File | null;
+  deathCertificate: File | null;
+}
+
+
 
 
 export default function action() {
@@ -10,12 +93,14 @@ export default function action() {
     const router = useRouter();
     const searchParam = useSearchParams();
     const docType = searchParam.get("docType");
-    
-   
     const [showDiscardPopup, setShowDiscardPopup] = useState(false);
     const [showCreatePopup, setShowCreatePopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+    const [clearanceInput, setClearanceInput] = useState<ClearanceInput>();
+
+
+
 
     const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
         container1: [],
@@ -39,15 +124,15 @@ export default function action() {
             [container]: [...prevFiles[container], ...fileArray], // Append new files to the specified container
           }));
         }
-      };
+    };
   
       // Handle file deletion for any container
-      const handleFileDelete = (container: string, fileName: string) => {
+    const handleFileDelete = (container: string, fileName: string) => {
         setFiles((prevFiles) => ({
           ...prevFiles,
           [container]: prevFiles[container].filter((file) => file.name !== fileName),
         }));
-      };
+    };
 
     
     const handleDiscardClick = async () => {
@@ -86,6 +171,45 @@ export default function action() {
                 
     };
 
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+    
+        // Handle birthday and compute age
+        if (name === "birthday") {
+          const birthDate = new Date(value);
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+          }
+        
+          setClearanceInput((prev: any) => ({
+            ...prev,
+            birthday: value,
+            age: age.toString(), // Ensure it's string if your input expects string
+          }));
+          return;
+        }
+      
+        setClearanceInput((prev: any) => {
+          const keys = name.split(".");
+          if (keys.length === 2) {
+            return {
+              ...prev,
+              [keys[0]]: {
+                ...prev[keys[0]],
+                [keys[1]]: value,
+              },
+            };
+          }
+          return {
+            ...prev,
+            [name]: value,
+          };
+        });
+      };
+
     return (
         <main className="addAnnouncement-main-container">
             <div className="section-1">
@@ -106,39 +230,6 @@ export default function action() {
                         <button className="discard-btn" onClick={handleDiscardClick}>Discard</button>
                         <button className="save-btn" onClick={handleCreateClick}>Create</button>
                     </div>
-
-                    {showDiscardPopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
-                                <p>Are you sure you want to discard the document?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> 
-                                </div> 
-                            </div>
-                        </div>
-                    )}
-
-                    {showCreatePopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
-                                <p>Are you sure you want to create the document?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowCreatePopup(false)} className="no-button">No</button> 
-                                    <button onClick={confirmCreate} className="yes-button">Yes</button> 
-                                </div> 
-                            </div>
-                        </div>
-                    )}
-
-                    {showPopup && (
-                        <div className={`popup-overlay show`}>
-                            <div className="popup">
-                                <p>{popupMessage}</p>
-                            </div>
-                        </div>
-                    )}
-
                 </div>
                 
                 <hr/>
@@ -150,25 +241,49 @@ export default function action() {
                                 <div className="fields-section">
                                     <p>Purpose</p>
                                     <select 
-                                        id="clearancePurpose" 
-                                        name="clearancePurpose" 
+                                        id="purpose" 
+                                        name="purpose" 
                                         className="input-field" 
                                         required
-                                        defaultValue=""
+                                        value ={clearanceInput?.purpose || ""}
+                                        onChange={handleChange} // Handle change to update state
+                                        
                                     >
                                         <option value="" disabled>Select purpose</option>
-                                        <option value="Occupancy/Moving Out">Occupancy / Moving Out</option>
-                                        <option value="Estate Tax">Estate Tax</option>
-                                        <option value="Death Residency">Death Residency</option>
-                                        <option value="No Income (Scholarship)">No Income (Scholarship)</option>
-                                        <option value="No Income (ESC)">No Income (ESC)</option>
-                                        <option value="Cohabitation">Cohabitation</option>
-                                        <option value="Guardianship">Guardianship</option>
-                                        <option value="Good Moral and Probation">Good Moral and Probation</option>
-                                        <option value="Garage/PUV">Garage/PUV</option>
-                                        <option value="Garage/TRU">Garage/TRU</option>
-                                        <option value="Residency">Residency</option>
-                                        <option value="Others">Others</option>
+                                            {docType === "Barangay Certificate" ? (<>
+                                              <option value="Residency">Residency</option>
+                                              <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
+                                              <option value="Estate Tax">Estate Tax</option>
+                                              <option value="Death Residency">Death Residency</option>
+                                              <option value="No Income">No Income</option>
+                                              <option value="Cohabitation">Cohabitation</option>
+                                              <option value="Guardianship">Guardianship</option>
+                                              <option value="Good Moral and Probation">Good Moral and Probation</option>
+                                              <option value="Garage/PUV">Garage/PUV</option>
+                                              <option value="Garage/TRU">Garage/TRU</option>
+                                            
+                                            </>):docType === "Barangay Clearance" ? (<>
+                                              <option value="Loan">Loan</option>
+                                              <option value="Bank Transaction">Bank Transaction</option>
+                                              <option value="Residency">Residency</option>
+                                              <option value="Local Employment">Local Employment</option>
+                                              <option value="Maynilad">Maynilad</option>
+                                              <option value="Meralco">Meralco</option>
+                                              <option value="Bail Bond">Bail Bond</option>
+                                            </>):docType === "Barangay Indigency" ? ( <>
+                                              <option value="No Income">No Income</option>
+                                              <option value="Public Attorneys Office">Public Attorneys Office</option>
+                                              <option value="AKAP">AKAP</option>
+                                              <option value="Financial Subsidy of Solo Parent">Financial Subsidy of Solo Parent</option>
+                                              <option value="Fire Emergency">Fire Emergency</option>
+                                              <option value="Flood Victims">Flood Victims</option>
+                                              <option value="Philhealth Sponsor">Philhealth Sponsor</option>
+                                              <option value="Medical Assistance">Medical Assistance</option>
+                                            </>): (docType === "Business Permit" ||docType === "Temporary Business Permit") && (
+                                              <>
+                                              <option value="New">New</option>
+                                              <option value="Renewal">Renewal</option>
+                                            </>)}
                                     </select>
                                 </div>
 
@@ -378,16 +493,38 @@ export default function action() {
 
 
                 </div>
+                {showDiscardPopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to discard the document?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button">No</button>
+                                    <button onClick={confirmDiscard} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+                    )}
 
-                
+                    {showCreatePopup && (
+                        <div className="confirmation-popup-overlay">
+                            <div className="confirmation-popup">
+                                <p>Are you sure you want to create the document?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowCreatePopup(false)} className="no-button">No</button> 
+                                    <button onClick={confirmCreate} className="yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+                    )}
 
-                
-        
+                    {showPopup && (
+                        <div className={`popup-overlay show`}>
+                            <div className="popup">
+                                <p>{popupMessage}</p>
+                            </div>
+                        </div>
+                    )}
 
-
-
-                
-                
             </div>
             
         </main>
