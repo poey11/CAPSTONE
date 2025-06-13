@@ -604,13 +604,13 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                               <div className="title-remarks-partyA">
                                 Incident Image
                               </div>
-                              <div className="box-container-incidentimage">
+                              <div className="box-container-incidentimage-2">
                                 {otherinformation.image ? (
                                    <a href={otherinformation.image} target="_blank" rel="noopener noreferrer">
-                                          <img
+                                        <img
                                         src={otherinformation.image}
                                         alt="Incident Image"
-                                        className="incident-img-view"
+                                        className="incident-img-view uploaded-pic"
                                       />
                                    </a>
                                   
