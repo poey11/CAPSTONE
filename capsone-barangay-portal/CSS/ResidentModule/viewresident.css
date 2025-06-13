@@ -696,7 +696,8 @@ background-color: #214666;
  font-size: 1rem;
 }
 
-.view-resident-fields-section{
+.view-resident-fields-section,
+.view-resident-fields-section-details{
   display: flex;
   flex-direction: column;
   margin-top: 10px;
@@ -712,6 +713,14 @@ background-color: #214666;
   font-weight: bold;
   align-self: flex-start; /* Left-aligns the label */
   margin-left: 20px;
+}
+
+.view-resident-fields-section-details p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 40px;
 }
 
 .view-resident-input-field {

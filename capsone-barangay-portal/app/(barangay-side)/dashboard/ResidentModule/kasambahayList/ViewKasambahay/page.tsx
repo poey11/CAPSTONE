@@ -27,7 +27,7 @@ interface KasambahayFormData {
   sssMember: boolean;
   philhealthMember: boolean;
   pagibigMember: boolean;
-  fileURL: string;
+  verificationFilesURLs: string[];
   updatedBy: string;
   createdBy: string;
   createdAt: string;
@@ -41,6 +41,10 @@ export default function ViewKasambahay() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("basic");
+  const [identificationFile, setIdentificationFile] = useState<File | null>(null);
+  const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
+  const [verificationFiles, setVerificationFiles] = useState<File[]>([]);
+  const [verificationPreviews, setVerificationPreviews] = useState<string[]>([]);
 
   
     const [formData, setFormData] = useState<KasambahayFormData>({
@@ -65,7 +69,7 @@ export default function ViewKasambahay() {
       philhealthMember: false,
       pagibigMember: false,
       identificationFileURL: "",
-      fileURL: "",
+      verificationFilesURLs: [],
       updatedBy: "",
       createdBy: "",
       createdAt: "",
@@ -102,7 +106,7 @@ export default function ViewKasambahay() {
               sssMember: docSnap.data().sssMember ?? false,
               philhealthMember: docSnap.data().philhealthMember ?? false,
               pagibigMember: docSnap.data().pagibigMember ?? false,
-              fileURL: docSnap.data().fileURL || "",
+              verificationFilesURLs: docSnap.data().verificationFilesURLs || [],
               updatedBy: docSnap.data().updatedBy || "",
               createdBy: docSnap.data().createdBy || "",
               createdAt: docSnap.data().createdAt || "",
@@ -111,7 +115,9 @@ export default function ViewKasambahay() {
             };
   
             setFormData(data);
-            setOriginalData(data); // Store original data
+          setOriginalData(data); // Store original data
+          setVerificationPreviews(docSnap.data().verificationFilesURLs || []);
+          setIdentificationPreview(docSnap.data().identificationFileURL || null);
   
           } else {
             setError("Kasambahay record not found.");
@@ -439,10 +445,12 @@ export default function ViewKasambahay() {
 
                 {activeSection === "others" && (
                   <>
+                  <div className="view-main-resident-content-others">
 
+                  <div className="add-main-resident-section-2-full-top">  
                    <div className="voters-details-container-center ">
 
-                   <div className="view-resident-fields-section">
+                   <div className="view-resident-fields-section-details">
                           <p>SSS Member</p>
                           <input
                             type="text"
@@ -453,7 +461,7 @@ export default function ViewKasambahay() {
                           />
                         </div>
 
-                        <div className="view-resident-fields-section">
+                        <div className="view-resident-fields-section-details">
                           <p>PhilHealth Member</p>
                           <input
                             type="text"
@@ -464,7 +472,7 @@ export default function ViewKasambahay() {
                           />
                         </div>
 
-                        <div className="view-resident-fields-section">
+                        <div className="view-resident-fields-section-details">
                           <p>Pag-IBIG Member</p>
                           <input
                             type="text"
@@ -476,6 +484,46 @@ export default function ViewKasambahay() {
                         </div>
 
                    </div>
+                   </div>
+
+                   <div className="add-main-resident-section-2-full-bottom-view">
+                   {formData.verificationFilesURLs.length > 0 ? (
+                            formData.verificationFilesURLs.map((url, index) => (
+                              <div key={index} className="services-onlinereq-verification-requirements-section">
+                                <span className="verification-requirements-label">
+                                  {formData.verificationFilesURLs.length === 1
+                                    ? 'Verification Requirement'
+                                    : `Verification Requirement ${index + 1}`}
+                                </span>
+
+                                <div className="services-onlinereq-verification-requirements-container">
+                                  <div className="file-name-image-display">
+                                    <a
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <img
+                                        src={url}
+                                        alt={`Verification Requirement ${index + 1}`}
+                                        className="verification-reqs-pic uploaded-pic"
+                                        style={{ cursor: 'pointer' }}
+                                      />
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="services-onlinereq-verification-requirements-section">
+                              <span className="verification-requirements-label">Verification Requirements</span>
+                              <div className="services-onlinereq-verification-requirements-container">
+                                <p className="no-verification-files-text">No verification requirements uploaded.</p>
+                              </div>
+                            </div>
+                          )}
+                   </div>
+                  </div>
 
                   </>
                 )}
