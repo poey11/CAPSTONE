@@ -186,12 +186,12 @@ export default function ViewFirstTimeJobSeeker() {
                           
                           <div className="voters-details-container-center ">
 
-                            <div className="view-resident-fields-section">
+                            <div className="view-resident-fields-section-details">
                                   <p>Date Applied</p>
                                   <input type="date" name="dateApplied"  value={formData?.dateApplied || ""} className="view-resident-input-field" readOnly/>
                             </div>
 
-                            <div className="view-resident-fields-section">
+                            <div className="view-resident-fields-section-details">
                                   <p>Remarks</p>
                                   <input type="text" name="remarks"  value={formData?.remarks || ""} className="view-resident-input-field" readOnly/>
                             </div>
@@ -212,7 +212,7 @@ export default function ViewFirstTimeJobSeeker() {
                            <>
 
                     <div className="voters-details-container-center ">
-                                 <div className="view-resident-fields-section">
+                                 <div className="view-resident-fields-section-details">
                           <p>Created By</p>
                           <input
                             type="text"
@@ -223,7 +223,7 @@ export default function ViewFirstTimeJobSeeker() {
                           />
                         </div>
 
-                        <div className="view-resident-fields-section">
+                        <div className="view-resident-fields-section-details">
                           <p>Created At</p>
                           <input
                             type="text"
@@ -234,7 +234,7 @@ export default function ViewFirstTimeJobSeeker() {
                           />
                         </div>
 
-                        <div className="view-resident-fields-section">
+                        <div className="view-resident-fields-section-details">
                           <p>Last Updated By</p>
                           <input
                             type="text"

@@ -518,7 +518,9 @@ export default function ViewKasambahay() {
                             <div className="services-onlinereq-verification-requirements-section">
                               <span className="verification-requirements-label">Verification Requirements</span>
                               <div className="services-onlinereq-verification-requirements-container">
-                                <p className="no-verification-files-text">No verification requirements uploaded.</p>
+                                <div className="no-verification-files-text">
+                                  <p>No verification requirements uploaded.</p>
+                                </div>
                               </div>
                             </div>
                           )}
