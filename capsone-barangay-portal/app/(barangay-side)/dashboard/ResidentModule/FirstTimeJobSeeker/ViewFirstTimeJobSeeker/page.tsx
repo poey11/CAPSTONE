@@ -250,6 +250,49 @@ export default function ViewFirstTimeJobSeeker() {
                               
                             )}
 
+
+                      {activeSection === "others" && (
+                        <>
+                          {formData?.verificationFilesURLs?.length > 0 ? (
+                            formData.verificationFilesURLs.map((url: string, index: number) => (
+                              <div key={index} className="services-onlinereq-verification-requirements-section">
+                                <span className="verification-requirements-label">
+                                  {formData.verificationFilesURLs.length === 1
+                                    ? "Verification Requirement"
+                                    : `Verification Requirement ${index + 1}`}
+                                </span>
+
+                                <div className="services-onlinereq-verification-requirements-container">
+                                  <div className="file-name-image-display">
+                                    <a
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <img
+                                        src={url}
+                                        alt={`Verification Requirement ${index + 1}`}
+                                        className="verification-reqs-pic uploaded-pic"
+                                        style={{ cursor: "pointer" }}
+                                      />
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="services-onlinereq-verification-requirements-section">
+                              <span className="verification-requirements-label">Verification Requirements</span>
+                              <div className="services-onlinereq-verification-requirements-container">
+                                <div className="no-verification-files-text">
+                                  <p>No verification requirements uploaded.</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+
                     </div>
 
               </div>
