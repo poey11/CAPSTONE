@@ -606,13 +606,16 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                               </div>
                               <div className="box-container-incidentimage">
                                 {otherinformation.image ? (
-                                  <img
-                                    src={otherinformation.image}
-                                    alt="Incident Image"
-                                    style={{ maxWidth: "100%", maxHeight: "260px", borderRadius: "10px" }}
-                                  />
+                                   <a href={otherinformation.image} target="_blank" rel="noopener noreferrer">
+                                          <img
+                                        src={otherinformation.image}
+                                        alt="Incident Image"
+                                        className="incident-img-view"
+                                      />
+                                   </a>
+                                  
                                 ) : (
-                                  <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>No image available</p>
+                                  <p className="no-image-text-view">No image available</p>
                                 )}
                               </div>
                             </div>

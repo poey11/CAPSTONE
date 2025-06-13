@@ -706,9 +706,9 @@ const ViewOnlineRequest = () => {
         
             const updatedData = {
                 status: newStatus,
-                ...(status === "Pending" && { statusPriority: 1 }),
-                ...(status === "Pick-up" && { statusPriority: 2 }),
-                ...(status === "Completed" && { statusPriority: 3 }),
+                ...(newStatus === "Pending" && { statusPriority: 1 }),
+                ...(newStatus === "Pick-up" && { statusPriority: 2 }),
+                ...(newStatus === "Completed" && { statusPriority: 3 }),
             };
         
             // Create notification
@@ -966,45 +966,43 @@ const ViewOnlineRequest = () => {
             {(userPosition === "Assistant Secretary" || userPosition === "Admin Staff") && (
                 <>
                     {((status !== "Rejected" && status !== "Completed") || (status === "Rejected" && requestData?.appointmentDate)) && (
-                        <div className="services-onlinereq-redirectionpage-section">
-                            {(status !== "Completed" && status !== "Rejected")&& (
-                                <>
-                                    <button className="services-onlinereq-redirection-buttons" onClick ={handlerejection}>
-                                        <div className="services-onlinereq-redirection-icons-section">
-                                            <img src="/images/rejected.png" alt="user info" className="redirection-icons-info"/> 
-                                        </div>
-                                        <h1>Reject Request</h1>
-                                    </button>
+                    <div className="services-onlinereq-redirectionpage-section">
+                        {(status !== "Completed" && status !== "Rejected") && (
+                        <>
+                            <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
+                            <div className="services-onlinereq-redirection-icons-section">
+                                <img src="/images/rejected.png" alt="user info" className="redirection-icons-info" />
+                            </div>
+                            <h1>Reject Request</h1>
+                            </button>
 
-                                    <button className="services-onlinereq-redirection-buttons" onClick={handlePrint}>
-                                        <div className="services-onlinereq-redirection-icons-section">
-                                            <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info"/> 
-                                        </div>
-                                        <h1>Generate Document</h1>
-                                    </button>
-                                </>
-                            )}
-                            
-                            {status === "Pick-up" && (
-                                    <button className="services-onlinereq-redirection-buttons">
-                                        <div className="services-onlinereq-redirection-icons-section">
-                                            <img src="/images/sendSMS.png" alt="user info" className="redirection-icons-info"/> 
-                                        </div>
-                                        <h1>Send SMS</h1>
-                                    </button>
-                            )}
+                            <button className="services-onlinereq-redirection-buttons" onClick={handlePrint}>
+                            <div className="services-onlinereq-redirection-icons-section">
+                                <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                            </div>
+                            <h1>Generate Document</h1>
+                            </button>
+                        </>
+                        )}
 
-                            {requestData?.appointmentDate && (
-                                <>
-                                    <button className="services-onlinereq-redirection-buttons" onClick ={handleviewappointmentdetails}>
-                                        <div className="services-onlinereq-redirection-icons-section">
-                                            <img src="/images/appointment.png" alt="user info" className="redirection-icons-info"/> 
-                                        </div>
-                                        <h1>Appointment Details</h1>
-                                    </button>
-                                </>
-                            )}
-                        </div>
+                        {status === "Pick-up" && (
+                        <button className="services-onlinereq-redirection-buttons">
+                            <div className="services-onlinereq-redirection-icons-section">
+                            <img src="/images/sendSMS.png" alt="user info" className="redirection-icons-info" />
+                            </div>
+                            <h1>Send SMS</h1>
+                        </button>
+                        )}
+
+                        {requestData?.appointmentDate && (
+                        <button className="services-onlinereq-redirection-buttons" onClick={handleviewappointmentdetails}>
+                            <div className="services-onlinereq-redirection-icons-section">
+                            <img src="/images/appointment.png" alt="user info" className="redirection-icons-info" />
+                            </div>
+                            <h1>Appointment Details</h1>
+                        </button>
+                        )}
+                    </div>
                     )}
                 </>
             )}

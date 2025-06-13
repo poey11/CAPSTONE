@@ -122,36 +122,27 @@ const getPageNumbers = () => {
     return (
 
         <main className="appointments-main-container">
-         <div className="appointments-section-1">
-          <h1>Scheduled Appointments</h1>
-          <button
-            className="add-announcement-btn"
-            onClick={handleCalendarView}
-          >
-            View Calendar
-          </button>
-          
-         </div>
+        
          <div className="appointments-section-2">
           <input 
               type="text" 
-              className="search-bar" 
+              className="appointments-module-filter" 
               placeholder="Enter Appointment Type" 
           />
           <input 
                 type="date" 
-                className="search-bar" 
+                className="appointments-module-filter" 
                 placeholder="Select Date From" 
             />
             <input 
                 type="date" 
-                className="search-bar" 
+                className="appointments-module-filter" 
                 placeholder="Select Date To" 
             />
           <select 
             id="featuredStatus" 
             name="featuredStatus" 
-            className="featuredStatus" 
+            className="appointments-module-filter" 
             required
             defaultValue=""  
           >
@@ -159,34 +150,15 @@ const getPageNumbers = () => {
             <option value="pending">Pending</option>
             <option value="completed">Completed</option>
           </select>
-          <select 
-            id="featuredStatus" 
-            name="featuredStatus" 
-            className="featuredStatus" 
-            required
-            defaultValue=""  
-          >
-            <option value="" disabled>Show...</option>
-            <option value="active">Show 5</option>
-            <option value="inactive">Show 10</option>
-          </select>
          </div>
+
+         <div className="appointment-calendar-container">
           <Calendar appointments={appointmentData} />
+         </div>
+          
 
          
-        <div className="redirection-section">
-        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {getPageNumbers().map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === 'number' && paginate(number)}
-            className={currentPage === number ? "active" : ""}
-          >
-            {number}
-          </button>
-        ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-      </div>
+        
       </main>
         
     );

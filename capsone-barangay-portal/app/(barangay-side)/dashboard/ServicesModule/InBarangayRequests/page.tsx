@@ -1,111 +1,51 @@
 "use client"
-
 import { useRouter } from "next/navigation";
-import type { Metadata } from "next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "@/CSS/barangaySide/ServicesModule/InBarangayRequests.css";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { db } from "@/app/db/firebase";
 
 
-
-
-const metadata: Metadata = {
-    title: "In Barangay Request",
-    description: "In Barangay Request in Services Module",
-  };
-
-
-  export default function InBarangayRequests() {
-    const requestData = [
-      {
-        documentType: "Barangay Clearance",
-        purpose: "Loan",
-        name: "Jonnell Quebal",
-        contact: "09171218101",
-        date: "2024-01-17",
-        status: "New",
-      },
-      {
-          documentType: "Barangay Indigency",
-          purpose: "No Income",
-          name: "Jonnell Quebal",
-          contact: "09171218101",
-          date: "2024-01-17",
-          status: "In Progress",
-      },
-      {
-          documentType: "Barangay ID",
-          purpose: "N/A",
-          name: "Jonnell Quebal",
-          contact: "09171218101",
-          date: "2024-01-17",
-          status: "In Progress",
-      },
-      {
-          documentType: "Barangay Permit",
-          purpose: "Business Permit",
-          name: "Jonnell Quebal",
-          contact: "09171218101",
-          date: "2024-01-17",
-          status: "Completed",
-      },
-      {
-          documentType: "Barangay Permit",
-          purpose: "Temporary Business Permit",
-          name: "Jonnell Quebal",
-          contact: "09171218101",
-          date: "2024-01-17",
-          status: "Completed",
-      },
-      {
-          documentType: "Barangay Permit",
-          purpose: "Construction Permit",
-          name: "Jonnell Quebal",
-          contact: "09171218101",
-          date: "2024-01-17",
-          status: "Completed",
-      },
-      {
-          documentType: "Barangay Permit",
-          purpose: "Liquor Permit",
-          name: "Jonnell Quebal",
-          contact: "09171218101",
-          date: "2024-01-17",
-          status: "Completed",
-      },
-      {
-          documentType: "Barangay Permit",
-          purpose: "COOP",
-          name: "Jonnell Quebal",
-          contact: "09171218101",
-          date: "2024-01-17",
-          status: "In Progress",
-      },
-      {
-          documentType: "Barangay Certificate",
-          purpose: "Death Residency",
-          name: "Rose Yap Fernandez",
-          contact: "09171218101",
-          date: "2024-01-17",
-          status: "In Progress",
-      },
-      {
-          documentType: "First Time Jobseeker",
-          purpose: "N/A",
-          name: "Jonnell Quebal",
-          contact: "09171218101",
-          date: "2024-01-17",
-          status: "New",
-      },
-        
-      
-    ];
-
-   
-
+  export default function InBarangayRequests() { 
     const router = useRouter();
+    const [requestData, setRequestData] = useState<any[]>([]);
+
+    useEffect(() => {
+      try {
+        const Collection = query(
+          collection(db, "InBarangayServiceRequests"),
+          orderBy("createdAt", "desc") // First, sort by latest
+        );
+      
+        const unsubscribe = onSnapshot(Collection, (snapshot) => {
+          let reports: any[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+        
+          // Now sort client-side: Pending (1) first, then Pickup (2), etc.
+          reports.sort((a, b) => {
+            if (a.statusPriority !== b.statusPriority) {
+              return a.statusPriority - b.statusPriority; // status priority asc
+            }
+          
+            // Convert string dates to timestamps
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          });
+        
+          setRequestData(reports);
+        });
+      
+        return unsubscribe;
+      } catch (error: any) {
+        console.log(error.message);
+      }
+    }, []);
+
+
 
     const handleGenerateDocument = () => {
-      router.push("/dashboard/ServicesModule/GenerateDocument");
+      router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument");
     };
 
     const handleView = (documentType: string, purpose: string) => {
