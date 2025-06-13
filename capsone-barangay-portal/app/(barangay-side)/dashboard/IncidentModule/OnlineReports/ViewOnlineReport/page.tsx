@@ -17,6 +17,7 @@ export default function ViewOnlineReports() {
     area: "",
     address: "",
     dateFiled: "",
+    addInfo: "",
     concerns: "",
     status: "",
     file: "",
@@ -39,11 +40,15 @@ export default function ViewOnlineReports() {
 
   const [initialRespondent, setInitialRespondent] = useState(respondent);
   const [showConfirmation, setShowConfirmation] = useState(false);
-   const [showPopup, setShowPopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
-   const [invalidFields, setInvalidFields] = useState<string[]>([]);
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  
+
 
 
 
@@ -79,6 +84,7 @@ export default function ViewOnlineReports() {
           area: data.area || "",
           address: data.address || "",
           dateFiled: data.dateFiled || "",
+          addInfo:data.addInfo || "",
           concerns: data.concerns || "",
           status: data.status || "",
           file: data.file || "",
@@ -191,6 +197,12 @@ const handleSubmitClick = async () => {
 
     return;
   }
+
+    setFormData((prevData) => ({
+    ...prevData,
+    status: "Acknowledged",
+  }));
+
 
   // Clear previous errors
   setInvalidFields([]);
@@ -327,6 +339,8 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                 </div>
                 )}
 
+           
+
 
 
       {/*}
@@ -361,8 +375,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
             </div>
 
             <div className="action-btn-section-online-report">
-                <button className="action-add-report" onClick={handleSubmitClick} >Save</button>
-
+                <button className="action-online-report" onClick={handleSubmitClick} >Save</button>                                                 
             </div>
         </div>
 
@@ -389,7 +402,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                       className={`info-toggle-btn-online-report ${activeSection === section ? "active" : ""}`}
                       onClick={() => setActiveSection(section)}
                     >
-                      {section === "complainant" && "Complainant Info"}
+                      {section === "complainant" && "Basic Info"}
                       {section === "incident" && "Incident Info"}
                        {section === "action" && "Action Details*"}
                  
@@ -448,21 +461,42 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                               </div>
 
                                  <div className="fields-section-online">
-                                <p>Contact Number</p>
+                                <p>Status</p>
                                  <input
                                   type="text"
                                   className="online-incident-input-field"
-                                  value={formData.contactNos}  
+                                  value={formData.status}  
                                   disabled          
                                  />
                               </div>
 
-                          
+                              
+
 
                           </div>
 
 
-                    
+                    </div>
+
+                    <div className="online-report-section-bottom-side-2">
+
+                        <div className="online-report-box-container">
+                              <div className="box-container-outer-image">
+                                <div className="title-image">
+                                  Summary of Concern
+                                </div>
+
+                                <div className="box-container-investigation-report">
+                                   <textarea   
+                                     className= "investigation-report-input-field"
+                                    value={formData.addInfo} 
+                                     disabled    
+                                    />
+                                     
+                                </div>
+
+                              </div>
+                            </div>                        
 
                     </div>
 
@@ -546,28 +580,31 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                         </div>
                       */}
 
-                      <div className="online-report-box-container">
-                        <div className="box-container-outer-image">
-                          <div className="title-image">
-                            Incident Image
-                          </div>
-
-                          <div className="box-container-incidentimage-online">
-                                {formData.file ? (
-                                  <img
-                                    src={formData.file}
-                                    alt="Incident Image"
-                                    style={{ maxWidth: "100%", maxHeight: "260px", borderRadius: "10px" }}
-                                  />
-                                ) : (
-                                  <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>No image available</p>
-                                )}
-                          </div>
-
+                  <div className="online-report-box-container">
+                      <div className="box-container-outer-image">
+                        <div className="title-image">
+                          Incident Image
                         </div>
 
-
+                        <div className="box-container-incidentimage-online">
+        
+                        {imageUrl ? (
+                        <a href={imageUrl} target="_blank" rel="noopener noreferrer">
+                          <img
+                            src={imageUrl}
+                            alt="Incident Image"
+                            className="incident-img"
+                          />
+                        </a>
+                          ) : (
+                            <p className="no-image-text ">
+                              No image available
+                            </p>
+                          )}
+                        </div>
                       </div>
+                    </div>
+
 
                     </div>
 
@@ -590,6 +627,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 placeholder="Enter Respondent Officer Name"
                                  name="respondentName" value={respondent.respondentName}
                                 onChange={handleChange} 
+                                   disabled = {formData.status === "Acknowledged"}
                                   />
                             </div>
 
@@ -601,13 +639,13 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 </div>
 
                                 <div className="box-container-investigation-report">
-                                   <textarea   className={`investigation-report-input-field ${invalidFields.includes("investigationReport") ? "input-error" : ""}`}  placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange}  />
+                                  <span className="required-asterisk">*</span>
+
+                                   <textarea   className={`investigation-report-input-field ${invalidFields.includes("investigationReport") ? "input-error" : ""}`}  placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange} disabled = {formData.status === "Acknowledged"} />
                                      
                                 </div>
 
                               </div>
-
-
                             </div>
                             
 
@@ -624,51 +662,59 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 <div className="box-container-investigation">
 
                                     <div className="file-upload-container-investigation">
-                                      <label htmlFor="file-upload2" className="upload-link">Click to Upload File</label>
-                                        <input
-                                          id="file-upload2"
-                                          type="file"
-                                          className="file-upload-input"
-                                          multiple
-                                          accept=".jpg,.jpeg,.png"
-                                          onChange={handleFileChange}
-                                        />
-                                         <div className="uploadedFiles-container">
-                                        {(files.length > 0 || respondent.file.length > 0) && (
-                                          <div className="file-name-image-display">
-                                            <ul>
-                                              {/* Display existing respondent files */}
-                                                {respondent.file.map((url: string, index: number) => (
-                                                  <div className="file-name-image-display-indiv" key={`existing-${index}`}> 
-                                                    <li>
-                                                      <div className="filename&image-container">
-                                                        <img src={url} alt={`Investigation Photo ${index + 1}`} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
-                                                      </div>
-                                                      <a href={url} target="_blank" rel="noopener noreferrer">View</a>
-                                                    </li>
-                                                  </div>
-                                                ))}
-
-
-                                              {/* Display newly uploaded files */}
-                                              {files.map((file, index) => (
-                                                <div className="file-name-image-display-indiv" key={`new-${index}`}> 
-                                                  <li>
-                                                    {file.preview && (
-                                                      <div className="filename&image-container">
-                                                        <img src={file.preview} alt={file.name} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
-                                                      </div>
-                                                    )}
-                                                    {file.name}
-                                                    <button type="button" onClick={() => handleFileDelete(file.name)} className="delete-button">
-                                                      <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                                                    </button>
-                                                  </li>
-                                                </div>
-                                              ))}
-                                            </ul>
-                                          </div>
+                                   {formData.status !== "Acknowledged" && (
+                                          <>
+                                            <label htmlFor="file-upload2" className="upload-link">Click to Upload File</label>
+                                            <input
+                                              id="file-upload2"
+                                              type="file"
+                                              className="file-upload-input"
+                                              multiple
+                                              accept=".jpg,.jpeg,.png"
+                                              onChange={handleFileChange}
+                                            />
+                                          </>
                                         )}
+                                         <div className="uploadedFiles-container">
+                                       {(files.length > 0 || respondent.file.length > 0) ? (
+                                      <div className="file-name-image-display">
+                                        <ul>
+                                          {/* Display existing respondent files */}
+                                          {respondent.file.map((url: string, index: number) => (
+                                            <div className="file-name-image-display-indiv" key={`existing-${index}`}> 
+                                              <li>
+                                                <div className="filename&image-container">
+                                                  <img src={url} alt={`Investigation Photo ${index + 1}`} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
+                                                </div>
+                                                <a href={url} target="_blank" rel="noopener noreferrer">View</a>
+                                              </li>
+                                            </div>
+                                          ))}
+
+                                          {/* Display newly uploaded files */}
+                                          {files.map((file, index) => (
+                                            <div className="file-name-image-display-indiv" key={`new-${index}`}> 
+                                              <li>
+                                                {file.preview && (
+                                                  <div className="filename&image-container">
+                                                    <img src={file.preview} alt={file.name} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
+                                                  </div>
+                                                )}
+                                                {file.name}
+                                                <button type="button" onClick={() => handleFileDelete(file.name)} className="delete-button">
+                                                  <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                                </button>
+                                              </li>
+                                            </div>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    ) : (
+                                      <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>
+                                        No image available
+                                      </p>
+                                    )}
+
                                       </div>
 
                                       

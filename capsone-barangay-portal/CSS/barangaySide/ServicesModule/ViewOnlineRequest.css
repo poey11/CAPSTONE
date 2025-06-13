@@ -389,7 +389,6 @@
 
  .services-onlinereq-redirectionpage-section {
   width: 80%;
-  height: 100px;
   margin:  auto;
   margin-bottom: 30px;
   display: flex;
@@ -400,6 +399,9 @@
   background-color: #ffffff;
   border-radius: 10px;
   border: 1px solid #ccc;
+  flex-wrap: wrap;
+  padding-top: 30px;
+  padding-bottom: 30px;
 }
 
 .services-onlinereq-redirection-buttons {
@@ -445,6 +447,27 @@
   width: 26px;
   height: 26px;
   filter: invert(53%) sepia(89%) saturate(2143%) hue-rotate(1deg) brightness(90%) contrast(95%);
+}
+
+
+.services-onlinereq-redirectionpage-section-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+
+.services-onlinereq-redirectionpage-section.top-row {
+  margin-bottom: 0px;
+}
+
+.services-onlinereq-redirectionpage-section.bottom-row {
+  margin-top: -10px;
+  padding-top: 0px;
+  border-top: none;
+  box-shadow: none;
 }
 
 .services-onlinereq-main-content {

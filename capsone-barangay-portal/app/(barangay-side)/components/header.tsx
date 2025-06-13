@@ -175,15 +175,43 @@ export default function Header() {
       },
 
 
+      //For Online Reports
+
+      "/dashboard/IncidentModule/OnlineReports": {
+        title: "Incident Online Reports",
+        breadcrumb: ["Incident Management", "Online Reports"],
+      },
+
+        "/dashboard/IncidentModule/OnlineReports/ViewOnlineReport": {
+        title: "View Online Reports",
+        breadcrumb: ["Incident Management", "Online Reports", "View Online Report"],
+      },
 
 
-          // For Online Requests
+         "/dashboard/IncidentModule": {
+        title: "Main Dashboard Incident Management",
+        breadcrumb: ["Incident Management", "Main Dashboard"],
+      },
+
+
+
+
+      // For Online Requests
 
       "/dashboard/ServicesModule/OnlineRequests": {
         title: "Online Documents Requests",
         breadcrumb: ["Services Management", "Online Requests"],
-      }
+      },
 
+      // Appointments
+
+      "/dashboard/ServicesModule/Appointments": {
+        title: "Scheduled Appointments",
+        breadcrumb: ["Services Management", "Appointments"],
+      },
+
+
+      
 
 
     };
