@@ -2,7 +2,7 @@
 import "@/CSS/barangaySide/ServicesModule/OnlineRequests.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query, where, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 
 
@@ -30,14 +30,14 @@ const getViewedRequests = (): string[] => {
   return data ? JSON.parse(data) : [];
 };
 
-const markAsViewed = (id: string) => {
-  const viewed = getViewedRequests();
-  if (!viewed.includes(id)) {
-    viewed.push(id);
-    localStorage.setItem("viewedRequests", JSON.stringify(viewed));
+const markAsViewed = async (id: string) => {
+  try {
+    const docRef = doc(db, "ServiceRequests", id);
+    await updateDoc(docRef, { isViewed: true });
+  } catch (error) {
+    console.error("Error marking request as viewed:", error);
   }
 };
-
     
     useEffect(() => {
       try {
@@ -52,7 +52,7 @@ const markAsViewed = (id: string) => {
           let reports: any[] = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
-             isNew: !viewed.includes(doc.id)  // Tag new ones
+            isNew: doc.data().isViewed === false,  // Tag new ones
           }));
         
           // Now sort client-side: Pending (1) first, then Pickup (2), etc.
