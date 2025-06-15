@@ -3575,7 +3575,7 @@ const ReportsPage = () => {
 
                   {session?.user?.role === "Barangay Official" &&
                     (
-                      session?.user?.position === "LT Staff" ||
+                      session?.user?.position === "LF Staff" ||
                       session?.user?.position === "Assistant Secretary" ||
                       session?.user?.position === "Secretary" ||
                       session?.user?.position === "Punong Barangay"
