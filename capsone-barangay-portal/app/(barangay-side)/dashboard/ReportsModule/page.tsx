@@ -3644,7 +3644,7 @@ const ReportsPage = () => {
               <button onClick={handleGenerateIncidentStatusSummaryPDF} disabled={loadingIncidentStatuses} className="report-button">
                 {loadingIncidentStatuses ? "Generating..." : "Incident Status Summary"}
               </button>             
-          {session?.user?.department === "Lupon" || session?.user?.position === "Assistant Secretary" && (
+          {(session?.user?.department === "Lupon" || session?.user?.position === "Assistant Secretary") && (
             <>
               <button onClick={handleGenerateLuponSettledPDF} disabled={loadingLuponSettledReport} className="report-button">
                 {loadingLuponSettledReport ? "Generating..." : "Lupon Settled Report"}
@@ -3654,14 +3654,14 @@ const ReportsPage = () => {
               </button>   
             </>
           )}
-          {session?.user?.department === "VAWC" || session?.user?.position === "Assistant Secretary" && (
+          {(session?.user?.department === "VAWC" || session?.user?.position === "Assistant Secretary") && (
             <>
               <button onClick={handleGenerateVAWCPDF} disabled={loadingVAWCReport} className="report-button">
                 {loadingVAWCReport ? "Generating..." : "Monthly VAWC Report"}
               </button>      
             </>
           )}
-          {session?.user?.department === "GAD" || session?.user?.department === "BCPC" || session?.user?.position === "Assistant Secretary"  && (
+          {(session?.user?.department === "GAD" || session?.user?.department === "BCPC" || session?.user?.position === "Assistant Secretary")  && (
             <>
               <button className="report-button">GADRCO Quarterly Monitoring Report</button>
             </>
