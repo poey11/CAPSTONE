@@ -92,8 +92,6 @@ interface ClearanceInput {
   taxDeclaration: File | null;
   approvedBldgPlan: File | null;
   deathCertificate: File | null;
-  
-  isViewed: boolean;
 }
 
 
@@ -109,7 +107,6 @@ export default function Action() {
   const [clearanceInput, setClearanceInput] =  useState<ClearanceInput>({
     accountId: user?.uid || "Guest",
     docType: docType || "" ,
-    isViewed: false,
     requestId: "",
     purpose: "",
     dateRequested: new Date().toLocaleString(),
@@ -240,37 +237,90 @@ export default function Action() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      /*if the user requesting has an accountt and is logined*/
       const user = auth.currentUser;
       if (user) {
-        
-        const docRef = doc(db, "ResidentUsers", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          const gender = data.sex;
-          console.log(gender);
-          let mrms = "";
-          if(gender === "male")mrms = "Mr.";
-          else mrms = "Ms.";
-          console.log( mrms);
-          setClearanceInput((prev: any) => ({
-            ...prev,
-            fullName: `${data.first_name} ${data.middle_name} ${data.last_name}`  || "",
-            contact: data.phone || "",
-            address: data.address || "",
-            gender: data.sex || "",
-            requestorFname: `${data.first_name} ${data.middle_name} ${data.last_name}` || "",
-            requestorMrMs: mrms,
+        const userDocRef = doc(db, "ResidentUsers", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+  
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          const residentId = userData.residentId;
+  
+          if (residentId) {
+            const residentDocRef = doc(db, "Residents", residentId);
+            const residentDocSnap = await getDoc(residentDocRef);
+  
+            if (residentDocSnap.exists()) {
+              const residentData = residentDocSnap.data();
+              const gender = residentData.sex;
+              const mrms = gender === "Male" ? "Mr." : "Ms.";
+  
+              const birthDate = new Date(residentData.dateOfBirth);
+              const today = new Date();
+              let age = today.getFullYear() - birthDate.getFullYear();
+              const monthDiff = today.getMonth() - birthDate.getMonth();
+              if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+              }
+  
+              if (
+                clearanceInput.purpose === "Estate Tax" ||
+                clearanceInput.purpose === "Death Residency"
+              ) {
+                setClearanceInput((prev: any) => ({
+                  ...prev,
+
+                  fullName: "",
+                  contact:  "",
+                  address: "",
+                  gender: "",
+                  civilStatus: "",
+                  birthplace: "",
+                  birthday: "",
+                  age: "",
+                  requestorFname: `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}` || "",
+                  requestorMrMs: mrms,
+                }));
+              } else {
+                setClearanceInput((prev: any) => ({
+                  ...prev,
+                  fullName: `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}` || "",
+                  contact: residentData.contactNumber || "",
+                  address: residentData.address || "",
+                  gender: residentData.sex || "",
+                  civilStatus: residentData.civilStatus || "",
+                  birthplace: residentData.placeOfBirth || "",
+                  birthday: residentData.dateOfBirth || "",
+                  age: age.toString(),
+                  precinctnumber: residentData.precinctNumber || "",
+                  requestorFname: `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}` || "",
+                  requestorMrMs: mrms,
+                }));
+              }
+            }
+          } else {
+            // Fallback to ResidentUsers table
+            const gender = userData.sex;
+            const mrms = gender === "male" ? "Mr." : "Ms.";
+  
+            setClearanceInput((prev: any) => ({
+              ...prev,
+              fullName: `${userData.first_name} ${userData.middle_name} ${userData.last_name}` || "",
+              contact: userData.phone || "",
+              address: userData.address || "",
+              gender: userData.sex || "",
+              requestorFname: `${userData.first_name} ${userData.middle_name} ${userData.last_name}` || "",
+              requestorMrMs: mrms,
+            }));
           }
-        
-        ));
         }
       }
     };
-
+  
     fetchUserData();
-  }, [user]);
+  }, [user, clearanceInput.purpose]); // 🔁 Added purpose to dependency array
+  
+  
   
 // State for all file containers
 const [files, setFiles] = useState<{ name: string, preview: string | undefined }[]>([]);
@@ -483,7 +533,6 @@ const handleFileChange = (
           purpose: clearanceInput.purpose,
           fullName: clearanceInput.fullName,
           dateOfResidency: clearanceInput.dateOfResidency,
-          isViewed: clearanceInput.isViewed,
           address: clearanceInput.address,
           ...(clearanceInput.purpose === "Residency" && {
             CYFrom: clearanceInput.CYFrom,
@@ -1520,7 +1569,7 @@ const handleFileChange = (
                 className="form-input" 
                 value={clearanceInput.age}
                 onChange={handleChange}
-                required 
+                readOnly 
                 min="1"  
                 max="150"  
                 placeholder="Enter Age"  
@@ -1548,32 +1597,91 @@ const handleFileChange = (
 
             {docType ==="Barangay ID" && (
               <>
-                <div className="form-group">
-                  <label htmlFor="religion" className="form-label">Religion<span className="required">*</span></label>
-                  <input 
-                    type="text" 
-                    id="religion" 
-                    name="religion" 
-                    className="form-input" 
-                    value={clearanceInput.religion}
-                    onChange={handleChange}
-                    required 
-                    placeholder="Enter Religion" 
+              <div className="form-group">
+                <label htmlFor="religion" className="form-label">Religion<span className="required">*</span></label>
+                <select
+                  id="religion"
+                  name="religion"
+                  className="form-input"
+                  value={
+                    ["Roman Catholic", "Iglesia ni Cristo", "Muslim", "Christian", "Others"].includes(clearanceInput.religion)
+                      ? clearanceInput.religion
+                      : ""
+                  }
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>Select Religion</option>
+                  <option value="Roman Catholic">Roman Catholic</option>
+                  <option value="Iglesia ni Cristo">Iglesia ni Cristo</option>
+                  <option value="Muslim">Muslim</option>
+                  <option value="Christian">Christian</option>
+                  <option value="Others">Others</option>
+                </select>
+
+                {clearanceInput.religion === "Others" && (
+                  <input
+                    type="text"
+                    name="religion"
+                    placeholder="Please specify your religion"
+                    className="form-input-others"
+                    value={
+                      ["Roman Catholic", "Iglesia ni Cristo", "Muslim", "Christian", "Others"].includes(clearanceInput.religion)
+                        ? ""
+                        : clearanceInput.religion
+                    }
+                    onChange={(e) =>
+                      setClearanceInput((prev: any) => ({
+                        ...prev,
+                        religion: e.target.value,
+                      }))
+                    }
+                    required
                   />
-                </div>
+                )}
+              </div>
+
                 <div className="form-group">
                   <label htmlFor="nationality" className="form-label">Nationality<span className="required">*</span></label>
-                  <input 
-                    type="text" 
-                    id="nationality" 
-                    name="nationality" 
-                    className="form-input" 
-                    required 
-                    value={clearanceInput.nationality}
+                  <select
+                    id="nationality"
+                    name="nationality"
+                    className="form-input"
+                    value={
+                      ["Filipino", "Others"].includes(clearanceInput.nationality)
+                        ? clearanceInput.nationality
+                        : ""
+                    }
                     onChange={handleChange}
-                    placeholder="Enter Nationality" 
-                  />
+                    required
+                  >
+                    <option value="" disabled>Select Nationality</option>
+                    <option value="Filipino">Filipino</option>
+                    <option value="Others">Others</option>
+                  </select>
+
+                  {clearanceInput.nationality === "Others" && (
+                    <input
+                      type="text"
+                      name="nationality"
+                      placeholder="Please specify your nationality"
+                      className="form-input-others"
+                      value={
+                        ["Filipino", "Others"].includes(clearanceInput.nationality)
+                          ? ""
+                          : clearanceInput.nationality
+                      }
+                      onChange={(e) =>
+                        setClearanceInput((prev: any) => ({
+                          ...prev,
+                          nationality: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  )}
                 </div>
+
               </>
             )}
             
@@ -1606,7 +1714,7 @@ const handleFileChange = (
                 onChange={handleChange}
   
               >
-                <option value="" disabled>Select civil status</option>
+                <option value="" disabled>Select Civil Status</option>
                 <option value="Single">Single</option>
                 <option value="Married">Married</option>
                 <option value="Widow">Widow</option>
@@ -1647,17 +1755,52 @@ const handleFileChange = (
 
                 <div className="form-group">
                   <label htmlFor="bloodtype" className="form-label">Blood Type<span className="required">*</span></label>
-                  <input 
-                    type="text" 
-                    id="bloodtype" 
-                    name="bloodtype" 
-                    className="form-input" 
-                    value={clearanceInput.bloodtype}
+                  <select
+                    id="bloodtype"
+                    name="bloodtype"
+                    className="form-input"
+                    value={
+                      ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Others"].includes(clearanceInput.bloodtype)
+                        ? clearanceInput.bloodtype
+                        : ""
+                    }
                     onChange={handleChange}
-                    required 
-                    placeholder="Enter Blood Type" 
-                  />
+                    required
+                  >
+                    <option value="" disabled>Select Blood Type</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="Others">Others</option>
+                  </select>
+
+                  {clearanceInput.bloodtype === "Others" && (
+                    <input
+                      type="text"
+                      name="bloodtype"
+                      placeholder="Please specify your blood type"
+                      className="form-input-others"
+                      value={
+                        ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Others"].includes(clearanceInput.bloodtype)
+                          ? ""
+                          : clearanceInput.bloodtype
+                      }
+                      onChange={(e) =>
+                        setClearanceInput((prev: any) => ({
+                          ...prev,
+                          bloodtype: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  )}
                 </div>
+
 
                 <div className="form-group">
                   <label htmlFor="occupation" className="form-label">Occupation<span className="required">*</span></label>
@@ -1714,20 +1857,52 @@ const handleFileChange = (
                 placeholder="Enter Precinct Number" 
               />
               </div>
-            ):(docType ==="Temporary Business Permit"||docType ==="Business Permit")?(<></>)
-            :docType=="Construction Permit"?(<></>):(<div className="form-group">
-              <label htmlFor="citizenship" className="form-label">Citizenship<span className="required">*</span></label>
-              <input 
-                type="text"  
-                id="citizenship"  
-                name="citizenship"  
-                className="form-input"  
-                value={clearanceInput.citizenship}
-                onChange={handleChange}
-                required 
-                placeholder="Enter Citizenship"  
-              />
-            </div>  )}
+            ):(docType === "Temporary Business Permit" || docType === "Business Permit") ? (<></>)
+            : docType === "Construction Permit" ? (<></>) : (
+              <div className="form-group">
+                <label htmlFor="citizenship" className="form-label">Citizenship<span className="required">*</span></label>
+                <select
+                  id="citizenship"
+                  name="citizenship"
+                  className="form-input"
+                  value={
+                    ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(clearanceInput.citizenship)
+                      ? clearanceInput.citizenship
+                      : ""
+                  }
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>Select Citizenship</option>
+                  <option value="Filipino">Filipino</option>
+                  <option value="Dual Citizen">Dual Citizen</option>
+                  <option value="Naturalized">Naturalized</option>
+                  <option value="Others">Others</option>
+                </select>
+
+                {clearanceInput.citizenship === "Others" && (
+                  <input
+                    type="text"
+                    id="citizenship"
+                    name="citizenship"
+                    className="form-input-others"
+                    placeholder="Please specify your citizenship"
+                    value={
+                      ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(clearanceInput.citizenship)
+                        ? ""
+                        : clearanceInput.citizenship
+                    }
+                    onChange={(e) =>
+                      setClearanceInput((prev: any) => ({
+                        ...prev,
+                        citizenship: e.target.value,
+                      }))
+                    }
+                    required
+                  />
+                )}
+              </div>
+            )}
           
 
         
@@ -1768,17 +1943,47 @@ const handleFileChange = (
 
               <div className="form-group">
                 <label htmlFor="relationship" className="form-label">Relationship<span className="required">*</span></label>
-                <input 
-                  type="text"  
-                  id="relationship"  
-                  name="emergencyDetails.relationship"  
-                  className="form-input"  
-                  value={clearanceInput.emergencyDetails.relationship}
+                <select
+                  id="relationship"
+                  name="emergencyDetails.relationship"
+                  className="form-input"
+                  value={
+                    ["Father", "Mother", "Brother", "Sister", "Legal Guardian"].includes(clearanceInput.emergencyDetails.relationship)
+                      ? clearanceInput.emergencyDetails.relationship
+                      : clearanceInput.emergencyDetails.relationship === "Others"
+                        ? "Others"
+                        : ""
+                  }
                   onChange={handleChange}
-                  required 
-                  placeholder="Enter Relationship"  
-                />
+                  required
+                >
+                  <option value="" disabled>Select Relationship</option>
+                  <option value="Father">Father</option>
+                  <option value="Mother">Mother</option>
+                  <option value="Brother">Brother</option>
+                  <option value="Sister">Sister</option>
+                  <option value="Legal Guardian">Legal Guardian</option>
+                  <option value="Others">Others</option>
+                </select>
+
+                {clearanceInput.emergencyDetails.relationship === "Others" && (
+                  <input
+                    type="text"
+                    name="emergencyDetails.relationship"
+                    placeholder="Please specify the relationship"
+                    className="form-input-others"
+                    value={
+                      ["Father", "Mother", "Brother", "Sister", "Legal Guardian", "Others"].includes(clearanceInput.emergencyDetails.relationship)
+                        ? ""
+                        : clearanceInput.emergencyDetails.relationship
+                    }
+                    onChange={handleChange}
+                    required
+                  />
+                )}
               </div>
+
+
 
               <div className="form-group">
                 <label htmlFor="contactnumber" className="form-label">Contact Number<span className="required">*</span></label>
@@ -1868,7 +2073,11 @@ const handleFileChange = (
               name="requestorMrMs" 
               className="form-input" 
               required
-              value={clearanceInput.requestorMrMs}
+              value={
+                ["Mr.", "Ms."].includes(clearanceInput.requestorMrMs)
+                  ? clearanceInput.requestorMrMs
+                  : ""
+              }
               onChange={handleChange}
             >
               <option value="" disabled>Select Requestor's Title</option>
@@ -1876,6 +2085,7 @@ const handleFileChange = (
               <option value="Ms.">Ms.</option>
             </select>
           </div>
+
 
 
           <div className="form-group">
