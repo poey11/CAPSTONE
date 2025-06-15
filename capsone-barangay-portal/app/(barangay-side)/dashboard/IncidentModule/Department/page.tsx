@@ -275,7 +275,7 @@ useEffect(() => {
           <option value="0">Show All</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
-          <option value="10">Show 15</option>
+          <option value="15">Show 15</option>
         </select>
 
 
@@ -318,9 +318,10 @@ useEffect(() => {
                 <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}><img src="/Images/view.png" alt="View" /></button>
                 {isAuthorized && (
                   <>
+                   {incident.status !== "settled" && (
                     <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}> <img src="/Images/edit.png" alt="Edit" /></button>
+                  )}
                     <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}><img src="/Images/delete.png" alt="Delete" /></button>
-
                   </>
                 )}
               </div>

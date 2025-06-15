@@ -19,7 +19,7 @@ interface EmergencyDetails {
 }
 
 interface ClearanceInput {
-  [key: string]: string | number | File | null | EmergencyDetails | undefined;
+  [key: string]: string | number | File | boolean |null | EmergencyDetails | undefined;
   accountId: string;
   docType: string;
   requestId: string;
@@ -92,6 +92,8 @@ interface ClearanceInput {
   taxDeclaration: File | null;
   approvedBldgPlan: File | null;
   deathCertificate: File | null;
+  
+  isViewed: boolean;
 }
 
 
@@ -107,6 +109,7 @@ export default function Action() {
   const [clearanceInput, setClearanceInput] =  useState<ClearanceInput>({
     accountId: user?.uid || "Guest",
     docType: docType || "" ,
+    isViewed: false,
     requestId: "",
     purpose: "",
     dateRequested: new Date().toLocaleString(),
@@ -480,6 +483,7 @@ const handleFileChange = (
           purpose: clearanceInput.purpose,
           fullName: clearanceInput.fullName,
           dateOfResidency: clearanceInput.dateOfResidency,
+          isViewed: clearanceInput.isViewed,
           address: clearanceInput.address,
           ...(clearanceInput.purpose === "Residency" && {
             CYFrom: clearanceInput.CYFrom,
