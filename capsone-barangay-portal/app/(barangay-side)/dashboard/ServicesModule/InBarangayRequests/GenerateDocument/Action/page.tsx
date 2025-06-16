@@ -1,95 +1,102 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState, useEffect } from "react";
 import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayCertificate.css";
+import { getLocalDateString } from "@/app/helpers/helpers";
+import {customAlphabet} from "nanoid";
+import { addDoc, collection, doc, getDoc} from "firebase/firestore";
+import { db, storage, auth } from "@/app/db/firebase";
+import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
+import { useSession } from "next-auth/react";
+
 
 interface EmergencyDetails {
-  fullName: string;
-  address: string;
-  relationship: string;
-  contactNumber: string;
+  fullName?: string;
+  address?: string;
+  relationship?: string;
+  contactNumber?: string;
+}
+interface File {
+    name?: string;
+    preview?: string | undefined;
 }
 
 interface ClearanceInput {
-  docType: string;
-  requestId: string;
-  purpose: string;
-  dateRequested: string;
-  fullName: string;
-  appointmentDate: string;
-  dateOfResidency: string;
-  dateofdeath: string;
-  address: string;
-  toAddress: string;
-  businessLocation: string;
-  businessNature: string;
-  noOfVechicles: string;
-  vehicleMake: string;
-  vehicleType: string;
-  vehiclePlateNo: string;
-  vehicleSerialNo: string;
-  vehicleChassisNo: string;
-  vehicleEngineNo: string;
-  vehicleFileNo: string;
-  estimatedCapital: string;
-  businessName: string;
-  birthday: string;
-  age: string;
-  gender: string;
-  civilStatus: string;
-  contact: string;
-  typeofconstruction: string;
-  typeofbldg: string;
-  othersTypeofbldg: string;
-  projectName: string;
-  citizenship: string;
-  educationalAttainment: string;
-  course: string;
-  isBeneficiary: string;
-  birthplace: string;
-  religion: string;
-  nationality: string;
-  height: string;
-  weight: string;
-  bloodtype: string;
-  occupation: string;
-  precinctnumber: string;
-  emergencyDetails: EmergencyDetails;
-  requestorMrMs: string;
-  requestorFname: string;
-  partnerWifeHusbandFullName: string;
-  cohabitationStartDate: string;
-  cohabitationRelationship: string;
-  wardFname: string;
-  wardRelationship: string;
-  guardianshipType: string;
-  CYFrom: string;
-  CYTo: string;
-  attestedBy: string;
-  goodMoralPurpose: string;
-  goodMoralOtherPurpose: string;
-  noIncomePurpose: string;
-  noIncomeChildFName: string;
-  deceasedEstateName: string;
-  estateSince: string;
-  signaturejpg: File | null;
-  barangayIDjpg: File | null;
-  validIDjpg: File | null;
-  letterjpg: File | null;
-  copyOfPropertyTitle: File | null;
-  dtiRegistration: File | null;
-  isCCTV: boolean | null;
-  taxDeclaration: File | null;
-  approvedBldgPlan: File | null;
-  deathCertificate: File | null;
+    accID?: string;
+    createdBy?: string;
+    docType?: string;
+    requestId?: string;
+    purpose?: string;
+    createdAt?: string;
+    fullName?: string;
+    appointmentDate?: string;
+    dateOfResidency?: string;
+    dateofdeath?: string;
+    address?: string;
+    toAddress?: string;
+    businessLocation?: string;
+    businessNature?: string;
+    noOfVechicles?: string;
+    vehicleMake?: string;
+    vehicleType?: string;
+    vehiclePlateNo?: string;
+    vehicleSerialNo?: string;
+    vehicleChassisNo?: string;
+    vehicleEngineNo?: string;
+    vehicleFileNo?: string;
+    estimatedCapital?: string;
+    businessName?: string;
+    birthday?: string;
+    age?: string;
+    gender?: string;
+    civilStatus?: string;
+    contact?: string;
+    typeofconstruction?: string;
+    typeofbldg?: string;
+    othersTypeofbldg?: string;
+    projectName?: string;
+    citizenship?: string;
+    educationalAttainment?: string;
+    course?: string;
+    isBeneficiary?: string;
+    birthplace?: string;
+    religion?: string;
+    nationality?: string;
+    height?: string;
+    weight?: string;
+    bloodtype?: string;
+    occupation?: string;
+    precinctnumber?: string;
+    emergencyDetails?: EmergencyDetails;
+    requestorMrMs?: string;
+    requestorFname?: string;
+    partnerWifeHusbandFullName?: string;
+    cohabitationStartDate?: string;
+    cohabitationRelationship?: string;
+    wardFname?: string;
+    wardRelationship?: string;
+    guardianshipType?: string;
+    CYFrom?: string;
+    CYTo?: string;
+    attestedBy?: string;
+    goodMoralPurpose?: string;
+    goodMoralOtherPurpose?: string;
+    noIncomePurpose?: string;
+    noIncomeChildFName?: string;
+    deceasedEstateName?: string;
+    estateSince?: string;
+    docsRequired: File[]; // Changed to File[] to match the file structure
+    status?: string; // Optional, can be added if needed
+    statusPriority?: number; // Optional, can be added if 
+    reqType?: string; // Optional, can be added if needed
 }
-
 
 
 
 export default function action() {
-
+    const { data: session } = useSession();
+    const user = session?.user;
     const router = useRouter();
     const searchParam = useSearchParams();
     const docType = searchParam.get("docType");
@@ -97,10 +104,53 @@ export default function action() {
     const [showCreatePopup, setShowCreatePopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
-    const [clearanceInput, setClearanceInput] = useState<ClearanceInput>();
+    const [clearanceInput, setClearanceInput] = useState<ClearanceInput>({
+        accID:"INBRGY-REQ",
+        reqType: "InBarangay",
+        docType: docType || "",
+        status: "Pending",
+        createdAt: new Date().toLocaleString(),
+        createdBy: user?.id || "",
+        statusPriority: 1, // Default priority for pending requests
+        docsRequired: [],
+    });
+    const [maxDate, setMaxDate] = useState<any>()
 
+    useEffect(() => {
+        setMaxDate(getLocalDateString(new Date()));
+    },[]);
 
+    const [number,setNumber] = useState(0);
+    useEffect(() => {
+        const fetchNumber = async () => {
+            try {
+                const count = await getSpecificCountofCollection("ServiceRequests", "reqType", "InBarangay");
+                setNumber(count || 0);
+            } catch (error) {
+                console.error("Error fetching number:", error);
+            }
+        }
+        fetchNumber();
 
+    },[])
+
+    useEffect(() => {
+        const getRequestId = () => {
+            const alphabet =  `ABCDEFGHIJKLMNOPQRSTUVWXYZ`;
+            const randomId = customAlphabet(alphabet, 6);
+            const requestId = randomId();
+            const nos = String(number+1).padStart(4, '0'); // Ensure the number is 4 digits
+            let format = `${requestId}-${nos}`;
+            setClearanceInput((prev) => ({
+                ...prev,
+                docType: docType || "",
+                requestId: format,
+            }));
+            setPopupMessage(`Request ID: ${format}`);
+        }
+        getRequestId();
+
+    }, [number]);
 
     const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
         container1: [],
@@ -123,7 +173,16 @@ export default function action() {
             ...prevFiles,
             [container]: [...prevFiles[container], ...fileArray], // Append new files to the specified container
           }));
+            setClearanceInput((prevFiles) => {
+                if (!prevFiles) return prevFiles;
+                return {
+                ...prevFiles,
+                docsRequired: [...(prevFiles.docsRequired || []), ...fileArray], // Update clearanceInput with new files
+                };
+            });
         }
+
+
     };
   
       // Handle file deletion for any container
@@ -132,6 +191,13 @@ export default function action() {
           ...prevFiles,
           [container]: prevFiles[container].filter((file) => file.name !== fileName),
         }));
+        setClearanceInput((prevFiles) => {
+          if (!prevFiles) return prevFiles;
+          return {
+            ...prevFiles,
+            docsRequired: prevFiles.docsRequired.filter((file) => file.name !== fileName), // Update clearanceInput if needed
+          };
+        });    
     };
 
     
@@ -148,26 +214,57 @@ export default function action() {
                 // Hide the popup after 3 seconds
                 setTimeout(() => {
                     setShowPopup(false);
-                    router.push("/dashboard/ServicesModule/InBarangayRequests");
+                    //router.push("/dashboard/ServicesModule/InBarangayRequests");
                 }, 3000);
     };
 
-    const handleCreateClick = async () => {
+    const handleUploadClick = async() => {
+        try {
+            const docRef = collection(db, "ServiceRequests");
+            const docData ={
+                ...clearanceInput,
+                requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`
+            }
+            console.log("Document Data:", docData);
+            const doc = await addDoc(docRef, docData);
+            console.log("Document written with ID: ", docData.requestId, " - ", doc.id);
+        } catch (error) {
+            console.error("Error:", error);
+        }       
+
+    }
+
+    const handleConfirmClick = async() => {
         setShowCreatePopup(true);
     }
 
+    const handleSubmit = (e:React.FormEvent) => {
+        e.preventDefault();
+        if(!files["container1"]||files.container1.length === 0) {
+            setPopupMessage("Please upload at least one file.");
+            setShowPopup(true);
+            setTimeout(() => {
+                setShowPopup(false);
+            }, 3000);
+            return;
+        }
+        
+        handleConfirmClick();
+    }
+
+
     const confirmCreate = async () => {
         setShowCreatePopup(false);
-
-                setPopupMessage("Barangay Certificate created successfully!");
-                setShowPopup(true);
-
-                // Hide the popup after 3 seconds
-                setTimeout(() => {
-                    setShowPopup(false);
-                    router.push("/dashboard/ServicesModule/InBarangayRequests/View/BarangayCertificate");
-                }, 3000);
-
+        setPopupMessage(`${docType} created successfully!`);
+        setShowPopup(true);
+        console.log("Files:", files);
+        console.log("Clearance Input:", clearanceInput);
+        handleUploadClick();
+        // Hide the popup after 3 seconds
+        setTimeout(() => {
+            setShowPopup(false);
+            //router.push("/dashboard/ServicesModule/InBarangayRequests/View/BarangayCertificate");
+        }, 3000);
                 
     };
 
@@ -223,32 +320,32 @@ export default function action() {
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/>
                         </button>
 
-                        <h1>{docType}</h1>
-                    </div>
-
-                    <div className="action-btn-section">
-                        <button className="discard-btn" onClick={handleDiscardClick}>Discard</button>
-                        <button className="save-btn" onClick={handleCreateClick}>Create</button>
+                        <h1>{docType} {clearanceInput.requestId}</h1>
                     </div>
                 </div>
                 
                 <hr/>
+                <form  onSubmit={handleSubmit}>
+                    <div className="action-btn-section">
+                        <button type="button" className="discard-btn" onClick={handleDiscardClick}>Discard</button>
+                        <button type="submit" className="save-btn" >Create</button>
+                    </div>
+                
+                    <div className="main-fields-container">
+                        <div className="main-fields-container-section1">
+                            <div className="section-left">
+                                <div className="fields-container">
+                                    <div className="fields-section">
+                                        <p>Purpose</p>
+                                        <select 
+                                            id="purpose" 
+                                            name="purpose" 
+                                            className="input-field" 
+                                            required
+                                            value ={clearanceInput?.purpose || ""}
+                                            onChange={handleChange} // Handle change to update state
 
-                <div className="main-fields-container">
-                    <div className="main-fields-container-section1">
-                        <div className="section-left">
-                            <div className="fields-container">
-                                <div className="fields-section">
-                                    <p>Purpose</p>
-                                    <select 
-                                        id="purpose" 
-                                        name="purpose" 
-                                        className="input-field" 
-                                        required
-                                        value ={clearanceInput?.purpose || ""}
-                                        onChange={handleChange} // Handle change to update state
-                                        
-                                    >
+                                        >
                                         <option value="" disabled>Select purpose</option>
                                             {docType === "Barangay Certificate" ? (<>
                                               <option value="Residency">Residency</option>
@@ -284,215 +381,298 @@ export default function action() {
                                               <option value="New">New</option>
                                               <option value="Renewal">Renewal</option>
                                             </>)}
-                                    </select>
+                                        </select>
+                                    </div>
+
                                 </div>
 
-                            </div>
-
-                            </div>
-
-                            <div className="section-right">
-                            <div className="fields-container">
-                                <div className="fields-section">
-                                    <p>Resident Since</p>
-                                    <input 
-                                        type="date" 
-                                        className="input-field" 
-                                        placeholder="Select Date From" 
-                                    />
                                 </div>
-                                
+
+                                <div className="section-right">
+                                <div className="fields-container">
+                                    <div className="fields-section">
+                                        <p>Resident Since</p>
+                                        <input 
+                                            value ={clearanceInput?.dateOfResidency || ""}
+                                            onChange={handleChange} // Handle change to update state
+                                            required
+                                            type="date"
+                                            id="dateOfResidency"
+                                            name="dateOfResidency"
+                                            className="input-field" 
+                                            max = {maxDate}
+                                            onKeyDown={(e) => e.preventDefault()}
+                                        />
+                                    </div>
+                                            
+                                </div>
                             </div>
+                                            
                         </div>
-                            
-                    </div>
 
-                    <div className="main-fields-container-section2">
-                        <div className="fields-container">
-                            <div className="fields-section">
-                                <p>Other Purpose</p>
+                        <div className="main-fields-container-section2">
+                            <div className="fields-container">
+                                {/* <div className="fields-section">
+                                    <p>Other Purpose</p>
+                                        <input 
+                                            type="text" 
+                                            className="headline" 
+                                            placeholder="Other Purpose" 
+                                        />
+                                </div> */}
+
+                                <div className="fields-section">
+                                    <p>Full Name</p>
                                     <input 
+                                        value ={clearanceInput?.fullName || ""}
+                                        onChange={handleChange} // Handle change to update state
+                                        required
+                                        id="fullName"
+                                        name="fullName"
                                         type="text" 
                                         className="headline" 
-                                        placeholder="Other Purpose" 
-                                    />
-                            </div>
-
-                            <div className="fields-section">
-                                <p>Full Name</p>
-                                <input 
-                                    type="text" 
-                                    className="headline" 
-                                    placeholder="Full Name" 
-                                />
-                            </div>
-
-                            <div className="fields-section">
-                                <p>Address</p>
-                                <input 
-                                    type="text" 
-                                    className="headline" 
-                                    placeholder="Address" 
-                                />
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div className="main-fields-container-section3">
-                        <div className="section-left">
-                            <div className="fields-container">
-                                <div className="fields-section">
-                                    <p>Age</p>
-                                    <input 
-                                        type="number"  // Ensures the input accepts only numbers
-                                        id="age"  
-                                        name="age"  
-                                        className="input-field" 
-                                        required 
-                                        min="1"  // Minimum age (you can adjust this as needed)
-                                        max="150"  // Maximum age (you can adjust this as needed)
-                                        placeholder="Enter Age"  
-                                        step="1"  // Ensures only whole numbers can be entered
+                                        placeholder="Full Name" 
                                     />
                                 </div>
 
                                 <div className="fields-section">
-                                    <p>Civil Status</p>  
-                                    <select 
-                                        id="civilstatus" 
-                                        name="civilstatus" 
-                                        className="input-field" 
-                                        required
-                                        defaultValue=""  
-                                    >
-                                        <option value="" disabled>Select civil status</option>
-                                        <option value="Single">Single</option>
-                                        <option value="Married">Married</option>
-                                        <option value="Widow">Widow</option>
-                                        <option value="Separated">Separated</option>
-                                    </select>
-                                </div>
-
-                                <div className="fields-section">
-                                    <p>Citizenship</p>
+                                    <p>Address</p>
                                     <input 
                                         type="text" 
-                                        className="input-field" 
+                                        value ={clearanceInput?.address || ""}
+                                        onChange={handleChange} // Handle change to update state
+                                        required
+                                        id="address"
+                                        name="address"
+                                        className="headline" 
                                         placeholder="Address" 
                                     />
                                 </div>
 
                             </div>
+                        </div>
 
+                        <div className="main-fields-container-section3">
+                            <div className="section-left">
+                                <div className="fields-container">
+                                    <div className="fields-section">
+                                        <p>Age</p>
+                                        <input 
+                                            type="number"  // Ensures the input accepts only numbers
+                                            id="age"  
+                                            name="age" 
+                                            value ={clearanceInput?.age || ""}
+                                            onChange={handleChange} // Handle change to update state
+                                            className="input-field" 
+                                            required 
+                                            min="1"  // Minimum age (you can adjust this as needed)
+                                            max="150"  // Maximum age (you can adjust this as needed)
+                                            placeholder="Enter Age"  
+                                            step="1"  // Ensures only whole numbers can be entered
+                                            disabled={true}  // Disable input to prevent manual changes
+                                        />
+                                    </div>
+
+                                    <div className="fields-section">
+                                        <p>Civil Status</p>  
+                                        <select 
+                                            value ={clearanceInput?.civilStatus}
+                                            onChange={handleChange}
+                                            id="civilStatus" 
+                                            name="civilStatus" 
+                                            className="input-field" 
+                                            required
+                                        >
+                                            <option value="" disabled>Select civil status</option>
+                                            <option value="Single">Single</option>
+                                            <option value="Married">Married</option>
+                                            <option value="Widow">Widow</option>
+                                            <option value="Separated">Separated</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="fields-section">
+                                        <p>Citizenship</p>
+                                        <input 
+                                            value ={clearanceInput?.citizenship || ""}
+                                            onChange={handleChange} 
+                                            required
+                                            type="text" 
+                                            id="citizenship"
+                                            name="citizenship"
+                                            className="input-field" 
+                                            placeholder="Address" 
+                                        />
+                                    </div>
+
+                                </div>
+
+                                </div>
+
+                            <div className="section-right">
+                                <div className="fields-container">
+                                    <div className="fields-section">
+                                        <p>Birthday</p>
+                                        <input 
+                                            type="date" 
+                                            className="input-field" 
+                                            placeholder="Select Date From" 
+                                            id="birthday"
+                                            name="birthday"
+                                            value ={clearanceInput?.birthday || ""}
+                                            onChange={handleChange} // Handle change to update state
+                                            required
+                                            max={maxDate}  // Restrict the date to today or earlier
+                                            onKeyDown={(e) => e.preventDefault()}  // Prevent manual input
+
+                                        />    
+                                    </div>
+                                    <div className="fields-section">
+                                        <p>Gender</p>
+                                        <select 
+                                            id="gender" 
+                                            name="gender" 
+                                            className="input-field" 
+                                            required
+                                            defaultValue=""  
+                                            value ={clearanceInput?.gender}
+                                            onChange={handleChange} // Handle change to update state
+                                        >
+                                            <option value="" disabled>Select gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="fields-section">
+                                        <p>Contact Number</p>
+                                        <input 
+                                            type="tel"  
+                                            id="contact"  
+                                            name="contact"
+                                            value ={clearanceInput?.contact || ""}
+                                            onChange={(e) => {
+                                              const input = e.target.value;
+                                              // Only allow digits and limit to 11 characters
+                                              if (/^\d{0,11}$/.test(input)) {
+                                                handleChange(e);
+                                              }
+                                            }}
+                                            className="input-field" 
+                                            required 
+                                            maxLength={11}  
+                                            pattern="^[0-9]{11}$" 
+                                            placeholder="Please enter a valid 11-digit contact number" 
+                                            title="Please enter a valid 11-digit contact number. Format: 09XXXXXXXXX"        
+                                            />
+                                    </div>
+                                </div>
                             </div>
 
-                        <div className="section-right">
+                        </div>
+
+                        <div className="main-fields-container-section2">
                             <div className="fields-container">
+                                
+
                                 <div className="fields-section">
-                                    <p>Birthday</p>
-                                    <input 
-                                        type="date" 
-                                        className="input-field" 
-                                        placeholder="Select Date From" 
-                                    />    
-                                </div>
-                                <div className="fields-section">
-                                    <p>Gender</p>
+                                    <p>Requestor's Title</p>
                                     <select 
-                                        id="gender" 
-                                        name="gender" 
-                                        className="input-field" 
+                                        id="requestorMrMs" 
+                                        name="requestorMrMs" 
+                                        className="headline" 
                                         required
-                                        defaultValue=""  
+                                        value ={clearanceInput?.requestorMrMs || ""}
+                                        onChange={handleChange} // Handle change to update state
                                     >
-                                        <option value="" disabled>Select gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
+                                        <option value="" disabled>Select title</option>
+                                        <option value="Mr.">Mr.</option>
+                                        <option value="Ms.">Ms.</option>
                                     </select>
                                 </div>
 
                                 <div className="fields-section">
-                                    <p>Contact Number</p>
+                                    <p>Requestor's Name</p>
                                     <input 
-                                        type="tel"  
-                                        id="contactnumber"  
-                                        name="contactnumber"  
-                                        className="input-field" 
-                                        required 
-                                        placeholder="Enter Contact Number"  
-                                        maxLength={10}  // Restrict the input to 10 characters as a number
-                                        pattern="^[0-9]{10}$"  // Regular expression to enforce a 10-digit number format
-                                        title="Please enter a valid 10-digit contact number"  // Tooltip for invalid input
+                                        type="text" 
+                                        value ={clearanceInput?.requestorFname || ""}
+                                        onChange={handleChange} // Handle change to update state
+                                        required
+                                        id="requestorFname"
+                                        name="requestorFname"
+                                        className="headline" 
+                                        placeholder="Enter Requestor's Name" 
                                     />
                                 </div>
+
                             </div>
                         </div>
 
-                    </div>
+                        <div className="main-fields-container-section4">
+                            <p>Requirements</p>
+                            <div className="requirements-file-upload-container">
+                                <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
+                                    <input
+                                    id="file-upload1"
+                                    type="file"
+                                    className="file-upload-input" 
+                                    multiple
+                                    accept=".jpg,.jpeg,.png"
+                                    name="file-upload1" // Use the same name as in the clearanceInput state
+                                                                            
+                                    onChange={handleFileChange('container1')} // Handle file selection
+                                    />
 
-                    <div className="main-fields-container-section4">
-                        <p>Requirements</p>
-                        <div className="requirements-file-upload-container">
-                            <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
-                                <input
-                                id="file-upload1"
-                                type="file"
-                                className="file-upload-input" 
-                                multiple
-                                accept=".jpg,.jpeg,.png"
-                                required
-                                onChange={handleFileChange('container1')} // Handle file selection
-                                />
-
-                            <div className="uploadedFiles-container">
-                                {/* Display the file names with image previews */}
-                                {files.container1.length > 0 && (
-                                    <div className="file-name-image-display">
-                                        <ul>
-                                            {files.container1.map((file, index) => (
-                                                <div className="file-name-image-display-indiv" key={index}>
-                                                    <li className="file-item"> 
-                                                        {/* Display the image preview */}
-                                                        {file.preview && (
-                                                            <div className="filename-image-container">
-                                                                <img
-                                                                    src={file.preview}
-                                                                    alt={file.name}
-                                                                    className="file-preview"
-                                                                />
+                                <div className="uploadedFiles-container">
+                                    {/* Display the file names with image previews */}
+                                    {files.container1.length > 0 && (
+                                        <div className="file-name-image-display">
+                                            <ul>
+                                                {files.container1.map((file, index) => (
+                                                    <div className="file-name-image-display-indiv" key={index}>
+                                                        <li className="file-item"> 
+                                                            {/* Display the image preview */}
+                                                            {file.preview && (
+                                                                <div className="filename-image-container">
+                                                                    <img
+                                                                        src={file.preview}
+                                                                        alt={file.name}
+                                                                        className="file-preview"
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                            <span className="file-name">{file.name}</span>  
+                                                            <div className="delete-container">
+                                                                {/* Delete button with image */}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleFileDelete('container1', file.name)}
+                                                                    className="delete-button"
+                                                                >
+                                                                    <img
+                                                                        src="/images/trash.png"  
+                                                                        alt="Delete"
+                                                                        className="delete-icon"
+                                                                    />
+                                                                </button>
                                                             </div>
-                                                        )}
-                                                        <span className="file-name">{file.name}</span>  
-                                                        <div className="delete-container">
-                                                            {/* Delete button with image */}
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => handleFileDelete('container1', file.name)}
-                                                                className="delete-button"
-                                                            >
-                                                                <img
-                                                                    src="/images/trash.png"  
-                                                                    alt="Delete"
-                                                                    className="delete-icon"
-                                                                />
-                                                            </button>
-                                                        </div>
-                                                    </li>
-                                                </div>
-                                            ))}  
-                                        </ul>
-                                    </div>
-                                )}
+                                                        </li>
+                                                    </div>
+                                                ))}  
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+
                             </div>
 
                         </div>
 
-                    </div>
 
 
-
-                </div>
+                        </div>
+                
+                </form>
                 {showDiscardPopup && (
                         <div className="confirmation-popup-overlay">
                             <div className="confirmation-popup">

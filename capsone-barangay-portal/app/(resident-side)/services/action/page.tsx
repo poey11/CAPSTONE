@@ -1521,6 +1521,7 @@ const handleFileChange = (
                 max="150"  
                 placeholder="Enter Age"  
                 step="1" 
+                disabled={true}
               />
             </div>
 

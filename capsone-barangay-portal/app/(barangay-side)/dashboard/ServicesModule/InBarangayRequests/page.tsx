@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import "@/CSS/barangaySide/ServicesModule/InBarangayRequests.css";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 
 
@@ -13,10 +13,10 @@ import { db } from "@/app/db/firebase";
     useEffect(() => {
       try {
         const Collection = query(
-          collection(db, "InBarangayServiceRequests"),
+          collection(db,"ServiceRequests"),
+          where("reqType", "==", "InBarangay"), // Filter for In Barangay requests
           orderBy("createdAt", "desc") // First, sort by latest
-        );
-      
+        );      
         const unsubscribe = onSnapshot(Collection, (snapshot) => {
           let reports: any[] = snapshot.docs.map((doc) => ({
             id: doc.id,
@@ -34,6 +34,8 @@ import { db } from "@/app/db/firebase";
           });
         
           setRequestData(reports);
+          console.log(requestData);
+
         });
       
         return unsubscribe;
@@ -41,7 +43,6 @@ import { db } from "@/app/db/firebase";
         console.log(error.message);
       }
     }, []);
-
 
 
     const handleGenerateDocument = () => {

@@ -144,7 +144,7 @@ const getCountofCollection = async (collectionString: string) => {
     try{
         const collectionRef = collection(db, collectionString);
         const collectionCount =  await getCountFromServer(collectionRef);
-        return collectionCount;
+        return collectionCount.data().count;
 
     }   
     catch(error:String|any){
