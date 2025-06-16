@@ -6,6 +6,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 
 interface FileData {
@@ -17,6 +18,8 @@ const ReportsPage = () => {
 
   // rbac
   const { data: session } = useSession();
+
+   const router = useRouter();
 
 
   // for residents
@@ -3550,142 +3553,173 @@ const ReportsPage = () => {
     }, 3000);
   };
 
+    const handleBack = () => {
+      router.back();
+    };
+
+
+
+
+      const [activeSection, setActiveSection] = useState("resident");
+
+const ITEMS_PER_PAGE = 6;
+const [currentPage, setCurrentPage] = useState(0);
+
+const startIndex = currentPage * ITEMS_PER_PAGE;
+const paginatedFiles = files.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+
+const handleNextPage = () => {
+  if ((currentPage + 1) * ITEMS_PER_PAGE < files.length) {
+    setCurrentPage((prev) => prev + 1);
+  }
+};
+
+const handleBackPage = () => {
+  if (currentPage > 0) {
+    setCurrentPage((prev) => prev - 1);
+  }
+};
+
   return (
-    <div className="report-main-container">
-      <h1 className="reports-title">Reports Module</h1>
+    <div className="downloadable-main-container">
+    
 
-      <div className="reports-section">
-        <div className="report-card">
-          <h2 className="report-title">Generate Reports</h2>
-          <div className="Option-container">
-            <select
-              className="featuredStatus"
-              onChange={handleModuleChange}
-              required
-            >
-              <option value="">Select Module...</option>
-                  {session?.user?.role === "Barangay Official" &&
-                    (
-                      session?.user?.position === "Secretary" ||
-                      session?.user?.position === "Assistant Secretary" ||
-                      session?.user?.position === "Punong Barangay"
-                    ) && (
-                      <option value="Resident Module">Resident Module</option>
-                  )}
+      <div className="downloadble-report-main-content">
 
-                  {session?.user?.role === "Barangay Official" &&
-                    (
-                      session?.user?.position === "LF Staff" ||
-                      session?.user?.position === "Assistant Secretary" ||
-                      session?.user?.position === "Secretary" ||
-                      session?.user?.position === "Punong Barangay"
-                    ) && (
-                      <option value="Incident Module">Incident Module</option>
-                  )}
+          <div className="downloadble-report-main-section1 ">
 
-                  {session?.user?.role === "Barangay Official" &&
-                    (
-                      session?.user?.position === "Secretary" ||
-                      session?.user?.position === "Punong Barangay" ||
-                      session?.user?.position === "Assistant Secretary" ||
-                      session?.user?.position === "Admin Staff"
-                    ) && (
-                      <option value="Services Module">Services Module</option>
-                  )}
-                  {session?.user?.role === "Barangay Official" && (
-                      <option value="Programs Module">Programs Module</option>
-                  )}
-            </select>
+            <div className="downloadble-report-main-section1-left">
+                <button onClick={handleBack}>
+                  <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                </button>
+
+                 <h1> Downloadble Forms</h1>
+            </div>
+
           </div>
 
-          {selectedModule === "Resident Module" && (
-            <>
-              <button onClick={handleRegistrationSummaryPDF} disabled={loadingRegistrationSummary} className="report-button">
-                {loadingRegistrationSummary ? "Generating..." : "Generate Resident Registration Summary Report"}
-              </button>
-              <button onClick={handleGenerateSeniorPDF} disabled={loadingResidentSeniorDemographic} className="report-button">
-                {loadingResidentSeniorDemographic ? "Generating..." : "Generate Resident Demographic Report(Senior Citizens)"}
-              </button>
-              <button onClick={handleGenerateStudentPDF} disabled={loadingResidentStudentDemographic} className="report-button">
-                {loadingResidentStudentDemographic ? "Generating..." : "Generate Resident Demographic Report(Students/Minors)"}
-              </button> 
-              <button onClick={handleGeneratePwdPDF} disabled={loadingResidentPWDDemographic} className="report-button">
-                {loadingResidentPWDDemographic ? "Generating..." : "Generate Resident Demographic Report(PWD)"}
-              </button>   
-              <button onClick={handleGenerateSoloParentPDF} disabled={loadingResidentSoloParentDemographic} className="report-button">
-                {loadingResidentSoloParentDemographic ? "Generating..." : "Generate Resident Demographic Report(Solo Parents)"}
-              </button>    
-              <button onClick={handleGenerateResidentPDF} disabled={loadingMasterResident} className="report-button">
-                {loadingMasterResident ? "Generating..." : "Generate Master Resident Inhabitant Record"}
-              </button>
-              <button onClick={handleGenerateEastResidentPDF} disabled={loadingResidentSeniorDemographic} className="report-button">
-                {loadingEastResident ? "Generating..." : "Generate East Resident Inhabitant Record"}
-              </button>
-              <button onClick={handleGenerateWestResidentPDF} disabled={loadingWestResident} className="report-button">
-                {loadingWestResident ? "Generating..." : "Generate West Resident Inhabitant Record"}
-              </button>
-              <button onClick={handleGenerateSouthResidentPDF} disabled={loadingSouthResident} className="report-button">
-                {loadingSouthResident ? "Generating..." : "Generate South Resident Inhabitant Record"}
-              </button>
-              <button onClick={handleGenerateKasambahayPDF} disabled={loadingKasambahay} className="report-button">
-                {loadingKasambahay ? "Generating..." : "Generate Kasambahay Masterlist"}
-              </button>
-              <button onClick={handleGenerateJobSeekerPDF} disabled={loadingJobSeeker} className="report-button">
-                {loadingJobSeeker ? "Generating..." : "Generate First-Time Job Seeker List"}
-              </button>       
-              </>
-          )}
 
-          {selectedModule === "Incident Module" && (
-            <>
-              <button onClick={handleGenerateIncidentSummaryPDF} disabled={loadingIncidentSummary} className="report-button">
-                {loadingIncidentSummary ? "Generating..." : "All Incidents Summary"}
-              </button>      
-              <button onClick={handleGenerateIncidentStatusSummaryPDF} disabled={loadingIncidentStatuses} className="report-button">
-                {loadingIncidentStatuses ? "Generating..." : "Incident Status Summary"}
-              </button>             
-          {(session?.user?.department === "Lupon" || session?.user?.position === "Assistant Secretary") && (
-            <>
-              <button onClick={handleGenerateLuponSettledPDF} disabled={loadingLuponSettledReport} className="report-button">
-                {loadingLuponSettledReport ? "Generating..." : "Lupon Settled Report"}
-              </button>   
-              <button onClick={handleGenerateLuponPendingPDF} disabled={loadingLuponPendingReport} className="report-button">
-                {loadingLuponPendingReport ? "Generating..." : "Lupon Pending Report"}
-              </button>   
-            </>
-          )}
-          {(session?.user?.department === "VAWC" || session?.user?.position === "Assistant Secretary") && (
-            <>
-              <button onClick={handleGenerateVAWCPDF} disabled={loadingVAWCReport} className="report-button">
-                {loadingVAWCReport ? "Generating..." : "Monthly VAWC Report"}
-              </button>      
-            </>
-          )}
-          {(session?.user?.department === "GAD" || session?.user?.department === "BCPC" || session?.user?.position === "Assistant Secretary")  && (
-            <>
-              <button className="report-button">GADRCO Quarterly Monitoring Report</button>
-            </>
-          )}
+          <div className="downloadble-report-header-body">
 
-        </>
+
+
+
+            <div className="downloadble-report-top-section">
+              <div className="downloadble-report-info-toggle-wrapper">
+                 {["resident" ].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "resident" && "Resident Module"}
+                     
+                    </button>
+                  ))}
+
+              </div>
+
+            </div>
+
+
+
+            <div className="downloadble-report-header-body-bottom-section">
+
+                  <div className="downloadble-forms-info-main-container">
+
+                    <div className="pagination-button-wrapper">
+                      <button
+                        className="pagination-btn"
+                        onClick={handleBackPage}
+                        disabled={currentPage === 0}
+                      >
+                        <img src="/Images/back.png" alt="Back" className="pagination-icon" />
+                      </button>
+                    </div>
+
+                    <div className="downloadble-forms-grid">
+                    {paginatedFiles.map((file, index)=> (
+                        <div className="form-card" key={index}>
+                          <div className="form-icon-label">
+                            <img src="/images/form.png" alt="Form Icon" />
+                            <span>{file.name.replace(".docx", "")}</span>
+                          </div>
+                          <div className="form-buttons">
+                            <button
+                              className="download-btn"
+                              onClick={() => window.location.href = file.url}
+                            >
+                              Download
+                            </button>
+                            <button
+                              className="delete-btn"
+                              onClick={() => deleteFile(file.name)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="pagination-button-wrapper">
+                      <button
+                        className="pagination-btn"
+                        onClick={handleNextPage}
+                        disabled={(currentPage + 1) * ITEMS_PER_PAGE >= files.length}
+                      >
+                          <img src="/Images/next.png" alt="Next" className="pagination-icon" />
+                      </button>
+                    </div>
+
+
+
+                  </div>
+
+            </div>
+
+
+
+
+
+          </div>
+
+
+    
+</div>
+
+
+
+      {/* Success Pop-up */}
+      {showSuccessPopup && (
+        <div className={`popup-overlay show`}>
+          <div className="popup">
+              <p>{popupMessage}</p>
+          </div>
+        </div>
       )}
 
-          {selectedModule === "Services Module" && (
-            <>
-              <button className="report-button">Most Requested Services Lists</button>
-            </>
-          )}
-
-          {selectedModule === "Programs Module" && (
-            <>
-              <button className="report-button">Program Participation Report</button>
-              <button className="report-button">Program Completion Status Report</button>
-            </>
-          )}
+      {/* Error Pop-up */}
+      {showErrorPopup && (
+        <div className={`popup-overlay show`}>
+          <div className="popup">
+              <p>{popupMessage}</p>
+          </div>
         </div>
+      )}
+
+
+
+{/*
+
+
+
+  
 
         <div className="report-card">
-          <h2 className="report-title">Downloadable Forms</h2>
+       
        
       <div className="forms-section">
 
@@ -3729,6 +3763,10 @@ const ReportsPage = () => {
 
     </div>
 
+ </div>
+*/}
+
+{/*
 <h2 className="report-title">Upload a File</h2>  
 
 <div className="upload-section">
@@ -3755,7 +3793,7 @@ const ReportsPage = () => {
                             
                               <span>{selectedUploadFile.name}</span>  
                               <div className="delete-container">
-                                  {/* Delete button with image */}
+                                 
                                   <button
                                       type="button"
                                       onClick={onDeleteFile} // Call the delete function
@@ -3783,31 +3821,21 @@ const ReportsPage = () => {
           </button>
       </div>
 
-</div>             
+</div>    
+
+
+*/}
+
+
+
+
+    </div>
+
           
-        </div>
+     
 
         
-      </div>
-
-      {/* Success Pop-up */}
-      {showSuccessPopup && (
-        <div className={`popup-overlay show`}>
-          <div className="popup">
-              <p>{popupMessage}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Error Pop-up */}
-      {showErrorPopup && (
-        <div className={`popup-overlay show`}>
-          <div className="popup">
-              <p>{popupMessage}</p>
-          </div>
-        </div>
-      )}
-    </div>
+  
   );
 };
 

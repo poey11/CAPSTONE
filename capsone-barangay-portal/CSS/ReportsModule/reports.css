@@ -306,3 +306,220 @@
   .input-field option {
       color: rgba(0, 0, 0, 0.4); 
   }
+
+
+
+
+
+
+
+
+
+  /*
+    DOWNLOADABLE FORMS
+  */
+
+
+
+  .downloadable-main-container {
+    width: 100%;
+ height: 100vh;
+ background-color: #F0F2F8; 
+ margin-left: 3rem; 
+ padding-top: 11.2%;
+ padding-bottom:30px;
+  }
+
+  .downloadble-report-main-content {
+    display: flex;
+  flex-direction: column;
+  width: 80%;
+  border-radius: 1rem;
+  border: 2px solid rgba(36, 53, 76, 0.7);
+  margin:  auto; 
+  background-color: #ffffff;
+  overflow: hidden; 
+  height: 600px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  .downloadble-report-main-section1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #214666;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+ .downloadble-report-main-section1 h1{
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.downloadble-report-main-section1-left {
+   display: flex;
+  align-items: center;
+  gap: 20px;
+   padding-left: 30px;
+}
+
+.back-btn{
+  width: 25px;
+  height: 25px;
+  filter: invert(1);
+}
+
+
+
+/*
+HERE ATA NEED YUNG HIWALAY
+*/
+
+.downloadble-report-header-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.downloadble-report-top-section {
+   display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.downloadble-report-info-toggle-wrapper {
+    display: flex;
+  justify-content: center; 
+  gap: 30px;
+  margin-bottom: 20px;
+  width: 70%;
+  align-items: center;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+
+
+.info-toggle-btn {
+  background-color: transparent;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 3px solid #ccc;
+  transition: all 0.3s ease;
+
+}
+
+.info-toggle-btn:hover,
+.info-toggle-btn.active {
+  color: #ff6600;
+  border-bottom: 3px solid #ff6600;
+}
+
+.downloadble-report-header-body-bottom-section {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.downloadble-forms-info-main-container {
+    width: 100%;
+    display: flex;
+}
+
+
+
+
+.downloadble-forms-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); 
+  grid-auto-rows: auto;
+  gap: 20px;
+  padding: 20px 40px;
+  width: 100%;
+  height: 100%;
+  background-color: #43a047;
+}
+
+
+.form-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.form-icon-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.form-icon-label img {
+  width: 20px;
+  height: 20px;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.download-btn, .delete-btn {
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+}
+
+.download-btn {
+  background-color: #214666;
+  color: white;
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+
+.pagination-button-wrapper {
+  display: flex;
+  padding-right: 2rem;
+  padding-left: 2rem;
+}
+
+
+
+.pagination-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-icon {
+  width: 20px;
+  height: 20px;
+}
+
