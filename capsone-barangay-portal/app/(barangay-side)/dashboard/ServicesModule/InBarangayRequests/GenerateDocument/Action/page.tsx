@@ -581,6 +581,8 @@ export default function action() {
                                             title="Please enter a valid 11-digit contact number. Format: 09XXXXXXXXX"        
                                             />
                                     </div>
+                                    
+
                                 </div>
                             </div>
 
@@ -588,7 +590,515 @@ export default function action() {
 
                         <div className="main-fields-container-section2">
                             <div className="fields-container">
+                                {clearanceInput.purpose === "Residency" && (
+                                      <>
+                                        <div className="fields-section">
+                                          <label htmlFor="attestedBy" className="form-label">Attested By Hon Kagawad: <span className="required">*</span></label>
+                                          <input 
+                                            type="text"  
+                                            id="attestedBy"  
+                                            name="attestedBy"  
+                                            value={clearanceInput.attestedBy}
+                                            onChange={handleChange}
+                                            className="headline"  
+                                            required 
+                                            placeholder="Enter Hon Kagawad's Full Name"  
+                                          />
+                                        </div>
+                                        <div className="fields-section">
+                                          <label htmlFor="CYFrom" className="form-label">Cohabitation Year From:<span className="required">*</span></label>
+                                          <select
+                                            id="CYFrom"
+                                            name="CYFrom"
+                                            value={clearanceInput.CYFrom}
+                                            onChange={handleChange}
+                                            className="headline"
+                                            required
+                                          >
+                                            <option value="" disabled>Select Year</option>
+                                            {[...Array(100)].map((_, i) => {
+                                              const year = new Date().getFullYear() - i;
+                                              const cyTo = parseInt(clearanceInput.CYTo || "");
+                                              const isDisabled = !isNaN(cyTo) && year >= cyTo;
+                                              return (
+                                                <option key={year} value={year} disabled={isDisabled}>
+                                                  {year}
+                                                </option>
+                                              );
+                                            })}
+                                          </select>
+                                        </div>
+                                        
+                                        <div className="fields-section">
+                                          <label htmlFor="CYTo" className="form-label">Cohabitation Year To:<span className="required">*</span></label>
+                                          <select
+                                            id="CYTo"
+                                            name="CYTo"
+                                            value={clearanceInput.CYTo}
+                                            onChange={handleChange}
+                                            className="headline"
+                                            required
+                                          >
+                                            <option value="" disabled>Select Year</option>
+                                            {[...Array(100)].map((_, i) => {
+                                              const year = new Date().getFullYear() - i;
+                                              const cyFrom = parseInt(clearanceInput.CYFrom || "1");
+                                              const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
+                                              return (
+                                                <option key={year} value={year} disabled={isDisabled}>
+                                                  {year}
+                                                </option>
+                                              );
+                                            })}
+                                          </select>
+                                      </div>
+                                      </>
+                                )}
+                                {clearanceInput.purpose === "Occupancy /  Moving Out" && (
+                                  <>
+                                    <div className="fields-section">
+                                      <label htmlFor="toAddress" className="form-label">To Address<span className="required">*</span></label>
+                                      <input 
+                                        type="text"  
+                                        id="toAddress"  
+                                        name="toAddress"  
+                                        value={clearanceInput.toAddress}
+                                        onChange={handleChange}
+                                        className="headline"  
+                                        required 
+                                        placeholder="Enter To Address"  
+                                      />
+                                    </div>
+                                  </>
+                                )}
+                                {(clearanceInput.purpose === "Death Residency"|| clearanceInput.purpose === "Estate Tax") && (
+                                  <div className="fields-section">
+                                    <label htmlFor="dateofdeath" className="form-label">Date Of Death<span className="required">*</span></label>
+                                    <input 
+                                      type="date" 
+                                      id="dateofdeath" 
+                                      name="dateofdeath" 
+                                      className="headline" 
+                                      value={clearanceInput.dateofdeath}
+                                      onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+
+                                      onChange={handleChange}
+                                      required 
+                                      max={getLocalDateString(new Date())} // Set max date to today
+                                    />
+                                  </div>
+                                )}
+
+                                {clearanceInput.purpose === "Estate Tax" && (
+                                  <>
+                                    <div className="fields-section">
+                                      <label htmlFor="estateSince" className="form-label">Estate Since:<span className="required">*</span></label>
+                                      <select
+                                        id="estateSince"
+                                        name="estateSince"
+                                        value={clearanceInput.estateSince}
+                                        onChange={handleChange}
+                                        className="headline"
+                                        required
+                                      >
+                                        <option value="" disabled>Select Year</option>
+                                        {[...Array(150)].map((_, i) => {
+                                          const year = new Date().getFullYear() - i;
+                                          return (
+                                            <option key={year} value={year}>
+                                              {year}
+                                            </option>
+                                          );
+                                        })}
+                                      </select>
+                                    </div>
+                                  </>
+                                )}
+
+                                {clearanceInput.purpose === "Good Moral and Probation" && (
+                                  <>
+                                    <div className="fields-section">
+                                      <label htmlFor="goodMoralPurpose" className="form-label">Purpose of Good Moral and Probation:<span className="required">*</span></label>
+                                      <select
+                                        id="goodMoralPurpose"
+                                        name="goodMoralPurpose"
+                                        className="headline"
+                                        value={clearanceInput.goodMoralPurpose}
+                                        onChange={handleChange}
+                                        required
+                                        >
+                                        <option value="" disabled>Select Purpose</option>
+                                        <option value = "Legal Purpose and Intent">Legal Purpose and Intent</option>
+                                        <option value = "Others">Others</option>
+                                      </select>
+                                    </div>
+                                    {clearanceInput.goodMoralPurpose === "Others" && (
+                                      <>
+                                        <div className="fields-section">
+                                          <label htmlFor="goodMoralOtherPurpose" className="form-label">Please Specify Other Purpose:<span className="required">*</span></label>
+                                          <input 
+                                            type="text"  
+                                            id="goodMoralOtherPurpose"  
+                                            name="goodMoralOtherPurpose"  
+                                            value={clearanceInput.goodMoralOtherPurpose}
+                                            onChange={handleChange}
+                                            className="headline"  
+                                            required 
+                                            placeholder="Enter Other Purpose"
+                                          />
+                                        </div>
+                                      </>
+                                    )}
+
+                                  </>
+                                )}
+                                {clearanceInput.purpose === "Guardianship" && (
+                                  <>
+                                    <div className="fields-section">
+                                    <label htmlFor="guardianshipType" className="form-label">Type of Guardianship Certificate<span className="required">*</span></label>
+                                        <select
+                                          id="guardianshipType"  
+                                          name="guardianshipType"  
+                                          className="headline"  
+                                          value={clearanceInput.guardianshipType}
+                                          onChange={handleChange}
+                                          required
+                                        >
+                                          <option value="" disabled>Select Type of Guardianship</option>
+                                          <option value="School Purpose">For School Purpose</option>
+                                          <option value="Legal Purpose">For Other Legal Purpose</option>
+                                        </select>
+                                    </div>
                                 
+                                    <div className="fields-section">
+                                    <label htmlFor="wardRelationship" className="form-label">Guardian's Relationship Towards the Ward<span className="required">*</span></label>
+                                        <select
+                                          id="wardRelationship"  
+                                          name="wardRelationship"  
+                                          className="headline"  
+                                          value={clearanceInput.wardRelationship}
+                                          onChange={handleChange}
+                                          required
+                                        >
+                                          <option value="" disabled>Select Type of Relationship</option>
+                                          <option value="Grandmother">Grandmother</option>
+                                          <option value="Grandfather">Grandfather</option>
+                                          <option value="Father">Father</option>
+                                          <option value="Mother">Mother</option>
+                                          <option value="Aunt">Aunt</option>
+                                          <option value="Uncle">Uncle</option>
+                                          <option value="Sister">Sister</option>
+                                          <option value="Brother">Brother</option>
+                                        </select>
+                                    </div>
+                                
+                                    <div className="fields-section">
+                                    <label htmlFor="wardFname" className="form-label">Ward's Full Name<span className="required">*</span></label>
+                                        <input 
+                                          type="text"  
+                                          id="wardFname"  
+                                          name="wardFname"  
+                                          value={clearanceInput.wardFname}
+                                          onChange={handleChange}
+                                          className="headline"  
+                                          required 
+                                          placeholder={`Enter Ward's Full Name`}
+                                        />
+                                    </div>
+                                
+                                  </>
+                                )}
+
+                                { clearanceInput.purpose === "Garage/TRU" && (
+                                  <>  
+                                    <div className="fields-section">
+                                      <label htmlFor="businessname" className="form-label">Business Name<span className="required">*</span></label>
+                                      <input 
+                                        type="text"  
+                                        id="businessname"  
+                                        name="businessName"  
+                                        className="headline"  
+                                        required 
+                                        placeholder="Enter Business Name"  
+                                        value={clearanceInput.businessName}
+                                        onChange={handleChange}
+                                      />
+                                    </div>            
+                                    <div className="fields-section">
+                                      <label htmlFor="businessloc" className="form-label">Business Location<span className="required">*</span></label>
+                                      <input 
+                                        type="text"  
+                                        id="businessloc"  
+                                        name="businessLocation"  
+                                        className="headline"  
+                                        value={clearanceInput.businessLocation}
+                                        onChange={handleChange}
+                                        required 
+                                        placeholder="Enter Business Location"  
+                                      />
+                                    </div>
+                                    <div className="fields-section">
+                                      <label htmlFor="noOfVechicles" className="form-label">Nos Of Tricycle<span className="required">*</span></label>
+                                      <input 
+                                        type="number"  
+                                        id="noOfVechicles"  
+                                        name="noOfVechicles"  
+                                        className="headline"  
+                                        required 
+                                        value={clearanceInput.noOfVechicles||1}
+                                        onChange={handleChange}
+                                        min={1}
+                                        onKeyDown={(e)=> {
+                                          if (e.key === 'e' || e.key === '-' || e.key === '+') {
+                                            e.preventDefault(); // Prevent scientific notation and negative/positive signs
+                                          }
+                                        }
+                                        } // Prevent manual input
+                                      />
+                                    </div>
+                                    <div className="fields-section">
+                                      <label htmlFor="businessnature" className="form-label">Nature of Business<span className="required">*</span></label>
+                                      <input 
+                                        type="text"  
+                                        id="businessnature"  
+                                        name="businessNature"  
+                                        value={clearanceInput.businessNature}
+                                        onChange={handleChange}
+                                        className="headline"  
+                                        required 
+                                        placeholder="Enter Business Nature"  
+                                      />
+                                    </div>
+                                    <div className="fields-section">
+                                      <label htmlFor="vehicleMake" className="form-label">Tricycle Make<span className="required">*</span></label>
+                                      <input 
+                                        type="text"  
+                                        id="vehicleMake"  
+                                        name="vehicleMake"  
+                                        className="headline"  
+                                        required 
+                                        value={clearanceInput.vehicleMake}
+                                        onChange={handleChange}
+                                        placeholder="Enter Tricycle Make"  
+                                      />
+                                    </div>
+                                    <div className="fields-section">
+                                      <label htmlFor="vehicleType" className="form-label">Tricycle Type<span className="required">*</span></label>
+                                      <select
+                                        id="vehicleType"  
+                                        name="vehicleType"  
+                                        className="headline"  
+                                        required 
+                                        value={clearanceInput.vehicleType}
+                                        onChange={handleChange}
+
+                                      >
+                                        <option value="" disabled>Select Tricycle Type</option>
+                                        <option value="Motorcycle w/ Sidecar">Motorcycle w/ Sidecar</option>
+                                        <option value="Motorcycle w/o Sidecar">Motorcycle w/o Sidecar</option>
+                                      </select>
+                                    </div>
+                                    <div className="fields-section">
+                                      <label htmlFor="vehiclePlateNo" className="form-label">Tricycle Plate No.<span className="required">*</span></label>
+                                      <input 
+                                        type="text"  
+                                        id="vehiclePlateNo"  
+                                        name="vehiclePlateNo"  
+                                        className="headline"  
+                                        required 
+                                        value={clearanceInput.vehiclePlateNo}
+                                        onChange={handleChange}
+                                        placeholder="Enter Tricycle Plate No."  
+                                      />
+                                    </div>
+                                    <div className="fields-section">
+                                      <label htmlFor="vehicleSerialNo" className="form-label">Tricycle Serial No.<span className="required">*</span></label>
+                                      <input 
+                                        type="text"  
+                                        id="vehicleSerialNo"  
+                                        name="vehicleSerialNo"  
+                                        className="headline"  
+                                        required 
+                                        value={clearanceInput.vehicleSerialNo}
+                                        onChange={handleChange}
+                                        placeholder="Enter Tricycle Serial No."  
+                                      />
+                                    </div>
+                                    <div className="fields-section">
+                                      <label htmlFor="vehicleChassisNo" className="form-label">Tricycle Chassis No.<span className="required">*</span></label>
+                                      <input 
+                                        type="text"  
+                                        id="vehicleChassisNo"  
+                                        name="vehicleChassisNo"  
+                                        className="headline"  
+                                        required 
+                                        value={clearanceInput.vehicleChassisNo}
+                                        onChange={handleChange}
+                                        placeholder="Enter Tricycle Chassis No."  
+                                      />
+                                    </div>
+                                    <div className="fields-section">
+                                      <label htmlFor="vehicleEngineNo" className="form-label">Tricycle Engine No.<span className="required">*</span></label>
+                                      <input 
+                                        type="text"  
+                                        id="vehicleEngineNo"  
+                                        name="vehicleEngineNo"  
+                                        className="headline"  
+                                        required 
+                                        value={clearanceInput.vehicleEngineNo}
+                                        onChange={handleChange}
+                                        placeholder="Enter Tricycle Engine No."  
+                                      />
+                                    </div>
+                                    <div className="fields-section">
+                                      <label htmlFor="vehicleFileNo" className="form-label">Tricycle File No.<span className="required">*</span></label>
+                                      <input 
+                                        type="text"  
+                                        id="vehicleFileNo"  
+                                        name="vehicleFileNo"  
+                                        className="headline"  
+                                        required 
+                                        value={clearanceInput.vehicleFileNo}
+                                        onChange={handleChange}
+                                        placeholder="Enter Tricycle File No."  
+                                      />
+                                    </div>
+                                    
+                                  </>
+                                )}
+
+                                {clearanceInput.purpose === "Garage/PUV" && (
+                                  <>
+                                    <div className="fields-section">
+                                      <label htmlFor="goodMoralOtherPurpose" className="form-label">Certificate Purpose<span className="required">*</span></label>
+                                      <input 
+                                        type="text"
+                                        id="goodMoralOtherPurpose"  
+                                        name="goodMoralOtherPurpose"  
+                                        className="headline"  
+                                        required 
+                                        value={clearanceInput.goodMoralOtherPurpose || ""}
+                                        onChange={handleChange}
+                                        placeholder="Enter Certificate Purpose"
+                                      />    
+                                    </div>
+                                    <div className="fields-section">
+                                      <label htmlFor="vehicleType" className="form-label">Vehicle Description<span className="required">*</span></label>
+                                      <input 
+                                        type="text"
+                                        id="vehicleType"  
+                                        name="vehicleType"  
+                                        className="headline"  
+                                        required 
+                                        value={clearanceInput.vehicleType || ""}
+                                        onChange={handleChange}
+                                        placeholder="Enter Vehicle Description"
+                                      />
+                                    </div>
+                                    <div className="fields-section">
+                                      <label htmlFor="noOfVechicles" className="form-label">Nos Of Vehicle/s<span className="required">*</span></label>
+                                      <input 
+                                        type="number"  
+                                        id="noOfVechicles"  
+                                        name="noOfVechicles"  
+                                        className="headline"  
+                                        required 
+                                        value={clearanceInput.noOfVechicles || 1}
+                                        onChange={handleChange}
+                                        min={1}
+                                        onKeyDown={(e)=> {
+                                          if (e.key === 'e' || e.key === '-' || e.key === '+') {
+                                            e.preventDefault(); // Prevent scientific notation and negative/positive signs
+                                          }
+                                        }
+                                        } // Prevent manual input
+                                      />
+                                    </div>
+                                  </>
+                                )}
+                                {clearanceInput.purpose === "No Income"  && (
+                                  <>
+                                    <div className="fields-section">
+                                      <label htmlFor="noIncomePurpose" className="form-label">Purpose Of No Income:<span className="required">*</span></label>
+                                        <select 
+                                          id="noIncomePurpose"  
+                                          name="noIncomePurpose"  
+                                          value={clearanceInput.noIncomePurpose}
+                                          onChange={handleChange}
+                                          className="headline"  
+                                          required 
+                                        >
+                                          <option value="" disabled>Select Purpose</option>
+                                          <option value="SPES Scholarship">SPES Scholarship</option>
+                                          <option value="ESC Voucher">DEPED Educational Services Contracting (ESC) Voucher</option>
+                                        </select>
+                                    </div>
+                                                    
+                                    <div className="fields-section">
+                                      <label htmlFor="noIncomeChildFName" className="form-label">Son/Daugther's Name<span className="required">*</span></label>
+                                        <input 
+                                          type="text"  
+                                          id="noIncomeChildFName"  
+                                          name="noIncomeChildFName"  
+                                          value={clearanceInput.noIncomeChildFName}
+                                          onChange={handleChange}
+                                          className="headline"  
+                                          required 
+                                          placeholder={`Enter Child's Full Name`}
+                                        />
+                                    </div>
+                                                    
+                                  </>
+                                )}
+                                {(clearanceInput.purpose === "Cohabitation") && (<>
+                                  <div className="fields-section">
+                                    <label htmlFor="partnerWifeHusbandFullName" className="form-label">Partner's/Wife's/Husband's Full Name<span className="required">*</span></label>
+                                    <input 
+                                      type="text"  
+                                      id="partnerWifeHusbandFullName"  
+                                      name="partnerWifeHusbandFullName"  
+                                      className="headline"  
+                                      required  
+                                      placeholder="Enter Full Name" 
+                                      value={clearanceInput.partnerWifeHusbandFullName}
+                                      onChange={handleChange}
+                                    />
+                                  </div>
+                                  <div className="fields-section">
+                                    <label htmlFor="cohabitationRelationship" className="form-label">
+                                      Type Of Relationship<span className="required">*</span>
+                                    </label>
+                                    <select
+                                      id="cohabitationRelationship"
+                                      name="cohabitationRelationship"
+                                      className="headline"
+                                      value={clearanceInput.cohabitationRelationship}
+                                      onChange={handleChange}
+                                      required
+                                    >
+                                      <option value="" disabled>Select Type of Relationship</option>
+                                      <option value="Husband And Wife">Husband And Wife</option>
+                                      <option value="Partners">Partners</option>
+                                    </select>
+                                  </div>
+
+                                  <div className="fields-section">
+                                    <label htmlFor="cohabitationStartDate" className="form-label">
+                                      Start Of Cohabitation<span className="required">*</span>
+                                    </label>
+                                    <input 
+                                    type = "date" 
+                                    id="cohabitationStartDate"
+                                    name="cohabitationStartDate"
+                                    className="headline"
+                                    value={clearanceInput.cohabitationStartDate}
+                                    onChange={handleChange}
+                                    onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                                    required
+                                    max = {getLocalDateString(new Date())} // Set max date to today
+                                    />
+                                  </div>
+                                </>)}
 
                                 <div className="fields-section">
                                     <p>Requestor's Title</p>
