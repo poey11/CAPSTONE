@@ -6,6 +6,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 
 interface FileData {
@@ -3550,8 +3551,390 @@ const ReportsPage = () => {
     }, 3000);
   };
 
+  const router = useRouter();
+  const [activeSection, setActiveSection] = useState("generate");
+  const [currentPage, setCurrentPage] = useState(1);
+  const moduleTotalPages: { [key: string]: number } = {
+    "Resident Module": 2,
+    "Incident Module": 1,
+    "Services Module": 1,
+    "Programs Module": 1,
+  };
+  
+  const totalPages = selectedModule ? moduleTotalPages[selectedModule] || 1 : 1;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedModule]);
+  
+
+  const handleBack = () => {
+    router.back();
+  };
+
+
+ 
+
   return (
-    <div className="report-main-container">
+    <div className="generatereport-main-container">
+
+      {/* NEW*/}
+      <div className="generatereport-redirectionpage-section">
+        <button 
+          className={`generatereport-redirection-buttons ${activeSection === "generate" ? "active" : ""}`}
+          onClick={() => setActiveSection("generate")}
+        >
+          <div className="generatereport-redirection-icons-section">
+            <img src="/images/report.png" alt="user info" className="redirection-icons-generatereport"/> 
+          </div>
+          <h1>Generate Report</h1>
+        </button>
+
+        <button 
+          className={`generatereport-redirection-buttons ${activeSection === "download" ? "active" : ""}`}
+          onClick={() => setActiveSection("download")}
+        >
+          <div className="generatereport-redirection-icons-section">
+            <img src="/images/form.png" alt="user info" className="redirection-icons-generatereport"/> 
+          </div>
+          <h1>Download Form</h1>
+        </button>
+
+      </div>
+
+
+    {activeSection === "generate" && (
+      <>
+        <div className="generatereport-main-content">
+          <div className="generatereport-main-section1">
+            <div className="generatereport-main-section1-left">
+              <button onClick={handleBack}>
+                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+              </button>
+              <h1> Generate Report </h1>
+            </div>
+          </div>
+
+          <div className="generatereport-header-body">
+            <div className="generatereport-header-body-top-section">
+              <div className="moduleDropdown-container">
+                <select
+                  className="moduleDropdown"
+                  onChange={handleModuleChange}
+                  required
+                >
+                  <option value="">Select Module</option>
+                      {session?.user?.role === "Barangay Official" &&
+                        (
+                          session?.user?.position === "Secretary" ||
+                          session?.user?.position === "Assistant Secretary" ||
+                          session?.user?.position === "Punong Barangay"
+                        ) && (
+                          <option value="Resident Module">Resident Module</option>
+                      )}
+
+                      {session?.user?.role === "Barangay Official" &&
+                        (
+                          session?.user?.position === "LF Staff" ||
+                          session?.user?.position === "Assistant Secretary" ||
+                          session?.user?.position === "Secretary" ||
+                          session?.user?.position === "Punong Barangay"
+                        ) && (
+                          <option value="Incident Module">Incident Module</option>
+                      )}
+
+                      {session?.user?.role === "Barangay Official" &&
+                        (
+                          session?.user?.position === "Secretary" ||
+                          session?.user?.position === "Punong Barangay" ||
+                          session?.user?.position === "Assistant Secretary" ||
+                          session?.user?.position === "Admin Staff"
+                        ) && (
+                          <option value="Services Module">Services Module</option>
+                      )}
+                      {session?.user?.role === "Barangay Official" && (
+                          <option value="Programs Module">Programs Module</option>
+                      )}
+                </select>
+              </div>
+            </div>
+
+            <div className="generatereport-header-body-bottom-section">
+
+            {selectedModule && (
+              <div className="generatereport-button-redirection-container">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  <img src="/Images/back.png" className="redirection-reports-button" />
+                </button>
+
+              </div>
+            )}
+
+              <div className="generatereport-main-reports-section">
+              {selectedModule === "Resident Module" && (
+                <>
+                  {currentPage === 1 && (
+                    <div className="report-grid">
+                      <button onClick={handleRegistrationSummaryPDF} disabled={loadingRegistrationSummary} className="report-tile">
+                      <img src="/images/regresident.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingRegistrationSummary ? "Generating..." : "Resident Registration Summary Report"}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateSeniorPDF} disabled={loadingResidentSeniorDemographic} className="report-tile">
+                        <img src="/images/senior.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingResidentSeniorDemographic ? (
+                            "Generating..."
+                          ) : (
+                            <>
+                              Resident Demographic Report <br/> (Senior Citizens)
+                            </>
+                          )}
+                          
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateStudentPDF} disabled={loadingResidentStudentDemographic} className="report-tile">
+                        <img src="/images/students.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingResidentStudentDemographic ? (
+                            "Generating..."
+                          ) : (
+                            <>
+                              Resident Demographic Report <br/> (Students/Minors)
+                            </>
+                          )}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGeneratePwdPDF} disabled={loadingResidentPWDDemographic} className="report-tile">
+                        <img src="/images/disabled.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingResidentPWDDemographic ? (
+                            "Generating..."
+                          ) : (
+                            <>
+                              Resident Demographic Report <br/> (PWD)
+                            </>
+                          )}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateSoloParentPDF} disabled={loadingResidentSoloParentDemographic} className="report-tile">
+                        <img src="/images/soloparent.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingResidentSoloParentDemographic ? (
+                            "Generating..."
+                          ) : (
+                            <>
+                              Resident Demographic Report<br /> (Solo Parents)
+                            </>
+                          )}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateResidentPDF} disabled={loadingMasterResident} className="report-tile">
+                        <img src="/images/form.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingMasterResident ? "Generating..." : "Masterlist Resident Inhabitant Record"}
+                        </p>
+                      </button>
+                    </div>
+                  )}
+
+                  {currentPage === 2 && (
+                    <div className="report-grid">
+                      <button onClick={handleGenerateEastResidentPDF} disabled={loadingEastResident} className="report-tile">
+                        <img src="/images/east.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                        {loadingEastResident ? "Generating..." : "East Resident Inhabitant Record"}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateWestResidentPDF} disabled={loadingWestResident} className="report-tile">
+                        <img src="/images/west.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingWestResident ? "Generating..." : "West Resident Inhabitant Record"}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateSouthResidentPDF} disabled={loadingSouthResident} className="report-tile">
+                        <img src="/images/south.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingSouthResident ? "Generating..." : "South Resident Inhabitant Record"}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateKasambahayPDF} disabled={loadingKasambahay} className="report-tile">
+                        <img src="/images/form.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingKasambahay ? "Generating..." : "Kasambahay Masterlist"}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateJobSeekerPDF} disabled={loadingJobSeeker} className="report-tile">
+                        <img src="/images/jobseeker.png" alt="user info" className="report-icon-bigger"/> 
+                        <p className="report-title">
+                          {loadingJobSeeker ? "Generating..." : "First-Time Job Seeker List"}
+                        </p>
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {selectedModule === "Incident Module" && (
+                <>
+                  {currentPage === 1 && (
+                    <div className="report-grid">
+                      <button onClick={handleGenerateIncidentSummaryPDF} disabled={loadingIncidentSummary} className="report-tile">
+                        <img src="/images/incident.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                        {loadingIncidentSummary ? "Generating..." : "All Incidents Summary"}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateIncidentStatusSummaryPDF} disabled={loadingIncidentStatuses} className="report-tile">
+                        <img src="/images/incidentstatus.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingIncidentStatuses ? "Generating..." : "Incident Status Summary"}
+                        </p>
+                      </button>
+
+                      {(session?.user?.department === "Lupon" || session?.user?.position === "Assistant Secretary") && (
+                        <>
+                          <button onClick={handleGenerateLuponSettledPDF} disabled={loadingLuponSettledReport} className="report-tile">
+                            <img src="/images/incidentsettled.png" alt="user info" className="report-icon-bigger"/> 
+                            <p className="report-title">
+                              {loadingLuponSettledReport ? "Generating..." : "Lupon Settled Report"}
+                            </p>
+                          </button>
+
+                          <button onClick={handleGenerateLuponPendingPDF} disabled={loadingLuponPendingReport} className="report-tile">
+                            <img src="/images/incidentpending.png" alt="user info" className="report-icon-bigger"/> 
+                            <p className="report-title">
+                              {loadingLuponPendingReport ? "Generating..." : "Lupon Pending Report"}
+                            </p>
+                          </button>
+                        </>
+                      )}
+
+                      {(session?.user?.department === "VAWC" || session?.user?.position === "Assistant Secretary") && (
+                        <>
+                          <button onClick={handleGenerateVAWCPDF} disabled={loadingVAWCReport} className="report-tile">
+                            <img src="/images/womenandchildren.png" alt="user info" className="report-icon-bigger"/> 
+                            <p className="report-title">
+                              {loadingVAWCReport ? "Generating..." : "Monthly VAWC Report"}
+                            </p>
+                          </button>
+                        </>
+                      )}
+
+                      {(session?.user?.department === "GAD" || session?.user?.department === "BCPC" || session?.user?.position === "Assistant Secretary")  && (
+                        <>
+                          <button  className="report-tile">
+                            <img src="/images/genders.png" alt="user info" className="report-icon"/> 
+                            <p className="report-title">
+                              GADRCO Quarterly Monitoring Report
+                            </p>
+                          </button>
+                        </>
+                      )}
+
+                    </div>
+                  )}
+                </>
+              )}  
+
+              {selectedModule === "Services Module" && (
+                <>
+                  {currentPage === 1 && (
+                    <div className="report-grid">
+                      <button  className="report-tile">
+                        <img src="/images/form.png" alt="user info" className="report-icon"/> 
+                          <p className="report-title">
+                            Most Requested Services Lists
+                          </p>
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {selectedModule === "Programs Module" && (
+                <>
+                  {currentPage === 1 && (
+                    <div className="report-grid">
+                      <button  className="report-tile">
+                        <img src="/images/form.png" alt="user info" className="report-icon"/> 
+                          <p className="report-title">
+                            Program Participation Report
+                          </p>
+                      </button>
+                      <button  className="report-tile">
+                        <img src="/images/form.png" alt="user info" className="report-icon"/> 
+                          <p className="report-title">
+                            Program Completion Status Report
+                          </p>
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+                
+              </div>
+
+            {selectedModule && (
+              <div className="generatereport-button-redirection-container">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, 2))}
+                  disabled={
+                    currentPage === 2 || 
+                    selectedModule === "Incident Module" || 
+                    selectedModule === "Services Module" || 
+                    selectedModule === "Programs Module"
+                  }
+                >
+                  <img src="/Images/next.png" className="redirection-reports-button" />
+                </button>
+              </div>
+            )}
+            </div>
+
+          </div>
+        </div>
+      </>
+    )}
+
+    {activeSection === "download" && (
+      <>
+        <div className="generatereport-main-content">
+          <div className="generatereport-main-section1">
+            <div className="generatereport-main-section1-left">
+              <button onClick={handleBack}>
+                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+              </button>
+              <h1> Download Form </h1>
+            </div>
+          </div>
+
+          <div className="generatereport-header-body">
+           
+
+          </div>
+        </div>
+      </>
+    )}
+
+
+{/*
+
       <h1 className="reports-title">Reports Module</h1>
 
       <div className="reports-section">
@@ -3563,7 +3946,7 @@ const ReportsPage = () => {
               onChange={handleModuleChange}
               required
             >
-              <option value="">Select Module...</option>
+              <option value="">Select Module</option>
                   {session?.user?.role === "Barangay Official" &&
                     (
                       session?.user?.position === "Secretary" ||
@@ -3684,6 +4067,9 @@ const ReportsPage = () => {
           )}
         </div>
 
+*/}
+
+{/*
         <div className="report-card">
           <h2 className="report-title">Downloadable Forms</h2>
        
@@ -3756,6 +4142,7 @@ const ReportsPage = () => {
                               <span>{selectedUploadFile.name}</span>  
                               <div className="delete-container">
                                   {/* Delete button with image */}
+{/*}
                                   <button
                                       type="button"
                                       onClick={onDeleteFile} // Call the delete function
@@ -3789,6 +4176,8 @@ const ReportsPage = () => {
 
         
       </div>
+
+  */}
 
       {/* Success Pop-up */}
       {showSuccessPopup && (
