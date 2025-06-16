@@ -525,6 +525,7 @@ const handleFileChange = (
         const clearanceVars = {
           createdAt: clearanceInput.dateRequested,
           requestId: clearanceInput.requestId,
+          reqType: "Online",
           status: "Pending",
           statusPriority: 1,
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,

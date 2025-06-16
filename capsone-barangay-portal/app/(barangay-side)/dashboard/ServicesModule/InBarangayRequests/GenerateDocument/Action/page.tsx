@@ -6,9 +6,11 @@ import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayCertificate.css";
 import { getLocalDateString } from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
 import { addDoc, collection, doc, getDoc} from "firebase/firestore";
-import { db, storage, auth } from "@/app/db/firebase";
+import { db, storage } from "@/app/db/firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import { useSession } from "next-auth/react";
+import { getStorage } from "firebase/storage";
 
 
 interface EmergencyDetails {
@@ -19,7 +21,6 @@ interface EmergencyDetails {
 }
 interface File {
     name?: string;
-    preview?: string | undefined;
 }
 
 interface ClearanceInput {
@@ -30,7 +31,6 @@ interface ClearanceInput {
     purpose?: string;
     createdAt?: string;
     fullName?: string;
-    appointmentDate?: string;
     dateOfResidency?: string;
     dateofdeath?: string;
     address?: string;
@@ -152,7 +152,7 @@ export default function action() {
 
     }, [number]);
 
-    const [files, setFiles] = useState<{ [key: string]: { name: string, preview: string | undefined }[] }>({
+    const [files, setFiles] = useState<{ [key: string]: { file: File; name: string; preview: string | undefined }[] }>({
         container1: [],
     });
 
@@ -167,22 +167,13 @@ export default function action() {
         if (selectedFiles) {
           const fileArray = Array.from(selectedFiles).map((file) => {
             const preview = URL.createObjectURL(file);
-            return { name: file.name, preview };
+            return { file, name: file.name, preview };
           });
           setFiles((prevFiles) => ({
             ...prevFiles,
             [container]: [...prevFiles[container], ...fileArray], // Append new files to the specified container
           }));
-            setClearanceInput((prevFiles) => {
-                if (!prevFiles) return prevFiles;
-                return {
-                ...prevFiles,
-                docsRequired: [...(prevFiles.docsRequired || []), ...fileArray], // Update clearanceInput with new files
-                };
-            });
         }
-
-
     };
   
       // Handle file deletion for any container
@@ -191,13 +182,7 @@ export default function action() {
           ...prevFiles,
           [container]: prevFiles[container].filter((file) => file.name !== fileName),
         }));
-        setClearanceInput((prevFiles) => {
-          if (!prevFiles) return prevFiles;
-          return {
-            ...prevFiles,
-            docsRequired: prevFiles.docsRequired.filter((file) => file.name !== fileName), // Update clearanceInput if needed
-          };
-        });    
+            
     };
 
     
@@ -214,20 +199,49 @@ export default function action() {
                 // Hide the popup after 3 seconds
                 setTimeout(() => {
                     setShowPopup(false);
-                    //router.push("/dashboard/ServicesModule/InBarangayRequests");
                 }, 3000);
     };
 
+    const handleUploadImage = async () => {
+        const uploadedFiles: { name: string }[] = [];
+
+        try {
+            let i = 0;
+            for (const file of files.container1) {
+                console.log("File:", file);
+                const fileExtension = file.name.split('.').pop();
+                const fileName = `${clearanceInput.requestId}-file${i}.${fileExtension}`;
+                const storageRef = ref(storage, `ServiceRequests/${fileName}`);
+                console.log("Storage Reference:", storageRef);
+
+                const snapshot = await uploadBytes(storageRef, file.file as Blob);
+                const url = await getDownloadURL(snapshot.ref);
+                uploadedFiles.push({ name: url });
+                i++;
+            }
+            console.log("Uploaded Files:", uploadedFiles);
+            return uploadedFiles; // Return the array of uploaded file names
+        }
+        catch (error) {
+            console.error("Error uploading images:", error);
+          
+        }    
+    }
+    let id: string | undefined;
     const handleUploadClick = async() => {
         try {
+            const uplodedFile = await handleUploadImage(); // Upload images after succesfully adding the document
+            console.log("Uploaded Files:", uplodedFile);
             const docRef = collection(db, "ServiceRequests");
             const docData ={
                 ...clearanceInput,
-                requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`
+                requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
+                docsRequired: uplodedFile, // Use the uploaded file names
             }
             console.log("Document Data:", docData);
             const doc = await addDoc(docRef, docData);
             console.log("Document written with ID: ", docData.requestId, " - ", doc.id);
+            id = doc.id; // Store the document ID for redirection
         } catch (error) {
             console.error("Error:", error);
         }       
@@ -259,11 +273,12 @@ export default function action() {
         setShowPopup(true);
         console.log("Files:", files);
         console.log("Clearance Input:", clearanceInput);
-        handleUploadClick();
+        handleUploadClick().then(() => {
+            router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
+        });
         // Hide the popup after 3 seconds
         setTimeout(() => {
             setShowPopup(false);
-            //router.push("/dashboard/ServicesModule/InBarangayRequests/View/BarangayCertificate");
         }, 3000);
                 
     };

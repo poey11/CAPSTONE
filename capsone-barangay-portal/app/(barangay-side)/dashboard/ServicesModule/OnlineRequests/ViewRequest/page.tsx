@@ -26,6 +26,7 @@ interface EmergencyDetails {
   interface OnlineRequest {
     accID: string;
     requestId: string;
+    reqType?: string; // "Online" or "InBarangay"
     requestor: string;
     partnerWifeHusbandFullName: string;
     cohabitationStartDate: string;
@@ -97,7 +98,12 @@ interface EmergencyDetails {
     tricycleChassisNo: string;
     tricycleEngineNo: string;
     tricycleFileNo: string;
+    docsRequired: File[]; // Changed to File[] to match the file structure
    
+}
+
+interface File {
+    name?: string;
 }
 
 
@@ -168,20 +174,22 @@ const ViewOnlineRequest = () => {
       return updatedData;
     };
 
+    
+
 
    useEffect(() => {
       if (!requestData) return;
+      if(!(requestData?.reqType === "InBarangay")) {
+        const fetchUrls = async () => {
+          const updated = await handleDownloadUrl(requestData);
 
-      const fetchUrls = async () => {
-        const updated = await handleDownloadUrl(requestData);
-
-        // Avoid state update if no real changes
-        if (JSON.stringify(updated) !== JSON.stringify(requestData)) {
-          setRequestData(updated);
-        }
-      };
-
-      fetchUrls();
+          // Avoid state update if no real changes
+          if (JSON.stringify(updated) !== JSON.stringify(requestData)) {
+            setRequestData(updated);
+          }
+        };
+        fetchUrls();
+      }
     }, [requestData]);
 
 
@@ -603,11 +611,6 @@ const ViewOnlineRequest = () => {
                 "endorsementLetter",
             ],
           },
-          
-
-          
-
-        
         }
         
 
@@ -623,29 +626,55 @@ const ViewOnlineRequest = () => {
         // Render 'others' section differently (image display)
         if (sectionName === "others") {
             return (
-              <div className="others-image-section" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
-                {fieldKeys.map((key) => {
-                  const fileUrl = (requestData as any)?.[key];
-          
-                  // Skip if no image
-                  if (!fileUrl) return null;
-          
-                  return (
-                    <div key={key} className="services-onlinereq-verification-requirements-section">
-                      <span className="verification-requirements-label">{getLabel(key)}</span>
-                      <div className="services-onlinereq-verification-requirements-container">
-                        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                          <img
-                            src={fileUrl}
-                            alt={getLabel(key)}
-                            className="verification-reqs-pic uploaded-picture"
-                            style={{ cursor: 'pointer' }}
-                          />
-                        </a>
-                      </div>
-                    </div>
-                  );
-                })}
+                <div className="others-image-section" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
+                  {requestData?.reqType === "InBarangay" ? 
+                  (
+                    <>
+                      {requestData?.docsRequired?.map((file, index) => {
+                        return(
+                          <div key={index} className="services-onlinereq-verification-requirements-section">
+                            <span className="verification-requirements-label">Image {index+1}</span>
+                            <div className="services-onlinereq-verification-requirements-container">
+                              <a href={file.name} target="_blank" rel="noopener noreferrer">
+                                <img
+                                  src={file.name}
+                                  alt={`Image ${index}`}
+                                  className="verification-reqs-pic uploaded-picture"
+                                  style={{ cursor: 'pointer' }}
+                                />
+                              </a>
+                            </div>
+                          </div>
+                        )
+
+                      })}
+                    </>
+                  ):(
+                    <>
+                      {fieldKeys.map((key) => {
+                        const fileUrl = (requestData as any)?.[key];
+
+                        // Skip if no image
+                        if (!fileUrl) return null;
+                        return (
+                          <div key={key} className="services-onlinereq-verification-requirements-section">
+                            <span className="verification-requirements-label">{getLabel(key)}</span>
+                            <div className="services-onlinereq-verification-requirements-container">
+                              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                                <img
+                                  src={fileUrl}
+                                  alt={getLabel(key)}
+                                  className="verification-reqs-pic uploaded-picture"
+                                  style={{ cursor: 'pointer' }}
+                                />
+                              </a>
+                            </div>
+                          </div>
+                        );
+                      })}   
+                    </>
+                  )}
+                
               </div>
             );
           }
@@ -1014,7 +1043,7 @@ const ViewOnlineRequest = () => {
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
-                        <h1> Online Request Details </h1>
+                        <h1> {requestData?.reqType || "Online"} Request Details </h1>
                     </div>
                 </div>
 

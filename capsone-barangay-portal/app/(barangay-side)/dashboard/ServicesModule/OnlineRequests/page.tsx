@@ -24,25 +24,26 @@ import { db } from "@/app/db/firebase";
 
 
 
-  // Helpers to manage viewed requests
-const getViewedRequests = (): string[] => {
-  const data = localStorage.getItem("viewedRequests");
-  return data ? JSON.parse(data) : [];
-};
-
-const markAsViewed = async (id: string) => {
-  try {
-    const docRef = doc(db, "ServiceRequests", id);
-    await updateDoc(docRef, { isViewed: true });
-  } catch (error) {
-    console.error("Error marking request as viewed:", error);
-  }
-};
+    // Helpers to manage viewed requests
+      const getViewedRequests = (): string[] => {
+        const data = localStorage.getItem("viewedRequests");
+        return data ? JSON.parse(data) : [];
+      };
+      
+      const markAsViewed = async (id: string) => {
+        try {
+          const docRef = doc(db, "ServiceRequests", id);
+          await updateDoc(docRef, { isViewed: true });
+        } catch (error) {
+          console.error("Error marking request as viewed:", error);
+        }
+    };
     
     useEffect(() => {
       try {
         const Collection = query(
           collection(db, "ServiceRequests"),
+          where("accID", "!=", "INBRGY-REQ"), // Filter for Online requests
           orderBy("createdAt", "desc") // First, sort by latest
         );
 
