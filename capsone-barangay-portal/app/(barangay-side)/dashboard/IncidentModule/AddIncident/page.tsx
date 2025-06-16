@@ -3,12 +3,14 @@ import "@/CSS/IncidentModule/AddNewIncident.css";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ref, uploadBytes } from "firebase/storage";
-import { addDoc, collection} from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where} from "firebase/firestore";
 import { db,storage } from "@/app/db/firebase";
 import {getAllSpecificDocument} from "@/app/helpers/firestorehelper";
 import {isPastDate,isToday,isPastOrCurrentTime, getLocalDateString, isValidPhilippineMobileNumber, getLocalTimeString} from "@/app/helpers/helpers";
 import { useSession } from "next-auth/react";
 import {customAlphabet} from "nanoid";
+import { useRef } from "react";
+
 
 
  interface userProps{
@@ -19,6 +21,8 @@ import {customAlphabet} from "nanoid";
   civilStatus: string;
   address: string;
   contact: string;
+  residentId: string,
+
 }
 
 
@@ -45,6 +49,8 @@ export default function AddIncident() {
     contact: "",
     civilStatus: "",
     address: "",
+    residentId: "",
+
   });
   const [respondent, setRespondent] = useState<userProps>({
     fname: "",
@@ -54,6 +60,8 @@ export default function AddIncident() {
     contact: "",
     civilStatus: "",
     address: "",
+    residentId: "",
+
   });
   const [reportInfo, setReportInfo] = useState<any>({
     caseNumber: "",
@@ -78,12 +86,115 @@ export default function AddIncident() {
 
   useEffect(() => {
     if(!user) return;
+
+    const nameParts = user.fullName.trim().split(" ");
     setdeskStaff({
-      fname: user.fullName.split(" ")[0],
-      lname: user.fullName.split(" ")[1],
+      fname: nameParts[0],
+      lname: nameParts.slice(1).join(" "),
     })
   },[user]);
- 
+
+  const [showFieldErrors, setShowFieldErrors] = useState(false);
+
+  const [showComplainantResidentsPopup, setShowComplainantResidentsPopup] = useState(false);
+  const [showRespondentResidentsPopup, setShowRespondentResidentsPopup] = useState(false);
+  const [residents, setResidents] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const employerPopupRef = useRef<HTMLDivElement>(null);
+
+  const [isComplainantResidentSelected, setIsComplainantResidentSelected] = useState(false);
+  const [isRespondentResidentSelected, setIsRespondentResidentSelected] = useState(false);
+
+
+  // for fetching residents
+  useEffect(() => {
+    const fetchResidents = async () => {
+      try {
+        const residentsCollection = collection(db, "Residents");
+            const residentsSnapshot = await getDocs(residentsCollection);
+            const residentsList = residentsSnapshot.docs.map(doc => {
+                const data = doc.data() as {
+                    residentNumber: string;
+                    firstName: string;
+                    middleName: string;
+                    lastName: string;
+                    address: string;
+                    sex: string;
+                    dateOfBirth: string;
+                    age: number;
+                    identificationFileURL: string
+                };
+    
+                return {
+                    id: doc.id,
+                    ...data
+                };
+            });
+    
+            setResidents(residentsList);
+      } catch (error) {
+        console.error("Error fetching residents:", error);
+      }
+    };
+  
+    fetchResidents();
+  }, []);
+
+    // Show complainant resident popup on input focus
+    const handleComplainantsClick = () => {
+      setShowComplainantResidentsPopup(true);
+    };
+  
+    // Close popup when clicking outside
+    useEffect(() => {
+      const handleClickComplainantOutside = (event: MouseEvent) => {
+        if (
+          employerPopupRef.current &&
+          !employerPopupRef.current.contains(event.target as Node)
+        ) {
+          setShowComplainantResidentsPopup(false);
+        }
+      };
+  
+      document.addEventListener("mousedown", handleClickComplainantOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickComplainantOutside);
+      };
+    }, []);
+
+    const filteredComplainantResidents = residents.filter((resident) =>
+    `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
+  // respondent resident search pop up
+  const handleRespondentsClick = () => {
+    setShowRespondentResidentsPopup(true);
+  };
+
+  // Close popup when clicking outside
+  useEffect(() => {
+    const handleClickRespondentOutside = (event: MouseEvent) => {
+      if (
+        employerPopupRef.current &&
+        !employerPopupRef.current.contains(event.target as Node)
+      ) {
+        setShowRespondentResidentsPopup(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickRespondentOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickRespondentOutside);
+    };
+  }, []);
+
+  const filteredRespondentResidents = residents.filter((resident) =>
+  `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+    .toLowerCase()
+    .includes(searchTerm.toLowerCase())
+);
 
 
   const [reportCollection, setReportCollection] = useState<any[]>([]);
@@ -192,7 +303,7 @@ export default function AddIncident() {
             department: departmentId,
             staffId: user?.id,
             isDialogue: false,
-            hearing:1,
+            hearing:0,
             generatedHearingSummons:0,
             createdAt: new Date(),
             ...(departmentId === "GAD" && { 
@@ -207,6 +318,7 @@ export default function AddIncident() {
                 contact: complainant.contact,
                 civilStatus: complainant.civilStatus,
                 address: complainant.address,
+                residentId: complainant.residentId,
             },
             respondent: {
                 fname: respondent.fname,
@@ -216,6 +328,7 @@ export default function AddIncident() {
                 contact: respondent.contact,
                 civilStatus: respondent.civilStatus,
                 address: respondent.address,
+                residentId: respondent.residentId,
             }
         };
 
@@ -248,70 +361,158 @@ export default function AddIncident() {
        setShowSubmitPopup(false);
             // Save filtered data to Firestore and get the reference
         const docRef = await addDoc(collection(db, "IncidentReports"), filteredData);
-
- 
-    router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&highlight=${docRef.id}`);
-
-
+        return docRef.id;
     } catch (e: any) {
         console.log(e);
     }
 };
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault(); 
+const delayedSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  setTimeout(() => {
+    handleSubmit(e);
+  }, 0); 
+};
+
+const handleSubmit = (event: React.FormEvent) => {
+  event.preventDefault(); 
+
+  console.log("Complainant at submit:", complainant);
+  console.log("Respondent at submit:", respondent);
+  console.log("Report at submit:", reportInfo);
+  console.log("desk staff at submit:", deskStaff);
+
+  setShowFieldErrors(true);
 
 
- 
-    const form = event.target as HTMLFormElement;
-    if (form.checkValidity()) {
-      if(!isValidPhilippineMobileNumber(complainant.contact)|| !isValidPhilippineMobileNumber(respondent.contact)){
-        setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
-        setShowErrorPopup(true);
-        setTimeout(() => setShowErrorPopup(false), 3000);
-        return;
-      }
-      const dateFiled = reportInfo.dateFiled;
-      const dateReceived = reportInfo.dateReceived;
-      const timeFiled = reportInfo.timeFiled;
-      const timeReceived = reportInfo.timeReceived;
+  const form = event.target as HTMLFormElement;
+  if (form.checkValidity()) {
 
-      const dateIsFiledToday= isToday(dateFiled);
-      const timeIsFiledPastOrNow = isPastOrCurrentTime(timeFiled);
-      const dateFiledIsPast = isPastDate(dateFiled);
+    setShowFieldErrors(true); // Activate red borders for invalid fields
 
-      const isInvalid = !dateFiledIsPast &&(!dateIsFiledToday || !timeIsFiledPastOrNow);
-      if (isInvalid) {
-        setPopupErrorMessage("Date and/or Time in Filed Section is Invalid.");
-        setShowErrorPopup(true);
-        setTimeout(() => setShowErrorPopup(false), 3000);
-        return;
-      }
-
-      const dateIsReceivedToday = isToday(dateReceived);
-      const timeIsRecievedPastOrNow = isPastOrCurrentTime(timeReceived);
-      const dateReceivedIsPast = isPastDate(dateReceived);
-      const isInvalidReceived = !dateReceivedIsPast &&(!dateIsReceivedToday || !timeIsRecievedPastOrNow);
-      if (isInvalidReceived) {
-        setPopupErrorMessage("Date and/or Time in Received Section is Invalid.");
-        setShowErrorPopup(true);
-        setTimeout(() => setShowErrorPopup(false), 3000);
-        return;
-      }
-
-
-    
-        setShowSubmitPopup(true);
-     
-    } else {
-     
-      form.reportValidity();
+    // Helper to check if a value is empty (null, undefined, or empty string)
+    const isEmpty = (value: any) =>
+    value === null || value === undefined || value.toString().trim() === "";
+  
+  const isValidPerson = (person: typeof complainant | typeof respondent) =>
+    !isEmpty(person.fname) &&
+    !isEmpty(person.lname) &&
+    !isEmpty(person.sex) &&
+    !isEmpty(person.age) &&
+    !isEmpty(person.civilStatus) &&
+    !isEmpty(person.address) &&
+    !isEmpty(person.contact);
+  
+  // Validate Complainant
+  if (!isValidPerson(complainant)) {
+    setPopupErrorMessage("Please fill out all required complainant fields.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+  
+  // Validate Respondent
+  if (!isValidPerson(respondent)) {
+    setPopupErrorMessage("Please fill out all required respondent fields.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+  
+  
+    // Validate Report Info
+    if (
+      isEmpty(reportInfo.caseNumber) ||
+      isEmpty(reportInfo.dateFiled) ||
+      isEmpty(reportInfo.timeFiled) ||
+      isEmpty(reportInfo.location) ||
+      isEmpty(reportInfo.nature) ||
+      isEmpty(reportInfo.concern) ||
+      isEmpty(reportInfo.status) ||
+      isEmpty(reportInfo.dateReceived) ||
+      isEmpty(reportInfo.timeReceived)
+    ) {
+      setPopupErrorMessage("Please fill out all required fields.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
     }
-  };
+  
+    // If nature is "Other", make sure specifyNature is filled
+    if (reportInfo.nature === "Other" && isEmpty(reportInfo.specifyNature)) {
+      setPopupErrorMessage("Please specify the nature of the concern.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
+  
+    // Validate GAD-specific child counts
+    if (reportInfo.departmentId === "GAD") {
+      if (isEmpty(reportInfo.nosofMaleChildren) || isEmpty(reportInfo.nosofFemaleChildren)) {
+        setPopupErrorMessage("Please provide the number of children for GAD reports.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
+    }
+  
+    // Validate Desk Staff
+    if (isEmpty(deskStaff.fname) || isEmpty(deskStaff.lname)) {
+      setPopupErrorMessage("Please provide the desk staff's full name.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
+
+    if(!isValidPhilippineMobileNumber(complainant.contact)|| !isValidPhilippineMobileNumber(respondent.contact)){
+      setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
+    const dateFiled = reportInfo.dateFiled;
+    const dateReceived = reportInfo.dateReceived;
+    const timeFiled = reportInfo.timeFiled;
+    const timeReceived = reportInfo.timeReceived;
+
+    const dateIsFiledToday= isToday(dateFiled);
+    const timeIsFiledPastOrNow = isPastOrCurrentTime(timeFiled);
+    const dateFiledIsPast = isPastDate(dateFiled);
+
+    const isInvalid = !dateFiledIsPast &&(!dateIsFiledToday || !timeIsFiledPastOrNow);
+    if (isInvalid) {
+      setPopupErrorMessage("Date and/or Time in Filed Section is Invalid.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
+
+    const dateIsReceivedToday = isToday(dateReceived);
+    const timeIsRecievedPastOrNow = isPastOrCurrentTime(timeReceived);
+    const dateReceivedIsPast = isPastDate(dateReceived);
+    const isInvalidReceived = !dateReceivedIsPast &&(!dateIsReceivedToday || !timeIsRecievedPastOrNow);
+    if (isInvalidReceived) {
+      setPopupErrorMessage("Date and/or Time in Received Section is Invalid.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
+
+
+  
+      setShowSubmitPopup(true);
+   
+  } else {
+   
+    form.reportValidity();
+  }
+};
+
+
 
   const handleConfirmSubmit = async () => {
     try {
-      await handleUpload(); // Save to Firestore only when confirmed
+      const docId = await handleUpload();
   
       setPopupMessage("Incident Successfully Submitted!");
       setShowPopup(true);
@@ -320,6 +521,10 @@ export default function AddIncident() {
       setTimeout(() => {
         setShowPopup(false);
         
+        if (docId) {
+          router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
+
+        } 
       }, 3000);
   
     } catch (error) {
@@ -398,6 +603,7 @@ export default function AddIncident() {
         contact: "",
         civilStatus: "",
         address: "",
+        residentId: "",
       });
       setRespondent({
         fname: "",
@@ -407,6 +613,7 @@ export default function AddIncident() {
         contact: "",
         civilStatus: "",
         address: "",
+        residentId: "",
       });
   }
 
@@ -414,6 +621,7 @@ export default function AddIncident() {
     router.back();
   };
 
+  const [activeSection, setActiveSection] = useState("complainant");
 
 
   return (
@@ -423,246 +631,463 @@ export default function AddIncident() {
 
         <div className="main-content-add">
 
-        <button type="button" className="back-button-add" onClick={handleBack}></button>
+       
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={delayedSubmit}>
+
             <div className="section-1-add">
-                <p className="NewOfficial-add"> New Incident</p>
 
-                    <div className="actions-add">
-                        <button  type="button" onClick={deleteForm} className="action-delete-add">Delete</button>
-                        <button type="submit" className="action-view-add" >Save</button>
-                    </div>
-                
+              <div className="section-1-left-side-add">
+
+                <button onClick={handleBack}>
+                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-add"/> 
+                </button>
+
+                <h1> Add New Incident </h1>
+              </div>
+
+                <div className="actions-add">
+                   <button type="submit" className="action-view-add" >Save</button>
+                 </div>
+          
              </div>
-             <input 
-                    type="text" 
-                    className="search-bar-add" 
-                    value={reportInfo.caseNumber}
-                    name="caseNumber"
-                    id="caseNumber"
-                    disabled
+
+
+              <div className="section-1-add-title">
+                  <input 
+                            type="text" 
+                            className="search-bar-add-case" 
+                            value={reportInfo.caseNumber}
+                            name="caseNumber"
+                            id="caseNumber"
+                            disabled
+                            
+                      />
+              </div>
                     
-                    />
-
-             <div className="section-2-add">
-
-                <div className="section-2-left-side-add">
-
-                    <p >Complainant's Information</p>
-                    <p>First Name</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar-add" 
-                    placeholder="Enter Complaint's First Name" 
-                    value={complainant.fname}
-                    name="fname"
-                    id="complainant"
-                    onChange={handleFormChange}
-                    required
-                    />
-                  <p>Last Name</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar-add" 
-                    placeholder="Enter Complaint's First Name" 
-                    value={complainant.lname}
-                    name="lname"
-                    id="complainant"
-                    onChange={handleFormChange}
-                    required
-                    />
-
-                  <p>Sex</p>
-                  <select 
-                    name="sex" 
-                    className="featuredStatus-add" 
-                    required
-                    id="complainant"
-                    value={complainant.sex}
-                    onChange={handleFormChange}
-                    >
-                    <option value="" disabled>Choose A Sex</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-
-
-                    <p>Age</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar-add" 
-                    placeholder="Enter Age" 
-                    value={complainant.age}
-                    name="age"
-                    id="complainant"
-                    onChange={handleFormChange}
-                    required
-                    />
-
-                    <p>Civil Status</p>
-                 
-                    <select   className="search-bar-add"    
-                    value={complainant.civilStatus} 
-                    name="civilStatus"
-                    id="complainant"
-                    onChange={handleFormChange}
-                    required>
-                      <option value="" disabled>Choose A Civil Status</option>
-                      <option value="Single">Single</option>
-                      <option value="Married">Married</option>
-                      <option value="Widowed">Widowed</option>
-                      <option value="Separated">Separated</option>
-                      <option value="Divorced">Divorced</option>
-                      
-                    </select>
-
-                    <p>Address</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar-add" 
-                    placeholder="Enter Address" 
-                    value={complainant.address}
-                    name="address"
-                    id="complainant"
-                    required
-                    onChange={handleFormChange}
-                    />
-
-                    <p>Contact Information</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar-add" 
-                    placeholder="Enter Contact Number" 
-                    value={complainant.contact}
-                    name="contact"
-                    id="complainant"
-                    required
-                    onChange={handleFormChange}
-                    />
-
-                </div>
               
-                <div className="section-2-right-side-add">
-                  
-                <p >Respondent's Information</p>
-                    <p>First Name</p>
+            
+            <div className="add-incident-bottom-section">
 
-                    <input 
-                    type="text" 
-                    className="search-bar-add" 
-                    placeholder="Enter Respondent's First Name" 
-                    value={respondent.fname}
-                    name="fname"
-                    id="respondent"  
-                    required
-                    onChange={handleFormChange}
-                    />
-                  <p>Last Name</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar-add" 
-                    placeholder="Enter Respondent's Last Name" 
-                    value={respondent.lname}
-                    name="lname"
-                    id="respondent"
-                    required
-                    onChange={handleFormChange}
-                    />
-
-                  <p>Sex</p>
-                  <select 
-                    id="respondent"
-                    name="sex" 
-                    className="featuredStatus-add" 
-                    required
-                    value={respondent.sex}
-                    onChange={handleFormChange}
+       
+                <nav className="add-incident-info-toggle-wrapper">
+                {["complainant", "respondent", "others","desk"].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn-add ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
                     >
-                    <option value="" disabled>Choose A Sex</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
+                      {section === "complainant" && "Complainant Info"}
+                      {section === "respondent" && "Respondent Info"}
+                      {section === "others" && "Other Info"}
+                      {section === "desk" && "Desk Officer Info"}
+                    </button>
+                  ))}
+                </nav>
 
 
-                    <p>Age</p>
+            <div className="add-incindent-bottom-section-scroll">
 
-                    <input 
-                    type="text" 
-                    id="respondent"
-                    className="search-bar-add" 
-                    placeholder="Enter Age" 
-                    value={respondent.age}
-                    name="age"
-                    required
-                    onChange={handleFormChange}
-                    />
+            <div className="add-incident-section-2">
 
-                    <p>Civil Status</p>
 
-                    <select   className="search-bar-add"    
-                    value={respondent.civilStatus} 
-                    name="civilStatus"
-                    id="respondent"
-                    onChange={handleFormChange}
-                    required>
-                      <option value="" disabled>Choose A Civil Status</option>
-                      <option value="Single">Single</option>
-                      <option value="Married">Married</option>
-                      <option value="Widowed">Widowed</option>
-                      <option value="Separated">Separated</option>
-                      <option value="Divorced">Divorced</option>
-                      
-                    </select>
+            {activeSection === "complainant" && (
+             <>
 
-                    <p>Address</p>
-
-                    <input 
-                    type="text" 
-                    id="respondent"
-                    className="search-bar-add" 
-                    placeholder="Enter Address" 
-                    value={respondent.address}
-                    name="address"
-                    required
-                    onChange={handleFormChange}
-                    />
-
-                    <p>Contact Information</p>
-
-                    <input 
-                    type="text" 
-                    id="respondent"
-                    className="search-bar-add" 
-                    placeholder="Enter Contact Number" 
-                    value={respondent.contact}
-                    name="contact"
-                    required
-   
-                    onChange={handleFormChange}
-                    />
-                
-
-                </div>
-
+         <div className="input-wrapper">
+              <div className="input-with-clear">
+                <input
+                  type="text"
+                  className="select-resident-input-field"
+                  placeholder="Select Complainant"
+                  onClick={handleComplainantsClick}
+                  value={
+                    isComplainantResidentSelected
+                      ? `${complainant.fname} ${complainant.lname}`
+                      : ''
+                  }
+                  readOnly
+                />
+                {isComplainantResidentSelected && (
+                  <span
+                    className="clear-icon"
+                    title="Click to clear selected complainant"
+                    onClick={() => {
+                      setComplainant({
+                        residentId: '',
+                        fname: '',
+                        lname: '',
+                        sex: '',
+                        age: '',
+                        civilStatus: '',
+                        address: '',
+                        contact: '',
+                      });
+                      setIsComplainantResidentSelected(false);
+                    }}
+                  >
+                    
+                  </span>
+                )}
+              </div>
+              {isComplainantResidentSelected && (
+                <p className="help-text">Click the <strong>×</strong> to clear the selected complainant.</p>
+              )}
             </div>
 
 
-              <div className="section-3-add">
-                <p className="title-add">Other Information</p>
-                
-                <div className="bars-add">
+            <div className="add-incident-full-top">
+
+  
+
+  
+                <div className="add-incident-section-left-side">
+         
+                  <div className="fields-section-add">
+                     <p>Last Name<span className="required">*</span></p>
+                      <input 
+                      type="text" 
+                      className={`add-incident-input-field ${showFieldErrors && !complainant.lname.trim() ? "input-error" : ""}`}
+                      placeholder="Enter Complaint's Last Name" 
+                      value={complainant.lname}
+                      name="lname"
+                      id="complainant"
+                      onChange={handleFormChange}
+                      required
+                      disabled={isComplainantResidentSelected}
+                      />
+                 </div>
+
+                  <div className="fields-section-add">
+                    <p>Sex<span className="required">*</span></p>
+                      <select 
+                      name="sex" 
+                      className={`add-incident-input-field ${showFieldErrors && !complainant.sex.trim() ? "input-error" : ""}`}
+                      required
+                      id="complainant"
+                      value={complainant.sex}
+                      onChange={handleFormChange}
+                      disabled={isComplainantResidentSelected}
+                      >
+                      <option value="" disabled>Choose A Sex</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                  </div>
+
+                  <div className="fields-section-add">
+                      <p>Civil Status<span className="required">*</span></p>              
+                      <select   
+                      className={`add-incident-input-field  ${showFieldErrors && !complainant.civilStatus.trim() ? "input-error" : ""}`}   
+                      value={complainant.civilStatus} 
+                      name="civilStatus"
+                      id="complainant"
+                      onChange={handleFormChange}
+                      disabled={isComplainantResidentSelected}
+                      required>
+                        <option value="" disabled>Choose A Civil Status</option>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Widowed">Widowed</option>
+                        <option value="Separated">Separated</option>
+                        <option value="Divorced">Divorced</option>
+                        
+                      </select>
+
+                  </div>
+
+               
+
+                </div>
+
+                <div className="add-incident-section-right-side">
+
+                  <div className="fields-section-add">
+                       <p>First Name<span className="required">*</span></p>
+                       <input 
+                        type="text" 
+                        className={`add-incident-input-field ${showFieldErrors && !complainant.fname.trim() ? "input-error" : ""}`}
+                        placeholder="Enter Complaint's First Name" 
+                        value={complainant.fname}
+                        name="fname"
+                        id="complainant"
+                        onChange={handleFormChange}
+                        required
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
+
+                  <div className="fields-section-add">
+                       <p>Age<span className="required">*</span></p>
+                       <input 
+                        type="number" 
+                        className={`add-incident-input-field`}
+                        placeholder="Enter Age" 
+                        value={complainant.age}
+                        name="age"
+                        id="complainant"
+                        onChange={handleFormChange}
+                        required
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
+
+                  <div className="fields-section-add">
+                       <p>Address<span className="required">*</span></p>
+                       <input 
+                        type="text" 
+                        className={`add-incident-input-field ${showFieldErrors && !complainant.address.trim() ? "input-error" : ""}`}    
+                        placeholder="Enter Address" 
+                        value={complainant.address}
+                        name="address"
+                        id="complainant"
+                        required
+                        onChange={handleFormChange}
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
+
+                </div>
+
+
+                </div>
+
+                <div className="add-incident-section-bottom-side-2">
+
+                     <div className="fields-section-add">
+                       <p>Contact Information<span className="required">*</span></p>
+                       <input 
+                        type="text" 
+                        className={`add-incident-input-field ${showFieldErrors && !complainant.contact.trim() ? "input-error" : ""}`}   
+                        placeholder="Enter Contact Number" 
+                        value={complainant.contact}
+                        name="contact"
+                        id="complainant"
+                        required
+                        onChange={handleFormChange}
+                        disabled={isComplainantResidentSelected}
+                        />
+                  </div>
                   
-                <div className="input-group-add">
-                    <p>Nature of Complaint</p>
-                    <select 
-                    className="featuredStatus-add" 
+                </div>
+
+
+
+
+                </>
+                      )}
+
+
+            {activeSection === "respondent" && (
+             <>
+           <div className="input-wrapper">
+              <div className="input-with-clear">
+                <input
+                  type="text"
+                  className="select-resident-input-field"
+                  placeholder="Select Respondent"
+                  onClick={handleRespondentsClick}
+                  value={
+                    isRespondentResidentSelected
+                      ? `${respondent.fname} ${respondent.lname}`
+                      : ''
+                  }
+                  readOnly
+                />
+                {isRespondentResidentSelected && (
+                  <span
+                    className="clear-icon"
+                    title="Click to clear selected respondent"
+                    onClick={() => {
+                      setRespondent({
+                        residentId: '',
+                        fname: '',
+                        lname: '',
+                        sex: '',
+                        age: '',
+                        civilStatus: '',
+                        address: '',
+                        contact: '',
+                      });
+                      setIsRespondentResidentSelected(false);
+                    }}
+                  >
+                    ×
+                  </span>
+                )}
+              </div>
+              {isRespondentResidentSelected && (
+                <p className="help-text">
+                  Click the <strong>×</strong> to clear the selected respondent.
+                </p>
+              )}
+            </div>
+
+
+
+                <div className="add-incident-full-top">
+
+
+
+                    <div className="add-incident-section-left-side">
+
+                      <div className="fields-section-add">
+                        <p>Last Name<span className="required">*</span></p>
+                          <input 
+                            type="text" 
+                            className={`add-incident-input-field ${showFieldErrors && !respondent.lname.trim() ? "input-error" : ""}`}   
+                            placeholder="Enter Respondent's Last Name" 
+                            value={respondent.lname}
+                            name="lname"
+                            id="respondent"
+                            required
+                            onChange={handleFormChange}
+                            disabled={isRespondentResidentSelected}
+                            />
+                      </div>
+
+                      <div className="fields-section-add">
+                         <p>Sex<span className="required">*</span></p>
+                         <select 
+                          id="respondent"
+                          name="sex" 
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.sex.trim() ? "input-error" : ""}`}   
+                          required
+                          value={respondent.sex}
+                          onChange={handleFormChange}
+                          disabled={isRespondentResidentSelected}
+                          >
+                          <option value="" disabled>Choose A Sex</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                        </select>
+
+                      </div>
+
+                      <div className="fields-section-add">
+                          <p>Civil Status<span className="required">*</span></p>
+                          <select   
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.civilStatus.trim() ? "input-error" : ""}`}   
+                          value={respondent.civilStatus} 
+                          name="civilStatus"
+                          id="respondent"
+                          onChange={handleFormChange}
+                          required
+                          disabled={isRespondentResidentSelected}
+                          >
+                            <option value="" disabled>Choose A Civil Status</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Widowed">Widowed</option>
+                            <option value="Separated">Separated</option>
+                            <option value="Divorced">Divorced</option>
+                            
+                          </select>
+                      </div>
+
+                   
+
+                    </div>
+
+
+                    <div className="add-incident-section-right-side">
+
+                      <div className="fields-section-add">
+                         <p>First Name<span className="required">*</span></p>
+                         <input 
+                          type="text" 
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.fname.trim() ? "input-error" : ""}`}   
+                          placeholder="Enter Respondent's First Name" 
+                          value={respondent.fname}
+                          name="fname"
+                          id="respondent"  
+                          required
+                          onChange={handleFormChange}
+                          disabled={isRespondentResidentSelected}
+                          />
+                      </div>
+
+                      <div className="fields-section-add">
+                          <p>Age<span className="required">*</span></p>
+                          <input 
+                            type="number" 
+                            id="respondent"
+                            className={`add-incident-input-field`}   
+                            placeholder="Enter Age" 
+                            value={respondent.age}
+                            name="age"
+                            required
+                            onChange={handleFormChange}
+                            disabled={isRespondentResidentSelected}
+
+                            />
+                      </div>
+
+                      <div className="fields-section-add">
+                          <p>Address<span className="required">*</span></p>
+                          <input 
+                            type="text" 
+                            id="respondent"
+                            className={`add-incident-input-field ${showFieldErrors && !respondent.address.trim() ? "input-error" : ""}`}   
+                            placeholder="Enter Address" 
+                            value={respondent.address}
+                            name="address"
+                            required
+                            onChange={handleFormChange}
+                            disabled={isRespondentResidentSelected}
+                            />
+
+
+                      </div>
+                        
+                        
+                    </div>
+
+
+
+                </div>
+
+
+                 <div className="add-incident-section-bottom-side-2">
+                         <div className="fields-section-add">
+                          <p>Contact Information<span className="required">*</span></p>
+                          <input 
+                          type="text" 
+                          id="respondent"
+                          className={`add-incident-input-field ${showFieldErrors && !respondent.contact.trim() ? "input-error" : ""}`}   
+                          placeholder="Enter Contact Number" 
+                          value={respondent.contact}
+                          name="contact"
+                          required
+        
+                          onChange={handleFormChange}
+                          disabled={isRespondentResidentSelected}
+
+                          />
+
+                      </div>
+              
+                  
+                </div>
+              </>
+            )}
+
+              
+
+        {activeSection === "others" && (
+          <>
+
+          <div className="add-incident-full-top">
+            
+
+          <div className="add-incident-section-left-side">
+
+              <div className="fields-section-add">
+                  <p>Nature of Complaint<span className="required">*</span></p>
+
+                  <select 
+                    className="add-incident-input-field" 
                     required
                     id="nature" name="nature" 
                     value={reportInfo.nature}
@@ -671,9 +1096,8 @@ export default function AddIncident() {
                     <option value="" disabled>Choose A Nature of Incident</option>
                     {departmentId === "Lupon" ? 
                     (<>
-                      <option value="Conciliation">Conciliation</option>
-                      <option value="Mediation">Mediation</option>
-                      <option value="Arbitration">Arbitration</option>
+                      <option value="Civil">Civil</option>
+                      <option value="Criminal">Criminal</option>
                       <option value="Others">Others</option>
                     </>): 
                     departmentId === "GAD" ?
@@ -710,74 +1134,188 @@ export default function AddIncident() {
                       <option value="Others">Others: (Trafficking, Prostitution, Violaiton of RA9208)</option>
                     </>)}
                   </select>
-                    
 
                   </div>
-                   {reportInfo.nature === "Others" && 
+
+                  {reportInfo.nature === "Others" && 
                    (<>
-                    <div className="input-group-add">
-                        <p>Specify Nature of Complaint</p>
-                        <input type="text" className="search-bar-add" placeholder="Enter Nature of Complaint" id="specifyNature" name="specifyNature" 
-                        value = {reportInfo.specifyNature} onChange={handleFormChange} required/>
-                    </div>
+                  
+                  <div className="fields-section-add">
+                      <p>Specify Nature of Complaint<span className="required">*</span></p>
+                      <input type="text" className="add-incident-input-field" placeholder="Enter Nature of Complaint" id="specifyNature" name="specifyNature" 
+                      value = {reportInfo.specifyNature} onChange={handleFormChange} required/>
+                  </div>
+                       
                    </>)}
 
-                    <div className="input-group-add">
-                        <p>Date Filed</p>
-                        <input type="date" className="search-bar-add" max={currentDate} id="dateFiled" name="dateFiled" 
-                        value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
-                    </div>
-
-                    <div className="input-group-add">
-                        <p>Time Filed</p>
-                        <input type="time" className="search-bar-add" id="timeFiled" name="timeFiled" 
+                   <div className="fields-section-add">
+                        <p>Time Filed<span className="required">*</span></p>
+                        <input type="time" className="add-incident-input-field" id="timeFiled" name="timeFiled" 
                         value = {reportInfo.timeFiled} onChange={handleFormChange} required />
+                   </div>
+
+
+                   <div className="fields-section-add">
+                  <p>Date Filed<span className="required">*</span></p>
+                  <input type="date" className="add-incident-input-field" max={currentDate} id="dateFiled" name="dateFiled" 
+                    value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
+              </div>
+
+              <div className="fields-section-add">
+                  <p>Location<span className="required">*</span></p>
+                  <input type="text" className="add-incident-input-field" placeholder="Enter Location" id="location" name="location" 
+                  value = {reportInfo.location} onChange={handleFormChange} required />
+
+              </div>
+
+
+          
+          </div>
+
+
+          <div className="add-incident-section-right-side">
+
+
+          <div className="box-container-outer-proof">
+                    <div className="title-proof">
+                          Proof of Incident
                     </div>
 
-                    <div className="input-group-add">
-                        <p>Location</p>
-                        <input type="text" className="search-bar-add" placeholder="Enter Location" id="location" name="location" 
-                        value = {reportInfo.location} onChange={handleFormChange} required />
-                    </div>
+                    <div className="box-container-proof">
 
-                    {departmentId === "GAD" && (
-                      <div>
-                        <div className="input-group-add">
-                          <p>Nos of Male Children Victim/s</p>
-                          <input type="number" 
-                          className="search-bar-add"
-                          min="0"
-                          value={reportInfo.nosofMaleChildren}
-                          name="nosofMaleChildren"
-                          onChange={handleFormChange}
-                          required />    
+                    <div className="file-upload-container-add">
+                          <label htmlFor="file-upload1" className="upload-link-add">Click to Upload File</label>
+                          <input
+                            id="file-upload1"
+                            type="file"
+                            className="file-upload-input-add"
+                            accept=".jpg,.jpeg,.png"
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              handleFileChangeContainer1(e);
+                              handleFormChange(e);
+                            }} // Handle file selection
+                          />
+                          <div className="uploadedFiles-container-add">
+                              {filesContainer1.length > 0 && (
+                                <div className="file-name-image-display-add">
+                                  <ul>
+                                    {filesContainer1.map((file, index) => (
+                                      <div className="file-name-image-display-indiv-add" key={index}>
+                                        <li>
+                                          {file.preview && (
+                                            <div className="filename-image-container-add">
+                                              <img
+                                                src={file.preview}
+                                                alt={file.name}
+                                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                              />
+                                            </div>
+                                          )}
+                                          {file.name}
+                                          <div className="delete-container-add">
+                                            <button
+                                              type="button"
+                                              onClick={() => handleFileDeleteContainer1()}
+                                              className="delete-button-add"
+                                            >
+                                              <img
+                                                src="/images/trash.png"
+                                                alt="Delete"
+                                                className="delete-icon-add"
+                                              />
+                                            </button>
+                                          </div>
+                                        </li>
+                                      </div>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                          </div>
                         </div>
 
-                        <div className="input-group-add">
-                          <p>Nos of Female Children Victim/s</p>
-                          <input type="number"
-                            className="search-bar-add"
-                            min="0"
-                            value={reportInfo.nosofFemaleChildren}
-                            name="nosofFemaleChildren"
+                    </div>
+
+
+              </div>
+
+          </div>
+
+          </div>
+
+
+        {departmentId === "GAD" && (
+                  <div className="add-incident-GAD-section">
+            
+                                <div className="fields-section-add">
+                                  <p>Nos of Male Children Victim/s<span className="required">*</span></p>
+                                  <input type="number" 
+                                  className="add-incident-input-field"
+                                  min="0"
+                                  value={reportInfo.nosofMaleChildren}
+                                  name="nosofMaleChildren"
+                                  onChange={handleFormChange}
+                                  required />    
+                                </div>
+
+                                <div className="fields-section-add">
+                                  <p>Nos of Female Children Victim/s<span className="required">*</span></p>
+                                  <input type="number"
+                                    className="add-incident-input-field"
+                                    min="0"
+                                    value={reportInfo.nosofFemaleChildren}
+                                    name="nosofFemaleChildren"  
+                                    onChange={handleFormChange}
+                                    required />    
+                                </div>
+                  </div>
+        )}
+
+
+          <div className="add-incident-section-bottom-side">
+
+            <div className="box-container-outer-resclassification-add">
+                    <div className="title-remarks-add">
+                        <p>Nature of Facts<span className="required">*</span></p>
+                    </div>
+
+                    <div className="box-container-remarks-add">
+                    <textarea 
+                            required
+                            placeholder="Enter Nature of Facts of the Complaint"
+                            value={reportInfo.concern}
+                            id="concern"
+                            name="concern"
                             onChange={handleFormChange}
-                            required />    
-                        </div>
+                            rows={15}
+                  ></textarea>
 
-                      </div>
-                    )}
-                </div>
-                
-                <p className="title-add">Complainant/s Recieved By</p>
-                <div className="bars-add">
-                
-                  <div className="input-group-add">
+                    </div>
+                      
+                      
 
-                    <p>Desk Officer First Name</p>
+            </div>
+                  
 
-                    <input 
+            </div>
+
+
+
+          </>
+        )}
+
+      {activeSection === "desk" && (
+          <>
+
+      <div className="add-incident-full-top">
+
+          <div className="add-incident-section-left-side">
+
+              <div className="fields-section-add">
+                  <p>Desk Officer First Name<span className="required">*</span></p>
+                  <input 
                     type="text" 
-                    className="search-bar-add" 
+                    className="add-incident-input-field" 
                     placeholder="Enter Desk Officer First Name" 
                     id="staff"
                     disabled
@@ -785,15 +1323,25 @@ export default function AddIncident() {
                     value = {deskStaff.fname} onChange={handleFormChange}
                     />
 
-                  </div>
+              </div>
 
-                   <div className="input-group-add">
+              <div className="fields-section-add">
+                  <p>Date Received<span className="required">*</span></p>                    
+                  <input type="date" className="add-incident-input-field" max={currentDate}  id="dateReceived" name="dateReceived" 
+                  value = {reportInfo.dateReceived} onChange={handleFormChange} disabled/>
 
-                    <p>Desk Officer Last Name</p>
+              </div>
 
+          </div>
+
+
+            <div className="add-incident-section-right-side">
+
+                <div className="fields-section-add">
+                    <p>Desk Officer Last Name<span className="required">*</span></p>
                     <input 
                     type="text" 
-                    className="search-bar-add" 
+                    className="add-incident-input-field" 
                     placeholder="Enter Desk Officer Last Name" 
                     id="staff"
                     disabled
@@ -801,114 +1349,31 @@ export default function AddIncident() {
                     value = {deskStaff.lname} onChange={handleFormChange}
                     />
 
-                  </div> 
-                            
-                  <div className="input-group-add">
-                        <p>Date Received</p>
-                        <input type="date" className="search-bar-add" max={currentDate}  id="dateReceived" name="dateReceived" 
-                        value = {reportInfo.dateReceived} onChange={handleFormChange} disabled/>
-                    </div>
-
-                    <div className="input-group-add">
-                        <p>Time Received</p>
-                        <input type="time" className="search-bar-add" id="timeReceived" name="timeReceived" 
-                        value = {reportInfo.timeReceived} onChange={handleFormChange} disabled />
-                    </div>
-
-
                 </div>
-                   
-            </div>
 
 
-
-            <div className="section-4-add">
-
-                <div className="section-4-left-side-add">
-
-                  <div className="fields-section-add">
-                              <p>Nature of Facts</p>
-                                  <textarea 
-                                      className="description-add" 
-                                      required
-                                      placeholder="Enter Nature of Facts of the Complaint"
-                                      value={reportInfo.concern}
-                                      id="concern"
-                                      name="concern"
-                                      onChange={handleFormChange}
-                                      rows={15}
-                               ></textarea>
-                    </div>
-
-                 </div>
-
-            <div className="section-4-right-side-add">
-              
-              
-            <div className="title-add">
-                     <p> Photo of the Incident (if Applicable)</p>
-               </div> 
- 
-               <div className="file-upload-container-add">
-                 <label htmlFor="file-upload1" className="upload-link-add">Click to Upload File</label>
-                 <input
-                   id="file-upload1"
-                   type="file"
-                   className="file-upload-input-add"
-                   accept=".jpg,.jpeg,.png"
-                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                     handleFileChangeContainer1(e);
-                     handleFormChange(e);
-                   }} // Handle file selection
-                 />
-                 <div className="uploadedFiles-container-add">
-                    {filesContainer1.length > 0 && (
-                      <div className="file-name-image-display-add">
-                        <ul>
-                          {filesContainer1.map((file, index) => (
-                            <div className="file-name-image-display-indiv-add" key={index}>
-                              <li>
-                                {file.preview && (
-                                  <div className="filename-image-container-add">
-                                    <img
-                                      src={file.preview}
-                                      alt={file.name}
-                                      style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                    />
-                                  </div>
-                                )}
-                                {file.name}
-                                <div className="delete-container-add">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleFileDeleteContainer1()}
-                                    className="delete-button-add"
-                                  >
-                                    <img
-                                      src="/images/trash.png"
-                                      alt="Delete"
-                                      className="delete-icon-add"
-                                    />
-                                  </button>
-                                </div>
-                              </li>
-                            </div>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                 </div>
-               </div>
-               
+                <div className="fields-section-add">
+                     <p>Time Received<span className="required">*</span></p>
+                     <input type="time" className="add-incident-input-field" id="timeReceived" name="timeReceived" 
+                        value = {reportInfo.timeReceived} onChange={handleFormChange} disabled />
+                </div>
 
             </div>
-                
 
-          </div>
+
+      </div>
+
+
+        </>
+        )}
+              
+      
+  
+          
            
-
-
-
+          </div>
+                         </div> 
+          </div>
         </form>
 
         </div> 
@@ -916,6 +1381,7 @@ export default function AddIncident() {
         {showSubmitPopup && (
                         <div className="confirmation-popup-overlay-add">
                             <div className="confirmation-popup-add">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to submit?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
@@ -926,7 +1392,7 @@ export default function AddIncident() {
         )}
 
         {showPopup && (
-                <div className={`popup-overlay-add show`}>
+                <div className={`popup-overlay-add-incident show`}>
                     <div className="popup-add">
                       <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                       <p>{popupMessage}</p>
@@ -935,7 +1401,7 @@ export default function AddIncident() {
                 )}
 
         {showErrorPopup && (
-                <div className={`error-popup-overlay-add show`}>
+                <div className={`popup-overlay-error show`}>
                     <div className="popup-add">
                       <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                       <p>{popupErrorMessage}</p>
@@ -943,6 +1409,161 @@ export default function AddIncident() {
                 </div>
                 )}
 
+
+ {/* for complainant search popup */}
+{showComplainantResidentsPopup && (
+      <div className="kasambahay-employer-popup-overlay">
+        <div className="kasambahay-employer-popup" ref={employerPopupRef}>
+          <h2>Residents List</h2>
+          <h1>* Please select Resident's Name *</h1>
+
+          <input
+            type="text"
+            placeholder="Search Resident's Name"
+            className="employer-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <div className="employers-list">
+            {residents.length === 0 ? (
+              <p>No residents found.</p>
+            ) : (
+              <table className="employers-table">
+                <thead>
+                  <tr>
+                    <th>Resident Number</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Last Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {filteredComplainantResidents.map((resident) => (
+            <tr
+              key={resident.id}
+              className="employers-table-row"
+              onClick={async () => {
+                try {
+                  
+                  setComplainant({
+                    ...complainant,
+                    residentId: resident.id,
+                    lname: resident.lastName || '',
+                    fname: resident.firstName || '',
+                    sex: resident.sex || '',
+                    age: resident.age || '',
+                    civilStatus: resident.civilStatus || '',
+                    address: resident.address || '',
+                    contact: resident.contactNumber || '',
+                  });
+                  setIsComplainantResidentSelected(true);
+                  setShowComplainantResidentsPopup(false);
+
+                  setTimeout(() => {
+                    console.log("Complainant updated:", resident);
+                  }, 0);
+                } catch (error) {
+                  setPopupErrorMessage("An error occurred. Please try again.");
+                  setShowErrorPopup(true);
+                  setTimeout(() => {
+                    setShowErrorPopup(false);
+                  }, 3000);
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <td>{resident.residentNumber}</td>
+              <td>{resident.firstName}</td>
+              <td>{resident.middleName}</td>
+              <td>{resident.lastName}</td>
+            </tr>
+          ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+
+ {/* for respondent search popup */}
+      {showRespondentResidentsPopup && (
+      <div className="kasambahay-employer-popup-overlay">
+        <div className="kasambahay-employer-popup" ref={employerPopupRef}>
+          <h2>Residents List</h2>
+          <h1>* Please select Respondent's Name *</h1>
+
+          <input
+            type="text"
+            placeholder="Search Resident's Name"
+            className="employer-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <div className="employers-list">
+            {residents.length === 0 ? (
+              <p>No residents found.</p>
+            ) : (
+              <table className="employers-table">
+                <thead>
+                  <tr>
+                    <th>Resident Number</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Last Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {filteredRespondentResidents.map((resident) => (
+            <tr
+              key={resident.id}
+              className="employers-table-row"
+              onClick={async () => {
+                try {
+                  
+                  setRespondent({
+                    ...respondent,
+                    residentId: resident.id,
+                    lname: resident.lastName || '',
+                    fname: resident.firstName || '',
+                    sex: resident.sex || '',
+                    age: resident.age || '',
+                    civilStatus: resident.civilStatus || '',
+                    address: resident.address || '',
+                    contact: resident.contactNumber || '',
+                  });
+                  setIsRespondentResidentSelected(true);
+                  setShowRespondentResidentsPopup(false);
+
+                  setTimeout(() => {
+                    console.log("Respondent updated:", resident);
+                  }, 0);
+                } catch (error) {
+                  setPopupErrorMessage("An error occurred. Please try again.");
+                  setShowErrorPopup(true);
+                  setTimeout(() => {
+                    setShowErrorPopup(false);
+                  }, 3000);
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <td>{resident.residentNumber}</td>
+              <td>{resident.firstName}</td>
+              <td>{resident.middleName}</td>
+              <td>{resident.lastName}</td>
+            </tr>
+          ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+      
 
     
     </main>

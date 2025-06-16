@@ -7,8 +7,9 @@ import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
 import { getLocalDateString, getLocalDateTimeString } from "@/app/helpers/helpers";
 import Letter from "@/app/(barangay-side)/components/letterForm"
+import { getSpecificDocument, generateDownloadLink } from "../../../../../helpers/firestorehelper";
 
-export default function GenerateDialougeLetter() {
+export default function GenerateDialogueLetter() {
     const user = useSession().data?.user;
     const searchParam = useSearchParams();
     const docId = searchParam.get("id")?.split("?")[0];
@@ -17,6 +18,24 @@ export default function GenerateDialougeLetter() {
     const [listOfStaffs, setListOfStaffs] = useState<any[]>([]);
     const [userInfo, setUserInfo] = useState<any | null>(null);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+    const [showSubmitPopup, setShowSubmitPopup] = useState<{ show: boolean; message: string; message2: string; letterType?: "dialogue" | "summon" }>({
+        show: false,
+        message: "",
+        message2: "",
+        letterType: undefined,
+    });
+
+
+    const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
+    const [hasSummonLetter, setHasSummonLetter] = useState(false);
+    const [reportData, setReportData] = useState<any>();
+    const [isDialogueSectionFilled, setIsDialogueSectionFilled] = useState(false);
+
+
+  
+    const [isLoading, setIsLoading] = useState(false);
+
+
     
     const [otherInfo, setOtherInfo] = useState({
         DateOfDelivery: "",
@@ -60,6 +79,23 @@ export default function GenerateDialougeLetter() {
         }
         fetchStaffList();
     },[]);
+
+
+    useEffect(() => {
+        if (!docId) return; // or use `id` or whatever your incident ID is called
+        const docRef = doc(db, "IncidentReports", docId, "DialogueMeeting", docId);
+      
+        const unsubscribe = onSnapshot(docRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.filled === true) {
+              setIsDialogueSectionFilled(true);
+            }
+          }
+        });
+      
+        return () => unsubscribe();
+      }, [docId]);
 
     useEffect(() => {
         if(!docId) return;
@@ -145,6 +181,8 @@ export default function GenerateDialougeLetter() {
  
     const sendSMSForDialogue = async () => {
      //dont forget to add the assing staff contact number
+       setIsLoading(true); // Start loading
+
 
       try{
         const response = await fetch("/api/clickSendApi", {
@@ -154,8 +192,7 @@ export default function GenerateDialougeLetter() {
             },
             body: JSON.stringify({
                 to: otherInfo.complainant.contact,
-                message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, a dialogue invitation will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
-                Please wait for the invitation. Thank you!`
+                message: `Good day Mr./Ms. ${otherInfo.complainant.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a dialogue invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled dialogue between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.\n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
             })
         });
         if (!response.ok) throw new Error("Failed to send SMS");
@@ -171,18 +208,29 @@ export default function GenerateDialougeLetter() {
             },
             body: JSON.stringify({
                 to: otherInfo.respondent.contact,
-                message: `Hello Mr/Ms. ${otherInfo.respondent.fname}, a dialogue invitation will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
-                Please wait for the invitation. Thank you!`
+               message: `Good day Mr./Ms. ${otherInfo.respondent.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a dialogue invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled dialogue between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.\n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
             })
         });
         if (!responseB.ok) throw new Error("Failed to send SMS");
+
+           setShowSubmitPopup({
+                show: true,
+                message: "SMS message for both parties sent succesfuly!",
+                message2: "",
+                letterType: "dialogue",
+            });
+
 
         const dataB = await responseB.json();
         console.log(dataB);
       }
       catch(err) {
         console.log(err);
-      }  
+      }  finally {  //ADDED
+             setTimeout(() => {
+            setIsLoading(false); // End loading after 2 seconds
+        }, 2000);
+       }
       
     }
 
@@ -195,8 +243,7 @@ export default function GenerateDialougeLetter() {
               },
               body: JSON.stringify({
                   to: otherInfo.respondent.contact,
-                  message: `Hello Mr/Ms. ${otherInfo.respondent.fname}, a summons will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
-                Please wait for the invitation. Thank you!`
+                     message: `Good day Mr./Ms. ${otherInfo.respondent.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a Hearing invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled hearing between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.\n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
               })
           });
           if (!response.ok) throw new Error("Failed to send SMS");
@@ -211,22 +258,36 @@ export default function GenerateDialougeLetter() {
             },
             body: JSON.stringify({
                 to: otherInfo.complainant.contact,
-                message: `Hello Mr/Ms. ${otherInfo.complainant.fname}, a summons will be deliver to you by ${otherInfo.LuponStaff} at ${otherInfo.DateOfDelivery}.
-              Please wait for the invitation. Thank you!`
+                 message: `Good day Mr./Ms. ${otherInfo.complainant.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a Hearing invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled hearing between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.\n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
             })
         });
         if (!responseB.ok) throw new Error("Failed to send SMS");
+
+              setShowSubmitPopup({
+                show: true,
+                message: "SMS message for both parties sent succesfuly!",
+                message2: "",
+                letterType: "summon",
+            });
+
 
         const dataB = await responseB.json();
         console.log(dataB);
         }
         catch(err) {
           console.log(err);
-        }  
+        }   finally {  //ADDED
+             setTimeout(() => {
+            setIsLoading(false); // End loading after 2 seconds
+        }, 2000);
+       }
     }
   
 
-    const printDialouge = async () => {
+    const printDialogue = async () => {
+         setIsLoading(true); // Start loading
+
+
         const day = otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[2];    
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const monthIndex = parseInt(otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[1], 10) - 1;
@@ -251,7 +312,6 @@ export default function GenerateDialougeLetter() {
             collective = "Gabi"; // Evening
         }
         
-
         try {
             const response = await fetch("/api/fillPDF", {
                 method: "POST",
@@ -288,12 +348,28 @@ export default function GenerateDialougeLetter() {
             a.download = "DialogueLetter.pdf";
             a.click();
             window.URL.revokeObjectURL(url);
+
+            setShowSubmitPopup({
+                show: true,
+                message: "Dialogue Letter has been generated successfully!",
+                message2: "Next: Complete the dialogue section after the meeting.",
+                letterType: "dialogue",
+            });
+
             
+                        
         } catch (error) {
             console.error(error)
-        }
+        } finally {  //ADDED
+             setTimeout(() => {
+            setIsLoading(false); // End loading after 2 seconds
+        }, 2000);
+       }
     }
     const printSummon = async () => {
+
+        setIsLoading(true); // Start loading
+
         const day = otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[2];
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const monthIndex = parseInt(otherInfo.DateTimeOfMeeting.split("T")[0].split("-")[1], 10) - 1;
@@ -368,13 +444,47 @@ export default function GenerateDialougeLetter() {
         a.download = "SummonLetter.pdf";
         a.click();
         window.URL.revokeObjectURL(url);
+
+          setShowSubmitPopup({
+                show: true,
+                message: "Summon Letter has been generated successfully!",
+                message2: "Next: Complete the hearing section after the meeting",
+                letterType: "summon",
+            });
+
        }
        catch(e:any){
         console.log()
-       } 
+       } finally {  //ADDED
+             setTimeout(() => {
+            setIsLoading(false); // End loading after 2 seconds
+        }, 2000);
+       }
     
     }
     
+    useEffect(() => {
+        const fetchSummonLetterStatus = async () => {
+          try {
+            if (!docId) return; // Ensure docId is loaded
+      
+            const lettersRef = collection(db, "IncidentReports", docId, "GeneratedLetters");
+      
+            const q = query(lettersRef, where("letterType", "==", "summon"));
+            const snapshot = await getDocs(q);
+      
+            if (!snapshot.empty) {
+              setHasSummonLetter(true);
+            } else {
+              setHasSummonLetter(false); // Optional fallback
+            }
+          } catch (error) {
+            console.error("Error checking summon letters:", error);
+          }
+        };
+      
+        fetchSummonLetterStatus();
+      }, [docId]);
 
     const handleIsDialogue = async () => {
         try {
@@ -438,19 +548,19 @@ export default function GenerateDialougeLetter() {
         const action = e.nativeEvent.submitter.name;
         
         if(delivery > meeting){
-            setErrorPopup({ show: true, message: "Date of Delivery must be earlier than Date of Meeting" });
+            setErrorPopup({ show: true, message: "Delivery Date must be before Meeting Date." });
             return;
         }
         if (action === "print") {
             if(actionId === "summon"){
                 handleIsHearing();
-                // printSummon()
+                 printSummon()
             }
             else{
                 handleIsDialogue();
-                // printDialouge()
+                 printDialogue()
             }
-            //clearForm();
+            clearForm();
         } else if (action === "sendSMS") {
             if(actionId === "summon"){
                 //sendSMSForSummons();
@@ -501,254 +611,530 @@ export default function GenerateDialougeLetter() {
         })
     }
     
-console.log(safeData);
-console.log(safeData.length)
+    console.log(safeData);
+    console.log(safeData.length)
+
+
+    useEffect(() => {
+        if(docId){
+          getSpecificDocument("IncidentReports", docId, setReportData).then(() => setLoading(false));
+        }
+        else{
+          console.log("No document ID provided.");
+          setReportData(null);
+         
+        }
+      }, [docId]);
+  
+      useEffect(() => {
+        if(reportData?.file){
+          generateDownloadLink(reportData?.file, "IncidentReports").then(url => {
+            if (url) setconcernImageUrl(url);
+          });
+        }
+      },[reportData]);
+
+    const handleInformationSection = (e:any) => {
+        router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
+    };
+
+    const handleGenerateLetterAndInvitation = (e:any) => {
+        const action = e.currentTarget.name;
+        router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}?action=${action}`);
+    };
+  
+    const handleDialogueSection = () => {
+        router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
+    };
+
+    const handleHearingSection = () => {
+        router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
+    };
+
+const hearingLabels = ["First", "Second", "Third"];
+const hearingB = hearingLabels[hearing] || "First";
+
   return (
-    <main className="main-container">
+    <main className="main-container-letter">
+
+
         {errorPopup.show && (
-              <div className="popup-overlay error">
-                  <div className="popup">
+              <div className={'popup-overlay-error show'}>
+                  <div className="popup-letter">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert-letter"/>
                       <p>{errorPopup.message}</p>
-                      <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
                   </div>
               </div>
         )}
-        <div className="main-content">
-            <div className="section-1">
-                <button type="button" className="back-button" onClick={handleAddLupon}></button>
-                {actionId === "summon" ? <p className="NewOfficial">Summon Letter ({hearing} Hearing)</p> : <p className="NewOfficial">Dialouge Letter</p>}
+
+
+
+            {showSubmitPopup.show && (
+            <div className="popup-backdrop">
+                <div className="popup-content">
+                    
+                        <img
+                            src="/Images/check.png"
+                            alt="warning icon"
+                            className="successful-icon-popup-letter"
+                        />
+                        <p>{showSubmitPopup.message}</p>
+                        <h2>{showSubmitPopup.message2}</h2>
+        
+                <button
+                    onClick={() => {
+                    setShowSubmitPopup({ show: false, message: "", message2: "",letterType: undefined });
+                    if (showSubmitPopup.letterType === "dialogue") {
+                        router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
+                    } else if (showSubmitPopup.letterType === "summon") {
+                        router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
+                    } else {
+                        router.back();
+                    }
+                    }}
+                    className="close-button-letter"
+                >
+                    Close
+                </button>
+                </div>
+            </div>
+            )}
+
+            {isLoading && (
+                    <div className="popup-backdrop">
+                        <div className="popup-content">
+                            <img src="/Images/loading.png" alt="loading..." className="successful-icon-popup-letter" />
+                            <p>Generating letter, please wait...</p>
+                        </div>
+                    </div>
+                )}
+
+
+
+        {/*
+               <div className="main-content-title-section">
+            <div className="main-content-title-section-1">
+                <h1>Generate Letter</h1>
+            </div>
+          
+       </div> 
+        */}
+
+            <div className="edit-incident-redirectionpage-section">
+                <button className="edit-incident-redirection-buttons" onClick={handleInformationSection}>
+                    <div className="edit-incident-redirection-icons-section">
+                    <img src="/images/profile-user.png" alt="user info" className="redirection-icons-info" /> 
+                    </div>
+                    <h1>Incident Information</h1>
+                </button>
+
+                <div className="dialogue-dropdown">
+                    <button
+                        className={
+                            actionId === "dialogue"
+                              ? "edit-incident-redirection-buttons-selected-dialogue-hearing"
+                              : "edit-incident-redirection-buttons"
+                        }
+                    >
+                        <div className="edit-incident-redirection-icons-section">
+                            <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue" /> 
+                        </div>
+                        <h1>Dialogue Meeting</h1>
+                    </button>
+
+                    <div className="dialogue-submenu">
+                    <button className="submenu-button" name="dialogue" onClick={handleGenerateLetterAndInvitation}>
+                        <h1>Generate Dialogue Letters</h1>
+                    </button>
+
+                    {reportData?.isDialogue ? (
+                        <button className="submenu-button" name="section" onClick={handleDialogueSection}>
+                        <h1>Dialogue Section</h1>
+                        </button>
+                    ) : (
+                        <button
+                        className="submenu-button"
+                        name="section"
+                        onClick={() => {
+                            setErrorPopup({ show: true, message: "Generate a Dialogue Letter First." });
+                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                        }}
+                        >
+                        <h1>Dialogue Section</h1>
+                        </button>
+                    )}
+                    </div>
+                </div>
+
+                <div className="hearing-dropdown">
+                    <button
+                        className={
+                            actionId === "summon"
+                              ? "edit-incident-redirection-buttons-selected-dialogue-hearing"
+                              : "edit-incident-redirection-buttons"
+                        }
+                    >
+                    <div className="edit-incident-redirection-icons-section">
+                        <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing" /> 
+                    </div>
+                    <h1>Hearing Section</h1>
+                    </button>
+
+                    <div className="hearing-submenu">
+                    {reportData?.isDialogue ? (
+                        isDialogueSectionFilled ? (
+                        <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
+                            <h1>Generate Summon Letters</h1>
+                        </button>
+                        ) : (
+                        <button
+                            className="submenu-button"
+                            name="summon"
+                            onClick={() => {
+                            setErrorPopup({ show: true, message: "Fill out the Dialogue Section first." });
+                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                            }}
+                        >
+                            <h1>Generate Summon Letters</h1>
+                        </button>
+                        )
+                    ) : (
+                        <button
+                        className="submenu-button"
+                        name="summon"
+                        onClick={() => {
+                            setErrorPopup({ show: true, message: "Generate a Dialogue Letter First." });
+                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                        }}
+                        >
+                        <h1>Generate Summon Letters</h1>
+                        </button>
+                    )}
+
+                    {hasSummonLetter ? (
+                        <button className="submenu-button" name="section" onClick={handleHearingSection}>
+                        <h1>Hearing Section</h1>
+                        </button>
+                    ) : (
+                        <button
+                        className="submenu-button"
+                        name="section"
+                        onClick={() => {
+                            setErrorPopup({ show: true, message: "Generate a Summon Letter First." });
+                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                        }}
+                        >
+                        <h1>Hearing Section</h1>
+                        </button>
+                    )}
+                    </div>
+                </div>
+            </div>
+    
+
+
+        <div className="main-content-letter">
+        <form onSubmit={onSubmit}>
+
+            <div className="section-1-letter">
+
+                <div className="section-left-side-letter">
+                    <button type="button" onClick={handleAddLupon}>
+                        <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-letter"/> 
+                    </button>
+
+                      {actionId === "summon" ? <h1 className="NewOfficial">Summon Letter ({hearingB} Hearing)</h1> : <h1 className="NewOfficial">Dialogue Letter</h1>}
+                </div>
+            
+            
+                <div className="actions-letter">
+                          {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
+                        {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Generate Letter</button>)}
+                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
+                </div>
 
              </div>
 
-             <form onSubmit={onSubmit}>
-             <div className="section-2">
+       
+             <div className="section-2-letter">
 
-                <div className="section-2-left-side">
-
-                    <p >Complainant's Information</p>
-                    <p>Name</p>
-
-                    <input 
-                        type="text" 
-                        className="search-bar" 
-                        placeholder={otherInfo.complainant.fname}
-                        value={otherInfo.complainant.fname}
-                        id="complainant.fname"
-                        name="complainant.fname"
-                        disabled
-                    />
-
-                    <p>Address</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder= {otherInfo.complainant.address}
-                    value={otherInfo.complainant.address}
-                    id="complainant.address"
-                    name="complainant.address"
-                    disabled
-                    />
-                    
-                    <p>Contact Nos</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder= {otherInfo.complainant.contact}
-                    value={otherInfo.complainant.contact}
-                    id="complainant.contact"
-                    name="complainant.contact"
-                    disabled
-                    />
-
-                </div>
-
-                <div className="section-2-right-side">
-
-                    <p>Respondent's Information</p>
-                    
-                    <p>Name</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder={otherInfo.respondent.fname}
-                    value={otherInfo.respondent.fname}
-                    id="respondent.fname"
-                    name="respondent.fname"
-                    disabled
-                    />
-
-                    <p>Address</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder= {otherInfo.respondent.address}
-                    value={otherInfo.respondent.address}
-                    id="respondent.address"
-                    name="respondent.address"
-                    disabled
-                    />
-                
-
-                    <p>Contact Nos</p>
-
-                    <input 
-                    type="text" 
-                    className="search-bar" 
-                    placeholder= {otherInfo.respondent.contact}
-                    value={otherInfo.respondent.contact}
-                    id="respondent.contact"
-                    name="respondent.contact"
-                    disabled
-                    />
-                </div>
-            </div>
-
-
-              <div className="section-3">
-                <p className="title">Other Information</p>
-                {actionId === "dialogue" ? (<>
-                    <div className="bars">
-                        <div className="input-group">
-                            <p>Date of Delivery</p>
-                            <input type="date" className="search-bar" placeholder="Enter Date of Delivery" 
-                            value={safeData[0]?.DateOfDelivery||otherInfo.DateOfDelivery}
-                            id="DateOfDelivery"
-                            name="DateOfDelivery"
-                            min={today}
-                            onKeyDown={(e) => e.preventDefault()}
-                            onChange={handleChange}
-                            required
-                            disabled = {safeData[0]?.DateOfDelivery ? true : false}
-                            />
-                        </div>
-                        
-                        <div className="input-group">
-                            <p>Date and Time of Meeting</p>
-                            <input type="datetime-local" className="search-bar" 
-                            value={safeData[0]?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
-                            onKeyDown={(e) => e.preventDefault()}
-                            id="DateTimeOfMeeting"
-                            name="DateTimeOfMeeting"
-                            onChange={handleChange}
-                            min={todayWithTime}
-                            required
-                            disabled = {safeData[0]?.DateTimeOfMeeting ? true : false}
-                            />
-                            
-                        </div>
-
-                    </div>
-
-                    <div className="bars">
-                        <div className="input-group">
-                            {/* change into drop box */}
-                            <p>Delivered By</p>
-                            <select className="search-bar" value={safeData[0]?.LuponStaff||otherInfo.LuponStaff}
-                            id="LuponStaff"
-                            name="LuponStaff"
-                            onChange={handleChange}
-                            required
-                            disabled = {safeData[0]?.LuponStaff ? true : false}
-                            >
-                                <option value="">Select Official/Kagawad</option>
-                                {listOfStaffs.map((staff, index) => (
-                                    <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
-                                        {staff.firstName} {staff.lastName}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="input-group">
-                            <p>Date Filed</p>
-                            <input type="date" className="search-bar" 
-                            value={otherInfo.DateFiled}
-                            max={today}
-                            id="DateFiled"
-                            name="DateFiled"
-                            onKeyDown={(e) => e.preventDefault()}
-                            onChange={handleChange}
-                            disabled
-                            />
-                        </div>
-                    </div>
-                
-                </>) : 
-                (<>
-                    <div className="bars">
-                        <div className="input-group">
-                            <p>Date of Delivery</p>
-                            <input type="date" className="search-bar" placeholder="Enter Date of Delivery" 
-                            value={otherInfo.DateOfDelivery}
-                            id="DateOfDelivery"
-                            name="DateOfDelivery"
-                            min={today}
-                            onKeyDown={(e) => e.preventDefault()}
-                            onChange={handleChange}
-                            required
-                           
-                            />
-                        </div>
-                        
-                        <div className="input-group">
-                            <p>Date and Time of Meeting</p>
-                            <input type="datetime-local" className="search-bar" 
-                            value={otherInfo.DateTimeOfMeeting}
-                            onKeyDown={(e) => e.preventDefault()}
-                            id="DateTimeOfMeeting"
-                            name="DateTimeOfMeeting"
-                            onChange={handleChange}
-                            min={todayWithTime}
-                            required                            />
-                            
-                        </div>
-
-                    </div>
-
-                    <div className="bars">
-                        <div className="input-group">
-                            {/* change into drop box */}
-                            <p>Delivered By</p>
-                            <select className="search-bar" value={otherInfo.LuponStaff}
-                            id="LuponStaff"
-                            name="LuponStaff"
-                            onChange={handleChange}
-                            required
-                            >
-                                <option value="">Select Official/Kagawad</option>
-                                {listOfStaffs.map((staff, index) => (
-                                    <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
-                                        {staff.firstName} {staff.lastName}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="input-group">
-                            <p>Date Filed</p>
-                            <input type="date" className="search-bar" 
-                            value={otherInfo.DateFiled}
-                            max={today}
-                            id="DateFiled"
-                            name="DateFiled"
-                            onKeyDown={(e) => e.preventDefault()}
-                            onChange={handleChange}
-                            disabled
-                            />
-                        </div>
-                    </div>
-                </>)}
-                    
-                    <div className="section-4">
+            {/*
+              <div className="section-4">
                         {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                         {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
-                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
+                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> 
+             </div>
+            */}
+                  
+
+            
+                <div className="section-2-information-section">
+
+                    <div className="section-2-information-top">
+
+                          <div className="section-title-letter">
+                                <h1>Complainant’s Information</h1>
+                        </div>
                     </div>
+
+                 <div className="section-2-information-bottom">
+
+                          <div className="fields-section-letter">
+                          <p>Name</p>
+                             <input 
+                            type="text" 
+                            className="generate-letter-input-field" 
+                            placeholder={otherInfo.complainant.fname}
+                            value={otherInfo.complainant.fname}
+                            id="complainant.fname"
+                            name="complainant.fname"
+                            disabled
+                        />
+                        </div>
+
+                        <div className="fields-section-letter">
+                            <p>Address</p>
+                                <input 
+                                type="text" 
+                                className="generate-letter-input-field" 
+                                placeholder= {otherInfo.complainant.address}
+                                value={otherInfo.complainant.address}
+                                id="complainant.address"
+                                name="complainant.address"
+                                disabled
+                                />
+                        </div>
+
+                        <div className="fields-section-letter">
+                            <p>Contact Nos</p>
+                            <input 
+                            type="text" 
+                            className="generate-letter-input-field" 
+                            placeholder= {otherInfo.complainant.contact}
+                            value={otherInfo.complainant.contact}
+                            id="complainant.contact"
+                            name="complainant.contact"
+                            disabled
+                            />
+
+                        </div>
+                 
+                 </div>       
+            
+
+              
+                </div>
+                
+                  <div className="section-2-information-section">
+
+                    <div className="section-2-information-top">
+
+                          <div className="section-title-letter">
+                                <h1>Respondent’s Information</h1>
+                        </div>
+                    </div>
+
+                 <div className="section-2-information-bottom">
+
+                          <div className="fields-section-letter">
+                          <p>Name</p>
+                            
+                            <input 
+                            type="text" 
+                            className="generate-letter-input-field" 
+                            placeholder={otherInfo.respondent.fname}
+                            value={otherInfo.respondent.fname}
+                            id="respondent.fname"
+                            name="respondent.fname"
+                            disabled
+                            />
+
+                        </div>
+
+                        <div className="fields-section-letter">
+                            <p>Address</p>
+                                   <input 
+                                type="text" 
+                                className="generate-letter-input-field" 
+                                placeholder= {otherInfo.respondent.address}
+                                value={otherInfo.respondent.address}
+                                id="respondent.address"
+                                name="respondent.address"
+                                disabled
+                                />
+                
+                        </div>
+
+                        <div className="fields-section-letter">
+                            <p>Contact Nos</p>
+                            <input 
+                            type="text" 
+                            className="generate-letter-input-field" 
+                            placeholder= {otherInfo.respondent.contact}
+                            value={otherInfo.respondent.contact}
+                            id="respondent.contact"
+                            name="respondent.contact"
+                            disabled
+                            />
+
+                        </div>
+                 
+                 </div>       
+            
+
+              
+                </div>
+
+
+                   <div className="section-2-information-section">
+                        <div className="section-2-information-top">
+                            <div className="section-title-letter">
+                            <h1>Other Information</h1>
+                            </div>
+                        </div>
+
+                        <div className="section-2-information-bottom">
+                            {actionId === "dialogue" ? (
+                            <>
+                                <div className="fields-section-letter">
+                                      <p>Date of Delivery</p>
+                                    <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
+                                    value={safeData[0]?.DateOfDelivery||otherInfo.DateOfDelivery}
+                                    id="DateOfDelivery"
+                                    name="DateOfDelivery"
+                                    min={today}
+                                    onKeyDown={(e) => e.preventDefault()}
+                                    onChange={handleChange}
+                                    required
+                                    disabled = {safeData[0]?.DateOfDelivery ? true : false}
+                                    />
+                                </div>
+                                <div className="fields-section-letter">
+                                     <p>Date and Time of Meeting</p>
+                                    <input type="datetime-local" className="generate-letter-input-field" 
+                                    value={safeData[0]?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
+                                    onKeyDown={(e) => e.preventDefault()}
+                                    id="DateTimeOfMeeting"
+                                    name="DateTimeOfMeeting"
+                                    onChange={handleChange}
+                                    min={todayWithTime}
+                                    required
+                                    disabled = {safeData[0]?.DateTimeOfMeeting ? true : false}
+                                    />
+
+                                </div>
+                                <div className="fields-section-letter">
+                                      <p>Delivered By</p>      
+                                    <select className="generate-letter-input-field" value={safeData[0]?.LuponStaff||otherInfo.LuponStaff}
+                                    id="LuponStaff"
+                                    name="LuponStaff"
+                                    onChange={handleChange}
+                                    required
+                                    disabled = {safeData[0]?.LuponStaff ? true : false}
+                                    >
+                                        <option value="">Select Official/Kagawad</option>
+                                        {listOfStaffs.map((staff, index) => (
+                                            <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
+                                                {staff.firstName} {staff.lastName}
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                </div>
+
+                                <div className="fields-section-letter">
+                                    <p>Date Filed</p>
+                                 <input type="date" className="generate-letter-input-field" 
+                                    value={otherInfo.DateFiled}
+                                    max={today}
+                                    id="DateFiled"
+                                    name="DateFiled"
+                                    onKeyDown={(e) => e.preventDefault()}
+                                    onChange={handleChange}
+                                    disabled
+                                    />
+                                </div>
+                            </>
+                            ) : (
+                            <>
+                                <div className="fields-section-letter">
+                                     <p>Date of Delivery</p>
+                                     <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
+                                    value={otherInfo.DateOfDelivery}
+                                    id="DateOfDelivery"
+                                    name="DateOfDelivery"
+                                    min={today}
+                                    onKeyDown={(e) => e.preventDefault()}
+                                    onChange={handleChange}
+                                    required
+                                
+                                    />
+
+                                </div>
+
+                                <div className="fields-section-letter">
+                                     <p>Date and Time of Meeting</p>
+                                        <input type="datetime-local" className="generate-letter-input-field" 
+                                        value={otherInfo.DateTimeOfMeeting}
+                                        onKeyDown={(e) => e.preventDefault()}
+                                        id="DateTimeOfMeeting"
+                                        name="DateTimeOfMeeting"
+                                        onChange={handleChange}
+                                        min={todayWithTime}
+                                        required              />
+
+                                </div>
+
+                                 <div className="fields-section-letter">
+                                    <p>Delivered By</p>
+                                     <select className="generate-letter-input-field" value={otherInfo.LuponStaff}
+                                id="LuponStaff"
+                                name="LuponStaff"
+                                onChange={handleChange}
+                                required
+                                >
+                                    <option value="">Select Official/Kagawad</option>
+                                    {listOfStaffs.map((staff, index) => (
+                                        <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
+                                            {staff.firstName} {staff.lastName}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                </div>
+
+                                 <div className="fields-section-letter">
+                                    <p>Date Filed</p>
+                                    <input type="date" className="generate-letter-input-field" 
+                                    value={otherInfo.DateFiled}
+                                    max={today}
+                                    id="DateFiled"
+                                    name="DateFiled"
+                                    onKeyDown={(e) => e.preventDefault()}
+                                    onChange={handleChange}
+                                    disabled
+                                    />
+
+                                </div>
+                            </>
+                            )}
+                        </div>
+                        </div>
+
+
+
+
+
+
+
+
+ 
+               
+
+               
             </div>
+
+          
            </form>
 
         </div> 
@@ -775,18 +1161,9 @@ console.log(safeData.length)
                     />
                 ))
         )} */}
-        {actionId === "summon" && (
-            Array.from({ length: safeData.length }, (_, i) => (
-                <Letter 
-                key={i}
-                DateOfDelivery={safeData[i].DateOfDelivery}
-                DateFiled={safeData[i].DateFiled}
-                DateTimeOfMeeting={safeData[i].DateTimeOfMeeting}
-                LuponStaff={safeData[i].LuponStaff}
-                hearingNumber={safeData[i].hearingNumber}
-                />
-            ))
-        )}
+
+
+      
 
 
 

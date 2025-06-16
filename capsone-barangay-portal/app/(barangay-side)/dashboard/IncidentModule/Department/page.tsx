@@ -29,7 +29,7 @@ export default function Department() {
   const [showAlertPopup, setshowAlertPopup] = useState(false); 
 
  const searchParams = useSearchParams();
-  const highlightUserId = searchParams.get("highlight");
+  const highlightUserId = searchParams.get("incidentId");
  const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
 
@@ -43,40 +43,44 @@ export default function Department() {
 
 
   useEffect(() => {
-  if (highlightUserId && incidentData.length > 0) {
-    setHighlightedId(highlightUserId);
-
-    const incidentIndex = filteredIncidents.findIndex(
-      (incident) => incident.id === highlightUserId
-    );
-
-    if (incidentIndex !== -1) {
-      const newPage = Math.floor(incidentIndex / incidentsPerPage) + 1;
-
-      if (currentPage !== newPage) {
-        setCurrentPage(newPage);
-      }
-
-      setTimeout(() => {
-        const targetElement = document.querySelector(`tr.highlighted-row`);
-        if (targetElement) {
-          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (highlightUserId && filteredIncidents.length > 0) {
+      setHighlightedId(highlightUserId);
+  
+      const incidentIndex = filteredIncidents.findIndex(
+        (incident) => incident.id === highlightUserId
+      );
+  
+      if (incidentIndex !== -1) {
+        const newPage = Math.floor(incidentIndex / incidentsPerPage) + 1;
+  
+        if (currentPage !== newPage) {
+          setCurrentPage(newPage);
         }
-      }, 500);
-
-      const timeoutId = setTimeout(() => {
-        setHighlightedId(null);
-
-        const params = new URLSearchParams(window.location.search);
-        params.delete("highlight");
-        const newUrl = `${window.location.pathname}?${params.toString()}`;
-        router.replace(newUrl, { scroll: false });
-      }, 3000);
-
-      return () => clearTimeout(timeoutId);
+  
+        // Delay scrolling slightly to let page update
+        const scrollTimeout = setTimeout(() => {
+          const targetElement = document.querySelector("tr.highlighted-row");
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 500);
+  
+        const clearHighlightTimeout = setTimeout(() => {
+          setHighlightedId(null);
+  
+          const params = new URLSearchParams(window.location.search);
+          params.delete("incidentId");
+          const newUrl = `${window.location.pathname}?${params.toString()}`;
+          router.replace(newUrl, { scroll: false });
+        }, 3000);
+  
+        return () => {
+          clearTimeout(scrollTimeout);
+          clearTimeout(clearHighlightTimeout);
+        };
+      }
     }
-  }
-}, [highlightUserId, incidentData, filteredIncidents, currentPage]);
+  }, [highlightUserId, filteredIncidents, currentPage, incidentsPerPage, router]);
 
 
 
@@ -230,12 +234,10 @@ useEffect(() => {
   return (
     <main className="main-container-departments">
       <div className="section-1-departments">
-        <h1>Lupon Tagapamayapa: {departmentId} Table</h1>
         {isAuthorized && (
           <button className="add-announcement-btn-departments" onClick={() => router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`)}>
           Add New Incident
           </button>
-
         )}
         
       </div>
@@ -273,7 +275,7 @@ useEffect(() => {
           <option value="0">Show All</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
-          <option value="10">Show 15</option>
+          <option value="15">Show 15</option>
         </select>
 
 
@@ -313,12 +315,13 @@ useEffect(() => {
             </td>
             <td>
               <div className="actions-departments-main">
-                <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}>View</button>
+                <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}><img src="/Images/view.png" alt="View" /></button>
                 {isAuthorized && (
                   <>
-                    <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}>Edit</button>
-                    <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}>Delete</button>
-
+                   {incident.status !== "settled" && (
+                    <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}> <img src="/Images/edit.png" alt="Edit" /></button>
+                  )}
+                    <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}><img src="/Images/delete.png" alt="Delete" /></button>
                   </>
                 )}
               </div>
@@ -351,7 +354,8 @@ useEffect(() => {
     
       {showDeletePopup && (
       <div className="confirmation-popup-overlay-add">
-        <div className="confirmation-popup-add">
+        <div className="confirmation-popup-incident">
+          <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
           <p>Are you sure you want to delete this Incident Record?</p>
           <h2>Incident Number: {selectedIncidentNumber}</h2>
           <div className="yesno-container-add">

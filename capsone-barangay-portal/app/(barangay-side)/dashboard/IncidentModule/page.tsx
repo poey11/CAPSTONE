@@ -92,21 +92,30 @@ export default function MainPageIncident() {
 
   return (
     <main className="main-container-all-department">
-      <div className="section-1-all-department">
-        <h1>All Departments</h1>
+      <div className="incident-layout-wrapper">
+
+    
+
+    <div className="incident-main-container">
+
+       <div className="titlesection-all-department">
+        <p>Latest 20 Incident Reports</p>
       </div>
 
+
+  
+     
       <div className="section-2-all-department">
         <input
           type="text"
-          className="search-bar-all-department"
+          className="all-departments-filter"
           placeholder="Enter Incident Case"
           value={caseNumberSearch}
           onChange={(e) => setCaseNumberSearch(e.target.value)}
         />
 
         <select
-          className="featuredStatus-all-department"
+          className="all-departments-filter"
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
         >
@@ -119,7 +128,7 @@ export default function MainPageIncident() {
         </select>
 
         <select
-          className="featuredStatus-all-department"
+          className="all-departments-filter"
           value={selectedDepartment}
           onChange={(e) => setSelectedDepartment(e.target.value)}
         >
@@ -132,7 +141,7 @@ export default function MainPageIncident() {
         </select>
 
         <select
-          className="featuredStatus-all-department"
+          className="all-departments-filter"
           value={showCount.toString()}
           onChange={(e) => setShowCount(parseInt(e.target.value))}
         >
@@ -142,13 +151,10 @@ export default function MainPageIncident() {
         </select>
       </div>
 
-      <div className="titlesection-all-department">
-        <p className="title-all-department">Latest 20 Incident Reports</p>
-      </div>
-
+     
       <div className="main-section-all-department">
         
-        <div className="table-section-all-department">
+      
           {filteredIncidents.length === 0 ? (
             <div className="no-result-card">
               <img
@@ -196,18 +202,24 @@ export default function MainPageIncident() {
               </tbody>
             </table>
           )}
-        </div>
+       
       </div>
 
+        </div>
+
+   
+
       <div className="incidentmap-section-all-department">
-        <div className="titlesection-all-department-heatmap">
-          <p className="title-all-department">Incident HeatMap</p>
+        <div className="titlesection-all-department">
+          <p>Incident HeatMap</p>
         </div>
 
         <div className="heatmap-container">
           <Heatmap />
         </div>
       </div>
+
+        </div>
     </main>
   );
 }

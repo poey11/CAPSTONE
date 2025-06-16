@@ -35,6 +35,7 @@ const incidentForm:React.FC = () => {
     department: "",
     status: "Pending",
     addInfo:"",
+   //  isViewed: false,
   });
 
 
@@ -271,6 +272,7 @@ const incidentForm:React.FC = () => {
           department: "Online",
           status: incidentReport.status,
           isFiled: false,
+          isViewed: false,
           addInfo: incidentReport.addInfo,
           createdAt: new Date().toLocaleString(),
         }];

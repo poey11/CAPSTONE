@@ -110,6 +110,8 @@ export default function reasonForRejection() {
     
     return (
     <main className="reasonforrejection-main-container">
+
+        {/*
         <div className="path-section">
                 <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
                 <h1 className="breadcrumb">
@@ -125,63 +127,63 @@ export default function reasonForRejection() {
 
         <div className="reasonforrejection-section-1">
             <h1>Pending Resident Users</h1>
-        </div>
+        </div>*/}
 
-        <div className="reasonforrejection-main-section">
-            <div className="reasonforrejection-main-section1">
-                <div className="reasonforrejection-main-section1-left">
+        <div className="add-barangayuser-main-content">
+            <div className="add-barangayuser-main-section1">
+                <div className="add-barangayuser-main-section1-left">
                     <button onClick={handleBack}>
-                        <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
+                        <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                     </button>
 
-                    <h1>Reason For Rejection</h1>
+                    <h1> Reason For Rejection </h1>
                 </div>
+
                 <div className="action-btn-section">
                     <button className="submit-btn" onClick={handleSubmitClick}>Submit</button>
+                </div>     
+            </div>
+
+            <div className="create-new-barangay-user">
+                <div className="fields-container-barangay-user">
+                    <div className="fields-container-reasonforreject">
+                        <div className="fields-section-reasonforreject">
+                            <p>Select Reason for Rejection</p>
+                            <select
+                                className="input-field-reasonforreject"
+                                value={selectedReason}
+                                onChange={(e) => {
+                                setSelectedReason(e.target.value);
+                                if (e.target.value !== "others") setOtherReason("");
+                                }}
+                            >
+                                <option value="">Select Reason</option>
+                                <option value="User not a resident">User not a resident</option>
+                                <option value="ID is blurry or unclear">ID is blurry or unclear</option>
+                                <option value="ID is expired">ID is expired</option>
+                                <option value="ID does not match the name on the account">ID does not match the name on the account</option>
+                                <option value="ID is not government-issued">ID is not government-issued</option>
+                                <option value="ID photo is cropped or partially shown">ID photo is cropped or partially shown</option>
+                                <option value="others">Others</option>
+                            </select>
+                        </div>
+
+                        {selectedReason === "others" && (
+                        <div className="fields-section-reasonforreject">
+                            <p>State Other Reason</p>
+                            <textarea
+                            className="reason"
+                            placeholder="Enter Description"
+                            rows={5}
+                            value={otherReason}
+                            onChange={(e) => setOtherReason(e.target.value)}
+                            ></textarea>
+                        </div>
+                        )}
+                    </div>
                 </div>
             </div>
-
-            <hr/>
-
-            <div className="main-fields-container">
-          <div className="fields-container">
-            <div className="fields-section">
-              <p>Select Reason for Rejection</p>
-              <select
-                className="input-field-reasonforreject"
-                value={selectedReason}
-                onChange={(e) => {
-                  setSelectedReason(e.target.value);
-                  if (e.target.value !== "others") setOtherReason("");
-                }}
-              >
-                <option value="">Select Reason for Rejection</option>
-                <option value="User not a resident">User not a resident</option>
-                <option value="ID is blurry or unclear">ID is blurry or unclear</option>
-                <option value="ID is expired">ID is expired</option>
-                <option value="ID does not match the name on the account">ID does not match the name on the account</option>
-                <option value="ID is not government-issued">ID is not government-issued</option>
-                <option value="ID photo is cropped or partially shown">ID photo is cropped or partially shown</option>
-                <option value="others">Others</option>
-              </select>
-            </div>
-
-            {selectedReason === "others" && (
-              <div className="fields-section">
-                <p>State Other Reason</p>
-                <textarea
-                  className="reason"
-                  placeholder="Enter Description"
-                  rows={10}
-                  value={otherReason}
-                  onChange={(e) => setOtherReason(e.target.value)}
-                ></textarea>
-              </div>
-            )}
-          </div>
-        </div>
-
-            
+    
         </div>
 
 

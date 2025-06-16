@@ -16,6 +16,8 @@ export default  function ViewLupon() {
   const [dialogueData, setDialogueData] = useState<any>(null);
   const [generatedSummonLetter, setGeneratedSummonLetter] = useState<any>();
   const [generatedDialogueLetter, setGeneratedDialogueLetter] = useState<any | null[]>([]);
+  
+  
 
   useEffect(()=>{
     if(!docId) return;
@@ -99,7 +101,8 @@ export default  function ViewLupon() {
   const status = reportData?.status; 
   const departId = reportData?.department;
   const complainantsData  ={
-    name: reportData?.complainant.fname + " " + reportData?.complainant.lname,
+    fname: reportData?.complainant.fname,
+    lname: reportData?.complainant.lname,
     contact: reportData?.complainant.contact,
     address:reportData?.complainant.address,
     civilStatus: reportData?.complainant.civilStatus,
@@ -108,7 +111,8 @@ export default  function ViewLupon() {
   }
 
   const respondent =  {
-    name: reportData?.respondent.fname + " " + reportData?.respondent.lname,
+    fname: reportData?.respondent.fname,
+    lname: reportData?.respondent.lname,
     contact: reportData?.respondent.contact,
     address:reportData?.respondent.address,
     civilStatus: reportData?.respondent.civilStatus,
@@ -118,8 +122,9 @@ export default  function ViewLupon() {
 
 
   const deskOfficerData =  {
-    name: reportData?.receivedBy,
-    dateTimeReceived:  reportData?.dateReceived + " " + reportData?.timeReceived,
+    name: reportData?.receivedBy, 
+    dateReceived:  reportData?.dateReceived,
+    timeReceived:  reportData?.timeReceived,
   };
   let natureC = reportData?.nature;
   if (natureC === "Others") {
@@ -170,6 +175,10 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
     thirdHearingOfficer: item.thirdHearingOfficer || "No Third Hearing Officer Assigned"
   })
 
+
+const firstHearing = hearingData?.length > 0 ? hearingFormDataA(hearingData[0], 0) : null;
+const secondHearing = hearingData?.length > 1 ? hearingFormDataA(hearingData[1], 1) : null;
+const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 2) : null;
   
   const complainantsFields = [
     {label: "Name", key: "name" },
@@ -234,15 +243,20 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
   ];
 
 
+  function getHearingOfficer(nos: string, formData: any) {
+    const key = `${nos.toLowerCase()}HearingOfficer`;
+    return formData[key] || "No Hearing Officer Assigned";
+  }
+
   const getStatusClass = (status: string) => {
     switch (status) {
       case "Pending":
         return "pending";
-      case "Resolved":
+      case "resolved":
         return "resolved";
-      case "Settled":
+      case "settled":
         return "settled";
-      case "Archived":
+      case "archived":
         return "archived";
       default:
         return "";
@@ -254,157 +268,570 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
       router.back();
     };
 
+    const sections = [
+      "complainant",
+      "respondent",
+      "incident",
+      "barangay desk",
+      "dialogue",
+      "hearing",
+    ];
+
+  const [activeSection, setActiveSection] = useState("complainant");
+  const [page, setPage] = useState(0); 
+  const visibleSections = sections.slice(page * 3, page * 3 + 3);
+
+  const [openIndices, setOpenIndices] = useState<{[key:number]: boolean}>({});
+
+  const toggleOpen = (index: number) => {
+    setOpenIndices(prev => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
   return (
     <main className="main-container-view">
       {/* should also include hearing and dialogue info*/}
-          
-
-     
-      <div className="main-content-view">
 
 
+      <div className="view-incident-main-content">
+        <div className="view-incident-main-section1">
+            <div className="view-incident-header-first-section">
+              <img src="/Images/QClogo.png" alt="QC Logo" className="logo1-image-side-bar-1" />
+            </div>
 
-        <div className="section-1-view">
+            <div className="view-incident-header-second-section">
+              <h2 className="gov-info">Republic of the Philippines</h2>
+              <h2 className="gov-info">Quezon City</h2>
+              <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+              <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+              <h2 className="contact">930-0040 / 428-9030</h2>
+            </div>
 
-       
-        <div className="viewincident-content-section1-left-view">
-
-            <button type="submit" className="back-button-view" onClick={handleViewLupon}></button>
-  
-             <h1>Complainant's Details</h1>
-
+            <div className="view-incident-header-third-section">
+              <img src="/Images/logo.png" alt="Brgy Logo" className="logo2-image-side-bar-1" />
+            </div>
         </div>
 
-          <div className="status-section-view">
-              <p className={`status-badge-view ${getStatusClass(status)}`}>{status}</p> 
-          </div>
-          
-        </div>
-
-
-        {complainantsFields.map((field) => (
-          <div className="details-section-view" key={field.key}>
-            <div className="title-view">
-              <p>{field.label}</p>
+        <div className="view-incident-header-body">
+          <div className="view-incident-header-body-top-section">
+            <div className="view-incident-backbutton-container">
+              <button onClick={handleViewLupon}>
+                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-main-resident"/> 
+              </button>
             </div>
-            <div className="description-view">
-              <p>{complainantsData[field.key as keyof typeof complainantsData]}</p>
-            </div>
-          </div>
-        ))}
-      </div>
 
-      <div className="main-content-view">
-        <div className="section-1-view">
-          <h1>Respondent's Details</h1>
-        </div>
+            
 
-        {respondentsField.map((field) => (
-          <div className="details-section-view" key={field.key}>
-            <div className="title-view">
-              <p>{field.label}</p>
-            </div>
-            <div className="description-view">
-              <p>{respondent[field.key as keyof typeof respondent]}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+            <div className="view-incident-info-toggle-wrapper">
 
-      <div className="main-content-view">
-        <div className="section-1-view">
-          <h1>Barangay Desk Officer's Details</h1>
-        </div>
-
-        {deskOfficerFields.map((field) => (
-          <div className="details-section-view" key={field.key}>
-            <div className="title-view">
-              <p>{field.label}</p>
-            </div>
-            <div className="description-view">
-              <p>{deskOfficerData[field.key as keyof typeof deskOfficerData]}</p>
-            </div>
-          </div>
-       ))}
-      </div>
-
-      <div className="main-content-view">
-        <div className="section-1-view">
-          <h1>Incident Information</h1>
-        </div>
-
-        {otherinformationFields.map((field) => (
-          <div className="details-section-view" key={field.key}>
-            <div className="title-view">
-              <p>{field.label}</p>
-            </div>
-            <div className="description-view">
-              {field.key === "image" ? (
-                otherinformation.image ? ( // ✅ Check if image exists
-                  <>
-                    <a href={otherinformation.image} target="_blank" rel="noopener noreferrer">
-                      <img
-                        src={otherinformation.image}
-                        alt="Incident Image"
-                        style={{ cursor: "pointer" , width: '30%', height: '100%', marginRight: '5px' }}
-                      />
-                    </a>
-                  </>
-                ) : (
-                  // ✅ Show fallback text when no image is available
-                  <p style={{ color: "gray", fontStyle: "italic" }}>No image available</p>
-                )
-              ) : (
-                <p>{otherinformation[field.key as keyof typeof otherinformation]}</p>
-              )}
-            </div>
-            {departId === "GAD" && field.key === "location" && (
-              <>
-               
-                <div className="title-view">
-                  <p>Nos of Male Children Victim/s</p>
-                </div>
-                <div className="description-view">
-                    <p>{reportData?.nosofMaleChildren}</p>
-                </div>
-                <div className="title-view">
-                  <p>Nos of Female Children Victim/s</p>
-                </div>
-                <div className="description-view">
-                    <p>{reportData?.nosofFemaleChildren}</p>
-                </div>
-              </>
-            )} 
-          </div>
-          
-        
-       ))}
-         
-       
-      </div>
-
-      
-        
-      {dialogueData && (
-        <div className="main-content-view">
-          <div className="section-1-view">
-            <h1>Dialogue Details</h1>
-          </div>
-
-          {dialogueFields.map((field) => (
-            <div className="details-section-view" key={field.key}>
-              <div className="title-view">
-                <p>{field.label}</p>
+              <div className="toggle-navigate-backbutton">
+                {/* Back button on the left */}
+                <button
+                  onClick={() => setPage(0)}
+                  type="button"
+                  disabled={page === 0}
+                  style={{ background: "none", border: "none", cursor: page === 0 ? "default" : "pointer" }}
+                >
+                  <img src="/Images/back.png" alt="Back" style={{ width: "20px", opacity: page === 0 ? 0.3 : 1 }} />
+                </button>
               </div>
-              <div className="description-view">
-                <p>{dialogueFormData[field.key as keyof typeof dialogueFormData]}</p>
+              
+              <div className="toggle-main-section">
+
+                {visibleSections.map((section) => (
+                  <button
+                    key={section}
+                    type="button"
+                    className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                    onClick={() => setActiveSection(section)}
+                  >
+                    {section === "complainant" && "Complainant"}
+                    {section === "respondent" && "Respondent"}
+                    {section === "incident" && "Incident"}
+                    {section === "barangay desk" && "Desk Officer"}
+                    {section === "dialogue" && "Dialogue"}
+                    {section === "hearing" && "Hearing"}
+                  </button>
+                ))}
+
+              </div>
+              
+
+              <div className="toggle-navigate-nextbutton">
+              {/* Right button on the right */}
+                <button
+                  onClick={() => setPage(1)}
+                  type="button"
+                  disabled={page === 1}
+                  style={{ background: "none", border: "none", cursor: page === 1 ? "default" : "pointer" }}
+                >
+                  <img src="/Images/next.png" alt="Next" style={{ width: "20px", opacity: page === 1 ? 0.3 : 1 }} />
+                </button>
               </div>
             </div>
-         ))}
-        </div>
-      )}
      
-     {hearingData.length > 0 && hearingData.map((item, index) => {
+          </div>
+
+          <div className="view-incident-header-body-bottom-section">
+            <div className="incident-main-details-container">
+              <div className="incident-main-details-section">
+                <div className="incident-main-details-topsection">
+                  <h1>{reportData?.caseNumber}</h1>
+                </div>
+                <div className="incident-main-details-statussection">
+                  <h1> Status</h1>
+
+                  <div className="status-section-view">
+                      <p className={`status-badge-view ${getStatusClass(status)}`}>{status}</p> 
+                  </div>
+                </div>
+                <div className="incident-main-details-description">
+                  <div className="incident-date-section">
+                    <div className="incident-date-topsection">
+                      <div className="incident-main-details-icons-section">
+                        <img src="/Images/calendar.png" alt="calendar icon" className="view-incident-description-icon-calendar" />
+                      </div>
+                      <div className="incident-main-details-title-section">
+                        <h1>Date Filed</h1>
+                      </div>
+                    </div>
+                    <p>{reportData?.dateFiled || "N/A"}</p>
+                  </div>
+
+                  <div className="incident-location-section">
+                    <div className="incident-loc-topsection">
+                      <div className="incident-main-details-icons-section">
+                        <img src="/Images/loc.png" alt="location icon" className="view-incident-description-icon-loc" />
+                      </div>
+                      <div className="incident-main-details-title-section">
+                        <h1>Location</h1>
+                      </div>
+                    </div>
+                    <p>{reportData?.location || "N/A"}</p>
+                  </div>
+
+                  <div className="incident-description-section">
+                    <div className="incident-desc-topsection">
+                      <div className="incident-main-details-icons-section">
+                        <img src="/Images/description.png" alt="description icon" className="view-incident-description-icon-desc" />
+                      </div>
+                      <div className="incident-main-details-title-section">
+                        <h1>Nature</h1>
+                      </div>
+                    </div>
+                    <p>{reportData?.nature || "N/A"}</p>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+
+            <div className="view-incident-info-main-container">
+              <div className="view-incident-info-container-scrollable">
+                <div className="view-incident-info-main-content">
+                  {activeSection === "complainant" && (
+                    <>
+                      <div className="view-incident-dialogue-content">
+                        <div className="view-incident-content-topsection">
+                          <div className="view-incident-content-left-side">
+                            <div className="view-incident-fields-section">
+                              <p>Last Name</p>
+                              <input type="text" className="view-incident-input-field" name="complainantName" value={complainantsData.lname || "N/A"} readOnly />
+                            </div>
+                            <div className="view-incident-fields-section">
+                              <p>First Name</p>
+                              <input type="text" className="view-incident-input-field" name="complainantName" value={complainantsData.fname || "N/A"} readOnly />
+                            </div>
+                            <div className="view-incident-fields-section">
+                              <p>Civil Status</p>
+                              <input type="text" className="view-incident-input-field" name="complainantCivilStatus" value={complainantsData.civilStatus || "N/A"} readOnly />
+                            </div>
+                          </div>
+
+                          <div className="view-incident-content-right-side">
+                            <div className="view-incident-fields-section">
+                              <p>Age</p>
+                              <input type="text" className="view-incident-input-field" name="complainantAge" value={complainantsData.age || "N/A"} readOnly />
+                            </div>
+                            <div className="view-incident-fields-section">
+                              <p>Sex</p>
+                              <input type="text" className="view-incident-input-field" name="complainantSex" value={complainantsData.sex || "N/A"} readOnly />
+                            </div>
+                            <div className="view-incident-fields-section">
+                              <p>Address</p>
+                              <input type="text" className="view-incident-input-field" name="complainantAddress" value={complainantsData.address || "N/A"} readOnly />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bottom-middle-section">
+                          <div className="bottom-middle-incidentfields">
+                            <p>Contact Number</p>
+                            <input type="text" className="view-incident-input-field" name="complainantContact" value={complainantsData.contact || "N/A"} readOnly />
+                            </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {activeSection === "respondent" && (
+                    <>
+                      <div className="view-incident-dialogue-content">
+                        <div className="view-incident-content-topsection">
+                          <div className="view-incident-content-left-side">
+                            <div className="view-incident-fields-section">
+                              <p>Last Name</p>
+                              <input type="text" className="view-incident-input-field" name="respondentName" value={respondent.lname || "N/A"} readOnly />
+                            </div>
+                            <div className="view-incident-fields-section">
+                              <p>First Name</p>
+                              <input type="text" className="view-incident-input-field" name="respondentName" value={respondent.fname || "N/A"} readOnly />
+                            </div>
+                            <div className="view-incident-fields-section">
+                              <p>Civil Status</p>
+                              <input type="text" className="view-incident-input-field" name="respondentCivilStatus" value={respondent.civilStatus || "N/A"} readOnly />
+                            </div>
+                          </div>
+
+                          <div className="view-incident-content-right-side">
+                            <div className="view-incident-fields-section">
+                              <p>Age</p>
+                              <input type="text" className="view-incident-input-field" name="respondentAge" value={respondent.age || "N/A"} readOnly />
+                            </div>
+                            <div className="view-incident-fields-section">
+                              <p>Sex</p>
+                              <input type="text" className="view-incident-input-field" name="respondentSex" value={respondent.sex || "N/A"} readOnly />
+                            </div>
+                            <div className="view-incident-fields-section">
+                              <p>Address</p>
+                              <input type="text" className="view-incident-input-field" name="respondentAddress" value={respondent.address || "N/A"} readOnly />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bottom-middle-section">
+                          <div className="bottom-middle-incidentfields">
+                            <p>Contact Number</p>
+                            <input type="text" className="view-incident-input-field" name="respondentContact" value={respondent.contact || "N/A"} readOnly />
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {activeSection === "barangay desk" && (
+                    <>
+                      <div className="barangay-desk-officer-section">
+                        <div className="view-incident-fields-section-deskofficer">
+                          <p>Full Name</p>
+                          <input type="text" className="view-incident-input-field" name="deskOfficerName" value={deskOfficerData.name || "N/A"} readOnly />
+                        </div>
+
+                        <div className="view-incident-fields-section-deskofficer">
+                          <p>Date Signed</p>
+                          <input type="text" className="view-incident-input-field" name="deskOfficerDateReceived" value={deskOfficerData.dateReceived || "N/A"} readOnly />
+                        </div>
+
+                        <div className="view-incident-fields-section-deskofficer">
+                          <p>Time Signed</p>
+                          <input type="text" className="view-incident-input-field" name="deskOfficerTimeReceived" value={deskOfficerData.timeReceived || "N/A"} readOnly />
+                        </div>
+
+                      </div>
+                    </>
+                  )}
+
+                  {activeSection === "incident" && (
+                    <>
+                      <div className="view-incident-dialogue-content">
+                        <div className="view-incident-content-topsection">
+                          <div className="view-incident-content-left-side">
+                            <div className="view-incident-fields-section">
+                              <p>Nature</p>
+                              <input type="text" className="view-incident-input-field" name="deskOfficerName" value={otherinformation.nature || "N/A"} readOnly />
+                            </div>
+                            
+                            {departId === "GAD" && (
+                              <>
+                                <div className="view-incident-fields-section">
+                                  <p>Nos of Male Children Victim/s</p>
+                                  <input type="text" className="view-incident-input-field" name="nosofMaleChildren" value={reportData?.nosofMaleChildren || "N/A"} readOnly
+                                  />
+                                </div>
+                              </>
+                            )}
+                             
+                          </div>
+
+                          <div className="view-incident-content-right-side">
+                            <div className="view-incident-fields-section">
+                              <p>Location</p>
+                              <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.location || "N/A"} readOnly />
+                            </div>
+
+                            {departId === "GAD" && (
+                              <>
+                                <div className="view-incident-fields-section">
+                                  <p>Nos of Female Children Victim/s</p>
+                                  <input type="text" className="view-incident-input-field" name="nosofFemaleChildren" value={reportData?.nosofFemaleChildren || "N/A"} readOnly
+                                  />
+                                </div>
+                              </>
+                            )}
+
+                          </div>
+                        </div>
+                        <div className="bottom-middle-section">
+                          <div className="bottom-middle-incidentfields">
+                              <p>Date & Time Filed</p>
+                              <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.date || "N/A"} readOnly />
+                            </div>
+                        </div>
+
+                        <div className="view-incident-content-bottomsection">
+                          <div className="view-incident-partyA-container">
+                            <div className="box-container-outer-natureoffacts">
+                              <div className="title-remarks-partyA">
+                                Nature of Facts
+                              </div>
+                              <div className="box-container-partyA">
+                              <textarea className="natureoffacts-input-field" name="concern" value={otherinformation.concern} readOnly/>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="view-incident-partyA-container">
+                            <div className="box-container-outer-natureoffacts">
+                              <div className="title-remarks-partyA">
+                                Incident Image
+                              </div>
+                              <div className="box-container-incidentimage-2">
+                                {otherinformation.image ? (
+                                   <a href={otherinformation.image} target="_blank" rel="noopener noreferrer">
+                                        <img
+                                        src={otherinformation.image}
+                                        alt="Incident Image"
+                                        className="incident-img-view uploaded-pic"
+                                      />
+                                   </a>
+                                  
+                                ) : (
+                                  <p className="no-image-text-view">No image available</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+
+                        
+                      </div>
+                    </>
+                  )}
+
+                  {activeSection === "dialogue" && (
+                    <>
+                      <div className="view-incident-dialogue-content">
+                        <div className="view-incident-content-topsection">
+                          <div className="view-incident-content-left-side">
+                            <div className="view-incident-fields-section">
+                              <p>Meeting Date & Time</p>
+                              <input type="text" className="view-incident-input-field" name="dialogueMeetingDateTime" value={dialogueFormData.dialogueMeetingDateTime || "N/A"} readOnly />
+                            </div>
+                          </div>
+
+                          <div className="view-incident-content-right-side">
+                            <div className="view-incident-fields-section">
+                              <p>Hearing Officer</p>
+                              <input type="text" className="view-incident-input-field" name="HearingOfficer" value={dialogueFormData.HearingOfficer || "No Hearing Officer Assigned"} readOnly />
+                            </div>  
+                          </div>
+                        </div>
+                      
+                        <div className="view-incident-content-bottomsection">
+                          <div className="view-incident-partyA-container">
+                            <div className="box-container-outer-natureoffacts">
+                              <div className="title-remarks-partyA">
+                                Party A
+                              </div>
+                              <div className="box-container-partyA">
+                                <textarea className="partyA-input-field" name="partyA" value={dialogueFormData.partyA} readOnly/>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="view-incident-partyA-container">
+                            <div className="box-container-outer-natureoffacts">
+                              <div className="title-remarks-partyA">
+                                Party B
+                              </div>
+                              <div className="box-container-partyA">
+                                <textarea className="partyA-input-field" name="partyB" value={dialogueFormData.partyB} readOnly/>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="view-incident-partyA-container">
+                            <div className="box-container-outer-natureoffacts">
+                              <div className="title-remarks-partyA">
+                                Remarks
+                              </div>
+                              <div className="box-container-partyA">
+                                <textarea className="partyA-input-field" name="remarks" value={dialogueFormData.remarks} readOnly/>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="view-incident-partyA-container">
+                            <div className="box-container-outer-natureoffacts">
+                              <div className="title-remarks-partyA">
+                                Minutes of Dialogue
+                              </div>
+                              <div className="box-container-partyA">
+                                <textarea className="partyA-input-field" name="minutesOfDialogue" value={dialogueFormData.minutesOfDialogue} readOnly/>
+                              </div>
+                            </div>
+                          </div>
+                          
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {activeSection === "hearing" && (
+                    <div className="hearing-sections">
+                      {hearingData.length > 0 &&
+                      [...hearingData]
+                        .sort((a, b) => {
+                          const order = { First: 1, Second: 2, Third: 3 };
+                          return order[a.nos as keyof typeof order] - order[b.nos as keyof typeof order];
+                        })
+                        .map((item, index) => {
+                          const hearingFormData = hearingFormDataA(item, index);
+
+                          return (
+                            <div className="view-incident-dialogue-content" key={index}>
+                            <div className="hearing-fullinfo-container">  
+                              <div className="hearing-title-container" style={{cursor: 'pointer'}} onClick={() => toggleOpen(index)}>
+                                  <div className="hearing-title">
+                                    <h1>{item.nos} Hearing Details</h1>
+                                  </div>
+                                  <div className="hearing-button-section">
+                                    <button className="toggle-btn-hearing"
+                                      aria-label={openIndices[index] ? 'Hide details' : 'Show details'}
+                                    >
+                                      <img 
+                                        src={openIndices[index] ? '/Images/up.png' : '/Images/down.png'} 
+                                        alt={openIndices[index] ? 'Hide details' : 'Show details'} 
+                                        style={{ width: '16px', height: '16px' }} 
+                                      />
+                                    </button>
+                                  </div>
+                                </div>
+
+                              <div className="view-incident-content-topsection">
+                                <div className="view-incident-content-left-side">
+                                  <div className="view-incident-fields-section">
+                                    <p>Meeting Date & Time</p>
+                                    <input
+                                      type="text"
+                                      className="view-incident-input-field"
+                                      name="hearingMeetingDateTime"
+                                      value={hearingFormData.hearingMeetingDateTime || "N/A"}
+                                      readOnly
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="view-incident-content-right-side">
+                                  <div className="view-incident-fields-section">
+                                    <p>{item.nos} Hearing Officer</p>
+                                    <input
+                                      type="text"
+                                      className="view-incident-input-field"
+                                      value={getHearingOfficer(item.nos, hearingFormData)}
+                                      readOnly
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Conditionally render bottom section */}
+                              {openIndices[index] && (
+                                <div className="view-incident-content-bottomsection">
+                                  <div className="view-incident-partyA-container">
+                                    <div className="box-container-outer-natureoffacts">
+                                      <div className="title-remarks-partyA">Party A</div>
+                                      <div className="box-container-partyA">
+                                        <textarea
+                                          className="partyA-input-field"
+                                          name="partyA"
+                                          value={hearingFormData.partyA}
+                                          readOnly
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="view-incident-partyA-container">
+                                    <div className="box-container-outer-natureoffacts">
+                                      <div className="title-remarks-partyA">Party B</div>
+                                      <div className="box-container-partyA">
+                                        <textarea
+                                          className="partyA-input-field"
+                                          name="partyB"
+                                          value={hearingFormData.partyB}
+                                          readOnly
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="view-incident-partyA-container">
+                                    <div className="box-container-outer-natureoffacts">
+                                      <div className="title-remarks-partyA">Remarks</div>
+                                      <div className="box-container-partyA">
+                                        <textarea
+                                          className="partyA-input-field"
+                                          name="remarks"
+                                          value={hearingFormData.remarks}
+                                          readOnly
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="view-incident-partyA-container">
+                                    <div className="box-container-outer-natureoffacts">
+                                      <div className="title-remarks-partyA">Minutes of Dialogue</div>
+                                      <div className="box-container-partyA">
+                                        <textarea
+                                          className="partyA-input-field"
+                                          name="minutesOfDialogue"
+                                          value={hearingFormData.minutesOfCaseProceedings}
+                                          readOnly
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          );
+                        })}
+
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> 
+      </div>  
+
+
+{/*
+      {hearingData.length > 0 && hearingData.map((item, index) => {
         const hearingFormData = hearingFormDataA(item,index);
 
         return (
@@ -429,11 +856,7 @@ const dialogueFormData = !dialogueData || dialogueData === "" ? {
           </>
         );    
       })}
-
-        
-
-      
-
+        */}
     </main>
   );
 }

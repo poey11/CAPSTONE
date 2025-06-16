@@ -5,15 +5,20 @@ import { useRouter } from "next/navigation";
 import { db } from "../../../../../db/firebase";
 import { collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
+import { useRef } from "react";
 
 export default function addVoter() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     voterNumber: "",
-    fullName: "",
+    lastName: "",
+    firstName: "",
+    middleName: "",
     homeAddress: "",
     precinctNumber: "",
     createdAt:"",
+    residentId: "",
+    identificationFileURL: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -25,6 +30,11 @@ export default function addVoter() {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
+  const [showResidentsPopup, setShowResidentsPopup] = useState(false);
+  const employerPopupRef = useRef<HTMLDivElement>(null);
+  const [residents, setResidents] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchLatestNumber = async () => {
@@ -86,12 +96,13 @@ export default function addVoter() {
   };*/
 
   const handleSubmitClick = async () => {
-    const { fullName, homeAddress, precinctNumber} = formData;
+    const { lastName, firstName, homeAddress, precinctNumber} = formData;
 
     const invalidFields: string[] = [];
 
 
-    if (!fullName) invalidFields.push("fullName");
+    if (!lastName) invalidFields.push("lastName");
+    if (!firstName) invalidFields.push("firstName");
     if (!homeAddress) invalidFields.push("homeAddress");
     if (!precinctNumber) invalidFields.push("precinctNumber");
   
@@ -158,6 +169,7 @@ export default function addVoter() {
       const docRef = await addDoc(voterCollection, {
         ...formData,
         voterNumber: latestNumber,
+        identificationFileURL: formData.identificationFileURL,
         createdAt: currentDate,
       });
       return docRef.id; // return ID
@@ -174,8 +186,71 @@ export default function addVoter() {
     router.push("/dashboard/ResidentModule/registeredVoters");
   };
 
+  useEffect(() => {
+    const fetchResidents = async () => {
+      try {
+        const residentsCollection = collection(db, "Residents");
+            const residentsSnapshot = await getDocs(residentsCollection);
+            const residentsList = residentsSnapshot.docs.map(doc => {
+                const data = doc.data() as {
+                    residentNumber: string;
+                    firstName: string;
+                    middleName: string;
+                    lastName: string;
+                    address: string;
+                    identificationFileURL: string
+                };
+    
+                return {
+                    id: doc.id,
+                    ...data
+                };
+            });
+    
+            setResidents(residentsList);
+      } catch (error) {
+        console.error("Error fetching residents:", error);
+      }
+    };
+  
+    fetchResidents();
+  }, []);
+
+  // Show popup on input focus
+  const handleVotersClick = () => {
+    setShowResidentsPopup(true);
+  };
+
+  // Close popup when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        employerPopupRef.current &&
+        !employerPopupRef.current.contains(event.target as Node)
+      ) {
+        setShowResidentsPopup(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const filteredResidents = residents.filter((resident) =>
+    `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
+  
+  const [activeSection, setActiveSection] = useState("details");
+  const [isResidentSelected, setIsResidentSelected] = useState(false);
+
   return (
     <main className="add-resident-main-container">
+      {/*}
         <div className="path-section">
           <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
           <h1 className="breadcrumb">
@@ -187,7 +262,7 @@ export default function addVoter() {
 
         <div className="addresident-page-title-section-1">
         <h1>Registered Voters</h1>
-        </div>
+        </div>*/}
         
         <div className="add-resident-main-content">
           <div className="add-resident-main-section1">
@@ -204,35 +279,142 @@ export default function addVoter() {
                 {loading ? "Saving..." : "Save"}
               </button>
             </div>
-            
           </div>
 
-          <hr/>
+          <div className="add-voter-bottom-section">
 
+              <nav className="voters-info-toggle-wrapper">
+                {["details"].map((section) => (
+                  <button
+                    key={section}
+                    type="button"
+                    className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                    onClick={() => setActiveSection(section)}
+                  >
+                    {section === "details" && "Details"}
+                  </button>
+                ))}
+              </nav>  
+            
+              <div className="add-resident-bottom-section-scroll">
 
-        <form id="addVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
-          <div className="add-resident-section-2-left-side">
+                <div className="input-wrapper">
+                  <div className="input-with-clear">
+                    <input
+                      type="text"
+                      className="select-resident-input-field"
+                      placeholder="Select Resident"
+                      onClick={handleVotersClick}
+                      value={
+                        isResidentSelected
+                          ? `${formData.firstName} ${formData.middleName} ${formData.lastName}`
+                          : ''
+                      }
+                      readOnly
+                    />
+                    {isResidentSelected && (
+                      <span
+                        className="clear-icon"
+                        title="Click to clear selected complainant"
+                        onClick={() => {
+                          setFormData({
+                            voterNumber: "",
+                            firstName: '',
+                            lastName: '',
+                            middleName: '',
+                            homeAddress: '',
+                            precinctNumber: "",
+                            createdAt:"",
+                            residentId: "",
+                            identificationFileURL: "",
+                          });
+                          setIsResidentSelected(false);
+                        }}
+                      >
+                        ×
+                      </span>
+                    )}
+                  </div>
+                  {isResidentSelected && (
+                    <p className="help-text">Click the <strong>×</strong> to clear the selected complainant.</p>
+                  )}
+                </div>
 
-            <div className="fields-container">
-              <div className="fields-section">
-                <p>Full Name<span className="required">*</span></p>
-                <input type="text"  className={`add-resident-input-field ${invalidFields.includes("fullName") ? "input-error" : ""}`} placeholder="Enter Full Name" name="fullName" value={formData.fullName} onChange={handleChange} required />
-              </div>
+                
 
-              <div className="fields-section">
-                <p>Home Address<span className="required">*</span></p>
-                <input type="text"  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+                <form id="addVoterForm" onSubmit={handleSubmit} className="add-resident-section-2">
+                {activeSection === "details" && (
+                  <>
+                    <div className="addvoter-outer-container">
+                      <div className="addvoter-outer-container-left">
+
+                      <div className="resident-photo-section-voter">
+                        <span className="resident-details-label-voter">Identification Picture</span>
+
+                        <div className="resident-profile-container-voter">
+                          <img
+                              src={formData.identificationFileURL || "/Images/default-identificationpic.jpg"}
+                              alt="Resident"
+                              className={
+                                formData.identificationFileURL
+                                  ? "resident-picture uploaded-picture"
+                                  : "resident-picture default-picture"
+                              }
+                          /> 
+                        </div>
+                      </div>
+                      </div>
+
+                      <div className="addvoter-outer-container-right">
+                        <div className="addvoter-top-details-section">
+                          <div className="add-main-resident-section-2-left-side">
+                            <div className="fields-section">
+                              <p>Last Name<span className="required">*</span></p>
+                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`} placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} disabled={isResidentSelected} required />
+                            </div>
+                            <div className="fields-section">
+                              <p>First Name<span className="required">*</span></p>
+                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`} placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} disabled={isResidentSelected} required />
+                            </div>
+                          </div>
+                          <div className="add-main-resident-section-2-right-side">
+                            <div className="fields-section">
+                              <p>Middle Name</p>
+                              <input type="text"  className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} readOnly />
+                            </div>
+                            <div className="fields-section">
+                              <p>Home Address<span className="required">*</span></p>
+                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} disabled={isResidentSelected} required />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="add-voter-section-2-full-bottom">
+                          
+                            <div className="fields-section-precinct">
+                              <p>Precinct Number<span className="required">*</span></p>
+                              <input type="text" className={`add-voterprecinct-input-field ${invalidFields.includes("precinctNumber") ? "input-error" : ""}`} placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required/>
+                            </div>
+                         
+                        </div>  
+                      </div>
+
+                    
+
+                    </div>
+
+                    
+                  
+
+                  </>
+                )}
+                </form>
+
               </div>
               
-              <div className="fields-section">
-                <p>Precinct Number<span className="required">*</span></p>
-                <input type="text" className={`add-resident-input-field ${invalidFields.includes("precinctNumber") ? "input-error" : ""}`} placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required/>
-              </div>
-            </div>
+         
           </div>
-        </form>
-        {error && <p className="error">{error}</p>}
-      </div>
+          {error && <p className="error">{error}</p>}
+        </div>
 
       {showSubmitPopup && (
                         <div className="confirmation-popup-overlay-add-voter">
@@ -265,6 +447,97 @@ export default function addVoter() {
                     </div>
                 </div>
                 )}
+
+
+{showResidentsPopup && (
+      <div className="kasambahay-employer-popup-overlay">
+        <div className="kasambahay-employer-popup" ref={employerPopupRef}>
+          <h2>Residents List</h2>
+          <h1>* Please select Resident's Name *</h1>
+
+          <input
+            type="text"
+            placeholder="Search Resident's Name"
+            className="employer-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <div className="employers-list">
+            {residents.length === 0 ? (
+              <p>No residents found.</p>
+            ) : (
+              <table className="employers-table">
+                <thead>
+                  <tr>
+                    <th>Resident Number</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Last Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {filteredResidents.map((resident) => (
+            <tr
+              key={resident.id}
+              className="employers-table-row"
+              onClick={async () => {
+                try {
+                  const votersSnapshot = await getDocs(collection(db, "VotersList"));
+                  const isDuplicate = votersSnapshot.docs.some((doc) => {
+                    const data = doc.data();
+                    return (
+                      data.lastName?.toLowerCase() === resident.lastName?.toLowerCase() &&
+                      data.firstName?.toLowerCase() === resident.firstName?.toLowerCase() &&
+                      data.middleName?.toLowerCase() === resident.middleName?.toLowerCase()
+                    );
+                  });
+
+                  if (isDuplicate) {
+                    setPopupErrorMessage("Resident is already in the Voter Database.");
+                    setShowErrorPopup(true);
+                    setTimeout(() => {
+                      setShowErrorPopup(false);
+                    }, 3000);
+                    return;
+                  }
+
+                  // Not a duplicate, proceed to set the form
+                  setFormData({
+                    ...formData,
+                    residentId: resident.id,
+                    lastName: resident.lastName || '',
+                    firstName: resident.firstName || '',
+                    middleName: resident.middleName || '',
+                    homeAddress: resident.address || '',
+                    identificationFileURL: resident.identificationFileURL || '',
+                  });
+                  setIsResidentSelected(true);
+                  setShowResidentsPopup(false);
+                } catch (error) {
+                  console.error("Error checking for duplicates:", error);
+                  setPopupErrorMessage("An error occurred. Please try again.");
+                  setShowErrorPopup(true);
+                  setTimeout(() => {
+                    setShowErrorPopup(false);
+                  }, 3000);
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <td>{resident.residentNumber}</td>
+              <td>{resident.firstName}</td>
+              <td>{resident.middleName}</td>
+              <td>{resident.lastName}</td>
+            </tr>
+          ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
     </main>
   );
 }

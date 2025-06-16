@@ -260,20 +260,15 @@ export default function ResidentModule() {
 
       <div className="resident-module-section-1">
 
+        {/*<h1>Main Residents</h1>*/}
+        {isAuthorized ? (
+          <Link href="/dashboard/ResidentModule/AddResident">
+            <button className="add-announcement-btn" onClick={handleAddResidentClick}>Import Residents from Excel</button>
+          </Link>
+        ) : (
+          <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Import Residents from Excel</button>
+        )}
 
-           <div className="redirection-section">
-            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-            {getPageNumbers().map((number, index) => (
-              <button
-                key={index}
-                onClick={() => typeof number === 'number' && paginate(number)}
-                className={currentPage === number ? "active" : ""}
-              >
-                {number}
-              </button>
-            ))}
-            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-          </div>
 
         {/*<h1>Main Residents</h1>*/}
         {isAuthorized ? (
@@ -453,6 +448,19 @@ export default function ResidentModule() {
       )}
     </div>
   
+       <div className="redirection-section">
+            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+            {getPageNumbers().map((number, index) => (
+              <button
+                key={index}
+                onClick={() => typeof number === 'number' && paginate(number)}
+                className={currentPage === number ? "active" : ""}
+              >
+                {number}
+              </button>
+            ))}
+            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+          </div>
 
   
     {showDeletePopup && (

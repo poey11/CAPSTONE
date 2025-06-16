@@ -1,9 +1,10 @@
-.viewresident-main-container {
+  .viewresident-main-container {
 
     width: 100%;
     height: 100vh;
-    background-color: #f9f9f9;
-    padding: 30px;
+    background-color: #F0F2F8; 
+    /*padding-top: 150px;*/
+    padding-top: 11.2%;
     margin-left: 3rem;
     overflow-y: auto; 
    
@@ -124,33 +125,6 @@ margin-top: 20px;
     font-size: 1rem;
   }
 
-  .path-section {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 30px;
-  }
-  
-  .path-section h1 {
-    font-size: 1.15rem;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.5);
-  }
-  
-  .path-section h2 {
-    font-size: 1.15rem;
-    font-weight: bold;
-    color: rgba(61, 61, 61, 0.5);
-  }
-  
-  .breadcrumb {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  .chevron {
-    color: #888;
-    margin-left: 10px;
-  }
 
   .employer-link {
     color: grey;
@@ -252,15 +226,7 @@ background-color: #214666;
   overflow: hidden; /* Prevent body overflow */
 }
 
-/* Left photo section */
-.resident-photo-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 50px 50px;
-  width: 35%;
-  overflow-y: auto; /* optional, in case photo content exceeds */
-}
+
 
 /* Right section that holds scrollable content */
 .resident-details-section {
@@ -293,54 +259,23 @@ background-color: #214666;
 }
 
 
-
-
-
-
-
-
-.resident-profile-container {
-  border: 1px solid rgba(44, 62, 80, 0.7);
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.voters-details-container-center {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  text-align: center;
-  margin-top: -8px; /* Pulls the card up under the label */
+  justify-content: center;
+  align-items: center;
 
 }
 
-.resident-details-label {
-  background-color: #214E77;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 14px;
-  position: relative;
-  top: 12px; /* Pushes it closer to the card */
-  z-index: 1;
-}
 
 
-.resident-photo {
-  width: 100%;
-  height: auto;
-  display: block;
-}
 
-.resident-name-box {
-  padding: 10px;
-  background-color: #F2F2F2;
-}
 
-.resident-name {
-  font-size: 16px;
-  font-weight: bold;
-  color: #2C3E50;
-  margin: 0;
-}
+
+
+
+
 
 
 .fields-section-residents{
@@ -532,33 +467,6 @@ background-color: #214666;
     font-size: 1rem;
   }
 
-  .path-section {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 30px;
-  }
-  
-  .path-section h1 {
-    font-size: 1.15rem;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.5);
-  }
-  
-  .path-section h2 {
-    font-size: 1.15rem;
-    font-weight: bold;
-    color: rgba(61, 61, 61, 0.5);
-  }
-  
-  .breadcrumb {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  .chevron {
-    color: #888;
-    margin-left: 10px;
-  }
 
   .employer-link {
     color: grey;
@@ -566,4 +474,516 @@ background-color: #214666;
     text-decoration: underline;
     cursor: pointer;
   }
+
+
+
+  /* NEW */
+
+.view-resident-main-content {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  border-radius: 1rem;
+  border: 2px solid rgba(36, 53, 76, 0.7);
+  margin:  auto; 
+  background-color: #ffffff;
+  overflow: hidden; 
+  height: 580px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.view-resident-main-content hr{
+  border: none; 
+  border-top: 2px solid rgba(0, 0, 0, 0.10);
+  margin: 30px 0; 
+}
+
+.view-resident-main-section1{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #214666;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.view-resident-header-second-section {
+  background-color: #214666;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-right: 50px;
+  text-align: center;
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+  }
   
+.view-resident-header-second-section h2 {
+  margin: 1px 0;
+  font-size: 12px;
+  font-weight: normal;
+}
+  
+.view-resident-header-second-section .barangay-name {
+  font-size: 18px;
+  font-weight: bolder;
+  margin: 10px 0 6px;
+  letter-spacing: 1px;
+}
+  
+.view-resident-header-second-section .address,
+.view-resident-header-second-section .contact {
+  font-size: 11px;
+}
+  
+.logo1-image-side-bar-1{
+  width: 170px;
+  height: 100px;
+}
+
+.logo2-image-side-bar-1{
+  width: 90px;
+  height: 90px;
+  margin-right: 45px;
+}
+
+.view-resident-header-body{
+  display: flex;
+  flex-direction: column;
+}
+
+.view-resident-header-body-top-section{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.view-resident-info-toggle-wrapper {
+  display: flex;
+  justify-content: center; 
+  gap: 30px;
+  margin-bottom: 20px;
+  width: 70%;
+  align-items: center;
+}
+
+.view-resident-backbutton-container{
+  width: 30%;
+  display: flex;
+  padding-left: 30px;
+}
+
+.view-resident-header-body-bottom-section{
+  display: flex;
+  flex-direction: row;
+}
+
+
+.title-resident-details-box {
+  position: absolute;
+  left: 10%; 
+  top: 0; 
+  transform: translate(25%, 25%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 192px;
+  text-align: center;
+}
+
+
+.resident-profile-container {
+  border: 1px solid rgba(44, 62, 80, 0.7);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%;
+  text-align: center;
+  margin-top: -8px; /* Pulls the card up under the label */
+  margin-left: 20px;
+  height: 250px;
+}
+
+.resident-details-label {
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  position: relative;
+  top: 12px; /* Pushes it closer to the card */
+  z-index: 1;
+  left: 10px;
+}
+
+
+.resident-photo {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.resident-name-box {
+  padding: 10px;
+  background-color: #F2F2F2;
+}
+
+.resident-name {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2C3E50;
+  margin: 0;
+}
+
+.resident-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-left: 60px;
+  padding-right: 50px;
+  padding-bottom: 50px;
+  width: 35%;
+}
+
+.view-resident-info-main-container{
+  width: 63%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 20px;
+}
+
+.view-resident-info-container-scrollable{
+  width: 100%;
+  height: 325px;
+  border: 1px solid rgba(44, 62, 80, 0.7);
+  border-radius: 8px;
+  margin-right: 45px;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+
+.view-resident-info-main-content{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.view-main-resident-content-left-side{
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+} 
+
+.view-main-resident-content-right-side {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+} 
+
+
+.view-main-resident-content-left-side p,
+.view-main-resident-content-right-side p {
+ color: grey;
+ font-weight: bold;
+ font-size: 1rem;
+}
+
+.view-resident-fields-section,
+.view-resident-fields-section-details{
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 13px;
+}
+
+.view-resident-fields-section p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 20px;
+}
+
+.view-resident-fields-section-details p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 40px;
+}
+
+.view-resident-input-field {
+  padding: 8px;
+  width: 85%;
+  margin-top: 10px;
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  color: #000000;
+  text-align: left;
+}
+
+.view-resident-input-field:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+.box-container-outer-resident-picture {
+  position: relative; 
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.title-resident-picture {
+  position: absolute;
+  left: -3%; 
+  top: 0; 
+  transform: translate(25%, 25%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  z-index: 10;
+  width: 180px;
+  text-align: center;
+}
+
+.box-container-resident-picture {
+  position: relative;
+  width: 100%;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.resident-picture-container {
+  width: 100%;
+  height: 60%;
+  overflow: hidden;
+}
+
+.resident-picture{
+  width: 255px;
+  height: 200px;
+}
+
+.uploaded-picture {
+  width: 100%;
+  height: 200px;
+}
+
+.default-picture {
+  width: 100%;
+  height: 200px;
+}
+
+
+
+.resident-name-section{
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid #5a6b7c;
+}
+
+.resident-name-section h2 {
+  font-weight: bold;
+  color: #2C3E50;
+  font-size: 18px;
+}
+
+
+/* for incidents section */
+
+.view-resident-incident-table-container {
+  display: flex;
+  justify-content: center; 
+  padding: 1rem; 
+}
+
+.incident-table-section {
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%; 
+  max-width: 100%;
+   border: 2px solid rgba(36, 53, 76, 0.7);
+     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
+}
+
+.incident-table-section {
+    width: 100%; 
+    border-collapse: collapse; 
+}
+
+.incident-table-section tbody tr:hover {
+  background-color: #e0e0e0; 
+  cursor: pointer; 
+  transition: background-color 0.2s ease; 
+}
+
+.incident-table-section td {
+     padding: 1rem; 
+    text-align: center; 
+    border-bottom: 2px solid #ddd;
+ color: rgb(44, 42, 42);
+    font-weight: normal;
+}
+
+.incident-table-section th {
+    padding: 1rem; 
+    text-align: left; 
+    border-bottom: 2px solid #ddd;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.incident-table-section thead { 
+  top: 0;
+  background-color: #214666; 
+  z-index: 10; 
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); 
+  height: 80px;
+}
+
+
+
+
+.status-badge-departments {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.status-badge-departments.pending {
+  background-color: #f0ad4e;
+}
+
+.status-badge-departments.settled {
+  background-color: #5cb85c;
+}
+
+.status-badge-departments.resolved {
+  background-color: #0275d8;
+}
+
+.status-badge-departments.archived {
+  background-color: #d9534f;
+}
+
+
+.no-incident-message {
+  height: 250px; 
+  width: 550px;
+  font-weight: bold;
+  font-size: 1rem; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: red;
+}
+
+
+.add-main-resident-section-2-full-bottom-view{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.add-main-resident-section-2-full-top{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.view-main-resident-content-others{
+  width: 100%;
+}
+
+
+.services-onlinereq-verification-requirements-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-left: 60px;
+  padding-bottom: 20px;
+  width: 100%;
+  padding-right: 60px;
+  margin-top: 30px;
+}
+
+.verification-requirements-label {
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 15px;
+  position: relative;
+  top: 12px; /* Pushes it closer to the card */
+  z-index: 1;
+  left: 0px;
+  text-align: center;
+  width: 250px;
+}
+
+.services-onlinereq-verification-requirements-container {
+  border: 1px solid rgba(44, 62, 80, 0.7);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%;
+  text-align: center;
+  margin-top: -8px; /* Pulls the card up under the label */
+  height: 300px;
+}
+
+.verification-reqs-pic {
+  margin-right: 8px;
+  margin-bottom: 8px;
+  width: 100px;
+  height: auto;
+  object-fit: cover;
+}
+
+.uploaded-pic {
+  width: 100%;
+  height: 300px;
+}
+
+.no-verification-files-text{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: red;
+}

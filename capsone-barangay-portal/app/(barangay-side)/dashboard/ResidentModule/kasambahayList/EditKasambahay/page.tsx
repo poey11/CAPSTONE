@@ -31,7 +31,8 @@ interface KasambahayFormData {
   sssMember: boolean;
   philhealthMember: boolean;
   pagibigMember: boolean;
-  fileURL: string;
+  verificationFilesURLs: [],
+  identificationFileURL: string,
   updatedBy: string;
 }
 
@@ -64,10 +65,33 @@ export default function EditKasambahay() {
     sssMember: false,
     philhealthMember: false,
     pagibigMember: false,
-    fileURL: "",
+    verificationFilesURLs: [],
+    identificationFileURL: "",
     updatedBy: "",
 
   });
+
+  const fieldSectionMap: { [key: string]: "basic" | "full" | "others" } = {
+    lastName: "basic",
+    firstName: "basic",
+    middleName: "basic",
+    sex: "basic",
+    homeAddress: "basic",
+    dateOfBirth: "basic",
+    
+    age: "full",
+    placeOfBirth: "full",
+    civilStatus: "full",
+    educationalAttainment: "full",
+    natureOfWork: "full",
+    employmentArrangement: "full",
+    salary: "full",
+    employerName: "full",
+    employerAddress: "full",
+
+    verificationFiles: "others",
+    identificationFile: "others"
+  };
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -85,9 +109,16 @@ export default function EditKasambahay() {
 
   const [showResidentsPopup, setShowResidentsPopup] = useState(false);
   const employerPopupRef = useRef<HTMLDivElement>(null);
+
+  const [identificationFile, setIdentificationFile] = useState<File | null>(null);
+  const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
+  const [identificationFileDeleted, setIdentificationFileDeleted] = useState(false);
+  const [verificationFiles, setVerificationFiles] = useState<File[]>([]);
+  const [verificationPreviews, setVerificationPreviews] = useState<string[]>([]);
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
   
-    const [residents, setResidents] = useState<any[]>([]);
-    const [searchTerm, setSearchTerm] = useState("");
+  const [residents, setResidents] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleDiscardClick = async () => {
     setShowDiscardPopup(true);
@@ -96,16 +127,20 @@ export default function EditKasambahay() {
   const confirmDiscard = async () => {
     setShowDiscardPopup(false);
 
-    setFormData(originalData); // Reset to original data
+      setFormData(originalData); // Reset to original data
+      setIdentificationPreview(originalData.identificationFileURL || null);
+      setIdentificationFile(null); // Reset file selection
+      setVerificationPreviews(originalData.verificationFilesURLs || []);
+      setVerificationFiles([]); // Reset file selection
 
-    setPopupMessage("Changes discarded successfully!");
-    setShowPopup(true);
-    
+      setPopupMessage("Changes discarded successfully!");
+      setShowPopup(true);
+      
 
-    // Hide the popup after 3 seconds
-    setTimeout(() => {
-      setShowPopup(false);
-    }, 3000);
+      // Hide the popup after 3 seconds
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 3000);
 
 };
 
@@ -139,12 +174,15 @@ export default function EditKasambahay() {
             sssMember: docSnap.data().sssMember ?? false,
             philhealthMember: docSnap.data().philhealthMember ?? false,
             pagibigMember: docSnap.data().pagibigMember ?? false,
-            fileURL: docSnap.data().fileURL || "",
+            verificationFilesURLs: docSnap.data().verificationFilesURLs || [],
+            identificationFileURL: docSnap.data().identificationFileURL || "",
             updatedBy: docSnap.data().updatedBy || "",
           };
 
           setFormData(data);
           setOriginalData(data); // Store original data
+          setVerificationPreviews(docSnap.data().verificationFilesURLs || []);
+          setIdentificationPreview(docSnap.data().identificationFileURL || null);
 
         } else {
           setError("Kasambahay record not found.");
@@ -159,38 +197,15 @@ export default function EditKasambahay() {
   }, [kasambahayId]);
 
 
+  const [activeSection, setActiveSection] = useState("basic");
+  // options: "basic", "full", "others"
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
       setPreview(URL.createObjectURL(selectedFile));
       e.target.value = "";
-    }
-  };
-
-  const handleFileDelete = async () => {
-    if (!formData.fileURL) return;
-  
-    try {
-      // Create a reference to the file in Firebase Storage
-      const fileRef = ref(storage, formData.fileURL);
-  
-      // Delete the file from Firebase Storage
-      await deleteObject(fileRef);
-  
-      // Clear the local state
-      setFile(null);
-      setPreview(null); // Ensure it's undefined
-  
-      // Reset fileURL in formData
-      setFormData((prev) => ({
-        ...prev,
-        fileURL: "",
-      }));
-  
-      console.log("File deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting file:", error);
     }
   };
   
@@ -242,24 +257,45 @@ export default function EditKasambahay() {
     });
   };
   
+  
   const handleSaveClick = async () => {
 
     const { lastName, firstName, homeAddress, dateOfBirth, age, sex, civilStatus, educationalAttainment, natureOfWork, employmentArrangement, salary, employerName, employerAddress} = formData;
   
-    if (!lastName || !firstName ||!homeAddress ||!dateOfBirth || !age || !sex || !civilStatus || !educationalAttainment || !natureOfWork || !employmentArrangement || !salary || !employerName || !employerAddress) {
+    const invalidFields: string[] = [];
 
+    if (!lastName) invalidFields.push("lastName");
+    if (!firstName) invalidFields.push("firstName");
+    if (!homeAddress) invalidFields.push("homeAddress");
+    if (!dateOfBirth) invalidFields.push("dateOfBirth");
+    if (!age) invalidFields.push("age");
+    if (!sex) invalidFields.push("sex");
+    if (!civilStatus) invalidFields.push("civilStatus");
+    if (!educationalAttainment) invalidFields.push("educationalAttainment");
+    if (!natureOfWork) invalidFields.push("natureOfWork");
+    if (!employmentArrangement) invalidFields.push("employmentArrangement");
+    if (!salary) invalidFields.push("salary");
+    if (!employerName) invalidFields.push("employerName");
+    if (!employerAddress) invalidFields.push("employerAddress");
+    
+   
+
+    if (invalidFields.length > 0) {
+      // Set the section based on the first invalid field
+      const firstInvalidField = invalidFields[0];
+      const section = fieldSectionMap[firstInvalidField];
+      setActiveSection(section);
+
+      setInvalidFields(invalidFields);
       setPopupErrorMessage("Please fill up all required fields.");
       setShowErrorPopup(true);
   
-    // Hide the popup after 3 seconds
-    setTimeout(() => {
-      setShowErrorPopup(false);
-      
-    }, 3000);
-    
+      setTimeout(() => {
+        setShowErrorPopup(false);
+      }, 3000);
       return;
     }
-
+    setInvalidFields([]);
     setShowSavePopup(true);
   } 
 
@@ -289,14 +325,35 @@ export default function EditKasambahay() {
     setError("");
 
     try {
-      let fileURL = formData.fileURL; // Default to existing URL
-  
-      //  If new file is selected, upload to Firebase Storage
-      if (file) {
-        const storageRef = ref(storage, `KasambahayFiles/${file.name}`);
-        await uploadBytes(storageRef, file);
-        fileURL = await getDownloadURL(storageRef);
+      // Initialize with existing URLs or empty array
+    let uploadedVerificationURLs: string[] = [...(formData.verificationFilesURLs || [])];
+
+    // Upload new verification files and get their URLs
+    for (const file of verificationFiles) {
+      const fileRef = ref(storage, `KasambahayFiles/VerificationFile/${file.name}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      uploadedVerificationURLs.push(url);
+    }
+
+    let uploadedIdentificationURL: string | null = formData.identificationFileURL;
+
+    if (identificationFile) {
+      // Upload new file
+      const idRef = ref(storage, `KasambahayFiles/IdentificationFile/${identificationFile.name}`);
+      await uploadBytes(idRef, identificationFile);
+      uploadedIdentificationURL = await getDownloadURL(idRef);
+    } else if (identificationFileDeleted) {
+      // Delete existing file
+      if (formData.identificationFileURL) {
+        const oldFileName = formData.identificationFileURL.split("%2F").pop()?.split("?")[0];
+        if (oldFileName) {
+          const deleteRef = ref(storage, `KasambahayFiles/IdentificationFile/${oldFileName}`);
+          await deleteObject(deleteRef);
+        }
       }
+      uploadedIdentificationURL = null;
+    }
 
       const docRef = doc(db, "KasambahayList", kasambahayId);
       await updateDoc(docRef, {
@@ -320,7 +377,8 @@ export default function EditKasambahay() {
         sssMember: formData.sssMember,
         philhealthMember: formData.philhealthMember,
         pagibigMember: formData.pagibigMember,
-        fileURL,
+        verificationFilesURLs: uploadedVerificationURLs.length ? uploadedVerificationURLs : formData.verificationFilesURLs,
+        identificationFileURL: uploadedIdentificationURL,
         updatedBy: session?.user?.position,
       });
 
@@ -338,8 +396,49 @@ export default function EditKasambahay() {
     window.location.href = "/dashboard/ResidentModule/kasambahayList";
   };
 
+  const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFile = e.target.files[0];
+  
+      // Ensure only one file is processed
+      setIdentificationFile(selectedFile);
+      setIdentificationPreview(URL.createObjectURL(selectedFile));
+  
+      // Reset the file input to prevent multiple selections
+      e.target.value = "";
+    }
+  };
+
+  const handleVerificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFiles = Array.from(e.target.files);
+      const newPreviews = selectedFiles.map((file) => URL.createObjectURL(file));
+      setVerificationFiles((prev) => [...prev, ...selectedFiles]);
+      setVerificationPreviews((prev) => [...prev, ...newPreviews]);
+      e.target.value = "";
+    }
+  };
+
+  const handleIdentificationFileDelete = () => {
+    setIdentificationFile(null);
+      setIdentificationPreview(null);
+      setFormData((prev) => ({
+        ...prev,
+        identificationFileURL: "",
+      }));
+  };
+
+  const handleVerificationFileDelete = (index: number) => {
+    setVerificationFiles((prev) => prev.filter((_, i) => i !== index));
+    setVerificationPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+  
+
+ 
+
   return (
     <main className="add-resident-main-container">
+      {/*}
       <div className="path-section">
         <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
         <h1 className="breadcrumb">
@@ -351,7 +450,7 @@ export default function EditKasambahay() {
 
       <div className="addresident-page-title-section-1">
         <h1>Edit Kasambahay Details</h1>
-      </div>
+      </div>*/}
 
       <div className="add-resident-main-content">
         <div className="add-resident-main-section1">
@@ -372,218 +471,387 @@ export default function EditKasambahay() {
           </div>
         </div>
 
-        <hr/>
-      
-        <form id="editKasambahayForm" onSubmit={handleSubmit} className="add-resident-section-2">
-          <div className="add-resident-section-2-left-side">
+        <div className="add-resident-bottom-section">
+          <nav className="kasambahay-info-toggle-wrapper">
+            {["basic", "full", "others"].map((section) => (
+              <button
+                key={section}
+                type="button"
+                className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                onClick={() => setActiveSection(section)}
+              >
+                {section === "basic" && "Basic Info"}
+                {section === "full" && "Full Info"}
+                {section === "others" && "Others"}
+              </button>
+            ))}
+          </nav>
 
-            <div className="fields-container">
-              <div className="fields-section">
-                <p>Registration Control Number</p>
-                <input type="text" name="registrationControlNumber" value={formData.registrationControlNumber} onChange={handleChange} disabled className="add-resident-input-field-disabled" />
-              </div>
+          <div className="add-resident-bottom-section-scroll">
+            <form id="addKasambahayForm" onSubmit={handleSubmit} className="add-resident-section-2">
 
-              <div className="fields-section">
-                <p>First Name<span className="required">*</span></p>
-                <input type="text" name="firstName" className="add-resident-input-field" value={formData.firstName} onChange={handleChange} required />
-              </div>
+            {activeSection === "basic" && (
+              <>
+                <div className="add-main-resident-section-2-full-top">  
+                  <div className="add-main-resident-section-2-left-side">
+                    <div className="fields-section">
+                      <p>Registration Control Number</p>
+                      <input type="text" 
+                        name="registrationControlNumber" 
+                        value={formData.registrationControlNumber} 
+                        onChange={handleChange} 
+                        disabled 
+                        className="add-resident-input-field-disabled" />
+                    </div>
 
-              <div className="fields-section">
-                <p>Last Name<span className="required">*</span></p>
-                <input type="text" name="lastName" className="add-resident-input-field" value={formData.lastName} onChange={handleChange} required />
-              </div>
+                    <div className="fields-section">
+                      <p>First Name<span className="required">*</span></p>
+                      <input type="text"
+                      className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`}
+                      placeholder="Enter First Name"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required />
+                    </div>
 
-              <div className="fields-section">
-                <p>Middle Name</p>
-                <input type="text" name="middleName" className="add-resident-input-field" value={formData.middleName} onChange={handleChange} />
-              </div>
+                    <div className="fields-section">
+                      <p>Middle Name</p>
+                      <input type="text"
+                        className="add-resident-input-field"
+                        placeholder="Enter Middle Name"
+                        name="middleName"
+                        value={formData.middleName}
+                        onChange={handleChange} 
+                        required
+                      />
+                    </div>
+                  </div>
 
-              <div className="fields-section">
-                <p>Home Address<span className="required">*</span></p>
-                <input type="text" name="homeAddress" className="add-resident-input-field" value={formData.homeAddress} onChange={handleChange} required />
-              </div>
-           
-              <div className="fields-section">
-                <p>Place of Birth</p>
-                <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange}/>
-              </div>
+                  <div className="add-main-resident-section-2-right-side">
+                    <div className="fields-section">
+                      <p>Last Name<span className="required">*</span></p>
+                        <input type="text"
+                        className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`}
+                        placeholder="Enter Last Name"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange} 
+                        required />
+                    </div>
+                    <div className="fields-section">
+                      <p>Sex<span className="required">*</span></p>
+                      <select
+                        name="sex"
+                        className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
+                        value={formData.sex}
+                        onChange={handleChange}
+                        required>
+                        <option value="" disabled>Choose Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    </div>
 
-              <div className="fields-section">
-                <p>Date of Birth<span className="required">*</span></p>
-                <input type="date" className="add-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} max={new Date().toISOString().split("T")[0]} required />
-              </div>
-            
-              <div className="fields-section">
-                <p>Sex<span className="required">*</span></p>
-                <select name="sex" className="add-resident-input-field" value={formData.sex} onChange={handleChange} required>
-                  <option value="" disabled>Choose Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                </select>
-              </div>
-
-              <div className="fields-section">
-                <p>Civil Status<span className="required">*</span></p>
-                <select name="civilStatus" className="add-resident-input-field" value={formData.civilStatus} onChange={handleChange} required>
-                  <option value="" disabled>Choose Civil Status</option>
-                  <option value="Single">Single</option>
-                  <option value="Married">Married</option>
-                  <option value="Widowed">Widowed</option>
-                  <option value="Divorced">Divorced</option>
-                  <option value="Separated">Separated</option>
-                </select>
-              </div>
-
-              <div className="fields-section">
-                <p>Educational Attainment<span className="required">*</span></p>
-                <select name="educationalAttainment" className="add-resident-input-field" value={formData.educationalAttainment} onChange={handleChange} required>
-                  <option value="" disabled>Choose Educational Attainment</option>
-                  <option value="1">Elem Under Grad</option>
-                    <option value="2">Elem Grad</option>
-                    <option value="3">HS Grad</option>
-                    <option value="4">HS Under Grad</option>
-                    <option value="5">COL Grad</option>
-                    <option value="6">COL Under Grad</option>
-                    <option value="7">Educational</option>
-                    <option value="8">Vocational</option>
-                </select>
-              </div>
-
-              <div className="fields-section">
-                <p>Nature of Work<span className="required">*</span></p>
-                <select name="natureOfWork" className="add-resident-input-field" value={formData.natureOfWork} onChange={handleChange} required>
-                <option value="" disabled>Choose Nature of Work</option>
-                  <option value="1">Gen. House Help (All Around)</option>
-                  <option value="2">YAYA</option>
-                  <option value="3">COOK</option>
-                  <option value="4">Gardener</option>
-                  <option value="5">Laundry Person</option>
-                  <option value="6">Others</option>
-                </select>
-              </div>
-
-              <div className="fields-section">
-                <p>Employment Arrangement<span className="required">*</span></p>
-                <select name="employmentArrangement" className="add-resident-input-field" value={formData.employmentArrangement} onChange={handleChange} required>
-                   <option value="" disabled>Choose Employment Arrangement</option>
-                   <option value="1">Live - IN</option>
-                   <option value="2">Live - OUT</option>
-                </select>
-              </div>
-            
-              <div className="fields-section">
-                <p>Range of Salary<span className="required">*</span></p>
-                <select name="salary" className="add-resident-input-field" value={formData.salary} onChange={handleChange} required>
-                <option value="1">₱1,500 - ₱1,999</option>
-                  <option value="2">₱2,000 - ₱2,499</option>
-                  <option value="3">₱2,500 - ₱4,999</option>
-                  <option value="4">₱5,000 and Above</option>
-                </select>
-              </div>
-
-              <div ref={employerPopupRef}>
-                <div className="fields-section">
-                  <p>Employer Name<span className="required">*</span></p>
-                  <input 
-                    type="text"
-                    className="add-resident-input-field"
-                    placeholder="Select Employer"
-                    name="employerName"
-                    value={formData.employerName}
-                    onChange={handleChange}
-                    required
-                    onClick={handleEmployerClick}
-                    />
+                    <div className="fields-section">
+                      <p>Home Address<span className="required">*</span></p>
+                      <input type="text"
+                        className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`}
+                        placeholder="Enter Address"
+                        name="homeAddress"
+                        value={formData.homeAddress}
+                        onChange={handleChange}
+                        required />
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <div className="fields-section">
-                <p>Employer Address<span className="required">*</span></p>
-                <input 
-                  type="text"
-                  className="add-resident-input-field"
-                  placeholder="Enter Employer Address"
-                  name="employerAddress"
-                  value={formData.employerAddress}
-                  onChange={handleChange}
-                  required />
-              </div>
-            </div>
-          </div>
+                <div className="add-main-resident-section-2-full-bottom">
+                  <div className="add-main-resident-section-2-cluster">
+                    <div className="fields-section">
+                      <p>Date of Birth<span className="required">*</span></p>
+                      <input type="date"
+                        className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
+                        name="dateOfBirth"
+                        value={formData.dateOfBirth}
+                        onChange={handleChange}
+                        max={new Date().toISOString().split("T")[0]}
+                        required />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
 
-          <div className="add-resident-section-2-right-side">
-            <div className="checkboxes-container">
-              <p>SSS Member</p>
-              <div className="checkbox-container">
-                <label className="checkbox-label">
-                  <input type="checkbox" name="sssMember" checked={formData.sssMember} onChange={handleChange} />
-                  Is this resident an SSS member?
-                </label>
-              </div>
+            {activeSection === "full" && (
+              <>
+                <div className="add-main-resident-section-2-full-top">  
+                  <div className="add-main-resident-section-2-left-side">
+                    <div className="fields-section">
+                      <p>Age<span className="required">*</span></p>
+                        <input
+                          type="number"
+                          className={`add-resident-input-field ${invalidFields.includes("age") ? "input-error" : ""}`}
+                          placeholder="Enter Age" 
+                          name="age"
+                          value={formData.age}
+                          onChange={handleChange}
+                          required
+                          readOnly
+                        />
+                    </div>
 
-              <p>PhilHealth Member</p>
-              <div className="checkbox-container">
-                <label className="checkbox-label">
-                  <input type="checkbox" name="philhealthMember" checked={formData.philhealthMember} onChange={handleChange} />
-                  Is this resident a PhilHealth member?
-                </label>
-              </div>
+                    <div className="fields-section">
+                      <p>Place of Birth</p>
+                      <input type="text"
+                        className="add-resident-input-field"
+                        placeholder="Enter Place of Birth"
+                        name="placeOfBirth"
+                        value={formData.placeOfBirth}
+                        onChange={handleChange}/>
+                    </div>
 
-              <p>Pag-IBIG Member</p>
-              <div className="checkbox-container">
-                <label className="checkbox-label">
-                  <input type="checkbox" name="pagibigMember" checked={formData.pagibigMember} onChange={handleChange} />
-                  Is this resident a Pag-IBIG member?
-                </label>
-              </div>
+                    <div className="fields-section">
+                      <p>Civil Status<span className="required">*</span></p>
+                        <select
+                          name="civilStatus"
+                          className={`add-resident-input-field ${invalidFields.includes("civilStatus") ? "input-error" : ""}`}
+                          value={formData.civilStatus}
+                          onChange={handleChange}
+                          required
+                        >
+                          <option value="" disabled>Choose Civil Status</option>
+                          <option value="Single">Single</option>
+                          <option value="Married">Married</option>
+                          <option value="Widowed">Widowed</option>
+                          <option value="Divorced">Divorced</option>
+                          <option value="Separated">Separated</option>
+                        </select>
+                    </div>
 
-            </div>
+                    <div className="fields-section">
+                      <p>Educational Attainment<span className="required">*</span></p>
+                        <select name="educationalAttainment"  className={`add-resident-input-field ${invalidFields.includes("educationalAttainment") ? "input-error" : ""}`} value={formData.educationalAttainment} onChange={handleChange} required>
+                          <option value="" disabled>Choose Educational Attainment</option>
+                          <option value="1">Elem Under Grad</option>
+                          <option value="2">Elem Grad</option>
+                          <option value="3">HS Grad</option>
+                          <option value="4">HS Under Grad</option>
+                          <option value="5">COL Grad</option>
+                          <option value="6">COL Under Grad</option>
+                          <option value="7">Educational</option>
+                          <option value="8">Vocational</option>
+                      </select>
+                    </div>
+                  </div>
 
-                {/* File Upload Section Paayos na lang dito mapapasok yung new image*/}
-                <div className="file-upload-container">  
-                  <label htmlFor="file-upload" className="upload-link">Click to Upload File</label>
-                  <input 
-                    id="file-upload" 
-                    type="file" 
-                    className="file-upload-input" 
-                    accept=".jpg,.jpeg,.png" 
-                    onChange={handleFileChange} 
-                  />
+                  <div className="add-main-resident-section-2-right-side">
+                    <div className="fields-section">
+                        <p>Nature of Work<span className="required">*</span></p>
+                        <select 
+                        name="natureOfWork"
+                        className={`add-resident-input-field ${invalidFields.includes("natureOfWork") ? "input-error" : ""}`} 
+                        value={formData.natureOfWork}
+                        onChange={handleChange}
+                          required
+                          >
+                        <option value="" disabled>Choose Nature of Work</option>
+                        <option value="1">Gen. House Help (All Around)</option>
+                        <option value="2">YAYA</option>
+                        <option value="3">COOK</option>
+                        <option value="4">Gardener</option>
+                        <option value="5">Laundry Person</option>
+                        <option value="6">Others</option>
+                      </select>
+                    </div>
 
-                  {/* Current Image Section */}
-                  {formData.fileURL && (
-                    <div className="file-name-image-display">
-                      <span className="section-title">Current Image</span>
-                      <div className="file-name-image-display-indiv">
-                        <img src={formData.fileURL} alt="Current Resident Image" style={{ width: "100px", height: "100px" }} />
-                        <div className="delete-container">
-                          <button type="button" onClick={handleFileDelete} className="delete-button">
-                            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                          </button>
+                    <div className="fields-section">
+                      <p>Employment Arrangement<span className="required">*</span></p>
+                      <select 
+                      name="employmentArrangement"
+                      className={`add-resident-input-field ${invalidFields.includes("employmentArrangement") ? "input-error" : ""}`} 
+                        value={formData.employmentArrangement}
+                        onChange={handleChange}
+                          required
+                          >
+                        <option value="" disabled>Choose Employment Arrangement</option>
+                        <option value="1">Live - IN</option>
+                        <option value="2">Live - OUT</option>
+                      </select>
+                    </div>
+
+                    <div className="fields-section">
+                      <p>Range of Salary<span className="required">*</span></p>
+                      <select 
+                      name="salary"
+                      className={`add-resident-input-field ${invalidFields.includes("salary") ? "input-error" : ""}`} 
+                        value={formData.salary}
+                        onChange={handleChange}
+                          required>
+                        <option value="" disabled>Choose Salary Range</option>
+                        <option value="1">₱1,500 - ₱1,999</option>
+                        <option value="2">₱2,000 - ₱2,499</option>
+                        <option value="3">₱2,500 - ₱4,999</option>
+                        <option value="4">₱5,000 and Above</option>
+                      </select>
+                    </div>
+
+                    <div ref={employerPopupRef}>
+                      <div className="fields-section">
+                        <p>Employer Name<span className="required">*</span></p>
+                        <input 
+                          type="text"
+                          className={`add-resident-input-field ${invalidFields.includes("employerName") ? "input-error" : ""}`} 
+                          placeholder="Select Employer"
+                          name="employerName"
+                          value={formData.employerName}
+                          onChange={handleChange}
+                          required
+                          onClick={handleEmployerClick}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="add-main-resident-section-2-full-bottom">
+                  <div className="add-main-resident-section-2-cluster">
+                    <div className="fields-section">
+                      <p>Employer Address<span className="required">*</span></p>
+                      <input 
+                        type="text"
+                        className={`add-resident-input-field ${invalidFields.includes("employerAddress") ? "input-error" : ""}`} 
+                        placeholder="Enter Employer Address"
+                        name="employerAddress"
+                        value={formData.employerAddress}
+                        onChange={handleChange}
+                        required />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {activeSection === "others" && (
+              <>
+                <div className="add-main-resident-others-mainsection">
+                  <div className="add-main-resident-section-2-top-side">
+                    <div className="box-container-outer-resclassification">
+                      <div className="title-resclassification">
+                        Social Benefit Status
+                      </div>
+
+                      <div className="box-container-resclassification">
+                        <div className="checkbox-container">
+                          <label className="checkbox-label">
+                            <input type="checkbox" name="sssMember" checked={formData.sssMember} onChange={handleChange} />
+                            SSS Membership
+                          </label>
+                        </div>
+                        <div className="checkbox-container">
+                          <label className="checkbox-label">
+                          <input type="checkbox" name="pagibigMember" checked={formData.pagibigMember} onChange={handleChange} />
+                            Pag-Ibig Membership
+                          </label>
+                        </div>
+                        <div className="checkbox-container">
+                          <label className="checkbox-label">
+                          <input type="checkbox" name="philhealthMember" checked={formData.philhealthMember} onChange={handleChange} />
+                          PhilHealth Membership
+                          </label>
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
 
-                  {/* New Image Section (Only if a file is uploaded) */}
-                  {file && (
-                    <div className="file-name-image-display">
-                      <span className="section-title">New Image</span>
-                      <div className="file-name-image-display-indiv">
-                        <img src={preview || ""} alt="New Resident Image" style={{ width: "100px", height: "100px" }} />
-                        <span>{file.name}</span>
-                        <div className="delete-container">
-                          <button type="button" onClick={handleFileDelete} className="delete-button">
-                            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                          </button>
-                        </div>
+                  <div className="add-main-resident-section-2-bottom-side">
+                    <div className="box-container-outer-resindentificationpic">
+                      <div className="title-resindentificationpic">
+                        Identification Picture
+                      </div>
+
+                      <div className="box-container-resindentificationpic">
+
+                        {/* File Upload Section */}
+                        <div className="identificationpic-container">
+                          <label htmlFor="identification-file-upload" className="upload-link">Click to Upload File</label>
+                          <input id="identification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleIdentificationFileChange} />
+
+
+                          {(identificationFile || identificationPreview) && (
+                            <div className="identificationpic-display">
+                              <div className="identification-picture">
+                                {identificationPreview && (
+                                  <img
+                                    src={identificationPreview}
+                                    alt="Preview"
+                                    style={{ height: '200px'}}
+                                  />
+                                )}
+                              </div>
+                                          
+                            </div>
+
+                          )}
+                          {(identificationFile || identificationPreview) && (
+                            <div className="delete-container">
+                              <button type="button" onClick={handleIdentificationFileDelete} className="delete-button">
+                                <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                              </button>
+                            </div>
+                          )}
+                        </div>             
                       </div>
                     </div>
-                  )}
-                </div>
 
-              </div>
+                    <div className="box-container-outer-verificationdocs">
+                      <div className="title-verificationdocs">
+                        Verification Documents
+                      </div>
+
+                      <div className={`box-container-verificationdocs ${invalidFields.includes("verificationFiles") ? "input-error" : ""}`}>
+                        <span className="required-asterisk">*</span>
+
+                        {/* File Upload Section */}
+                        <div className="file-upload-container">
+                                      
+
+
+                                      {(verificationFiles.length > 0 || verificationPreviews.length > 0) && (
+                                        <div className="file-name-image-display">
+                                          {verificationPreviews.map((preview, index) => (
+                                            <a
+                                            key={index}
+                                            href={preview}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{ textDecoration: "none", color: "inherit" }}
+                                          >
+                                            <div key={index} className="identificationpic-file-name-image-display-indiv">
+                                              {preview && (
+                                                <img src={preview} alt="Preview" style={{ width: "50px", height: "50px", marginRight: "5px" }} />
+                                              )}
+                                              <span>
+                                                {verificationFiles[index]?.name || `Document ${index + 1}`}
+                                              </span>
+                                            </div>
+                                          </a>
+                                          ))}
+                                        </div>
+                                      )}
+
+
+                                      
+                                    </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+              )}
             </form>
+          </div>
+        </div> 
         {error && <p className="error">{error}</p>}
       </div>
 

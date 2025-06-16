@@ -3,7 +3,7 @@ import "@/CSS/ResidentModule/addresident.css";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { db, storage } from "../../../../db/firebase";
-import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs, where} from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -65,6 +65,25 @@ export default function AddResident() {
     ]
   };
 
+  const fieldSectionMap: { [key: string]: "basic" | "full" | "others" } = {
+    lastName: "basic",
+    firstName: "basic",
+    middleName: "basic",
+    sex: "basic",
+    address: "basic",
+    dateOfBirth: "basic",
+    age: "full",
+    placeOfBirth: "full",
+    civilStatus: "full",
+    generalLocation: "full",
+    cluster: "full",
+    occupation: "full",
+    contactNumber: "full",
+    emailAddress: "full",
+    precinctNumber: "full",
+    verificationFiles: "others",
+  };
+
   const { data: session } = useSession();
   const [identificationFile, setIdentificationFile] = useState<File | null>(null);
   const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
@@ -79,7 +98,6 @@ export default function AddResident() {
   const [popupMessage, setPopupMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
-  const [newDocId, setNewDocId] = useState<string | null>(null);
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -170,27 +188,31 @@ export default function AddResident() {
   };
   
 
-  const handleSubmitClick = async () => {
-    const { 
-      firstName, lastName, address, generalLocation, dateOfBirth, 
-      age, sex, civilStatus, contactNumber,  emailAddress
-  } = formData;
+  const handleSubmitClick = () => {
+    const { firstName, lastName, address, generalLocation, cluster, dateOfBirth, age, sex, civilStatus, contactNumber } = formData;
   
     const invalidFields: string[] = [];
-
+  
     if (!lastName) invalidFields.push("lastName");
     if (!firstName) invalidFields.push("firstName");
     if (!address) invalidFields.push("address");
     if (!generalLocation) invalidFields.push("generalLocation");
+    if (!cluster) invalidFields.push("cluster");
     if (!dateOfBirth) invalidFields.push("dateOfBirth");
-    if (!age) invalidFields.push("age"); 
+    if (!age) invalidFields.push("age");
     if (!sex) invalidFields.push("sex");
     if (!civilStatus) invalidFields.push("civilStatus");
     if (!contactNumber) invalidFields.push("contactNumber");
-    if (!emailAddress) invalidFields.push("emailAddress");
-
-
+  
+    if (verificationFiles.length === 0) {
+      invalidFields.push("verificationFiles");
+    }
+  
     if (invalidFields.length > 0) {
+      const firstInvalidField = invalidFields[0];
+      const section = fieldSectionMap[firstInvalidField];
+      setActiveSection(section);
+  
       setInvalidFields(invalidFields);
       setPopupErrorMessage("Please fill up all required fields.");
       setShowErrorPopup(true);
@@ -200,69 +222,84 @@ export default function AddResident() {
       }, 3000);
       return;
     }
-    
-    // Phone number validation logic
+  
+    // Phone number validation
     const phoneRegex = /^09\d{9}$/;
     if (!phoneRegex.test(contactNumber)) {
+      setActiveSection("full");
       setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
       setShowErrorPopup(true);
       setTimeout(() => setShowErrorPopup(false), 3000);
       return;
     }
-
+  
+    // Email validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    if (!emailRegex.test(emailAddress)) {
-      setPopupErrorMessage( "Invalid email address. Format: example@domain.com" );
+    if (formData.emailAddress && !emailRegex.test(formData.emailAddress)) {
+      setActiveSection("full");
+      setPopupErrorMessage("Invalid email address. Format: example@domain.com");
       setShowErrorPopup(true);
       setTimeout(() => setShowErrorPopup(false), 3000);
       return;
     }
-
+  
+    // All validation passed — show confirmation popup
     setInvalidFields([]);
     setShowSubmitPopup(true);
-};
+  };
 
-/*
-const confirmSubmit = async () => {
-  setShowSubmitPopup(false);
 
-  setPopupMessage("Resident Record added successfully!");
-  setShowPopup(true);
-
-  // Hide the popup after 3 seconds
-  setTimeout(() => {
-    setShowPopup(false);
-    //router.push("/dashboard/ResidentModule");
-    router.push(`/dashboard/ResidentModule?highlight=${newDocId}`);
-  }, 3000);
-
-  // Create a fake event and call handleSubmit
-  const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-  await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
-};*/
-
-const confirmSubmit = async () => {
-  setShowSubmitPopup(false);
-
-  // Wait for handleSubmit to finish and set newDocId
-  const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-  const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
-
-  if (!docId) {
-    setPopupErrorMessage("Failed to create resident record.");
-    setShowErrorPopup(true);
-    return;
-  }
-
-  setPopupMessage("Resident Record added successfully!");
-  setShowPopup(true);
-
-  setTimeout(() => {
-    setShowPopup(false);
-    router.push(`/dashboard/ResidentModule?highlight=${docId}`);
-  }, 3000);
-};
+  const confirmSubmit = async () => {
+    setShowSubmitPopup(false);
+    setLoading(true);
+  
+    try {
+      // Check if resident already exists by matching firstName, lastName, and middleName
+      const residentsRef = collection(db, "Residents");
+      const q = query(
+        residentsRef,
+        where("firstName", "==", formData.firstName.trim()),
+        where("lastName", "==", formData.lastName.trim()),
+        where("middleName", "==", formData.middleName?.trim() || "")
+      );
+  
+      const querySnapshot = await getDocs(q);
+  
+      if (!querySnapshot.empty) {
+        setLoading(false);
+        setPopupErrorMessage("Resident is already in the Residents Table");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
+  
+      // No duplicate found — proceed with actual submit
+      const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+      const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+  
+      setLoading(false);
+  
+      if (!docId) {
+        setPopupErrorMessage("Failed to create resident record.");
+        setShowErrorPopup(true);
+        return;
+      }
+  
+      setPopupMessage("Resident Record added successfully!");
+      setShowPopup(true);
+  
+      setTimeout(() => {
+        setShowPopup(false);
+        router.push(`/dashboard/ResidentModule?highlight=${docId}`);
+      }, 3000);
+  
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
+      setPopupErrorMessage("An error occurred. Please try again.");
+      setShowErrorPopup(true);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -273,7 +310,7 @@ const confirmSubmit = async () => {
       let verificationFilesURLs: string[] = [];
       if (verificationFiles.length > 0) {
         for (const file of verificationFiles) {
-          const storageRef = ref(storage, `ResidentsFiles/${file.name}`);
+          const storageRef = ref(storage, `ResidentsFiles/VerificationFile/${file.name}`);
           await uploadBytes(storageRef, file);
           const url = await getDownloadURL(storageRef);
           verificationFilesURLs.push(url);
@@ -282,7 +319,7 @@ const confirmSubmit = async () => {
 
       let identificationFileURL = "";
       if (identificationFile) {
-        const storageRef = ref(storage, `ResidentsFiles/${identificationFile.name}`);
+        const storageRef = ref(storage, `ResidentsFiles/IndentificationFile/${identificationFile.name}`);
         await uploadBytes(storageRef, identificationFile);
         identificationFileURL = await getDownloadURL(storageRef);
       }
@@ -335,28 +372,7 @@ const [activeSection, setActiveSection] = useState("basic");
 
   return (
       <main className="add-resident-main-container">
-        {/*}
-        <div className="add-resident-main-header">
 
-          <div className="path-section">
-            <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
-            <h1 className="breadcrumb">
-              <Link href="/dashboard/ResidentModule">Main Residents</Link>
-              <span className="chevron">/</span>
-            </h1>
-            <h2 className="breadcrumb">Add Resident<span className="chevron"></span></h2>
-          </div>
-
-          <div className="addresident-page-title-section-1">
-            <h1>Main Residents</h1>
-          </div>
-
-        </div>*/}
-        
-
-        
-        
-      
           <div className="add-resident-main-content">
 
             <div className="add-resident-main-section1">
@@ -365,7 +381,7 @@ const [activeSection, setActiveSection] = useState("basic");
                   <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                 </button>
 
-                <h1> New Resident </h1>
+                <h1> Add New Resident </h1>
               </div>
 
               <div className="action-btn-section">
@@ -379,7 +395,7 @@ const [activeSection, setActiveSection] = useState("basic");
           
 
             <div className="add-resident-bottom-section">
-                <nav className="info-toggle-wrapper">
+                <nav className="main-residents-info-toggle-wrapper">
                   {["basic", "full", "others"].map((section) => (
                     <button
                       key={section}
@@ -590,28 +606,29 @@ const [activeSection, setActiveSection] = useState("basic");
 
                           <div className="add-main-resident-section-2-full-bottom">  
                           
-                            <div className="add-main-resident-section-2-cluster">
-                            {formData.generalLocation && (
-                                      <div className="fields-section">
-                                        <p>Cluster/Section<span className="required">*</span></p>
-                                        <select
-                                          name="cluster"
-                                          className={`add-resident-input-field ${invalidFields.includes("cluster") ? "input-error" : ""}`}
-                                          value={formData.cluster || ""}
-                                          onChange={handleChange}
-                                          required
-                                        >
-                                          <option value="" disabled>Choose HOA/Sitio</option>
-                                          {clusterOptions[formData.generalLocation].map((option, index) => (
-                                            <option key={index} value={option}>
-                                              {option}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </div>
-                                    )}
-
+                          <div className="add-main-resident-section-2-cluster">
+                            <div className="fields-section">
+                              <p>Cluster/Section<span className="required">*</span></p>
+                              <select
+                                name="cluster"
+                                className={`add-resident-input-field ${invalidFields.includes("cluster") ? "input-error" : ""}`}
+                                value={formData.cluster || ""}
+                                onChange={handleChange}
+                                required
+                                disabled={!formData.generalLocation} // Optional: disables until a location is picked
+                              >
+                                <option value="" disabled>
+                                  {formData.generalLocation ? "Choose HOA/Sitio" : "Select Location First"}
+                                </option>
+                                {formData.generalLocation &&
+                                  clusterOptions[formData.generalLocation].map((option, index) => (
+                                    <option key={index} value={option}>
+                                      {option}
+                                    </option>
+                                  ))}
+                              </select>
                             </div>
+                          </div>
                           </div>
                         </>
                       )}
@@ -692,12 +709,13 @@ const [activeSection, setActiveSection] = useState("basic");
                                   Verification Documents
                                 </div>
 
-                                <div className="box-container-verificationdocs">
+                                <div className={`box-container-verificationdocs ${invalidFields.includes("verificationFiles") ? "input-error" : ""}`}>
+                                <span className="required-asterisk">*</span>
 
                                   {/* File Upload Section */}
                                   <div className="file-upload-container">
                                       <label htmlFor="verification-file-upload" className="upload-link">Click to Upload File</label>
-                                      <input id="verification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleVerificationFileChange} />
+                                      <input id="verification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleVerificationFileChange} required/>
 
 
                                       {verificationFiles.length > 0 && (
@@ -750,6 +768,7 @@ const [activeSection, setActiveSection] = useState("basic");
         {showSubmitPopup && (
                         <div className="confirmation-popup-overlay-add-resident">
                             <div className="confirmation-popup-add-resident">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to submit?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>

@@ -126,19 +126,6 @@ export default function JobSeekerListModule() {
     return `${month}/${day}/${year}`;
   };
 
-  /*
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this job seeker?")) {
-      try {
-        await deleteDoc(doc(db, "JobSeekerList", id));
-        setJobSeekers((prev) => prev.filter(seeker => seeker.id !== id));
-        alert("Job seeker deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting job seeker:", error);
-        alert("Failed to delete job seeker.");
-      }
-    }
-  };*/
 
   const handleAddResidentClick = () => {
   
@@ -233,22 +220,7 @@ export default function JobSeekerListModule() {
       </div>*/}
       <div className="resident-module-section-1">
 
-        
-
-      <div className="redirection-section">
-        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {getPageNumbers().map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === 'number' && paginate(number)}
-            className={currentPage === number ? "active" : ""}
-          >
-            {number}
-          </button>
-        ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-      </div>
-
+    
 
 
         {/*<h1>First-Time Job Seeker List</h1>*/}
@@ -310,7 +282,7 @@ export default function JobSeekerListModule() {
     </tr>
   </thead>
   <tbody>
-    {filteredJobSeekers.map((seeker) => {
+    {currentResidents.map((seeker) => {
       const fullName = `${seeker.lastName || ""}, ${seeker.firstName || ""} ${seeker.middleName || ""}`.trim();
       return (
         <tr
@@ -378,6 +350,21 @@ export default function JobSeekerListModule() {
 
   )}
 </div>
+
+    <div className="redirection-section">
+            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+            {getPageNumbers().map((number, index) => (
+              <button
+                key={index}
+                onClick={() => typeof number === 'number' && paginate(number)}
+                className={currentPage === number ? "active" : ""}
+              >
+                {number}
+              </button>
+            ))}
+            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+          </div>
+
       {showDeletePopup && (
                         <div className="confirmation-popup-overlay-module-jobseeker">
                             <div className="confirmation-popup-module-jobseeker">
