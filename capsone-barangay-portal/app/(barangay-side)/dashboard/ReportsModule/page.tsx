@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject, listAll } from "firebase/storage";
 import { getFirestore, collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import ExcelJS from 'exceljs';
@@ -7,6 +7,7 @@ import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+
 
 
 interface FileData {
@@ -3581,6 +3582,36 @@ const handleBackPage = () => {
   }
 };
 
+ const [showUploadFilePopup, setShowUploadFilePopup] = useState(false);
+ const uploadFilePopUpRef = useRef<HTMLDivElement>(null);
+
+
+
+ const handleUploadClick = () => {
+  setShowUploadFilePopup(true);
+ };
+
+  useEffect(() => {
+
+    const handleClickUploadFileOutside = (event: MouseEvent) => {
+
+      if(
+         uploadFilePopUpRef.current &&
+         !uploadFilePopUpRef.current.contains(event.target as Node)
+      ) {
+      setShowUploadFilePopup(false);        
+      }
+
+    };
+
+     document.addEventListener("mousedown", handleClickUploadFileOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickUploadFileOutside);
+    };
+    
+  }, []);
+
+ 
   return (
     <div className="downloadable-main-container">
 
@@ -3599,7 +3630,7 @@ const handleBackPage = () => {
             </div>
 
             <div className="action-btn-download-forms">
-              <button className="action-download" > Upload File</button>
+              <button className="action-download" onClick={handleUploadClick} > Upload File</button>
             </div>
 
           </div>
@@ -3722,6 +3753,155 @@ const handleBackPage = () => {
           </div>
         </div>
       )}
+
+      {showUploadFilePopup && (
+        <div className="fileupload-popup-overlay">
+          <div className="fileupload-popup" ref = {uploadFilePopUpRef}>
+
+              <div className="file-upload-popup-section-1">
+
+                <h1> Upload File</h1>
+      
+                    <button 
+                    onClick={uploadFile} 
+                    disabled={!selectedUploadFile} 
+                    className="upload-button-section-1"
+                    >
+                    Upload
+                </button>
+              </div>
+
+              <div className="file-upload-popup-section-2">
+
+                  <div className="upload-container-downloadable-forms">
+                      <input 
+                          type="file" 
+                          onChange={handleFileUpload} 
+                          id="file-upload"
+                          style={{ display: 'none' }} 
+                      />
+                      <label 
+                          htmlFor="file-upload" 
+                          className="upload-link"
+                      >
+                          Choose File
+                      </label>
+
+                      {selectedUploadFile && (
+                          <div className="file-name-image-display">
+                              <ul>
+                                  <div className="file-name-image-display-indiv">
+                                      <li className="file-item"> 
+                                          
+                                        
+                                          <span>{selectedUploadFile.name}</span>  
+                                          <div className="delete-container">
+                                            
+                                              <button
+                                                  type="button"
+                                                  onClick={onDeleteFile} // Call the delete function
+                                                  className="deleted-button"
+                                              >
+                                                  <img
+                                                      src="/images/trash.png"  
+                                                      alt="Delete"
+                                                      className="delete-icon"
+                                                  />
+                                              </button>
+                                          </div>
+                                      </li>
+                                  </div>
+                              </ul>
+                          </div>
+                      )}
+                  </div>
+
+
+              </div>
+
+              <div className="file-upload-section-3">
+
+                <div className="section-3-main-content">
+                      
+                    <div className="main-content-section-1">
+                        <h1>Select Module</h1>
+                    </div>
+                     
+            
+                    <div className="section-3-fields-section">
+                        
+                        <div className="module-checkbox-container">
+                          <label className="module-checkbox-label">
+                              <input type="checkbox" />
+                              Resident Module
+                          </label>
+                        </div>
+
+                        <div className="module-checkbox-container">
+                          <label className="module-checkbox-label">
+                              <input type="checkbox" />
+                              Incident Module
+                          </label>
+                        </div>
+
+                         <div className="module-checkbox-container">
+                          <label className="module-checkbox-label">
+                              <input type="checkbox" />
+                              Services Module
+                          </label>
+                        </div>
+                       
+                    </div>
+
+                     <div className="section-3-fields-section">
+                        
+                        <div className="module-checkbox-container">
+                          <label className="module-checkbox-label">
+                              <input type="checkbox" />
+                           Reports Module
+                          </label>
+                        </div>
+
+                        <div className="module-checkbox-container">
+                          <label className="module-checkbox-label">
+                              <input type="checkbox" />
+                               Officials Module
+                          </label>
+                        </div>
+
+                         <div className="module-checkbox-container">
+                          <label className="module-checkbox-label">
+                              <input type="checkbox" />
+                              Announcement
+                          </label>
+                        </div>
+                       
+                    </div>
+
+
+
+
+
+
+                </div>
+                      
+                  
+              </div>
+
+
+
+
+
+          
+          </div>
+
+
+
+        </div>
+      )}
+
+
+
 
 
 
