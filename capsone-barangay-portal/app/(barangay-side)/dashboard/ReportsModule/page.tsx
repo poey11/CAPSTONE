@@ -3583,7 +3583,8 @@ const handleBackPage = () => {
 
   return (
     <div className="downloadable-main-container">
-    
+
+   
 
       <div className="downloadble-report-main-content">
 
@@ -3597,15 +3598,27 @@ const handleBackPage = () => {
                  <h1> Downloadble Forms</h1>
             </div>
 
+            <div className="action-btn-download-forms">
+              <button className="action-download" > Upload File</button>
+            </div>
+
           </div>
 
 
           <div className="downloadble-report-header-body">
 
 
-
-
             <div className="downloadble-report-top-section">
+
+                {/*
+                  TO DO JERICHO: 
+                  add logic na yung lalabas lang is yung modules na pwede sakanila
+
+                  sample: If Lupon Staff , incident module lang lalabas fixed
+                          If Punong Barangay , Pwede siya mag generate report sa lahat
+                          Etc...
+                */}
+
               <div className="downloadble-report-info-toggle-wrapper">
                  {["resident" ].map((section) => (
                     <button

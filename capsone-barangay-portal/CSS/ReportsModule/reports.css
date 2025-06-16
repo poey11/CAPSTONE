@@ -377,9 +377,63 @@
 HERE ATA NEED YUNG HIWALAY
 */
 
+.downloadble-forms-section-1 {
+     display: flex;
+    justify-content: flex-end; /*Gawin space between if sa taas yung pagination*/ 
+    width: 100%;
+}
+.downloadble-forms-section-1 h1{
+      font-size: 2rem;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.upload-file-btn {
+    background-color:#e56723;
+    color: white;
+    border: none;
+    padding: 13px 22px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .upload-file-btn:hover {
+    background-color:#cc591b;
+  }
+
+  .action-btn-download-forms {
+      display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-right: 30px;
+  }
+
+  .action-download {
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+  width: 100px;
+  }
+
+  .action-download {
+    background-color: #4caf50; 
+    color: white;
+  }
+
+
+  .action-download:hover {
+     background-color: #3e8f41; 
+  }
+
 .downloadble-report-header-body {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  padding-bottom: 20px;
 }
 
 .downloadble-report-top-section {
@@ -428,6 +482,7 @@ HERE ATA NEED YUNG HIWALAY
 
 .downloadble-forms-info-main-container {
     width: 100%;
+    height: 100%;
     display: flex;
 }
 
@@ -442,7 +497,6 @@ HERE ATA NEED YUNG HIWALAY
   padding: 20px 40px;
   width: 100%;
   height: 100%;
-  background-color: #43a047;
 }
 
 
@@ -456,6 +510,13 @@ HERE ATA NEED YUNG HIWALAY
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+border: 1px solid rgba(44, 62, 80, 0.7);
+  height: 115px; 
+  min-height: 115px;
+}
+
+.form-card:hover {
+    transform: translateY(-5px);
 }
 
 .form-icon-label {
@@ -466,6 +527,7 @@ HERE ATA NEED YUNG HIWALAY
   font-weight: 600;
   font-size: 14px;
   margin-bottom: 15px;
+  color: #2C3E50;
 }
 
 .form-icon-label img {
@@ -522,4 +584,7 @@ HERE ATA NEED YUNG HIWALAY
   width: 20px;
   height: 20px;
 }
+
+
+
 
