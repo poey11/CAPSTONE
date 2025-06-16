@@ -1,16 +1,15 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChangeEvent, useState, useEffect } from "react";
+import { ChangeEvent, useState, useEffect,useRef } from "react";
 import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayCertificate.css";
 import { getLocalDateString } from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
-import { addDoc, collection, doc, getDoc} from "firebase/firestore";
+import { addDoc, collection, doc, getDocs} from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import { useSession } from "next-auth/react";
-import { getStorage } from "firebase/storage";
 
 
 interface EmergencyDetails {
@@ -24,6 +23,7 @@ interface File {
 }
 
 interface ClearanceInput {
+    residentId?: string;
     accID?: string;
     createdBy?: string;
     docType?: string;
@@ -104,6 +104,48 @@ export default function action() {
     const [showCreatePopup, setShowCreatePopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+    const [isResidentSelected, setIsResidentSelected] = useState(false);
+    const [showResidentsPopup, setShowResidentsPopup] = useState(false);
+    const [residents, setResidents] = useState<any[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    
+    const employerPopupRef = useRef<HTMLDivElement>(null);
+    
+    useEffect(() => {
+        const fetchResidents = async () => {
+          try {
+            const residentsCollection = collection(db, "Residents");
+                const residentsSnapshot = await getDocs(residentsCollection);
+                const residentsList = residentsSnapshot.docs.map(doc => {
+                    const data = doc.data() as {
+                        residentNumber: string;
+                        firstName: string;
+                        middleName: string;
+                        lastName: string;
+                        address: string;
+                        sex: string;
+                        dateOfBirth: string;
+                        age: number;
+                        identificationFileURL: string
+                    };
+        
+                    return {
+                        id: doc.id,
+                        ...data
+                    };
+                });
+        
+                setResidents(residentsList);
+          } catch (error) {
+            console.error("Error fetching residents:", error);
+          }
+        };
+      
+        fetchResidents();
+        
+      }, []);
+
+      
     const [clearanceInput, setClearanceInput] = useState<ClearanceInput>({
         accID:"INBRGY-REQ",
         reqType: "InBarangay",
@@ -115,7 +157,13 @@ export default function action() {
         docsRequired: [],
     });
     const [maxDate, setMaxDate] = useState<any>()
+    
 
+    const filteredResidents = residents.filter((resident) =>
+        `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      );
     useEffect(() => {
         setMaxDate(getLocalDateString(new Date()));
     },[]);
@@ -156,6 +204,9 @@ export default function action() {
         container1: [],
     });
 
+    const handleResidentClick = () => {
+      setShowResidentsPopup(true);
+    };
 
     const handleBack = () => {
       router.back();
@@ -320,7 +371,19 @@ export default function action() {
             [name]: value,
           };
         });
-      };
+    };
+
+      
+    const [addOn, setAddOn] = useState<string>("");
+    
+    
+    useEffect(() => {
+      if ((clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax" ) && docType === "Barangay Certificate") setAddOn("Deceased's ");
+      else if(clearanceInput.purpose === "Occupancy /  Moving Out" && docType === "Barangay Certificate")setAddOn("From ");
+      else if(clearanceInput.purpose === "Guardianship" && docType === "Barangay Certificate") setAddOn("Guardian's ");
+      else setAddOn("");
+      
+    }, [clearanceInput.purpose, docType]);
 
     return (
         <main className="addAnnouncement-main-container">
@@ -427,17 +490,46 @@ export default function action() {
 
                         <div className="main-fields-container-section2">
                             <div className="fields-container">
-                                {/* <div className="fields-section">
-                                    <p>Other Purpose</p>
-                                        <input 
-                                            type="text" 
-                                            className="headline" 
-                                            placeholder="Other Purpose" 
-                                        />
-                                </div> */}
-
                                 <div className="fields-section">
-                                    <p>Full Name</p>
+                                    <input 
+                                        type="text" 
+                                        className="headline" 
+                                        placeholder="Select Resident"
+                                        value = {
+                                            isResidentSelected ?
+                                            `${clearanceInput.fullName}` :
+                                            ""
+                                        }
+                                        onClick={handleResidentClick}
+                                        readOnly 
+                                    />
+                                    {isResidentSelected && (
+                                        <>
+                                            <span
+                                                className="clear-icon"
+                                                title="Click to clear selected complainant"
+                                                onClick={() => {
+                                                    setClearanceInput({
+                                                    ...clearanceInput,
+                                                    fullName: "",
+                                                    address: "",
+                                                    gender: "",
+                                                    civilStatus: "",
+                                                    birthday: "",
+                                                    contact: "",
+                                                  });
+                                                  
+                                                  setIsResidentSelected(false);
+                                                }}
+                                              >
+                                            </span>
+                                        </>
+                                    )}
+
+                                </div>
+                                    
+                                <div className="fields-section">
+                                    <p>{addOn}Full Name</p>
                                     <input 
                                         value ={clearanceInput?.fullName || ""}
                                         onChange={handleChange} // Handle change to update state
@@ -446,12 +538,13 @@ export default function action() {
                                         name="fullName"
                                         type="text" 
                                         className="headline" 
-                                        placeholder="Full Name" 
+                                        placeholder= {`Enter ${addOn}Full Name`} 
+                                        disabled={isResidentSelected} // Disable input if a resident is selected
                                     />
                                 </div>
 
                                 <div className="fields-section">
-                                    <p>Address</p>
+                                    <p>{addOn}Address</p>
                                     <input 
                                         type="text" 
                                         value ={clearanceInput?.address || ""}
@@ -460,7 +553,9 @@ export default function action() {
                                         id="address"
                                         name="address"
                                         className="headline" 
-                                        placeholder="Address" 
+                                        placeholder={`Enter ${addOn}Address`} 
+                                        disabled={isResidentSelected} // Disable input if a resident is selected
+
                                     />
                                 </div>
 
@@ -497,6 +592,7 @@ export default function action() {
                                             name="civilStatus" 
                                             className="input-field" 
                                             required
+                                            disabled={isResidentSelected} // Disable input if a resident is selected
                                         >
                                             <option value="" disabled>Select civil status</option>
                                             <option value="Single">Single</option>
@@ -539,7 +635,7 @@ export default function action() {
                                             required
                                             max={maxDate}  // Restrict the date to today or earlier
                                             onKeyDown={(e) => e.preventDefault()}  // Prevent manual input
-
+                                            disabled={isResidentSelected} // Disable input if a resident is selected
                                         />    
                                     </div>
                                     <div className="fields-section">
@@ -552,6 +648,7 @@ export default function action() {
                                             defaultValue=""  
                                             value ={clearanceInput?.gender}
                                             onChange={handleChange} // Handle change to update state
+                                            disabled={isResidentSelected}
                                         >
                                             <option value="" disabled>Select gender</option>
                                             <option value="Male">Male</option>
@@ -579,7 +676,8 @@ export default function action() {
                                             pattern="^[0-9]{11}$" 
                                             placeholder="Please enter a valid 11-digit contact number" 
                                             title="Please enter a valid 11-digit contact number. Format: 09XXXXXXXXX"        
-                                            />
+                                            disabled={isResidentSelected}
+                                       />
                                     </div>
                                     
 
@@ -1192,10 +1290,7 @@ export default function action() {
                             </div>
 
                         </div>
-
-
-
-                        </div>
+                    </div>
                 
                 </form>
                 {showDiscardPopup && (
@@ -1228,6 +1323,82 @@ export default function action() {
                                 <p>{popupMessage}</p>
                             </div>
                         </div>
+                    )}
+
+
+                    {showResidentsPopup && (
+                      <div className="kasambahay-employer-popup-overlay">
+                        <div className="kasambahay-employer-popup" ref={employerPopupRef}>
+                          <h2>Residents List</h2>
+                          <h1>* Please select Resident's Name *</h1>
+
+                          <input
+                            type="text"
+                            placeholder="Search Resident's Name"
+                            className="employer-search-input"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                          />
+
+                          <div className="employers-list">
+                            {residents.length === 0 ? (
+                              <p>No residents found.</p>
+                            ) : (
+                              <table className="employers-table">
+                                <thead>
+                                  <tr>
+                                    <th>Resident Number</th>
+                                    <th>First Name</th>
+                                    <th>Middle Name</th>
+                                    <th>Last Name</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                {filteredResidents.map((resident) => (
+                            <tr
+                              key={resident.id}
+                              className="employers-table-row"
+                              onClick={async () => {
+                                try {
+                                
+                                  setClearanceInput({
+                                    ...clearanceInput,
+                                    residentId: resident.id,
+                                    fullName: `${resident.firstName} ${resident.middleName} ${resident.lastName}`,
+                                    gender: resident.sex || '',
+                                    birthday: resident.dateOfBirth|| '',
+                                    civilStatus: resident.civilStatus || '',
+                                    address: resident.address || '',
+                                    contact: resident.contactNumber || '',
+                                  });
+                                    setIsResidentSelected(true);
+                                    setShowResidentsPopup(false);
+                              
+                                  setTimeout(() => {
+                                    console.log("Complainant updated:", resident);
+                                  }, 0);
+                                } catch (error) {
+                                  setPopupMessage("An error occurred. Please try again.");
+                                  setShowPopup(true);
+                                  setTimeout(() => {
+                                    setShowPopup(false);
+                                  }, 3000);
+                                }
+                              }}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              <td>{resident.residentNumber}</td>
+                              <td>{resident.firstName}</td>
+                              <td>{resident.middleName}</td>
+                              <td>{resident.lastName}</td>
+                            </tr>
+                          ))}
+                                </tbody>
+                              </table>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     )}
 
             </div>
