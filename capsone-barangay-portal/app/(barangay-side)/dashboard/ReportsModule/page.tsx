@@ -534,6 +534,8 @@ const ReportsPage = () => {
 
   const generateSeniorCitizenReport = async () => {
     setLoadingResidentSeniorDemographic(true);
+
+      
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -1412,6 +1414,7 @@ const ReportsPage = () => {
 
   const generateResidentRegistrationSummary = async () => {
     setLoadingRegistrationSummary(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -1580,7 +1583,8 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      alert("Resident Registration Summary generated successfully. Please wait for the downloadable file!");
+      /*alert("Resident Registration Summary generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Resident Registration Summary...")
       return fileUrl;
     } catch (error) {
       console.error("Error generating Resident Registration Summary:", error);
@@ -1612,7 +1616,16 @@ const ReportsPage = () => {
   
       saveAs(blob, `Resident_Registration_Summary_${month}_${year}.pdf`);
   
-      alert("Resident Registration Summary successfully converted to PDF!");
+      /*alert("Resident Registration Summary successfully converted to PDF!");*/
+
+      
+      setIsGenerating(false); 
+      setPopupSuccessGenerateReportMessage("Resident Registration Summary converted to PDF");
+      setShowSuccessGenerateReportPopup(true)
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false)
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
       alert("Failed to generate PDF.");
@@ -3552,6 +3565,10 @@ const ReportsPage = () => {
   };
 
   const router = useRouter();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingMessage, setGeneratingMessage] = useState("");
+  const [showSuccessGenerateReportPopup, setShowSuccessGenerateReportPopup] = useState(false);
+  const [popupSuccessGenerateReportMessage, setPopupSuccessGenerateReportMessage] = useState("");
   const [activeSection, setActiveSection] = useState("generate");
   const [currentPage, setCurrentPage] = useState(1);
   const moduleTotalPages: { [key: string]: number } = {
@@ -3571,6 +3588,21 @@ const ReportsPage = () => {
   const handleBack = () => {
     router.back();
   };
+
+
+  useEffect(() => {
+    if (session?.user?.role === "Barangay Official") {
+      const position = session.user.position;
+  
+      if (["Secretary", "Assistant Secretary", "Punong Barangay"].includes(position)) {
+        setSelectedModule("Resident Module");
+      } else if (position === "LF Staff") {
+        setSelectedModule("Incident Module");
+      } else if (position === "Admin Staff") {
+        setSelectedModule("Services Module");
+      }
+    }
+  }, [session?.user]);
 
 
  
@@ -3618,11 +3650,13 @@ const ReportsPage = () => {
           <div className="generatereport-header-body">
             <div className="generatereport-header-body-top-section">
               <div className="moduleDropdown-container">
-                <select
-                  className="moduleDropdown"
-                  onChange={handleModuleChange}
-                  required
-                >
+              <select
+                className="moduleDropdown"
+                title="Select a Module"
+                onChange={handleModuleChange}
+                value={selectedModule}
+                required
+              >
                   <option value="">Select Module</option>
                       {session?.user?.role === "Barangay Official" &&
                         (
@@ -3856,7 +3890,7 @@ const ReportsPage = () => {
                   {currentPage === 1 && (
                     <div className="report-grid">
                       <button  className="report-tile">
-                        <img src="/images/form.png" alt="user info" className="report-icon"/> 
+                        <img src="/images/services.png" alt="user info" className="report-icon"/> 
                           <p className="report-title">
                             Most Requested Services Lists
                           </p>
@@ -3871,13 +3905,13 @@ const ReportsPage = () => {
                   {currentPage === 1 && (
                     <div className="report-grid">
                       <button  className="report-tile">
-                        <img src="/images/form.png" alt="user info" className="report-icon"/> 
+                        <img src="/images/participation.png" alt="user info" className="report-icon"/> 
                           <p className="report-title">
                             Program Participation Report
                           </p>
                       </button>
                       <button  className="report-tile">
-                        <img src="/images/form.png" alt="user info" className="report-icon"/> 
+                        <img src="/images/status.png" alt="user info" className="report-icon-bigger"/> 
                           <p className="report-title">
                             Program Completion Status Report
                           </p>
@@ -4196,6 +4230,29 @@ const ReportsPage = () => {
           </div>
         </div>
       )}
+
+      {/* Generating of Report Popup */}
+      {isGenerating && (
+        <div className="popup-backdrop">
+          <div className="popup-content">
+            <img src="/Images/loading.png" alt="loading..." className="successful-icon-popup-letter" />
+            <p>{generatingMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Success Generate Report Popup*/}
+      {showSuccessGenerateReportPopup && (
+        <div className={`popup-overlay-success-generate-report show`}>
+          <div className="popup-add-resident">
+            <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+            <p>{popupSuccessGenerateReportMessage}</p>
+          </div>
+        </div>
+      )}
+
+
+      
     </div>
   );
 };
