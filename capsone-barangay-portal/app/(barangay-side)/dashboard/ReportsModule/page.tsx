@@ -2628,6 +2628,7 @@ const ReportsPage = () => {
 
   const generateSouthResidentListReport = async () => {
     setLoadingSouthResident(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -2838,12 +2839,21 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Resident List for South Fairview generated successfully. Please wait for the downloadable file!");
-  
+      /*alert("Resident List for South Fairview generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Resident List for South Fairview ...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating report:", error);
-      alert("Failed to generate South Fairview Resident Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate South Fairview Resident Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate South Fairview Resident Report.");*/
     } finally {
       setLoadingSouthResident(false);
     }
@@ -2854,7 +2864,19 @@ const ReportsPage = () => {
     setLoadingSouthResident(true);
     try {
       const fileUrl = await generateSouthResidentListReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -2870,10 +2892,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `Inhabitant_Record_SouthFairview_${year}.pdf`);
   
-      alert("Resident Report (South Fairview) successfully converted to PDF!");
+      /*alert("Resident Report (South Fairview) successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Resident Report (South Fairview) generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingSouthResident(false);
     }
