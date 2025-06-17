@@ -3621,31 +3621,28 @@ const handleBackPage = () => {
     setIsLoading(true); // Start loading
   
     try {
-
       window.location.href = url;
   
-     
       await new Promise(resolve => setTimeout(resolve, 1000));
   
-      setPopupMessage("File download sucessful!")
-      setShowPopup(true);
-  
+      setPopupMessage("File download successful!");
     } catch (error) {
       console.error("Error in uploadForms:", error);
     } finally {
-      // Ensure loading state ends after 2 seconds
+      // End loading after 2 seconds
       setTimeout(() => {
-        setIsLoading(false)
-      }, 2000);
-      
-      setTimeout(() => {
-        setShowPopup(false);
-      }, 4000);
-    }
-
-   
-  };
+        setIsLoading(false);
   
+        // Show popup after loading is done
+        setShowPopup(true);
+  
+        // Hide popup after 2 more seconds
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 2000);
+      }, 2000);
+    }
+  };
   
 
   /*
