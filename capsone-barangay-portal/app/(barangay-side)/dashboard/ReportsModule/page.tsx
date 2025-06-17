@@ -62,6 +62,8 @@ const ReportsPage = () => {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const storage = getStorage();
   const db = getFirestore();
 
@@ -101,6 +103,8 @@ const ReportsPage = () => {
 };
 
   const uploadFile = async () => {
+
+
     if (!selectedUploadFile) return;
     const fileRef = ref(storage, `ReportsModule/${selectedUploadFile.name}`);
     try {
@@ -110,8 +114,7 @@ const ReportsPage = () => {
       fetchDownloadLinks(); 
     } catch (error) {
       console.error("Upload failed:", error);
-    }
-
+    } 
     window.location.reload();
 
   };
@@ -3584,6 +3587,11 @@ const handleBackPage = () => {
 
  const [showUploadFilePopup, setShowUploadFilePopup] = useState(false);
  const uploadFilePopUpRef = useRef<HTMLDivElement>(null);
+ const [showSubmitPopup, setShowSubmitPopup] = useState<{ show: boolean; message: string; message2: string;}>({
+  show: false,
+  message: "",
+  message2: "",
+});
 
 
 
@@ -3611,7 +3619,42 @@ const handleBackPage = () => {
     
   }, []);
 
- 
+  
+
+  const uploadForms = async (url: string): Promise<void> => {
+    setIsLoading(true); // Start loading
+  
+    try {
+
+      window.location.href = url;
+  
+     
+      await new Promise(resolve => setTimeout(resolve, 1000));
+  
+      setShowSubmitPopup({
+        show: true,
+        message: "Form download initiated successfully!",
+        message2: "",
+      });
+  
+    } catch (error) {
+      console.error("Error in uploadForms:", error);
+    } finally {
+      // Ensure loading state ends after 2 seconds
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
+    }
+  };
+  
+  
+
+  /*
+  const uploadForms = (url: string): void => {
+    window.location.href = url;
+  };
+  */
+  
   return (
     <div className="downloadable-main-container">
 
@@ -3693,7 +3736,7 @@ const handleBackPage = () => {
                           <div className="form-buttons">
                             <button
                               className="download-btn"
-                              onClick={() => window.location.href = file.url}
+                              onClick={() => uploadForms(file.url)}
                             >
                               Download
                             </button>
@@ -3754,6 +3797,19 @@ const handleBackPage = () => {
         </div>
       )}
 
+      {isLoading && (
+            <div className="popup-backdrop-download">
+              <div className="popup-content-download">
+                  <img src="/Images/loading.png" alt="loading..." className="successful-icon-popup-download" />
+                     <p>Downloading Form, please wait...</p>
+              </div>
+             </div>
+                )}
+
+
+                
+
+    
       {showUploadFilePopup && (
         <div className="fileupload-popup-overlay">
           <div className="fileupload-popup" ref = {uploadFilePopUpRef}>
