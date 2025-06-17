@@ -217,79 +217,6 @@
 }
 
 
-  
-.file-name-image-display {
-  margin-top: 10px;
-  font-size: 16px;
-  color: rgba(6, 34, 120, 0.6);
-  text-align: center;
-  font-weight: bold;
-  }
-  
-  .file-name-image-display-indiv {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px;
-      border-bottom: 1px solid #ddd;
-      background-color: #f8f8f8;
-      border-radius: 5px;
-      gap: 10px;
-  }
-  
-  .file-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-  }
-  
-  .file-preview {
-      width: 50px;
-      height: 50px;
-      object-fit: cover;
-      border-radius: 4px;
-      flex-shrink: 0; /* Prevents the image from shrinking */
-  }
-  
-  .file-upload-label {
-  font-size: 16px;
-  font-weight: bold;
-  color: rgba(0, 0, 0, 0.6);
-  text-align: center;
-  
-  }
-  
-  .upload-link {
-  color: rgb(245, 143, 88);
-  text-decoration: underline;
-  cursor: pointer;
-  }
-  
-  .file-name {
-      max-width: 150px; /* Adjust this value based on your layout */
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-size: 14px;
-      flex-grow: 1; /* Takes up remaining space */
-  }
-  
-  .delete-container {
-      flex-shrink: 0; /* Prevents the delete button from shrinking */
-  }
-  
-  .delete-button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 5px;
-  }
-  
-  .delete-icon {
-      width: 20px;
-      height: 20px;
-  }
 
 
   .input-field{
@@ -730,6 +657,7 @@ border: 1px solid rgba(44, 62, 80, 0.7);
   padding: 2rem;
   gap: 1.5rem;
   margin-top: 1.2rem;
+  margin-bottom: 1.2rem;
 }
 
 
@@ -924,3 +852,95 @@ input[type="checkbox"] {
 }
 
 
+
+  
+
+.file-name-image-display {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #2C3E50;
+  text-align: center;
+  font-weight: bold;
+  width: 50%;
+}
+
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.file-name-image-display-indiv {
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+  border: 2px solid rgba(36, 53, 76, 0.7);
+  border-radius: 20px;
+  background-color: #f8f9fb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.3s;
+}
+
+.file-name-image-display-indiv:hover {
+  background-color: #eef2f7;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  width: 95%;
+  padding: 1rem;
+}
+
+.file-preview {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.upload-link {
+  color: rgb(245, 143, 88);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.file-name {
+  width: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 14px;
+  flex-grow: 1;
+  text-align: center;
+  color: #34495E;
+}
+
+.delete-container {
+  flex-shrink: 0;
+}
+
+.delete-button-upload {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.2s ease;
+}
+
+.delete-button-upload:hover {
+  transform: scale(1.1);
+}
+
+.delete-icon-upload {
+  width: 20px;
+  height: 20px;
+   filter: brightness(0) saturate(100%) invert(22%) sepia(98%) saturate(7484%) hue-rotate(358deg) brightness(101%) contrast(112%);
+  opacity: 0.8;
+}
+
+.delete-button-upload:hover .delete-icon-upload {
+  opacity: 1;
+}

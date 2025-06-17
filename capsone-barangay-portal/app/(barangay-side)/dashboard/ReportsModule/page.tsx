@@ -3920,32 +3920,30 @@ const handleBackPage = () => {
                       </label>
 
                       {selectedUploadFile && (
-                          <div className="file-name-image-display">
-                              <ul>
-                                  <div className="file-name-image-display-indiv">
-                                      <li className="file-item"> 
-                                          
-                                        
-                                          <span>{selectedUploadFile.name}</span>  
-                                          <div className="delete-container">
-                                            
-                                              <button
-                                                  type="button"
-                                                  onClick={onDeleteFile} // Call the delete function
-                                                  className="deleted-button"
-                                              >
-                                                  <img
-                                                      src="/images/trash.png"  
-                                                      alt="Delete"
-                                                      className="delete-icon"
-                                                  />
-                                              </button>
-                                          </div>
-                                      </li>
-                                  </div>
-                              </ul>
-                          </div>
+                        <div className="file-name-image-display">
+                          <ul className="file-list">
+                            <li className="file-name-image-display-indiv">
+                              <div className="file-item">
+                                <span className="file-name">{selectedUploadFile.name}</span>
+                                <div className="delete-container">
+                                  <button
+                                    type="button"
+                                    onClick={onDeleteFile}
+                                    className="delete-button-upload"
+                                  >
+                                    <img
+                                      src="/Images/delete.png"
+                                      alt="Delete"
+                                      className="delete-icon-upload"
+                                    />
+                                  </button>
+                                </div>
+                              </div>
+                            </li>
+                          </ul>
+                        </div>
                       )}
+
                   </div>
 
 
