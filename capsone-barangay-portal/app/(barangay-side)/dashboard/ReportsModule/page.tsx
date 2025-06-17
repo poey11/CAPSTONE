@@ -747,11 +747,12 @@ const ReportsPage = () => {
       /*alert("Senior Citizen Report successfully converted to PDF!");*/
 
       setIsGenerating(false); 
-      setPopupSuccessGenerateReportMessage("Senior Citizen Report converted to PDF");
-      setShowSuccessGenerateReportPopup(true)
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Senior Citizen Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
 
       setTimeout(() => {
-        setShowSuccessGenerateReportPopup(false)
+        setShowSuccessGenerateReportPopup(false);
       }, 5000);
     } catch (error) {
       console.error("Error:", error);
@@ -763,6 +764,7 @@ const ReportsPage = () => {
   
   const generateStudentDemographicReport = async () => {
     setLoadingResidentStudentDemographic(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -947,7 +949,8 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      alert("Student Demographic Report generated successfully. Please wait for the downloadable file!");
+      /*alert("Student Demographic Report generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Student Demographic Report...");
       return fileUrl;
     } catch (error) {
       console.error("Error generating Student report:", error);
@@ -978,7 +981,16 @@ const ReportsPage = () => {
       const year = currentDate.getFullYear();
       saveAs(blob, `Student_Demographic_Report_${year}.pdf`);
   
-      alert("Student Demographic Report successfully converted to PDF!");
+      /*alert("Student Demographic Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Student Demographic Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
       alert("Failed to generate Student PDF.");
@@ -1592,7 +1604,7 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
       /*alert("Resident Registration Summary generated successfully. Please wait for the downloadable file!");*/
-      setGeneratingMessage("Generating Resident Registration Summary...")
+      setGeneratingMessage("Generating Resident Registration Summary...");
       return fileUrl;
     } catch (error) {
       console.error("Error generating Resident Registration Summary:", error);
@@ -1626,13 +1638,13 @@ const ReportsPage = () => {
   
       /*alert("Resident Registration Summary successfully converted to PDF!");*/
 
-      
       setIsGenerating(false); 
-      setPopupSuccessGenerateReportMessage("Resident Registration Summary converted to PDF");
-      setShowSuccessGenerateReportPopup(true)
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Resident Registration Summary generated successfully");
+      setShowSuccessGenerateReportPopup(true);
 
       setTimeout(() => {
-        setShowSuccessGenerateReportPopup(false)
+        setShowSuccessGenerateReportPopup(false);
       }, 5000);
     } catch (error) {
       console.error("Error:", error);
