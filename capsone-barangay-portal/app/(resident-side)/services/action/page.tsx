@@ -237,6 +237,63 @@ export default function Action() {
   const isReadOnly = requestMode === "For Myself";
 
  
+  const fetchAndCloneFile = async (url: string, newFilename: string): Promise<File> => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+  
+    // Create a new File with the desired filename
+    const file = new File([blob], newFilename, { type: blob.type });
+    return file;
+  };
+
+  useEffect(() => {
+    const fetchAndCloneFile = async (url: string, newFilename: string): Promise<File> => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch file");
+      const blob = await response.blob();
+      return new File([blob], newFilename, { type: blob.type });
+    };
+  
+    const cloneUploadIfExists = async () => {
+      if (
+        userData?.upload &&
+        typeof userData.upload === "string" &&
+        userData.upload.includes("firebasestorage.googleapis.com") &&
+        user?.uid
+      ) {
+        const timestamp = Date.now();
+        const userUID = user.uid;
+        const newFilename = `service_request_${userUID}.validIDjpg.${timestamp}.jpg`;
+  
+        try {
+          const clonedFile = await fetchAndCloneFile(userData.upload, newFilename);
+          const previewUrl = URL.createObjectURL(clonedFile);
+  
+          // Set preview for UI display
+          setFiles3([
+            {
+              name: newFilename,
+              preview: previewUrl,
+            },
+          ]);
+  
+          // Set file to clearanceInput
+          setClearanceInput((prev: any) => ({
+            ...prev,
+            validIDjpg: clonedFile,
+          }));
+  
+          // Cleanup object URL after some time
+          setTimeout(() => URL.revokeObjectURL(previewUrl), 10000);
+        } catch (error) {
+          console.error("Error cloning uploaded file:", error);
+        }
+      }
+    };
+  
+    cloneUploadIfExists();
+  }, [userData, user]);
+  
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -2754,61 +2811,60 @@ const handleFileChange = (
             <h1 className="form-label-description">(for residents with no Barangay ID)</h1>
 
             <div className="file-upload-container">
-              <label htmlFor="file-upload3"  className="upload-link">Click to Upload File</label>
-                <input
-                  id="file-upload3"
-                  type="file"
-                  accept=".jpg,.jpeg,.png"
-                  required = {(docType === "Temporary Business Permit" || docType === "Business Permit")}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleFileChange(e,setFiles3, 'validIDjpg');
-                  }} // Handle file selection
-                  style={{ display: "none" }}
-                />
+              {/* Only show upload button if no uploaded file exists */}
+              {!userData?.upload && (
+                <>
+                  <label htmlFor="file-upload3" className="upload-link">Click to Upload File</label>
+                  <input
+                    id="file-upload3"
+                    type="file"
+                    accept=".jpg,.jpeg,.png"
+                    required={(docType === "Temporary Business Permit" || docType === "Business Permit")}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleFileChange(e, setFiles3, 'validIDjpg');
+                    }}
+                    style={{ display: "none" }}
+                  />
+                </>
+              )}
 
-              <div className="uploadedFiles-container">
-                {/* Display the file names with image previews */}
-                {files3.length > 0 && (
-                  <div className="file-name-image-display">
-                    <ul>
-                      {files3.map((file, index) => (
-                        <div className="file-name-image-display-indiv" key={index}>
-                          <li> 
-                              {/* Display the image preview */}
-                              {file.preview && (
-                                <div className="filename&image-container">
-                                  <img
-                                    src={file.preview}
-                                    alt={file.name}
-                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                  />
-                                </div>
-                                )}
-                              {file.name}  
+              {/* Always show file preview if exists */}
+              {files3.length > 0 && (
+                <div className="file-name-image-display">
+                  <ul>
+                    {files3.map((file, index) => (
+                      <div className="file-name-image-display-indiv" key={index}>
+                        <li>
+                          <div className="filename&image-container">
+                            <img
+                              src={file.preview}
+                              alt={file.name}
+                              style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                            />
+                          </div>
+                          {file.name}
+
+                          {!userData?.upload && (
                             <div className="delete-container">
-                              {/* Delete button with image */}
                               <button
-                                  type="button"
-                                  onClick={() => handleFileDelete('file-upload3', setFiles3)}
-                                  className="delete-button"
-                                >
-                                  <img
-                                    src="/images/trash.png"  
-                                    alt="Delete"
-                                    className="delete-icon"
-                                  />
-                                </button>
-
+                                type="button"
+                                onClick={() => handleFileDelete('file-upload3', setFiles3)}
+                                className="delete-button"
+                              >
+                                <img
+                                  src="/images/trash.png"
+                                  alt="Delete"
+                                  className="delete-icon"
+                                />
+                              </button>
                             </div>
-                                        
-                              
-                          </li>
-                        </div>
-                      ))}  
-                    </ul>
-                  </div>
-                )}
-              </div>
+                          )}
+                        </li>
+                      </div>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </>
