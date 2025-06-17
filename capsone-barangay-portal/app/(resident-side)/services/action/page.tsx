@@ -1922,17 +1922,32 @@ const handleFileChange = (
             ):(docType === "Temporary Business Permit" || docType === "Business Permit") ? (<></>)
             : docType === "Construction Permit" ? (<></>) : (
               <div className="form-group">
-                <label htmlFor="citizenship" className="form-label">Citizenship<span className="required">*</span></label>
+                <label htmlFor="citizenship" className="form-label">
+                  Citizenship<span className="required">*</span>
+                </label>
                 <select
                   id="citizenship"
                   name="citizenship"
                   className="form-input"
                   value={
-                    ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(clearanceInput.citizenship)
-                      ? clearanceInput.citizenship
+                    ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(clearanceInput.citizenship.split("(")[0])
+                      ? clearanceInput.citizenship.split("(")[0]
                       : ""
                   }
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    if (selected === "Dual Citizen" || selected === "Others") {
+                      setClearanceInput((prev: any) => ({
+                        ...prev,
+                        citizenship: selected,
+                      }));
+                    } else {
+                      setClearanceInput((prev: any) => ({
+                        ...prev,
+                        citizenship: selected,
+                      }));
+                    }
+                  }}
                   required
                 >
                   <option value="" disabled>Select Citizenship</option>
@@ -1942,11 +1957,32 @@ const handleFileChange = (
                   <option value="Others">Others</option>
                 </select>
 
+                {/* Input field for Dual Citizen */}
+                {clearanceInput.citizenship === "Dual Citizen" && (
+                  <input
+                    type="text"
+                    className="form-input-others"
+                    placeholder="Specify other citizenship (e.g., American)"
+                    value={
+                      clearanceInput.citizenship.includes("(")
+                        ? clearanceInput.citizenship.split("(")[1].replace(")", "")
+                        : ""
+                    }
+                    onChange={(e) => {
+                      const second = e.target.value.trim();
+                      setClearanceInput((prev: any) => ({
+                        ...prev,
+                        citizenship: second ? `Dual Citizen(${second})` : "Dual Citizen",
+                      }));
+                    }}
+                    required
+                  />
+                )}
+
+                {/* Input field for Others */}
                 {clearanceInput.citizenship === "Others" && (
                   <input
                     type="text"
-                    id="citizenship"
-                    name="citizenship"
                     className="form-input-others"
                     placeholder="Please specify your citizenship"
                     value={
@@ -1964,6 +2000,7 @@ const handleFileChange = (
                   />
                 )}
               </div>
+
             )}
           
 
