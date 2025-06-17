@@ -823,6 +823,40 @@ input[type="checkbox"] {
   margin-bottom: 10px;
 }
 
+.yesno-container-module-downloadable {
+  display: flex;
+  gap: 20px;
+}
+
+.no-button-downloadable,
+.yes-button-downloadable {
+  padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer; 
+    width: 150px;
+    box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+    margin-top: 20px;
+}
+
+.yes-button-downloadable {
+   background-color: #4caf50; 
+}
+
+.yes-button-downloadable:hover {
+   background-color: #3d8c40; 
+}
+
+.no-button-downloadable {
+  background-color: #f44336;
+}
+
+.no-button-downloadable:hover {
+  background-color:  #c2352b; 
+}
+
 .popup-overlay-downloadble-forms {
   position: fixed;
   top: 13%;

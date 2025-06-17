@@ -68,6 +68,9 @@ const ReportsPage = () => {
   const db = getFirestore();
 
 
+const [fileToDelete, setFileToDelete] = useState<string | null>(null);
+
+
   const fetchDownloadLinks = async () => {
     try {
       const folderRef = ref(storage, "ReportsModule/");
@@ -119,18 +122,10 @@ const ReportsPage = () => {
 
   };
 
-  const deleteFile = async (fileName: string) => {
-    const fileRef = ref(storage, `ReportsModule/${fileName}`);
-    try {
-      await deleteObject(fileRef);
-      alert("File deleted successfully!");
-      setFiles(files.filter(file => file.name !== fileName));
-    } catch (error) {
-      console.error("Delete failed:", error);
-    }
-    window.location.reload();
+  /*
+  delete place
+  */
 
-  };
 
   // kasambahay report
 
@@ -3588,6 +3583,7 @@ const handleBackPage = () => {
  const [showUploadFilePopup, setShowUploadFilePopup] = useState(false);
  const uploadFilePopUpRef = useRef<HTMLDivElement>(null);
  const [showPopup, setShowPopup] = useState(false);
+ const [showDeletePopup, setShowDeletePopup] = useState(false); 
  
 
 
@@ -3644,12 +3640,61 @@ const handleBackPage = () => {
     }
   };
   
+  
 
   /*
   const uploadForms = (url: string): void => {
     window.location.href = url;
   };
   */
+
+
+
+
+
+  
+  /*
+  OLD CODE OF DELETING. Transferred to another function bcos I
+  added a confirmation pop-up - Derick Mwah
+
+  const deleteFile = async (fileName: string) => {
+    const fileRef = ref(storage, `ReportsModule/${fileName}`);
+    try {
+      await deleteObject(fileRef);
+      alert("File deleted successfully!");
+      setFiles(files.filter(file => file.name !== fileName));
+    } catch (error) {
+      console.error("Delete failed:", error);
+    }
+    window.location.reload();
+
+  };
+*/
+
+const handleDeleteClick = (fileName: string) => {
+  setFileToDelete(fileName);
+  setShowDeletePopup(true);
+};
+
+
+const confirmDelete = async () => {
+  if (!fileToDelete) return;
+
+  const fileRef = ref(storage, `ReportsModule/${fileToDelete}`);
+  try {
+    await deleteObject(fileRef);
+    setPopupMessage("File deleted successfuly!");
+    setFiles((prev) => prev.filter((file) => file.name !== fileToDelete));
+  } catch (error) {
+    console.error("Delete failed:", error);
+    alert("Failed to delete file.");
+  }
+
+  setShowPopup(true);
+  setShowDeletePopup(false);
+  setFileToDelete(null);
+};
+
   
   return (
     <div className="downloadable-main-container">
@@ -3738,7 +3783,7 @@ const handleBackPage = () => {
                             </button>
                             <button
                               className="delete-btn"
-                              onClick={() => deleteFile(file.name)}
+                              onClick={() => handleDeleteClick(file.name)}
                             >
                               Delete
                             </button>
@@ -3810,6 +3855,24 @@ const handleBackPage = () => {
               </div>
           </div>
             )}
+
+         
+                    {showDeletePopup && (
+                <div className="popup-backdrop-download">
+                  <div className="popup-content-download">
+                    <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup-download" />
+                    <p>Are you sure you want to delete this file?</p>
+                    <h2>{fileToDelete}</h2>
+                    <div className="yesno-container-module-downloadable">
+                      <button onClick={() => setShowDeletePopup(false)} className="no-button-downloadable">No</button>
+                      <button onClick={confirmDelete} className="yes-button-downloadable">Yes</button>
+                    </div> 
+                  </div>
+                </div>
+              )}
+
+
+          
 
 
     
