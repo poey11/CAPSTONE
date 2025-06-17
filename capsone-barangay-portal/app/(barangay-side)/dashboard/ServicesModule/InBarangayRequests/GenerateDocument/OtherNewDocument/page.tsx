@@ -52,6 +52,7 @@ export default function AddNewDoc() {
     
     const handleSubmit = (e: any) => {
         e.preventDefault();
+        console.log("Form submitted with data:", data);
     }
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const { name, value } = e.target;
@@ -142,12 +143,36 @@ export default function AddNewDoc() {
                                 ))}
                         </select>
                     </div>
-                    {formValue.filter((doc:DocumentField) => doc.type === data.type).map((doc: DocumentField) => (
-                            console.log("Document Fields:",doc.fields),  
-                            <></>
-                        ))
+                    {formValue
+                        .filter((doc: DocumentField) => doc.title === data.purpose)
+                        .map((doc: DocumentField) =>
+                            doc.fields
+                                ? doc.fields.map((field: fieldInputs, index: number) => (
+                                    <input
+                                        key={index}
+                                        type="text"
+                                        name={field.name}
+                                        value={data.fields?.find(f => f.name === field.name)?.value || ""}
+                                        onChange={handleChange}
+                                        className="w-1/2 mt-4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder={`Enter ${field.name}`}
+                                        required
+                                    />
+                                    ))
+                                    : null
+                        )
                     }
-
+                    <textarea 
+                        className="w-full mt-4 h-full bg-white p-4 rounded-lg shadow-md"  
+                        placeholder="Body of the new document"
+                        value={
+                            formValue.find((doc: DocumentField) => doc.type === data.type && doc.title === data.purpose)?.body || ""
+                        }
+                        required
+                        name="body"
+                        disabled
+                       
+                    />
 
                     <button 
                         type="submit"

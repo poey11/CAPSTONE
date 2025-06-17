@@ -7,8 +7,11 @@ import { useRouter } from "next/navigation";
 interface DocumentField {
     title?: string;
     type?: string;
-    description?: string;
     body?: string;
+}
+
+interface FieldInputs {
+    name?: string;   
 }
 
 
@@ -17,10 +20,10 @@ export default function AddNewDoc() {
     const router = useRouter();
     const [formValue, setFormValue] = useState<DocumentField>();
     const [newField, setNewField] = useState<string>("");
-    const [fields, setFields] = useState<string[]>([]); 
+    const [fields, setFields] = useState<FieldInputs[]>([]); 
     const handleAddField = () => {
         if (newField.trim() === "") return; // prevent adding empty fields
-        setFields([...fields, newField]);
+        setFields([...fields, { name: newField }]);
         setNewField(""); // clear input after adding
     };
     const handleRemoveField = (index: number) => {
@@ -31,7 +34,7 @@ export default function AddNewDoc() {
 
     const handleFieldChange = (index: number, value: string) => {
         const updatedFields = [...fields];
-        updatedFields[index] = value;
+        updatedFields[index] = { name: value };
         setFields(updatedFields);
     };
 
@@ -48,9 +51,7 @@ export default function AddNewDoc() {
         const docRef = collection(db, "OtherDocuments");
         const docData = {
             ...formValue,
-            fields:{
-                ...fields
-            }
+            fields:fields
         }
         console.log("Document submitted with fields:", fields);
         console.log("Document body:", formValue);
@@ -105,11 +106,6 @@ export default function AddNewDoc() {
                             <option value="other">Other</option>
                         </select>
                     </div>
-                    <input 
-                        type="text" 
-                        className="w-1/2 ml-1 mt-4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Document Description"
-                    />
                     {/* Dynamic Fields for Input Names */}
                     {fields.map((field, index) => (
                           <input 
@@ -118,7 +114,7 @@ export default function AddNewDoc() {
                             id={`field-${index}`}
                             className="mt-2 w-1/8 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder={`${field || `Field Name ${index + 1}`}`} // fallback placeholder if field is empty
-                            value={field}
+                            value={field.name || ""}
                             disabled
                             onChange={(e) => handleFieldChange(index, e.target.value)}
                           />
