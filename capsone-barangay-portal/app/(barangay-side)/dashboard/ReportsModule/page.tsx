@@ -534,8 +534,8 @@ const ReportsPage = () => {
 
   const generateSeniorCitizenReport = async () => {
     setLoadingResidentSeniorDemographic(true);
-
-      
+    setIsGenerating(true);
+    
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -714,8 +714,8 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      alert("Senior Citizen Report generated successfully. Please wait for the downloadable file!");
-  
+      /*alert("Senior Citizen Report generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Senior Citizen Report...")
       return fileUrl;
     } catch (error) {
       console.error("Error generating senior citizen report:", error);
@@ -744,7 +744,15 @@ const ReportsPage = () => {
       const year = currentDate.getFullYear();
       saveAs(blob, `Senior_Citizen_Report_${year}.pdf`);
   
-      alert("Senior Citizen Report successfully converted to PDF!");
+      /*alert("Senior Citizen Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setPopupSuccessGenerateReportMessage("Senior Citizen Report converted to PDF");
+      setShowSuccessGenerateReportPopup(true)
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false)
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
       alert("Failed to generate PDF.");
