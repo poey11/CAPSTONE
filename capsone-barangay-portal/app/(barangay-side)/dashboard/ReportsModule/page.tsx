@@ -2341,6 +2341,7 @@ const ReportsPage = () => {
 
   const generateWestResidentListReport = async () => {
     setLoadingWestResident(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -2574,12 +2575,21 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Resident List for West Fairview generated successfully. Please wait for the downloadable file!");
-  
+      /*alert("Resident List for West Fairview generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Resident List for West Fairview ...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating report:", error);
-      alert("Failed to generate West Fairview Resident Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate West Fairview Resident Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate West Fairview Resident Report.");*/
     } finally {
       setLoadingWestResident(false);
     }
