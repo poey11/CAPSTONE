@@ -5,7 +5,7 @@ import { ChangeEvent, useState, useEffect,useRef } from "react";
 import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayCertificate.css";
 import { getLocalDateString } from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
-import { addDoc, collection, doc, getDocs} from "firebase/firestore";
+import { addDoc, collection, getDocs} from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";

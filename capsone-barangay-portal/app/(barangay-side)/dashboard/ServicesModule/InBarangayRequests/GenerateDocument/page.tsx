@@ -19,8 +19,12 @@ export default function GenerateDocument() {
     }
 
     const [isDropdownVisible, setDropdownVisible] = useState(false);
-
-
+    const handleAddNewDocument = () => {
+        router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/addNewDoc");
+    }
+    const handleOtherNewDocument = () => {
+        router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/OtherNewDocument");
+    }
     return (
         <main className="generatedocument-main-container">
             <div className="generatedocument-section-1">
@@ -34,6 +38,12 @@ export default function GenerateDocument() {
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
                         </button>
                         <h1>Generate Document</h1>
+                        <button
+                          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-300"
+                          onClick={handleAddNewDocument}
+                        >
+                          Add New Document
+                        </button>
                     </div>
 
                 </div>
@@ -83,6 +93,13 @@ export default function GenerateDocument() {
                             <div className="generate-documents-documents-card" onClick={handleSubmit} id="First Time Jobseeker">
                                 <h1>First Time Jobseeker</h1>
                             </div>
+
+                            </div>
+                            
+                            <div className="generate-documents-container-column">
+                                <div className="generate-documents-documents-card" onClick={handleOtherNewDocument}>
+                                    <h1>Other New Documents</h1>
+                                </div>
 
                             </div>
                         </div>
