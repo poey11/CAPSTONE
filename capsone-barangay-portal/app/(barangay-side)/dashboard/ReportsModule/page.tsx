@@ -105,26 +105,59 @@ const [fileToDelete, setFileToDelete] = useState<string | null>(null);
     setSelectedUploadFile(null);
 };
 
-  const uploadFile = async () => {
+
+const uploadFile = async () => {
+  if (!selectedUploadFile) return;
+
+  const fileRef = ref(storage, `ReportsModule/${selectedUploadFile.name}`);
+  try {
+    await uploadBytes(fileRef, selectedUploadFile);
+    setPopupMessage("File Uploaded Successfully!");
+    setSelectedUploadFile(null);
+    fetchDownloadLinks(); 
+  } catch (error) {
+    console.error("Upload failed:", error);
+    setPopupMessage("File upload failed. Please try again.");
+  }
+
+  setShowPopup(true); 
+  setShowUploadFilePopup(false);
+ 
+  setTimeout(() => {
+    setShowPopup(false);
+  }, 3000);
+  
+};
+
+  
+  const handleDeleteClick = (fileName: string) => {
+  setFileToDelete(fileName);
+  setShowDeletePopup(true);
+
+    setTimeout(() => {
+    setShowPopup(false);
+  }, 3000);
+  
+};
 
 
-    if (!selectedUploadFile) return;
-    const fileRef = ref(storage, `ReportsModule/${selectedUploadFile.name}`);
-    try {
-      await uploadBytes(fileRef, selectedUploadFile);
-      alert("File uploaded successfully!");
-      setSelectedUploadFile(null);
-      fetchDownloadLinks(); 
-    } catch (error) {
-      console.error("Upload failed:", error);
-    } 
-    window.location.reload();
+const confirmDelete = async () => {
+  if (!fileToDelete) return;
 
-  };
+  const fileRef = ref(storage, `ReportsModule/${fileToDelete}`);
+  try {
+    await deleteObject(fileRef);
+    setPopupMessage("File deleted successfuly!");
+    setFiles((prev) => prev.filter((file) => file.name !== fileToDelete));
+  } catch (error) {
+    console.error("Delete failed:", error);
+    alert("Failed to delete file.");
+  }
 
-  /*
-  delete place
-  */
+  setShowPopup(true);
+  setShowDeletePopup(false);
+  setFileToDelete(null);
+};
 
 
   // kasambahay report
@@ -3639,8 +3672,8 @@ const handleBackPage = () => {
       }, 2000);
     }
   };
-  
-  
+
+
 
   /*
   const uploadForms = (url: string): void => {
@@ -3671,29 +3704,6 @@ const handleBackPage = () => {
   };
 */
 
-const handleDeleteClick = (fileName: string) => {
-  setFileToDelete(fileName);
-  setShowDeletePopup(true);
-};
-
-
-const confirmDelete = async () => {
-  if (!fileToDelete) return;
-
-  const fileRef = ref(storage, `ReportsModule/${fileToDelete}`);
-  try {
-    await deleteObject(fileRef);
-    setPopupMessage("File deleted successfuly!");
-    setFiles((prev) => prev.filter((file) => file.name !== fileToDelete));
-  } catch (error) {
-    console.error("Delete failed:", error);
-    alert("Failed to delete file.");
-  }
-
-  setShowPopup(true);
-  setShowDeletePopup(false);
-  setFileToDelete(null);
-};
 
   
   return (
