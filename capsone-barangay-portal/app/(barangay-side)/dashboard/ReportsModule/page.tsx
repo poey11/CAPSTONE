@@ -1679,6 +1679,7 @@ const ReportsPage = () => {
 
   const generateResidentListReport = async () => {
     setLoadingMasterResident(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -1846,8 +1847,8 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Resident Masterlist generated successfully. Please wait for the downloadable file!");
-  
+      /*alert("Resident Masterlist generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Resident Masterlist...");
       return fileUrl;
     } catch (error) {
       console.error("Error generating report:", error);
@@ -1880,7 +1881,15 @@ const ReportsPage = () => {
       const year = currentDate.getFullYear();
       saveAs(blob, `Inhabitant_Record_${year}.pdf`);
   
-      alert("Resident Masterlist Report successfully converted to PDF!");
+      /*alert("Resident Masterlist Report successfully converted to PDF!");*/
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Resident Masterlist Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
       alert("Failed to generate PDF.");
