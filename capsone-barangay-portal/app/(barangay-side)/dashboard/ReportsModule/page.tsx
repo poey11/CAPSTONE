@@ -1218,6 +1218,7 @@ const ReportsPage = () => {
   
   const generateSoloParentReport = async () => {
     setLoadingResidentSoloParentDemographic(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -1402,7 +1403,8 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      alert("Solo Parent Demographic Report generated successfully. Please wait for the downloadable file!");
+      /*alert("Solo Parent Demographic Report generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Solo Parent Demographic Report...");
       return fileUrl;
     } catch (error) {
       console.error("Error generating Solo Parent report:", error);
@@ -1431,7 +1433,16 @@ const ReportsPage = () => {
       const year = new Date().getFullYear();
       saveAs(blob, `Solo_Parent_Demographic_Report_${year}.pdf`);
   
-      alert("Solo Parent Report successfully converted to PDF!");
+      /*alert("Solo Parent Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Solo Parent Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error generating Solo Parent PDF:", error);
       alert("Failed to generate Solo Parent PDF.");
