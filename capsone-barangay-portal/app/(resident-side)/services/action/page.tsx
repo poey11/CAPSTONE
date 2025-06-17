@@ -232,93 +232,106 @@ export default function Action() {
 
  
 
+  const [requestMode, setRequestMode] = useState("For Myself");
+  const [userData, setUserData] = useState<any>(null);
+  const isReadOnly = requestMode === "For Myself";
 
  
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const userDocRef = doc(db, "ResidentUsers", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
+      if (!user) return;
   
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          const residentId = userData.residentId;
+      const userDocRef = doc(db, "ResidentUsers", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (!userDocSnap.exists()) return;
   
-          if (residentId) {
-            const residentDocRef = doc(db, "Residents", residentId);
-            const residentDocSnap = await getDoc(residentDocRef);
+      const userData = userDocSnap.data();
+      setUserData(userData);
   
-            if (residentDocSnap.exists()) {
-              const residentData = residentDocSnap.data();
-              const gender = residentData.sex;
-              const mrms = gender === "Male" ? "Mr." : "Ms.";
+      const residentId = userData.residentId;
+      const isVerified = userData.status === "Verified";
+      const isEstateOrDeath = ["Estate Tax", "Death Residency"].includes(clearanceInput.purpose);
   
-              const birthDate = new Date(residentData.dateOfBirth);
-              const today = new Date();
-              let age = today.getFullYear() - birthDate.getFullYear();
-              const monthDiff = today.getMonth() - birthDate.getMonth();
-              if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-              }
+      // Force set requestMode when purpose requires it
+      if (isEstateOrDeath && requestMode !== "For Someone Else") {
+        setRequestMode("For Someone Else");
+        return; // wait for the next re-run
+      }
   
-              if (
-                clearanceInput.purpose === "Estate Tax" ||
-                clearanceInput.purpose === "Death Residency"
-              ) {
-                setClearanceInput((prev: any) => ({
-                  ...prev,
-
-                  fullName: "",
-                  contact:  "",
-                  address: "",
-                  gender: "",
-                  civilStatus: "",
-                  birthplace: "",
-                  birthday: "",
-                  age: "",
-                  requestorFname: `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}` || "",
-                  requestorMrMs: mrms,
-                }));
-              } else {
-                setClearanceInput((prev: any) => ({
-                  ...prev,
-                  fullName: `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}` || "",
-                  contact: residentData.contactNumber || "",
-                  address: residentData.address || "",
-                  gender: residentData.sex || "",
-                  civilStatus: residentData.civilStatus || "",
-                  birthplace: residentData.placeOfBirth || "",
-                  birthday: residentData.dateOfBirth || "",
-                  age: age.toString(),
-                  precinctnumber: residentData.precinctNumber || "",
-                  requestorFname: `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}` || "",
-                  requestorMrMs: mrms,
-                }));
-              }
-            }
-          } else {
-            // Fallback to ResidentUsers table
-            const gender = userData.sex;
-            const mrms = gender === "male" ? "Mr." : "Ms.";
+      if (isVerified && residentId) {
+        const residentDocRef = doc(db, "Residents", residentId);
+        const residentDocSnap = await getDoc(residentDocRef);
+        if (!residentDocSnap.exists()) return;
   
-            setClearanceInput((prev: any) => ({
-              ...prev,
-              fullName: `${userData.first_name} ${userData.middle_name} ${userData.last_name}` || "",
-              contact: userData.phone || "",
-              address: userData.address || "",
-              gender: userData.sex || "",
-              requestorFname: `${userData.first_name} ${userData.middle_name} ${userData.last_name}` || "",
-              requestorMrMs: mrms,
-            }));
+        const residentData = residentDocSnap.data();
+        const gender = residentData.sex;
+        const mrms = gender === "Male" ? "Mr." : "Ms.";
+        const fullName = `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}`;
+  
+        if (requestMode === "For Someone Else") {
+          // ✅ CLEAR all personal fields, only keep requestor fields
+          setClearanceInput((prev: any) => ({
+            ...prev,
+            fullName: "",
+            contact: "",
+            address: "",
+            gender: "",
+            civilStatus: "",
+            birthplace: "",
+            birthday: "",
+            age: "",
+            precinctnumber: "",
+            requestorFname: fullName,
+            requestorMrMs: mrms,
+          }));
+        } else {
+          // ✅ FILL all fields for "For Myself"
+          const birthDate = new Date(residentData.dateOfBirth);
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
           }
+  
+          setClearanceInput((prev: any) => ({
+            ...prev,
+            fullName,
+            contact: residentData.contactNumber || "",
+            address: residentData.address || "",
+            gender: residentData.sex || "",
+            civilStatus: residentData.civilStatus || "",
+            birthplace: residentData.placeOfBirth || "",
+            birthday: residentData.dateOfBirth || "",
+            age: age.toString(),
+            precinctnumber: residentData.precinctNumber || "",
+            requestorFname: fullName,
+            requestorMrMs: mrms,
+          }));
         }
+      } else {
+        // fallback for unverified users
+        const gender = userData.sex;
+        const mrms = gender === "male" ? "Mr." : "Ms.";
+        const fullName = `${userData.first_name} ${userData.middle_name} ${userData.last_name}`;
+  
+        setClearanceInput((prev: any) => ({
+          ...prev,
+          fullName,
+          contact: userData.phone || "",
+          address: userData.address || "",
+          gender: userData.sex || "",
+          requestorFname: fullName,
+          requestorMrMs: mrms,
+        }));
       }
     };
   
     fetchUserData();
-  }, [user, clearanceInput.purpose]); // 🔁 Added purpose to dependency array
+  }, [user, clearanceInput.purpose, requestMode]); // ✅ Add requestMode
+  
+
   
   
   
@@ -706,6 +719,36 @@ const handleFileChange = (
       <div className="form-content">
         <h1 className="form-title">
         {docType} Request Form
+
+        {userData?.status === "Verified" &&
+          userData?.residentId &&
+          !["Estate Tax", "Death Residency"].includes(clearanceInput.purpose) && (
+            <div className="form-group">
+              <label className="form-label">Who is this request for?<span className="required">*</span></label>
+              <div className="radio-group">
+                <label>
+                  <input
+                    type="radio"
+                    value="For Myself"
+                    checked={requestMode === "For Myself"}
+                    onChange={(e) => setRequestMode(e.target.value)}
+                  />
+                  For Myself
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="For Someone Else"
+                    checked={requestMode === "For Someone Else"}
+                    onChange={(e) => setRequestMode(e.target.value)}
+                  />
+                  For Someone Else
+                </label>
+              </div>
+            </div>
+          )}
+
+
         </h1>
 
         <hr/>
@@ -838,6 +881,7 @@ const handleFileChange = (
                 placeholder="Enter Full Name" 
                 value={clearanceInput.fullName}
                 onChange={handleChange}
+                readOnly={isReadOnly}
               />
             </div>
 
@@ -1151,7 +1195,9 @@ const handleFileChange = (
                 required 
                 value={clearanceInput.address}
                 onChange={handleChange}
-                placeholder="Enter Home/Office Address"  
+                placeholder="Enter Home/Office Address" 
+                readOnly={isReadOnly}
+ 
               />
             </div>
             </>
@@ -1184,6 +1230,8 @@ const handleFileChange = (
                 className="form-input"  
                 required 
                 placeholder={`Enter ${addOn}Address`}
+                readOnly={isReadOnly}
+
               />
             </div>
             {clearanceInput.purpose === "No Income" && (
@@ -1409,6 +1457,8 @@ const handleFileChange = (
                 onChange={handleChange}
                 required 
                 max={getLocalDateString(new Date())}
+                readOnly={isReadOnly}
+
               />
             </div>
             
@@ -1469,6 +1519,8 @@ const handleFileChange = (
                   onChange={handleChange}
                   required 
                   placeholder="Enter Birthplace" 
+                  readOnly={isReadOnly}
+
                 />
               </div>
             )}
@@ -1584,6 +1636,7 @@ const handleFileChange = (
                 name="gender" 
                 className="form-input" 
                 required
+                disabled = {isReadOnly}
                 value={clearanceInput.gender}
                 onChange={handleChange}
                >
@@ -1712,6 +1765,8 @@ const handleFileChange = (
                 required
                 value={clearanceInput.civilStatus}
                 onChange={handleChange}
+                disabled={isReadOnly}
+
   
               >
                 <option value="" disabled>Select Civil Status</option>
