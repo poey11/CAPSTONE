@@ -3587,12 +3587,8 @@ const handleBackPage = () => {
 
  const [showUploadFilePopup, setShowUploadFilePopup] = useState(false);
  const uploadFilePopUpRef = useRef<HTMLDivElement>(null);
- const [showSubmitPopup, setShowSubmitPopup] = useState<{ show: boolean; message: string; message2: string;}>({
-  show: false,
-  message: "",
-  message2: "",
-});
-
+ const [showPopup, setShowPopup] = useState(false);
+ 
 
 
  const handleUploadClick = () => {
@@ -3631,20 +3627,23 @@ const handleBackPage = () => {
      
       await new Promise(resolve => setTimeout(resolve, 1000));
   
-      setShowSubmitPopup({
-        show: true,
-        message: "Form download initiated successfully!",
-        message2: "",
-      });
+      setPopupMessage("File download sucessful!")
+      setShowPopup(true);
   
     } catch (error) {
       console.error("Error in uploadForms:", error);
     } finally {
       // Ensure loading state ends after 2 seconds
       setTimeout(() => {
-        setIsLoading(false);
+        setIsLoading(false)
       }, 2000);
+      
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 4000);
     }
+
+   
   };
   
   
@@ -3806,8 +3805,15 @@ const handleBackPage = () => {
              </div>
                 )}
 
+        {showPopup && (
+          <div className={`popup-overlay-downloadble-forms show`}>
+              <div className="popup-downloadble-forms">
+                <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                <p>{popupMessage}</p>
+              </div>
+          </div>
+            )}
 
-                
 
     
       {showUploadFilePopup && (
