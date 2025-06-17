@@ -253,12 +253,13 @@ export default function Action() {
       const isVerified = userData.status === "Verified";
       const isEstateOrDeath = ["Estate Tax", "Death Residency"].includes(clearanceInput.purpose);
   
-      // Force set requestMode when purpose requires it
+      //  Force set requestMode to "For Someone Else" for Estate/Death
       if (isEstateOrDeath && requestMode !== "For Someone Else") {
         setRequestMode("For Someone Else");
-        return; // wait for the next re-run
+        return; // Wait for re-run
       }
   
+      //  For Verified ResidentUsers with a linked residentId
       if (isVerified && residentId) {
         const residentDocRef = doc(db, "Residents", residentId);
         const residentDocSnap = await getDoc(residentDocRef);
@@ -269,8 +270,20 @@ export default function Action() {
         const mrms = gender === "Male" ? "Mr." : "Ms.";
         const fullName = `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}`;
   
+        //  Handle age calculation based on death date or today
+        const birthDate = new Date(residentData.dateOfBirth);
+        const referenceDate = isEstateOrDeath && clearanceInput.dateofdeath
+          ? new Date(clearanceInput.dateofdeath)
+          : new Date();
+  
+        let age = referenceDate.getFullYear() - birthDate.getFullYear();
+        const monthDiff = referenceDate.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && referenceDate.getDate() < birthDate.getDate())) {
+          age--;
+        }
+  
         if (requestMode === "For Someone Else") {
-          // ✅ CLEAR all personal fields, only keep requestor fields
+          //  Only set requestor fields
           setClearanceInput((prev: any) => ({
             ...prev,
             fullName: "",
@@ -286,15 +299,7 @@ export default function Action() {
             requestorMrMs: mrms,
           }));
         } else {
-          // ✅ FILL all fields for "For Myself"
-          const birthDate = new Date(residentData.dateOfBirth);
-          const today = new Date();
-          let age = today.getFullYear() - birthDate.getFullYear();
-          const monthDiff = today.getMonth() - birthDate.getMonth();
-          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-          }
-  
+          //  Fill all fields for self
           setClearanceInput((prev: any) => ({
             ...prev,
             fullName,
@@ -310,8 +315,9 @@ export default function Action() {
             requestorMrMs: mrms,
           }));
         }
+  
       } else {
-        // fallback for unverified users
+        //  Fallback for Unverified accounts
         const gender = userData.sex;
         const mrms = gender === "male" ? "Mr." : "Ms.";
         const fullName = `${userData.first_name} ${userData.middle_name} ${userData.last_name}`;
@@ -329,7 +335,8 @@ export default function Action() {
     };
   
     fetchUserData();
-  }, [user, clearanceInput.purpose, requestMode]); // ✅ Add requestMode
+  }, [user, clearanceInput.purpose, requestMode, clearanceInput.dateofdeath]);
+  
   
 
   
