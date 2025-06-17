@@ -656,7 +656,8 @@
   }
 }
 
-.popup-overlay-success-generate-report {
+.popup-overlay-success-generate-report,
+.popup-overlay-error-generate-report {
   position: fixed;
   top: 13%;
   right: -3px;
@@ -676,20 +677,29 @@
   border-left: 10px solid #403f3e;
 }
 
+.popup-overlay-error-generate-report {
+  background: #cc3434;
+    border-left: 10px solid #8a0f0f;
+}
+
 .popup-overlay-success-generate-report {
   background: #777575;
   border-left: 10px solid #403f3e;
 }
 
-.popup-overlay-success-generate-report.show {
+.popup-overlay-success-generate-report.show,
+.popup-overlay-error-generate-report.show {
   animation: slideIn 0.5s ease-out;
 }
 
-.popup-overlay-success-generate-report.hide {
+.popup-overlay-success-generate-report.hide,
+.popup-overlay-error-generate-report.hide {
   animation: slideOut 0.5s ease-out;
 }
 
-.popup-add-resident {
+.popup-success-generate-report,
+.popup-error-generate-report
+ {
   display: flex;
   align-items: center;
   justify-content: center;

@@ -718,8 +718,18 @@ const ReportsPage = () => {
       setGeneratingMessage("Generating Senior Citizen Report...")
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating senior citizen report:", error);
-      alert("Failed to generate Senior Citizen Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Senior Citizen Report.");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+
+      /*alert("Failed to generate Senior Citizen Report.");*/
     } finally {
       setLoadingResidentSeniorDemographic(false);
     }
@@ -729,7 +739,19 @@ const ReportsPage = () => {
     setLoadingResidentSeniorDemographic(true);
     try {
       const fileUrl = await generateSeniorCitizenReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -756,7 +778,14 @@ const ReportsPage = () => {
       }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Senior Citizen Report PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+    }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingResidentSeniorDemographic(false);
     }
@@ -953,8 +982,17 @@ const ReportsPage = () => {
       setGeneratingMessage("Generating Student Demographic Report...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating Student report:", error);
-      alert("Failed to generate Student Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Student Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Student Report.");*/
     } finally {
       setLoadingResidentStudentDemographic(false);
     }
@@ -966,7 +1004,19 @@ const ReportsPage = () => {
     setLoadingResidentStudentDemographic(true);
     try {
       const fileUrl = await generateStudentDemographicReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -993,7 +1043,13 @@ const ReportsPage = () => {
       }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate Student PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Student PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Student PDF.");*/
     } finally {
       setLoadingResidentStudentDemographic(false);
     }
@@ -1172,8 +1228,17 @@ const ReportsPage = () => {
       setGeneratingMessage("Generating PWD Demographic Report...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating Student report:", error);
-      alert("Failed to generate PWD Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate PWD Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PWD Report.");*/
     } finally {
       setLoadingResidentPWDDemographic(false);
     }
@@ -1210,7 +1275,13 @@ const ReportsPage = () => {
       }, 5000);
     } catch (error) {
       console.error("Error generating PWD PDF:", error);
-      alert("Failed to generate PWD PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate PWD Report PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PWD PDF.");*/
     } finally {
       setLoadingResidentPWDDemographic(false);
     }
@@ -1407,8 +1478,16 @@ const ReportsPage = () => {
       setGeneratingMessage("Generating Solo Parent Demographic Report...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating Solo Parent report:", error);
-      alert("Failed to generate Solo Parent Report.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Solo Parent Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Solo Parent Report.");*/
     } finally {
       setLoadingResidentSoloParentDemographic(false);
     }
@@ -1445,7 +1524,13 @@ const ReportsPage = () => {
       }, 5000);
     } catch (error) {
       console.error("Error generating Solo Parent PDF:", error);
-      alert("Failed to generate Solo Parent PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Solo Parent PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Solo Parent PDF.");*/
     } finally {
       setLoadingResidentSoloParentDemographic(false);
     }
@@ -1629,8 +1714,17 @@ const ReportsPage = () => {
       setGeneratingMessage("Generating Resident Registration Summary...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+      
       console.error("Error generating Resident Registration Summary:", error);
-      alert("Failed to generate Resident Registration Summary.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Resident Registration Summary");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Resident Registration Summary.");*/
     } finally {
       setLoadingRegistrationSummary(false);
     }
@@ -1640,7 +1734,19 @@ const ReportsPage = () => {
     setLoadingRegistrationSummary(true);
     try {
       const fileUrl = await generateResidentRegistrationSummary();
-      if (!fileUrl) return alert("Failed to generate Excel summary report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel summary report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel summary report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -1670,7 +1776,13 @@ const ReportsPage = () => {
       }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Resident Registration Summary PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingRegistrationSummary(false);
     }
@@ -1851,8 +1963,16 @@ const ReportsPage = () => {
       setGeneratingMessage("Generating Resident Masterlist...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating report:", error);
-      alert("Failed to generate Resident Masterlist Report.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Resident Masterlist Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Resident Masterlist Report.");*/
     } finally {
       setLoadingMasterResident(false);
     }
@@ -1863,8 +1983,20 @@ const ReportsPage = () => {
     setLoadingMasterResident(true);
     try {
       const fileUrl = await generateResidentListReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
   
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
+
       const response = await fetch("/api/convertPDF", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1892,7 +2024,13 @@ const ReportsPage = () => {
       }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Resident Masterlist Report PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingMasterResident(false);
     }
@@ -1902,6 +2040,7 @@ const ReportsPage = () => {
   // east fairview
   const generateEastResidentListReport = async () => {
     setLoadingEastResident(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -2122,11 +2261,23 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Resident List for East Fairview generated successfully. Please wait for the downloadable file!");
+      /*alert("Resident List for East Fairview generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Resident List for East Fairview ...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating report:", error);
-      alert("Failed to generate East Fairview Resident Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate East Fairview Resident Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate East Fairview Resident Report.");*/
+
+
     } finally {
       setLoadingEastResident(false);
     }
@@ -2137,8 +2288,19 @@ const ReportsPage = () => {
     setLoadingEastResident(true);
     try {
       const fileUrl = await generateEastResidentListReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
   
+      if (!fileUrl) {
+        setIsGenerating(false); 
+
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
       const response = await fetch("/api/convertPDF", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2153,10 +2315,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `Inhabitant_Record_EastFairview_${year}.pdf`);
   
-      alert("Resident Report (East Fairview) successfully converted to PDF!");
+      /*alert("Resident Report (East Fairview) successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Resident Report (East Fairview) generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Resident Report (East Fairview) PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
     setLoadingEastResident(false);
     }
@@ -3620,6 +3797,8 @@ const ReportsPage = () => {
   const [generatingMessage, setGeneratingMessage] = useState("");
   const [showSuccessGenerateReportPopup, setShowSuccessGenerateReportPopup] = useState(false);
   const [popupSuccessGenerateReportMessage, setPopupSuccessGenerateReportMessage] = useState("");
+  const [showErrorGenerateReportPopup, setShowErrorGenerateReportPopup] = useState(false);
+  const [popupErrorGenerateReportMessage, setPopupErrorGenerateReportMessage] = useState("");
   const [activeSection, setActiveSection] = useState("generate");
   const [currentPage, setCurrentPage] = useState(1);
   const moduleTotalPages: { [key: string]: number } = {
@@ -4295,9 +4474,19 @@ const ReportsPage = () => {
       {/* Success Generate Report Popup*/}
       {showSuccessGenerateReportPopup && (
         <div className={`popup-overlay-success-generate-report show`}>
-          <div className="popup-add-resident">
+          <div className="popup-success-generate-report">
             <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
             <p>{popupSuccessGenerateReportMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Success Generate Report Popup*/}
+      {showErrorGenerateReportPopup && (
+        <div className={`popup-overlay-error-generate-report show`}>
+          <div className="popup-error-generate-report">
+          <img src={ "/Images/warning-1.png"} alt="icon alert" className="icon-alert" />
+            <p>{popupErrorGenerateReportMessage}</p>
           </div>
         </div>
       )}
