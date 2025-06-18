@@ -232,93 +232,168 @@ export default function Action() {
 
  
 
+  const [requestMode, setRequestMode] = useState("For Myself");
+  const [userData, setUserData] = useState<any>(null);
 
- 
-
+  const isVerified = userData?.status === "Verified";
+  const isReadOnly = requestMode === "For Myself" && isVerified;
   useEffect(() => {
-    const fetchUserData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const userDocRef = doc(db, "ResidentUsers", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-  
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          const residentId = userData.residentId;
-  
-          if (residentId) {
-            const residentDocRef = doc(db, "Residents", residentId);
-            const residentDocSnap = await getDoc(residentDocRef);
-  
-            if (residentDocSnap.exists()) {
-              const residentData = residentDocSnap.data();
-              const gender = residentData.sex;
-              const mrms = gender === "Male" ? "Mr." : "Ms.";
-  
-              const birthDate = new Date(residentData.dateOfBirth);
-              const today = new Date();
-              let age = today.getFullYear() - birthDate.getFullYear();
-              const monthDiff = today.getMonth() - birthDate.getMonth();
-              if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-              }
-  
-              if (
-                clearanceInput.purpose === "Estate Tax" ||
-                clearanceInput.purpose === "Death Residency"
-              ) {
-                setClearanceInput((prev: any) => ({
-                  ...prev,
+    const fetchAndCloneFile = async (url: string, newFilename: string): Promise<File> => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch file");
+      const blob = await response.blob();
+      return new File([blob], newFilename, { type: blob.type });
+    };
 
-                  fullName: "",
-                  contact:  "",
-                  address: "",
-                  gender: "",
-                  civilStatus: "",
-                  birthplace: "",
-                  birthday: "",
-                  age: "",
-                  requestorFname: `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}` || "",
-                  requestorMrMs: mrms,
-                }));
-              } else {
-                setClearanceInput((prev: any) => ({
-                  ...prev,
-                  fullName: `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}` || "",
-                  contact: residentData.contactNumber || "",
-                  address: residentData.address || "",
-                  gender: residentData.sex || "",
-                  civilStatus: residentData.civilStatus || "",
-                  birthplace: residentData.placeOfBirth || "",
-                  birthday: residentData.dateOfBirth || "",
-                  age: age.toString(),
-                  precinctnumber: residentData.precinctNumber || "",
-                  requestorFname: `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}` || "",
-                  requestorMrMs: mrms,
-                }));
-              }
-            }
-          } else {
-            // Fallback to ResidentUsers table
-            const gender = userData.sex;
-            const mrms = gender === "male" ? "Mr." : "Ms.";
+
+    // for users that are verified and have an existing upload for verification
   
-            setClearanceInput((prev: any) => ({
-              ...prev,
-              fullName: `${userData.first_name} ${userData.middle_name} ${userData.last_name}` || "",
-              contact: userData.phone || "",
-              address: userData.address || "",
-              gender: userData.sex || "",
-              requestorFname: `${userData.first_name} ${userData.middle_name} ${userData.last_name}` || "",
-              requestorMrMs: mrms,
-            }));
-          }
+    const cloneUploadIfExists = async () => {
+      if (
+        userData?.upload &&
+        typeof userData.upload === "string" &&
+        userData.upload.includes("firebasestorage.googleapis.com") &&
+        user?.uid
+      ) {
+        const timestamp = Date.now();
+        const userUID = user.uid;
+        const newFilename = `service_request_${userUID}.validIDjpg.${timestamp}.jpg`;
+  
+        try {
+          const clonedFile = await fetchAndCloneFile(userData.upload, newFilename);
+          const previewUrl = URL.createObjectURL(clonedFile);
+  
+          // Set preview for UI display
+          setFiles3([
+            {
+              name: newFilename,
+              preview: previewUrl,
+            },
+          ]);
+  
+          // Set file to clearanceInput
+          setClearanceInput((prev: any) => ({
+            ...prev,
+            validIDjpg: clonedFile,
+          }));
+  
+          // Cleanup object URL after some time
+          setTimeout(() => URL.revokeObjectURL(previewUrl), 10000);
+        } catch (error) {
+          console.error("Error cloning uploaded file:", error);
         }
       }
     };
   
+    cloneUploadIfExists();
+  }, [userData, user]);
+  
+
+
+
+  // will get user data if for myself, otherwise will set to null
+  // user data will be based on info in their resident records
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user) return;
+  
+      const userDocRef = doc(db, "ResidentUsers", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (!userDocSnap.exists()) return;
+  
+      const userData = userDocSnap.data();
+      setUserData(userData);
+  
+      const residentId = userData.residentId;
+      const isVerified = userData.status === "Verified";
+      const isEstateOrDeath = ["Estate Tax", "Death Residency"].includes(clearanceInput.purpose);
+  
+      //  Force set requestMode to "For Someone Else" for Estate/Death
+      if (isEstateOrDeath && requestMode !== "For Someone Else") {
+        setRequestMode("For Someone Else");
+        return; // Wait for re-run
+      }
+  
+      //  For Verified ResidentUsers with a linked residentId
+      if (isVerified && residentId) {
+        const residentDocRef = doc(db, "Residents", residentId);
+        const residentDocSnap = await getDoc(residentDocRef);
+        if (!residentDocSnap.exists()) return;
+  
+        const residentData = residentDocSnap.data();
+        const gender = residentData.sex;
+        const mrms = gender === "Male" ? "Mr." : "Ms.";
+        const fullName = `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}`;
+  
+        //  Handle age calculation based on death date or today
+        const birthDate = new Date(residentData.dateOfBirth);
+        const referenceDate = isEstateOrDeath && clearanceInput.dateofdeath
+          ? new Date(clearanceInput.dateofdeath)
+          : new Date();
+  
+        let age = referenceDate.getFullYear() - birthDate.getFullYear();
+        const monthDiff = referenceDate.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && referenceDate.getDate() < birthDate.getDate())) {
+          age--;
+        }
+  
+        if (requestMode === "For Someone Else") {
+          //  Only set requestor fields
+          setClearanceInput((prev: any) => ({
+            ...prev,
+            fullName: "",
+            contact: "",
+            address: "",
+            gender: "",
+            civilStatus: "",
+            birthplace: "",
+            birthday: "",
+            age: "",
+            precinctnumber: "",
+            requestorFname: fullName,
+            requestorMrMs: mrms,
+          }));
+        } else {
+          //  Fill all fields for self
+          setClearanceInput((prev: any) => ({
+            ...prev,
+            fullName,
+            contact: residentData.contactNumber || "",
+            address: residentData.address || "",
+            gender: residentData.sex || "",
+            civilStatus: residentData.civilStatus || "",
+            birthplace: residentData.placeOfBirth || "",
+            birthday: residentData.dateOfBirth || "",
+            age: age.toString(),
+            precinctnumber: residentData.precinctNumber || "",
+            requestorFname: fullName,
+            requestorMrMs: mrms,
+          }));
+        }
+  
+      } else {
+        //  Fallback for Unverified accounts
+        const gender = userData.sex;
+        const mrms = gender === "male" ? "Mr." : "Ms.";
+        const fullName = `${userData.first_name} ${userData.middle_name} ${userData.last_name}`;
+  
+        setClearanceInput((prev: any) => ({
+          ...prev,
+          fullName,
+          contact: userData.phone || "",
+          address: userData.address || "",
+          gender: userData.sex || "",
+          requestorFname: fullName,
+          requestorMrMs: mrms,
+        }));
+      }
+    };
+  
     fetchUserData();
-  }, [user, clearanceInput.purpose]); // 🔁 Added purpose to dependency array
+  }, [user, clearanceInput.purpose, requestMode, clearanceInput.dateofdeath]);
+  
+  
+
   
   
   
@@ -706,6 +781,36 @@ const handleFileChange = (
       <div className="form-content">
         <h1 className="form-title">
         {docType} Request Form
+
+        {userData?.status === "Verified" &&
+          userData?.residentId &&
+          !["Estate Tax", "Death Residency"].includes(clearanceInput.purpose) && (
+            <div className="form-group">
+              <label className="form-label">Who is this request for?<span className="required">*</span></label>
+              <div className="radio-group">
+                <label>
+                  <input
+                    type="radio"
+                    value="For Myself"
+                    checked={requestMode === "For Myself"}
+                    onChange={(e) => setRequestMode(e.target.value)}
+                  />
+                  For Myself
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="For Someone Else"
+                    checked={requestMode === "For Someone Else"}
+                    onChange={(e) => setRequestMode(e.target.value)}
+                  />
+                  For Someone Else
+                </label>
+              </div>
+            </div>
+          )}
+
+
         </h1>
 
         <hr/>
@@ -838,6 +943,7 @@ const handleFileChange = (
                 placeholder="Enter Full Name" 
                 value={clearanceInput.fullName}
                 onChange={handleChange}
+                readOnly={isReadOnly}
               />
             </div>
 
@@ -1151,7 +1257,9 @@ const handleFileChange = (
                 required 
                 value={clearanceInput.address}
                 onChange={handleChange}
-                placeholder="Enter Home/Office Address"  
+                placeholder="Enter Home/Office Address" 
+                readOnly={isReadOnly}
+ 
               />
             </div>
             </>
@@ -1184,6 +1292,8 @@ const handleFileChange = (
                 className="form-input"  
                 required 
                 placeholder={`Enter ${addOn}Address`}
+                readOnly={isReadOnly}
+
               />
             </div>
             {clearanceInput.purpose === "No Income" && (
@@ -1205,7 +1315,7 @@ const handleFileChange = (
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="noIncomeChildFName" className="form-label">Son/Daugther's Name<span className="required">*</span></label>
+                  <label htmlFor="noIncomeChildFName" className="form-label">Son/Daughter's Name<span className="required">*</span></label>
                     <input 
                       type="text"  
                       id="noIncomeChildFName"  
@@ -1409,6 +1519,8 @@ const handleFileChange = (
                 onChange={handleChange}
                 required 
                 max={getLocalDateString(new Date())}
+                readOnly={isReadOnly}
+
               />
             </div>
             
@@ -1469,6 +1581,8 @@ const handleFileChange = (
                   onChange={handleChange}
                   required 
                   placeholder="Enter Birthplace" 
+                  readOnly={isReadOnly}
+
                 />
               </div>
             )}
@@ -1584,6 +1698,7 @@ const handleFileChange = (
                 name="gender" 
                 className="form-input" 
                 required
+                disabled = {isReadOnly}
                 value={clearanceInput.gender}
                 onChange={handleChange}
                >
@@ -1712,6 +1827,8 @@ const handleFileChange = (
                 required
                 value={clearanceInput.civilStatus}
                 onChange={handleChange}
+                disabled={isReadOnly}
+
   
               >
                 <option value="" disabled>Select Civil Status</option>
@@ -1860,17 +1977,32 @@ const handleFileChange = (
             ):(docType === "Temporary Business Permit" || docType === "Business Permit") ? (<></>)
             : docType === "Construction Permit" ? (<></>) : (
               <div className="form-group">
-                <label htmlFor="citizenship" className="form-label">Citizenship<span className="required">*</span></label>
+                <label htmlFor="citizenship" className="form-label">
+                  Citizenship<span className="required">*</span>
+                </label>
                 <select
                   id="citizenship"
                   name="citizenship"
                   className="form-input"
                   value={
-                    ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(clearanceInput.citizenship)
-                      ? clearanceInput.citizenship
+                    ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(clearanceInput.citizenship.split("(")[0])
+                      ? clearanceInput.citizenship.split("(")[0]
                       : ""
                   }
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    if (selected === "Dual Citizen" || selected === "Others") {
+                      setClearanceInput((prev: any) => ({
+                        ...prev,
+                        citizenship: selected,
+                      }));
+                    } else {
+                      setClearanceInput((prev: any) => ({
+                        ...prev,
+                        citizenship: selected,
+                      }));
+                    }
+                  }}
                   required
                 >
                   <option value="" disabled>Select Citizenship</option>
@@ -1880,11 +2012,32 @@ const handleFileChange = (
                   <option value="Others">Others</option>
                 </select>
 
+                {/* Input field for Dual Citizen */}
+                {clearanceInput.citizenship === "Dual Citizen" && (
+                  <input
+                    type="text"
+                    className="form-input-others"
+                    placeholder="Specify other citizenship (e.g., American)"
+                    value={
+                      clearanceInput.citizenship.includes("(")
+                        ? clearanceInput.citizenship.split("(")[1].replace(")", "")
+                        : ""
+                    }
+                    onChange={(e) => {
+                      const second = e.target.value.trim();
+                      setClearanceInput((prev: any) => ({
+                        ...prev,
+                        citizenship: second ? `Dual Citizen(${second})` : "Dual Citizen",
+                      }));
+                    }}
+                    required
+                  />
+                )}
+
+                {/* Input field for Others */}
                 {clearanceInput.citizenship === "Others" && (
                   <input
                     type="text"
-                    id="citizenship"
-                    name="citizenship"
                     className="form-input-others"
                     placeholder="Please specify your citizenship"
                     value={
@@ -1902,6 +2055,7 @@ const handleFileChange = (
                   />
                 )}
               </div>
+
             )}
           
 
@@ -2655,61 +2809,60 @@ const handleFileChange = (
             <h1 className="form-label-description">(for residents with no Barangay ID)</h1>
 
             <div className="file-upload-container">
-              <label htmlFor="file-upload3"  className="upload-link">Click to Upload File</label>
-                <input
-                  id="file-upload3"
-                  type="file"
-                  accept=".jpg,.jpeg,.png"
-                  required = {(docType === "Temporary Business Permit" || docType === "Business Permit")}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleFileChange(e,setFiles3, 'validIDjpg');
-                  }} // Handle file selection
-                  style={{ display: "none" }}
-                />
+              {/* Only show upload button if no uploaded file exists */}
+              {!userData?.upload && (
+                <>
+                  <label htmlFor="file-upload3" className="upload-link">Click to Upload File</label>
+                  <input
+                    id="file-upload3"
+                    type="file"
+                    accept=".jpg,.jpeg,.png"
+                    required={(docType === "Temporary Business Permit" || docType === "Business Permit")}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleFileChange(e, setFiles3, 'validIDjpg');
+                    }}
+                    style={{ display: "none" }}
+                  />
+                </>
+              )}
 
-              <div className="uploadedFiles-container">
-                {/* Display the file names with image previews */}
-                {files3.length > 0 && (
-                  <div className="file-name-image-display">
-                    <ul>
-                      {files3.map((file, index) => (
-                        <div className="file-name-image-display-indiv" key={index}>
-                          <li> 
-                              {/* Display the image preview */}
-                              {file.preview && (
-                                <div className="filename&image-container">
-                                  <img
-                                    src={file.preview}
-                                    alt={file.name}
-                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                  />
-                                </div>
-                                )}
-                              {file.name}  
+              {/* Always show file preview if exists */}
+              {files3.length > 0 && (
+                <div className="file-name-image-display">
+                  <ul>
+                    {files3.map((file, index) => (
+                      <div className="file-name-image-display-indiv" key={index}>
+                        <li>
+                          <div className="filename&image-container">
+                            <img
+                              src={file.preview}
+                              alt={file.name}
+                              style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                            />
+                          </div>
+                          {file.name}
+
+                          {!userData?.upload && (
                             <div className="delete-container">
-                              {/* Delete button with image */}
                               <button
-                                  type="button"
-                                  onClick={() => handleFileDelete('file-upload3', setFiles3)}
-                                  className="delete-button"
-                                >
-                                  <img
-                                    src="/images/trash.png"  
-                                    alt="Delete"
-                                    className="delete-icon"
-                                  />
-                                </button>
-
+                                type="button"
+                                onClick={() => handleFileDelete('file-upload3', setFiles3)}
+                                className="delete-button"
+                              >
+                                <img
+                                  src="/images/trash.png"
+                                  alt="Delete"
+                                  className="delete-icon"
+                                />
+                              </button>
                             </div>
-                                        
-                              
-                          </li>
-                        </div>
-                      ))}  
-                    </ul>
-                  </div>
-                )}
-              </div>
+                          )}
+                        </li>
+                      </div>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </>
