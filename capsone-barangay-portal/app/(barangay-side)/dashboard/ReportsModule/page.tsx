@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef} from "react";
 import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject, listAll } from "firebase/storage";
 import { getFirestore, collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import ExcelJS from 'exceljs';
@@ -4108,6 +4108,7 @@ const ReportsPage = () => {
   };
 
   const router = useRouter();
+  const hasInitialized = useRef(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatingMessage, setGeneratingMessage] = useState("");
   const [showSuccessGenerateReportPopup, setShowSuccessGenerateReportPopup] = useState(false);
@@ -4136,7 +4137,12 @@ const ReportsPage = () => {
 
 
   useEffect(() => {
-    if (session?.user?.role === "Barangay Official") {
+    // Wait until session.user is available
+    if (!session?.user || hasInitialized.current) return;
+  
+    hasInitialized.current = true;
+  
+    if (session.user.role === "Barangay Official") {
       const position = session.user.position;
   
       if (["Secretary", "Assistant Secretary", "Punong Barangay"].includes(position)) {
