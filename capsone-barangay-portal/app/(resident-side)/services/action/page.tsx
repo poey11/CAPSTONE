@@ -234,18 +234,9 @@ export default function Action() {
 
   const [requestMode, setRequestMode] = useState("For Myself");
   const [userData, setUserData] = useState<any>(null);
-  const isReadOnly = requestMode === "For Myself";
 
- 
-  const fetchAndCloneFile = async (url: string, newFilename: string): Promise<File> => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-  
-    // Create a new File with the desired filename
-    const file = new File([blob], newFilename, { type: blob.type });
-    return file;
-  };
-
+  const isVerified = userData?.status === "Verified";
+  const isReadOnly = requestMode === "For Myself" && isVerified;
   useEffect(() => {
     const fetchAndCloneFile = async (url: string, newFilename: string): Promise<File> => {
       const response = await fetch(url);
@@ -253,6 +244,9 @@ export default function Action() {
       const blob = await response.blob();
       return new File([blob], newFilename, { type: blob.type });
     };
+
+
+    // for users that are verified and have an existing upload for verification
   
     const cloneUploadIfExists = async () => {
       if (
@@ -295,6 +289,10 @@ export default function Action() {
   }, [userData, user]);
   
 
+
+
+  // will get user data if for myself, otherwise will set to null
+  // user data will be based on info in their resident records
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user) return;
@@ -1317,7 +1315,7 @@ const handleFileChange = (
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="noIncomeChildFName" className="form-label">Son/Daugther's Name<span className="required">*</span></label>
+                  <label htmlFor="noIncomeChildFName" className="form-label">Son/Daughter's Name<span className="required">*</span></label>
                     <input 
                       type="text"  
                       id="noIncomeChildFName"  
