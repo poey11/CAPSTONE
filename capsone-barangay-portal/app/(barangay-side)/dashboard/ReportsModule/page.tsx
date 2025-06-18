@@ -1,11 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef} from "react";
 import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject, listAll } from "firebase/storage";
 import { getFirestore, collection, query, where, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 
 interface FileData {
@@ -129,6 +130,7 @@ const ReportsPage = () => {
 
   const generateKasambahayReport = async () => {
     setLoadingKasambahay(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -334,13 +336,23 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Kasambahay Masterlist Report generated successfully. Please wait for the downloadable file!");
-  
+      /*alert("Kasambahay Masterlist Report generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Kasambahay Masterlist Report...");
+
       // Return file URL for conversion
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Unexpected error:", error);
-      alert("Failed to generate Kasambahay Masterlist Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Kasambahay Masterlist Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Kasambahay Masterlist Report.");*/
     } finally {
       setLoadingKasambahay(false);
     }
@@ -353,7 +365,19 @@ const ReportsPage = () => {
   
     try {
       const fileUrl = await generateKasambahayReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -369,9 +393,24 @@ const ReportsPage = () => {
       const currentMonthYear = currentDate.toLocaleString("en-US", { month: "long", year: "numeric" }).toUpperCase();
       saveAs(blob, `Kasambahay_Masterlist_${currentMonthYear}.pdf`);
   
-      alert("Kasambahay Report successfully converted to PDF!");
+      /*alert("Kasambahay Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Kasambahay Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Kasambahay Report PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
       alert("Failed to generate PDF.");
     } finally {
       setLoadingKasambahay(false);
@@ -382,6 +421,7 @@ const ReportsPage = () => {
   
   const generateFirstTimeJobSeekerReport = async () => {
     setLoadingJobSeeker(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -485,13 +525,23 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("First-Time Job Seeker Report generated successfully. Please wait for the downloadable file!");
-  
+      /*alert("First-Time Job Seeker Report generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating First-Time Job Seeker Report...");
+
       // Return file URL for conversion
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating report:", error);
-      alert("Failed to generate First-Time Job Seeker Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate First-Time Job Seeker Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate First-Time Job Seeker Report.");*/
     } finally {
       setLoadingJobSeeker(false);
     }
@@ -501,7 +551,19 @@ const ReportsPage = () => {
     setLoadingJobSeeker(true);
     try {
       const fileUrl = await generateFirstTimeJobSeekerReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -519,10 +581,25 @@ const ReportsPage = () => {
       const currentMonthYear = currentDate.toLocaleString("en-US", { month: "long", year: "numeric" }).toUpperCase();
       saveAs(blob, `FirstTimeJobSeekers_${currentMonthYear}.pdf`);
   
-      alert("First-Time Job Seeker Report successfully converted to PDF!");
+      /*alert("First-Time Job Seeker Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("First-Time Job Seeker Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate First-Time Job Seeker Report PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingJobSeeker(false);
     }
@@ -533,6 +610,8 @@ const ReportsPage = () => {
 
   const generateSeniorCitizenReport = async () => {
     setLoadingResidentSeniorDemographic(true);
+    setIsGenerating(true);
+    
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -711,12 +790,22 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      alert("Senior Citizen Report generated successfully. Please wait for the downloadable file!");
-  
+      /*alert("Senior Citizen Report generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Senior Citizen Report...")
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating senior citizen report:", error);
-      alert("Failed to generate Senior Citizen Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Senior Citizen Report.");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+
+      /*alert("Failed to generate Senior Citizen Report.");*/
     } finally {
       setLoadingResidentSeniorDemographic(false);
     }
@@ -726,7 +815,19 @@ const ReportsPage = () => {
     setLoadingResidentSeniorDemographic(true);
     try {
       const fileUrl = await generateSeniorCitizenReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -741,10 +842,26 @@ const ReportsPage = () => {
       const year = currentDate.getFullYear();
       saveAs(blob, `Senior_Citizen_Report_${year}.pdf`);
   
-      alert("Senior Citizen Report successfully converted to PDF!");
+      /*alert("Senior Citizen Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Senior Citizen Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Senior Citizen Report PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+    }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingResidentSeniorDemographic(false);
     }
@@ -752,6 +869,7 @@ const ReportsPage = () => {
   
   const generateStudentDemographicReport = async () => {
     setLoadingResidentStudentDemographic(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -936,11 +1054,21 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      alert("Student Demographic Report generated successfully. Please wait for the downloadable file!");
+      /*alert("Student Demographic Report generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Student Demographic Report...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating Student report:", error);
-      alert("Failed to generate Student Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Student Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Student Report.");*/
     } finally {
       setLoadingResidentStudentDemographic(false);
     }
@@ -952,7 +1080,19 @@ const ReportsPage = () => {
     setLoadingResidentStudentDemographic(true);
     try {
       const fileUrl = await generateStudentDemographicReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -967,10 +1107,25 @@ const ReportsPage = () => {
       const year = currentDate.getFullYear();
       saveAs(blob, `Student_Demographic_Report_${year}.pdf`);
   
-      alert("Student Demographic Report successfully converted to PDF!");
+      /*alert("Student Demographic Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Student Demographic Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate Student PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Student PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Student PDF.");*/
     } finally {
       setLoadingResidentStudentDemographic(false);
     }
@@ -978,6 +1133,7 @@ const ReportsPage = () => {
   
   const generatePwdReport = async () => {
     setLoadingResidentPWDDemographic(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -1144,11 +1300,21 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      alert("PWD Demographic Report generated successfully. Please wait for the downloadable file!");
+      /*alert("PWD Demographic Report generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating PWD Demographic Report...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating Student report:", error);
-      alert("Failed to generate PWD Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate PWD Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PWD Report.");*/
     } finally {
       setLoadingResidentPWDDemographic(false);
     }
@@ -1173,10 +1339,25 @@ const ReportsPage = () => {
       const year = new Date().getFullYear();
       saveAs(blob, `PWD_Demographic_Report_${year}.pdf`);
   
-      alert("PWD Report successfully converted to PDF!");
+      /*alert("PWD Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("PWD Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error generating PWD PDF:", error);
-      alert("Failed to generate PWD PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate PWD Report PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PWD PDF.");*/
     } finally {
       setLoadingResidentPWDDemographic(false);
     }
@@ -1184,6 +1365,7 @@ const ReportsPage = () => {
   
   const generateSoloParentReport = async () => {
     setLoadingResidentSoloParentDemographic(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -1368,11 +1550,20 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      alert("Solo Parent Demographic Report generated successfully. Please wait for the downloadable file!");
+      /*alert("Solo Parent Demographic Report generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Solo Parent Demographic Report...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating Solo Parent report:", error);
-      alert("Failed to generate Solo Parent Report.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Solo Parent Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Solo Parent Report.");*/
     } finally {
       setLoadingResidentSoloParentDemographic(false);
     }
@@ -1397,10 +1588,25 @@ const ReportsPage = () => {
       const year = new Date().getFullYear();
       saveAs(blob, `Solo_Parent_Demographic_Report_${year}.pdf`);
   
-      alert("Solo Parent Report successfully converted to PDF!");
+      /*alert("Solo Parent Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Solo Parent Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error generating Solo Parent PDF:", error);
-      alert("Failed to generate Solo Parent PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Solo Parent PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Solo Parent PDF.");*/
     } finally {
       setLoadingResidentSoloParentDemographic(false);
     }
@@ -1411,6 +1617,7 @@ const ReportsPage = () => {
 
   const generateResidentRegistrationSummary = async () => {
     setLoadingRegistrationSummary(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -1579,11 +1786,21 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      alert("Resident Registration Summary generated successfully. Please wait for the downloadable file!");
+      /*alert("Resident Registration Summary generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Resident Registration Summary...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+      
       console.error("Error generating Resident Registration Summary:", error);
-      alert("Failed to generate Resident Registration Summary.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Resident Registration Summary");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Resident Registration Summary.");*/
     } finally {
       setLoadingRegistrationSummary(false);
     }
@@ -1593,7 +1810,19 @@ const ReportsPage = () => {
     setLoadingRegistrationSummary(true);
     try {
       const fileUrl = await generateResidentRegistrationSummary();
-      if (!fileUrl) return alert("Failed to generate Excel summary report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel summary report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel summary report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -1611,10 +1840,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `Resident_Registration_Summary_${month}_${year}.pdf`);
   
-      alert("Resident Registration Summary successfully converted to PDF!");
+      /*alert("Resident Registration Summary successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Resident Registration Summary generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Resident Registration Summary PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingRegistrationSummary(false);
     }
@@ -1623,6 +1867,7 @@ const ReportsPage = () => {
 
   const generateResidentListReport = async () => {
     setLoadingMasterResident(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -1790,12 +2035,20 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Resident Masterlist generated successfully. Please wait for the downloadable file!");
-  
+      /*alert("Resident Masterlist generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Resident Masterlist...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating report:", error);
-      alert("Failed to generate Resident Masterlist Report.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Resident Masterlist Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Resident Masterlist Report.");*/
     } finally {
       setLoadingMasterResident(false);
     }
@@ -1806,8 +2059,20 @@ const ReportsPage = () => {
     setLoadingMasterResident(true);
     try {
       const fileUrl = await generateResidentListReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
   
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
+
       const response = await fetch("/api/convertPDF", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1824,10 +2089,24 @@ const ReportsPage = () => {
       const year = currentDate.getFullYear();
       saveAs(blob, `Inhabitant_Record_${year}.pdf`);
   
-      alert("Resident Masterlist Report successfully converted to PDF!");
+      /*alert("Resident Masterlist Report successfully converted to PDF!");*/
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Resident Masterlist Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Resident Masterlist Report PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingMasterResident(false);
     }
@@ -1837,6 +2116,7 @@ const ReportsPage = () => {
   // east fairview
   const generateEastResidentListReport = async () => {
     setLoadingEastResident(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -2057,11 +2337,23 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Resident List for East Fairview generated successfully. Please wait for the downloadable file!");
+      /*alert("Resident List for East Fairview generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Resident List for East Fairview...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating report:", error);
-      alert("Failed to generate East Fairview Resident Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate East Fairview Resident Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate East Fairview Resident Report.");*/
+
+
     } finally {
       setLoadingEastResident(false);
     }
@@ -2072,8 +2364,19 @@ const ReportsPage = () => {
     setLoadingEastResident(true);
     try {
       const fileUrl = await generateEastResidentListReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
   
+      if (!fileUrl) {
+        setIsGenerating(false); 
+
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
       const response = await fetch("/api/convertPDF", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2088,10 +2391,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `Inhabitant_Record_EastFairview_${year}.pdf`);
   
-      alert("Resident Report (East Fairview) successfully converted to PDF!");
+      /*alert("Resident Report (East Fairview) successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Resident Report (East Fairview) generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Resident Report (East Fairview) PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
     setLoadingEastResident(false);
     }
@@ -2099,6 +2417,7 @@ const ReportsPage = () => {
 
   const generateWestResidentListReport = async () => {
     setLoadingWestResident(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -2332,12 +2651,21 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Resident List for West Fairview generated successfully. Please wait for the downloadable file!");
-  
+      /*alert("Resident List for West Fairview generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Resident List for West Fairview...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating report:", error);
-      alert("Failed to generate West Fairview Resident Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate West Fairview Resident Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate West Fairview Resident Report.");*/
     } finally {
       setLoadingWestResident(false);
     }
@@ -2376,6 +2704,7 @@ const ReportsPage = () => {
 
   const generateSouthResidentListReport = async () => {
     setLoadingSouthResident(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -2586,12 +2915,21 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Resident List for South Fairview generated successfully. Please wait for the downloadable file!");
-  
+      /*alert("Resident List for South Fairview generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Resident List for South Fairview...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating report:", error);
-      alert("Failed to generate South Fairview Resident Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate South Fairview Resident Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate South Fairview Resident Report.");*/
     } finally {
       setLoadingSouthResident(false);
     }
@@ -2602,7 +2940,19 @@ const ReportsPage = () => {
     setLoadingSouthResident(true);
     try {
       const fileUrl = await generateSouthResidentListReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -2618,10 +2968,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `Inhabitant_Record_SouthFairview_${year}.pdf`);
   
-      alert("Resident Report (South Fairview) successfully converted to PDF!");
+      /*alert("Resident Report (South Fairview) successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Resident Report (South Fairview) generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingSouthResident(false);
     }
@@ -2634,6 +2999,7 @@ const ReportsPage = () => {
 
   const generateIncidentSummaryReport = async () => {
     setLoadingIncidentSummary(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -2853,11 +3219,22 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      alert("Incident Report generated successfully. Please wait for the downloadable file!");
+      /*alert("Incident Report generated successfully. Please wait for the downloadable file!");*/
+
+      setGeneratingMessage("Generating All Incidents Summary Report...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating report:", error);
-      alert("Failed to generate Incident Report.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate All Incidents Summary Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+
+      /*alert("Failed to generate Incident Report.");*/
     } finally {
       setLoadingIncidentSummary(false);
     }
@@ -2868,7 +3245,19 @@ const ReportsPage = () => {
     setLoadingIncidentSummary(true);
     try {
       const fileUrl = await generateIncidentSummaryReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -2884,10 +3273,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `Incident_Summary_Report${year}.pdf`);
   
-      alert("Incident Summary Report successfully converted to PDF!");
+      /*alert("Incident Summary Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("All Incidents Summary Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingIncidentSummary(false);
     }
@@ -2898,6 +3302,7 @@ const ReportsPage = () => {
 
   const generateVAWCReport = async () => {
     setLoadingVAWCReport(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -3012,11 +3417,21 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("VAWC Report generated successfully! Please wait for the downloadable file!");
+      /*alert("VAWC Report generated successfully! Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating VAWC Report...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating VAWC report:", error);
-      alert("Failed to generate VAWC Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate VAWC Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate VAWC Report.");*/
     } finally {
       setLoadingVAWCReport(false);
     }
@@ -3027,7 +3442,19 @@ const ReportsPage = () => {
     setLoadingVAWCReport(true);
     try {
       const fileUrl = await generateVAWCReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -3043,10 +3470,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `VAWC_Report_${year}.pdf`);
   
-      alert("VAWC Report successfully converted to PDF!");
+      /*alert("VAWC Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("VAWC Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate VAWC Report PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingVAWCReport(false);
     }
@@ -3056,6 +3498,7 @@ const ReportsPage = () => {
 
   const generateLuponSettledReport = async () => {
     setLoadingLuponSettledReport(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -3176,11 +3619,21 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Lupon Settled Report generated successfully! Please wait for the downloadable file!");
+      /*alert("Lupon Settled Report generated successfully! Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Lupon Settled Report...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating Lupon Settled report:", error);
-      alert("Failed to generate Lupon Settled Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Lupon Settled Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Lupon Settled Report.");*/
     } finally {
       setLoadingLuponSettledReport(false);
     }
@@ -3191,7 +3644,19 @@ const ReportsPage = () => {
     setLoadingLuponSettledReport(true);
     try {
       const fileUrl = await generateLuponSettledReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -3207,10 +3672,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `Lupon_Settled_Report_${year}.pdf`);
   
-      alert("Lupon Settled Report successfully converted to PDF!");
+      /*alert("Lupon Settled Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Lupon Settled Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Lupon Settled Report PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingLuponSettledReport(false);
     }
@@ -3221,6 +3701,7 @@ const ReportsPage = () => {
 
   const generateLuponPendingReport = async () => {
     setLoadingLuponPendingReport(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -3340,11 +3821,21 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Lupon Pending Report generated successfully! Please wait for the downloadable file!");
+      /*alert("Lupon Pending Report generated successfully! Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Lupon Pending Report...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating Lupon Pending report:", error);
-      alert("Failed to generate Lupon Pending Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Lupon Pending Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Lupon Pending Report.");*/
     } finally {
       setLoadingLuponPendingReport(false);
     }
@@ -3355,7 +3846,19 @@ const ReportsPage = () => {
     setLoadingLuponPendingReport(true);
     try {
       const fileUrl = await generateLuponPendingReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -3371,10 +3874,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `Lupon_Pending_Report_${year}.pdf`);
   
-      alert("Lupon Pending Report successfully converted to PDF!");
+      /*alert("Lupon Pending Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Lupon Pending Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Lupon Pending Report PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingLuponPendingReport(false);
     }
@@ -3386,6 +3904,7 @@ const ReportsPage = () => {
 
   const generateIncidentStatusSummaryReport = async () => {
     setLoadingIncidentStatuses(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const monthYear = currentDate.toLocaleDateString("en-US", {
@@ -3486,11 +4005,22 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Incident Summary Report generated successfully. Please wait for the downloadable file!");
+      /*alert("Incident Summary Report generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Incident Summary Report...");
       return fileUrl;
     } catch (error) {
       console.error("Error generating incident summary report:", error);
-      alert("Failed to generate Incident Summary Report.");
+      setIsGenerating(false);
+
+      console.error("Error generating report:", error);
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate East Fairview Resident Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Incident Summary Report.");*/
     } finally {
       setLoadingIncidentStatuses(false);
     }
@@ -3500,8 +4030,20 @@ const ReportsPage = () => {
     setLoadingIncidentStatuses(true);
     try {
       const fileUrl = await generateIncidentStatusSummaryReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
   
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
+
       const response = await fetch("/api/convertPDF", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -3519,10 +4061,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `Incident_Status_Summary_Report_${monthYear.replace(" ", "_")}.pdf`);
   
-      alert("Incident Summary Report successfully converted to PDF!");
+      /*alert("Incident Summary Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Incident Summary Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate Incident Summary PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Incident Summary PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Incident Summary PDF.");*/
     } finally {
       setLoadingIncidentStatuses(false);
     }
@@ -3550,8 +4107,440 @@ const ReportsPage = () => {
     }, 3000);
   };
 
+  const router = useRouter();
+  const hasInitialized = useRef(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingMessage, setGeneratingMessage] = useState("");
+  const [showSuccessGenerateReportPopup, setShowSuccessGenerateReportPopup] = useState(false);
+  const [popupSuccessGenerateReportMessage, setPopupSuccessGenerateReportMessage] = useState("");
+  const [showErrorGenerateReportPopup, setShowErrorGenerateReportPopup] = useState(false);
+  const [popupErrorGenerateReportMessage, setPopupErrorGenerateReportMessage] = useState("");
+  const [activeSection, setActiveSection] = useState("generate");
+  const [currentPage, setCurrentPage] = useState(1);
+  const moduleTotalPages: { [key: string]: number } = {
+    "Resident Module": 2,
+    "Incident Module": 1,
+    "Services Module": 1,
+    "Programs Module": 1,
+  };
+  
+  const totalPages = selectedModule ? moduleTotalPages[selectedModule] || 1 : 1;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedModule]);
+  
+
+  const handleBack = () => {
+    router.back();
+  };
+
+
+  useEffect(() => {
+    // Wait until session.user is available
+    if (!session?.user || hasInitialized.current) return;
+  
+    hasInitialized.current = true;
+  
+    if (session.user.role === "Barangay Official") {
+      const position = session.user.position;
+  
+      if (["Secretary", "Assistant Secretary", "Punong Barangay"].includes(position)) {
+        setSelectedModule("Resident Module");
+      } else if (position === "LF Staff") {
+        setSelectedModule("Incident Module");
+      } else if (position === "Admin Staff") {
+        setSelectedModule("Services Module");
+      }
+    }
+  }, [session?.user]);
+
+
+ 
+
   return (
-    <div className="report-main-container">
+    <div className="generatereport-main-container">
+
+      {/* NEW*/}
+      <div className="generatereport-redirectionpage-section">
+        <button 
+          className={`generatereport-redirection-buttons ${activeSection === "generate" ? "active" : ""}`}
+          onClick={() => setActiveSection("generate")}
+        >
+          <div className="generatereport-redirection-icons-section">
+            <img src="/images/report.png" alt="user info" className="redirection-icons-generatereport"/> 
+          </div>
+          <h1>Generate Report</h1>
+        </button>
+
+        <button 
+          className={`generatereport-redirection-buttons ${activeSection === "download" ? "active" : ""}`}
+          onClick={() => setActiveSection("download")}
+        >
+          <div className="generatereport-redirection-icons-section">
+            <img src="/images/form.png" alt="user info" className="redirection-icons-generatereport"/> 
+          </div>
+          <h1>Download Form</h1>
+        </button>
+
+      </div>
+
+
+    {activeSection === "generate" && (
+      <>
+        <div className="generatereport-main-content">
+          <div className="generatereport-main-section1">
+            <div className="generatereport-main-section1-left">
+              <button onClick={handleBack}>
+                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+              </button>
+              <h1> Generate Report </h1>
+            </div>
+          </div>
+
+          <div className="generatereport-header-body">
+            <div className="generatereport-header-body-top-section">
+              <div className="moduleDropdown-container">
+              <select
+                className="moduleDropdown"
+                title="Select a Module"
+                onChange={handleModuleChange}
+                value={selectedModule}
+                required
+              >
+                  <option value="">Select Module</option>
+                      {session?.user?.role === "Barangay Official" &&
+                        (
+                          session?.user?.position === "Secretary" ||
+                          session?.user?.position === "Assistant Secretary" ||
+                          session?.user?.position === "Punong Barangay"
+                        ) && (
+                          <option value="Resident Module">Resident Module</option>
+                      )}
+
+                      {session?.user?.role === "Barangay Official" &&
+                        (
+                          session?.user?.position === "LF Staff" ||
+                          session?.user?.position === "Assistant Secretary" ||
+                          session?.user?.position === "Secretary" ||
+                          session?.user?.position === "Punong Barangay"
+                        ) && (
+                          <option value="Incident Module">Incident Module</option>
+                      )}
+
+                      {session?.user?.role === "Barangay Official" &&
+                        (
+                          session?.user?.position === "Secretary" ||
+                          session?.user?.position === "Punong Barangay" ||
+                          session?.user?.position === "Assistant Secretary" ||
+                          session?.user?.position === "Admin Staff"
+                        ) && (
+                          <option value="Services Module">Services Module</option>
+                      )}
+                      {session?.user?.role === "Barangay Official" && (
+                          <option value="Programs Module">Programs Module</option>
+                      )}
+                </select>
+              </div>
+            </div>
+
+            <div className="generatereport-header-body-bottom-section">
+
+            {selectedModule && (
+              <div className="generatereport-button-redirection-container">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  <img src="/Images/back.png" className="redirection-reports-button" />
+                </button>
+
+              </div>
+            )}
+
+              <div className="generatereport-main-reports-section">
+              {selectedModule === "Resident Module" && (
+                <>
+                  {currentPage === 1 && (
+                    <div className="report-grid">
+                      <button onClick={handleRegistrationSummaryPDF} disabled={loadingRegistrationSummary} className="report-tile">
+                      <img src="/images/regresident.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingRegistrationSummary ? "Generating..." : "Resident Registration Summary Report"}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateSeniorPDF} disabled={loadingResidentSeniorDemographic} className="report-tile">
+                        <img src="/images/senior.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingResidentSeniorDemographic ? (
+                            "Generating..."
+                          ) : (
+                            <>
+                              Resident Demographic Report <br/> (Senior Citizens)
+                            </>
+                          )}
+                          
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateStudentPDF} disabled={loadingResidentStudentDemographic} className="report-tile">
+                        <img src="/images/students.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingResidentStudentDemographic ? (
+                            "Generating..."
+                          ) : (
+                            <>
+                              Resident Demographic Report <br/> (Students/Minors)
+                            </>
+                          )}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGeneratePwdPDF} disabled={loadingResidentPWDDemographic} className="report-tile">
+                        <img src="/images/disabled.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingResidentPWDDemographic ? (
+                            "Generating..."
+                          ) : (
+                            <>
+                              Resident Demographic Report <br/> (PWD)
+                            </>
+                          )}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateSoloParentPDF} disabled={loadingResidentSoloParentDemographic} className="report-tile">
+                        <img src="/images/soloparent.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingResidentSoloParentDemographic ? (
+                            "Generating..."
+                          ) : (
+                            <>
+                              Resident Demographic Report<br /> (Solo Parents)
+                            </>
+                          )}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateResidentPDF} disabled={loadingMasterResident} className="report-tile">
+                        <img src="/images/form.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingMasterResident ? "Generating..." : "Masterlist Resident Inhabitant Record"}
+                        </p>
+                      </button>
+                    </div>
+                  )}
+
+                  {currentPage === 2 && (
+                    <div className="report-grid">
+                      <button onClick={handleGenerateEastResidentPDF} disabled={loadingEastResident} className="report-tile">
+                        <img src="/images/east.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                        {loadingEastResident ? (
+                          "Generating..."
+                        ) : (
+                          <>
+                            Resident Inhabitant Record<br />
+                            (East Fairview)
+                          </>
+                        )}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateWestResidentPDF} disabled={loadingWestResident} className="report-tile">
+                        <img src="/images/west.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingWestResident ? (
+                            "Generating..."
+                          ) : (
+                            <>
+                              Resident Inhabitant Record<br />
+                              (West Fairview)
+                            </>
+                          )}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateSouthResidentPDF} disabled={loadingSouthResident} className="report-tile">
+                        <img src="/images/south.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingSouthResident ? (
+                            "Generating..."
+                          ) : (
+                            <>
+                              Resident Inhabitant Record<br />
+                              (South Fairview)
+                            </>
+                          )}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateKasambahayPDF} disabled={loadingKasambahay} className="report-tile">
+                        <img src="/images/form.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingKasambahay ? "Generating..." : "Kasambahay Masterlist"}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateJobSeekerPDF} disabled={loadingJobSeeker} className="report-tile">
+                        <img src="/images/jobseeker.png" alt="user info" className="report-icon-bigger"/> 
+                        <p className="report-title">
+                          {loadingJobSeeker ? "Generating..." : "First-Time Job Seeker List"}
+                        </p>
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {selectedModule === "Incident Module" && (
+                <>
+                  {currentPage === 1 && (
+                    <div className="report-grid">
+                      <button onClick={handleGenerateIncidentSummaryPDF} disabled={loadingIncidentSummary} className="report-tile">
+                        <img src="/images/incident.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                        {loadingIncidentSummary ? "Generating..." : "All Incidents Summary"}
+                        </p>
+                      </button>
+
+                      <button onClick={handleGenerateIncidentStatusSummaryPDF} disabled={loadingIncidentStatuses} className="report-tile">
+                        <img src="/images/incidentstatus.png" alt="user info" className="report-icon"/> 
+                        <p className="report-title">
+                          {loadingIncidentStatuses ? "Generating..." : "Incident Status Summary"}
+                        </p>
+                      </button>
+
+                      {(session?.user?.department === "Lupon" || session?.user?.position === "Assistant Secretary") && (
+                        <>
+                          <button onClick={handleGenerateLuponSettledPDF} disabled={loadingLuponSettledReport} className="report-tile">
+                            <img src="/images/incidentsettled.png" alt="user info" className="report-icon-bigger"/> 
+                            <p className="report-title">
+                              {loadingLuponSettledReport ? "Generating..." : "Lupon Settled Report"}
+                            </p>
+                          </button>
+
+                          <button onClick={handleGenerateLuponPendingPDF} disabled={loadingLuponPendingReport} className="report-tile">
+                            <img src="/images/incidentpending.png" alt="user info" className="report-icon-bigger"/> 
+                            <p className="report-title">
+                              {loadingLuponPendingReport ? "Generating..." : "Lupon Pending Report"}
+                            </p>
+                          </button>
+                        </>
+                      )}
+
+                      {(session?.user?.department === "VAWC" || session?.user?.position === "Assistant Secretary") && (
+                        <>
+                          <button onClick={handleGenerateVAWCPDF} disabled={loadingVAWCReport} className="report-tile">
+                            <img src="/images/womenandchildren.png" alt="user info" className="report-icon-bigger"/> 
+                            <p className="report-title">
+                              {loadingVAWCReport ? "Generating..." : "Monthly VAWC Report"}
+                            </p>
+                          </button>
+                        </>
+                      )}
+
+                      {(session?.user?.department === "GAD" || session?.user?.department === "BCPC" || session?.user?.position === "Assistant Secretary")  && (
+                        <>
+                          <button  className="report-tile">
+                            <img src="/images/genders.png" alt="user info" className="report-icon"/> 
+                            <p className="report-title">
+                              GADRCO Quarterly Monitoring Report
+                            </p>
+                          </button>
+                        </>
+                      )}
+
+                    </div>
+                  )}
+                </>
+              )}  
+
+              {selectedModule === "Services Module" && (
+                <>
+                  {currentPage === 1 && (
+                    <div className="report-grid">
+                      <button  className="report-tile">
+                        <img src="/images/services.png" alt="user info" className="report-icon"/> 
+                          <p className="report-title">
+                            Most Requested Services Lists
+                          </p>
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {selectedModule === "Programs Module" && (
+                <>
+                  {currentPage === 1 && (
+                    <div className="report-grid">
+                      <button  className="report-tile">
+                        <img src="/images/participation.png" alt="user info" className="report-icon"/> 
+                          <p className="report-title">
+                            Program Participation Report
+                          </p>
+                      </button>
+                      <button  className="report-tile">
+                        <img src="/images/status.png" alt="user info" className="report-icon-bigger"/> 
+                          <p className="report-title">
+                            Program Completion Status Report
+                          </p>
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+                
+              </div>
+
+            {selectedModule && (
+              <div className="generatereport-button-redirection-container">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, 2))}
+                  disabled={
+                    currentPage === 2 || 
+                    selectedModule === "Incident Module" || 
+                    selectedModule === "Services Module" || 
+                    selectedModule === "Programs Module"
+                  }
+                >
+                  <img src="/Images/next.png" className="redirection-reports-button" />
+                </button>
+              </div>
+            )}
+            </div>
+
+          </div>
+        </div>
+      </>
+    )}
+
+    {activeSection === "download" && (
+      <>
+        <div className="generatereport-main-content">
+          <div className="generatereport-main-section1">
+            <div className="generatereport-main-section1-left">
+              <button onClick={handleBack}>
+                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+              </button>
+              <h1> Download Form </h1>
+            </div>
+          </div>
+
+          <div className="generatereport-header-body">
+           
+
+          </div>
+        </div>
+      </>
+    )}
+
+
+{/*
+
       <h1 className="reports-title">Reports Module</h1>
 
       <div className="reports-section">
@@ -3563,7 +4552,7 @@ const ReportsPage = () => {
               onChange={handleModuleChange}
               required
             >
-              <option value="">Select Module...</option>
+              <option value="">Select Module</option>
                   {session?.user?.role === "Barangay Official" &&
                     (
                       session?.user?.position === "Secretary" ||
@@ -3684,6 +4673,9 @@ const ReportsPage = () => {
           )}
         </div>
 
+*/}
+
+{/*
         <div className="report-card">
           <h2 className="report-title">Downloadable Forms</h2>
        
@@ -3756,6 +4748,7 @@ const ReportsPage = () => {
                               <span>{selectedUploadFile.name}</span>  
                               <div className="delete-container">
                                   {/* Delete button with image */}
+{/*}
                                   <button
                                       type="button"
                                       onClick={onDeleteFile} // Call the delete function
@@ -3790,6 +4783,8 @@ const ReportsPage = () => {
         
       </div>
 
+  */}
+
       {/* Success Pop-up */}
       {showSuccessPopup && (
         <div className={`popup-overlay show`}>
@@ -3807,6 +4802,39 @@ const ReportsPage = () => {
           </div>
         </div>
       )}
+
+      {/* Generating of Report Popup */}
+      {isGenerating && (
+        <div className="popup-backdrop">
+          <div className="popup-content">
+            <img src="/Images/loading.png" alt="loading..." className="successful-icon-popup-letter" />
+            <p>{generatingMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Success Generate Report Popup*/}
+      {showSuccessGenerateReportPopup && (
+        <div className={`popup-overlay-success-generate-report show`}>
+          <div className="popup-success-generate-report">
+            <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+            <p>{popupSuccessGenerateReportMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Success Generate Report Popup*/}
+      {showErrorGenerateReportPopup && (
+        <div className={`popup-overlay-error-generate-report show`}>
+          <div className="popup-error-generate-report">
+          <img src={ "/Images/warning-1.png"} alt="icon alert" className="icon-alert" />
+            <p>{popupErrorGenerateReportMessage}</p>
+          </div>
+        </div>
+      )}
+
+
+      
     </div>
   );
 };
