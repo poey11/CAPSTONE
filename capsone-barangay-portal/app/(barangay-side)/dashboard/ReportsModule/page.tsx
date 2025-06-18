@@ -2999,6 +2999,7 @@ const ReportsPage = () => {
 
   const generateIncidentSummaryReport = async () => {
     setLoadingIncidentSummary(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -3218,11 +3219,22 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      alert("Incident Report generated successfully. Please wait for the downloadable file!");
+      /*alert("Incident Report generated successfully. Please wait for the downloadable file!");*/
+
+      setGeneratingMessage("Generating All Incidents Summary Report...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating report:", error);
-      alert("Failed to generate Incident Report.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate All Incidents Summary Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+
+      /*alert("Failed to generate Incident Report.");*/
     } finally {
       setLoadingIncidentSummary(false);
     }
@@ -3233,7 +3245,19 @@ const ReportsPage = () => {
     setLoadingIncidentSummary(true);
     try {
       const fileUrl = await generateIncidentSummaryReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -3249,10 +3273,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `Incident_Summary_Report${year}.pdf`);
   
-      alert("Incident Summary Report successfully converted to PDF!");
+      /*alert("Incident Summary Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("All Incidents Summary Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingIncidentSummary(false);
     }
@@ -3751,6 +3790,7 @@ const ReportsPage = () => {
 
   const generateIncidentStatusSummaryReport = async () => {
     setLoadingIncidentStatuses(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const monthYear = currentDate.toLocaleDateString("en-US", {
@@ -3851,11 +3891,22 @@ const ReportsPage = () => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Incident Summary Report generated successfully. Please wait for the downloadable file!");
+      /*alert("Incident Summary Report generated successfully. Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Incident Summary Report...");
       return fileUrl;
     } catch (error) {
       console.error("Error generating incident summary report:", error);
-      alert("Failed to generate Incident Summary Report.");
+      setIsGenerating(false);
+
+      console.error("Error generating report:", error);
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate East Fairview Resident Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Incident Summary Report.");*/
     } finally {
       setLoadingIncidentStatuses(false);
     }
@@ -3865,8 +3916,20 @@ const ReportsPage = () => {
     setLoadingIncidentStatuses(true);
     try {
       const fileUrl = await generateIncidentStatusSummaryReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
   
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
+
       const response = await fetch("/api/convertPDF", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -3884,10 +3947,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `Incident_Status_Summary_Report_${monthYear.replace(" ", "_")}.pdf`);
   
-      alert("Incident Summary Report successfully converted to PDF!");
+      /*alert("Incident Summary Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Incident Summary Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate Incident Summary PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Incident Summary PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Incident Summary PDF.");*/
     } finally {
       setLoadingIncidentStatuses(false);
     }
