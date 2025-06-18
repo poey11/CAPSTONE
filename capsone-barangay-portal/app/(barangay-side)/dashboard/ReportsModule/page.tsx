@@ -3460,6 +3460,7 @@ const ReportsPage = () => {
 
   const generateLuponSettledReport = async () => {
     setLoadingLuponSettledReport(true);
+    setIsGenerating(true);
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -3580,11 +3581,21 @@ const ReportsPage = () => {
       await uploadBytes(storageRef, blob);
       const fileUrl = await getDownloadURL(storageRef);
   
-      alert("Lupon Settled Report generated successfully! Please wait for the downloadable file!");
+      /*alert("Lupon Settled Report generated successfully! Please wait for the downloadable file!");*/
+      setGeneratingMessage("Generating Lupon Settled Report...");
       return fileUrl;
     } catch (error) {
+      setIsGenerating(false);
+
       console.error("Error generating Lupon Settled report:", error);
-      alert("Failed to generate Lupon Settled Report.");
+
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Lupon Settled Report");  
+      
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate Lupon Settled Report.");*/
     } finally {
       setLoadingLuponSettledReport(false);
     }
@@ -3595,7 +3606,19 @@ const ReportsPage = () => {
     setLoadingLuponSettledReport(true);
     try {
       const fileUrl = await generateLuponSettledReport();
-      if (!fileUrl) return alert("Failed to generate Excel report.");
+      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+
+      if (!fileUrl) {
+        setIsGenerating(false); 
+  
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+  
+        setTimeout(() => {
+          setShowErrorGenerateReportPopup(false);
+        }, 5000);
+        return;
+      }
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -3611,10 +3634,25 @@ const ReportsPage = () => {
   
       saveAs(blob, `Lupon_Settled_Report_${year}.pdf`);
   
-      alert("Lupon Settled Report successfully converted to PDF!");
+      /*alert("Lupon Settled Report successfully converted to PDF!");*/
+
+      setIsGenerating(false); 
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Lupon Settled Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowSuccessGenerateReportPopup(false);
+      }, 5000);
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Lupon Settled Report PDF");    
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingLuponSettledReport(false);
     }
