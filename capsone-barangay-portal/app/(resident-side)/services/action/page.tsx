@@ -546,6 +546,13 @@ const handleFileChange = (
         return;
       }
 
+      if (Number(clearanceInput.age) < 18) {
+        setErrorMessage("Age must be 18 or above to proceed with this document request.");
+        setShowErrorPopup(true);
+        return;
+      }
+    
+
       console.log(clearanceInput);
     
       // List all file-related keys in an array for easier maintenance
@@ -759,6 +766,8 @@ const handleFileChange = (
       router.push('/services/notification'); 
     //  router.push("/services");
     };
+
+
     const [addOn, setAddOn] = useState<string>("");
     
     

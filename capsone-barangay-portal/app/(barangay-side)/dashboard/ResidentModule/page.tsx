@@ -3,7 +3,7 @@ import "@/CSS/ResidentModule/module.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "../../../db/firebase";
-import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from 'next/navigation';
@@ -158,15 +158,16 @@ export default function ResidentModule() {
   }, [searchName, searchAddress, searchOccupation, residentType, showCount, residents, sortOrder, selectedLocation]);
 
 
-  const handleDeleteClick = async (id: string, residentNumber: string) => {
-    if (isAuthorized) {
-      setDeleteUserId(id);
-      setSelectedResidentNumber(residentNumber);
-      setShowDeletePopup(true);
-    } else {
+  const handleDeleteClick = (id: string, residentNumber: string) => {
+    if (!isAuthorized) {
       alert("You are not authorized to delete this resident.");
-      router.refresh(); // Refresh the page
+      router.refresh();
+      return;
     }
+  
+    setDeleteUserId(id);
+    setSelectedResidentNumber(residentNumber);
+    setShowDeletePopup(true); // only show popup, no deletion yet
   };
   
   
@@ -191,34 +192,45 @@ export default function ResidentModule() {
   };
 
   const confirmDelete = async () => {
-    if (deleteUserId) {
-      try {
-        await deleteDoc(doc(db, "Residents", deleteUserId));
-        setResidents((prev) => prev.filter(resident => resident.id !== deleteUserId));
-        
-        setShowDeletePopup(false);
-        setDeleteUserId(null);
-
-        setPopupMessage("Resident Record deleted successfully!");
-        setShowPopup(true);
-
-        setTimeout(() => {
-          setShowPopup(false);
-        }, 3000);
-
-      } catch (error) {
-        console.error("Error deleting resident:", error);
-        setPopupMessage("Failed to delete resident.");
-      
-        setTimeout(() => {
-          setShowPopup(false);
-        }, 3000);
+    if (!deleteUserId) return;
+  
+    try {
+      // 🔴 Delete related records that match the residentId (Firestore document ID)
+      const collectionsToClean = ["JobSeekerList", "KasambahayList", "VotersList"];
+      for (const collectionName of collectionsToClean) {
+        const q = query(
+          collection(db, collectionName),
+          where("residentId", "==", deleteUserId)
+        );
+        const querySnapshot = await getDocs(q);
+  
+        const deletePromises = querySnapshot.docs.map((docSnap) =>
+          deleteDoc(doc(db, collectionName, docSnap.id))
+        );
+        await Promise.all(deletePromises);
       }
+  
+      // ✅ Delete from "Residents"
+      await deleteDoc(doc(db, "Residents", deleteUserId));
+  
+      // ✅ Update UI
+      setResidents((prev) => prev.filter(resident => resident.id !== deleteUserId));
+      setDeleteUserId(null);
+      setShowDeletePopup(false);
+  
+      setPopupMessage("Resident Record deleted successfully!");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+  
+    } catch (error) {
+      console.error("Error deleting resident and related records:", error);
+      setPopupMessage("Failed to delete resident.");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
     }
-
-  }
-
- 
+  };
+  
+  
 
   const indexOfLastResident = currentPage * residentsPerPage;
   const indexOfFirstResident = indexOfLastResident - residentsPerPage;
