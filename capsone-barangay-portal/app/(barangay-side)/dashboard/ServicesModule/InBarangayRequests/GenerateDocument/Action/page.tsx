@@ -172,7 +172,7 @@ export default function action() {
     useEffect(() => {
         const fetchNumber = async () => {
             try {
-                const count = await getSpecificCountofCollection("ServiceRequests", "reqType", "InBarangay");
+                const count = await getSpecificCountofCollection("ServiceRequests", "accID", "INBRGY-REQ");
                 setNumber(count || 0);
             } catch (error) {
                 console.error("Error fetching number:", error);
@@ -188,7 +188,7 @@ export default function action() {
             const randomId = customAlphabet(alphabet, 6);
             const requestId = randomId();
             const nos = String(number+1).padStart(4, '0'); // Ensure the number is 4 digits
-            let format = `${requestId}-${nos}`;
+            let format = `${requestId} - ${nos}`;
             setClearanceInput((prev) => ({
                 ...prev,
                 docType: docType || "",
@@ -612,7 +612,7 @@ export default function action() {
                                             id="citizenship"
                                             name="citizenship"
                                             className="input-field" 
-                                            placeholder="Address" 
+                                            placeholder="Input Citizenship" 
                                         />
                                     </div>
 
@@ -1369,7 +1369,8 @@ export default function action() {
                                     birthday: resident.dateOfBirth|| '',
                                     civilStatus: resident.civilStatus || '',
                                     address: resident.address || '',
-                                    contact: resident.contactNumber || '',
+                                    contact: resident.contacztNumber || '',
+                                    age: resident.age || '',
                                   });
                                     setIsResidentSelected(true);
                                     setShowResidentsPopup(false);

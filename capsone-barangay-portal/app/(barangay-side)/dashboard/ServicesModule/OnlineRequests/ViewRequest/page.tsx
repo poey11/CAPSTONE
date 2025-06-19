@@ -979,7 +979,7 @@ const ViewOnlineRequest = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download=`${requestData?.docType}_${requestData?.purpose || ""}_certificate.pdf`;
+        link.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_certificate.pdf`;
         link.click();
         URL.revokeObjectURL(url);
         link.remove();

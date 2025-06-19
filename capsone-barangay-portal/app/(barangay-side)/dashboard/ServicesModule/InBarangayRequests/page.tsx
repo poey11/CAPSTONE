@@ -14,7 +14,7 @@ import { db } from "@/app/db/firebase";
       try {
         const Collection = query(
           collection(db,"ServiceRequests"),
-          where("reqType", "==", "InBarangay"), // Filter for In Barangay requests
+          where("accID", "==", "INBRGY-REQ"), // Filter for In Barangay requests
           orderBy("createdAt", "desc") // First, sort by latest
         );      
         const unsubscribe = onSnapshot(Collection, (snapshot) => {
@@ -49,27 +49,14 @@ import { db } from "@/app/db/firebase";
       router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument");
     };
 
-    const handleView =(id: string) => {
-      router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
+    const handleView =(id: string,reqType:string) => {
+      if(reqType === "Other Documents"){
+        router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/OtherNewDocument/view?id=${id}`);
+      }
+      else{
+        router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
+      }
     };
-
-  const handleEdit = (documentType: string, purpose: string) => {
-    const documentRoutes: { [key: string]: string } = {
-        "Barangay Clearance": "/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayClearance",
-        "Barangay Indigency": "/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayIndigency",
-        "Barangay ID": "/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayID",
-        "Barangay Certificate": "/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayCertificate",
-        "First Time Jobseeker": "/dashboard/ServicesModule/InBarangayRequests/Edit/FirstTimeJobseeker",
-    };
-
-    if (documentType === "Barangay Permit" && purpose) {
-        const formattedPurpose = purpose.replace(/\s+/g, ""); // Remove spaces for URL consistency
-        router.push(`/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayPermit/${formattedPurpose}`);
-    } else {
-        const route = documentRoutes[documentType] || "/dashboard/ServicesModule/OnlineRequests/View";
-        router.push(route);
-    }
-};
 
   const [selectedDocumentType, setSelectedDocumentType] = useState<string | null>(null);
 
@@ -215,7 +202,7 @@ const confirmDelete = () => {
                   <div className="actions">
                     <button
                         className="action-view"
-                        onClick={() => handleView(request.id)}
+                        onClick={() => handleView(request.id, request.reqType)}
                     >
                         View
                     </button>

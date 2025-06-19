@@ -7,12 +7,6 @@ import "@/CSS/barangaySide/ServicesModule/GenerateDocument.css";
 
 export default function GenerateDocument() {
     const router = useRouter();
-    console.log(router);
-    const handleBackToInBarangay = () => {
-        router.back();
-    };
-
-
     const handleSubmit = (e: any) => {
         const action = e.currentTarget.id;
         router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=${action}`);
@@ -34,7 +28,7 @@ export default function GenerateDocument() {
             <div className="addAnnouncement-main-section">
                 <div className="addAnnouncement-main-section1">
                     <div className="addAnnouncement-main-section1-left">
-                        <button onClick={handleBackToInBarangay}>
+                        <button onClick={router.back} >
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
                         </button>
                         <h1>Generate Document</h1>

@@ -45,19 +45,26 @@ export default function AddNewDoc() {
             [name]: value,
         }));
     }
+    const newFields = [...fields, { name: "name" }, { name: "requestor" }];
+
+    
 
     const handleSubmit = async(e: React.FormEvent) => {
         e.preventDefault();
+
+        
         const docRef = collection(db, "OtherDocuments");
         const docData = {
             ...formValue,
-            fields:fields
+            fields:newFields
         }
         console.log("Document submitted with fields:", fields);
         console.log("Document body:", formValue);
         console.log("Document data:", docData);
         const doc = await addDoc(docRef, docData) 
         console.log("Document written with ID: ", doc.id);
+        alert("Document added successfully!");
+        router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument");
     }
 
     return(
@@ -96,14 +103,13 @@ export default function AddNewDoc() {
                             required
                             >
                             <option value="" disabled>Select Document Type</option>
-                            <option value="certificate">Certificate</option>
-                            <option value="clearance">clearance</option>
-                            <option value="indigency">Indigency</option>
-                            <option value="id">ID</option>
-                            <option value="permit">Permit</option>
-                            <option value="clearance">Clearance</option>
-                            <option value="jobseeker">First Time Jobseeker</option>
-                            <option value="other">Other</option>
+                            <option value="Barangay Certificate">Certificate</option>
+                            <option value="Barangay Clearance">Clearance</option>
+                            <option value="Barangay Indigency">Indigency</option>
+                            <option value="Barangay ID">ID</option>
+                            <option value="Barangay Permit">Permit</option>
+                            <option value="First Time Jobseeker">First Time Jobseeker</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
                     {/* Dynamic Fields for Input Names */}
@@ -150,6 +156,9 @@ export default function AddNewDoc() {
                         <p>Use 'day' to include the day today.</p>
                         <p>Use 'month' to include the month today.</p>
                         <p>Use 'year' to include the year today.</p>
+
+                        <p>Use 'name' to include the name for the document.</p>
+                        <p>Use 'requestor' to include the requestor's name.</p>
                     </div>
                     <textarea  
                         className="w-full mt-4 h-1/2 bg-white p-4 rounded-lg shadow-md"  
