@@ -262,7 +262,7 @@ export default function AddNewDoc() {
                             name="purpose"
                             value={data.purpose || ""}
                             id="purpose"
-                            required
+                            
                             >
                             <option value="" disabled>Select Document Purpose</option>
                                 {formValue.filter((doc:DocumentField)=> doc.type === data.type).
