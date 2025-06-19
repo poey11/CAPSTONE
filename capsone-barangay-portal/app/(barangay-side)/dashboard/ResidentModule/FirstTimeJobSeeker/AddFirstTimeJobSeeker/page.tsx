@@ -12,7 +12,7 @@ import { useRef } from "react";
 export default function AddFirstTimeJobSeeker() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    dateApplied: "", // YYYY-MM-DD format
+    dateApplied: new Date().toISOString().split("T")[0],
     lastName: "", //-
     firstName: "", //-
     middleName: "", //-
@@ -376,7 +376,7 @@ export default function AddFirstTimeJobSeeker() {
                     <input
                       type="text"
                       className="select-resident-input-field"
-                      placeholder="Select Complainant"
+                      placeholder="Select Resident"
                       onClick={handleJobseekerClick}
                       value={
                         isResidentSelected
@@ -517,7 +517,9 @@ export default function AddFirstTimeJobSeeker() {
                           name="dateApplied" 
                           value={formData.dateApplied} 
                           onChange={handleChange}
-                          required />
+                          required 
+                          readOnly
+                          />
                       </div>
                     </div>
                   </div>
