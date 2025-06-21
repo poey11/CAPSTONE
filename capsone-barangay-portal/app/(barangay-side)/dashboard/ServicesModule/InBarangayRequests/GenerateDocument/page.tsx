@@ -19,6 +19,9 @@ export default function GenerateDocument() {
     const handleOtherNewDocument = () => {
         router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/OtherNewDocument");
     }
+      const handleEditNewDocument = () => {
+        router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/EditDoc");
+    }
     return (
         <main className="generatedocument-main-container">
             <div className="generatedocument-section-1">
@@ -37,6 +40,13 @@ export default function GenerateDocument() {
                           onClick={handleAddNewDocument}
                         >
                           Add New Document
+                        </button>
+
+                        <button
+                          className="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition-colors duration-300"
+                          onClick={handleEditNewDocument}
+                        >
+                          Edit New Document
                         </button>
                     </div>
 

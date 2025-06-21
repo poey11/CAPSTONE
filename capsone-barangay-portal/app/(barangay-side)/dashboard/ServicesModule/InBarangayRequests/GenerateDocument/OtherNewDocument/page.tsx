@@ -2,15 +2,18 @@
 import { useRouter} from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { collection, onSnapshot,addDoc, doc} from "firebase/firestore";
-import { db } from "@/app/db/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+import { db,storage } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import {customAlphabet} from "nanoid";
 
-
+//documentField interface
 interface fieldInputs{
     name: string;
 }
+
 
 
 interface DocumentField {
@@ -20,18 +23,25 @@ interface DocumentField {
     description?: string;
     body?: string;
     fields?: fieldInputs[];
+    imageFields: fieldInputs[];
 }
 
+//data interace
 interface dataFields {
     name?: string;
     value?: string;
 }
+interface imageFields{
+    name?: string;
+    file?: File;
 
+}
 interface  data {
     type?: string;
     purpose?: string;
     fields?: dataFields[];
     body?: string;
+    imageFields?: imageFields[];
 }
 
 export default function AddNewDoc() {
@@ -148,59 +158,110 @@ export default function AddNewDoc() {
 
     
     const handleSubmit = async (e: any) => {
-        e.preventDefault();
-        console.log("Form submitted with data:", data);
-        const requestorField = data.fields?.find(
-          (f) => f.name?.toLowerCase() === "requestor"
-        );
-        const docRef = collection(db, "ServiceRequests");
-        const docData = {
-            accID:"INBRGY-REQ",
-            reqType: "Other Documents",
-            docType: data.type,
-            requestId: reqID,
-            createdAt: new Date().toLocaleString(),
-            requestor: requestorField ? requestorField.value : "",
-            purpose: data.purpose,
-            status: "Pending",
-            statusPriority: 1, // Assuming Pending has the highest priority
-            body: data.body,
-            createdBy: user?.id || "",
-            fields: data.fields
-        }    
-        const success = await addDoc(docRef, docData)
-        console.log("Document submitted with fields:", docData);
-        console.log(success)
-        router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/OtherNewDocument/view?id="+ success.id);
-    }
+      e.preventDefault();
+      console.log("Form submitted with data:", data);
 
-    const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-        const { name, value } = e.target;
-        if( name === "type" || name === "purpose") {
-            setData((prev) => ({
-                ...prev,
-                [name]: value,
-                fields: [],
-            }));
-        }
-        else{
-            setData((prev) => {
-                const updatedFields = prev.fields ? [...prev.fields] : [];
-                const fieldIndex = updatedFields.findIndex((f) => f.name === name);
-                
-                if (fieldIndex !== -1) {
-                    updatedFields[fieldIndex].value = value;
-                } else {
-                    updatedFields.push({ name, value });
-                }
-                
-                return {
-                    ...prev,
-                    fields: updatedFields,
-                };
-            });
-        }
-    }
+      const requestorField = data.fields?.find(
+        (f) => f.name?.toLowerCase() === "requestor"
+      );
+
+      // 1. Upload images to Firebase Storage
+      const uploadedImageUrls = await Promise.all(
+        (data.imageFields || []).map(async (imgField) => {
+          if (!imgField.file || !imgField.name) return null;
+
+          const fileName = `${reqID}-${imgField.name}-${Date.now()}`;
+          const storageRef = ref(storage, `ServiceRequests/${fileName}`);
+
+          await uploadBytes(storageRef, imgField.file);
+          const downloadURL = await getDownloadURL(storageRef);
+
+          return {
+            name: imgField.name,
+            url: downloadURL,
+          };
+        })
+      );
+
+      // 2. Filter out null entries
+      const validImages = uploadedImageUrls.filter((img) => img !== null);
+
+      // 3. Prepare Firestore document data
+      const docData = {
+        accID: "INBRGY-REQ",
+        reqType: "Other Documents",
+        docType: data.type,
+        requestId: reqID,
+        createdAt: new Date().toLocaleString(),
+        requestor: requestorField ? requestorField.value : "",
+        purpose: data.purpose,
+        status: "Pending",
+        statusPriority: 1,
+        body: data.body,
+        createdBy: user?.id || "",
+        fields: data.fields,
+        imageFields: validImages, // Save download URLs, not File objects
+      };
+
+      // 4. Save to Firestore
+      const docRef = collection(db, "ServiceRequests");
+      const success = await addDoc(docRef, docData);
+
+      console.log("Request submitted successfully.");
+
+      console.log("Document data to be saved:", docData);
+    router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/OtherNewDocument/view?id="+ success.id);
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value, files, type } = e.target as HTMLInputElement;
+
+      if (name === "type" || name === "purpose") {
+        setData((prev) => ({
+          ...prev,
+          [name]: value,
+          fields: [],
+          imageFields: [],
+        }));
+        return;
+      }
+
+      if (type === "file" && files && files.length > 0) {
+        const file = files[0];
+        setData((prev) => {
+          const updatedImages = prev.imageFields ? [...prev.imageFields] : [];
+          const existingIndex = updatedImages.findIndex((img) => img.name === name);
+
+          if (existingIndex !== -1) {
+            updatedImages[existingIndex].file = file;
+          } else {
+            updatedImages.push({ name, file });
+          }
+
+          return {
+            ...prev,
+            imageFields: updatedImages,
+          };
+        });
+      } else {
+        setData((prev) => {
+          const updatedFields = prev.fields ? [...prev.fields] : [];
+          const existingIndex = updatedFields.findIndex((f) => f.name === name);
+
+          if (existingIndex !== -1) {
+            updatedFields[existingIndex].value = value;
+          } else {
+            updatedFields.push({ name, value });
+          }
+
+          return {
+            ...prev,
+            fields: updatedFields,
+          };
+        });
+      }
+    };
+
 
 
 
@@ -273,6 +334,7 @@ export default function AddNewDoc() {
                                 ))}
                         </select>
                     </div>
+                    Document Fields:
                     {data.type && data.purpose && formValue
                       .filter((doc) => doc.type === data.type && doc.title === data.purpose)
                       .flatMap((doc) =>
@@ -288,6 +350,31 @@ export default function AddNewDoc() {
                                   onChange={handleChange}
                                   className="w-1/8 mt-4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                   placeholder={`Enter ${field.name}`}
+                                  required
+                                />
+                            </div>
+                          )) || []
+                          
+                        )
+                      
+                      }
+
+                    Image Fields:
+                    {data.type && data.purpose && formValue
+                      .filter((doc) => doc.type === data.type && doc.title === data.purpose)
+                      .flatMap((doc) =>
+                        doc.imageFields?.map((field, index) => (
+                            <div key={index} className="flex items-center w-full justify-center">
+                                <label htmlFor={field.name} className="w-1/8 mt-4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                  {field.name}:
+                                </label>
+                                <input
+                                  key={index}
+                                  type="file"
+                                  name={field.name}
+                                    accept="image/*"
+                                  onChange={handleChange}
+                                  className="w-1/8 mt-4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                   required
                                 />
                             </div>

@@ -15,17 +15,52 @@ interface FieldInputs {
 }
 
 
+
 export default function AddNewDoc() {
 
     const router = useRouter();
     const [formValue, setFormValue] = useState<DocumentField>();
     const [newField, setNewField] = useState<string>("");
     const [fields, setFields] = useState<FieldInputs[]>([]); 
+
+    const [newImageField, setnewImageField] = useState<string>("");
+
+    const [imageFields, setImageFields] = useState<FieldInputs[]>([]);
+
+    const instruction = `
+    Please fill in the details for the new document you want to add.
+    You may include custom fields and image fields as needed.
+
+    To insert dynamic values into the document body, use the following format:
+    {day}, {month}, {year}, {name}, and {requestor}.
+    These placeholders will be automatically replaced with the actual values.
+        
+    If you add your own fields (e.g., a field named "address"), you can include them in the document body using the same format: {address}.`;
+
     const handleAddField = () => {
         if (newField.trim() === "") return; // prevent adding empty fields
         setFields([...fields, { name: newField }]);
         setNewField(""); // clear input after adding
     };
+
+    const handleAddImageField = () => {
+        if( newImageField.trim() === "") return; // prevent adding empty fields
+        setImageFields([...imageFields, { name:  newImageField }]);
+        setnewImageField(""); // clear input after adding
+    };
+
+    const handleRemoveImageField = (index: number) => {
+        const updatedImageFields = [...imageFields];
+        updatedImageFields.splice(index, 1);
+        setImageFields(updatedImageFields);
+    };
+
+    const handleChangeImageField = (index: number, value: string) => {
+        const updatedImageFields = [...imageFields];
+        updatedImageFields[index] = { name: value };
+        setImageFields(updatedImageFields);
+    };
+
     const handleRemoveField = (index: number) => {
         const updatedFields = [...fields];
         updatedFields.splice(index, 1);
@@ -40,10 +75,19 @@ export default function AddNewDoc() {
 
     const handleChange=(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const {name, value } = e.target;
-        setFormValue((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        setFormValue((prev) => {
+            if(name==="type"){
+                return{
+                    ...prev,
+                    type: value,
+                    purpose:""
+                }
+            }
+            return {
+                ...prev,
+                [name]: value,
+            };
+        });
     }
     const newFields = [...fields, { name: "name" }, { name: "requestor" }];
 
@@ -56,7 +100,8 @@ export default function AddNewDoc() {
         const docRef = collection(db, "OtherDocuments");
         const docData = {
             ...formValue,
-            fields:newFields
+            fields:newFields,
+            imageFields: imageFields,
         }
         console.log("Document submitted with fields:", fields);
         console.log("Document body:", formValue);
@@ -113,6 +158,8 @@ export default function AddNewDoc() {
                         </select>
                     </div>
                     {/* Dynamic Fields for Input Names */}
+
+                    Document field
                     {fields.map((field, index) => (
                           <input 
                             key={index}
@@ -125,7 +172,9 @@ export default function AddNewDoc() {
                             onChange={(e) => handleFieldChange(index, e.target.value)}
                           />
                     ))}
+
                     <div className="flex items-center mt-2">
+                        <label className="text-gray-700">Add Field:</label>
                         <input 
                                 type="text" 
                                 id="newField"
@@ -151,8 +200,52 @@ export default function AddNewDoc() {
                             +
                         </button>
                     </div>
+
+                    Image  field
+                    {imageFields.map((field, index) => (
+
+                        <input 
+                            key={index}
+                            type="text"
+                            id={`field-${index}`}
+                            className="mt-2 w-1/8 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder={`${field || `Field Name ${index + 1}`}`} // fallback placeholder if field is empty
+                            value={field.name || ""}
+                            disabled
+                            onChange={(e) => handleChangeImageField(index, e.target.value)}
+                          />
+
+                    ))}
+                    
+                    <div className="flex items-center mt-2">
+                        <label className="text-gray-700">Add Image Field:</label>
+                        <input 
+                                type="text" 
+                                id="newField"
+                                value={newImageField}
+                                onChange={(e) => setnewImageField(e.target.value)}
+                                className="mt-2 w-1/8 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder={`Field Name`}
+                            />
+                        {imageFields.length > 0 && (
+                        <button 
+                            type="button"
+                            className=" ml-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-800 transition-colors duration-300"
+                            onClick={() => handleRemoveImageField(imageFields.length - 1)}
+                            >
+                            -
+                        </button>
+                        )}
+                        <button
+                            type="button"
+                            className=" ml-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-800 transition-colors duration-300"
+                            onClick={handleAddImageField}
+                            >
+                            +
+                        </button>
+                    </div>
                     <div className="w-1/2 mt-4">
-                        <p className="text-gray-600 mt-4">Add the body of the document below:</p>
+                        <p className="text-gray-600 mt-4">Add pre-set field names:</p>
                         <p>Use 'day' to include the day today.</p>
                         <p>Use 'month' to include the month today.</p>
                         <p>Use 'year' to include the year today.</p>
@@ -162,7 +255,7 @@ export default function AddNewDoc() {
                     </div>
                     <textarea  
                         className="w-full mt-4 h-1/2 bg-white p-4 rounded-lg shadow-md"  
-                        placeholder="Body of the new document"
+                        placeholder={instruction}
                         onChange={handleChange}
                         value={formValue?.body || ""}
                         required

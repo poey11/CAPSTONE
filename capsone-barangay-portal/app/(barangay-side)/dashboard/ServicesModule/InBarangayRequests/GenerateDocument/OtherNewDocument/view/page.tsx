@@ -12,11 +12,18 @@ interface dataFields {
     value?: string;
 }
 
+interface imageFields{
+    name?: string;
+    url?: string;
+
+}
+
 interface  data {
     purpose?: string;
     fields?: dataFields[];
     body?: string;
     docType?: string;
+    imageFields?: imageFields[];
 }
 
 
@@ -129,7 +136,7 @@ export default function view() {
                 <h2 className="text-xl font-semibold mb-4">Document Type: {data.docType}</h2>
                 <p className="mb-2"><strong>Purpose:</strong> {data.purpose}</p>
                 <p className="mb-4"><strong>Body:</strong> {data.body}</p>
-                <h3 className="text-lg font-semibold mb-2">Fields:</h3>
+                <h3 className="text-lg font-semibold mb-2">Document Fields:</h3>
                 <ul className="list-disc pl-5">
                     {data.fields?.map((field, index) => (
                         <li key={index} className="mb-1">
@@ -137,8 +144,19 @@ export default function view() {
                         </li>
                     ))}
                 </ul>
-
-                
+                <h3 className="text-lg font-semibold mb-2">Images Fields:</h3>
+                <ul className="list-disc pl-5">
+                    {data.imageFields?.map((img, index) => (
+                      <div key={index} className="flex flex-col items-center">
+                        <p className="mb-2 text-sm font-medium">{img.name}</p>
+                        <img
+                          src={img.url}
+                          alt={img.name}
+                          className="w-40 h-40 object-cover border rounded shadow-md"
+                        />
+                      </div>
+                    ))}
+                </ul>
             </div>
             {pdfUrl && (
                 <div className="mt-4">
