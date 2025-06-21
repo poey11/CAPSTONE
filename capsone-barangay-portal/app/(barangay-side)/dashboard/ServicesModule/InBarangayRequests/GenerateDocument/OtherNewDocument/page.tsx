@@ -17,13 +17,14 @@ interface fieldInputs{
 
 
 interface DocumentField {
-    id?: string;
-    title?: string;
-    type?: string;
-    description?: string;
-    body?: string;
-    fields?: fieldInputs[];
-    imageFields: fieldInputs[];
+  id?: string;
+  title?: string;
+  type?: string;
+  description?: string;
+  body?: string;
+  fields?: fieldInputs[];
+  imageFields: fieldInputs[];
+  forResidentOnly?: boolean;
 }
 
 //data interace
@@ -215,52 +216,67 @@ export default function AddNewDoc() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const { name, value, files, type } = e.target as HTMLInputElement;
-
-      if (name === "type" || name === "purpose") {
-        setData((prev) => ({
-          ...prev,
-          [name]: value,
-          fields: [],
-          imageFields: [],
-        }));
-        return;
-      }
-
-      if (type === "file" && files && files.length > 0) {
-        const file = files[0];
-        setData((prev) => {
-          const updatedImages = prev.imageFields ? [...prev.imageFields] : [];
-          const existingIndex = updatedImages.findIndex((img) => img.name === name);
-
-          if (existingIndex !== -1) {
-            updatedImages[existingIndex].file = file;
-          } else {
-            updatedImages.push({ name, file });
-          }
-
-          return {
+      
+         // When document type is changed
+        if (name === "type") {
+          setData((prev) => ({
             ...prev,
-            imageFields: updatedImages,
-          };
-        });
-      } else {
-        setData((prev) => {
-          const updatedFields = prev.fields ? [...prev.fields] : [];
-          const existingIndex = updatedFields.findIndex((f) => f.name === name);
-
-          if (existingIndex !== -1) {
-            updatedFields[existingIndex].value = value;
-          } else {
-            updatedFields.push({ name, value });
-          }
-
-          return {
+            type: value,
+            purpose: "",           // 🔁 reset purpose
+            fields: [],            // reset dynamic fields
+            imageFields: [],       // reset uploaded files
+          }));
+          return;
+        }
+      
+         // When purpose is changed
+        if (name === "purpose") {
+          setData((prev) => ({
             ...prev,
-            fields: updatedFields,
-          };
-        });
-      }
-    };
+            purpose: value,
+            fields: [],            // reset fields when purpose changes
+            imageFields: [],       // reset imageFields when purpose changes
+          }));
+          return;
+        }
+      
+         // File upload
+        if (type === "file" && files && files.length > 0) {
+          const file = files[0];
+          setData((prev) => {
+            const updatedImages = prev.imageFields ? [...prev.imageFields] : [];
+            const existingIndex = updatedImages.findIndex((img) => img.name === name);
+          
+            if (existingIndex !== -1) {
+              updatedImages[existingIndex].file = file;
+            } else {
+              updatedImages.push({ name, file });
+            }
+          
+            return {
+              ...prev,
+              imageFields: updatedImages,
+            };
+          });
+        } else {
+          // Text input
+          setData((prev) => {
+            const updatedFields = prev.fields ? [...prev.fields] : [];
+            const existingIndex = updatedFields.findIndex((f) => f.name === name);
+          
+            if (existingIndex !== -1) {
+              updatedFields[existingIndex].value = value;
+            } else {
+              updatedFields.push({ name, value });
+            }
+          
+            return {
+              ...prev,
+              fields: updatedFields,
+            };
+          });
+        }
+    };  
 
 
 
@@ -333,6 +349,15 @@ export default function AddNewDoc() {
                                     </option>
                                 ))}
                         </select>
+                        {formValue.some(
+                          (doc: DocumentField) =>
+                            doc.type === data.type &&
+                            doc.title === data.purpose &&
+                            doc.forResidentOnly === true
+                        ) && (
+                          <p className="text-red-500 ml-4">This document is for residents only.</p>
+                        )}
+
                     </div>
                     Document Fields:
                     {data.type && data.purpose && formValue

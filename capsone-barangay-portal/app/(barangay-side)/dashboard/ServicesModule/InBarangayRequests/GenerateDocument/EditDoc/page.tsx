@@ -13,6 +13,7 @@ interface DocumentField {
     fields?: FieldInputs[];
     imageFields?: FieldInputs[];
     purpose?: string;
+    forResidentOnly?: boolean;
 }
 
 interface FieldInputs {
@@ -42,13 +43,15 @@ export default function EditDoc() {
 
     const [activeFields, setActiveFields] = useState<dataFields[]>([]);
     const [activeImageFields, setActiveImageFields] = useState<imageFields[]>([]);
-    const [docId, setDocId] = useState<string>("");
 
     const [newField, setNewField] = useState<dataFields[]>([]);
     const [newImageField, setNewImageField] = useState<imageFields[]>([])
 
     const [newFieldName, setNewFieldName] = useState<string>("");
     const [newImageFieldName, setNewImageFieldName] = useState<string>("");
+
+    const [isResidentOnly, setIsResidentOnly] = useState<boolean>(false);
+
     const instruction = `
     Please fill in the details for the new document you want to add.
     You may include custom fields and image fields as needed.
@@ -110,6 +113,7 @@ export default function EditDoc() {
           body: data.body || "",
           fields: updatedFields,
           imageFields: updatedImageFields,
+          forResidentOnly: isResidentOnly,
         }
       
         const success = await updateDoc(docRef, docData);
@@ -135,6 +139,11 @@ export default function EditDoc() {
                 [name]: value,
             };
         });
+
+        if (name === "forResidentOnly" && e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
+            setIsResidentOnly(e.target.checked);
+    
+        }
     }
     
 
@@ -184,8 +193,6 @@ export default function EditDoc() {
 
 
 
-
-
     useEffect(() => {
         const collectionRef = collection(db, "OtherDocuments");
 
@@ -202,6 +209,21 @@ export default function EditDoc() {
         return () => unsubscribe();
 
     }, []);
+
+    useEffect(() => {
+        const selectedDoc = formValue.find(
+        (doc) => doc.type === data.type && doc.title === data.purpose
+        );
+        if (selectedDoc?.forResidentOnly) {
+            setIsResidentOnly(selectedDoc.forResidentOnly);
+        } else {
+            setIsResidentOnly(false);
+        }
+
+
+    }, [data.type, data.purpose, formValue]);
+
+
 
     useEffect(() => {
       const selectedDoc = formValue.find(
@@ -300,6 +322,19 @@ export default function EditDoc() {
                                 ))}
                         </select>
                     </div>
+                      <div className="flex items-center mt-2">
+
+                            <label htmlFor="forResidentOnly" className="ml-2">Is the document only for Resident?</label>
+                            <input 
+                                type="checkbox" 
+                                name="forResidentOnly"
+                                checked={isResidentOnly}
+                                onChange={handleChange}
+                                className="ml-2 mr-2"
+                            />
+                            <span className="text-gray-700">Yes</span>
+                        </div>
+
                     {/* Dynamic Fields for Input Names */}
                     
                     <div  className="flex flex-col items-start mt-4">

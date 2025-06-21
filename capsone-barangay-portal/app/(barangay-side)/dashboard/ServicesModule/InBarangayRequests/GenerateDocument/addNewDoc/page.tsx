@@ -8,6 +8,7 @@ interface DocumentField {
     title?: string;
     type?: string;
     body?: string;
+    forResidentOnly?: boolean;
 }
 
 interface FieldInputs {
@@ -19,7 +20,14 @@ interface FieldInputs {
 export default function AddNewDoc() {
 
     const router = useRouter();
-    const [formValue, setFormValue] = useState<DocumentField>();
+    const [formValue, setFormValue] = useState<DocumentField>(
+        {
+            title: "",
+            type: "",
+            body: "",
+            forResidentOnly: false,
+        }
+    );
     const [newField, setNewField] = useState<string>("");
     const [fields, setFields] = useState<FieldInputs[]>([]); 
 
@@ -102,6 +110,7 @@ export default function AddNewDoc() {
             ...formValue,
             fields:newFields,
             imageFields: imageFields,
+
         }
         console.log("Document submitted with fields:", fields);
         console.log("Document body:", formValue);
@@ -131,14 +140,14 @@ export default function AddNewDoc() {
                 <form onSubmit={handleSubmit} className="w-full h-screen flex flex-col items-center justify-center">
                     <input 
                         type="text" 
-                        className="w-1/2 mt-4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-1/2  p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         name="title"
                         onChange={handleChange}
                         value={formValue?.title || ""}
                         required
                         placeholder="Document Title"
                     />
-                    <div className="flex items-center w-1/2 mt-4">
+                    <div className="flex items-center mt-4">
                         <label className="text-gray-700">Document Type:</label>
                         <select    
                             className="ml-2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -156,6 +165,19 @@ export default function AddNewDoc() {
                             <option value="First Time Jobseeker">First Time Jobseeker</option>
                             <option value="Other">Other</option>
                         </select>
+                        
+                        <div className="flex items-center ">
+
+                            <label htmlFor="forResidentOnly" className="ml-2">Is the document only for Resident?</label>
+                            <input 
+                                type="checkbox" 
+                                name="forResidentOnly"
+                                checked={formValue?.forResidentOnly || false}
+                                onChange={(e) => setFormValue({ ...formValue, forResidentOnly: e.target.checked })}
+                                className="ml-2 mr-2"
+                            />
+                            <span className="text-gray-700">Yes</span>
+                        </div>
                     </div>
                     {/* Dynamic Fields for Input Names */}
 
