@@ -772,7 +772,6 @@ const ViewOnlineRequest = () => {
     };
 
     const handleSMS = async() => {
-        //window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
         try{
           const response = await fetch("/api/clickSendApi", {
               method: "POST",
@@ -781,7 +780,10 @@ const ViewOnlineRequest = () => {
               },
               body: JSON.stringify({
                   to: requestData?.contact,
-                  message: `Hello Mr/Ms. ${requestData?.fullName}, your document request with ID ${requestData?.requestId} is now ready for pick-up. Please visit the barangay hall to collect your document. Thank you!`,
+                  message: `Hello Mr/Ms. ${requestData?.fullName}, your 
+                  document request with ID ${requestData?.requestId} 
+                  is now ready for pick-up. Please visit the barangay hall 
+                  to collect your document. Thank you!`,
               })
           });
           if (!response.ok) throw new Error("Failed to send SMS");
@@ -1015,7 +1017,7 @@ const ViewOnlineRequest = () => {
                         )}
 
                         {status === "Pick-up" && (
-                        <button className="services-onlinereq-redirection-buttons">
+                        <button  onClick={handleSMS} className="services-onlinereq-redirection-buttons">
                             <div className="services-onlinereq-redirection-icons-section">
                             <img src="/images/sendSMS.png" alt="user info" className="redirection-icons-info" />
                             </div>
