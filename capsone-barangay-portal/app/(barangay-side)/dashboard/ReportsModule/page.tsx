@@ -73,7 +73,10 @@ const [showUploadFilePopup, setShowUploadFilePopup] = useState(false);
  const [showPopup, setShowPopup] = useState(false);
  const [showDeletePopup, setShowDeletePopup] = useState(false); 
  const [fileToDelete, setFileToDelete] = useState<string | null>(null);
- const [isLoading, setIsLoading] = useState(false);
+ const [isLoading, setIsLoading] = useState<{ status: boolean; message: string }>({
+  status: false,
+  message: "",
+});
 
 
   const fetchDownloadLinks = async () => {
@@ -116,7 +119,7 @@ const [showUploadFilePopup, setShowUploadFilePopup] = useState(false);
 //2 (NEW)
 const uploadFile = async () => {
 
- setIsLoading(true); 
+ setIsLoading({ status: true, message: "Uploading File, please wait..." });
 
   if (!selectedUploadFile) return;
 
@@ -134,7 +137,7 @@ const uploadFile = async () => {
 
     // End loading after 2 seconds
     setTimeout(() => {
-      setIsLoading(false);
+      setIsLoading({ status: false, message: "" });
 
       // Show popup after loading ends
       setShowPopup(true);
@@ -4270,7 +4273,7 @@ const handleNextPage = () => {
   
 
   const uploadForms = async (url: string): Promise<void> => {
-    setIsLoading(true); // Start loading
+    setIsLoading({ status: true, message: "Downloading Form, please wait..." });
   
     try {
       window.location.href = url;
@@ -4283,7 +4286,7 @@ const handleNextPage = () => {
     } finally {
       // End loading after 2 seconds
       setTimeout(() => {
-        setIsLoading(false);
+        setIsLoading({ status: false, message: "" });
   
         // Show popup after loading is done
         setShowPopup(true);
@@ -4780,11 +4783,11 @@ const handleNextPage = () => {
         </div>
       )}
 
-      {isLoading && (
+      {isLoading.status && (
             <div className="popup-backdrop-download">
               <div className="popup-content-download">
                   <img src="/Images/loading.png" alt="loading..." className="successful-icon-popup-download" />
-                     <p>Downloading Form, please wait...</p>
+                    <p>{isLoading.message}</p>
               </div>
              </div>
                 )}
