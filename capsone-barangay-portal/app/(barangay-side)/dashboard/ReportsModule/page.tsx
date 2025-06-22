@@ -63,6 +63,19 @@ const ReportsPage = () => {
   const db = getFirestore();
 
 
+
+  /*
+Downloadable Forms
+  */
+
+const [showUploadFilePopup, setShowUploadFilePopup] = useState(false);
+ const uploadFilePopUpRef = useRef<HTMLDivElement>(null);
+ const [showPopup, setShowPopup] = useState(false);
+ const [showDeletePopup, setShowDeletePopup] = useState(false); 
+ const [fileToDelete, setFileToDelete] = useState<string | null>(null);
+ const [isLoading, setIsLoading] = useState(false);
+
+
   const fetchDownloadLinks = async () => {
     try {
       const folderRef = ref(storage, "ReportsModule/");
@@ -86,6 +99,8 @@ const ReportsPage = () => {
     fetchDownloadLinks();
   }, []);
 
+
+  //1
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedUploadFile(event.target.files[0]);
@@ -97,34 +112,76 @@ const ReportsPage = () => {
     setSelectedUploadFile(null);
 };
 
-  const uploadFile = async () => {
-    if (!selectedUploadFile) return;
-    const fileRef = ref(storage, `ReportsModule/${selectedUploadFile.name}`);
-    try {
-      await uploadBytes(fileRef, selectedUploadFile);
-      alert("File uploaded successfully!");
-      setSelectedUploadFile(null);
-      fetchDownloadLinks(); 
-    } catch (error) {
-      console.error("Upload failed:", error);
-    }
 
-    window.location.reload();
+//2 (NEW)
+const uploadFile = async () => {
 
-  };
+ setIsLoading(true); 
 
-  const deleteFile = async (fileName: string) => {
-    const fileRef = ref(storage, `ReportsModule/${fileName}`);
-    try {
-      await deleteObject(fileRef);
-      alert("File deleted successfully!");
-      setFiles(files.filter(file => file.name !== fileName));
-    } catch (error) {
-      console.error("Delete failed:", error);
-    }
-    window.location.reload();
+  if (!selectedUploadFile) return;
 
-  };
+   const fileRef = ref(storage, `ReportsModule/${selectedUploadFile.name}`);
+  try {
+    await uploadBytes(fileRef, selectedUploadFile);
+    setPopupMessage("File Uploaded Successfully!");
+    setSelectedUploadFile(null);
+    fetchDownloadLinks(); 
+  } catch (error) {
+    console.error("Upload failed:", error);
+    setPopupMessage("File upload failed. Please try again.");
+  }finally {
+    setShowUploadFilePopup(false);
+
+    // End loading after 2 seconds
+    setTimeout(() => {
+      setIsLoading(false);
+
+      // Show popup after loading ends
+      setShowPopup(true);
+
+      // Hide popup after 2 more seconds
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 2000);
+    }, 2000);
+  }
+
+  
+};
+
+
+ const handleUploadClick = () => {
+  setShowUploadFilePopup(true);
+ };
+
+const handleDeleteClick = (fileName: string) => {
+  setFileToDelete(fileName);
+  setShowDeletePopup(true);
+
+    setTimeout(() => {
+    setShowPopup(false);
+  }, 3000);
+  
+};
+
+
+const confirmDelete = async () => {
+  if (!fileToDelete) return;
+
+  const fileRef = ref(storage, `ReportsModule/${fileToDelete}`);
+  try {
+    await deleteObject(fileRef);
+    setPopupMessage("File deleted successfuly!");
+    setFiles((prev) => prev.filter((file) => file.name !== fileToDelete));
+  } catch (error) {
+    console.error("Delete failed:", error);
+    alert("Failed to delete file.");
+  }
+
+  setShowPopup(true);
+  setShowDeletePopup(false);
+  setFileToDelete(null);
+};
 
   // kasambahay report
 
@@ -4156,7 +4213,88 @@ const ReportsPage = () => {
   }, [session?.user]);
 
 
- 
+
+
+/*
+
+*/
+
+
+const ITEMS_PER_PAGE = 6;
+const [currentPageForms, setCurrentPageForms] = useState(0);
+
+const startIndex = currentPageForms * ITEMS_PER_PAGE;
+const paginatedFiles = files.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+
+const handleNextPage = () => {
+  if ((currentPageForms + 1) * ITEMS_PER_PAGE < files.length) {
+    setCurrentPageForms((prev) => prev + 1);
+  }
+};
+
+
+ const handleBackPage = () => {
+  if (currentPageForms > 0) {
+    setCurrentPageForms((prev) => prev - 1);
+  }
+};
+
+
+  useEffect(() => {
+
+    const handleClickUploadFileOutside = (event: MouseEvent) => {
+
+      if(
+         uploadFilePopUpRef.current &&
+         !uploadFilePopUpRef.current.contains(event.target as Node)
+      ) {
+      setShowUploadFilePopup(false);        
+      }
+
+    };
+
+     document.addEventListener("mousedown", handleClickUploadFileOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickUploadFileOutside);
+    };
+    
+  }, []);
+
+  
+
+
+  const [activeSectionForms, setActiveSectionForms] = useState("resident");
+
+
+  
+
+  const uploadForms = async (url: string): Promise<void> => {
+    setIsLoading(true); // Start loading
+  
+    try {
+      window.location.href = url;
+  
+      await new Promise(resolve => setTimeout(resolve, 1000));
+  
+      setPopupMessage("File download successful!");
+    } catch (error) {
+      console.error("Error in uploadForms:", error);
+    } finally {
+      // End loading after 2 seconds
+      setTimeout(() => {
+        setIsLoading(false);
+  
+        // Show popup after loading is done
+        setShowPopup(true);
+  
+        // Hide popup after 2 more seconds
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 2000);
+      }, 2000);
+    }
+  };
 
   return (
     <div className="generatereport-main-container">
@@ -4196,6 +4334,7 @@ const ReportsPage = () => {
               </button>
               <h1> Generate Report </h1>
             </div>
+
           </div>
 
           <div className="generatereport-header-body">
@@ -4528,15 +4667,300 @@ const ReportsPage = () => {
               </button>
               <h1> Download Form </h1>
             </div>
+
+                <div className="action-btn-downloadble-forms">
+                    <button className="action-download" onClick={handleUploadClick} >Upload File</button>
+              </div>
+
           </div>
 
           <div className="generatereport-header-body">
+
+                        <div className="downloadble-report-top-section">
+
+                {/*
+                  TO DO JERICHO: 
+                  add logic na yung lalabas lang is yung modules na pwede sakanila
+
+                  sample: If Lupon Staff , incident module lang lalabas fixed
+                          If Punong Barangay , Pwede siya mag generate report sa lahat
+                          Etc...
+                */}
+
+              <div className="downloadble-report-info-toggle-wrapper">
+                 {["resident" ].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSectionForms === section ? "active" : ""}`}
+                      onClick={() => setActiveSectionForms(section)}
+                    >
+                      {section === "resident" && "Resident Module"}
+                     
+                    </button>
+                  ))}
+
+              </div>
+
+            </div>
+
+
+
+            <div className="downloadble-report-header-body-bottom-section">
+
+                  <div className="downloadble-forms-info-main-container">
+
+                    <div className="pagination-button-wrapper">
+                      <button
+                        className="pagination-btn"
+                        onClick={handleBackPage}
+                        disabled={currentPageForms === 0}
+                      >
+                        <img src="/Images/back.png" alt="Back" className="pagination-icon" />
+                      </button>
+                    </div>
+
+                    <div className="downloadble-forms-grid">
+                    {paginatedFiles.map((file, index)=> (
+                        <div className="form-card" key={index}>
+                          <div className="form-icon-label">
+                            <img src="/images/form.png" alt="Form Icon" />
+                            <span>{file.name.replace(".docx", "")}</span>
+                          </div>
+                          <div className="form-buttons">
+                            <button
+                              className="download-btn"
+                              onClick={() => uploadForms(file.url)}
+                            >
+                              Download
+                            </button>
+                            <button
+                              className="delete-btn"
+                              onClick={() => handleDeleteClick(file.name)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="pagination-button-wrapper">
+                      <button
+                        className="pagination-btn"
+                        onClick={handleNextPage}
+                        disabled={(currentPageForms + 1) * ITEMS_PER_PAGE >= files.length}
+                      >
+                          <img src="/Images/next.png" alt="Next" className="pagination-icon" />
+                      </button>
+                    </div>
+
+
+
+                  </div>
+
+            </div>
            
 
           </div>
         </div>
       </>
     )}
+
+
+
+
+
+
+    {showErrorPopup && (
+        <div className={`popup-overlay show`}>
+          <div className="popup">
+              <p>{popupMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {isLoading && (
+            <div className="popup-backdrop-download">
+              <div className="popup-content-download">
+                  <img src="/Images/loading.png" alt="loading..." className="successful-icon-popup-download" />
+                     <p>Downloading Form, please wait...</p>
+              </div>
+             </div>
+                )}
+
+        {showPopup && (
+          <div className={`popup-overlay-downloadble-forms show`}>
+              <div className="popup-downloadble-forms">
+                <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                <p>{popupMessage}</p>
+              </div>
+          </div>
+            )}
+
+         
+                    {showDeletePopup && (
+                <div className="popup-backdrop-download">
+                  <div className="popup-content-download">
+                    <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup-download" />
+                    <p>Are you sure you want to delete this file?</p>
+                    <h2>{fileToDelete}</h2>
+                    <div className="yesno-container-module-downloadable">
+                      <button onClick={() => setShowDeletePopup(false)} className="no-button-downloadable">No</button>
+                      <button onClick={confirmDelete} className="yes-button-downloadable">Yes</button>
+                    </div> 
+                  </div>
+                </div>
+              )}
+
+
+          
+
+
+    
+      {showUploadFilePopup && (
+        <div className="fileupload-popup-overlay">
+          <div className="fileupload-popup" ref = {uploadFilePopUpRef}>
+
+              <div className="file-upload-popup-section-1">
+
+                <h1> Upload File</h1>
+      
+                    <button 
+                    onClick={uploadFile} 
+                    disabled={!selectedUploadFile} 
+                    className="upload-button-section-1"
+                    >
+                    Upload
+                </button>
+              </div>
+
+              <div className="file-upload-popup-section-2">
+
+                  <div className="upload-container-downloadable-forms">
+                      <input 
+                          type="file" 
+                          onChange={handleFileUpload} 
+                          id="file-upload"
+                          style={{ display: 'none' }} 
+                      />
+                      <label 
+                          htmlFor="file-upload" 
+                          className="upload-link"
+                      >
+                          Choose File
+                      </label>
+
+                      {selectedUploadFile && (
+                        <div className="file-name-image-display">
+                          <ul className="file-list">
+                            <li className="file-name-image-display-indiv">
+                              <div className="file-item">
+                                <span className="file-name">{selectedUploadFile.name}</span>
+                                <div className="delete-container">
+                                  <button
+                                    type="button"
+                                    onClick={onDeleteFile}
+                                    className="delete-button-upload"
+                                  >
+                                    <img
+                                      src="/Images/delete.png"
+                                      alt="Delete"
+                                      className="delete-icon-upload"
+                                    />
+                                  </button>
+                                </div>
+                              </div>
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+
+                  </div>
+
+
+              </div>
+
+              <div className="file-upload-section-3">
+
+                <div className="section-3-main-content">
+                      
+                    <div className="main-content-section-1">
+                        <h1>Select Module</h1>
+                    </div>
+                     
+            
+                    <div className="section-3-fields-section">
+                        
+                        <div className="module-checkbox-container">
+                          <label className="module-checkbox-label">
+                              <input type="checkbox" />
+                              Resident Module
+                          </label>
+                        </div>
+
+                        <div className="module-checkbox-container">
+                          <label className="module-checkbox-label">
+                              <input type="checkbox" />
+                              Incident Module
+                          </label>
+                        </div>
+
+                         <div className="module-checkbox-container">
+                          <label className="module-checkbox-label">
+                              <input type="checkbox" />
+                              Services Module
+                          </label>
+                        </div>
+                       
+                    </div>
+
+                     <div className="section-3-fields-section">
+                        
+                        <div className="module-checkbox-container">
+                          <label className="module-checkbox-label">
+                              <input type="checkbox" />
+                           Reports Module
+                          </label>
+                        </div>
+
+                        <div className="module-checkbox-container">
+                          <label className="module-checkbox-label">
+                              <input type="checkbox" />
+                               Officials Module
+                          </label>
+                        </div>
+
+                         <div className="module-checkbox-container">
+                          <label className="module-checkbox-label">
+                              <input type="checkbox" />
+                              Announcement
+                          </label>
+                        </div>
+                       
+                    </div>
+
+
+
+
+
+
+                </div>
+                      
+                  
+              </div>
+
+
+
+
+
+          
+          </div>
+
+
+
+        </div>
+      )}
 
 
 {/*
