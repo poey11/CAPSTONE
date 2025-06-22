@@ -4674,9 +4674,9 @@ const handleNextPage = () => {
 
           </div>
 
-          <div className="generatereport-header-body">
+          <div className="downloadble-report-header-body">
 
-                        <div className="downloadble-report-top-section">
+                   <div className="downloadble-report-top-section">
 
                 {/*
                   TO DO JERICHO: 
