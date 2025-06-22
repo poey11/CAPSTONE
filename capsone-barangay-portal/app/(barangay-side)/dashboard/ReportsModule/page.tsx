@@ -4305,7 +4305,7 @@ const handleNextPage = () => {
       {/* NEW*/}
       <div className="generatereport-redirectionpage-section">
         <button 
-          className={`generatereport-redirection-buttons ${activeSection === "generate" ? "active" : ""}`}
+          className={` ${activeSection === "generate" ? "generate-reports-download-forms-selected" : "generatereport-redirection-buttons"}`}
           onClick={() => setActiveSection("generate")}
         >
           <div className="generatereport-redirection-icons-section">
@@ -4315,7 +4315,7 @@ const handleNextPage = () => {
         </button>
 
         <button 
-          className={`generatereport-redirection-buttons ${activeSection === "download" ? "active" : ""}`}
+          className={` ${activeSection === "download" ? "generate-reports-download-forms-selected " : "generatereport-redirection-buttons"}`}
           onClick={() => setActiveSection("download")}
         >
           <div className="generatereport-redirection-icons-section">

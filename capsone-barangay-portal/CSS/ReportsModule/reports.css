@@ -348,7 +348,7 @@
 }
 
 .generatereport-redirection-buttons:not(:disabled):hover {
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 .generatereport-redirection-buttons h1 {
@@ -373,6 +373,7 @@
 .generatereport-redirection-buttons:disabled {
   cursor: default;
 }
+
 
 
 .generatereport-redirection-icons-section {
@@ -1371,3 +1372,52 @@ input[type="checkbox"] {
   .action-download:hover {
      background-color: #3e8f41; 
   }
+
+
+/*
+tinangal 
+*/
+  .generate-report-selected {
+      width: 270px;
+  height: 50px;
+  background-color: #F0F2F8;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: auto;
+  }
+
+  .generate-report-selected h1 {
+  color: #2C3E50;
+  font-weight: bolder;
+  font-size: 16px;
+  }
+
+
+
+  .generate-reports-download-forms-selected {
+      width: 270px;
+  height: 50px;
+  background-color: #F0F2F8;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+  }
+
+  
+  .generate-reports-download-forms-selected h1{
+    color: #2C3E50;
+  font-weight: bolder;
+  font-size: 16px;
+  
+  }
+  
