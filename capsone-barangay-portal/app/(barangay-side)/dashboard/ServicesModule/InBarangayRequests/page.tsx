@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import "@/CSS/barangaySide/ServicesModule/InBarangayRequests.css";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 
 
@@ -13,10 +13,10 @@ import { db } from "@/app/db/firebase";
     useEffect(() => {
       try {
         const Collection = query(
-          collection(db, "InBarangayServiceRequests"),
+          collection(db,"ServiceRequests"),
+          where("accID", "==", "INBRGY-REQ"), // Filter for In Barangay requests
           orderBy("createdAt", "desc") // First, sort by latest
-        );
-      
+        );      
         const unsubscribe = onSnapshot(Collection, (snapshot) => {
           let reports: any[] = snapshot.docs.map((doc) => ({
             id: doc.id,
@@ -34,6 +34,8 @@ import { db } from "@/app/db/firebase";
           });
         
           setRequestData(reports);
+          console.log(requestData);
+
         });
       
         return unsubscribe;
@@ -43,32 +45,18 @@ import { db } from "@/app/db/firebase";
     }, []);
 
 
-
     const handleGenerateDocument = () => {
       router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument");
     };
 
-    const handleView = (documentType: string, purpose: string) => {
-      router.push("/dashboard/ServicesModule/InBarangayRequests/View");
-  };
-
-  const handleEdit = (documentType: string, purpose: string) => {
-    const documentRoutes: { [key: string]: string } = {
-        "Barangay Clearance": "/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayClearance",
-        "Barangay Indigency": "/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayIndigency",
-        "Barangay ID": "/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayID",
-        "Barangay Certificate": "/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayCertificate",
-        "First Time Jobseeker": "/dashboard/ServicesModule/InBarangayRequests/Edit/FirstTimeJobseeker",
+    const handleView =(id: string,reqType:string) => {
+      if(reqType === "Other Documents"){
+        router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/OtherNewDocument/view?id=${id}`);
+      }
+      else{
+        router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
+      }
     };
-
-    if (documentType === "Barangay Permit" && purpose) {
-        const formattedPurpose = purpose.replace(/\s+/g, ""); // Remove spaces for URL consistency
-        router.push(`/dashboard/ServicesModule/InBarangayRequests/Edit/BarangayPermit/${formattedPurpose}`);
-    } else {
-        const route = documentRoutes[documentType] || "/dashboard/ServicesModule/OnlineRequests/View";
-        router.push(route);
-    }
-};
 
   const [selectedDocumentType, setSelectedDocumentType] = useState<string | null>(null);
 
@@ -189,10 +177,10 @@ const confirmDelete = () => {
             <thead>
               <tr>
                 <th>Document Type</th>
+                <th>Request ID</th>
+                <th>Request Date</th>
+                <th>Requestor</th>
                 <th>Purpose</th>
-                <th>Name</th>
-                <th>Contact</th>
-                <th>Date</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -200,31 +188,25 @@ const confirmDelete = () => {
             <tbody>
             {requestData.map((request, index) => (
               <tr key={index}>
-                <td>{request.documentType}</td>
+                <td>{request.docType}</td>
+                <td>{request.requestId}</td>
+                <td>{request.createdAt}</td>
+                <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
-                <td>{request.name}</td>
-                <td>{request.contact}</td>
-                <td>{request.date}</td>
                 <td>
                     <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
                         {request.status}
                     </span>
                 </td>
                 <td>
-                <div className="actions">
+                  <div className="actions">
                     <button
                         className="action-view"
-                        onClick={() => handleView(request.documentType, request.purpose)}
+                        onClick={() => handleView(request.id, request.reqType)}
                     >
                         View
                     </button>
-                    <button
-                        className="action-edit"
-                        onClick={() => handleEdit(request.documentType, request.purpose)}
-                    >
-                        Edit
-                    </button>
-                    <button className="action-delete" onClick={() => handleDeleteClick(request.documentType)}>Delete</button>
+
                   </div>
                 </td>
               </tr>

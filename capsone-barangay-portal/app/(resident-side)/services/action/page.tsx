@@ -607,6 +607,7 @@ const handleFileChange = (
         const clearanceVars = {
           createdAt: clearanceInput.dateRequested,
           requestId: clearanceInput.requestId,
+          reqType: "Online",
           status: "Pending",
           statusPriority: 1,
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
@@ -1697,6 +1698,7 @@ const handleFileChange = (
                 max="150"  
                 placeholder="Enter Age"  
                 step="1" 
+                disabled={true}
               />
             </div>
 

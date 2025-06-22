@@ -1,8 +1,8 @@
 "use client"
 
 import { useRouter, useSearchParams} from "next/navigation";
-import { useState } from "react";
-import { doc, updateDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import "@/CSS/User&Roles/ReasonForRejection.css";
 
@@ -17,6 +17,7 @@ export default function reasonForRejection() {
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
 
+
     const [rejectionReason, setRejectionReason] = useState<rejectProp>({
         reason: "",
     });
@@ -25,6 +26,29 @@ export default function reasonForRejection() {
     const [popupMessage, setPopupMessage] = useState("");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [popupErrorMessage, setPopupErrorMessage] = useState("");
+    const [data, setData] = useState<any>();
+    useEffect(() => {
+        if (!id) return
+        try {
+            const fetchData = async () => {
+                // Fetch the document from Firestore
+                const docRef = doc(db, "ServiceRequests", id);
+                const docSnapshot = await getDoc(docRef);
+                
+                if (docSnapshot.exists()) {
+                    const data = docSnapshot.data();
+                    setData(data);
+                } else {
+                    console.error("Document does not exist");
+                }
+            };
+            fetchData();
+        } catch (error: any) {
+            console.error("Error fetching data:", error.message);
+            
+        }
+
+    },[]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setRejectionReason({
@@ -61,7 +85,13 @@ export default function reasonForRejection() {
             setShowPopup(true);
             setTimeout(() => {
                 setShowPopup(false);
-                router.push(`/dashboard/ServicesModule/OnlineRequests?highlight=${id}`);
+                if(data?.reqType === "InBarangay") {
+                    router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${id}`);
+                }
+                else{
+                    router.push(`/dashboard/ServicesModule/OnlineRequests?highlight=${id}`);
+                }
+                
             }, 3000);
         } catch (error) {
             console.error("Error updating rejection reason:", error);
