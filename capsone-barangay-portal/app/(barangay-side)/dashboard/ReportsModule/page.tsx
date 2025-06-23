@@ -7,6 +7,8 @@ import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { MonthYearModal } from "@/app/(barangay-side)/components/MonthYearModal"; 
+
 
 
 interface FileData {
@@ -44,15 +46,24 @@ const ReportsPage = () => {
   const [selectedModule, setSelectedModule] = useState<string>("");
   const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(null);
 
-    // for incident reports
-    const [loadingVAWCReport, setLoadingVAWCReport] = useState(false);    
-    const [loadingLuponSettledReport, setLoadingLuponSettledReport] = useState(false);    
-    const [loadingLuponPendingReport, setLoadingLuponPendingReport] = useState(false);    
-    const [loadingIncidentSummary, setLoadingIncidentSummary] = useState(false);    
-    const [loadingIncidentStatuses, setLoadingIncidentStatuses] = useState(false);    
-    const [loadingGADRCOMonitoringReport, setGADRCOMonitoringReport] = useState(false);    
+  // for incident reports
+  const [loadingVAWCReport, setLoadingVAWCReport] = useState(false);    
+  const [loadingLuponSettledReport, setLoadingLuponSettledReport] = useState(false);    
+  const [loadingLuponPendingReport, setLoadingLuponPendingReport] = useState(false);    
+  const [loadingIncidentSummary, setLoadingIncidentSummary] = useState(false);    
+  const [loadingIncidentStatuses, setLoadingIncidentStatuses] = useState(false);    
+  const [loadingGADRCOMonitoringReport, setGADRCOMonitoringReport] = useState(false);    
 
 
+        // for services reports
+
+  const [loadingBarangayCertPending, setLoadingBarangayCertPending] = useState(false);    
+  const [loadingBarangayCertCompleted, setLoadingBarangayCertCompleted] = useState(false);    
+  const [loadingBarangayCertMonthly, setLoadingBarangayCertMonthly] = useState(false);    
+  
+  const [showCertMonthlyModal, setShowCertMonthlyModal] = useState(false);
+  const [showCompletedCertModal, setShowCompletedCertModal] = useState(false);
+  const [showPendingCertModal, setShowPendingCertModal] = useState(false);
 
   
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -4141,7 +4152,724 @@ const confirmDelete = async () => {
       }, 5000);
       /*alert("Failed to generate Incident Summary PDF.");*/
     } finally {
-      setLoadingIncidentStatuses(false);
+      setLoadingIncidentSummary(false);
+    }
+  };
+
+    // Services Module
+
+  // Barangay Cert pending
+
+  const generateBarangayCertPendingMonthlyReport = async (
+    month: number,
+    year: number,
+    allTime: boolean = false
+  ) => {
+    setLoadingBarangayCertPending(true);
+    setIsGenerating(true);
+  
+    try {
+      const startOfMonth = new Date(year, month, 1);
+      const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
+  
+      const reportTitle = allTime
+        ? `AS OF ALL TIME`
+        : `AS OF ${startOfMonth.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+          }).toUpperCase()}`;
+  
+      const serviceRef = collection(db, "ServiceRequests");
+      const q = query(serviceRef);
+      const querySnapshot = await getDocs(q);
+  
+      const requests = querySnapshot.docs
+        .map((doc) => doc.data())
+        .filter((req) => {
+          const isCert = req.docType === "Barangay Certificate";
+          const isCompleted = req.status?.toLowerCase() === "pending";
+          const created = new Date(req.createdAt);
+          return (
+            isCert &&
+            isCompleted &&
+            (allTime || (created >= startOfMonth && created <= endOfMonth))
+          );
+        })
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  
+      if (requests.length === 0) {
+        alert(
+          allTime
+            ? "No pending Barangay Certificate requests found."
+            : "No pending Barangay Certificate requests for the selected month."
+        );
+        setShowPendingCertModal(false);
+        setIsGenerating(false);
+        return null;
+      }
+  
+      const templateRef = ref(
+        storage,
+        "ReportsModule/Barangay Certificate Requests_Template.xlsx"
+      );
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+  
+      worksheet.getCell("A1").alignment = { horizontal: "center", wrapText: true };
+      worksheet.getCell("A3").value = reportTitle;
+      worksheet.getCell("A3").alignment = { horizontal: "center", wrapText: true };
+  
+      const originalFooterStartRow = 21;
+      const originalFooterEndRow = 25;
+      const footerDrawings = worksheet.getImages().filter((img) => {
+        const row = img.range?.tl?.nativeRow;
+        return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
+      });
+  
+      let insertionRow = 4;
+      const rowsNeeded = requests.length;
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));
+  
+      let count = 1;
+      requests.forEach((req) => {
+        const row = worksheet.getRow(insertionRow);
+        row.height = 45;
+  
+        const formattedCreatedAt = new Date(req.createdAt).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+  
+        const cells = [
+          count,
+          req.requestId || "",
+          req.requestor || "",
+          req.purpose || "",
+          req.address || "",
+          req.contact || "",
+          formattedCreatedAt,
+          req.status || "",
+        ];
+  
+        cells.forEach((value, index) => {
+          const cell = row.getCell(index + 1);
+          cell.value = value;
+          cell.font = { name: "Calibri", size: 12 };
+          cell.alignment = { horizontal: "center", wrapText: true };
+          cell.border = {
+            top: { style: "medium" },
+            bottom: { style: "medium" },
+            left: { style: "medium" },
+            right: { style: "medium" },
+          };
+        });
+  
+        row.commit();
+        insertionRow++;
+        count++;
+      });
+  
+      footerDrawings.forEach((drawing) => {
+        const offset = rowsNeeded;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+      });
+  
+      const footerShift = rowsNeeded;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 1;
+  
+      worksheet.insertRow(newDateRowIndex - 1, []);
+      worksheet.insertRow(newDateRowIndex, []);
+  
+      const dateRow = worksheet.getRow(newDateRowIndex + 1);
+      dateRow.height = 40;
+  
+      const currentDate = new Date();
+      const formattedDate = currentDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+  
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(3);
+      dateCell1.value = `${formattedDate}\nDate`;
+      dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
+  
+      worksheet.mergeCells(`E${dateRow.number}:F${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(5);
+      dateCell2.value = `${formattedDate}\nDate`;
+      dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
+  
+      dateRow.commit();
+  
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9,
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0,
+      };
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const paddedMonth = String(month + 1).padStart(2, "0");
+      const fileName = allTime
+        ? `BarangayCertificate_Pending_ALLTIME.xlsx`
+        : `BarangayCertificate_Pending_${year}_${paddedMonth}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+      setGeneratingMessage("Generating Pending Barangay Certificate Report...");
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating report:", error);
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate report");
+  
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      return null;
+    } finally {
+      setLoadingBarangayCertPending(false);
+      setShowPendingCertModal(false);
+    }
+  };
+  
+  const handleGenerateBarangayCertMonthlyPendingPDF = async (
+    month: number,
+    year: number,
+    allTime: boolean = false
+  ) => {
+    setLoadingBarangayCertPending(true);
+  
+    try {
+      const fileUrl = await generateBarangayCertPendingMonthlyReport(month, year, allTime);
+  
+      if (!fileUrl) {
+        alert(allTime
+          ? "No pending Barangay Certificate requests found."
+          : "No pending Barangay Certificate requests for the selected month."
+        );
+        return;
+      }
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("PDF conversion failed");
+  
+      const blob = await response.blob();
+  
+      const label = allTime
+        ? "ALLTIME"
+        : new Date(year, month).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+          }).replace(" ", "");
+  
+      saveAs(blob, `BarangayCertificate_Pending_${label}.pdf`);
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Failed to generate PDF");
+    } finally {
+      setLoadingBarangayCertPending(false);
+      setShowPendingCertModal(false);
+      setIsGenerating(false);
+
+    }
+  };
+  // barangay cert completed
+
+  const generateBarangayCertCompletedMonthlyReport = async (
+    month: number,
+    year: number,
+    allTime: boolean = false
+  ) => {
+    setLoadingBarangayCertCompleted(true);
+    setIsGenerating(true);
+  
+    try {
+      const startOfMonth = new Date(year, month, 1);
+      const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
+  
+      const reportTitle = allTime
+        ? `AS OF ALL TIME`
+        : `AS OF ${startOfMonth.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+          }).toUpperCase()}`;
+  
+      const serviceRef = collection(db, "ServiceRequests");
+      const q = query(serviceRef);
+      const querySnapshot = await getDocs(q);
+  
+      const requests = querySnapshot.docs
+        .map((doc) => doc.data())
+        .filter((req) => {
+          const isCert = req.docType === "Barangay Certificate";
+          const isCompleted = req.status?.toLowerCase() === "completed";
+          const created = new Date(req.createdAt);
+          return (
+            isCert &&
+            isCompleted &&
+            (allTime || (created >= startOfMonth && created <= endOfMonth))
+          );
+        })
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  
+      if (requests.length === 0) {
+        alert(
+          allTime
+            ? "No completed Barangay Certificate requests found."
+            : "No completed Barangay Certificate requests for the selected month."
+        );
+        setShowCompletedCertModal(false);
+        setIsGenerating(false);
+        return null;
+      }
+  
+      const templateRef = ref(
+        storage,
+        "ReportsModule/Barangay Certificate Requests_Template.xlsx"
+      );
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+  
+      worksheet.getCell("A1").alignment = { horizontal: "center", wrapText: true };
+      worksheet.getCell("A3").value = reportTitle;
+      worksheet.getCell("A3").alignment = { horizontal: "center", wrapText: true };
+  
+      const originalFooterStartRow = 21;
+      const originalFooterEndRow = 25;
+      const footerDrawings = worksheet.getImages().filter((img) => {
+        const row = img.range?.tl?.nativeRow;
+        return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
+      });
+  
+      let insertionRow = 4;
+      const rowsNeeded = requests.length;
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));
+  
+      let count = 1;
+      requests.forEach((req) => {
+        const row = worksheet.getRow(insertionRow);
+        row.height = 45;
+  
+        const formattedCreatedAt = new Date(req.createdAt).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+  
+        const cells = [
+          count,
+          req.requestId || "",
+          req.requestor || "",
+          req.purpose || "",
+          req.address || "",
+          req.contact || "",
+          formattedCreatedAt,
+          req.status || "",
+        ];
+  
+        cells.forEach((value, index) => {
+          const cell = row.getCell(index + 1);
+          cell.value = value;
+          cell.font = { name: "Calibri", size: 12 };
+          cell.alignment = { horizontal: "center", wrapText: true };
+          cell.border = {
+            top: { style: "medium" },
+            bottom: { style: "medium" },
+            left: { style: "medium" },
+            right: { style: "medium" },
+          };
+        });
+  
+        row.commit();
+        insertionRow++;
+        count++;
+      });
+  
+      footerDrawings.forEach((drawing) => {
+        const offset = rowsNeeded;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+      });
+  
+      const footerShift = rowsNeeded;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 1;
+  
+      worksheet.insertRow(newDateRowIndex - 1, []);
+      worksheet.insertRow(newDateRowIndex, []);
+  
+      const dateRow = worksheet.getRow(newDateRowIndex + 1);
+      dateRow.height = 40;
+  
+      const currentDate = new Date();
+      const formattedDate = currentDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+  
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(3);
+      dateCell1.value = `${formattedDate}\nDate`;
+      dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
+  
+      worksheet.mergeCells(`E${dateRow.number}:F${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(5);
+      dateCell2.value = `${formattedDate}\nDate`;
+      dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
+  
+      dateRow.commit();
+  
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9,
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0,
+      };
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const paddedMonth = String(month + 1).padStart(2, "0");
+      const fileName = allTime
+        ? `BarangayCertificate_Completed_ALLTIME.xlsx`
+        : `BarangayCertificate_Completed_${year}_${paddedMonth}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+      setGeneratingMessage("Generating Completed Barangay Certificate Report...");
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating report:", error);
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate report");
+  
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      return null;
+    } finally {
+      setLoadingBarangayCertCompleted(false);
+      setShowCompletedCertModal(false);
+    }
+  };
+  
+  const handleGenerateBarangayCertMonthlyCompletedPDF = async (
+    month: number,
+    year: number,
+    allTime: boolean = false
+  ) => {
+    setLoadingBarangayCertCompleted(true);
+  
+    try {
+      const fileUrl = await generateBarangayCertCompletedMonthlyReport(month, year, allTime);
+  
+      if (!fileUrl) {
+        alert(allTime
+          ? "No completed Barangay Certificate requests found."
+          : "No completed Barangay Certificate requests for the selected month."
+        );
+        return;
+      }
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("PDF conversion failed");
+  
+      const blob = await response.blob();
+  
+      const label = allTime
+        ? "ALLTIME"
+        : new Date(year, month).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+          }).replace(" ", "");
+  
+      saveAs(blob, `BarangayCertificate_Completed_${label}.pdf`);
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Failed to generate PDF");
+    } finally {
+      setLoadingBarangayCertCompleted(false);
+      setShowCompletedCertModal(false);
+      setIsGenerating(false);
+
+    }
+  };
+  
+  const generateBarangayCertMonthlyReport = async (
+    month: number,
+    year: number,
+    allTime: boolean = false
+  ) => {
+    setLoadingBarangayCertMonthly(true);
+    setIsGenerating(true);
+  
+    try {
+      const startOfMonth = new Date(year, month, 1);
+      const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
+  
+      const reportTitle = allTime
+        ? `AS OF ALL TIME`
+        : `AS OF ${startOfMonth.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+          }).toUpperCase()}`;
+  
+      const serviceRef = collection(db, "ServiceRequests");
+      const q = query(serviceRef);
+      const querySnapshot = await getDocs(q);
+  
+      const requests = querySnapshot.docs
+        .map((doc) => doc.data())
+        .filter((req) => {
+          const isCert = req.docType === "Barangay Certificate";
+          const created = new Date(req.createdAt);
+          return (
+            isCert &&
+            (allTime || (created >= startOfMonth && created <= endOfMonth))
+          );
+        })
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  
+      if (requests.length === 0) {
+        alert(
+          allTime
+            ? "No Barangay Certificate requests found."
+            : "No Barangay Certificate requests for the selected month."
+        );
+        setShowCertMonthlyModal(false);
+        setIsGenerating(false);
+        return null;
+      }
+  
+      const templateRef = ref(
+        storage,
+        "ReportsModule/Barangay Certificate Requests_Template.xlsx"
+      );
+      const url = await getDownloadURL(templateRef);
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+  
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+  
+      worksheet.getCell("A1").alignment = { horizontal: "center", wrapText: true };
+      worksheet.getCell("A3").value = reportTitle;
+      worksheet.getCell("A3").alignment = { horizontal: "center", wrapText: true };
+  
+      const originalFooterStartRow = 21;
+      const originalFooterEndRow = 25;
+      const footerDrawings = worksheet.getImages().filter((img) => {
+        const row = img.range?.tl?.nativeRow;
+        return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
+      });
+  
+      let insertionRow = 4;
+      const rowsNeeded = requests.length;
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));
+  
+      let count = 1;
+      requests.forEach((req) => {
+        const row = worksheet.getRow(insertionRow);
+        row.height = 45;
+  
+        const formattedCreatedAt = new Date(req.createdAt).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+  
+        const cells = [
+          count,
+          req.requestId || "",
+          req.requestor || "",
+          req.purpose || "",
+          req.address || "",
+          req.contact || "",
+          formattedCreatedAt,
+          req.status || "",
+        ];
+  
+        cells.forEach((value, index) => {
+          const cell = row.getCell(index + 1);
+          cell.value = value;
+          cell.font = { name: "Calibri", size: 12 };
+          cell.alignment = { horizontal: "center", wrapText: true };
+          cell.border = {
+            top: { style: "medium" },
+            bottom: { style: "medium" },
+            left: { style: "medium" },
+            right: { style: "medium" },
+          };
+        });
+  
+        row.commit();
+        insertionRow++;
+        count++;
+      });
+  
+      footerDrawings.forEach((drawing) => {
+        const offset = rowsNeeded;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+      });
+  
+      const footerShift = rowsNeeded;
+      const newDateRowIndex = originalFooterEndRow + footerShift + 1;
+  
+      worksheet.insertRow(newDateRowIndex - 1, []);
+      worksheet.insertRow(newDateRowIndex, []);
+  
+      const dateRow = worksheet.getRow(newDateRowIndex + 1);
+      dateRow.height = 40;
+  
+      const currentDate = new Date();
+      const formattedDate = currentDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+  
+      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      const dateCell1 = dateRow.getCell(3);
+      dateCell1.value = `${formattedDate}\nDate`;
+      dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
+  
+      worksheet.mergeCells(`E${dateRow.number}:F${dateRow.number}`);
+      const dateCell2 = dateRow.getCell(5);
+      dateCell2.value = `${formattedDate}\nDate`;
+      dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+      dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
+  
+      dateRow.commit();
+  
+      worksheet.pageSetup = {
+        horizontalCentered: true,
+        verticalCentered: false,
+        orientation: "landscape",
+        paperSize: 9,
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0,
+      };
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const paddedMonth = String(month + 1).padStart(2, "0");
+      const fileName = allTime
+        ? `BarangayCertificate_ALLTIME.xlsx`
+        : `BarangayCertificate_${year}_${paddedMonth}.xlsx`;
+      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRef, blob);
+  
+      const fileUrl = await getDownloadURL(storageRef);
+      setGeneratingMessage("Generating Barangay Certificate Report...");
+      return fileUrl;
+    } catch (error) {
+      console.error("Error generating report:", error);
+      setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate report");
+  
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+      }, 5000);
+      return null;
+    } finally {
+      setLoadingBarangayCertCompleted(false);
+      setShowCompletedCertModal(false);
+    }
+  };
+  
+  const handleGenerateBarangayCertMonthlyPDF = async (
+    month: number,
+    year: number,
+    allTime: boolean = false
+  ) => {
+    setLoadingBarangayCertMonthly(true);
+  
+    try {
+      const fileUrl = await generateBarangayCertMonthlyReport(month, year, allTime);
+  
+      if (!fileUrl) {
+        alert(allTime
+          ? "No Barangay Certificate requests found."
+          : "No Barangay Certificate requests for the selected month."
+        );
+        return;
+      }
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("PDF conversion failed");
+  
+      const blob = await response.blob();
+  
+      const label = allTime
+        ? "ALLTIME"
+        : new Date(year, month).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+          }).replace(" ", "");
+  
+      saveAs(blob, `BarangayCertificate_${label}.pdf`);
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Failed to generate PDF");
+    } finally {
+      setLoadingBarangayCertMonthly(false);
+      setShowCertMonthlyModal(false);
+      setIsGenerating(false);
+
     }
   };
   
@@ -4217,10 +4945,6 @@ const confirmDelete = async () => {
 
 
 
-
-/*
-
-*/
 
 
 const ITEMS_PER_PAGE = 6;
@@ -4609,6 +5333,100 @@ const handleNextPage = () => {
                             Most Requested Services Lists
                           </p>
                       </button>
+                        <>
+                              <button
+                                type="button"
+                                onClick={() => setShowPendingCertModal(true)}
+                                disabled={loadingBarangayCertPending}
+                                className={`report-tile ${loadingBarangayCertPending ? "disabled" : ""}`}
+                                aria-busy={loadingBarangayCertPending}
+                                aria-label="Generate Monthly Pending Barangay Certificate Report"
+                              >
+                                <img
+                                  src="/images/services.png"
+                                  alt="Barangay Certificate Icon"
+                                  className="report-icon"
+                                  aria-hidden="true"
+                                />
+                                <p className="report-title">
+                                  {loadingBarangayCertCompleted
+                                    ? "Generating..."
+                                    : "Monthly Barangay Certificate - Pending Status Report"}
+                                </p>
+                              </button>
+
+                              <MonthYearModal
+                                show={showPendingCertModal}
+                                onClose={() => setShowPendingCertModal(false)}
+                                onGenerate={handleGenerateBarangayCertMonthlyPendingPDF}
+                                loading={loadingBarangayCertPending}
+                                title="Generate Monthly Pending Barangay Certificate Report"
+                              />
+                            </>
+                
+                        <>
+                              <button
+                                type="button"
+                                onClick={() => setShowCompletedCertModal(true)}
+                                disabled={loadingBarangayCertCompleted}
+                                className={`report-tile ${loadingBarangayCertCompleted ? "disabled" : ""}`}
+                                aria-busy={loadingBarangayCertCompleted}
+                                aria-label="Generate Monthly Completed Barangay Certificate Report"
+                              >
+                                <img
+                                  src="/images/services.png"
+                                  alt="Barangay Certificate Icon"
+                                  className="report-icon"
+                                  aria-hidden="true"
+                                />
+                                <p className="report-title">
+                                  {loadingBarangayCertCompleted
+                                    ? "Generating..."
+                                    : "Monthly Barangay Certificate - Completed Status Report"}
+                                </p>
+                              </button>
+
+                              <MonthYearModal
+                                show={showCompletedCertModal}
+                                onClose={() => setShowCompletedCertModal(false)}
+                                onGenerate={handleGenerateBarangayCertMonthlyCompletedPDF}
+                                loading={loadingBarangayCertCompleted}
+                                title="Generate Monthly Completed Barangay Certificate Report"
+                              />
+                            </>
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setShowCertMonthlyModal(true)}
+                            disabled={loadingBarangayCertMonthly}
+                            className={`report-tile ${loadingBarangayCertMonthly ? "disabled" : ""}`}
+                            aria-busy={loadingBarangayCertMonthly}
+                            aria-label="Generate Monthly Barangay Certificate Report"
+                          >
+                            <img
+                              src="/images/services.png"
+                              alt="Barangay Certificate Icon"
+                              className="report-icon"
+                              aria-hidden="true"
+                            />
+                            <p className="report-title">
+                              {loadingBarangayCertMonthly ? "Generating..." : "Monthly Barangay Certificate Report"}
+                            </p>
+                          </button>
+
+                          {/* Modal Triggered by the Button Above */}
+                          <MonthYearModal
+                            show={showCertMonthlyModal}
+                            onClose={() => setShowCertMonthlyModal(false)}
+                            onGenerate={handleGenerateBarangayCertMonthlyPDF}
+                            loading={loadingBarangayCertMonthly}
+                            title="Generate Monthly Barangay Certificate Report"
+                          />
+                        </>
+
+
+
+
                     </div>
                   )}
                 </>
@@ -4942,275 +5760,12 @@ const handleNextPage = () => {
                         </div>
                        
                     </div>
-
-
-
-
-
-
                 </div>
-                      
-                  
               </div>
-
-
-
-
-
-          
           </div>
-
-
-
         </div>
       )}
 
-
-{/*
-
-      <h1 className="reports-title">Reports Module</h1>
-
-      <div className="reports-section">
-        <div className="report-card">
-          <h2 className="report-title">Generate Reports</h2>
-          <div className="Option-container">
-            <select
-              className="featuredStatus"
-              onChange={handleModuleChange}
-              required
-            >
-              <option value="">Select Module</option>
-                  {session?.user?.role === "Barangay Official" &&
-                    (
-                      session?.user?.position === "Secretary" ||
-                      session?.user?.position === "Assistant Secretary" ||
-                      session?.user?.position === "Punong Barangay"
-                    ) && (
-                      <option value="Resident Module">Resident Module</option>
-                  )}
-
-                  {session?.user?.role === "Barangay Official" &&
-                    (
-                      session?.user?.position === "LF Staff" ||
-                      session?.user?.position === "Assistant Secretary" ||
-                      session?.user?.position === "Secretary" ||
-                      session?.user?.position === "Punong Barangay"
-                    ) && (
-                      <option value="Incident Module">Incident Module</option>
-                  )}
-
-                  {session?.user?.role === "Barangay Official" &&
-                    (
-                      session?.user?.position === "Secretary" ||
-                      session?.user?.position === "Punong Barangay" ||
-                      session?.user?.position === "Assistant Secretary" ||
-                      session?.user?.position === "Admin Staff"
-                    ) && (
-                      <option value="Services Module">Services Module</option>
-                  )}
-                  {session?.user?.role === "Barangay Official" && (
-                      <option value="Programs Module">Programs Module</option>
-                  )}
-            </select>
-          </div>
-
-          {selectedModule === "Resident Module" && (
-            <>
-              <button onClick={handleRegistrationSummaryPDF} disabled={loadingRegistrationSummary} className="report-button">
-                {loadingRegistrationSummary ? "Generating..." : "Generate Resident Registration Summary Report"}
-              </button>
-              <button onClick={handleGenerateSeniorPDF} disabled={loadingResidentSeniorDemographic} className="report-button">
-                {loadingResidentSeniorDemographic ? "Generating..." : "Generate Resident Demographic Report(Senior Citizens)"}
-              </button>
-              <button onClick={handleGenerateStudentPDF} disabled={loadingResidentStudentDemographic} className="report-button">
-                {loadingResidentStudentDemographic ? "Generating..." : "Generate Resident Demographic Report(Students/Minors)"}
-              </button> 
-              <button onClick={handleGeneratePwdPDF} disabled={loadingResidentPWDDemographic} className="report-button">
-                {loadingResidentPWDDemographic ? "Generating..." : "Generate Resident Demographic Report(PWD)"}
-              </button>   
-              <button onClick={handleGenerateSoloParentPDF} disabled={loadingResidentSoloParentDemographic} className="report-button">
-                {loadingResidentSoloParentDemographic ? "Generating..." : "Generate Resident Demographic Report(Solo Parents)"}
-              </button>    
-              <button onClick={handleGenerateResidentPDF} disabled={loadingMasterResident} className="report-button">
-                {loadingMasterResident ? "Generating..." : "Generate Master Resident Inhabitant Record"}
-              </button>
-              <button onClick={handleGenerateEastResidentPDF} disabled={loadingResidentSeniorDemographic} className="report-button">
-                {loadingEastResident ? "Generating..." : "Generate East Resident Inhabitant Record"}
-              </button>
-              <button onClick={handleGenerateWestResidentPDF} disabled={loadingWestResident} className="report-button">
-                {loadingWestResident ? "Generating..." : "Generate West Resident Inhabitant Record"}
-              </button>
-              <button onClick={handleGenerateSouthResidentPDF} disabled={loadingSouthResident} className="report-button">
-                {loadingSouthResident ? "Generating..." : "Generate South Resident Inhabitant Record"}
-              </button>
-              <button onClick={handleGenerateKasambahayPDF} disabled={loadingKasambahay} className="report-button">
-                {loadingKasambahay ? "Generating..." : "Generate Kasambahay Masterlist"}
-              </button>
-              <button onClick={handleGenerateJobSeekerPDF} disabled={loadingJobSeeker} className="report-button">
-                {loadingJobSeeker ? "Generating..." : "Generate First-Time Job Seeker List"}
-              </button>       
-              </>
-          )}
-
-          {selectedModule === "Incident Module" && (
-            <>
-              <button onClick={handleGenerateIncidentSummaryPDF} disabled={loadingIncidentSummary} className="report-button">
-                {loadingIncidentSummary ? "Generating..." : "All Incidents Summary"}
-              </button>      
-              <button onClick={handleGenerateIncidentStatusSummaryPDF} disabled={loadingIncidentStatuses} className="report-button">
-                {loadingIncidentStatuses ? "Generating..." : "Incident Status Summary"}
-              </button>             
-          {(session?.user?.department === "Lupon" || session?.user?.position === "Assistant Secretary") && (
-            <>
-              <button onClick={handleGenerateLuponSettledPDF} disabled={loadingLuponSettledReport} className="report-button">
-                {loadingLuponSettledReport ? "Generating..." : "Lupon Settled Report"}
-              </button>   
-              <button onClick={handleGenerateLuponPendingPDF} disabled={loadingLuponPendingReport} className="report-button">
-                {loadingLuponPendingReport ? "Generating..." : "Lupon Pending Report"}
-              </button>   
-            </>
-          )}
-          {(session?.user?.department === "VAWC" || session?.user?.position === "Assistant Secretary") && (
-            <>
-              <button onClick={handleGenerateVAWCPDF} disabled={loadingVAWCReport} className="report-button">
-                {loadingVAWCReport ? "Generating..." : "Monthly VAWC Report"}
-              </button>      
-            </>
-          )}
-          {(session?.user?.department === "GAD" || session?.user?.department === "BCPC" || session?.user?.position === "Assistant Secretary")  && (
-            <>
-              <button className="report-button">GADRCO Quarterly Monitoring Report</button>
-            </>
-          )}
-
-        </>
-      )}
-
-          {selectedModule === "Services Module" && (
-            <>
-              <button className="report-button">Most Requested Services Lists</button>
-            </>
-          )}
-
-          {selectedModule === "Programs Module" && (
-            <>
-              <button className="report-button">Program Participation Report</button>
-              <button className="report-button">Program Completion Status Report</button>
-            </>
-          )}
-        </div>
-
-*/}
-
-{/*
-        <div className="report-card">
-          <h2 className="report-title">Downloadable Forms</h2>
-       
-      <div className="forms-section">
-
-
-          <div className="Option-container">
-            <select
-              className="featuredStatus"
-              onChange={handleSelectChange}
-              required
-            >
-              <option value="">Select a form...</option>
-              {files.length > 0 ? (
-                files.map((file, index) => (
-                  <option key={index} value={file.name.replace(".docx", "")}> 
-                    {file.name.replace(".docx", "")}
-                  </option>
-                ))
-              ) : (
-                <option>Loading files...</option>
-              )}
-            </select>
-          </div>
-
-          {selectedFile && (
-              <div className="download-item">
-                <span className="download-text">{selectedFile.name.replace(".docx", "")}</span>
-                <button 
-                  onClick={() => window.location.href = selectedFile.url} 
-                  className="download-button"
-                >
-                  Download
-                </button>
-                <button 
-                  onClick={() => deleteFile(selectedFile.name)} 
-                  className="deleted-button"
-                >
-                  Delete
-                </button>
-              </div>
-            )}
-
-    </div>
-
-<h2 className="report-title">Upload a File</h2>  
-
-<div className="upload-section">
-      <div className="upload-container-brgyside">
-          <input 
-              type="file" 
-              onChange={handleFileUpload} 
-              id="file-upload"
-              style={{ display: 'none' }} 
-          />
-          <label 
-              htmlFor="file-upload" 
-              className="upload-link"
-          >
-              Choose File
-          </label>
-
-          {selectedUploadFile && (
-              <div className="file-name-image-display">
-                  <ul>
-                      <div className="file-name-image-display-indiv">
-                          <li className="file-item"> 
-                              
-                            
-                              <span>{selectedUploadFile.name}</span>  
-                              <div className="delete-container">
-                                  {/* Delete button with image */}
-{/*}
-                                  <button
-                                      type="button"
-                                      onClick={onDeleteFile} // Call the delete function
-                                      className="deleted-button"
-                                  >
-                                      <img
-                                          src="/images/trash.png"  
-                                          alt="Delete"
-                                          className="delete-icon"
-                                      />
-                                  </button>
-                              </div>
-                          </li>
-                      </div>
-                  </ul>
-              </div>
-          )}
-
-          <button 
-              onClick={uploadFile} 
-              disabled={!selectedUploadFile} 
-              className="upload-button"
-          >
-              Upload
-          </button>
-      </div>
-
-</div>             
-          
-        </div>
-
-        
-      </div>
-
-  */}
 
       {/* Success Pop-up */}
       {showSuccessPopup && (
@@ -5259,6 +5814,8 @@ const handleNextPage = () => {
           </div>
         </div>
       )}
+
+      
 
 
       
