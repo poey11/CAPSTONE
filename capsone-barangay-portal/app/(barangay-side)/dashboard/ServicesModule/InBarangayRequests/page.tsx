@@ -9,6 +9,22 @@ import { db } from "@/app/db/firebase";
   export default function InBarangayRequests() { 
     const router = useRouter();
     const [requestData, setRequestData] = useState<any[]>([]);
+     const [searchType, setSearchType] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+      const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+  const [filteredInBarangayRequests, setFilteredInBarangayRequests] = useState<any[]>([]);
+
+
+
+  const [selectedDocumentType, setSelectedDocumentType] = useState<string | null>(null);
+
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
 
     useEffect(() => {
       try {
@@ -34,6 +50,10 @@ import { db } from "@/app/db/firebase";
           });
         
           setRequestData(reports);
+          setFilteredInBarangayRequests(reports); // add
+
+          setLoading(false);
+          setError(null);
           console.log(requestData);
 
         });
@@ -43,6 +63,40 @@ import { db } from "@/app/db/firebase";
         console.log(error.message);
       }
     }, []);
+
+
+    /*
+      FILTER LOGIC
+    */
+
+
+    useEffect(() => {
+    let filtered = requestData;
+
+   if (searchType !== "" && searchType !== "All") {
+    filtered = filtered.filter((req) =>
+      req.docType.toLowerCase().includes(searchType.toLowerCase())
+    );
+  }
+
+    if (dateFrom && dateTo) {
+      filtered = filtered.filter((req) => {
+        const requestDate = new Date(req.createdAt);
+        return requestDate >= new Date(dateFrom) && requestDate <= new Date(dateTo);
+      });
+    }
+
+    if (statusFilter !== "") {
+      filtered = filtered.filter(
+        (req) => req.status.toLowerCase() === statusFilter.toLowerCase()
+      );
+    }
+
+    setFilteredInBarangayRequests(filtered);
+    setCurrentPage(1);
+  }, [searchType, dateFrom, dateTo, statusFilter, requestData]);
+
+
 
 
     const handleGenerateDocument = () => {
@@ -58,11 +112,7 @@ import { db } from "@/app/db/firebase";
       }
     };
 
-  const [selectedDocumentType, setSelectedDocumentType] = useState<string | null>(null);
 
-  const [showDeletePopup, setShowDeletePopup] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupMessage, setPopupMessage] = useState("");
 
   const handleDeleteClick = (documentType: string) => {
     setSelectedDocumentType(documentType); 
@@ -83,24 +133,20 @@ const confirmDelete = () => {
 };
 
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const residentsPerPage = 10; //pwede paltan 
+ const [currentPage, setCurrentPage] = useState(1);
+  const requestsPerPage = 10;
 
-  const [filteredOnlineRequests, setFilteredOnlineRequests] = useState<any[]>([]);
+  const indexOfLastRequest = currentPage * requestsPerPage;
+  const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
+  const currentInBarangayRequests = filteredInBarangayRequests.slice(indexOfFirstRequest, indexOfLastRequest);
 
-  const indexOfLastRequest = currentPage * residentsPerPage;
-  const indexOfFirstRequest = indexOfLastRequest - residentsPerPage;
-  const currentOnlineRequests = filteredOnlineRequests.slice(indexOfFirstRequest, indexOfLastRequest);
-
-  const totalPages = Math.ceil(filteredOnlineRequests.length / residentsPerPage);
-
+  const totalPages = Math.ceil(filteredInBarangayRequests.length / requestsPerPage);
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
   const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
   const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
 
   const getPageNumbers = () => {
-    const totalPagesArray = [];
     const pageNumbersToShow = [];
 
     for (let i = 1; i <= totalPages; i++) {
@@ -116,63 +162,76 @@ const confirmDelete = () => {
 
     return pageNumbersToShow;
   };
-  
+
 
 
     return (
 
         <main className="inbarangayreq-main-container">
          <div className="inbarangayreq-section-1">
-          <h1>In Barangay Document Requests</h1>
-          <button
-            className="add-announcement-btn"
-            onClick={handleGenerateDocument}
-          >
-            Generate Document
-          </button>
-         </div>
-         <div className="inbarangayreq-section-2">
-          <input 
-              type="text" 
-              className="search-bar" 
-              placeholder="Enter Document Type" 
-          />
-          <input 
-                type="date" 
-                className="search-bar" 
-                placeholder="Select Date From" 
-            />
-            <input 
-                type="date" 
-                className="search-bar" 
-                placeholder="Select Date To" 
-            />
-          <select 
-            id="featuredStatus" 
-            name="featuredStatus" 
-            className="featuredStatus" 
-            required
-            defaultValue=""  
-          >
-            <option value="" disabled>Select Status</option>
-            <option value="active">New</option>
-            <option value="inactive">Completed</option>
-            <option value="inactive">In Progress</option>
-          </select>
-          <select 
-            id="featuredStatus" 
-            name="featuredStatus" 
-            className="featuredStatus" 
-            required
-            defaultValue=""  
-          >
-            <option value="" disabled>Show...</option>
-            <option value="active">Show 5</option>
-            <option value="inactive">Show 10</option>
-          </select>
+         
+              <button
+                className="add-announcement-btn"
+                onClick={handleGenerateDocument}
+              >
+                Generate Document
+              </button>
          </div>
 
-         <div className="inbarangayreq-main-section">
+         <div className="inbarangayreq-section-2">
+           
+           <select
+            className="inbarangay-services-module-filter"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
+            <option value="All">All Document Types</option>
+            <option value="Barangay Certificate">Barangay Certificate</option>
+            <option value="Barangay Indigency">Barangay Indigency</option>
+            <option value="Barangay ID">Barangay ID</option>
+            <option value="Barangay Permits">Barangay Permits</option>
+            <option value="Barangay Clearance">Barangay Clearance</option>
+            <option value="First Time Jobseeker">First Time Jobseeker</option>
+            <option value="Other">Other Documents</option>
+          </select>
+
+            <input
+              type="date"
+              className="inbarangay-services-module-filter"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+            />
+            <input
+              type="date"
+              className="inbarangay-services-module-filter"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+            />
+            <select
+              className="inbarangay-services-module-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">Select Status</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="rejected">Rejected</option>
+              <option value="inProgress">In Progress</option>
+            </select>
+      </div>
+
+       <div className="inbarangayreq-main-section">
+        {loading ? (
+            <p>Loading Online Requests...</p>
+          ) : error ? (
+            <p className="error">{error}</p>
+          ) : currentInBarangayRequests.length === 0 ? (
+            <div className="no-result-card-inbarangay">
+              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
+              <p className="no-results-inbarangay">No Results Found</p>
+            </div>
+          ) : (
+
           <table>
             <thead>
               <tr>
@@ -186,34 +245,50 @@ const confirmDelete = () => {
               </tr>
             </thead>
             <tbody>
-            {requestData.map((request, index) => (
-              <tr key={index}>
-                <td>{request.docType}</td>
-                <td>{request.requestId}</td>
-                <td>{request.createdAt}</td>
-                <td>{request.requestor}</td>
-                <td>{request.purpose}</td>
-                <td>
+              {currentInBarangayRequests.map((request, index) => (
+                <tr key={index}>
+                  <td>{request.docType}</td>
+                  <td>{request.requestId}</td>
+                  <td>{request.createdAt}</td>
+                  <td>{request.requestor}</td>
+                  <td>{request.purpose}</td>
+                  <td>
                     <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
-                        {request.status}
+                      {request.status}
                     </span>
-                </td>
-                <td>
-                  <div className="actions">
-                    <button
-                        className="action-view"
-                        onClick={() => handleView(request.id, request.reqType)}
-                    >
-                        View
-                    </button>
-
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td>
+                    <div className="actions-inbarangay">
+                      <button className="action-inbarangay-view" onClick={() => handleView(request.id, request.reqType)}>
+                          <img src="/Images/view.png" alt="View" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
+        )}
+      </div>
+
+        <div className="redirection-section-inbarangay">
+            <button onClick={prevPage} disabled={currentPage === 1}>
+              &laquo;
+            </button>
+            {getPageNumbers().map((number, index) => (
+              <button
+                key={index}
+                onClick={() => typeof number === "number" && paginate(number)}
+                className={currentPage === number ? "active" : ""}
+              >
+                {number}
+              </button>
+            ))}
+            <button onClick={nextPage} disabled={currentPage === totalPages}>
+              &raquo;
+            </button>
         </div>
+
 
 
         {showPopup && (
