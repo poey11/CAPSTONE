@@ -202,6 +202,10 @@
     width: 332px; /* Optional: Set a minimum width for the dropdown */
   }
 
+  
+
+  
+
 
   .generate-documents-dropdown p {
     margin: 0;
@@ -209,16 +213,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #333;
-    font-size: 14px;
     cursor: pointer;
     transition: color 0.2s ease-in-out;
     height: 60px;
+    transition: background-color 0.2s, color 0.4s;
+    color: #2C3E50;
+    font-weight: bolder;
+    font-size: 16px;
 }
 
 .generate-documents-dropdown p:hover {
-    background-color: rgb(204, 199, 196); /* Highlight option on hover */
-    color: white;
+    background-color: #BC5F1C;
+    color: #ffffff;
 }
 
   .generate-documents-dropdown-container:hover .generate-documents-dropdown,
@@ -265,6 +271,12 @@
     justify-content: center;
   }
 
+  .generate-documents-documents-card h1,
+  .generate-documents-documents-card-othernewdocs h1{
+    color: #2C3E50;
+    font-weight: bolder;
+    font-size: 16px;
+  }
 
 
   
