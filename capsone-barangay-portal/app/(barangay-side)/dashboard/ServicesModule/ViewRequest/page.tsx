@@ -10,8 +10,8 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { getLocalDateString } from "@/app/helpers/helpers";
 import { toWords } from 'number-to-words';
-import OnlineRequests from "../page";
-import OnlineReports from "../../../IncidentModule/OnlineReports/page";
+import OnlineRequests from "../OnlineRequests/page";
+import OnlineReports from "../../IncidentModule/OnlineReports/page";
 
 
 interface EmergencyDetails {
@@ -1118,21 +1118,21 @@ const ViewOnlineRequest = () => {
                                         <p>{requestData?.purpose || "N/A"}</p>
                                     </div>
 
-                                    {!requestData?.appointmentDate && (
-                                        <>
-                                            <div className="onlinereq-date-section">
-                                                <div className="onlinereq-date-topsection">
-                                                    <div className="onlinereq-main-details-icons-section">
-                                                        <img src="/Images/calendar.png" alt="calendar icon" className="onlinereq-calendar-section-icon" />
-                                                    </div>
-                                                    <div className="onlinereq-main-details-title-section">
-                                                        <h1>Date Requested</h1>
-                                                    </div>
-                                                </div>
-                                                <p>{requestData?.createdAt || "N/A"}</p>
-                                            </div>
-                                        </>
-                                    )}
+                                  
+                                  
+                                    <div className="onlinereq-date-section">
+                                         <div className="onlinereq-date-topsection">
+                                            <div className="onlinereq-main-details-icons-section">
+                                           <img src="/Images/calendar.png" alt="calendar icon" className="onlinereq-calendar-section-icon" />
+                                              </div>
+                                              <div className="onlinereq-main-details-title-section">
+                                                <h1>Date Requested</h1>
+                                             </div>
+                                           </div>
+                                         <p>{requestData?.createdAt || "N/A"}</p>
+                                      </div>
+                                      
+                                   
 
                                     {requestData?.appointmentDate && (
                                         <>

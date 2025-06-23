@@ -6,6 +6,7 @@ import {storage,db} from "@/app/db/firebase";
 import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { getSpecificDocument } from '@/app/helpers/firestorehelper';
+import "@/CSS/barangaySide/ServicesModule/ViewNewDocRequests.css";
 
 interface dataFields {
     name?: string;
@@ -36,6 +37,7 @@ export default function view() {
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+    const [activeSection, setActiveSection] = useState("basic");
 
     console.log(id);
 
@@ -116,22 +118,156 @@ export default function view() {
         link.remove();
     }
 
+        const handleBack = () => {
+        router.back();
+    };
+
+
     return(
-        <div className="w-full h-screen bg-[#f9f9f9] z-10 ml-8 p-[30px]">
-            <div className="flex items-center mb-6">
-                <button 
-                    onClick={() => router.back()}
-                className="bg-gray-600 text-white mr-2 px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-300">
-                    Back
-                </button>
+        <div className="main-container-services-newdoc">
+            <div className="newdoc-redirection-section">
+               
                 <button
-                    className='bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300'
+                    className="newdoc-redirection-buttons"
                     onClick={handdlePrintDocument}
                     >
-                   Print Document
+                 <div className="newdoc-redirection-icons">
+                     <img src="/images/generatedoc.png" alt="user info" className="newdoc-redirection-icons-info" />
+                 </div>
+                  <h1> Generate Document</h1>
                 </button>
-                <h1 className="text-2xl font-bold mb-4 max-w-lg">View Document Details </h1>
-            </div>           
+           
+            </div>       
+
+            <div className="newdoc-main-content">
+
+                <div className="newdoc-main-section1">
+
+                  <div className="newdoc-main-section1-left">
+                     <button onClick={handleBack}>
+                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                      </button>
+
+                      <h1> {data.purpose} Request Details   </h1>
+                  </div>
+
+                </div>
+
+                <div className= "newdoc-header-body">
+
+                  <div className="newdoc-header-body-top-section">
+
+                    <div className="newdoc-info-toggle-wrapper">
+                            {["basic", "full", "others" ].map((section) => (
+                                <button
+                                key={section}
+                                type="button"
+                                className={`newdoc-info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                                onClick={() => setActiveSection(section)}
+                                >
+                                {section === "basic" && "Basic Information"}
+                                {section === "full" && "Full Information"}
+                                {section === "others" && "Other Information"}
+                                </button>
+                            ))}
+                        </div> 
+
+                    </div>
+
+                    <div className="newdoc-header-body-bottom-section">
+                      <div className= "newdoc-main-details-container">
+                        <div className= "newdoc-main-details-section">
+                          <div className="newdoc-main-details-topsection">
+                              <h1> lala</h1>
+                          </div>
+
+                          <div className="newdoc-main-details-statussection">
+                            <h1> Status </h1>
+
+                            <div className= "newdoc-main-details-status-section-view">
+
+                              {/*
+                                Add functionality for status (added na css)
+                              */}
+                              <select
+                                id = "status"
+                                className=""
+                              >
+                                 <option value="Pending">Pending</option>
+                                  <option value="Pick-up">Pick-up</option>
+                                  <option value="Completed">Completed</option>
+                                  <option value="Rejected" disabled>Rejected</option>
+                              </select>
+
+                            </div>
+
+                          </div>
+
+                          <div className= "newdoc-main-details-description">
+                              <div className= "newdoc-purpose-section">
+                                  <div className= "newdoc-purpose-topsection">
+                                    
+                                  <div className= "newdoc-main-details-icon-section">
+                                    <img src="/Images/purpose.png" alt="description icon" className="newdoc-type-section-icon" />
+                                  </div>
+                                  
+                                  <div className= "newdoc-main-details-title-section">
+                                    <h1> Document Type</h1>
+                                  </div>
+                                    
+                                  </div>
+
+                                  <p>{data.docType}</p>
+
+                              </div>
+
+                              <div className= "newdoc-purpose-section">
+                                  <div className= "newdoc-purpose-topsection">
+                                    
+                                  <div className= "newdoc-main-details-icon-section">
+                                    <img src="/Images/purpose.png" alt="description icon" className="newdoc-type-section-icon" />
+                                  </div>
+                                  
+                                  <div className= "newdoc-main-details-title-section">
+                                    <h1>Purpose</h1>
+                                  </div>
+                                    
+                                  </div>
+
+                                  <p>{data.purpose}</p>
+
+                              </div>
+
+                              <div className= "newdoc-date-section">
+                                <div className= "newdoc-date-topsection">
+                                  <div className= "newdoc-main-details-icon-section">
+                                     <img src="/Images/calendar.png" alt="calendar icon" className="newdoc-calendar-section-icon" />
+                                  </div>
+
+                                  <div className= "newdoc-main-details-title-section">
+                                    <h1>Date Requested</h1>
+                                  </div>
+
+                                </div>
+
+                                  <p>{data.purpose}</p>
+
+                              </div>
+
+
+                          </div>     
+
+
+                        </div>
+
+                      </div>
+
+                    </div>
+                        
+                </div>
+
+            </div>
+
             <div className="bg-white p-6 rounded-lg shadow-md">
                 <h2 className="text-xl font-semibold mb-4">Document Type: {data.docType}</h2>
                 <p className="mb-2"><strong>Purpose:</strong> {data.purpose}</p>
