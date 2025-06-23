@@ -1120,7 +1120,7 @@ const ViewOnlineRequest = () => {
 
                                   
                                   
-                                    <div className="onlinereq-date-section">
+                                            <div className="onlinereq-date-section">
                                          <div className="onlinereq-date-topsection">
                                             <div className="onlinereq-main-details-icons-section">
                                            <img src="/Images/calendar.png" alt="calendar icon" className="onlinereq-calendar-section-icon" />

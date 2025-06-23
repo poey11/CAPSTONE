@@ -346,3 +346,80 @@ text-align: left;
   height: 20px;
   margin-left: 7px;
 }
+
+.newdoc-info-main-container {
+  width: 75%;
+  display: flex;   
+}
+
+.newdoc-info-container-scrollable {
+  width: 100%;
+  height: 550px;
+  border: 1px solid rgba(44, 62, 80, 0.7);
+  border-radius: 8px;
+  margin-right: 45px;
+  overflow-y: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 20px;
+}
+
+.newdoc-info-main-content {
+width: 100%;
+display: flex;
+flex-direction: row;
+margin-top: 60px; 
+}
+
+.newdoc-content-left-side {
+  display: flex;
+  flex-direction: column;
+  width: 50%;   
+}
+
+.newdoc-content-right-side {
+ display: flex;
+  flex-direction: column;
+  width: 50%; 
+}
+
+.newdoc-content-right-side p,
+.newdoc-content-right-side p {
+  color: grey;
+ font-weight: bold;
+ font-size: 1rem;   
+}
+
+.newdoc-input-field {
+    padding: 8px;
+  width: 85%;
+  margin-top: 10px;
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  color: #000000;
+  text-align: left;  
+}
+
+.newdoc-input-field:focus {
+ border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+}
+
+.newdoc-fields-section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 13px;    
+}
+
+.newdoc-fields-section p{
+   font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 20px; 
+}

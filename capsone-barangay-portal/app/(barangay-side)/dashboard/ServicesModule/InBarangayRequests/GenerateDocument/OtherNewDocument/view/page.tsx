@@ -37,7 +37,7 @@ export default function view() {
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-    const [activeSection, setActiveSection] = useState("basic");
+    const [activeSection, setActiveSection] = useState("full");
 
     console.log(id);
 
@@ -158,14 +158,14 @@ export default function view() {
                   <div className="newdoc-header-body-top-section">
 
                     <div className="newdoc-info-toggle-wrapper">
-                            {["basic", "full", "others" ].map((section) => (
+                            {[ "full", "others" ].map((section) => (
                                 <button
                                 key={section}
                                 type="button"
                                 className={`newdoc-info-toggle-btn ${activeSection === section ? "active" : ""}`}
                                 onClick={() => setActiveSection(section)}
                                 >
-                                {section === "basic" && "Basic Information"}
+                            
                                 {section === "full" && "Full Information"}
                                 {section === "others" && "Other Information"}
                                 </button>
@@ -259,6 +259,70 @@ export default function view() {
 
 
                         </div>
+
+                      </div>
+
+
+                      <div className= "newdoc-info-main-container">
+                          
+                          <div className= "newdoc-info-container-scrollable">
+                  {activeSection === "full" && (
+                        <>
+                            <div className="newdoc-info-main-content">
+                                <div className="newdoc-content-left-side">
+                                  {data.fields?.map((field, index) => {
+                                    if (index % 2 === 0) {
+                                      return (
+                                        <div key={index} className="newdoc-fields-section">
+                                          <p>{field.name}</p>
+                                          <input
+                                            type="text"
+                                            className="newdoc-input-field"
+                                            value={field.value}
+                                            readOnly
+                                          />
+                                        </div>
+                                      );
+                                    }
+                                    return null; 
+                                  })}
+                                </div>
+
+                                <div className="newdoc-content-right-side">
+                                  {data.fields?.map((field, index) => {
+                                    if (index % 2 !== 0) {
+                                      return (
+                                        <div key={index} className="newdoc-fields-section">
+                                          <p>{field.name}</p>
+                                          <input
+                                            type="text"
+                                            className="newdoc-input-field"
+                                            value={field.value}
+                                            readOnly
+                                          />
+                                        </div>
+                                      );
+                                    }
+                                    return null; // Skip rendering on right for even indexes
+                                  })}
+                                </div>
+                              </div>
+                              
+                          </>
+                        )}
+
+
+                         {activeSection === "others" && (
+                        <>
+                            <div className="newdoc-info-main-content">
+                              
+                              </div>
+                              
+                          </>
+                        )}
+                            
+                          </div>
+                          
 
                       </div>
 
