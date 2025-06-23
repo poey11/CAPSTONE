@@ -194,6 +194,16 @@ export default function Header() {
       },
 
 
+      // For In Brangay Requests
+
+      "/dashboard/ServicesModule/InBarangayRequests": {
+        title: "In Barangay Documents Requests",
+        breadcrumb: ["Services Management", "In Barangay Requests"],
+      },
+      "/dashboard/ServicesModule/InBarangayRequests/GenerateDocument": {
+        title: "In Barangay Documents Requests",
+        breadcrumb: ["Services Management", "In Barangay Requests", "New Document Request"],
+      },
 
 
       // For Online Requests

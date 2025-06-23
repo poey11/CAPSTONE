@@ -22,43 +22,38 @@ export default function GenerateDocument() {
       const handleEditNewDocument = () => {
         router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/EditDoc");
     }
+
+    const handleBack = () => {
+        router.push("/dashboard/ServicesModule/InBarangayRequests");
+    };
+
     return (
         <main className="generatedocument-main-container">
-            <div className="generatedocument-section-1">
-                <h1>In Barangay Document Request</h1>
-            </div>
+            {/* NEW */}
 
-            <div className="addAnnouncement-main-section">
-                <div className="addAnnouncement-main-section1">
-                    <div className="addAnnouncement-main-section1-left">
-                        <button onClick={router.back} >
+            <div className="generatedocument-inbrgy-main-content">
+                <div className="generatedocument-inbrgy-main-section1">
+                    <div className="generatedocument-inbrgy-main-section1-left">
+                        <button onClick={handleBack} >
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
                         </button>
-                        <h1>Generate Document</h1>
-                        <button
-                          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-300"
-                          onClick={handleAddNewDocument}
-                        >
-                          Add New Document
-                        </button>
 
-                        <button
-                          className="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition-colors duration-300"
-                          onClick={handleEditNewDocument}
-                        >
-                          Edit New Document
-                        </button>
+                        <h1> New Document Request </h1>
                     </div>
 
+                    <div className="action-btn-section">
+                        <button className="action-add-new-doc"  onClick={handleAddNewDocument}>
+                            Add New Document
+                        </button>
+                        <button className="action-edit-new-doc"  onClick={handleEditNewDocument}>
+                            Edit New Document
+                        </button>
+                    </div>
                 </div>
 
-                <hr />
-
-            
-                    <div className="generate-documents-main-select-container">
-
+                <div className="generatedocument-inbrgy-info-main-container">
+                    <div className="generatedocument-inbrgy-top-section">
                         <div className="generate-documents-container">
-
                             <div className="generate-documents-container-column"  >
                                 <div className="generate-documents-documents-card" onClick={handleSubmit} id="Barangay Certificate">
                                     <h1>Barangay Certificate</h1>
@@ -74,42 +69,42 @@ export default function GenerateDocument() {
                             </div>
 
                             <div className="generate-documents-container-column">
-                            <div 
-                                className="generate-documents-documents-card generate-documents-dropdown-container"
-                                onMouseEnter={() => setDropdownVisible(true)}
-                                onMouseLeave={() => setDropdownVisible(false)}
-                            >
-                                <h1>Barangay Permits</h1>
-                                {isDropdownVisible && (
-                                <div className="generate-documents-dropdown">
-                                    <p className="dropdown-item" onClick={handleSubmit} id="Business Permit">Business Permit</p>
-                                    <p className="dropdown-item" onClick={handleSubmit} id="Temporary Business Permit">Temporary Business Permit</p>
-                                    <p className="dropdown-item" onClick={handleSubmit} id="Construction ">Construction Permit</p>
+                                <div 
+                                    className="generate-documents-documents-card generate-documents-dropdown-container"
+                                    onMouseEnter={() => setDropdownVisible(true)}
+                                    onMouseLeave={() => setDropdownVisible(false)}
+                                >
+                                    <h1>Barangay Permits</h1>
+                                    {isDropdownVisible && (
+                                    <div className="generate-documents-dropdown">
+                                        <p className="dropdown-item" onClick={handleSubmit} id="Business Permit">Business Permit</p>
+                                        <p className="dropdown-item" onClick={handleSubmit} id="Temporary Business Permit">Temporary Business Permit</p>
+                                        <p className="dropdown-item" onClick={handleSubmit} id="Construction ">Construction Permit</p>
+                                    </div>
+                                    )}
                                 </div>
-                                )}
-                            </div>
                             
 
-                            <div className="generate-documents-documents-card" onClick={handleSubmit} id="Barangay Clearance">
-                                <h1>Barangay Clearance</h1>
-                            </div>
+                                <div className="generate-documents-documents-card" onClick={handleSubmit} id="Barangay Clearance">
+                                    <h1>Barangay Clearance</h1>
+                                </div>
 
-                            <div className="generate-documents-documents-card" onClick={handleSubmit} id="First Time Jobseeker">
-                                <h1>First Time Jobseeker</h1>
-                            </div>
-
-                            </div>
-                            
-                            <div className="generate-documents-container-column">
-                                <div className="generate-documents-documents-card" onClick={handleOtherNewDocument}>
-                                    <h1>Other New Documents</h1>
+                                <div className="generate-documents-documents-card" onClick={handleSubmit} id="First Time Jobseeker">
+                                    <h1>First Time Jobseeker</h1>
                                 </div>
 
                             </div>
                         </div>
-
                     </div>
-            
+                    <div className="generatedocument-inbrgy-bottom-section">
+                        <div className="generate-documents-othernewdocs-container">
+                            <div className="generate-documents-documents-card-othernewdocs" onClick={handleOtherNewDocument}>
+                                <h1>Other New Documents</h1>
+                            </div>
+                         </div>           
+                    </div>
+                </div>
+
             </div>
         </main>
     );

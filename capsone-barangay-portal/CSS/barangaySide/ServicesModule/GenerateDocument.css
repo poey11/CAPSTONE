@@ -1,11 +1,10 @@
 .generatedocument-main-container{
     width: 100%;
     height: 100vh;
-    background-color: #f9f9f9;
-    padding:30px;
-    margin-left: 3rem;
-    overflow-y: auto; 
-
+    background-color: #F0F2F8; 
+    margin-left: 3rem; 
+    padding-top: 11.2%;
+    padding-bottom:30px;
 }
 
 .generatedocument-section-1{
@@ -58,8 +57,8 @@
 .back-btn{
     width: 25px;
     height: 25px;
-    filter: grayscale(100%) brightness(0%) invert(50%);
-}
+    filter: invert(1);
+  }
 
 
 .action-btn-section{
@@ -192,10 +191,10 @@
   .generate-documents-dropdown{
     display: none;
     position: absolute;
-    top: 70px; /* Aligns directly below the container */
-    left: 0;
-    background-color: rgb(228, 223, 220);
-    border: 1px solid #ddd;
+    top: 65px; /* Aligns directly below the container */
+    left: -.5;
+    background-color: white;
+    border: 1px solid rgba(44, 62, 80, 0.7);
     border-radius: 0px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 10px;
@@ -207,10 +206,14 @@
   .generate-documents-dropdown p {
     margin: 0;
     padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #333;
     font-size: 14px;
     cursor: pointer;
     transition: color 0.2s ease-in-out;
+    height: 60px;
 }
 
 .generate-documents-dropdown p:hover {
@@ -242,16 +245,16 @@
 
   .generate-documents-documents-card {
     flex: 1 1 calc(50% - 20px);
-    background-color: rgba(243, 238, 235, 0.341);
+    background-color: white;
     padding: 20px;
     padding-left: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+    border: 1px solid rgba(44, 62, 80, 0.7);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.142);
+    transition: transform 0.2s, box-shadow 0.2s;
     height: 70px;
     margin-bottom: 20px;
     margin-left: 20px;
-    transition: all 0.3s ease;
     display: flex;
     gap: 55px;
     align-items: center;
@@ -261,13 +264,41 @@
     text-align: center;
     justify-content: center;
   }
+
+
+
   
-  .generate-documents-documents-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    background-color: rgb(190, 187, 184);
+  
+  
+
+  .generate-documents-documents-card-othernewdocs {
+    flex: 1 1 calc(50% - 20px);
+    background-color: white;
+    padding: 20px;
+    padding-left: 20px;
+    border: 1px solid rgba(44, 62, 80, 0.7);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.142);
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 70px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 55px;
+    align-items: center;
+    z-index: 10;
+    width: 350px; /* Adjusted for better fit */
+    max-width: 90%; /* Responsive width */
+    text-align: center;
+    justify-content: center;
+  }
+
+  
+  
+  .generate-documents-documents-card:hover,
+  .generate-documents-documents-card-othernewdocs:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.444);
     cursor: pointer;
-    color: white;
   }
 
 
@@ -275,11 +306,7 @@
     gap: 40px;
     display: flex;
     justify-content: center;
-    margin-left: 80px;
     align-items: center;
-    width: 90%; /* Make it flexible */
-    max-width: 1000px; /* Restrict maximum width */
-
 }
 
 
@@ -341,4 +368,94 @@
 /* Hover Behavior */
     .nested-trigger:hover + .nested-dropdown {
     display: block;
+}
+
+
+
+/* NEW CSS */
+
+.generatedocument-inbrgy-main-content {
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    border-radius: 1rem;
+    border: 2px solid rgba(36, 53, 76, 0.7);
+    margin:  auto; 
+    background-color: #ffffff;
+    overflow: hidden; 
+    height: 500px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    margin-top: 20px;
+}
+
+.generatedocument-inbrgy-main-section1{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #214666;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+  
+  .generatedocument-inbrgy-main-section1 h1{
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #ffffff;
+  }
+
+  .generatedocument-inbrgy-main-section1-left{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-left: 30px;
+  }
+
+  .action-btn-section{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-right: 30px;
+  }
+
+.action-add-new-doc,
+.action-edit-new-doc{
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+  width: 150px;
+}
+
+.action-add-new-doc {
+    background-color: #4caf50; /* Green */
+    color: white;
+}
+
+.action-edit-new-doc {
+    background-color: #e97e1f; /* Green */
+    color: white;
+}
+
+.generatedocument-inbrgy-info-main-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.generatedocument-inbrgy-top-section {
+    padding-top: 30px;
+}
+
+.generatedocument-inbrgy-bottom-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.generate-documents-othernewdocs-container {
+   width: 380px;
+   display: flex;
+   justify-content: center;
 }
