@@ -423,3 +423,46 @@ margin-top: 60px;
   align-self: flex-start; /* Left-aligns the label */
   margin-left: 20px; 
 }
+
+.newdoc-verification-requirements-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-left: 60px;
+    padding-bottom: 20px;
+    width: 100%;
+    padding-right: 60px; 
+}
+
+  .newdoc-verification-requirements-label {
+    background-color: #1f3b57;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 18px;
+    position: relative;
+    top: 12px; /* Pushes it closer to the card */
+    z-index: 1;
+    left: 0px;
+    text-align: center;
+    width: 250px;
+  }
+
+
+  .newdoc-verification-requirements-container {
+    border: 1px solid rgba(44, 62, 80, 0.7);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 100%;
+    text-align: center;
+    margin-top: -8px; /* Pulls the card up under the label */
+    height: 400px;
+  }
+
+    .uploaded-picture {
+    width: 100%;
+    height: 100%;
+  }

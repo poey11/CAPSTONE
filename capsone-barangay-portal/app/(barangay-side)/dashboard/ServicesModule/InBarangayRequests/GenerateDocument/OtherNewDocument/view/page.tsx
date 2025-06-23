@@ -312,14 +312,52 @@ export default function view() {
                         )}
 
 
-                         {activeSection === "others" && (
+                       {activeSection === "others" && (
                         <>
-                            <div className="newdoc-info-main-content">
-                              
+                          <div className="newdoc-info-main-content">
+                            {data.imageFields?.map((img, index) => (
+                              <div key={index} className="newdoc-verification-requirements-section">
+                                <span className="newdoc-verification-requirements-label">
+                                  {img.name}
+                                </span>
+
+                                <div className="newdoc-verification-requirements-container flex justify-center items-center">
+                                  <a href={img.url} target="_blank" rel="noopener noreferrer">
+                                    <img
+                                      src={img.url}
+                                      alt={img.name}
+                                      className="uploaded-picture"
+                                    />
+                                  </a>
+                                </div>
                               </div>
-                              
-                          </>
-                        )}
+                            ))}
+                          </div>
+
+
+                             {/* Render the PDF preview if available */}
+                    {pdfUrl && (
+                      <div className="newdoc-verification-requirements-section">
+                        <span className="newdoc-verification-requirements-label">
+                          Generated PDF
+                        </span>
+
+                        <div className="newdoc-verification-requirements-container">
+                          <iframe
+                            src={pdfUrl}
+                            width="100%"
+                            height="100%"
+                            className="border-none w-full h-full"
+                            title="Generated PDF"
+                          />
+                        </div>
+                      </div>
+                    )}
+                        </>
+                      )}
+
+                    
+
                             
                           </div>
                           
@@ -332,6 +370,11 @@ export default function view() {
 
             </div>
 
+
+
+    {/*
+
+    OLD CODE
             <div className="bg-white p-6 rounded-lg shadow-md">
                 <h2 className="text-xl font-semibold mb-4">Document Type: {data.docType}</h2>
                 <p className="mb-2"><strong>Purpose:</strong> {data.purpose}</p>
@@ -358,6 +401,8 @@ export default function view() {
                     ))}
                 </ul>
             </div>
+
+           
             {pdfUrl && (
                 <div className="mt-4">
                     <h3 className="text-lg font-semibold mb-2">Generated PDF:</h3>
@@ -371,6 +416,8 @@ export default function view() {
                     />
                 </div>
                 )}
+
+                 */}
         </div>
     )
 
