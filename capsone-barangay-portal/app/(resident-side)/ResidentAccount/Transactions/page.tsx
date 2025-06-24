@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/authContext";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
-import {getAllSpecificDocument} from "@/app/helpers/firestorehelper";
 
 export default function Transactions() {
     const router = useRouter();
@@ -61,11 +60,15 @@ export default function Transactions() {
     }, [currentUser]);
 
     const handleTransactionClick = (transaction: any) => {
+        console.log("Transaction clicked:", transaction);
         if (transaction.type === "IncidentReport") {
             router.push(`/ResidentAccount/Transactions/IncidentTransactions?id=${transaction.id}`);
         } else if (transaction.type === "ServiceRequest") {
             router.push(`/ResidentAccount/Transactions/DocumentTransactions?id=${transaction.id}`);
-        }   
+        } 
+        else{
+            router.push(`/ResidentAccount/Transactions/DocumentTransactions/OtherDocumentTransactions?id=${transaction.id}`);
+        }  
     };
 
     const filteredTransactions = transactionData.filter((item) => {

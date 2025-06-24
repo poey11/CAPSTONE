@@ -1,8 +1,6 @@
 "use client";
-import type { Metadata } from "next";
 import { useAuth } from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsmain/requestdocumentsmain.css";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function Services() {
@@ -24,6 +22,10 @@ export default function Services() {
     if (isGuest && !isAllowedForGuest(action)) return;
     router.push(`/services/action?doc=${action}`);
   };
+
+  const gotoOtherDocuments = () => {
+    router.push("/services/other-documents");
+  }
 
   return (
     <main className="services-container">
@@ -118,6 +120,14 @@ export default function Services() {
               )}
             </div>
 
+          </div>
+          <div className="documents-container-column">
+              <div className="tooltip-wrapper">
+                <div className="documents-card" onClick={gotoOtherDocuments}>
+                  <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+                  <h1>Other Documents</h1>
+                </div>  
+              </div>
           </div>
         </div>
       </div>
