@@ -32,6 +32,8 @@ const ReportsPage = () => {
   const [loadingWestResident, setLoadingWestResident] = useState(false);    
   const [loadingSouthResident, setLoadingSouthResident] = useState(false);  
   const [loadingRegistrationSummary, setLoadingRegistrationSummary] = useState(false);  
+  const [showResidentSummaryModal, setShowResidentSummaryModal] = useState(false);
+
 
   // for resident demographic reports
   const [loadingResidentSeniorDemographic, setLoadingResidentSeniorDemographic] = useState(false);  
@@ -530,11 +532,11 @@ const confirmDelete = async () => {
       const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow === 0);
       const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 5);
   
-      worksheet.getRow(5).getCell(1).value = `As of ${currentMonthYear}`;
-      worksheet.getRow(5).getCell(1).font = { name: "Calibri", size: 12, bold: true }; 
+      worksheet.getRow(2).getCell(1).value = `As of ${currentMonthYear}`;
+      worksheet.getRow(2).getCell(1).font = { name: "Calibri", size: 12, bold: true }; 
   
-      const dataStartRow = 8;
-      const footerStartRow = 13; 
+      const dataStartRow = 5;
+      const footerStartRow = 10; 
 
       worksheet.spliceRows(dataStartRow + jobSeekers.length, 0, ...new Array(footerDrawings.length).fill([])); 
       
@@ -1686,38 +1688,43 @@ const confirmDelete = async () => {
 
   // all residents
 
-  const generateResidentRegistrationSummary = async () => {
+  const generateResidentRegistrationSummary = async (
+    month: number,
+    year: number,
+    allTime: boolean = false
+  ): Promise<string | null> => {
     setLoadingRegistrationSummary(true);
     setIsGenerating(true);
+  
     try {
       const currentDate = new Date();
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth() + 1; // JavaScript month index starts at 0
-      const monthStr = month.toString().padStart(2, "0");
-      const monthName = currentDate.toLocaleString("default", { month: "long" });
-      const reportTitle = `RESIDENT REGISTRATION SUMMARY - ${monthName.toUpperCase()} ${year}`;
-  
-      const startDateStr = `${year}-${monthStr}-01`;
-      const endDate = new Date(year, month, 0); // last day of the month
-      const endDateStr = `${year}-${monthStr}-${endDate.getDate().toString().padStart(2, "0")}`;
+      const monthName = new Date(year, month).toLocaleString("default", { month: "long" });
+      const reportLabel = allTime ? "ALL TIME" : `${monthName.toUpperCase()} ${year}`;
+      const reportTitle = `RESIDENT REGISTRATION SUMMARY - ${reportLabel}`;
   
       const residentRef = collection(db, "Residents");
-      const q = query(
-        residentRef,
-        where("createdAt", ">=", startDateStr),
-        where("createdAt", "<=", endDateStr)
-      );
-  
+      const q = query(residentRef);
       const querySnapshot = await getDocs(q);
-      let residents = querySnapshot.docs.map((doc) => doc.data());
+  
+      let residents = querySnapshot.docs
+        .map((doc) => doc.data())
+        .filter((res) => {
+          if (!res.createdAt) return false;
+          if (allTime) return true;
+          const resDate = new Date(res.createdAt);
+          return resDate.getFullYear() === year && resDate.getMonth() === month;
+        });
   
       if (residents.length === 0) {
-        alert("No residents registered this month.");
-        setLoadingRegistrationSummary(false);
-        return;
+        alert(allTime
+          ? "No registered residents found."
+          : "No residents registered this month.");
+          setShowResidentSummaryModal(false);
+          setIsGenerating(false);
+        return null;
       }
   
-      // Sort residents alphabetically
+      // Sort alphabetically
       residents.sort((a, b) => {
         const lastA = (a.lastName || "").trim().toUpperCase();
         const lastB = (b.lastName || "").trim().toUpperCase();
@@ -1727,9 +1734,7 @@ const confirmDelete = async () => {
         const addressB = (b.address || "").trim().toUpperCase();
   
         if (lastA === lastB) {
-          if (firstA === firstB) {
-            return addressA.localeCompare(addressB);
-          }
+          if (firstA === firstB) return addressA.localeCompare(addressB);
           return firstA.localeCompare(firstB);
         }
         return lastA.localeCompare(lastB);
@@ -1751,11 +1756,11 @@ const confirmDelete = async () => {
   
       const originalFooterStartRow = 24;
       const originalFooterEndRow = 28;
- 
       let insertionRow = 4;
+  
       const rowsNeeded = Math.max(0, insertionRow + residents.length - (originalFooterStartRow - 1));
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));  
-
+      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));
+  
       residents.forEach((resident, index) => {
         const row = worksheet.getRow(insertionRow);
         row.height = 55;
@@ -1793,7 +1798,7 @@ const confirmDelete = async () => {
         insertionRow++;
       });
   
-      // Add total
+      // Total row
       const totalRow = worksheet.getRow(insertionRow);
       worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
       totalRow.getCell(1).value = `TOTAL: ${residents.length}`;
@@ -1801,7 +1806,7 @@ const confirmDelete = async () => {
       totalRow.getCell(1).font = { name: "Times New Roman", size: 10 };
       totalRow.commit();
   
-      // Shift footer drawings/images
+      // Shift footer drawings
       const totalInsertedRows = residents.length;
       const footerDrawings = worksheet.getImages().filter((img) => {
         const row = img.range?.tl?.nativeRow;
@@ -1812,17 +1817,15 @@ const confirmDelete = async () => {
         if (drawing.range?.br) drawing.range.br.nativeRow += totalInsertedRows;
       });
   
-      // Insert 2 blank rows + date rows
+      // Insert date rows
       const dateInsertRowIndex = originalFooterEndRow + totalInsertedRows + 2;
       worksheet.insertRow(dateInsertRowIndex - 1, []);
       worksheet.insertRow(dateInsertRowIndex, []);
       const dateRow = worksheet.getRow(dateInsertRowIndex + 1);
       dateRow.height = 40;
   
-      const formattedDate = currentDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
+      const formattedDate = new Date().toLocaleDateString("en-US", {
+        year: "numeric", month: "long", day: "numeric",
       });
   
       worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
@@ -1841,57 +1844,52 @@ const confirmDelete = async () => {
   
       worksheet.pageSetup = {
         horizontalCentered: true,
-        verticalCentered: false,
         orientation: "landscape",
-        paperSize: 9, 
+        paperSize: 9,
         fitToPage: true,
         fitToWidth: 1,
-        fitToHeight: 0, 
+        fitToHeight: 0,
       };
-
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   
-      const fileName = `Resident_Registration_Summary_${monthName}_${year}.xlsx`;
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const fileName = `Resident_Registration_Summary_${reportLabel.replace(/\s+/g, "_")}.xlsx`;
       const storageRef = ref(storage, `GeneratedReports/${fileName}`);
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      /*alert("Resident Registration Summary generated successfully. Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating Resident Registration Summary...");
       return fileUrl;
     } catch (error) {
-      setIsGenerating(false);
-      
       console.error("Error generating Resident Registration Summary:", error);
-
       setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate Resident Registration Summary");  
-      
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
-      /*alert("Failed to generate Resident Registration Summary.");*/
+      setPopupErrorGenerateReportMessage("Failed to generate Resident Registration Summary");
+      setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
+      return null;
     } finally {
       setLoadingRegistrationSummary(false);
+      setShowResidentSummaryModal(false);
     }
   };
-  
-  const handleRegistrationSummaryPDF = async () => {
-    setLoadingRegistrationSummary(true);
-    try {
-      const fileUrl = await generateResidentRegistrationSummary();
-      /*if (!fileUrl) return alert("Failed to generate Excel summary report.");*/
 
-      if (!fileUrl) {
-        setIsGenerating(false); 
+  const handleRegistrationSummaryPDF = async (
+    month: number,
+    year: number,
+    allTime: boolean = false
+  ) => {
+    setLoadingRegistrationSummary(true);
   
+    try {
+      const fileUrl = await generateResidentRegistrationSummary(month, year, allTime);
+  
+      if (!fileUrl) {
+        setIsGenerating(false);
         setPopupErrorGenerateReportMessage("Failed to generate Excel summary report");
         setShowErrorGenerateReportPopup(true);
-  
-        setTimeout(() => {
-          setShowErrorGenerateReportPopup(false);
-        }, 5000);
+        setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
         return;
       }
   
@@ -1904,36 +1902,29 @@ const confirmDelete = async () => {
       if (!response.ok) throw new Error("Failed to convert to PDF");
   
       const blob = await response.blob();
+      const label = allTime
+        ? "ALL_TIME"
+        : `${new Date(year, month).toLocaleString("default", { month: "long" })}_${year}`;
   
-      const currentDate = new Date();
-      const year = currentDate.getFullYear();
-      const month = currentDate.toLocaleString("default", { month: "long" });
+      saveAs(blob, `Resident_Registration_Summary_${label}.pdf`);
   
-      saveAs(blob, `Resident_Registration_Summary_${month}_${year}.pdf`);
-  
-      /*alert("Resident Registration Summary successfully converted to PDF!");*/
-
-      setIsGenerating(false); 
+      setIsGenerating(false);
       setGeneratingMessage("");
       setPopupSuccessGenerateReportMessage("Resident Registration Summary generated successfully");
       setShowSuccessGenerateReportPopup(true);
-
-      setTimeout(() => {
-        setShowSuccessGenerateReportPopup(false);
-      }, 5000);
+      setTimeout(() => setShowSuccessGenerateReportPopup(false), 5000);
     } catch (error) {
       console.error("Error:", error);
       setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate Resident Registration Summary PDF");    
-
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
-      /*alert("Failed to generate PDF.");*/
+      setPopupErrorGenerateReportMessage("Failed to generate Resident Registration Summary PDF");
+      setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
     } finally {
       setLoadingRegistrationSummary(false);
+      setShowResidentSummaryModal(false);
+      setIsGenerating(false);
     }
   };
+  
   
 
   const generateResidentListReport = async () => {
@@ -2188,6 +2179,20 @@ const confirmDelete = async () => {
   const generateEastResidentListReport = async () => {
     setLoadingEastResident(true);
     setIsGenerating(true);
+  
+    // Helper to safely merge cells without error
+    const safeMergeCells = (ws: ExcelJS.Worksheet, range: string) => {
+      try {
+        ws.mergeCells(range);
+      } catch (e) {
+        if (e instanceof Error) {
+          console.warn(`Skipping merge for ${range}: ${e.message}`);
+        } else {
+          console.warn(`Skipping merge for ${range}: Unknown error`, e);
+        }
+      }
+    };
+  
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
@@ -2196,38 +2201,23 @@ const confirmDelete = async () => {
       const residentRef = collection(db, "Residents");
       const q = query(residentRef);
       const querySnapshot = await getDocs(q);
-  
       let residents = querySnapshot.docs.map((doc) => doc.data());
   
-      // Group residents by cluster for East Fairview
       const addressGroups = {
-        "RINA": residents.filter((resident) =>
-          resident.cluster && resident.cluster.toUpperCase().includes("RINA")
-        ),
-        "SAMAFA": residents.filter((resident) =>
-          resident.cluster && resident.cluster.toUpperCase().includes("SAMAFA")
-        ),
-        "SAMAPLI": residents.filter((resident) =>
-          resident.cluster && resident.cluster.toUpperCase().includes("SAMAPLI")
-        ),
-        "SITIO KISLAP": residents.filter((resident) =>
-          resident.cluster && resident.cluster.toUpperCase().includes("SITIO KISLAP")
-        ),
-        "EFHAI": residents.filter((resident) =>
-          resident.cluster && resident.cluster.toUpperCase().includes("EFHAI")
-        ),
+        "RINA": residents.filter((r) => r.cluster?.toUpperCase().includes("RINA")),
+        "SAMAFA": residents.filter((r) => r.cluster?.toUpperCase().includes("SAMAFA")),
+        "SAMAPLI": residents.filter((r) => r.cluster?.toUpperCase().includes("SAMAPLI")),
+        "SITIO KISLAP": residents.filter((r) => r.cluster?.toUpperCase().includes("SITIO KISLAP")),
+        "EFHAI": residents.filter((r) => r.cluster?.toUpperCase().includes("EFHAI")),
       };
   
-      // Filter out empty groups
-      const filteredGroups = Object.entries(addressGroups).filter(([key, value]) => value.length > 0);
-  
+      const filteredGroups = Object.entries(addressGroups).filter(([_, members]) => members.length > 0);
       if (filteredGroups.length === 0) {
         alert("No residents found.");
         setLoadingEastResident(false);
         return;
       }
   
-      // Load Excel template
       const templateRef = ref(storage, "ReportsModule/INHABITANT RECORD TEMPLATE.xlsx");
       const url = await getDownloadURL(templateRef);
       const response = await fetch(url);
@@ -2237,48 +2227,42 @@ const confirmDelete = async () => {
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
   
-      // Update header
       worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY INHABITANTS";
       worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
       worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
       worksheet.getCell("A2").value = reportTitle;
   
-      // Define footer rows 
       const originalFooterStartRow = 24;
       const originalFooterEndRow = 28;
   
-      // Calculate total residents count
       const totalResidents = filteredGroups.reduce((sum, [, members]) => sum + members.length, 0);
   
-      // Collect footer drawings
       const footerDrawings = worksheet.getImages().filter((img) => {
         const row = img.range?.tl?.nativeRow;
         return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
       });
   
-      // Insert rows before footer to make room for all residents
       let insertionRow = 4;
-      const rowsNeeded = Math.max(0, insertionRow + totalResidents);
+      const rowsNeeded = Math.max(0, insertionRow + residents.length);
       worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));
-
+  
       let count = 1;
   
       for (const [group, members] of filteredGroups) {
-        // Sort members by lastName, then firstName
+        if (!members.length) continue;
+  
         members.sort((a, b) => {
           const lastA = (a.lastName || "").trim().toUpperCase();
           const lastB = (b.lastName || "").trim().toUpperCase();
           const firstA = (a.firstName || "").trim().toUpperCase();
           const firstB = (b.firstName || "").trim().toUpperCase();
-  
-          if (lastA === lastB) return firstA.localeCompare(firstB);
-          return lastA.localeCompare(lastB);
+          return lastA === lastB ? firstA.localeCompare(firstB) : lastA.localeCompare(lastB);
         });
   
-        worksheet.mergeCells(insertionRow, 1, insertionRow, 12);
+        // Group header
+        safeMergeCells(worksheet, `A${insertionRow}:L${insertionRow}`);
         const headerRow = worksheet.getRow(insertionRow);
         const headerCell = headerRow.getCell(1);
-  
         headerCell.value = group;
         headerCell.font = { name: "Times New Roman", size: 14, bold: true };
         headerCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
@@ -2292,6 +2276,7 @@ const confirmDelete = async () => {
         headerRow.commit();
         insertionRow++;
   
+        // Resident rows
         members.forEach((resident) => {
           const row = worksheet.getRow(insertionRow);
           row.height = 55;
@@ -2331,8 +2316,9 @@ const confirmDelete = async () => {
           count++;
         });
   
+        // Total row
         const totalRow = worksheet.getRow(insertionRow);
-        worksheet.mergeCells(`A${insertionRow}:L${insertionRow}`);
+        safeMergeCells(worksheet, `A${insertionRow}:L${insertionRow}`);
         totalRow.getCell(1).value = `TOTAL: ${members.length}`;
         totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
         totalRow.getCell(1).font = { name: "Times New Roman", size: 12, italic: true, bold: true };
@@ -2342,26 +2328,19 @@ const confirmDelete = async () => {
           right: { style: "medium", color: { argb: "000000" } },
         };
         totalRow.commit();
-  
         insertionRow++;
       }
   
-      // Shift footer drawings
+      // Shift footer images
       footerDrawings.forEach((drawing) => {
-        const offset = rowsNeeded;
-        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
-        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += rowsNeeded;
+        if (drawing.range?.br) drawing.range.br.nativeRow += rowsNeeded;
       });
   
-      // Insert 2 extra rows after footer for dates
-      const footerShift = rowsNeeded;
-      const newDateRowIndex = originalFooterEndRow + footerShift + 1; 
-  
-      // Insert 2 empty rows before date row
+      // Insert date
+      const newDateRowIndex = originalFooterEndRow + rowsNeeded + 1;
       worksheet.insertRow(newDateRowIndex - 1, []);
       worksheet.insertRow(newDateRowIndex, []);
-  
-      // Prepare the date row
       const dateRow = worksheet.getRow(newDateRowIndex + 1);
       dateRow.height = 40;
   
@@ -2371,13 +2350,13 @@ const confirmDelete = async () => {
         day: "numeric",
       });
   
-      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
+      safeMergeCells(worksheet, `C${dateRow.number}:D${dateRow.number}`);
       const dateCell1 = dateRow.getCell(3);
       dateCell1.value = `${formattedDate}\nDate`;
       dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
   
-      worksheet.mergeCells(`H${dateRow.number}:I${dateRow.number}`);
+      safeMergeCells(worksheet, `H${dateRow.number}:I${dateRow.number}`);
       const dateCell2 = dateRow.getCell(8);
       dateCell2.value = `${formattedDate}\nDate`;
       dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
@@ -2385,18 +2364,17 @@ const confirmDelete = async () => {
   
       dateRow.commit();
   
-      // Save and upload
-
+      // Final save
       worksheet.pageSetup = {
         horizontalCentered: true,
         verticalCentered: false,
         orientation: "landscape",
-        paperSize: 9, 
+        paperSize: 9,
         fitToPage: true,
         fitToWidth: 1,
-        fitToHeight: 0, 
+        fitToHeight: 0,
       };
-
+  
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -2405,49 +2383,27 @@ const confirmDelete = async () => {
       const fileName = `Inhabitant_Record_EastFairview_${year}.xlsx`;
       const storageRef = ref(storage, `GeneratedReports/${fileName}`);
       await uploadBytes(storageRef, blob);
-  
       const fileUrl = await getDownloadURL(storageRef);
   
-      /*alert("Resident List for East Fairview generated successfully. Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating Resident List for East Fairview...");
       return fileUrl;
     } catch (error) {
       setIsGenerating(false);
-
       console.error("Error generating report:", error);
-
       setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate East Fairview Resident Report");  
-      
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
-      /*alert("Failed to generate East Fairview Resident Report.");*/
-
-
+      setPopupErrorGenerateReportMessage("Failed to generate East Fairview Resident Report");
+      setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
     } finally {
       setLoadingEastResident(false);
     }
   };
   
-  
   const handleGenerateEastResidentPDF = async () => {
     setLoadingEastResident(true);
     try {
       const fileUrl = await generateEastResidentListReport();
-      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
+      if (!fileUrl) return alert("Failed to generate Excel report.");
   
-      if (!fileUrl) {
-        setIsGenerating(false); 
-
-        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
-        setShowErrorGenerateReportPopup(true);
-
-        setTimeout(() => {
-          setShowErrorGenerateReportPopup(false);
-        }, 5000);
-        return;
-      }
       const response = await fetch("/api/convertPDF", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2462,27 +2418,12 @@ const confirmDelete = async () => {
   
       saveAs(blob, `Inhabitant_Record_EastFairview_${year}.pdf`);
   
-      /*alert("Resident Report (East Fairview) successfully converted to PDF!");*/
-
-      setIsGenerating(false); 
-      setGeneratingMessage("");
-      setPopupSuccessGenerateReportMessage("Resident Report (East Fairview) generated successfully");
-      setShowSuccessGenerateReportPopup(true);
-
-      setTimeout(() => {
-        setShowSuccessGenerateReportPopup(false);
-      }, 5000);
+      alert("Resident Report (East Fairview) successfully converted to PDF!");
     } catch (error) {
       console.error("Error:", error);
-      setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate Resident Report (East Fairview) PDF");    
-
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
-      /*alert("Failed to generate PDF.");*/
+      alert("Failed to generate PDF.");
     } finally {
-    setLoadingEastResident(false);
+      setLoadingEastResident(false);
     }
   };
 
@@ -5129,12 +5070,37 @@ const handleNextPage = () => {
                 <>
                   {currentPage === 1 && (
                     <div className="report-grid">
-                      <button onClick={handleRegistrationSummaryPDF} disabled={loadingRegistrationSummary} className="report-tile">
-                      <img src="/images/regresident.png" alt="user info" className="report-icon"/> 
-                        <p className="report-title">
-                          {loadingRegistrationSummary ? "Generating..." : "Resident Registration Summary Report"}
-                        </p>
-                      </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowResidentSummaryModal(true)}
+                      disabled={loadingRegistrationSummary}
+                      className={`report-tile ${loadingRegistrationSummary ? "disabled" : ""}`}
+                      aria-busy={loadingRegistrationSummary}
+                      aria-label="Generate Monthly Resident Registration Summary Report"
+                    >
+                      <img
+                        src="/images/regresident.png" // You can change this to your desired icon
+                        alt="Resident Summary Icon"
+                        className="report-icon"
+                        aria-hidden="true"
+                      />
+                      <p className="report-title">
+                        {loadingRegistrationSummary
+                          ? "Generating..."
+                          : "Monthly Resident Registration Summary Report"}
+                      </p>
+                    </button>
+
+                    <MonthYearModal
+                      show={showResidentSummaryModal}
+                      onClose={() => setShowResidentSummaryModal(false)}
+                      onGenerate={handleRegistrationSummaryPDF}
+                      loading={loadingRegistrationSummary}
+                      title="Generate Monthly Resident Registration Summary Report"
+                    />
+                  </>
+
 
                       <button onClick={handleGenerateSeniorPDF} disabled={loadingResidentSeniorDemographic} className="report-tile">
                         <img src="/images/senior.png" alt="user info" className="report-icon"/> 
