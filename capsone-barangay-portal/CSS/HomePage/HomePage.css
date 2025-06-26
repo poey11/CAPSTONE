@@ -389,3 +389,86 @@ align-items: center;
   height: 420px;
   background-color: rgba(75, 74, 74, 0.234);
 }
+
+
+
+
+
+
+/*
+TRY NEW
+*/
+
+.main-container-home-page {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100vh;
+}
+
+
+.home-hero-section {
+  height: 100vh;
+  width: 100%;
+  scroll-snap-align: start;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+}
+
+
+.main-content-home,
+.section-content-home {
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.main-heading-home {
+  font-size: 3.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.main-subheading-home {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.main-button-home {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  background-color: #fff;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.main-button-home:hover {
+  background-color: #e2e2e2;
+}
+
+
+.second-section-home {
+  height: 100vh;
+  background-color: #f4f6f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  scroll-snap-align: start;
+  text-align: center;
+}
+
+.section-heading-home {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.section-subheading-home {
+  font-size: 1.125rem;
+  color: #333;
+}

@@ -106,8 +106,39 @@ const homePage:React.FC = () => {
 	return (
 		
       
-        <main className="main-container-home">
-     
+<main className="main-container-home-page">
+  <section className="home-hero-section">
+    <div className="main-content-home">
+      <h1 className="main-heading-home">Welcome to Barangay Fairview</h1>
+      <p className="main-subheading-home">
+        Delivering fast, transparent, and accessible local services for our community.
+      </p>
+      <button className="main-button-home">Learn More</button>
+    </div>
+  </section>
+
+  <section className="second-section-home">
+    <div className="section-content-home">
+      <h2 className="section-heading-home">Our Services</h2>
+      <p className="section-subheading-home">
+        Request documents, report issues, and connect with your barangay anytime.
+      </p>
+    </div>
+  </section>
+
+
+
+
+
+
+
+
+
+
+
+          {/*
+          
+   
           <div className="homepage-container-home">
 
 
@@ -265,8 +296,10 @@ const homePage:React.FC = () => {
 
         </div>
 
-
+       */}
+     
       </main>
+      
 	);
 }
 
