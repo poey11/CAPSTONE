@@ -108,6 +108,9 @@ export default function action() {
     const [showResidentsPopup, setShowResidentsPopup] = useState(false);
     const [residents, setResidents] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
+
+
     
     const employerPopupRef = useRef<HTMLDivElement>(null);
     
@@ -143,6 +146,37 @@ export default function action() {
       
         fetchResidents();
         
+      }, []);
+
+      useEffect(() => {
+        const fetchOtherDocumentPurposes = async () => {
+          try {
+            const otherDocsRef = collection(db, "OtherDocuments");
+            const snapshot = await getDocs(otherDocsRef);
+      
+            const groupedTitles: { [key: string]: string[] } = {};
+      
+            snapshot.docs.forEach(doc => {
+              const data = doc.data();
+              const type = data.type;
+              const title = data.title;
+      
+              if (!groupedTitles[type]) {
+                groupedTitles[type] = [];
+              }
+      
+              if (title && type) {
+                groupedTitles[type].push(title);
+              }
+            });
+      
+            setOtherDocPurposes(groupedTitles);
+          } catch (error) {
+            console.error("Error fetching OtherDocuments:", error);
+          }
+        };
+      
+        fetchOtherDocumentPurposes();
       }, []);
 
       
@@ -436,6 +470,11 @@ export default function action() {
                                               <option value="Good Moral and Probation">Good Moral and Probation</option>
                                               <option value="Garage/PUV">Garage/PUV</option>
                                               <option value="Garage/TRU">Garage/TRU</option>
+
+                                              {/* Dynamically fetched purposes from OtherDocuments */}
+                                              {otherDocPurposes["Barangay Certificate"]?.map((title, index) => (
+                                                <option key={index} value={title}>{title}</option>
+                                              ))}
                                             
                                             </>):docType === "Barangay Clearance" ? (<>
                                               <option value="Loan">Loan</option>
@@ -445,6 +484,12 @@ export default function action() {
                                               <option value="Maynilad">Maynilad</option>
                                               <option value="Meralco">Meralco</option>
                                               <option value="Bail Bond">Bail Bond</option>
+
+                                              {/* Dynamically fetched purposes from OtherDocuments */}
+                                              {otherDocPurposes["Barangay Clearance"]?.map((title, index) => (
+                                                <option key={index} value={title}>{title}</option>
+                                              ))}
+                                              
                                             </>):docType === "Barangay Indigency" ? ( <>
                                               <option value="No Income">No Income</option>
                                               <option value="Public Attorneys Office">Public Attorneys Office</option>
@@ -454,6 +499,11 @@ export default function action() {
                                               <option value="Flood Victims">Flood Victims</option>
                                               <option value="Philhealth Sponsor">Philhealth Sponsor</option>
                                               <option value="Medical Assistance">Medical Assistance</option>
+
+                                              {/* Dynamically fetched purposes from OtherDocuments */}
+                                              {otherDocPurposes["Barangay Indigency"]?.map((title, index) => (
+                                                <option key={index} value={title}>{title}</option>
+                                              ))}
                                             </>): (docType === "Business Permit" ||docType === "Temporary Business Permit") && (
                                               <>
                                               <option value="New">New</option>

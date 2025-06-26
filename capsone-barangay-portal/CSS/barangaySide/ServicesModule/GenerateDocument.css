@@ -200,6 +200,8 @@
     padding: 10px;
     z-index: 100; /* Ensure dropdown is above other elements */
     width: 332px; /* Optional: Set a minimum width for the dropdown */
+    height: 200px;
+    overflow-y: auto;
   }
 
   

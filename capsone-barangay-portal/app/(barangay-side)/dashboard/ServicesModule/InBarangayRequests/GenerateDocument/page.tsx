@@ -1,12 +1,17 @@
 "use client"
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { collection, getDocs} from "firebase/firestore";
+import { db } from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/GenerateDocument.css";
 
 
 export default function GenerateDocument() {
     const router = useRouter();
+    const [permitOptions, setPermitOptions] = useState<string[]>([]);
+
+
     const handleSubmit = (e: any) => {
         const action = e.currentTarget.id;
         router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=${action}`);
@@ -26,6 +31,23 @@ export default function GenerateDocument() {
     const handleBack = () => {
         router.push("/dashboard/ServicesModule/InBarangayRequests");
     };
+
+    useEffect(() => {
+        const fetchPermitOptions = async () => {
+          try {
+            const querySnapshot = await getDocs(collection(db, "OtherDocuments"));
+            const permits = querySnapshot.docs
+              .filter(doc => doc.data().type === "Barangay Permit")
+              .map(doc => doc.data().title);
+      
+            setPermitOptions(permits);
+          } catch (error) {
+            console.error("Error fetching Barangay Permit documents:", error);
+          }
+        };
+      
+        fetchPermitOptions();
+      }, []);
 
     return (
         <main className="generatedocument-main-container">
@@ -53,8 +75,7 @@ export default function GenerateDocument() {
                     </div>
                 </div>
 
-                {/* TO DO: yung other new documents, dapat automatic na siya makikita sa dropdown ng documents
-                di na siya naka hiwalay sa existing documents */}
+                
 
                 <div className="generatedocument-inbrgy-info-main-container">
                     <div className="generatedocument-inbrgy-top-section">
@@ -85,6 +106,13 @@ export default function GenerateDocument() {
                                         <p className="dropdown-item" onClick={handleSubmit} id="Business Permit">Business Permit</p>
                                         <p className="dropdown-item" onClick={handleSubmit} id="Temporary Business Permit">Temporary Business Permit</p>
                                         <p className="dropdown-item" onClick={handleSubmit} id="Construction ">Construction Permit</p>
+                                        
+                                        {/* Add dynamic permit titles */}
+                                        {permitOptions.map((title, index) => (
+                                            <p key={index} className="dropdown-item" onClick={handleSubmit} id={title}>
+                                            {title}
+                                            </p>
+                                        ))}
                                     </div>
                                     )}
                                 </div>
