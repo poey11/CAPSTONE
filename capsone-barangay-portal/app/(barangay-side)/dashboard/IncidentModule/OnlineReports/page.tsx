@@ -3,7 +3,7 @@ import "@/CSS/IncidentModule/OnlineReporting.css";
 import { useState, useEffect } from "react";
 import { getAllSpecificDocument } from "@/app/helpers/firestorehelper";
 import { useRouter } from "next/navigation";
-import { doc, updateDoc } from "firebase/firestore";
+import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import {db} from "@/app/db/firebase";
 
 const statusOptions = ["All", "Acknowledged", "Pending"];
@@ -37,47 +37,38 @@ const getViewedRequests = (): string[] => {
     }
   };
 
-
-
-{/*}
-  useEffect(() => {
-    const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", "Online", setIncidentData);
-
-
-     const viewed = getViewedRequests();
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-    
-  }, []);
-*/}
-
+  
 
   useEffect(() => {
-    const unsubscribe = getAllSpecificDocument(
-      "IncidentReports",
-      "department",
-      "==",
-      "Online",
-      (data: any[]) => {
-        const processed = data.map((item) => ({
-          ...item,
-          isNew: item.isViewed === false,
-        }));
+    try {
+      const Collection = query(
+        collection(db, "IncidentReports"), 
+        where("department", "==", "Online"),
+        orderBy("createdAt", "desc"));
 
-        setIncidentData(processed);
-        setFilteredData(processed);
-        
-      }
-    );
+        const unsubscribe = onSnapshot(Collection, (snapshot) => {
+          let data:any[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            isNew: doc.data().isViewed === false, // Check if the request is new
+            }));
+          data.sort((a, b) => {
+            if(a.statusPriority !== b.statusPriority) {
+              return a.statusPriority - b.statusPriority; // Sort by status priority first
+            }
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+            return dateB - dateA; // Sort by createdAt in descending order
+          });
+          setIncidentData(data);
+          setFilteredData(data);
+        });
 
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
+    } catch (error) {
+      console.error("Error fetching incident data:", error);
+      
+    }
+
   }, []);
 
   useEffect(() => {
@@ -271,12 +262,13 @@ const getViewedRequests = (): string[] => {
     <table>
       <thead>
         <tr>
-          <th>Filed</th>
           <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
             Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
           </th>
           <th>Complainant's Full Name</th>
           <th>Date Filed</th>
+          <th>Incident Date and Time</th>
+          <th>Area of Incident</th>
           <th>Concern</th>
           <th>Status</th>
           <th>Actions</th>
@@ -287,10 +279,11 @@ const getViewedRequests = (): string[] => {
           const fullName = `${incident.lastname || ""}, ${incident.firstname || ""}`.trim();
           return (
              <tr key={index} className={incident.isNew ? "highlight-new-request" : ""}>
-              <td>{incident.isFiled === true ? "Filed" : "Not Yet Filed"}</td>
               <td>{incident.caseNumber || "N/A"}</td>
               <td>{fullName}</td>
+              <td>{incident.createdAt}</td>
               <td>{incident.dateFiled} {incident.time}</td>
+              <td>{incident.area}</td>
               <td>{incident.concerns}</td>
               <td>
                 <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>

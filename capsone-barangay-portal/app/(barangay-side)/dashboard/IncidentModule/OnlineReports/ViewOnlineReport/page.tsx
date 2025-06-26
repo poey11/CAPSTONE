@@ -2,11 +2,11 @@
 import "@/CSS/IncidentModule/OnlineReporting.css";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
-import { doc, getDoc, updateDoc, collection, getDocs, setDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, getDocs, setDoc, query, where } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
 
-const statusOptions = ["Acknowledged", "Pending"];
 
 export default function ViewOnlineReports() {
   const [formData, setFormData] = useState({
@@ -26,7 +26,9 @@ export default function ViewOnlineReports() {
     time: "",
   });
   
-  
+  const user = useSession().data?.user;
+ 
+  const [listOfStaffs, setListOfStaffs] = useState<any[]>([]);
 
   const [respondent, setRespondent] = useState<{
     respondentName: string;
@@ -65,7 +67,28 @@ export default function ViewOnlineReports() {
     }
   }, [incidentId]);
 
-  
+  useEffect(() => {
+    try {
+      const collectionRef = query(collection(db, "BarangayUsers"), where("position", "==", "LF Staff"));
+      const unsubscribe = getDocs(collectionRef).then((querySnapshot) => {
+        const staffList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));  
+        setListOfStaffs(staffList);
+      });
+      return () => {
+        unsubscribe; // Clean up the subscription
+      };
+    } catch (error) {
+      console.error("Error fetching staff list:", error);
+      
+    }
+    
+
+  }, []);
+
+  console.log("List of Staffs:", listOfStaffs);
 
   const fetchIncidentData = async (id: string) => {
     try {
@@ -100,8 +123,8 @@ export default function ViewOnlineReports() {
             investigationReport: data.respondent.investigationReport || "",
             file: Array.isArray(data.respondent.file) ? data.respondent.file : data.respondent.file ? [data.respondent.file] : [],
           };
-          setRespondent(initialData);
           setInitialRespondent(initialData);
+          setRespondent(initialData);
         }
   
         // ✅ Fetch the incident proof photo (if available)
@@ -128,6 +151,8 @@ export default function ViewOnlineReports() {
     );
   };
   
+
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -176,15 +201,22 @@ export default function ViewOnlineReports() {
 
 
 
+  const handleSMSToAssignedOfficer = async () => {
+    //sends an sms to the assigned officer regarding the incident report to conduct an investigation 
+
+
+
+  }
 
 const handleSubmitClick = async () => {
-  const { respondentName, investigationReport, file } = respondent;
-
+  const { respondentName, investigationReport  } = respondent;
+  console.log(respondent)
   const invalidFields: string[] = [];
 
   if (!respondentName.trim()) invalidFields.push("respondentName");
-  if (!investigationReport.trim()) invalidFields.push("investigationReport");
- // if (!file || file.length === 0) invalidFields.push("file");
+  if (!investigationReport.trim() && respondentName === user?.id ) invalidFields.push("investigationReport");
+  //if ((!file || file.length === 0) && respondentName === user?.id ) invalidFields.push("file");
+  //if(files.length === 0 && respondentName === user?.id ) invalidFields.push("file");
 
   if (invalidFields.length > 0) {
     setInvalidFields(invalidFields); // highlight invalid fields
@@ -198,11 +230,6 @@ const handleSubmitClick = async () => {
     return;
   }
 
-    setFormData((prevData) => ({
-    ...prevData,
-    status: "Acknowledged",
-  }));
-
 
   // Clear previous errors
   setInvalidFields([]);
@@ -210,32 +237,54 @@ const handleSubmitClick = async () => {
 };
 
 
-    
+ 
   
   const confirmSubmit = async () => {
-  setShowConfirmation(false);
-
- // Create a fake event and call handleSubmit
-    const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-    const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
-
+    setShowConfirmation(false);
     
-    if (!docId) {
-      setPopupErrorMessage("Failed to save record.");
-      setShowErrorPopup(true);
-      return;
+    if(formData.status !== "In - Progress" && formData.status !== "Acknowledged") {
+      setFormData((prevData) => ({
+        ...prevData,
+        status: "In - Progress", // Set status to "In - Progress" if not already set
+        statusPriority: 2, // Set priority to 2 for "In - Progress"
+        
+      }));
+      setInitialRespondent((prev) => ({
+        ...prev,
+        respondentName: user?.id || "", // Set the current user's ID as the respondent
+      }));
+
     }
-    
-    setPopupMessage("Online Report Submitted Succesfuly!!");
-    setShowPopup(true);
-  
-    // Hide the popup after 3 seconds
-    setTimeout(() => {
-      setShowPopup(false);
-      router.push(`/dashboard/IncidentModule/OnlineReports`);
-    }, 3000);
+    else{
+      setFormData((prevData) => ({
+        ...prevData,
+        status: "Acknowledged", // Set status to "Acknowledged" if not already set
+        statusPriority: 3, // Set priority to 3 for "Acknowledged"
+      }));
 
-};
+    }
+
+
+      const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+      const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+
+
+      if (!docId) {
+        setPopupErrorMessage("Failed to save record.");
+        setShowErrorPopup(true);
+        return;
+      }
+
+      setPopupMessage("Online Report Submitted Succesfuly!!");
+      setShowPopup(true);
+      handleSMSToAssignedOfficer(); // Call the SMS function
+      // Hide the popup after 3 seconds
+      setTimeout(() => {
+        setShowPopup(false);
+        router.push(`/dashboard/IncidentModule/OnlineReports`);
+      }, 3000);
+
+  };
 
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): Promise<string | undefined> => {
   if (e) e.preventDefault();
@@ -258,14 +307,21 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): 
     );
 
     await updateDoc(incidentRef, {
-      status: formData.status,
+      status: formData.status === "Pending"
+        ? "In - Progress"
+        : formData.status === "In - Progress" &&
+        "Acknowledged", 
+      statusPriority: formData.status === "Pending"
+        ? 2
+        : formData.status === "In - Progress"
+        ? 3
+        : 1,
       respondent: {
         respondentName: respondent.respondentName,
         investigationReport: respondent.investigationReport,
         file: uploadedFileUrls,
       },
     });
-
     const notificationRef = doc(collection(db, "Notifications"));
     await setDoc(notificationRef, {
       residentID: formData.reportID,
@@ -374,9 +430,19 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
               <h1>Online Report Details</h1>
             </div>
 
-            <div className="action-btn-section-online-report">
-                <button className="action-online-report" onClick={handleSubmitClick} >Save</button>                                                 
-            </div>
+            {formData.status !== "Acknowledged" &&
+              user?.position === "LF Staff" &&
+              (
+                initialRespondent.respondentName === "" ||  // No respondent assigned yet
+                user?.id === respondent.respondentName      // Current user is the assigned respondent
+              ) && (
+                <div className="action-btn-section-online-report">
+                  <button className="action-online-report" onClick={handleSubmitClick}>
+                    Save
+                  </button>
+                </div>
+            )}
+
         </div>
 
           <div className="section-1-reports-title">
@@ -621,14 +687,22 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
 
                           <div className="fields-section-online">
                                 <p>Barangay Officer<span className="required">*</span></p>
-                                <input 
-                                type="text" 
-                              className={`online-incident-input-field ${invalidFields.includes("respondentName") ? "input-error" : ""}`} 
-                                placeholder="Enter Respondent Officer Name"
-                                 name="respondentName" value={respondent.respondentName}
-                                onChange={handleChange} 
-                                   disabled = {formData.status === "Acknowledged"}
-                                  />
+                                <select
+                                  className={`online-incident-input-field ${invalidFields.includes("respondentName") ? "input-error" : ""}`}
+                                  name="respondentName" 
+                                  value={respondent.respondentName}
+                                  onChange={handleChange}
+                                  disabled = {formData.status === "Acknowledged" || initialRespondent.respondentName !== "" ||user?.position !== "LF Staff"}                                  
+                                >
+                                  <option value="" disabled>Select Officer</option>
+                                  {listOfStaffs.map((staff,index) => (
+                                    <option key={index} value={staff.id}>
+                                      {staff.firstName} {staff.lastName}
+                                    </option>
+                                  ))}
+
+                                </select>
+                                
                             </div>
 
                         
@@ -641,7 +715,11 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 <div className="box-container-investigation-report">
                                   <span className="required-asterisk">*</span>
 
-                                   <textarea   className={`investigation-report-input-field ${invalidFields.includes("investigationReport") ? "input-error" : ""}`}  placeholder="Enter Investigation Details" name="investigationReport" value={respondent.investigationReport} onChange={handleChange} disabled = {formData.status === "Acknowledged"} />
+                                  <textarea   className={`investigation-report-input-field ${invalidFields.includes("investigationReport") ? "input-error" : ""}`}  
+                                   
+                                   placeholder="Enter Investigation Details" name="investigationReport" 
+                                   value={respondent.investigationReport} onChange={handleChange} 
+                                   disabled = {formData.status === "Acknowledged" || user?.id !== respondent.respondentName  } />
                                      
                                 </div>
 
@@ -660,69 +738,70 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 </div>
 
                                 <div className="box-container-investigation">
+                                  <div className="file-upload-container-investigation">
 
-                                    <div className="file-upload-container-investigation">
-                                   {formData.status !== "Acknowledged" && (
-                                          <>
-                                            <label htmlFor="file-upload2" className="upload-link">Click to Upload File</label>
-                                            <input
-                                              id="file-upload2"
-                                              type="file"
-                                              className="file-upload-input"
-                                              multiple
-                                              accept=".jpg,.jpeg,.png"
-                                              onChange={handleFileChange}
-                                            />
-                                          </>
-                                        )}
-                                         <div className="uploadedFiles-container">
-                                       {(files.length > 0 || respondent.file.length > 0) ? (
-                                      <div className="file-name-image-display">
-                                        <ul>
-                                          {/* Display existing respondent files */}
-                                          {respondent.file.map((url: string, index: number) => (
-                                            <div className="file-name-image-display-indiv" key={`existing-${index}`}> 
-                                              <li>
-                                                <div className="filename&image-container">
-                                                  <img src={url} alt={`Investigation Photo ${index + 1}`} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
-                                                </div>
-                                                <a href={url} target="_blank" rel="noopener noreferrer">View</a>
-                                              </li>
-                                            </div>
-                                          ))}
-
-                                          {/* Display newly uploaded files */}
-                                          {files.map((file, index) => (
-                                            <div className="file-name-image-display-indiv" key={`new-${index}`}> 
-                                              <li>
-                                                {file.preview && (
-                                                  <div className="filename&image-container">
-                                                    <img src={file.preview} alt={file.name} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
-                                                  </div>
-                                                )}
-                                                {file.name}
-                                                <button type="button" onClick={() => handleFileDelete(file.name)} className="delete-button">
-                                                  <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                                                </button>
-                                              </li>
-                                            </div>
-                                          ))}
-                                        </ul>
-                                      </div>
-                                    ) : (
-                                      <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>
-                                        No image available
-                                      </p>
+                                    {/* Only show upload input if no existing respondent files */}
+                                    {formData.status !== "Acknowledged" && respondent.file.length === 0 && (
+                                      <>
+                                        <label htmlFor="file-upload2" className="upload-link">Click to Upload File</label>
+                                        <input
+                                          id="file-upload2"
+                                          type="file" 
+                                          name="file"
+                                        
+                                          className={`file-upload-input ${invalidFields.includes("file") ? "input-error" : ""}`}
+                                          multiple
+                                          accept=".jpg,.jpeg,.png"
+                                          onChange={handleFileChange}
+                                          disabled={formData.status === "Acknowledged" || user?.id !== respondent.respondentName}
+                                        />
+                                      </>
                                     )}
 
-                                      </div>
+                                    <div className="uploadedFiles-container">
+                                      {(files.length > 0 || respondent.file.length > 0) ? (
+                                        <div className="file-name-image-display">
+                                          <ul>
+                                            {/* Existing files */}
+                                            {respondent.file.map((url: string, index: number) => (
+                                              <div className="file-name-image-display-indiv" key={`existing-${index}`}>
+                                                <li>
+                                                  <div className="filename&image-container">
+                                                    <img src={url} alt={`Investigation Photo ${index + 1}`} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
+                                                  </div>
+                                                  <a href={url} target="_blank" rel="noopener noreferrer">View</a>
+                                                </li>
+                                              </div>
+                                            ))}
 
-                                      
-                                      
-                                          
+                                            {/* New files */}
+                                            {files.map((file, index) => (
+                                              <div className="file-name-image-display-indiv" key={`new-${index}`}>
+                                                <li>
+                                                  {file.preview && (
+                                                    <div className="filename&image-container">
+                                                      <img src={file.preview} alt={file.name} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
+                                                    </div>
+                                                  )}
+                                                  {file.name}
+                                                  <button type="button" onClick={() => handleFileDelete(file.name)} className="delete-button">
+                                                    <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                                  </button>
+                                                </li>
+                                              </div>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      ) : (
+                                        <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>
+                                          No image available
+                                        </p>
+                                      )}
                                     </div>
-
+                                    
+                                  </div>
                                 </div>
+
 
                               </div>
 

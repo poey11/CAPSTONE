@@ -6,7 +6,7 @@ import { useAuth } from "@/app/context/authContext";
 import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection, doc, getDoc} from "firebase/firestore";
 import { db,storage, auth } from "@/app/db/firebase";
-import { getAllSpecificDocument } from "@/app/helpers/firestorehelper";
+import { getAllSpecificDocument, getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import {isPastDate,isToday,isPastOrCurrentTime,getLocalDateString} from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
 
@@ -35,15 +35,13 @@ const incidentForm:React.FC = () => {
     department: "",
     status: "Pending",
     addInfo:"",
-   //  isViewed: false,
   });
 
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const docRef = doc(db, "ResidentUsers", user.uid);
+      if (currentUser && currentUser !== "Guest") {
+        const docRef = doc(db, "ResidentUsers", currentUser);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -59,7 +57,8 @@ const incidentForm:React.FC = () => {
     };
 
     fetchUserData();
-  }, []);
+  }, [currentUser]);
+  
   const [onlineReportCollection, setOnlineReportCollection] = useState<any[]>([]);
   useEffect(() => {
     try {
@@ -75,33 +74,52 @@ const incidentForm:React.FC = () => {
    
   }, []);
   
-  useEffect(() => {
-    const getCaseNumber = () => {
-      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      const randomId = customAlphabet(alphabet, 6);
-      const randomIdString = randomId();
-      let formattedNumber = ""
-      if(onlineReportCollection.length < 1){
-        formattedNumber = String(1).padStart(4, "0");
+    const [nos, setNos] = useState<number>(0); // Initialize with a default value
+  
+    useEffect(() => {
+      if(user){;
+        const fetchCount = async () => {
+          try {
+            const count = await getSpecificCountofCollection("IncidentReports", "reportID", user.uid);
+            setNos(count || 1);
+          } catch (error) {
+            console.error("Error fetching count:", error);
+          }
+        }
+        fetchCount();
       }
       else{
-        const lastReport = onlineReportCollection[0].caseNumber.split("-");
-        const number = parseInt(lastReport[lastReport.length - 1]);
-        formattedNumber = String(number+1).padStart(4, "0");
+        const fetchCount = async () => {
+          try {
+            const count = await getSpecificCountofCollection("IncidentReports", "reportID", "Guest");
+            setNos(count || 1);
+          } catch (error) {
+            console.error("Error fetching count:", error);
+          }
+        }
+        fetchCount();
       }
-      const user = currentUser !== "Guest"
-      ? currentUser.substring(0, 6).toUpperCase()
-      : "GUEST";  
-      const caseValue =`${user} - ${randomIdString} - ${formattedNumber}` ;
-      console.log("Generated Case Number:", caseValue);
-      setIncidentReport((prev: any) => ({
-        ...prev,
-        caseNumber: caseValue, // ex : "ABCDEF - ABCDEF - 0001" or "GUEST - ABCDEF - 0001"
-      }));
-    };
+  
+    },[user]);
+    useEffect(() => {
+       const getServiceRequestId =  () => {
+         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+         const randomId = customAlphabet(alphabet, 6);
+         const requestId = randomId();
+         const number = String(nos+1).padStart(4, '0'); // Ensure 3 digits
+         let format = `${user?.uid.substring(0,6).toUpperCase()|| "GUEST"} - ${requestId} - ${number}`;
+          setIncidentReport((prev: any) => ({
+            ...prev,
+            caseNumber: format,
+          }));
+         console.log("format", format);
+       }
+       getServiceRequestId();
+     
+     }, [user,nos]);
 
-    getCaseNumber();
-  },[user, onlineReportCollection]);
+
+ 
 
   
     const clearForm = () => {
@@ -256,7 +274,7 @@ const incidentForm:React.FC = () => {
         console.log(currentUser);
         
         const toAdd = [{
-          ...(currentUser !== "Guest" && { reportID: currentUser }), // Include reportID only if currentUser is not Guest
+          ...(currentUser !== "Guest" ? { reportID: currentUser } :{reportID: "Guest"}), // Include reportID only if currentUser is not Guest
           caseNumber: incidentReport.caseNumber,
           firstname: incidentReport.firstname,
           middlename: incidentReport.middlename,
@@ -271,10 +289,11 @@ const incidentForm:React.FC = () => {
           file: filename,
           department: "Online",
           status: incidentReport.status,
-          isFiled: false,
+          statusPriority: 1,
           isViewed: false,
           addInfo: incidentReport.addInfo,
           createdAt: new Date().toLocaleString(),
+          
         }];
         console.log(toAdd);
         handleReportUpload(toAdd, storageRef);
@@ -327,6 +346,7 @@ const incidentForm:React.FC = () => {
                 placeholder="Enter First Name"
                 value={incidentReport.firstname}
                 onChange={handleFormChange}
+                disabled={currentUser !== "Guest"} // Disable if user is a guest
               />
             </div>
 
@@ -346,6 +366,8 @@ const incidentForm:React.FC = () => {
                   placeholder="Enter Middle Name"
                   value={incidentReport.middlename}
                   onChange={handleFormChange}
+                  disabled={currentUser !== "Guest"} // Disable if user is a guest
+
                 />
             </div>
         
@@ -365,6 +387,7 @@ const incidentForm:React.FC = () => {
                 placeholder="Enter Last Name"
                 value={incidentReport.lastname}
                 onChange={handleFormChange}
+                disabled={currentUser !== "Guest"}
               />
             </div>
 
@@ -390,6 +413,7 @@ const incidentForm:React.FC = () => {
                 pattern="^[0-9]{11}$" 
                 placeholder="Please enter a valid 11-digit contact number" 
                 title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX"
+                disabled={currentUser !== "Guest"}
               />
             </div>
             <div className="form-group-incident-report">
