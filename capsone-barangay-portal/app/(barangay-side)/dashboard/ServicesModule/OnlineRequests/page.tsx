@@ -84,11 +84,11 @@ import { db } from "@/app/db/firebase";
       let filtered = requestData;
 
       // Filter by Document Type
-      if (searchType.trim() !== "") {
-        filtered = filtered.filter((req) =>
-          req.docType.toLowerCase().includes(searchType.toLowerCase())
-        );
-      }
+      if (searchType !== "" && searchType !== "All") {
+      filtered = filtered.filter((req) =>
+        req.docType.toLowerCase().includes(searchType.toLowerCase())
+      );
+    }
 
       // Filter by Date Range
       if (dateFrom && dateTo) {
@@ -211,13 +211,21 @@ import { db } from "@/app/db/firebase";
 
 
          <div className="onlinereq-section-2">
-              <input
-              type="text"
-              className="online-services-module-filter"
-              placeholder="Enter Document Type"
-              value={searchType}
-              onChange={(e) => setSearchType(e.target.value)}
-            />
+              
+            <select
+            className="online-services-module-filter"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
+            <option value="All">All Document Types</option>
+            <option value="Barangay Certificate">Barangay Certificate</option>
+            <option value="Barangay Indigency">Barangay Indigency</option>
+            <option value="Barangay ID">Barangay ID</option>
+            <option value="Barangay Permits">Barangay Permits</option>
+            <option value="Barangay Clearance">Barangay Clearance</option>
+            <option value="First Time Jobseeker">First Time Jobseeker</option>
+            <option value="Other">Other Documents</option>
+          </select>
 
             <input
               type="date"
@@ -287,7 +295,7 @@ import { db } from "@/app/db/firebase";
                     </span>
                 </td>
                 <td>
-                  <div className="-services-actions">
+                  <div className="actions">
                     <button
                         className="action-view-services"
                         onClick={() => handleView(request)}

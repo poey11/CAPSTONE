@@ -1,16 +1,18 @@
 .inbarangayreq-main-container{
-    width: 100%;
+ width: 100%;
     height: 100vh;
-    background-color: #f9f9f9;
-    padding:30px;
-    margin-left: 3rem;
-    overflow-y: auto; 
+    background-color: #F0F2F8; 
+    padding-left:30px;
+    padding-right:30px;
+    padding-bottom:30px;
+    padding-top: 150px;
+    margin-left: 3rem; 
 }
 
 .inbarangayreq-section-1{
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     width: 100%;
 }
 
@@ -38,129 +40,196 @@
     display: flex;
     gap: 20px;
     padding: 0;
-    margin-top: 25px;
+    margin-top: 5px;
   }
 
-  .search-bar, .featuredStatus{
+  .inbarangay-services-module-filter {
     padding: 8px;
     width: 100%;
     max-width: 400px;
     margin-top: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
+    color: #000000;
+    text-align: left;
+  }
+
+  .inbarangay-services-module-filter:focus {
+    border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+
+   .inbarangay-services-module-filter option {
     color: rgba(0, 0, 0, 0.4);
   }
 
-  .featuredStatus option {
-    color: rgba(0, 0, 0, 0.4); 
-  }
+
 
 .inbarangayreq-main-section {
-    flex: 1; /* Makes it take up remaining space */
-    display: flex; /* Ensures proper alignment */
+    flex: 1; 
+    display: flex; 
     flex-direction: column;
     padding: 0;
     margin: 0; /* Remove default margin */
     overflow: auto; /* Allow scrolling if content overflows */
     width: 100%;
-    height: 100%; /* Full height */
-    margin-top: 2rem;
-    border: 2px solid  #ddd;
+    height: 100%; 
     max-height: 70%;
-}
-
-.inbarangayreq-main-section table {
-    width: 100%; /* Ensures the table spans the full width */
-    border-collapse: collapse; /* Removes unnecessary spacing between table cells */
-}
-
-.inbarangayreq-main-section td {
-    padding: 1rem; 
-    text-align: center; 
-    border-bottom: 2px solid #ddd;
-    color: grey;
-    font-weight: lighter;
-}
-
-.inbarangayreq-main-section th {
-    padding: 1rem; 
-    text-align: left; 
-    border-bottom: 2px solid #ddd;
-    color: grey;
-    text-align: center;
-    
-}
-
-.inbarangayreq-ain-section .announcement-info {
-    display: flex;
-    align-items: center; /* Center align the image and text */
-    gap: 1rem; /* Add space between the image and text */
-}
-
-.inbarangayreq-main-section .announcement-image {
-    width: 50px;
-    height: 50px;
-    border-radius: 10%; /* Make the image circular */
-    object-fit: cover; /* Ensure the image is properly scaled */
-}
-
-.inbarangayreq-main-section tbody tr:hover {
-  background-color: #e0e0e0; 
-  cursor: pointer; 
-  transition: background-color 0.2s ease; 
+    margin-top: 2rem;
+     border: 2px solid rgba(36, 53, 76, 0.7);
+     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
+    border-radius: 6px;
 }
 
 .inbarangayreq-main-section thead {
   position: sticky;
   top: 0;
-  background-color: rgb(232, 228, 228); /* Ensures it's visible when scrolled */
+  background-color: #214666; 
   z-index: 10; /* Ensures it stays above other content */
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
   height: 80px;
 }
 
-.actions {
+
+.inbarangayreq-main-section table {
+   width: 100%; /* Ensures the table spans the full width */
+  border-collapse: collapse; /* Removes unnecessary spacing between table cells */
+}
+
+
+.inbarangayreq-main-section td {
+  padding: 1rem; 
+    text-align: center; 
+    border-bottom: 2px solid #ddd;
+    color: rgb(44, 42, 42);
+    font-weight: normal;
+}
+
+.inbarangayreq-main-section th {
+     padding: 1rem; 
+    text-align: left; 
+    border-bottom: 2px solid #ddd;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+
+.redirection-section-inbarangay {
     display: flex;
     justify-content: center;
-    gap: 0.5rem; /* Space between action buttons */
-}
-
-.action-view,
-.action-edit,
-.action-delete {   
-    border: none;
-    cursor: pointer;
-    padding: 8px 12px;
-    font-size: 13px;
+    align-items: center;
+    padding: 5px;
     border-radius: 5px;
-    transition: background-color 0.2s ease;
+    gap: 5px;
+      border: 2px solid rgba(36, 53, 76, 0.7);
+     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
+  }
+  
+  .redirection-section-inbarangay button {
+    padding: 4px 8px;
+    border: none;
+    background-color: #2C3E50;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.3s;
+  }
+  
+  .redirection-section-inbarangay button:hover {
+    background-color: #214666;
+  }
+  
+  .redirection-section-inbarangay button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .redirection-section-inbarangay .active {
+     background-color: #214666;
+    font-weight: bold;
+  }
+  
+
+  .no-result-card-inbarangay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    border: 2px solid #f3c3bf;
+    width: 500px;
+    border-radius: 1rem;
+    background-color: #fff;
+    margin-top: 5rem;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.03);
+    align-self: center;
+  }
+  
+  .no-result-icon-inbarangay {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 0.5rem;
+    opacity: 0.75;
+  }
+
+  .no-results-inbarangay {
+    font-weight: bold;
+    font-size: 1.25rem;
+    color: #e7594e;
+  }
+
+  .actions-inbarangay {
+   display: flex;
+    gap: 1rem; /* Space between action buttons */
+    justify-content: center;
 }
 
-.action-view {
-    background-color: #4caf50; /* Green */
+
+
+
+.action-inbarangay-view {   
+     border: none;
+    cursor: pointer;
+    width: 24px;
+    height: 24px; 
+}
+
+.action-inbarangay-view img {
+    filter: brightness(0) saturate(100%) invert(38%) sepia(78%) saturate(374%) hue-rotate(81deg) brightness(91%) contrast(92%);
+}
+
+
+
+
+/***
+.action-view{
+    background-color: #4caf50; 
     color: white;
 }
 
 .action-view:hover {
-    background-color: #3e8f41; /* Green */
+    background-color: #3e8f41; 
 }
 
 .action-edit {
-    background-color: #ff9800; /* Orange */
+    background-color: #ff9800; 
     color: white;
 }
 .action-edit:hover {
-    background-color: #d58102; /* Orange */
+    background-color: #d58102; 
 }
 
 .action-delete {
-    background-color: #f44336; /* Red */
+    background-color: #f44336; 
     color: white;
 }
 .action-delete:hover {
-    background-color: #d73c31; /* Red */
+    background-color: #d73c31; 
 }
-
+***/
 
 .status-badge {
     padding: 8px 12px;            
@@ -175,7 +244,7 @@
 
 /* Colors for different statuses */
 
-.status-badge.in-progress {
+.status-badge.inProgress {
     background-color: #ffd700;    
 }
 
@@ -185,6 +254,18 @@
 
 .status-badge.new {
     background-color: #f79233;    
+}
+
+.status-badge.rejected {
+    background-color: #e22929;    
+}
+
+.status-badge.pending {
+    background-color: #325bd4;    
+}
+
+.status-badge.pick-up {
+    background-color: #be5cb6;    
 }
 
 
