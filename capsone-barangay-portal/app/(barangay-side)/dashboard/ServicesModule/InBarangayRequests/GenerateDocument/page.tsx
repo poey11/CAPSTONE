@@ -51,6 +51,9 @@ export default function GenerateDocument() {
                     </div>
                 </div>
 
+                {/* TO DO: yung other new documents, dapat automatic na siya makikita sa dropdown ng documents
+                di na siya naka hiwalay sa existing documents */}
+
                 <div className="generatedocument-inbrgy-info-main-container">
                     <div className="generatedocument-inbrgy-top-section">
                         <div className="generate-documents-container">
@@ -99,7 +102,7 @@ export default function GenerateDocument() {
                     <div className="generatedocument-inbrgy-bottom-section">
                         <div className="generate-documents-othernewdocs-container">
                             <div className="generate-documents-documents-card-othernewdocs" onClick={handleOtherNewDocument}>
-                                <h1>Other New Documents</h1>
+                                <h1>Other Documents</h1>
                             </div>
                          </div>           
                     </div>

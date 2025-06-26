@@ -3,6 +3,7 @@ import React, { useState, ChangeEvent } from "react";
 import { addDoc, collection, getDocs} from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import { useRouter } from "next/navigation";
+import "@/CSS/barangaySide/ServicesModule/GenerateDocument.css";
 
 interface DocumentField {
     title?: string;
@@ -120,9 +121,383 @@ export default function AddNewDoc() {
         alert("Document added successfully!");
         router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument");
     }
+    const handleBack = () => {
+        router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument");
+    };
+
+    const [isPredefinedOpen, setIsPredefinedOpen] = useState(false);
+    const [isNotesOpen, setIsNotesOpen] = useState(false);
+
+    const togglePredefinedOpen = () => {
+        setIsPredefinedOpen(prev => !prev);
+    };
+
+    const toggleNotesOpen = () => {
+        setIsNotesOpen(prev => !prev);
+    };
 
     return(
-        <div className="w-full h-screen bg-[#f9f9f9] z-10 ml-8 p-[30px]">
+        <main className="addNewDoc-main-container">
+            {/* NEW */}
+            <form onSubmit={handleSubmit}>
+                <div className="addNewDoc-inbrgy-main-content">
+                    <div className="addNewDoc-inbrgy-main-section1">
+                        <div className="addNewDoc-inbrgy-main-section1-left">
+                            <button onClick={handleBack}>
+                                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
+                            </button>
+
+                            <h1> Add New Document </h1>
+                        </div>
+
+                        <div className="action-btn-section">
+                            <button type="submit" className="action-add-new-doc">
+                                Save New Document
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="addNewDoc-info-main-container">
+                        <div className="addNewDoc-info-top-section">
+                            <h1>* Please fill in the details of the new document you want to add. *</h1>
+                        </div>
+                        <div className="addNewDoc-info-bottom-section">
+                            <div className="addNewDoc-left-section">
+                                <div className="addNewDoc-fields-section">
+                                    <p>Document Title<span className="required">*</span></p>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        onChange={handleChange}
+                                        value={formValue?.title || ""}
+                                        className="addNewDoc-input-field" 
+                                        placeholder="Enter Document Title"
+                                        required
+                                    />
+                                </div>
+                                <div className="addNewDoc-fields-section">
+                                    <p>Document Type<span className="required">*</span></p>
+                                    <select  
+                                        name="type"
+                                        className="addNewDoc-input-field" 
+                                        value={formValue?.type || ""}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="" disabled>Select Document Type</option>
+                                        <option value="Barangay Certificate">Certificate</option>
+                                        <option value="Barangay Clearance">Clearance</option>
+                                        <option value="Barangay Indigency">Indigency</option>
+                                        <option value="Barangay ID">ID</option>
+                                        <option value="Barangay Permit">Permit</option>
+                                        <option value="First Time Jobseeker">First Time Jobseeker</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div className="addNewDoc-checkbox-container">
+                                    <label className="addNewDoc-checkbox-label" htmlFor="forResidentOnly" >
+                                        <p>Is the document only for Residents?<span className="required">*</span></p> 
+                                    </label>
+                                    <input 
+                                        type="checkbox" 
+                                        name="forResidentOnly"  
+                                        checked={formValue?.forResidentOnly || false}
+                                        onChange={(e) => setFormValue({ ...formValue, forResidentOnly: e.target.checked })}
+                                    />  
+                                </div>
+                                
+                                <div className="box-container-outer-doc-fields">
+                                    <div className="title-doc-fields">
+                                        Document Fields
+                                    </div>
+
+                                    
+                                    <div className="box-container-doc-fields">
+                                        <div className="instructions-container">
+                                            <h1>* Enter the fields needed for the document. No need to input pre-defined fields. *</h1>
+                                        </div>
+                                        <span className="required-asterisk">*</span>
+                                        <div className="add-doc-field-container">
+                                            <div className="add-doc-field-row">
+                                                <div className="row-title-section">
+                                                    <h1>Add Field:</h1>
+                                                </div>
+                                                <div className="row-input-section">
+                                                    <input 
+                                                        type="text" 
+                                                        id="newField"
+                                                        value={newField}
+                                                        onChange={(e) => setNewField(e.target.value)}
+                                                        className="add-doc-field-input"
+                                                        placeholder={`Enter Field Name`}
+                                                    />
+                                                </div>
+                                                <div className="row-button-section">
+                                                    <button
+                                                        type="button"
+                                                        className="doc-field-add-button"
+                                                        onClick={handleAddField}
+                                                        >
+                                                        +
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="added-doc-field-container">
+                                            {fields.map((field, index) => (
+                                                <div key={`field-${index}`} className="added-doc-field-row">
+                                                    <div className="row-input-section-added">
+                                                        <input 
+                                                            type="text"
+                                                            id={`field-${index}`}
+                                                            className="added-doc-field-input"
+                                                            placeholder={`${field || `Field Name ${index + 1}`}`} // fallback placeholder if field is empty
+                                                            value={field.name || ""}
+                                                            disabled
+                                                            onChange={(e) => handleFieldChange(index, e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <div className="row-button-section">
+                                                        <button 
+                                                            type="button"
+                                                            className="doc-field-remove-button"
+                                                            onClick={() => handleRemoveField(index)}
+                                                        >
+                                                            -
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div className="box-container-outer-doc-reqs">
+                                    <div className="title-doc-reqs">
+                                        Requirements Fields
+                                    </div>
+                                    <div className="box-container-doc-reqs">
+                                        <div className="instructions-container">
+                                            <h1>* Enter the requirements needed for this document. *</h1>
+                                        </div>
+                                        <span className="required-asterisk">*</span>
+                                        <div className="add-doc-field-container">
+                                            <div className="add-doc-field-row">
+                                                <div className="row-title-section">
+                                                    <h1>Add Field:</h1>
+                                                </div>
+                                                <div className="row-input-section">
+                                                    <input 
+                                                        type="text" 
+                                                        id="newField"
+                                                        value={newImageField}
+                                                        onChange={(e) => setnewImageField(e.target.value)}
+                                                        className="add-doc-field-input"
+                                                        placeholder={`Enter Requirements Field`}
+                                                    />
+                                                </div>
+                                                <div className="row-button-section">
+                                                    <button
+                                                        type="button"
+                                                        className="doc-field-add-button"
+                                                        onClick={handleAddImageField}
+                                                        >
+                                                        +
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="added-doc-field-container">
+                                            {imageFields.map((field, index) => (
+                                                <div key={`field-${index}`} className="added-doc-field-row">
+                                                    
+                                                    <div className="row-input-section-added">
+                                                        <input 
+                                                            type="text"
+                                                            id={`field-${index}`}
+                                                            className="added-doc-field-input"
+                                                            placeholder={`${field || `Field Name ${index + 1}`}`} // fallback placeholder if field is empty
+                                                            value={field.name || ""}
+                                                            disabled
+                                                            onChange={(e) => handleChangeImageField(index, e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <div className="row-button-section">
+                                                        <button 
+                                                            type="button"
+                                                            className="doc-field-remove-button"
+                                                            onClick={() => handleRemoveImageField(index)}
+                                                        >
+                                                            -
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div className="addNewDoc-right-section">
+                                <div className="predefined-fields-notes-container">
+                                    <div className="predefined-fields-notes-container-tile" style={{cursor: 'pointer'}} onClick={togglePredefinedOpen}>
+                                        <div className="predefined-fields-title">
+                                            <h1>Pre-defined Fields</h1>
+                                        </div>
+                                        <div className="predefined-fields-button-section">
+                                            <button
+                                                type="button"
+                                                className="toggle-btn-predefined-fields"
+                                                aria-label={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                                            >
+                                            <img
+                                                src={isPredefinedOpen ? '/Images/up.png' : '/Images/down.png'}
+                                                alt={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                                                style={{ width: '16px', height: '16px' }}
+                                            />
+                                            </button>
+                                        </div>                                        
+                                    </div>
+
+                                
+                                    {isPredefinedOpen && (
+                                        <div className="predefined-fields-content">
+                                            <div className="predefined-field-row">
+                                                <div className="predefined-field-name">
+                                                    <h1>1. Field Name: 'name'</h1>
+                                                </div>
+                                                <div className="predefined-field-description">
+                                                    <h1>*Use this field to display who the document is for*</h1>
+                                                </div>
+                                            </div>
+                                            <div className="predefined-field-row">
+                                                <div className="predefined-field-name">
+                                                    <h1>2. Field Name: 'requestor'</h1>
+                                                </div>
+                                                <div className="predefined-field-description">
+                                                    <h1>*Use this field to display the name of requestor*</h1>
+                                                </div>
+                                            </div>
+                                            <div className="predefined-field-row">
+                                                <div className="predefined-field-name">
+                                                    <h1>3. Field Name: 'day'</h1>
+                                                </div>
+                                                <div className="predefined-field-description">
+                                                    <h1>*Use this field to display the day today*</h1>
+                                                </div>
+                                            </div>
+                                            <div className="predefined-field-row">
+                                                <div className="predefined-field-name">
+                                                    <h1>4. Field Name: 'month'</h1>
+                                                </div>
+                                                <div className="predefined-field-description">
+                                                    <h1>*Use this field to display the month today*</h1>
+                                                </div>
+                                            </div>
+                                            <div className="predefined-field-row">
+                                                <div className="predefined-field-name">
+                                                    <h1>5. Field Name: 'year'</h1>
+                                                </div>
+                                                <div className="predefined-field-description">
+                                                    <h1>*Use this field to display the year today*</h1>
+                                                </div>
+                                            </div>    
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="notes-container">
+                                    <div className="notes-container-tile" style={{cursor: 'pointer'}} onClick={toggleNotesOpen}>
+                                        <div className="notes-title">
+                                            <h1>Notes</h1>
+                                        </div>
+                                        <div className="notes-button-section">
+                                            <button
+                                                type="button"
+                                                className="toggle-btn-predefined-fields"
+                                                aria-label={isNotesOpen ? 'Hide details' : 'Show details'}
+                                            >
+                                            <img
+                                                src={isNotesOpen ? '/Images/up.png' : '/Images/down.png'}
+                                                alt={isNotesOpen ? 'Hide details' : 'Show details'}
+                                                style={{ width: '16px', height: '16px' }}
+                                            />
+                                            </button>
+                                        </div>                                        
+                                    </div>
+
+                                    {isNotesOpen && (
+                                        <div className="notes-content">
+                                            <div className="notes-row">
+                                                <h1>
+                                                    To insert dynamic values into the document body, use the following format: {'{day}'}, {'{month}'}, {'{year}'}, {'{name}'}, and {'{requestor}'}.
+                                                </h1>
+                                            </div>
+                                            <div className="notes-row">
+                                                <h1>
+                                                    These placeholders will be automatically replaced with the actual values.
+                                                </h1>
+                                            </div>
+                                            <div className="notes-row">
+                                                <h1>
+                                                    If you add your own fields (e.g., a field named "address"), you can include them in the document body using the same format: {`{address}`}.
+                                                </h1>
+                                            </div>
+                                            <div className="notes-row-sample">
+                                                <h2>
+                                                    Sample Body:
+                                                </h2>
+                                                <h1>
+                                                    This is to certify that {`{name}`} is a resident of Barangay Fairview. <br/>
+                                                </h1>
+                                                <h1>
+                                                    This document is issued upon the request of {`{requestor}`}.
+                                                </h1>
+                                                <h1>
+                                                    Issued on {`{month}`} {`{day}`}, {`{year}`}.
+                                                </h1>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                </div>
+
+                                <div className="box-container-outer-body">
+                                    <div className="title-body">
+                                        Document Body
+                                    </div>
+                                    
+                                    <div className="box-container-body">
+                                        <span className="required-asterisk">*</span>
+                                        <textarea 
+                                            className="body-input-field"
+                                            placeholder="Enter Body of Document"
+                                            onChange={handleChange}
+                                            value={formValue?.body || ""}
+                                            name="body"
+                                            required
+                                        />
+                                    </div>
+
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+            </form>
+            
+
+
+            {/* OLD */}
+{/*
+
+            <div className="w-full h-screen bg-[#f9f9f9] z-10 ml-8 p-[30px]">
             <div className="flex items-center justify-between mb-6">
                 <button 
                     onClick={() => router.back()}
@@ -181,6 +556,7 @@ export default function AddNewDoc() {
                     </div>
                     {/* Dynamic Fields for Input Names */}
 
+{/*
                     Document field
                     {fields.map((field, index) => (
                           <input 
@@ -293,5 +669,10 @@ export default function AddNewDoc() {
                 </form>
             </div>
         </div>
+
+        */}
+
+        </main>
+        
     );
 }
