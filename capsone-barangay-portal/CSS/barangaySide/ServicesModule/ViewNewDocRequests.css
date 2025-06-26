@@ -367,7 +367,7 @@ text-align: left;
 .newdoc-info-main-content {
 width: 100%;
 display: flex;
-flex-direction: row;
+flex-direction: column;
 margin-top: 60px; 
 }
 

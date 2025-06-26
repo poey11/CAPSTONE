@@ -24,7 +24,9 @@ interface  data {
     fields?: dataFields[];
     body?: string;
     docType?: string;
+    requestId?: number;
     imageFields?: imageFields[];
+     createdAt?: string; 
 }
 
 
@@ -122,11 +124,33 @@ export default function view() {
         router.back();
     };
 
+    function sortFieldsPriority(fields: dataFields[] = []): dataFields[] {
+  return [...fields].sort((a, b) => {
+    const getPriority = (field?: dataFields) => {
+      if (!field?.name) return 3;
+      const id = field.name.toLowerCase();
+      if (id === "requestor") return 0;
+      if (id.includes("name")) return 1;
+      return 2;
+    };
+    return getPriority(a) - getPriority(b);
+  });
+}
+
+    
+
 
     return(
         <div className="main-container-services-newdoc">
             <div className="newdoc-redirection-section">
+
+              {/*
+                ADD SEND SMS button for admins?
+
+                add rbac para kungs sino mga dadaanan na departments before ma generate
+              */}
                
+
                 <button
                     className="newdoc-redirection-buttons"
                     onClick={handdlePrintDocument}
@@ -178,7 +202,7 @@ export default function view() {
                       <div className= "newdoc-main-details-container">
                         <div className= "newdoc-main-details-section">
                           <div className="newdoc-main-details-topsection">
-                              <h1> lala</h1>
+                              <h1>{data.requestId}</h1>
                           </div>
 
                           <div className="newdoc-main-details-statussection">
@@ -250,7 +274,7 @@ export default function view() {
 
                                 </div>
 
-                                  <p>{data.purpose}</p>
+                                  <p>{data.createdAt}</p>
 
                               </div>
 
@@ -268,45 +292,45 @@ export default function view() {
                           <div className= "newdoc-info-container-scrollable">
                   {activeSection === "full" && (
                         <>
-                            <div className="newdoc-info-main-content">
-                                <div className="newdoc-content-left-side">
-                                  {data.fields?.map((field, index) => {
-                                    if (index % 2 === 0) {
-                                      return (
-                                        <div key={index} className="newdoc-fields-section">
-                                          <p>{field.name}</p>
-                                          <input
-                                            type="text"
-                                            className="newdoc-input-field"
-                                            value={field.value}
-                                            readOnly
-                                          />
-                                        </div>
-                                      );
-                                    }
-                                    return null; 
-                                  })}
-                                </div>
-
-                                <div className="newdoc-content-right-side">
-                                  {data.fields?.map((field, index) => {
-                                    if (index % 2 !== 0) {
-                                      return (
-                                        <div key={index} className="newdoc-fields-section">
-                                          <p>{field.name}</p>
-                                          <input
-                                            type="text"
-                                            className="newdoc-input-field"
-                                            value={field.value}
-                                            readOnly
-                                          />
-                                        </div>
-                                      );
-                                    }
-                                    return null; // Skip rendering on right for even indexes
-                                  })}
-                                </div>
+                    <div className="newdoc-info-main-content">
+                      <div className="newdoc-content-left-side">
+                        {sortFieldsPriority(data.fields)?.map((field, index) => {
+                          if (index % 2 === 0) {
+                            return (
+                              <div key={index} className="newdoc-fields-section">
+                                <p>{field.name}</p>
+                                <input
+                                  type="text"
+                                  className="newdoc-input-field"
+                                  value={field.value}
+                                  readOnly
+                                />
                               </div>
+                            );
+                          }
+                          return null;
+                        })}
+                      </div>
+
+                      <div className="newdoc-content-right-side">
+                        {sortFieldsPriority(data.fields)?.map((field, index) => {
+                          if (index % 2 !== 0) {
+                            return (
+                              <div key={index} className="newdoc-fields-section">
+                                <p>{field.name}</p>
+                                <input
+                                  type="text"
+                                  className="newdoc-input-field"
+                                  value={field.value}
+                                  readOnly
+                                />
+                              </div>
+                            );
+                          }
+                          return null;
+                        })}
+                      </div>
+                    </div>
                               
                           </>
                         )}
@@ -336,6 +360,8 @@ export default function view() {
 
 
                              {/* Render the PDF preview if available */}
+
+                             
                     {pdfUrl && (
                       <div className="newdoc-verification-requirements-section">
                         <span className="newdoc-verification-requirements-label">
