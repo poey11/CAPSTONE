@@ -45,9 +45,11 @@ export default function GenerateDocument() {
                         <button className="action-add-new-doc"  onClick={handleAddNewDocument}>
                             Add New Document
                         </button>
+                        {/*
                         <button className="action-edit-new-doc"  onClick={handleEditNewDocument}>
                             Edit New Document
                         </button>
+                        */}
                     </div>
                 </div>
 
