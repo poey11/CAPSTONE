@@ -477,7 +477,8 @@ TRY NEW
 
 .second-section-home {
   height: 100vh;
-background: linear-gradient(135deg, #e0e7ff 0%, #fef9ff 100%);
+/*background: linear-gradient(135deg, #e0e7ff 0%, #fef9ff 100%);*/
+  background-image: url('/Images/bghome.jpg');
   display: flex;
  /* justify-content: center;*/
   align-items: center;
@@ -586,4 +587,94 @@ position: relative;
   font-size: 1rem;
   color: #555;
   line-height: 1.4;
+}
+
+
+
+.third-section-home {
+
+  height: 100vh;
+/*background: linear-gradient(135deg, #e0e7ff 0%, #fef9ff 100%);*/
+  background-image: url('/Images/bghome.jpg');
+  display: flex;
+ /* justify-content: center;*/
+  align-items: center;
+  scroll-snap-align: start;
+  text-align: center;
+  flex-direction: column;
+  padding-top: 150px; /* Added para dun sa */  
+}
+
+.third-section-container {
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  flex-wrap: wrap;
+ height: 100%;
+}
+
+.captain-image-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.captain-image {
+  width: 450px;
+  height: 500px;
+  max-width: 100%;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.captain-info {
+  flex: 1;
+  text-align: left;
+}
+
+.captain-role {
+  font-size: 0.875rem;
+  color: #3b82f6;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.captain-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.captain-quote {
+  font-size: 1.125rem;
+  color: #555;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.captain-description {
+  font-size: 1rem;
+  color: #444;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.captain-button {
+  padding: 0.75rem 1.75rem;
+  font-size: 1rem;
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.captain-button:hover {
+  background-color: #2563eb;
 }

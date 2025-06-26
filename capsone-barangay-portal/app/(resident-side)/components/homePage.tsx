@@ -187,6 +187,33 @@ const homePage:React.FC = () => {
   </div>
 
 
+<div className="third-section-home">
+  <div className="third-section-container">
+    <div className="captain-image-container">
+      <img src="/Images/kap2.png" alt="Barangay Captain" className="captain-image" />
+    </div>
+
+    <div className="captain-info">
+      <span className="captain-role">Barangay Captain</span>
+      <h2 className="captain-name">Jonell L. Quebal</h2>
+      <p className="captain-quote">
+        “Great leaders inspire unity, progress, and hope within their community” 
+        <br /><em>- Jonell</em>
+      </p>
+      <p className="captain-description">
+        Barangay Captain Jonel Quebal, a dedicated public servant and a true 
+                            advocate for the well-being of Barangay Fairview.
+                            A proud product of our barangay, Captain Jonel Quebal has been serving 
+                            the community with passion and commitment since 2013. Learn more about Barangay 
+                            Captain Jonel Quebal and his vision for Barangay Fairview. Read his blog to stay
+                            connected and inspired!
+      </p>
+      <button className="captain-button">Contact Us</button>
+    </div>
+  </div>
+</div>
+
+
 
 
 
