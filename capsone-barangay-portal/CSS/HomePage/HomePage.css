@@ -3,6 +3,8 @@
     height: 100%;
     width: 100%;
   }
+
+  /*
   
   .homepage-container-home {
     display: flex;
@@ -72,6 +74,7 @@
 .second-section-home {
   align-self: center;
   padding: 3rem;
+  background-color: #F0F2F8;
 }
   
 .captain-image-home {
@@ -224,7 +227,7 @@ align-items: center;
   background: white;
   border-radius: 10px;
   margin: 20px;
-  padding: 1rem; /* Added padding for consistent spacing */
+  padding: 1rem; 
   border: 2px solid #ddd;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -239,7 +242,7 @@ align-items: center;
   width: 100%;
   height: 12rem;
   object-fit: cover;
-  border-radius: 8px 8px 0 0; /* Rounded corners at the top */
+  border-radius: 8px 8px 0 0; 
 }
 
 .facility-content {
@@ -247,16 +250,16 @@ align-items: center;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 1.5rem; /* Increased padding for a consistent look */
+  padding: 1.5rem; 
   text-align: center;
-  flex-grow: 1; /* Ensures content takes equal space */
+  flex-grow: 1; 
 }
 
 .facility {
   font-size: 1.5rem;
   color: #DF7426;
   font-weight: bold;
-  margin-bottom: 0.5rem; /* Added margin for spacing */
+  margin-bottom: 0.5rem; 
 }
 
 .location {
@@ -265,7 +268,7 @@ align-items: center;
   font-weight: normal;
 }
 
-/* Responsive Fix */
+
 @media (max-width: 1024px) {
   .facilities-card {
     width: 80%;
@@ -391,7 +394,7 @@ align-items: center;
 }
 
 
-
+*/
 
 
 
@@ -420,11 +423,30 @@ TRY NEW
 }
 
 
-.main-content-home,
-.section-content-home {
+.main-content-home {
   max-width: 800px;
   padding: 0 20px;
+
 }
+
+
+.section-content-home {
+  /* max-width: 800px;*/
+  width: 100%;
+  margin-top: 50px;
+}
+
+.section-content-home h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.section-content-home p {
+    font-size: 1.125rem;
+  color: #333;
+}
+
+
 
 .main-heading-home {
   font-size: 3.5rem;
@@ -455,20 +477,110 @@ TRY NEW
 
 .second-section-home {
   height: 100vh;
-  background-color: #f4f6f9;
+  background-color: #F0F2F8;
   display: flex;
-  justify-content: center;
+ /* justify-content: center;*/
   align-items: center;
   scroll-snap-align: start;
   text-align: center;
+  flex-direction: column;
+  padding-top: 150px; /* Added para dun sa */
 }
 
-.section-heading-home {
-  font-size: 2.5rem;
+
+.second-section-home-upper{
+  width: 100%;
+}
+
+.second-section-home-lower {
+  width: 100%;
+  display: flex;
+
+}
+
+
+
+.services-content-home {
+  width: 100%;
+  display: flex;
+  gap: 80px;
+    justify-content: center;
+  align-items: center;
+  margin-top: 100px;
+  height: 100%;
+}
+
+.section-content-home h2 {
+   font-size: 3.5rem;
+  font-weight: bold;
   margin-bottom: 1rem;
+  color: #2C3E50;
 }
 
-.section-subheading-home {
-  font-size: 1.125rem;
-  color: #333;
+.services-card {
+  width: 25%;
+  height: 100%;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+
+.services-card:hover {
+  transform: translateY(-5px);
+}
+
+
+
+.services-card-upper {
+  height: 50%;
+  width: 100%;
+}
+
+.services-card-lower {
+  height: 50%;
+  width: 100%;
+
+}
+
+.services-image {
+ height: 40%;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+}
+
+.red-tint {
+  filter: hue-rotate(-25deg) saturate(400%) brightness(1.1);
+}
+
+
+.icon-image {
+  width: 80px;
+  height: 80px;
+}
+
+.services-description {
+  height: 60%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.services-description h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.services-description p {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.4;
 }

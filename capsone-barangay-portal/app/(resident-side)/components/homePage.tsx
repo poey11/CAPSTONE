@@ -107,24 +107,84 @@ const homePage:React.FC = () => {
 		
       
 <main className="main-container-home-page">
-  <section className="home-hero-section">
-    <div className="main-content-home">
-      <h1 className="main-heading-home">Welcome to Barangay Fairview</h1>
-      <p className="main-subheading-home">
-        Delivering fast, transparent, and accessible local services for our community.
-      </p>
-      <button className="main-button-home">Learn More</button>
-    </div>
-  </section>
 
-  <section className="second-section-home">
-    <div className="section-content-home">
-      <h2 className="section-heading-home">Our Services</h2>
-      <p className="section-subheading-home">
-        Request documents, report issues, and connect with your barangay anytime.
-      </p>
-    </div>
-  </section>
+      <div className="home-hero-section">
+        <div className="main-content-home">
+          <h1 className="main-heading-home">Welcome to Barangay Fairview</h1>
+          <p className="main-subheading-home">
+            Delivering fast, transparent, and accessible local services for our community.
+          </p>
+          <button className="main-button-home">Learn More</button>
+        </div>
+      </div>
+
+      <div className="second-section-home">
+
+        <div className="second-section-home-upper">
+
+          <div className="section-content-home">
+            <h2>Our Services</h2>
+            <p>
+              Request documents, report issues, and connect with your barangay anytime.
+            </p>
+          </div>
+
+        </div> 
+
+
+        <div className="second-section-home-lower">
+
+          <div className="services-content-home">
+                <div className="services-card">
+
+                    <div className="services-image">
+                        <img src="/Images/document.png" alt="Document Request Icon" className="icon-image" />
+                    </div>
+
+                    <div className="services-description">
+                        <h3>Document Requests</h3>
+                <p>Secure barangay clearances, certificates, and other official documents online with ease.</p>
+
+                    </div>
+                </div>
+
+               <div className="services-card">
+
+                    <div className="services-image">
+                       <img src="/Images/incident.png" alt="Incident Report Icon" className="icon-image red-tint" />
+
+                    </div>
+
+                    <div className="services-description">
+                        <h3>Incident Reports</h3>
+                <p>Secure barangay clearances, certificates, and other official documents online with ease.</p>
+
+                    </div>
+                </div>
+
+
+                   <div className="services-card">
+
+                    <div className="services-image">
+                        <img src="/Images/training-program.png" alt="Document Request Icon" className="icon-image" />
+                    </div>
+
+                    <div className="services-description">
+                        <h3>Programs</h3>
+                <p>Secure barangay clearances, certificates, and other official documents online with ease.</p>
+
+                    </div>
+                </div>
+
+            </div>
+
+          
+
+
+        </div>
+
+
+  </div>
 
 
 
