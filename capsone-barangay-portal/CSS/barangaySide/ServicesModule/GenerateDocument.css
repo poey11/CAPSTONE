@@ -193,7 +193,7 @@
     position: absolute;
     top: 65px; /* Aligns directly below the container */
     left: -.5;
-    background-color: white;
+    background-color: #F0F2F8;
     border: 1px solid rgba(44, 62, 80, 0.7);
     border-radius: 0px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -253,7 +253,7 @@
 
   .generate-documents-documents-card {
     flex: 1 1 calc(50% - 20px);
-    background-color: white;
+    background-color: #F0F2F8;
     padding: 20px;
     padding-left: 20px;
     border: 1px solid rgba(44, 62, 80, 0.7);
@@ -287,7 +287,7 @@
 
   .generate-documents-documents-card-othernewdocs {
     flex: 1 1 calc(50% - 20px);
-    background-color: white;
+    background-color: #F0F2F8;
     padding: 20px;
     padding-left: 20px;
     border: 1px solid rgba(44, 62, 80, 0.7);

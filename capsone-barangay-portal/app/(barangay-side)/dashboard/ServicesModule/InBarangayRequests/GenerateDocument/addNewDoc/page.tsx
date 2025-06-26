@@ -87,6 +87,7 @@ export default function AddNewDoc() {
         setFields(updatedFields);
     };
 
+    /*
     const handleChange=(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const {name, value } = e.target;
         setFormValue((prev) => {
@@ -103,6 +104,33 @@ export default function AddNewDoc() {
             };
         });
     }
+    */
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+    
+        setFormValue((prev) => {
+            if (name === "type") {
+                const isResidentDoc =
+                    value === "Barangay Certificate" ||
+                    value === "Barangay Clearance" ||
+                    value === "Barangay Indigency";
+    
+                return {
+                    ...prev,
+                    type: value,
+                    forResidentOnly: isResidentDoc ? true : prev.forResidentOnly,
+                    purpose: "",
+                };
+            }
+    
+            return {
+                ...prev,
+                [name]: value,
+            };
+        });
+    };
+
     const newFields = [...fields, { name: "name" }, { name: "requestor" }];
 
     
@@ -116,7 +144,7 @@ export default function AddNewDoc() {
             ...formValue,
             fields:newFields,
             imageFields: imageFields,
-
+            newDoc: true,
         }
         console.log("Document submitted with fields:", fields);
         console.log("Document body:", formValue);
@@ -196,10 +224,8 @@ export default function AddNewDoc() {
                                         <option value="" disabled>Select Document Type</option>
                                         <option value="Barangay Certificate">Certificate</option>
                                         <option value="Barangay Clearance">Clearance</option>
-                                        <option value="Barangay Indigency">Indigency</option>
-                                        <option value="Barangay ID">ID</option>
+                                        <option value="Barangay Indigency">Indigency</option>                     
                                         <option value="Barangay Permit">Permit</option>
-                                        <option value="First Time Jobseeker">First Time Jobseeker</option>
                                         <option value="Other">Other</option>
                                     </select>
                                 </div>
@@ -211,8 +237,13 @@ export default function AddNewDoc() {
                                         type="checkbox" 
                                         name="forResidentOnly"  
                                         checked={formValue?.forResidentOnly || false}
+                                        disabled={
+                                            formValue.type === "Barangay Certificate" ||
+                                            formValue.type === "Barangay Clearance" ||
+                                            formValue.type === "Barangay Indigency"
+                                         }
                                         onChange={(e) => setFormValue({ ...formValue, forResidentOnly: e.target.checked })}
-                                    />  
+                                    />    
                                 </div>
                                 
                                 <div className="box-container-outer-doc-fields">
