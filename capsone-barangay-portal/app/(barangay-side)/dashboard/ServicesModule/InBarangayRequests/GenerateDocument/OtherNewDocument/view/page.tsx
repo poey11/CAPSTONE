@@ -338,7 +338,7 @@ export default function view() {
 
                        {activeSection === "others" && (
                         <>
-                          <div className="newdoc-info-main-content">
+                          <div className="newdoc-info-main-content-images">
                             {data.imageFields?.map((img, index) => (
                               <div key={index} className="newdoc-verification-requirements-section">
                                 <span className="newdoc-verification-requirements-label">
