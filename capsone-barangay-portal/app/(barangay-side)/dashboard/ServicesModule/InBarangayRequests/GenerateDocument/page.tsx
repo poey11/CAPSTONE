@@ -108,6 +108,7 @@ export default function GenerateDocument() {
                                         <p className="dropdown-item" onClick={handleSubmit} id="Construction ">Construction Permit</p>
                                         
                                         {/* Add dynamic permit titles */}
+                                        
                                         {permitOptions.map((title, index) => (
                                             <p key={index} className="dropdown-item" onClick={handleSubmit} id={title}>
                                             {title}

@@ -472,6 +472,7 @@ export default function action() {
                                               <option value="Garage/TRU">Garage/TRU</option>
 
                                               {/* Dynamically fetched purposes from OtherDocuments */}
+
                                               {otherDocPurposes["Barangay Certificate"]?.map((title, index) => (
                                                 <option key={index} value={title}>{title}</option>
                                               ))}
@@ -486,10 +487,11 @@ export default function action() {
                                               <option value="Bail Bond">Bail Bond</option>
 
                                               {/* Dynamically fetched purposes from OtherDocuments */}
+
                                               {otherDocPurposes["Barangay Clearance"]?.map((title, index) => (
                                                 <option key={index} value={title}>{title}</option>
                                               ))}
-                                              
+
                                             </>):docType === "Barangay Indigency" ? ( <>
                                               <option value="No Income">No Income</option>
                                               <option value="Public Attorneys Office">Public Attorneys Office</option>
@@ -501,6 +503,7 @@ export default function action() {
                                               <option value="Medical Assistance">Medical Assistance</option>
 
                                               {/* Dynamically fetched purposes from OtherDocuments */}
+                                              
                                               {otherDocPurposes["Barangay Indigency"]?.map((title, index) => (
                                                 <option key={index} value={title}>{title}</option>
                                               ))}
