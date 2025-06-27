@@ -92,15 +92,15 @@ const homePage:React.FC = () => {
     
 
     const nextSlide = () => {
-        setCurrentSlide((prev) =>
-        (prev + 1) % (facilities.length - 2) 
-        );
+      setCurrentSlide((prev) =>
+        prev + 3 >= facilities.length ? 0 : prev + 1
+      );
     };
 
     const prevSlide = () => {
-        setCurrentSlide((prev) =>
-        (prev - 1 + facilities.length - 2) % (facilities.length - 2) 
-        );
+      setCurrentSlide((prev) =>
+        prev === 0 ? Math.max(facilities.length - 3, 0) : prev - 1
+      );
     };
 
 	return (
@@ -212,6 +212,45 @@ const homePage:React.FC = () => {
     </div>
   </div>
 </div>
+
+
+
+ <div className="fourth-section-home">
+  <div className="fouth-section-home-upper">
+    <div className="section-content-home">
+      <h2>Our Facilities</h2>
+      <p>
+        Explore the various facilities available in our barangay, designed to support community activities, public services, and resident well-being.
+      </p>
+    </div>
+  </div>
+
+  <div className="facilities-content-home-wrapper">
+    <button className="slide-button" onClick={prevSlide}>&lt;</button>
+
+  <div className="facilities-content-home">
+  {facilities.slice(currentSlide, currentSlide + 3).map((item, index) => (
+    <div className="facilities-card" key={index}>
+      
+      <div className="facilities-image-wrapper">
+        <img src={item.image} alt={item.facility} className="facilities-image" />
+      </div>
+
+      <div className="facilities-info">
+        <h3>{item.facility}</h3>
+        <p>{item.location}</p>
+      </div>
+
+    </div>
+  ))}
+</div>
+
+
+    <button className="slide-button" onClick={nextSlide}>&gt;</button>
+  </div>
+
+</div>
+
 
 
 
