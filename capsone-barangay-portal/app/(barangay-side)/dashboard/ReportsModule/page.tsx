@@ -495,25 +495,46 @@ const confirmDelete = async () => {
   const generateFirstTimeJobSeekerReport = async () => {
     setLoadingJobSeeker(true);
     setIsGenerating(true);
+  
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
       const month = String(currentDate.getMonth() + 1).padStart(2, "0");
-      const currentMonthYear = currentDate.toLocaleString("en-US", { month: "long", year: "numeric" }).toUpperCase();
+  
+      const currentMonthYear = currentDate.toLocaleString("en-US", {
+        month: "long",
+        year: "numeric",
+      }).toUpperCase();
+  
+      const previousMonth = currentDate.getMonth();
+      const previousYear = previousMonth === 0 ? currentDate.getFullYear() - 1 : currentDate.getFullYear();
+      const previousMonthName = String(previousMonth === 0 ? 12 : previousMonth).padStart(2, "0");
+      const previousMonthYear = new Date(previousYear, previousMonth, 1)
+        .toLocaleString("en-US", { month: "long", year: "numeric" })
+        .toUpperCase();
   
       const jobSeekerRef = collection(db, "JobSeekerList");
-      const q = query(jobSeekerRef);
-      const querySnapshot = await getDocs(q);
   
-      let jobSeekers = querySnapshot.docs.map((doc) => doc.data());
+      const qOldRecords = query(
+        jobSeekerRef,
+        where("createdAt", "<", `${year}-${month}-01`)
+      );
+      const oldRecordsSnapshot = await getDocs(qOldRecords);
+      const oldSeekers = oldRecordsSnapshot.docs.map((doc) => doc.data());
   
-      if (jobSeekers.length === 0) {
-        alert("No first-time job seekers found.");
+      const qCurrentMonthRecords = query(
+        jobSeekerRef,
+        where("createdAt", ">=", `${year}-${month}-01`),
+        where("createdAt", "<=", `${year}-${month}-31`)
+      );
+      const currentMonthSnapshot = await getDocs(qCurrentMonthRecords);
+      const currentMonthSeekers = currentMonthSnapshot.docs.map((doc) => doc.data());
+  
+      if (oldSeekers.length === 0 && currentMonthSeekers.length === 0) {
+        alert("No new job seekers found.");
         setLoadingJobSeeker(false);
         return;
       }
-  
-      jobSeekers.sort((a, b) => new Date(a.dateApplied).getTime() - new Date(b.dateApplied).getTime());
   
       const templateRef = ref(storage, "ReportsModule/First Time Job Seeker Record.xlsx");
       const url = await getDownloadURL(templateRef);
@@ -523,102 +544,171 @@ const confirmDelete = async () => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
-
+  
       const monthNames = [
-        "January", "February", "March", "April", "May", "June",
+        "", "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
       ];
-  
-      const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow === 0);
-      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 5);
-  
-      worksheet.getRow(2).getCell(1).value = `As of ${currentMonthYear}`;
-      worksheet.getRow(2).getCell(1).font = { name: "Calibri", size: 12, bold: true }; 
+
+      const reportTitle = `AS OF ${currentMonthYear.toUpperCase()}`;
+      worksheet.getCell("A1").value = "(RA 11261 - FIRST TIME JOBSEEKERS ACT)\nROSTER OF BENEFICIARIES/AVAILEES\nBARANGAY FAIRVIEW\nQUEZON CITY";
+      worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
+      worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      worksheet.getCell("A2").value = reportTitle;
+
+      for (let rowNum = 1; rowNum <= 4; rowNum++) {
+        const row = worksheet.getRow(rowNum);
+        row.eachCell((cell) => {
+          cell.alignment = {
+            horizontal: "center",
+            vertical: "middle",
+            wrapText: true,
+          };
+        });
+        row.commit();
+      }
   
       const dataStartRow = 5;
-      const footerStartRow = 10; 
-
-      worksheet.spliceRows(dataStartRow + jobSeekers.length, 0, ...new Array(footerDrawings.length).fill([])); 
+      const footerStartRow = 5; // updated from 10
+  
+      const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow === 0);
+      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= footerStartRow);
+  
+      worksheet.spliceRows(dataStartRow, 0, ...new Array(oldSeekers.length + currentMonthSeekers.length + 2).fill([]));
+  
+      // Reset header positions
+      headerDrawings.forEach((drawing) => {
+        if (drawing.range?.tl) drawing.range.tl.nativeRow = 0;
+        if (drawing.range?.br) drawing.range.br.nativeRow = 0;
+      });
       
-      let insertionRow = dataStartRow;
-
-      const lastDataRow = insertionRow + jobSeekers.length - 1;
-
+      let oldInsertionRow = dataStartRow;
+      let newInsertionRow = oldInsertionRow + oldSeekers.length + 2;
+      
   
-      jobSeekers.forEach((seeker) => {
-        const row = worksheet.getRow(insertionRow);
+      const formatSeekerRow = (seeker: {
+        dateApplied?: string;
+        lastName?: string;
+        firstName?: string;
+        middleName?: string;
+        age?: number | string;
+        monthOfBirth?: string;
+        dayOfBirth?: string;
+        yearOfBirth?: string;
+        sex?: string;
+        remarks?: string;
+      }) => [
+        seeker.dateApplied ? new Date(seeker.dateApplied).toLocaleDateString("en-US") : "",
+        seeker.lastName || "",
+        seeker.firstName || "",
+        seeker.middleName || "",
+        seeker.age || "",
+        seeker.monthOfBirth ? monthNames[parseInt(seeker.monthOfBirth, 10)] : "",
+        seeker.dayOfBirth || "",
+        seeker.yearOfBirth || "",
+        seeker.sex === "M" ? "*" : "",
+        seeker.sex === "F" ? "*" : "",
+        seeker.remarks || "",
+      ];
+      
   
-        const cells = [
-            seeker.dateApplied ? new Date(seeker.dateApplied).toLocaleDateString("en-US") : "",
-            seeker.lastName || "",
-            seeker.firstName || "",
-            seeker.middleName || "",
-            seeker.age || "",
-            seeker.monthOfBirth ? monthNames[parseInt(seeker.monthOfBirth, 10) - 1] : "",
-            seeker.dayOfBirth || "",
-            seeker.yearOfBirth || "",
-            seeker.sex === "M" ? "*" : "",
-            seeker.sex === "F" ? "*" : "",
-            seeker.remarks || ""
-          ];
+      // OLD members
+      oldSeekers.forEach((seeker) => {
+        const row = worksheet.getRow(oldInsertionRow);
+        row.height = 60;
+        const cells = formatSeekerRow(seeker);
   
-          cells.forEach((value, index) => {
-            const cell = row.getCell(index + 1);
-            cell.value = value;
-            cell.font = { name: "Calibri", size: 12 };
-          });
-    
-          row.commit();
-          insertionRow++;
+        cells.forEach((value, index) => {
+          const cell = row.getCell(index + 1);
+          cell.value = value;
+          cell.font = { name: "Calibri", size: 14 };
+          cell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
+          cell.border = {
+            top: { style: "thin" },
+            bottom: { style: "thin" },
+            left: { style: "thin" },
+            right: { style: "thin" },
+          };
         });
-    
-        footerDrawings.forEach((drawing) => {
-          const newRow = (drawing.range?.tl?.nativeRow || 186) + jobSeekers.length + 1;
-          if (drawing.range?.tl) drawing.range.tl.nativeRow = newRow;
-          if (drawing.range?.br) drawing.range.br.nativeRow = newRow + 1;
+  
+        row.commit();
+        oldInsertionRow++;
+      });
+  
+      // Header for new members
+      const headerRow = worksheet.getRow(footerStartRow + oldSeekers.length + 1);
+      worksheet.unMergeCells(headerRow.number, 1, headerRow.number, 11);
+      headerRow.getCell(1).value = `(NEW MEMBERS ${currentMonthYear})`;
+      headerRow.getCell(1).font = { bold: true, italic: true, size: 16, color: { argb: "FF0000" } };
+      headerRow.alignment = { horizontal: "left", vertical: "middle" };
+      headerRow.height = 25;
+      worksheet.mergeCells(headerRow.number, 1, headerRow.number, 11);
+      headerRow.commit();
+  
+      // NEW members
+      currentMonthSeekers.forEach((seeker) => {
+        const row = worksheet.getRow(newInsertionRow);
+        row.height = 60;
+        const cells = formatSeekerRow(seeker);
+  
+        cells.forEach((value, index) => {
+          const cell = row.getCell(index + 1);
+          cell.value = value;
+          cell.font = { name: "Calibri", size: 14 };
+          cell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
+          cell.border = {
+            top: { style: "thin" },
+            bottom: { style: "thin" },
+            left: { style: "thin" },
+            right: { style: "thin" },
+          };
         });
-
-      // Create a buffer and upload to Firebase Storage
+  
+        row.commit();
+        newInsertionRow++;
+      });
+  
+      // Shift footer drawings
+      footerDrawings.forEach((drawing) => {
+        const newRow = (drawing.range?.tl?.nativeRow || footerStartRow) + oldSeekers.length + currentMonthSeekers.length + 2;
+        if (drawing.range?.tl) drawing.range.tl.nativeRow = newRow;
+        if (drawing.range?.br) drawing.range.br.nativeRow = newRow + 1;
+      });
+  
+      // Save and upload
       worksheet.pageSetup = {
         horizontalCentered: true,
         verticalCentered: false,
         orientation: "landscape",
-        paperSize: 9, 
+        paperSize: 9,
         fitToPage: true,
         fitToWidth: 1,
-        fitToHeight: 0, 
+        fitToHeight: 0,
       };
-
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   
-      const fileName = `FirstTimeJobSeekers_${currentMonthYear}.xlsx`;
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const fileName = `JobSeeker_Masterlist_${currentMonthYear}.xlsx`;
       const storageRef = ref(storage, `GeneratedReports/${fileName}`);
       await uploadBytes(storageRef, blob);
-  
       const fileUrl = await getDownloadURL(storageRef);
   
-      /*alert("First-Time Job Seeker Report generated successfully. Please wait for the downloadable file!");*/
-      setGeneratingMessage("Generating First-Time Job Seeker Report...");
-
-      // Return file URL for conversion
+      setGeneratingMessage("Generating Job Seeker Masterlist Report...");
       return fileUrl;
     } catch (error) {
       setIsGenerating(false);
-
-      console.error("Error generating report:", error);
-
+      console.error("Error generating job seeker report:", error);
       setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate First-Time Job Seeker Report");  
-      
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
-      /*alert("Failed to generate First-Time Job Seeker Report.");*/
+      setPopupErrorGenerateReportMessage("Failed to generate Job Seeker Report");
+      setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
     } finally {
       setLoadingJobSeeker(false);
     }
   };
+  
 
   const handleGenerateJobSeekerPDF = async () => {
     setLoadingJobSeeker(true);
