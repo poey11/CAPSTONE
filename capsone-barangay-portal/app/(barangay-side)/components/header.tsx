@@ -208,6 +208,10 @@ export default function Header() {
         title: "In Barangay Documents Requests",
         breadcrumb: ["Services Management", "In Barangay Requests", "New Document Request", "Add New Document"],
       },
+      "/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action": {
+        title: "In Barangay Documents Requests",
+        breadcrumb: ["Services Management", "In Barangay Requests", "New Document Request"],
+      },
 
 
       // For Online Requests

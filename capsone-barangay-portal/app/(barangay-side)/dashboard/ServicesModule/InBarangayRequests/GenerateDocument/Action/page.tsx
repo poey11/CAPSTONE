@@ -242,6 +242,23 @@ export default function action() {
       setShowResidentsPopup(true);
     };
 
+    // Close popup when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          employerPopupRef.current &&
+          !employerPopupRef.current.contains(event.target as Node)
+        ) {
+          setShowResidentsPopup(false);
+        }
+      };
+  
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, []);
+
     const handleBack = () => {
       router.back();
     };
@@ -419,12 +436,229 @@ export default function action() {
       
     }, [clearanceInput.purpose, docType]);
 
-    return (
-        <main className="addAnnouncement-main-container">
-            <div className="section-1">
-                <h1>Generate Document</h1>
-            </div>
 
+    const [activeSection, setActiveSection] = useState("basic");
+
+    return (
+        <main className="createRequest-main-container">
+          {/* NEW */}
+          <form  onSubmit={handleSubmit}>
+            <div className="createRequest-inbrgy-main-content">
+              <div className="createRequest-inbrgy-main-section1">
+                <div className="createRequest-inbrgy-main-section1-left">
+                  <button onClick={handleBack}>
+                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
+                  </button>
+
+                  <h1> {docType} {clearanceInput.requestId} </h1>
+                </div>
+
+                <div className="action-btn-section">
+                  <button type="button" className="discard-btn" onClick={handleDiscardClick}>
+                    Discard
+                  </button>
+                  <button type="submit" className="save-btn">
+                    Create
+                  </button>
+                </div>
+              </div>
+
+              <div className="createRequest-bottom-section">
+                <nav className="createRequest-info-toggle-wrapper">
+                  {["basic", "full", "others"].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    > 
+                      {section === "basic" && "Basic Info"}
+                      {section === "full" && "Full Info"}
+                      {section === "others" && "Others"}
+                    </button>
+                  ))}
+                </nav>
+
+                <div className="createRequest-bottom-section-scroll">
+                  {activeSection === "basic" && (
+                    <>
+                
+                    <div className="createRequest-input-wrapper">
+                      <div className="createRequest-input-with-clear">
+                        <input 
+                          type="text" 
+                          className="createRequest-select-resident-input-field" 
+                          placeholder="Select Resident"
+                          value = {
+                            isResidentSelected ?
+                            `${clearanceInput.fullName}` :
+                            ""
+                          }
+                          onClick={handleResidentClick}
+                          readOnly 
+                        />
+
+                        {isResidentSelected && (
+                          <>
+                            <span
+                              className="clear-icon"
+                              title="Click to clear selected complainant"
+                              onClick={() => {
+                                setClearanceInput({
+                                  ...clearanceInput,
+                                  fullName: "",
+                                  address: "",
+                                  gender: "",
+                                  civilStatus: "",
+                                  birthday: "",
+                                  contact: "",
+                                });
+                                                    
+                                setIsResidentSelected(false);
+                              }}
+                            >
+                              ×
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      {isResidentSelected && (
+                      <p className="help-text">Click the <strong>×</strong> to clear the selected complainant.</p>
+                      )}
+                    </div>
+
+                    <div className="createRequest-section-2-full-top">
+                      <div className="createRequest-section-2-left-side">
+                        <div className="fields-section">
+                          <h1>Request ID</h1>
+                          <input 
+                            value ={clearanceInput.requestId || ""}
+                            onChange={handleChange} // Handle change to update state
+                            required
+                            type="text"
+                            id="requestId"
+                            name="requestId"
+                            className="createRequest-input-field" 
+                            disabled
+                          />
+                        </div>
+
+                        <div className="fields-section">
+                          <h1>{addOn}Full Name</h1>
+                          <input 
+                            value ={clearanceInput?.fullName || ""}
+                            onChange={handleChange} // Handle change to update state
+                            required
+                            id="fullName"
+                            name="fullName"
+                            type="text" 
+                            className="createRequest-input-field" 
+                            placeholder= {`Enter ${addOn}Full Name`} 
+                            disabled={isResidentSelected} // Disable input if a resident is selected
+                          />
+                        </div>
+                        
+
+                        
+                      </div>
+
+                      <div className="createRequest-section-2-right-side">
+                        <div className="fields-section">
+                          <h1>Purpose</h1>
+                          <select 
+                            id="purpose" 
+                            name="purpose" 
+                            className="createRequest-input-field" 
+                            required
+                            value ={clearanceInput?.purpose || ""}
+                            onChange={handleChange} // Handle change to update state
+                          >
+                          <option value="" disabled>Select purpose</option>
+                            {docType === "Barangay Certificate" ? (<>
+                              <option value="Residency">Residency</option>
+                              <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
+                              <option value="Estate Tax">Estate Tax</option>
+                              <option value="Death Residency">Death Residency</option>
+                              <option value="No Income">No Income</option>
+                              <option value="Cohabitation">Cohabitation</option>
+                              <option value="Guardianship">Guardianship</option>
+                              <option value="Good Moral and Probation">Good Moral and Probation</option>
+                              <option value="Garage/PUV">Garage/PUV</option>
+                              <option value="Garage/TRU">Garage/TRU</option>
+
+                              {/* Dynamically fetched purposes from OtherDocuments */}
+
+                              {otherDocPurposes["Barangay Certificate"]?.map((title, index) => (
+                                <option key={index} value={title}>{title}</option>
+                              ))}
+                                            
+                            </>):docType === "Barangay Clearance" ? (<>
+                              <option value="Loan">Loan</option>
+                              <option value="Bank Transaction">Bank Transaction</option>
+                              <option value="Residency">Residency</option>
+                              <option value="Local Employment">Local Employment</option>
+                              <option value="Maynilad">Maynilad</option>
+                              <option value="Meralco">Meralco</option>
+                              <option value="Bail Bond">Bail Bond</option>
+
+                              {/* Dynamically fetched purposes from OtherDocuments */}
+
+                              {otherDocPurposes["Barangay Clearance"]?.map((title, index) => (
+                                <option key={index} value={title}>{title}</option>
+                              ))}
+
+                              </>):docType === "Barangay Indigency" ? ( <>
+                                <option value="No Income">No Income</option>
+                                <option value="Public Attorneys Office">Public Attorneys Office</option>
+                                <option value="AKAP">AKAP</option>
+                                <option value="Financial Subsidy of Solo Parent">Financial Subsidy of Solo Parent</option>
+                                <option value="Fire Emergency">Fire Emergency</option>
+                                <option value="Flood Victims">Flood Victims</option>
+                                <option value="Philhealth Sponsor">Philhealth Sponsor</option>
+                                <option value="Medical Assistance">Medical Assistance</option>
+
+                                {/* Dynamically fetched purposes from OtherDocuments */}
+                                              
+                                {otherDocPurposes["Barangay Indigency"]?.map((title, index) => (
+                                  <option key={index} value={title}>{title}</option>
+                                ))}
+
+                              </>): (docType === "Business Permit" ||docType === "Temporary Business Permit") && (
+                                 <>
+                                <option value="New">New</option>
+                                <option value="Renewal">Renewal</option>
+                            </>)}
+                          </select>
+                        </div>
+
+                        <div className="fields-section">
+                          <h1>Resident Since</h1>
+                          <input 
+                            value ={clearanceInput?.dateOfResidency || ""}
+                            onChange={handleChange} // Handle change to update state
+                            required
+                            type="date"
+                            id="dateOfResidency"
+                            name="dateOfResidency" 
+                            className="createRequest-input-field" 
+                            max = {maxDate}
+                            onKeyDown={(e) => e.preventDefault()}
+                          />
+                        </div>
+                      </div>
+
+                    </div>
+
+
+                    </>
+                  )}
+                    
+                </div>
+              </div>
+            </div>
+          </form>
+
+            {/* OLD */}
             <div className="addAnnouncement-main-section">
                 <div className="addAnnouncement-main-section1">
                     <div className="addAnnouncement-main-section1-left">
