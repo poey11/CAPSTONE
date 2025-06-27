@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
 import { doc, getDoc, updateDoc, collection, getDocs, setDoc, query, where } from "firebase/firestore";
-import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
+import { getStorage, ref, getDownloadURL, uploadBytes, list } from "firebase/storage";
 
 
 export default function ViewOnlineReports() {
@@ -47,14 +47,7 @@ export default function ViewOnlineReports() {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-
-  
-
-
-
-
-
+  const [previewImage, setPreviewImage] = useState<string | null>(null);  
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [files, setFiles] = useState<{ file: File; name: string; preview: string | undefined }[]>([]);
   const router = useRouter();
@@ -74,7 +67,7 @@ export default function ViewOnlineReports() {
         const staffList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        }));  
+        })); // Exclude the current user
         setListOfStaffs(staffList);
       });
       return () => {
@@ -84,9 +77,13 @@ export default function ViewOnlineReports() {
       console.error("Error fetching staff list:", error);
       
     }
-    
 
   }, []);
+
+  // useEffect(() => {
+  //   listOfStaffs.fi
+
+  // },[listOfStaffs]);
 
   console.log("List of Staffs:", listOfStaffs);
 
@@ -695,8 +692,11 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                   disabled = {formData.status === "Acknowledged" || initialRespondent.respondentName !== "" ||user?.position !== "LF Staff"}                                  
                                 >
                                   <option value="" disabled>Select Officer</option>
-                                  {listOfStaffs.map((staff,index) => (
-                                    <option key={index} value={staff.id}>
+                                  {listOfStaffs.filter(staff => !(staff.id == user?.id && respondent.respondentName =="") ) 
+                                  .map((staff,index) => (
+                                    <option key={index} 
+                                      value={staff.id}
+                                      >
                                       {staff.firstName} {staff.lastName}
                                     </option>
                                   ))}

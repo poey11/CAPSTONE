@@ -22,7 +22,6 @@ import { useRef } from "react";
   address: string;
   contact: string;
   residentId: string,
-
 }
 
 
@@ -36,6 +35,9 @@ export default function AddIncident() {
   const [popupMessage, setPopupMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
+
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
 
   const currentDate = getLocalDateString(new Date());
   const currentTime = getLocalTimeString(new Date());
@@ -69,6 +71,7 @@ export default function AddIncident() {
     timeFiled: "",
     location: "",
     nature: "",
+    areaOfincident: "",
     specifyNature: "",
     concern: "",
     status: "Pending",
@@ -78,6 +81,7 @@ export default function AddIncident() {
     nosofMaleChildren: "",
     nosofFemaleChildren: "",
     file: null,
+    typeOfIncident: "",
   });
   const [deskStaff, setdeskStaff] = useState<any>({
     fname: "",
@@ -296,6 +300,7 @@ export default function AddIncident() {
             specifyNature: reportInfo.specifyNature,
             concern: reportInfo.concern,
             status: "Pending",
+            statusPriority: 1,
             receivedBy: `${deskStaff.fname} ${deskStaff.lname}`,
             dateReceived: reportInfo.dateReceived,
             timeReceived: reportInfo.timeReceived,
@@ -303,6 +308,8 @@ export default function AddIncident() {
             department: departmentId,
             staffId: user?.id,
             isDialogue: false,
+            typeOfIncident: reportInfo.typeOfIncident,
+            areaOfincident: reportInfo.areaOfincident,
             hearing:0,
             generatedHearingSummons:0,
             createdAt: new Date(),
@@ -512,12 +519,13 @@ const handleSubmit = (event: React.FormEvent) => {
 
   const handleConfirmSubmit = async () => {
     try {
+      setHasSubmitted(true);
       const docId = await handleUpload();
-  
+      
       setPopupMessage("Incident Successfully Submitted!");
       setShowPopup(true);
 
-  
+
       setTimeout(() => {
         setShowPopup(false);
         
@@ -535,7 +543,7 @@ const handleSubmit = (event: React.FormEvent) => {
     }
   };
   
-
+ 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type, id } = e.target;
 
@@ -577,45 +585,9 @@ const handleSubmit = (event: React.FormEvent) => {
             [name]: updatedValue,
         }));
     }
-};
+  };
 
   
-  const deleteForm = () => {
-    handleFileDeleteContainer1();
-    setReportInfo({
-        dateFiled: "",
-        timeFiled: "",
-        location: "",
-        nature: "",
-        concern: "",
-        status: "",
-        specifyNature: "",
-        receivedBy: "",
-        dateReceived: "",
-        timeReceived: "",
-        file: null,
-      });
-      setComplainant({
-        fname: "",
-        lname: "",
-        sex: "",
-        age: "",
-        contact: "",
-        civilStatus: "",
-        address: "",
-        residentId: "",
-      });
-      setRespondent({
-        fname: "",
-        lname: "",
-        sex: "",
-        age: "",
-        contact: "",
-        civilStatus: "",
-        address: "",
-        residentId: "",
-      });
-  }
 
   const handleBack = () => {
     router.back();
@@ -647,7 +619,9 @@ const handleSubmit = (event: React.FormEvent) => {
               </div>
 
                 <div className="actions-add">
-                   <button type="submit" className="action-view-add" >Save</button>
+                  {!hasSubmitted && (
+                    <button type="submit" className="action-view-add" >Save</button>
+                  )}
                  </div>
           
              </div>
@@ -655,17 +629,31 @@ const handleSubmit = (event: React.FormEvent) => {
 
               <div className="section-1-add-title">
                   <input 
-                            type="text" 
-                            className="search-bar-add-case" 
-                            value={reportInfo.caseNumber}
-                            name="caseNumber"
-                            id="caseNumber"
-                            disabled
-                            
-                      />
+                    type="text" 
+                    className="search-bar-add-case" 
+                    value={reportInfo.caseNumber}
+                    name="caseNumber"
+                    id="caseNumber"
+                    disabled    
+                  />
+                
               </div>
                     
-              
+              <div className="section-1-add-title flex-col">
+                Type of Incident
+                <div>
+                  <input type="radio" id="minor" name="typeOfIncident" 
+                  onChange={handleFormChange}
+                  className="mr-2" value="Minor" required/>
+                  <label htmlFor="minor">Minor Incident</label>
+                </div>
+                <div>
+                  <input type="radio" id="major"  name="typeOfIncident"  
+                  onChange={handleFormChange}
+                  className="mr-2" value="Major" required/>  
+                  <label htmlFor="major">Major Incident</label>
+                </div>
+              </div>
             
             <div className="add-incident-bottom-section">
 
@@ -1136,7 +1124,7 @@ const handleSubmit = (event: React.FormEvent) => {
                   </select>
 
                   </div>
-
+                    
                   {reportInfo.nature === "Others" && 
                    (<>
                   
@@ -1147,6 +1135,23 @@ const handleSubmit = (event: React.FormEvent) => {
                   </div>
                        
                    </>)}
+
+                    
+                  <div className="fields-section-add">
+                      <p>Area of Incident<span className="required">*</span></p>
+                      <select 
+                        className="add-incident-input-field" 
+                        required
+                        id="areaOfIncident" name="areaOfIncident" 
+                        value={reportInfo.areaOfIncident}
+                        onChange={handleFormChange}
+                        >
+                          <option value="" disabled>Choose An Area of Incident</option>
+                          <option value="South Fairview">South Fairview</option>
+                          <option value="West Fairview">West Fairview</option>
+                          <option value="East Fairview">East Fairview</option>
+                        </select>
+                  </div>
 
                    <div className="fields-section-add">
                         <p>Time Filed<span className="required">*</span></p>
@@ -1167,7 +1172,7 @@ const handleSubmit = (event: React.FormEvent) => {
                   value = {reportInfo.location} onChange={handleFormChange} required />
 
               </div>
-
+              
 
           
           </div>
