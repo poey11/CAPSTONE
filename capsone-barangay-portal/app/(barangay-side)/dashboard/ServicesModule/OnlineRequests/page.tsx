@@ -47,7 +47,7 @@ import { db } from "@/app/db/firebase";
           orderBy("createdAt", "desc") // First, sort by latest
         );
 
-          const viewed = getViewedRequests();
+        const viewed = getViewedRequests();
       
         const unsubscribe = onSnapshot(Collection, (snapshot) => {
           let reports: any[] = snapshot.docs.map((doc) => ({
@@ -67,7 +67,7 @@ import { db } from "@/app/db/firebase";
           });
         
           setRequestData(reports);
-           setFilteredOnlineRequests(reports); 
+          setFilteredOnlineRequests(reports); 
 
         setLoading(false);
         setError(null);
@@ -78,17 +78,17 @@ import { db } from "@/app/db/firebase";
         console.log(error.message);
       }
     }, []);
-
+    console.log(requestData);
 
     useEffect(() => {
       let filtered = requestData;
 
       // Filter by Document Type
-      if (searchType.trim() !== "") {
-        filtered = filtered.filter((req) =>
-          req.docType.toLowerCase().includes(searchType.toLowerCase())
-        );
-      }
+      if (searchType !== "" && searchType !== "All") {
+      filtered = filtered.filter((req) =>
+        req.docType.toLowerCase().includes(searchType.toLowerCase())
+      );
+    }
 
       // Filter by Date Range
       if (dateFrom && dateTo) {
@@ -112,86 +112,89 @@ import { db } from "@/app/db/firebase";
 
 
     console.log(requestData);
-  const [currentPage, setCurrentPage] = useState(1);
-  const residentsPerPage = 10; //pwede paltan 
+    const [currentPage, setCurrentPage] = useState(1);
+    const residentsPerPage = 10; //pwede paltan 
 
-  const [filteredOnlineRequests, setFilteredOnlineRequests] = useState<any[]>([]);
+    const [filteredOnlineRequests, setFilteredOnlineRequests] = useState<any[]>([]);
 
-  const indexOfLastRequest = currentPage * residentsPerPage;
-  const indexOfFirstRequest = indexOfLastRequest - residentsPerPage;
-  const currentOnlineRequests = filteredOnlineRequests.slice(indexOfFirstRequest, indexOfLastRequest);
+    const indexOfLastRequest = currentPage * residentsPerPage;
+    const indexOfFirstRequest = indexOfLastRequest - residentsPerPage;
+    const currentOnlineRequests = filteredOnlineRequests.slice(indexOfFirstRequest, indexOfLastRequest);
 
-  const totalPages = Math.ceil(filteredOnlineRequests.length / residentsPerPage);
+    const totalPages = Math.ceil(filteredOnlineRequests.length / residentsPerPage);
 
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-  const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
-  const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+    const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+    const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
 
-  const getPageNumbers = () => {
-    const totalPagesArray = [];
-    const pageNumbersToShow = [];
+    const getPageNumbers = () => {
+      const totalPagesArray = [];
+      const pageNumbersToShow = [];
 
-    for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-        pageNumbersToShow.push(i);
-      } else if (
-        (i === currentPage - 2 || i === currentPage + 2) &&
-        pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
-      ) {
-        pageNumbersToShow.push("...");
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+          pageNumbersToShow.push(i);
+        } else if (
+          (i === currentPage - 2 || i === currentPage + 2) &&
+          pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
+        ) {
+          pageNumbersToShow.push("...");
+        }
+      }
+
+      return pageNumbersToShow;
+    };
+
+    const handleView = (request: any) => {
+      console.log("Viewing request:", request);
+      const id = request.id;
+      markAsViewed(id); // mark before navigating
+      if(request.type === "OtherDocument") {
+        router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest/otherDocument?id=${id}`);
+      }
+      else{
+        router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
+      }
+    };
+
+
+  // Highlighting Logic based on the URL parameter
+  const searchParams = useSearchParams();
+  const highlightResidentId = searchParams.get("highlight");
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+
+  useEffect(() => {
+    if (highlightResidentId && filteredOnlineRequests.length > 0) {
+      const targetIndex = filteredOnlineRequests.findIndex(resident => resident.id === highlightResidentId);
+      if (targetIndex !== -1) {
+        const targetPage = Math.floor(targetIndex / residentsPerPage) + 1;
+        setHighlightedId(highlightResidentId);
+        setCurrentPage(targetPage);
+
+        setTimeout(() => {
+          const targetElement = document.querySelector(`tr[data-id="${highlightResidentId}"]`);
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 500);
+
+        const timeoutId = setTimeout(() => {
+          setHighlightedId(null);
+
+          const params = new URLSearchParams(window.location.search);
+          params.delete("highlight");
+          const newUrl = `${window.location.pathname}?${params.toString()}`;
+          router.replace(newUrl, { scroll: false });
+        }, 3000);
+
+        return () => clearTimeout(timeoutId);
+
       }
     }
+  }, [highlightResidentId, filteredOnlineRequests]);
 
-    return pageNumbersToShow;
-  };
-
-  const handleView = (id: string) => {
-  markAsViewed(id); // mark before navigating
-  router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
-};
-
-
-// Highlighting Logic based on the URL parameter
-const searchParams = useSearchParams();
-const highlightResidentId = searchParams.get("highlight");
-const [highlightedId, setHighlightedId] = useState<string | null>(null);
-
-
-useEffect(() => {
-  if (highlightResidentId && filteredOnlineRequests.length > 0) {
-    const targetIndex = filteredOnlineRequests.findIndex(resident => resident.id === highlightResidentId);
-    if (targetIndex !== -1) {
-      const targetPage = Math.floor(targetIndex / residentsPerPage) + 1;
-      setHighlightedId(highlightResidentId);
-      setCurrentPage(targetPage);
-
-      setTimeout(() => {
-        const targetElement = document.querySelector(`tr[data-id="${highlightResidentId}"]`);
-        if (targetElement) {
-          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }, 500);
-
-      const timeoutId = setTimeout(() => {
-        setHighlightedId(null);
-
-        const params = new URLSearchParams(window.location.search);
-        params.delete("highlight");
-        const newUrl = `${window.location.pathname}?${params.toString()}`;
-        router.replace(newUrl, { scroll: false });
-      }, 3000);
-
-      return () => clearTimeout(timeoutId);
-
-    }
-  }
-}, [highlightResidentId, filteredOnlineRequests]);
-
-
-  const handleSMS = () => {
-    //window.location.href = "/dashboard/ServicesModule/OnlineRequests/SMS";
-  };
 
     return (
 
@@ -208,13 +211,21 @@ useEffect(() => {
 
 
          <div className="onlinereq-section-2">
-              <input
-              type="text"
-              className="online-services-module-filter"
-              placeholder="Enter Document Type"
-              value={searchType}
-              onChange={(e) => setSearchType(e.target.value)}
-            />
+              
+            <select
+            className="online-services-module-filter"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
+            <option value="All">All Document Types</option>
+            <option value="Barangay Certificate">Barangay Certificate</option>
+            <option value="Barangay Indigency">Barangay Indigency</option>
+            <option value="Barangay ID">Barangay ID</option>
+            <option value="Barangay Permits">Barangay Permits</option>
+            <option value="Barangay Clearance">Barangay Clearance</option>
+            <option value="First Time Jobseeker">First Time Jobseeker</option>
+            <option value="Other">Other Documents</option>
+          </select>
 
             <input
               type="date"
@@ -284,10 +295,10 @@ useEffect(() => {
                     </span>
                 </td>
                 <td>
-                  <div className="-services-actions">
+                  <div className="actions">
                     <button
                         className="action-view-services"
-                        onClick={() => handleView(request.id)}
+                        onClick={() => handleView(request)}
                     >
                        <img src="/Images/view.png" alt="View" />
                     </button>
