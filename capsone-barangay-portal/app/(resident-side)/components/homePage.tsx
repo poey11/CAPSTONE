@@ -166,7 +166,7 @@ const homePage:React.FC = () => {
                    <div className="services-card">
 
                     <div className="services-image">
-                        <img src="/Images/training-program.png" alt="Document Request Icon" className="icon-image" />
+                        <img src="/Images/training-program.png" alt="Document Request Icon" className="icon-image green-tint" />
                     </div>
 
                     <div className="services-description">
