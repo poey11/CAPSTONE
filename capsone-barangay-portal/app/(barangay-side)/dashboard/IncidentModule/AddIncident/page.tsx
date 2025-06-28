@@ -71,11 +71,10 @@ export default function AddIncident() {
     timeFiled: "",
     location: "",
     nature: "",
-    areaOfincident: "",
+    areaOfIncident: "",
     specifyNature: "",
     concern: "",
     status: "Pending",
-    receivedBy: "",
     dateReceived: currentDate,
     timeReceived: currentTime,
     nosofMaleChildren: "",
@@ -424,13 +423,15 @@ const handleSubmit = (event: React.FormEvent) => {
     return;
   }
   
-  // Validate Respondent
-  if (!isValidPerson(respondent)) {
-    setPopupErrorMessage("Please fill out all required respondent fields.");
-    setShowErrorPopup(true);
-    setTimeout(() => setShowErrorPopup(false), 3000);
-    return;
+  if(reportInfo.typeOfIncident === "Major" ) {
+    if (!isValidPerson(respondent)) {
+      setPopupErrorMessage("Please fill out all required respondent fields.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
   }
+  
   
   
     // Validate Report Info
@@ -443,9 +444,32 @@ const handleSubmit = (event: React.FormEvent) => {
       isEmpty(reportInfo.concern) ||
       isEmpty(reportInfo.status) ||
       isEmpty(reportInfo.dateReceived) ||
-      isEmpty(reportInfo.timeReceived)
+      isEmpty(reportInfo.timeReceived)||
+      isEmpty(reportInfo.typeOfIncident) ||
+      (reportInfo.typeOfIncident === "Minor" && isEmpty(reportInfo.recommendedEvent)) ||
+      isEmpty(reportInfo.areaOfIncident)
     ) {
-      setPopupErrorMessage("Please fill out all required fields.");
+      // Find the first empty field in reportInfo
+      const emptyField = Object.entries({
+        caseNumber: reportInfo.caseNumber,
+        dateFiled: reportInfo.dateFiled,
+        timeFiled: reportInfo.timeFiled,
+        location: reportInfo.location,
+        nature: reportInfo.nature,
+        concern: reportInfo.concern,
+        status: reportInfo.status,
+        dateReceived: reportInfo.dateReceived,
+        timeReceived: reportInfo.timeReceived,
+        typeOfIncident: reportInfo.typeOfIncident,
+        recommendedEvent: reportInfo.typeOfIncident === "Minor" ? reportInfo.recommendedEvent : undefined,
+        areaOfIncident: reportInfo.areaOfIncident,
+      }).find(([_, value]) => isEmpty(value));
+
+      setPopupErrorMessage(
+        emptyField
+          ? `Please fill out the required field: ${emptyField[0]}`
+          : "Please fill out all required fields."
+      );
       setShowErrorPopup(true);
       setTimeout(() => setShowErrorPopup(false), 3000);
       return;
@@ -477,12 +501,29 @@ const handleSubmit = (event: React.FormEvent) => {
       return;
     }
 
-    if(!isValidPhilippineMobileNumber(complainant.contact)|| !isValidPhilippineMobileNumber(respondent.contact)){
-      setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
-      setShowErrorPopup(true);
-      setTimeout(() => setShowErrorPopup(false), 3000);
-      return;
+    if(reportInfo.typeOfIncident === "Minor"  ) {
+      if(!isValidPhilippineMobileNumber(complainant.contact)){
+        setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
+      if(respondent.contact && !isValidPhilippineMobileNumber(respondent.contact)){
+        setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
     }
+    else{
+      if(!isValidPhilippineMobileNumber(complainant.contact)|| !isValidPhilippineMobileNumber(respondent.contact)){
+        setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+      }
+    }
+    
     const dateFiled = reportInfo.dateFiled;
     const dateReceived = reportInfo.dateReceived;
     const timeFiled = reportInfo.timeFiled;
@@ -935,7 +976,7 @@ const handleSubmit = (event: React.FormEvent) => {
                             value={respondent.lname}
                             name="lname"
                             id="respondent"
-                            required
+                            required = {reportInfo.typeOfIncident === "Major"}
                             onChange={handleFormChange}
                             disabled={isRespondentResidentSelected}
                             />
@@ -947,7 +988,7 @@ const handleSubmit = (event: React.FormEvent) => {
                           id="respondent"
                           name="sex" 
                           className={`add-incident-input-field ${showFieldErrors && !respondent.sex.trim() ? "input-error" : ""}`}   
-                          required
+                          required = {reportInfo.typeOfIncident === "Major"}
                           value={respondent.sex}
                           onChange={handleFormChange}
                           disabled={isRespondentResidentSelected}
@@ -967,7 +1008,7 @@ const handleSubmit = (event: React.FormEvent) => {
                           name="civilStatus"
                           id="respondent"
                           onChange={handleFormChange}
-                          required
+                          required = {reportInfo.typeOfIncident === "Major"}
                           disabled={isRespondentResidentSelected}
                           >
                             <option value="" disabled>Choose A Civil Status</option>
@@ -996,7 +1037,7 @@ const handleSubmit = (event: React.FormEvent) => {
                           value={respondent.fname}
                           name="fname"
                           id="respondent"  
-                          required
+                          required = {reportInfo.typeOfIncident === "Major"}
                           onChange={handleFormChange}
                           disabled={isRespondentResidentSelected}
                           />
@@ -1011,7 +1052,7 @@ const handleSubmit = (event: React.FormEvent) => {
                             placeholder="Enter Age" 
                             value={respondent.age}
                             name="age"
-                            required
+                          required = {reportInfo.typeOfIncident === "Major"}
                             onChange={handleFormChange}
                             disabled={isRespondentResidentSelected}
 
@@ -1027,7 +1068,7 @@ const handleSubmit = (event: React.FormEvent) => {
                             placeholder="Enter Address" 
                             value={respondent.address}
                             name="address"
-                            required
+                            required = {reportInfo.typeOfIncident === "Major"}
                             onChange={handleFormChange}
                             disabled={isRespondentResidentSelected}
                             />
@@ -1053,8 +1094,7 @@ const handleSubmit = (event: React.FormEvent) => {
                           placeholder="Enter Contact Number" 
                           value={respondent.contact}
                           name="contact"
-                          required
-        
+                          required = {reportInfo.typeOfIncident === "Major"}
                           onChange={handleFormChange}
                           disabled={isRespondentResidentSelected}
 
