@@ -402,6 +402,21 @@ align-items: center;
 TRY NEW
 */
 
+
+
+
+.fade-slide-up {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.8s ease-out;
+}
+
+.fade-slide-up.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
 .main-container-home-page {
   scroll-snap-type: y mandatory;
   overflow-y: scroll;
@@ -426,7 +441,8 @@ TRY NEW
 .main-content-home {
   max-width: 800px;
   padding: 0 20px;
-
+   opacity: 0;
+ 
 }
 
 

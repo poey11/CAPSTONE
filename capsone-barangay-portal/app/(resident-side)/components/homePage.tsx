@@ -1,6 +1,6 @@
 "use client";
 import "@/CSS/HomePage/HomePage.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from 'next/link';
 import { db } from '@/app/db/firebase'  ;
 import {doc, setDoc, getDoc, updateDoc, increment} from "firebase/firestore";
@@ -103,22 +103,50 @@ const homePage:React.FC = () => {
       );
     };
 
+    const heroRef = useRef(null);
+
+
+
+    useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+        } else {
+          entry.target.classList.remove('in-view');
+        }
+      },
+      {
+        threshold: 0.2,
+      }
+    );
+
+    if (heroRef.current) {
+      observer.observe(heroRef.current);
+    }
+
+    return () => {
+      if (heroRef.current) {
+        observer.unobserve(heroRef.current);
+      }
+    };
+  }, []);
+
 	return (
 		
       
 <main className="main-container-home-page">
 
       <div className="home-hero-section">
-        <div className="main-content-home">
+       <div className="main-content-home fade-slide-up" ref={heroRef}>
           <h1 className="main-heading-home">Welcome to Barangay Fairview</h1>
-          <p className="main-subheading-home">
-            Delivering fast, transparent, and accessible local services for our community.
-          </p>
+          <p className="main-subheading-home">Delivering fast, transparent, and accessible local services for our community.</p>
           <button className="main-button-home">Learn More</button>
         </div>
+
       </div>
 
-      <div className="second-section-home">
+      <div className="second-section-home" >
 
         <div className="second-section-home-upper">
 

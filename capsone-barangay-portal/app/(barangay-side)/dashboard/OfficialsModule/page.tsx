@@ -91,67 +91,6 @@ export default function OfficialsModule() {
 </div>
 
 
-      
-               
-      
-
-
-      <div className="login-container-resident">
-  <div className="login-card-wrapper">
-    {/* Left Side: Login Form */}
-    <div className="login-left-panel">
-      <h2 className="login-heading">Login</h2>
-      <form onSubmit={handleLogin}>
-        <div className="form-group-resident">
-          <label htmlFor="email" className="form-label-resident">Username:</label>
-          <div className="input-icon-wrapper">
-            <input
-              onChange={handleChange}
-              value={resident.email}
-              type="text"
-              id="email"
-              name="email"
-              className="form-input-resident"
-              required
-            />
-            <i className="fa fa-user input-icon" />
-          </div>
-        </div>
-
-        <div className="form-group-resident">
-          <label htmlFor="password" className="form-label-resident">Password:</label>
-          <div className="input-icon-wrapper">
-            <input
-              onChange={handleChange}
-              value={resident.password}
-              type={showPassword ? "text" : "password"}
-              id="password"
-              name="password"
-              className="form-input-resident"
-              required
-            />
-            
-          </div>
-        </div>
-
-        <div className="section3-resident">
-          <button type="submit" className="submit-button-resident">Login</button>
-        </div>
-
-        <div className="section2-resident">
-          <span className="section2options-resident" onClick={handleForgotPassword}>Forgot Password?</span>
-          <span className="section2options-resident" onClick={handleRegister}>Sign Up</span>
-        </div>
-      </form>
-    </div>
-
-    {/* Right Side: Welcome Text */}
-    <div className="login-right-panel">
-      <h2>WELCOME<br />BACK!</h2>
-      <p>Lorem ipsum dolor sit amet consectetur adipisicing.</p>
-    </div>
-  </div>
-</div>
 
        
       
