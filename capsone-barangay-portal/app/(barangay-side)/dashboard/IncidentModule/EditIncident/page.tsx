@@ -151,38 +151,47 @@ export default function EditLuponIncident() {
     
     const HandleEditDoc = async () => {
       
-      
       if (docId) {
         const docRef = doc(db, "IncidentReports", docId);
-    
+
         // Fixing receivedBy handling (avoiding split on undefined)
         const receivedByParts = reportData.receivedBy?.split(" ") || ["", ""];
         const receivedByFname = mergeData(receivedByParts[0], toUpdate.fname);
         const receivedByLname = mergeData(receivedByParts[1], toUpdate.lname);
-    
+
+        // Determine statusPriority based on status
+        let statusValue = mergeData(reportData.status, toUpdate.status);
+        let statusPriority = 1;
+        if (statusValue === "settled") {
+          statusPriority = 2;
+        } else {
+          statusPriority = 3;
+        }
+
         const cleanedData = removeUndefined({
           complainant: {
-            fname: mergeData(reportData.complainant?.fname, toUpdate.complainant?.fname),
-            lname: mergeData(reportData.complainant?.lname, toUpdate.complainant?.lname),
-            sex: mergeData(reportData.complainant?.sex, toUpdate.complainant?.sex),
-            age: mergeData(reportData.complainant?.age, toUpdate.complainant?.age),
-            civilStatus: mergeData(reportData.complainant?.civilStatus, toUpdate.complainant?.civilStatus),
-            address: mergeData(reportData.complainant?.address, toUpdate.complainant?.address),
-            contact: mergeData(reportData.complainant?.contact, toUpdate.complainant?.contact),
+        fname: mergeData(reportData.complainant?.fname, toUpdate.complainant?.fname),
+        lname: mergeData(reportData.complainant?.lname, toUpdate.complainant?.lname),
+        sex: mergeData(reportData.complainant?.sex, toUpdate.complainant?.sex),
+        age: mergeData(reportData.complainant?.age, toUpdate.complainant?.age),
+        civilStatus: mergeData(reportData.complainant?.civilStatus, toUpdate.complainant?.civilStatus),
+        address: mergeData(reportData.complainant?.address, toUpdate.complainant?.address),
+        contact: mergeData(reportData.complainant?.contact, toUpdate.complainant?.contact),
           },
           respondent: {
-            fname: mergeData(reportData.respondent?.fname, toUpdate.respondent?.fname),
-            lname: mergeData(reportData.respondent?.lname, toUpdate.respondent?.lname),
-            sex: mergeData(reportData.respondent?.sex, toUpdate.respondent?.sex),
-            age: mergeData(reportData.respondent?.age, toUpdate.respondent?.age),
-            civilStatus: mergeData(reportData.respondent?.civilStatus, toUpdate.respondent?.civilStatus),
-            address: mergeData(reportData.respondent?.address, toUpdate.respondent?.address),
-            contact: mergeData(reportData.respondent?.contact, toUpdate.respondent?.contact),
+        fname: mergeData(reportData.respondent?.fname, toUpdate.respondent?.fname),
+        lname: mergeData(reportData.respondent?.lname, toUpdate.respondent?.lname),
+        sex: mergeData(reportData.respondent?.sex, toUpdate.respondent?.sex),
+        age: mergeData(reportData.respondent?.age, toUpdate.respondent?.age),
+        civilStatus: mergeData(reportData.respondent?.civilStatus, toUpdate.respondent?.civilStatus),
+        address: mergeData(reportData.respondent?.address, toUpdate.respondent?.address),
+        contact: mergeData(reportData.respondent?.contact, toUpdate.respondent?.contact),
           },
           receivedBy: `${receivedByFname} ${receivedByLname}`,
           nature: mergeData(reportData.nature, toUpdate.nature),
           location: mergeData(reportData.location, toUpdate.location),
-          status: mergeData(reportData.status, toUpdate.status),
+          status: statusValue,
+          statusPriority: statusPriority,
           nosofFemaleChildren: mergeData(reportData.nosofFemaleChildren, toUpdate.nosofFemaleChildren),
           nosofMaleChildren: mergeData(reportData.nosofMaleChildren, toUpdate.nosofMaleChildren),
 
@@ -190,7 +199,7 @@ export default function EditLuponIncident() {
           isConciliation: toUpdate.isConciliation ?? false,
           isArbitration: toUpdate.isArbitration ?? false,
         });
-       
+
         await updateDoc(docRef, cleanedData);
       }
     };
@@ -203,8 +212,8 @@ export default function EditLuponIncident() {
       console.log(toUpdate);  //
     
 
-const complainantContact = toUpdate.complainant.contact || reportData?.complainant?.contact || "";
-const respondentContact = toUpdate.respondent.contact || reportData?.respondent?.contact || "";
+      const complainantContact = toUpdate.complainant.contact || reportData?.complainant?.contact || "";
+      const respondentContact = toUpdate.respondent.contact || reportData?.respondent?.contact || "";
 
       if (form.checkValidity()) {
 
