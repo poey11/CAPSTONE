@@ -232,11 +232,10 @@ export default function Action() {
 
  
 
-  const [requestMode, setRequestMode] = useState("For Myself");
   const [userData, setUserData] = useState<any>(null);
 
   const isVerified = userData?.status === "Verified";
-  const isReadOnly = requestMode === "For Myself" && isVerified;
+  const isReadOnly = isVerified;
   useEffect(() => {
     const fetchAndCloneFile = async (url: string, newFilename: string): Promise<File> => {
       const response = await fetch(url);
@@ -308,11 +307,6 @@ export default function Action() {
       const isVerified = userData.status === "Verified";
       const isEstateOrDeath = ["Estate Tax", "Death Residency"].includes(clearanceInput.purpose);
   
-      //  Force set requestMode to "For Someone Else" for Estate/Death
-      if (isEstateOrDeath && requestMode !== "For Someone Else") {
-        setRequestMode("For Someone Else");
-        return; // Wait for re-run
-      }
   
       //  For Verified ResidentUsers with a linked residentId
       if (isVerified && residentId) {
@@ -337,7 +331,7 @@ export default function Action() {
           age--;
         }
   
-        if (requestMode === "For Someone Else") {
+        if (isEstateOrDeath) {
           //  Only set requestor fields
           setClearanceInput((prev: any) => ({
             ...prev,
@@ -390,7 +384,7 @@ export default function Action() {
     };
   
     fetchUserData();
-  }, [user, clearanceInput.purpose, requestMode, clearanceInput.dateofdeath]);
+  }, [user, clearanceInput.purpose, clearanceInput.dateofdeath]);
   
   
 
@@ -791,35 +785,6 @@ const handleFileChange = (
       <div className="form-content">
         <h1 className="form-title">
         {docType} Request Form
-
-        {userData?.status === "Verified" &&
-          userData?.residentId &&
-          !["Estate Tax", "Death Residency"].includes(clearanceInput.purpose) && (
-            <div className="form-group">
-              <label className="form-label">Who is this request for?<span className="required">*</span></label>
-              <div className="radio-group">
-                <label>
-                  <input
-                    type="radio"
-                    value="For Myself"
-                    checked={requestMode === "For Myself"}
-                    onChange={(e) => setRequestMode(e.target.value)}
-                  />
-                  For Myself
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    value="For Someone Else"
-                    checked={requestMode === "For Someone Else"}
-                    onChange={(e) => setRequestMode(e.target.value)}
-                  />
-                  For Someone Else
-                </label>
-              </div>
-            </div>
-          )}
-
 
         </h1>
 
