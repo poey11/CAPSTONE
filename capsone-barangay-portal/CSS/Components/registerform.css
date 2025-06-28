@@ -1,9 +1,9 @@
 
   .main-container-register-form {
-    background-color: #D8DFE5;
+     background-image: url('/Images/bghome.jpg');
     display: flex;
     flex-direction: column;  
-    min-height: 100vh; 
+    height: 100%;
     width: 100%;
  }
 
@@ -65,9 +65,9 @@
 
   .register-section-register-form h1 {
     font-size: 30px; 
-    color: #DF7426;
+    color: #2C3E50;
     text-align: center;
-    font-weight: bold;  
+    font-weight: 750;  
     margin-top: 20px;
     margin-bottom: 10px;
     text-transform: uppercase;
@@ -97,31 +97,22 @@
 
   .form-group-register-form input, 
   .form-group-register-form select {
-    padding: 8px;
+   padding: 8px;
     width: 100%;
-    max-width: 100%;
-    border: 1px solid #ccc;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
-    color: rgba(0, 0, 0, 0.4);
-    padding-right: 40px;
+    color: #000000;
+    text-align: left; 
 }
 
   .form-label-register-form {
   font-size: 16px;
   font-weight: bold;
-  color: gray;
-
+  color: #2C3E50;
   }
 
-  .form-input-register-form {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    color: #555;
-    accent-color: #f49028; 
-  }
+
 
   .form-input-register-form:focus {
     border-color: #f49028;
