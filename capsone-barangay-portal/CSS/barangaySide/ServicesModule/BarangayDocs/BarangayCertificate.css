@@ -365,7 +365,7 @@
         right: -3px;
         background: #777575;
         color: white;
-        width: 350px;
+        width: 400px;
         height: 50px;
         border-radius: 5px;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -396,16 +396,16 @@
     
     
     .confirmation-popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, 0.076); 
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999; 
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999; 
       }
       
       .confirmation-popup {
@@ -413,8 +413,8 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 200px;
-        width: 400px;
+        height: 220px;
+        width: 450px;
         background-color: #f9f9f9;
         border-radius: 20px;
         border: 2px solid rgb(168, 161, 158);
@@ -424,7 +424,6 @@
         font-size: 18px;
         font-weight: lighter;
         position: fixed;
-        left: 43%; /* Adjust the value */
       }
       
       .confirmation-popup p{
@@ -996,4 +995,15 @@ gap: 20px;
   color: rgb(245, 143, 88);
   text-decoration: underline;
   cursor: pointer;
+}
+
+.successful-icon-popup {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.icon-alert {
+  width: 27px;
+  height: 27px;
 }
