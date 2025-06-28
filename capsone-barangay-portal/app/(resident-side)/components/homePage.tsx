@@ -104,33 +104,45 @@ const homePage:React.FC = () => {
     };
 
     const heroRef = useRef(null);
+const servicesRef = useRef(null);
+const serviceCardsRef = useRef<(HTMLDivElement | null)[]>([]);
+const thirdSectionRef = useRef(null);
+const facilitiesRef = useRef(null);
 
 
-
-    useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
+useEffect(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('in-view');
         } else {
           entry.target.classList.remove('in-view');
         }
-      },
-      {
-        threshold: 0.2,
-      }
-    );
+      });
+    },
+    { threshold: 0.2 }
+  );
 
-    if (heroRef.current) {
-      observer.observe(heroRef.current);
-    }
+  const refs = [
+    heroRef.current,
+    servicesRef.current,
+    thirdSectionRef.current,
+    facilitiesRef.current,
+    ...serviceCardsRef.current
+  ];
 
-    return () => {
-      if (heroRef.current) {
-        observer.unobserve(heroRef.current);
-      }
-    };
-  }, []);
+  refs.forEach((ref) => {
+    if (ref) observer.observe(ref);
+  });
+
+  return () => {
+    refs.forEach((ref) => {
+      if (ref) observer.unobserve(ref);
+    });
+  };
+}, []);
+
 
 	return (
 		
@@ -148,7 +160,7 @@ const homePage:React.FC = () => {
 
       <div className="second-section-home" >
 
-        <div className="second-section-home-upper">
+       <div className="second-section-home-upper">
 
           <div className="section-content-home">
             <h2>Our Services</h2>
@@ -160,7 +172,7 @@ const homePage:React.FC = () => {
         </div> 
 
 
-        <div className="second-section-home-lower">
+        <div className="second-section-home-lower fade-slide-up"  ref={servicesRef}>
 
           <div className="services-content-home">
                 <div className="services-card">
@@ -221,7 +233,7 @@ const homePage:React.FC = () => {
       <img src="/Images/kap2.png" alt="Barangay Captain" className="captain-image" />
     </div>
 
-    <div className="captain-info">
+    <div className="captain-info fade-slide-up" ref={thirdSectionRef}>
       <span className="captain-role">Barangay Captain</span>
       <h2 className="captain-name">Jonell L. Quebal</h2>
       <p className="captain-quote">
@@ -253,7 +265,7 @@ const homePage:React.FC = () => {
     </div>
   </div>
 
-  <div className="facilities-content-home-wrapper">
+  <div className="facilities-content-home-wrapper fade-slide-up" ref={facilitiesRef}>
     <button className="slide-button" onClick={prevSlide}>&lt;</button>
 
   <div className="facilities-content-home">
