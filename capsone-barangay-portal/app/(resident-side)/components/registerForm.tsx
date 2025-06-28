@@ -216,119 +216,127 @@ const RegisterForm: React.FC = () => {
 
 
              <div className="register-section-register-form">
-                <h1>Register</h1>
+                <h1>Sign Up</h1>
 
                 <hr/>
                 <form className="register-form" onSubmit={handleSubmit}>
-                    <div className="form-group-register-form">
-                        <label htmlFor="sex" className="form-label-register-form">Sex:<span className="required">*</span></label>
-                        <select value={resident.sex} onChange={handleChange} id="sex" name="sex" className="form-input-register-form" required>
-                            <option value="" disabled>Select a Sex</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
+                    
+                    <div className="form-container">
 
-                    <div className="form-group-register-form">
-                        <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
-                        <input value={resident.first_name} onChange={handleChange} id="first_name" 
-                        type="text" name="first_name" 
-                        className="form-input-register-form "
-                        placeholder= "Enter First Name"
-                        required />
+                        <div className="form-container-upper ">
 
-                    </div>
+                       
+                        <div className="form-container-left-side">
+                              <div className="form-group-register-form">
+                                    <label htmlFor="sex" className="form-label-register-form">Sex:<span className="required">*</span></label>
+                                    <select value={resident.sex} onChange={handleChange} id="sex" name="sex" className="form-input-register-form" required>
+                                        <option value="" disabled>Select a Sex</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                            </div>
 
-                    <div className="form-group-register-form">
-                        <label htmlFor="middle_name" className="form-label-register-form">Middle Name: </label>
-                        <input value={resident.middle_name} onChange={handleChange} id="middle_name" 
-                        type="text" name="middle_name" 
-                        className="form-input-register-form "
-                        placeholder= "Enter Middle Name" />
+                            <div className="form-group-register-form">
+                                <label htmlFor="middle_name" className="form-label-register-form">Middle Name: </label>
+                                <input value={resident.middle_name} onChange={handleChange} id="middle_name" 
+                                type="text" name="middle_name" 
+                                className="form-input-register-form "
+                                placeholder= "Enter Middle Name" />
 
-                    </div>
+                            </div>
 
-                    <div className="form-group-register-form">
-                        <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
-                        
+                                    
+                            <div className="form-group-register-form">
+                                <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
+                                <input  value={resident.email} onChange={handleChange} id="email" 
+                                type="email" name="email" 
+                                className="form-input-register-form " 
+                                placeholder="Enter Email"
+                                required />
+                            </div>
 
-                        <input value={resident.last_name} onChange={handleChange} id="last_name" 
-                        type="text" name="last_name" 
-                        className="form-input-register-form " 
-                        placeholder="Enter Last Name"
-                        required/>
+                            <div className="form-group-register-form">
+                                <label htmlFor="email" className="form-label-register-form" >Date of Birth:<span className="required">*</span> </label>
+                                <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
+                                type="date" name="dateOfBirth" 
+                                className="form-input-register-form " 
+                                placeholder="Enter Email"
+                                max={today}
+                                required />
+                            </div>
 
-                    </div>
+                              <div className="form-group-register-form">
+                                    <label htmlFor="password" className="form-label-register-form">Password:<span className="required">*</span> </label>
+                                    <div className="relative">
+                                        <input value={resident.password} onChange={handleChange} id="password"
+                                            type={showPassword ? "text" : "password"}
+                                            name="password" 
+                                            className="form-input-register-form"
+                                            placeholder="Enter Password"
+                                            required/>
+                                            <button
+                                                 type="button"
+                                                 className="toggle-password-btn"
+                                                 onClick={() => setShowPassword(!showPassword)}
+                                                        >
+                                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                </button>
+                                    </div>
+                                </div>
 
-                    <div className="form-group-register-form">
-                        <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
-                        <input  value={resident.email} onChange={handleChange} id="email" 
-                        type="email" name="email" 
-                        className="form-input-register-form " 
-                        placeholder="Enter Email"
-                        required />
-                    </div>
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="phone" className="form-label-register-form" >Phone Number:<span className="required">*</span> </label>
-                        <input  value={resident.phone} id="phone" 
-                        type="tel" name="phone"
-                        className="form-input-register-form " 
-                        maxLength={11}
-                        pattern="^[0-9]{11}$" 
-                        placeholder="Enter Phone Number"
-                        onChange={(e) => {
-                            const input = e.target.value;
-                            // Only allow digits and limit to 11 characters
-                            if (/^\d{0,11}$/.test(input)) {
-                              handleChange(e);
-                            }
-                        }}
-                        required />
-                    </div>
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="email" className="form-label-register-form" >Date of Birth:<span className="required">*</span> </label>
-                        <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
-                        type="date" name="dateOfBirth" 
-                        className="form-input-register-form " 
-                        placeholder="Enter Email"
-                        max={today}
-                        required />
-                    </div>
-
-
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="address" className="form-label-register-form">Address:<span className="required">*</span> </label>
-                        <input value={resident.address} onChange={handleChange} id="address" 
-                        type="text" name="address" 
-                        className="form-input-register-form " 
-                        placeholder="Enter Address"
-                        required />
-                    </div>
-
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="password" className="form-label-register-form">Password:<span className="required">*</span> </label>
-                        <div className="relative">
-                            <input value={resident.password} onChange={handleChange} id="password"
-                                type={showPassword ? "text" : "password"}
-                                name="password" 
-                                className="form-input-register-form"
-                                placeholder="Enter Password"
-                                required/>
-                                <button
-                                                                                type="button"
-                                                                                className="toggle-password-btn"
-                                                                                onClick={() => setShowPassword(!showPassword)}
-                                                                            >
-                                                                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                                                            </button>
                         </div>
-                    </div>
 
-                    <div className="form-group-register-form">
+                         <div className="form-container-right-side">
+                            <div className="form-group-register-form">
+                                <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
+                                <input value={resident.first_name} onChange={handleChange} id="first_name" 
+                                type="text" name="first_name" 
+                                className="form-input-register-form "
+                                placeholder= "Enter First Name"
+                                required />
+
+                            </div>
+
+                            <div className="form-group-register-form">
+                                <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
+                                
+
+                                <input value={resident.last_name} onChange={handleChange} id="last_name" 
+                                type="text" name="last_name" 
+                                className="form-input-register-form " 
+                                placeholder="Enter Last Name"
+                                required/>
+
+                            </div>
+
+                            <div className="form-group-register-form">
+                                <label htmlFor="phone" className="form-label-register-form" >Phone Number:<span className="required">*</span> </label>
+                                <input  value={resident.phone} id="phone" 
+                                type="tel" name="phone"
+                                className="form-input-register-form " 
+                                maxLength={11}
+                                pattern="^[0-9]{11}$" 
+                                placeholder="Enter Phone Number"
+                                onChange={(e) => {
+                                    const input = e.target.value;
+                                    // Only allow digits and limit to 11 characters
+                                    if (/^\d{0,11}$/.test(input)) {
+                                    handleChange(e);
+                                    }
+                                }}
+                                required />
+                            </div>
+
+                            <div className="form-group-register-form">
+                                <label htmlFor="address" className="form-label-register-form">Address:<span className="required">*</span> </label>
+                                <input value={resident.address} onChange={handleChange} id="address" 
+                                type="text" name="address" 
+                                className="form-input-register-form " 
+                                placeholder="Enter Address"
+                                required />
+                            </div>
+
+                             <div className="form-group-register-form">
                         <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password:<span className="required">*</span></label>
                         <div className="relative">
                             <input
@@ -351,8 +359,15 @@ const RegisterForm: React.FC = () => {
                         </div>
                     </div>
 
+                        </div>
 
-                    <div className="signature/printedname-container">
+                         </div>
+
+
+
+                         <div className="form-container-lower">
+
+                                  <div className="signature/printedname-container">
                         <label className="form-label-register-form">Upload Valid ID with address:<span className="required">*</span></label>
                         
                         <div className="file-upload-container-register">
@@ -420,228 +435,14 @@ const RegisterForm: React.FC = () => {
                     <button type="submit" className="submit-button" disabled={!isTermChecked}>
                         Register
                     </button>
+
+                         </div>
+
+                    </div>
+                  
                 </form>
             </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-            <div className="register-section-register-form">
-                <h1>Register</h1>
-
-                <hr/>
-                <form className="register-form" onSubmit={handleSubmit}>
-                    <div className="form-group-register-form">
-                        <label htmlFor="sex" className="form-label-register-form">Sex:<span className="required">*</span></label>
-                        <select value={resident.sex} onChange={handleChange} id="sex" name="sex" className="form-input-register-form" required>
-                            <option value="" disabled>Select a Sex</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
-                        <input value={resident.first_name} onChange={handleChange} id="first_name" 
-                        type="text" name="first_name" 
-                        className="form-input-register-form "
-                        placeholder= "Enter First Name"
-                        required />
-
-                    </div>
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="middle_name" className="form-label-register-form">Middle Name: </label>
-                        <input value={resident.middle_name} onChange={handleChange} id="middle_name" 
-                        type="text" name="middle_name" 
-                        className="form-input-register-form "
-                        placeholder= "Enter Middle Name" />
-
-                    </div>
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
-                        
-
-                        <input value={resident.last_name} onChange={handleChange} id="last_name" 
-                        type="text" name="last_name" 
-                        className="form-input-register-form " 
-                        placeholder="Enter Last Name"
-                        required/>
-
-                    </div>
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
-                        <input  value={resident.email} onChange={handleChange} id="email" 
-                        type="email" name="email" 
-                        className="form-input-register-form " 
-                        placeholder="Enter Email"
-                        required />
-                    </div>
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="phone" className="form-label-register-form" >Phone Number:<span className="required">*</span> </label>
-                        <input  value={resident.phone} id="phone" 
-                        type="tel" name="phone"
-                        className="form-input-register-form " 
-                        maxLength={11}
-                        pattern="^[0-9]{11}$" 
-                        placeholder="Enter Phone Number"
-                        onChange={(e) => {
-                            const input = e.target.value;
-                            // Only allow digits and limit to 11 characters
-                            if (/^\d{0,11}$/.test(input)) {
-                              handleChange(e);
-                            }
-                        }}
-                        required />
-                    </div>
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="email" className="form-label-register-form" >Date of Birth:<span className="required">*</span> </label>
-                        <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
-                        type="date" name="dateOfBirth" 
-                        className="form-input-register-form " 
-                        placeholder="Enter Email"
-                        max={today}
-                        required />
-                    </div>
-
-
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="address" className="form-label-register-form">Address:<span className="required">*</span> </label>
-                        <input value={resident.address} onChange={handleChange} id="address" 
-                        type="text" name="address" 
-                        className="form-input-register-form " 
-                        placeholder="Enter Address"
-                        required />
-                    </div>
-
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="password" className="form-label-register-form">Password:<span className="required">*</span> </label>
-                        <div className="relative">
-                            <input value={resident.password} onChange={handleChange} id="password"
-                                type={showPassword ? "text" : "password"}
-                                name="password" 
-                                className="form-input-register-form"
-                                placeholder="Enter Password"
-                                required/>
-                                <button
-                                                                                type="button"
-                                                                                className="toggle-password-btn"
-                                                                                onClick={() => setShowPassword(!showPassword)}
-                                                                            >
-                                                                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                                                            </button>
-                        </div>
-                    </div>
-
-                    <div className="form-group-register-form">
-                        <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password:<span className="required">*</span></label>
-                        <div className="relative">
-                            <input
-                                id="confirm_password"
-                                type={showConfirmPassword ? "text" : "password"}
-                                name="confirm_password"
-                                value={confirmPassword}
-                                onChange={handleChange}
-                                className="form-input-register-form"
-                                placeholder="Confirm Password"
-                                required
-                            />
-                            <button
-                                                                            type="button"
-                                                                            className="toggle-password-btn"
-                                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                                        >
-                                                                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                                </button>
-                        </div>
-                    </div>
-
-
-                    <div className="signature/printedname-container">
-                        <label className="form-label-register-form">Upload Valid ID with address:<span className="required">*</span></label>
-                        
-                        <div className="file-upload-container-register">
-                            <label htmlFor="file-upload-register" className="upload-link">Click to Upload File</label>
-                            <input
-                            id="file-upload-register"
-                            type="file"
-                            className="file-upload-input-register"
-                            accept="image/*"
-                            onChange={handleFileChangeContainer1}
-                            required
-
-                            style={{ display: "none" }}
-                            />
-                            <div className="uploadedFiles-container-register">
-                            {filesContainer1.length > 0 && (
-                                <div className="file-name-image-display-register">
-                                <ul>
-                                    {filesContainer1.map((file, index) => (
-                                    <div className="file-name-image-display-indiv-register" key={index}>
-                                        <li>
-                                        {file.preview && (
-                                            <div className="filename-image-container-register">
-                                            <img
-                                                src={file.preview}
-                                                alt={file.name}
-                                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                            />
-                                            </div>
-                                        )}
-                                        {file.name}
-                                        <div className="delete-container-register">
-                                            <button
-                                            type="button"
-                                            onClick={() => handleFileDeleteContainer1(file.name)}
-                                            className="delete-button-register"
-                                            >
-                                            <img
-                                                src="/images/trash.png"
-                                                alt="Delete"
-                                                className="delete-icon-register"
-                                            />
-                                            </button>
-                                        </div>
-                                        </li>
-                                    </div>
-                                    ))}
-                                </ul>
-                                </div>
-                            )}
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div className="form-checkbox-section">
-                        <label htmlFor="terms" className="form-label-register-form">I agree to the terms and conditions <span className="required">*</span></label>
-                        <input id="terms" onChange={handleCheckBox} type="checkbox" name="terms" className="form-checkbox" required/>
-                    </div>
-
-                    <div className="form-captcha">
-                        <ReCAPTCHA sitekey={captchaSiteKey} onChange={handleToken} />
-                    </div>
-
-                    <button type="submit" className="submit-button" disabled={!isTermChecked}>
-                        Register
-                    </button>
-                </form>
-            </div>
 
     
         </main>
