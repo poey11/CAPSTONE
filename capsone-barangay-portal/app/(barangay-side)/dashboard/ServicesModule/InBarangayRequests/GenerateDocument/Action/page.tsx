@@ -18,8 +18,10 @@ interface EmergencyDetails {
   relationship?: string;
   contactNumber?: string;
 }
-interface File {
-    name?: string;
+interface UploadedFile {
+  name: string;
+  file?: Blob | globalThis.File;
+  preview?: string;
 }
 
 interface ClearanceInput {
@@ -91,6 +93,7 @@ interface ClearanceInput {
     status?: string; // Optional, can be added if needed
     statusPriority?: number; // Optional, can be added if 
     reqType?: string; // Optional, can be added if needed
+    identificationPicture?: File[];
 }
 
 
@@ -111,7 +114,7 @@ export default function action() {
     const [residents, setResidents] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
-
+    const [idPicture, setIdPicture] = useState<UploadedFile[]>([]);
 
     
     const employerPopupRef = useRef<HTMLDivElement>(null);
@@ -244,6 +247,25 @@ export default function action() {
       setShowResidentsPopup(true);
     };
 
+    const handleIDPictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const preview = URL.createObjectURL(file);
+    
+      setIdPicture([
+        {
+          file,
+          name: file.name,
+          preview,
+        },
+      ]);
+    };
+
+    const handleIDPictureDelete = () => {
+      setIdPicture([]);
+    };
+
     // Close popup when clicking outside
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
@@ -307,50 +329,68 @@ export default function action() {
     };
 
     const handleUploadImage = async () => {
-        const uploadedFiles: { name: string }[] = [];
-
-        try {
-            let i = 0;
-            for (const file of files.container1) {
-                console.log("File:", file);
-                const fileExtension = file.name.split('.').pop();
-                const fileName = `${clearanceInput.requestId}-file${i}.${fileExtension}`;
-                const storageRef = ref(storage, `ServiceRequests/${fileName}`);
-                console.log("Storage Reference:", storageRef);
-
-                const snapshot = await uploadBytes(storageRef, file.file as Blob);
-                const url = await getDownloadURL(snapshot.ref);
-                uploadedFiles.push({ name: url });
-                i++;
-            }
-            console.log("Uploaded Files:", uploadedFiles);
-            return uploadedFiles; // Return the array of uploaded file names
-        }
-        catch (error) {
-            console.error("Error uploading images:", error);
-          
-        }    
-    }
+      const uploadedFiles: { name: string }[] = [];
+      let idPictureUrls: { name: string }[] = [];
+  
+      try {
+          let i = 0;
+          for (const file of files.container1) {
+              const fileExtension = file.name.split('.').pop();
+              const fileName = `${clearanceInput.requestId}-file${i}.${fileExtension}`;
+              const storageRef = ref(storage, `ServiceRequests/${fileName}`);
+  
+              const snapshot = await uploadBytes(storageRef, file.file as Blob);
+              const url = await getDownloadURL(snapshot.ref);
+              uploadedFiles.push({ name: url });
+              i++;
+          }
+  
+         
+          if (idPicture.length > 0) {
+              const file = idPicture[0]; // only one allowed
+              const ext = file.name.split('.').pop();
+              const fileName = `${clearanceInput.requestId}-idpicture.${ext}`;
+              const storageRef = ref(storage, `ServiceRequests/${fileName}`);
+              const snapshot = await uploadBytes(storageRef, file.file as Blob);
+              const url = await getDownloadURL(snapshot.ref);
+              idPictureUrls = [{ name: url }];
+          }
+  
+          return {
+              docsRequired: uploadedFiles,
+              identificationPicture: idPictureUrls
+          };
+      } catch (error) {
+          console.error("Error uploading images:", error);
+          return {
+              docsRequired: [],
+              identificationPicture: []
+          };
+      }
+  };
     let id: string | undefined;
-    const handleUploadClick = async() => {
-        try {
-            const uplodedFile = await handleUploadImage(); // Upload images after succesfully adding the document
-            console.log("Uploaded Files:", uplodedFile);
-            const docRef = collection(db, "ServiceRequests");
-            const docData ={
-                ...clearanceInput,
-                requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
-                docsRequired: uplodedFile, // Use the uploaded file names
-            }
-            console.log("Document Data:", docData);
-            const doc = await addDoc(docRef, docData);
-            console.log("Document written with ID: ", docData.requestId, " - ", doc.id);
-            id = doc.id; // Store the document ID for redirection
-        } catch (error) {
-            console.error("Error:", error);
-        }       
-
-    }
+    const handleUploadClick = async () => {
+      try {
+        const uploadedFiles = await handleUploadImage(); // returns an object with two arrays
+        console.log("Uploaded Files:", uploadedFiles);
+    
+        const docRef = collection(db, "ServiceRequests");
+    
+        const docData = {
+          ...clearanceInput,
+          requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
+          docsRequired: uploadedFiles.docsRequired,
+          identificationPicture: uploadedFiles.identificationPicture, 
+        };
+    
+        console.log("Document Data:", docData);
+        const doc = await addDoc(docRef, docData);
+        console.log("Document written with ID: ", docData.requestId, " - ", doc.id);
+        id = doc.id;
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
 
     const handleConfirmClick = async() => {
         setShowCreatePopup(true);
@@ -1472,8 +1512,62 @@ export default function action() {
                             </div>
                           </div>
                         </div>
+
+                        {clearanceInput.purpose === "Residency" && (
+                          <>
+                            <div className="box-container-outer-verificationdocs">
+                            <div className="title-verificationdocs">
+                              Identification Picture
+                            </div>
+
+                            <div className="box-container-verificationdocs">
+                              <span className="required-asterisk">*</span>
+
+                              {/* File Upload Section */}
+                              <div className="file-upload-container">
+                                <label htmlFor="id-picture-upload" className="upload-link">
+                                  Click to Upload Picture
+                                </label>
+
+                                <input
+                                  id="id-picture-upload"
+                                  type="file"
+                                  className="file-upload-input"
+                                  accept=".jpg,.jpeg,.png"
+                                  name="idPicture"
+                                  onChange={(e) => handleIDPictureChange(e)}
+                                />
+
+                                {/* Display the image preview (only one) */}
+                                { idPicture.length > 0 && (
+                                  <div className="file-name-image-display">
+                                    {idPicture.map((file, index) => (
+                                      <div className="file-name-image-display-indiv" key={index}>
+                                        <li className="file-item">
+                                          {file.preview && (
+                                            <div className="filename-image-container">
+                                              <img src={file.preview} alt={file.name} className="file-preview" />
+                                            </div>
+                                          )}
+                                          <span className="file-name">{file.name}</span>
+                                          <div className="delete-container">
+                                            <button type="button" onClick={handleIDPictureDelete} className="delete-button">
+                                              <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                            </button>
+                                          </div>
+                                        </li>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          </>
+                        )}
+
+                        
                       </div>
-                      
                     </>
                   )}
                     
