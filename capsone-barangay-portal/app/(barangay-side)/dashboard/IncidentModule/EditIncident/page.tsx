@@ -7,8 +7,6 @@ import { doc, updateDoc, collection, where, getDocs, query, onSnapshot} from "fi
 import { db } from "../../../../db/firebase";
 import { isValidPhilippineMobileNumber } from "@/app/helpers/helpers";
 import React from "react";
-import Dialogue from "@/app/(barangay-side)/components/dialogueForm"
-import Hearing from "@/app/(barangay-side)/components/hearingForm";
 
 
 export default function EditLuponIncident() {
@@ -270,39 +268,6 @@ const confirmSubmit = async () => {
 
       
 
-    const handleDeleteForm=()=>{
-        setToUpdate({
-          complainant: {
-            fname: "",
-            lname: "",
-            sex: "",
-            age: "",
-            civilStatus: "",
-            address: "",
-            contact: "",
-          },
-          respondent: {
-            fname: "",
-            lname: "",
-            sex: "",
-            age: "",
-            civilStatus: "",
-            address: "",
-            contact: "",
-          },
-          fname: "",
-          lname: "",
-          nature: "",
-          location: "",
-          status:"",
-          nosofFemaleChildren: "",
-          nosofMaleChildren: "",
-        });
-    }
-
-    
-
-
     useEffect(() => {
       if (reportData) {
         setToUpdate({
@@ -408,105 +373,109 @@ const confirmSubmit = async () => {
               </div>
               <h1>Incident Information</h1>
             </button>
-
-            <div className="dialogue-dropdown">
-              <button className="edit-incident-redirection-buttons">
-                <div className="edit-incident-redirection-icons-section">
-                  <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
-                </div>
-                <h1>Dialogue Meeting</h1>
-              </button>
-
-              <div className="dialogue-submenu">
-                <button className="submenu-button" name="dialogue" onClick={handleGenerateLetterAndInvitation}>
-                  <h1>Generate Dialogue Letters</h1>
-                </button>
-
-                {reportData.isDialogue ? (
-                  <button className="submenu-button" name="section" onClick={handleDialogueSection}>
-                    <h1>Dialogue Section</h1>
+          
+            {reportData?.typeOfIncident === "Major" && (
+              <>
+                <div className="dialogue-dropdown">
+                  <button className="edit-incident-redirection-buttons">
+                    <div className="edit-incident-redirection-icons-section">
+                      <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
+                    </div>
+                    <h1>Dialogue Meeting</h1>
                   </button>
-                ) : (
-                  <button
-                    className="submenu-button"
-                    name="section"
-                    onClick={() => {
-                      setPopupErrorMessage("Generate A Dialogue Letter First");
-                      setShowErrorPopup(true);
-                      setTimeout(() => setShowErrorPopup(false), 3000);
-                    }}
-                  >
-                    <h1>Dialogue Section</h1>
-                  </button>
-                )}
 
-                
-                
-              </div>
-            </div>
-
-            <div className="hearing-dropdown">
-              <button className="edit-incident-redirection-buttons">
-                <div className="edit-incident-redirection-icons-section">
-                  <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing"/> 
-                </div>
-                <h1>Hearing Section</h1>
-              </button>
-
-              <div className="hearing-submenu">
-                {reportData.isDialogue ? (
-                  isDialogueSectionFilled ? (
-                    <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
-                      <h1>Generate Summon Letters</h1>
+                  <div className="dialogue-submenu">
+                    <button className="submenu-button" name="dialogue" onClick={handleGenerateLetterAndInvitation}>
+                      <h1>Generate Dialogue Letters</h1>
                     </button>
-                  ) : (
-                    <button
-                      className="submenu-button"
-                      name="summon"
-                      onClick={() => {
-                        setPopupErrorMessage("Fill out the Dialogue Section first.");
-                        setShowErrorPopup(true);
-                        setTimeout(() => setShowErrorPopup(false), 3000);
-                      }}
-                    >
-                      <h1>Generate Summon Letters</h1>
-                    </button>
-                  )
-                ) : (
-                  <button
-                    className="submenu-button"
-                    name="summon"
-                    onClick={() => {
-                      setPopupErrorMessage("Generate a Dialogue Letter first.");
-                      setShowErrorPopup(true);
-                      setTimeout(() => setShowErrorPopup(false), 3000);
-                    }}
-                  >
-                    <h1>Generate Summon Letters</h1>
-                  </button>
-                )}
 
-                {hasSummonLetter ? (
-                  <button className="submenu-button" name="section" onClick={handleHearingSection}>
+                    {reportData.isDialogue ? (
+                      <button className="submenu-button" name="section" onClick={handleDialogueSection}>
+                        <h1>Dialogue Section</h1>
+                      </button>
+                    ) : (
+                      <button
+                        className="submenu-button"
+                        name="section"
+                        onClick={() => {
+                          setPopupErrorMessage("Generate A Dialogue Letter First");
+                          setShowErrorPopup(true);
+                          setTimeout(() => setShowErrorPopup(false), 3000);
+                        }}
+                      >
+                        <h1>Dialogue Section</h1>
+                      </button>
+                    )}
+
+                    
+                    
+                  </div>
+                </div>
+
+                <div className="hearing-dropdown">
+                  <button className="edit-incident-redirection-buttons">
+                    <div className="edit-incident-redirection-icons-section">
+                      <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing"/> 
+                    </div>
                     <h1>Hearing Section</h1>
                   </button>
-                ) : (
-                  <button
-                    className="submenu-button"
-                    name="section"
-                    onClick={() => {
-                      setPopupErrorMessage("Generate a Summon Letter First");
-                      setShowErrorPopup(true);
-                      setTimeout(() => setShowErrorPopup(false), 3000);
-                    }}
-                  >
-                    <h1>Hearing Section</h1>
-                  </button>
-                )}
-              </div>
 
-            </div>
+                  <div className="hearing-submenu">
+                    {reportData.isDialogue ? (
+                      isDialogueSectionFilled ? (
+                        <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
+                          <h1>Generate Summon Letters</h1>
+                        </button>
+                      ) : (
+                        <button
+                          className="submenu-button"
+                          name="summon"
+                          onClick={() => {
+                            setPopupErrorMessage("Fill out the Dialogue Section first.");
+                            setShowErrorPopup(true);
+                            setTimeout(() => setShowErrorPopup(false), 3000);
+                          }}
+                        >
+                          <h1>Generate Summon Letters</h1>
+                        </button>
+                      )
+                    ) : (
+                      <button
+                        className="submenu-button"
+                        name="summon"
+                        onClick={() => {
+                          setPopupErrorMessage("Generate a Dialogue Letter first.");
+                          setShowErrorPopup(true);
+                          setTimeout(() => setShowErrorPopup(false), 3000);
+                        }}
+                      >
+                        <h1>Generate Summon Letters</h1>
+                      </button>
+                    )}
 
+                    {hasSummonLetter ? (
+                      <button className="submenu-button" name="section" onClick={handleHearingSection}>
+                        <h1>Hearing Section</h1>
+                      </button>
+                    ) : (
+                      <button
+                        className="submenu-button"
+                        name="section"
+                        onClick={() => {
+                          setPopupErrorMessage("Generate a Summon Letter First");
+                          setShowErrorPopup(true);
+                          setTimeout(() => setShowErrorPopup(false), 3000);
+                        }}
+                      >
+                        <h1>Hearing Section</h1>
+                      </button>
+                    )}
+                  </div>
+
+                </div>
+              
+              </>
+            )}
           </div>
           
           <div className="edit-incident-main-content">
@@ -565,14 +534,15 @@ const confirmSubmit = async () => {
                           onChange={handleFormChange}               
                         >
                           <option value="pending">Pending</option>
-                          <option value="resolved">Resolved</option>
                           <option value="settled">Settled</option>
                           <option value="archived">Archived</option>
                         </select>
                       </div> 
                     </div>
 
+
                     <div className="edit-incident-main-details-description">
+
                       <div className="incident-date-section">
                         <div className="incident-date-topsection">
                           <div className="incident-main-details-icons-section">
@@ -594,7 +564,7 @@ const confirmSubmit = async () => {
                             <h1>Location</h1>
                           </div>
                         </div>
-                        <p>{reportData?.location || "N/A"}</p>
+                        <p>{`${reportData?.location} - ${reportData.areaOfIncident}` || "N/A"}</p>
                       </div>
                         
                       <div className="incident-description-section">
@@ -622,12 +592,14 @@ const confirmSubmit = async () => {
                               <div className="edit-incident-content-left-side">
                                 <div className="edit-incident-fields-section">
                                   <p>Last Name</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.complainant.lname} value={toUpdate.complainant.lname} name="complainant.lname" id="complainant.lname" onChange={handleFormChange} />
+                                  <input type="text" className="edit-incident-input-field" 
+                                  placeholder= {reportData.complainant.lname} value={toUpdate.complainant.lname} 
+                                  name="complainant.lname" id="complainant.lname" onChange={handleFormChange} disabled/>
                                 </div>
 
                                 <div className="edit-incident-fields-section">
                                   <p>First Name</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.complainant.fname} value={toUpdate.complainant.fname} name="complainant.fname" id="complainant.fname" onChange={handleFormChange} />
+                                  <input type="text" className="edit-incident-input-field" disabled placeholder= {reportData.complainant.fname} value={toUpdate.complainant.fname} name="complainant.fname" id="complainant.fname" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
@@ -635,7 +607,7 @@ const confirmSubmit = async () => {
                                   <select   className="edit-incident-input-field"    
                                     value={toUpdate.complainant.civilStatus || reportData.complainant.civilStatus || ""} // Show db value or user-updated value
                                     name="complainant.civilStatus"
-                                    id="complainant.civilStatus"
+                                    id="complainant.civilStatus" disabled
                                     onChange={handleFormChange}
                                     required>
                                     <option value="" disabled>Choose A Civil Status</option>
@@ -651,7 +623,7 @@ const confirmSubmit = async () => {
                               <div className="edit-incident-content-right-side">
                                 <div className="edit-incident-fields-section">
                                   <p>Age</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.complainant.age} value={toUpdate.complainant.age} name="complainant.age" id="complainant.age" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.complainant.age} value={toUpdate.complainant.age} name="complainant.age" id="complainant.age" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
@@ -659,7 +631,7 @@ const confirmSubmit = async () => {
                                   <select 
                                     className="edit-incident-input-field"                     
                                     name="complainant.sex" 
-                                    id="complainant.sex"
+                                    id="complainant.sex" disabled
                                     value={toUpdate.complainant.sex || reportData.complainant.sex || ""} // Show db value or user-updated value
                                     onChange={handleFormChange}
                                     >
@@ -671,7 +643,7 @@ const confirmSubmit = async () => {
 
                                 <div className="edit-incident-fields-section">
                                   <p>Address</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.complainant.address} value={toUpdate.complainant.address} name="complainant.address" id="complainant.address" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.complainant.address} value={toUpdate.complainant.address} name="complainant.address" id="complainant.address" onChange={handleFormChange} />
                                 </div>
                               </div>
                             </div>
@@ -679,7 +651,7 @@ const confirmSubmit = async () => {
                             <div className="bottom-middle-section">
                               <div className="bottom-middle-incidentfields">
                                 <p>Contact Number</p>
-                                <input type="text" className="edit-incident-input-field" placeholder={reportData.complainant.contact} value={toUpdate.complainant.contact} name="complainant.contact" id="complainant.contact" onChange={handleFormChange} />
+                                <input type="text" disabled className="edit-incident-input-field" placeholder={reportData.complainant.contact} value={toUpdate.complainant.contact} name="complainant.contact" id="complainant.contact" onChange={handleFormChange} />
                               </div>
                             </div>
                           </div>
@@ -693,19 +665,19 @@ const confirmSubmit = async () => {
                               <div className="edit-incident-content-left-side">
                                 <div className="edit-incident-fields-section">
                                   <p>Last Name</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.respondent.lname} value={toUpdate.respondent.lname} name="respondent.lname" id="respondent.lname" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.respondent.lname} value={toUpdate.respondent.lname} name="respondent.lname" id="respondent.lname" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
                                   <p>First Name</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.respondent.fname} value={toUpdate.respondent.fname} name="respondent.fname" id="respondent.fname" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.respondent.fname} value={toUpdate.respondent.fname} name="respondent.fname" id="respondent.fname" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
                                   <p>Civil Status</p>
                                   <select   className="edit-incident-input-field"    
                                     value={toUpdate.respondent.civilStatus || reportData.respondent.civilStatus || ""} // Show db value or user-updated value
-                                    name="respondent.civilStatus"
+                                    name="respondent.civilStatus" disabled
                                     id="respondent.civilStatus"
                                     onChange={handleFormChange}
                                     required>
@@ -722,7 +694,7 @@ const confirmSubmit = async () => {
                               <div className="edit-incident-content-right-side">
                                 <div className="edit-incident-fields-section">
                                   <p>Age</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.respondent.age} value={toUpdate.respondent.age} name="respondent.age" id="respondent.age" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.respondent.age} value={toUpdate.respondent.age} name="respondent.age" id="respondent.age" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
@@ -730,7 +702,7 @@ const confirmSubmit = async () => {
                                   <select 
                                     className="edit-incident-input-field"                     
                                     name="respondent.sex" 
-                                    id="respondent.sex"
+                                    id="respondent.sex" disabled
                                     value={toUpdate.respondent.sex || reportData.respondent.sex || ""} // Show db value or user-updated value
                                     onChange={handleFormChange}
                                     >
@@ -742,7 +714,7 @@ const confirmSubmit = async () => {
 
                                 <div className="edit-incident-fields-section">
                                   <p>Address</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.respondent.address} value={toUpdate.respondent.address} name="respondent.address" id="respondent.address" onChange={handleFormChange} />
+                                  <input type="text"  disabled className="edit-incident-input-field" placeholder= {reportData.respondent.address} value={toUpdate.respondent.address} name="respondent.address" id="respondent.address" onChange={handleFormChange} />
                                 </div>
                               </div>
                             </div>
@@ -750,7 +722,7 @@ const confirmSubmit = async () => {
                             <div className="bottom-middle-section">
                               <div className="bottom-middle-incidentfields">
                                 <p>Contact Number</p>
-                                <input type="text" className="edit-incident-input-field" placeholder={reportData.respondent.contact} value={toUpdate.respondent.contact} name="respondent.contact" id="respondent.contact" onChange={handleFormChange} />
+                                <input type="text" disabled className="edit-incident-input-field" placeholder={reportData.respondent.contact} value={toUpdate.respondent.contact} name="respondent.contact" id="respondent.contact" onChange={handleFormChange} />
                               </div>
                             </div>
                           </div>
@@ -790,8 +762,20 @@ const confirmSubmit = async () => {
                                         value={toUpdate.nosofMaleChildren || reportData.nosofMaleChildren}
                                         onChange={handleFormChange}
                                         name="nosofMaleChildren"
-                                        required 
+                                        disabled
                                       />   
+                                    </div>
+                                  </>
+                                )}
+                                {/* I will be reusint the classname for recommendedEvent*/}
+                                { reportData?.typeOfIncident === "Minor" && (
+                                  <>
+                                    <div className="edit-incident-content-middle-section">
+                                      <div className="edit-incident-fields-section">
+                                        <p>Recommended Event To Join By Desk Officer</p>
+                                        <input type="text" className="edit-incident-input-field" 
+                                        value={`${reportData.recommendedEvent}`} name="recommendedEvent" id="recommendedEvent" disabled/>
+                                      </div>
                                     </div>
                                   </>
                                 )}
@@ -801,7 +785,7 @@ const confirmSubmit = async () => {
                                   <p>Location</p>
                                   <input type="text" className="edit-incident-input-field" 
                                     placeholder={reportData.location} 
-                                    value={toUpdate.location}
+                                    value={`${toUpdate.location} - ${reportData.areaOfIncident}`}
                                     name="location"
                                     id="location"
                                     onChange={handleFormChange} disabled
@@ -818,19 +802,28 @@ const confirmSubmit = async () => {
                                         value={toUpdate.nosofFemaleChildren||reportData.nosofFemaleChildren}
                                         name="nosofFemaleChildren"
                                         onChange={handleFormChange}
-                                        required 
+                                        disabled
                                       />   
                                     </div>
                                   </>
                                 )}
+                                { reportData?.typeOfIncident === "Minor" && (
+                                    <div className="edit-incident-fields-section">
+                                      <p>Date & Time Filed</p>
+                                      <input type="text" className="edit-incident-input-field" placeholder={`${reportData.dateFiled} ${reportData.timeFiled}`} disabled/>
+                                    </div>
+                                )}
+                               
                               </div>
                             </div>
-
+                            
                             <div className="bottom-middle-section">
-                              <div className="bottom-middle-incidentfields">
-                                <p>Date & Time Filed</p>
-                                <input type="text" className="edit-incident-input-field" placeholder={`${reportData.dateFiled} ${reportData.timeFiled}`} disabled/>
-                              </div>
+                              {reportData?.typeOfIncident === "Major" && (
+                                 <div className="bottom-middle-incidentfields">
+                                  <p>Date & Time Filed</p>
+                                  <input type="text" className="edit-incident-input-field" placeholder={`${reportData.dateFiled} ${reportData.timeFiled}`} disabled/>
+                                </div>
+                              )}
                             </div>
 
                             <div className="edit-incident-content-bottomsection">

@@ -82,6 +82,7 @@ export default function AddIncident() {
     nosofFemaleChildren: "",
     file: null,
     typeOfIncident: "",
+    recommendedEvent: "",
   });
   const [deskStaff, setdeskStaff] = useState<any>({
     fname: "",
@@ -315,6 +316,9 @@ export default function AddIncident() {
             hearing:0,
             generatedHearingSummons:0,
             createdAt: new Date(),
+            ...(reportInfo.typeOfIncident === "Minor" && {
+              recommendedEvent: reportInfo.recommendedEvent,
+            }),
             ...(departmentId === "GAD" && { 
               nosofMaleChildren: reportInfo.nosofMaleChildren,
               nosofFemaleChildren: reportInfo.nosofFemaleChildren,
@@ -1155,6 +1159,37 @@ const handleSubmit = (event: React.FormEvent) => {
                         </select>
                   </div>
 
+                  {reportInfo.typeOfIncident === "Minor" && (
+                    <>
+                      <div className="fields-section-add">
+                        <p>Recommended To Join:<span className="required">*</span></p>
+                        <select 
+                          className="add-incident-input-field" 
+                          required
+                          id="recommendedEvent" name="recommendedEvent" 
+                          value={reportInfo.recommendedEvent}
+                          onChange={handleFormChange}
+                          >
+                            {/* the options are hard coded for now but will be revised when the program.s and event are implemented.
+                            Will be replaced with a dynamic list of events/programs from the database Not sure if the list will be based on the
+                            area of incident. or all events will be available to all areas.
+                            */}
+                            <option value="" disabled>Choose an Event/Program To Recommend</option>
+                            <option value="Livelihood Training Program">Livelihood Training Program</option>
+                            <option value="Parenting Seminar">Parenting Seminar</option>
+                            <option value="Community Clean-Up Drive">Community Clean-Up Drive</option>
+                            <option value="Drug Awareness Seminar">Drug Awareness Seminar</option>
+                            <option value="Youth Leadership Workshop">Youth Leadership Workshop</option>
+                            <option value="Barangay Sports Program">Barangay Sports Program</option>
+                            <option value="Health and Wellness Camp">Health and Wellness Camp</option>
+                            <option value="Solo Parent Support Group">Solo Parent Support Group</option>
+                            <option value="GAD (Gender and Development) Seminar">GAD (Gender and Development) Seminar</option>
+                            <option value="Barangay Livelihood Assistance Orientation">Barangay Livelihood Assistance Orientation</option>
+                          </select>
+                      </div>
+                    </>
+                  )}
+
                    <div className="fields-section-add">
                         <p>Time Filed<span className="required">*</span></p>
                         <input type="time" className="add-incident-input-field" id="timeFiled" name="timeFiled" 
@@ -1252,30 +1287,28 @@ const handleSubmit = (event: React.FormEvent) => {
 
 
         {departmentId === "GAD" && (
-                  <div className="add-incident-GAD-section">
-            
-                                <div className="fields-section-add">
-                                  <p>Nos of Male Children Victim/s<span className="required">*</span></p>
-                                  <input type="number" 
-                                  className="add-incident-input-field"
-                                  min="0"
-                                  value={reportInfo.nosofMaleChildren}
-                                  name="nosofMaleChildren"
-                                  onChange={handleFormChange}
-                                  required />    
-                                </div>
-
-                                <div className="fields-section-add">
-                                  <p>Nos of Female Children Victim/s<span className="required">*</span></p>
-                                  <input type="number"
-                                    className="add-incident-input-field"
-                                    min="0"
-                                    value={reportInfo.nosofFemaleChildren}
-                                    name="nosofFemaleChildren"  
-                                    onChange={handleFormChange}
-                                    required />    
-                                </div>
-                  </div>
+          <div className="add-incident-GAD-section">
+            <div className="fields-section-add">
+              <p>Nos of Male Children Victim/s<span className="required">*</span></p>
+              <input type="number" 
+              className="add-incident-input-field"
+              min="0"
+              value={reportInfo.nosofMaleChildren}
+              name="nosofMaleChildren"
+              onChange={handleFormChange}
+              required />    
+            </div>
+            <div className="fields-section-add">
+              <p>Nos of Female Children Victim/s<span className="required">*</span></p>
+              <input type="number"
+                className="add-incident-input-field"
+                min="0"
+                value={reportInfo.nosofFemaleChildren}
+                name="nosofFemaleChildren"  
+                onChange={handleFormChange}
+                required />    
+            </div>
+          </div>
         )}
 
 
