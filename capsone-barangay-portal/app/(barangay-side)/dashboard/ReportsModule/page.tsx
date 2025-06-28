@@ -21,6 +21,10 @@ const ReportsPage = () => {
   // rbac
   const { data: session } = useSession();
 
+  // file upload rbac
+  const canSelectFolder = ["Secretary", "Assistant Secretary", "Punong Barangay"].includes(session?.user?.position || "");
+  const canUpload = session?.user?.position === "Assistant Secretary";
+
 
   // for residents
   const [loadingKasambahay, setLoadingKasambahay] = useState(false); 
@@ -44,7 +48,6 @@ const ReportsPage = () => {
   
 
 
-  const [files, setFiles] = useState<FileData[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
   const [selectedModule, setSelectedModule] = useState<string>("");
   const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(null);
@@ -61,7 +64,7 @@ const ReportsPage = () => {
   const [showVAWCModal, setShowVAWCModal] = useState(false);
 
 
-        // for services reports
+  // for services reports
 
   const [loadingBarangayCertPending, setLoadingBarangayCertPending] = useState(false);    
   const [loadingBarangayCertCompleted, setLoadingBarangayCertCompleted] = useState(false);    
@@ -81,117 +84,108 @@ const ReportsPage = () => {
 
 
 
-  /*
-Downloadable Forms
-  */
-
-const [showUploadFilePopup, setShowUploadFilePopup] = useState(false);
- const uploadFilePopUpRef = useRef<HTMLDivElement>(null);
- const [showPopup, setShowPopup] = useState(false);
- const [showDeletePopup, setShowDeletePopup] = useState(false); 
- const [fileToDelete, setFileToDelete] = useState<string | null>(null);
- const [isLoading, setIsLoading] = useState<{ status: boolean; message: string }>({
-  status: false,
-  message: "",
-});
-
-
-  const fetchDownloadLinks = async () => {
-    try {
-      const folderRef = ref(storage, "ReportsModule/");
-      const fileList = await listAll(folderRef);
   
-      const urls = await Promise.all(
-        fileList.items.map(async (item) => {
-          const url = await getDownloadURL(item);
-          return { name: item.name, url };
-        })
-      );
+// Downloadable Forms
+
+  const [files, setFiles] = useState<FileData[]>([]);
+  const [showUploadFilePopup, setShowUploadFilePopup] = useState(false);
+  const uploadFilePopUpRef = useRef<HTMLDivElement>(null);
+  const [showPopup, setShowPopup] = useState(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<{ status: boolean; message: string }>({
+    status: false,
+    message: "",
+  });
+
+const [selectedFolder, setSelectedFolder] = useState<string>("ReportsModule/");
+const [viewingFolder, setViewingFolder] = useState<string>("ReportsModule/");
+
+
+const fetchDownloadLinks = async () => {
+  try {
+    const folderRef = ref(storage, viewingFolder);
+    const fileList = await listAll(folderRef);
+    const urls = await Promise.all(
+      fileList.items.map(async (item) => {
+        const url = await getDownloadURL(item);
+        return { name: item.name, url };
+      })
+    );
+    setFiles(urls);
+  } catch (error) {
+    console.error("Error fetching file URLs:", error);
+  }
+};
+
   
-      setFiles(urls);
-    } catch (error) {
-      console.error("Error fetching file URLs:", error);
-    }
-  };
-  
 
-  useEffect(() => {
-    fetchDownloadLinks();
-  }, []);
+useEffect(() => {
+  fetchDownloadLinks();
+}, [viewingFolder]);
 
 
-  //1
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setSelectedUploadFile(event.target.files[0]);
-    }
-  };
+const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  if (event.target.files && event.target.files[0]) {
+    setSelectedUploadFile(event.target.files[0]);
+  }
+};
 
-   // Function to remove the selected file
-   const onDeleteFile = () => {
-    setSelectedUploadFile(null);
+const onDeleteFile = () => {
+  setSelectedUploadFile(null);
 };
 
 
-//2 (NEW)
 const uploadFile = async () => {
-
- setIsLoading({ status: true, message: "Uploading File, please wait..." });
-
   if (!selectedUploadFile) return;
+  if (!selectedFolder) {
+    setPopupMessage("Please select a folder.");
+    setShowPopup(true);
+    return;
+  }
 
-   const fileRef = ref(storage, `ReportsModule/${selectedUploadFile.name}`);
+  setIsLoading({ status: true, message: "Uploading File, please wait..." });
+
   try {
+    const fileRef = ref(storage, `${selectedFolder}${selectedUploadFile.name}`);
     await uploadBytes(fileRef, selectedUploadFile);
     setPopupMessage("File Uploaded Successfully!");
     setSelectedUploadFile(null);
-    fetchDownloadLinks(); 
+    fetchDownloadLinks();
   } catch (error) {
     console.error("Upload failed:", error);
     setPopupMessage("File upload failed. Please try again.");
-  }finally {
+  } finally {
     setShowUploadFilePopup(false);
-
-    // End loading after 2 seconds
     setTimeout(() => {
       setIsLoading({ status: false, message: "" });
-
-      // Show popup after loading ends
       setShowPopup(true);
-
-      // Hide popup after 2 more seconds
-      setTimeout(() => {
-        setShowPopup(false);
-      }, 2000);
+      setTimeout(() => setShowPopup(false), 2000);
     }, 2000);
   }
-
-  
 };
 
 
- const handleUploadClick = () => {
+const handleUploadClick = () => {
   setShowUploadFilePopup(true);
- };
+};
 
 const handleDeleteClick = (fileName: string) => {
   setFileToDelete(fileName);
   setShowDeletePopup(true);
-
-    setTimeout(() => {
+  setTimeout(() => {
     setShowPopup(false);
   }, 3000);
-  
 };
 
 
 const confirmDelete = async () => {
   if (!fileToDelete) return;
 
-  const fileRef = ref(storage, `ReportsModule/${fileToDelete}`);
+  const fileRef = ref(storage, `${viewingFolder}${fileToDelete}`);
   try {
     await deleteObject(fileRef);
-    setPopupMessage("File deleted successfuly!");
+    setPopupMessage("File deleted successfully!");
     setFiles((prev) => prev.filter((file) => file.name !== fileToDelete));
   } catch (error) {
     console.error("Delete failed:", error);
@@ -201,6 +195,163 @@ const confirmDelete = async () => {
   setShowPopup(true);
   setShowDeletePopup(false);
   setFileToDelete(null);
+};
+
+useEffect(() => {
+  const handleClickUploadFileOutside = (event: MouseEvent) => {
+    if (uploadFilePopUpRef.current && !uploadFilePopUpRef.current.contains(event.target as Node)) {
+      setShowUploadFilePopup(false);
+    }
+  };
+  document.addEventListener("mousedown", handleClickUploadFileOutside);
+  return () => {
+    document.removeEventListener("mousedown", handleClickUploadFileOutside);
+  };
+}, []);
+
+  
+  
+const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const selectedName = e.target.value;
+  const file = files.find((f) => f.name.replace(".docx", "") === selectedName) || null;
+  setSelectedFile(file);
+};
+
+const handleModuleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  setSelectedModule(e.target.value);
+};
+
+
+const handleDownload = (file: FileData) => {
+  setPopupMessage(`${file.name.replace(".docx", "")} downloaded!`);
+  setShowSuccessPopup(true);
+  setTimeout(() => {
+    setShowSuccessPopup(false);
+  }, 3000);
+};
+
+const router = useRouter();
+const hasInitialized = useRef(false);
+const [isGenerating, setIsGenerating] = useState(false);
+const [generatingMessage, setGeneratingMessage] = useState("");
+const [showSuccessGenerateReportPopup, setShowSuccessGenerateReportPopup] = useState(false);
+const [popupSuccessGenerateReportMessage, setPopupSuccessGenerateReportMessage] = useState("");
+const [showErrorGenerateReportPopup, setShowErrorGenerateReportPopup] = useState(false);
+const [popupErrorGenerateReportMessage, setPopupErrorGenerateReportMessage] = useState("");
+const [activeSection, setActiveSection] = useState("generate");
+const [currentPage, setCurrentPage] = useState(1);
+const moduleTotalPages: { [key: string]: number } = {
+  "Resident Module": 2,
+  "Incident Module": 1,
+  "Services Module": 1,
+  "Programs Module": 1,
+};
+
+const totalPages = selectedModule ? moduleTotalPages[selectedModule] || 1 : 1;
+
+useEffect(() => {
+  setCurrentPage(1);
+}, [selectedModule]);
+
+
+const handleBack = () => {
+  router.back();
+};
+
+
+useEffect(() => {
+  // Wait until session.user is available
+  if (!session?.user || hasInitialized.current) return;
+
+  hasInitialized.current = true;
+
+  if (session.user.role === "Barangay Official") {
+    const position = session.user.position;
+
+    if (["Secretary", "Assistant Secretary", "Punong Barangay"].includes(position)) {
+      setSelectedModule("Resident Module");
+    } else if (position === "LF Staff") {
+      setSelectedModule("Incident Module");
+    } else if (position === "Admin Staff") {
+      setSelectedModule("Services Module");
+    }
+  }
+}, [session?.user]);
+
+
+
+const ITEMS_PER_PAGE = 6;
+const [currentPageForms, setCurrentPageForms] = useState(0);
+const startIndex = currentPageForms * ITEMS_PER_PAGE;
+const paginatedFiles = files.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+
+const handleNextPage = () => {
+  if ((currentPageForms + 1) * ITEMS_PER_PAGE < files.length) {
+    setCurrentPageForms((prev) => prev + 1);
+  }
+};
+
+
+const handleBackPage = () => {
+  if (currentPageForms > 0) {
+    setCurrentPageForms((prev) => prev - 1);
+  }
+};
+
+
+useEffect(() => {
+
+  const handleClickUploadFileOutside = (event: MouseEvent) => {
+
+    if(
+       uploadFilePopUpRef.current &&
+       !uploadFilePopUpRef.current.contains(event.target as Node)
+    ) {
+    setShowUploadFilePopup(false);        
+    }
+
+  };
+
+   document.addEventListener("mousedown", handleClickUploadFileOutside);
+  return () => {
+    document.removeEventListener("mousedown", handleClickUploadFileOutside);
+  };
+  
+}, []);
+
+
+
+
+const [activeSectionForms, setActiveSectionForms] = useState("resident");
+
+
+
+const uploadForms = async (url: string): Promise<void> => {
+  setIsLoading({ status: true, message: "Downloading Form, please wait..." });
+
+  try {
+    window.location.href = url;
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    setPopupMessage("File download successful!");
+  } catch (error) {
+    console.error("Error in uploadForms:", error);
+  } finally {
+    // End loading after 2 seconds
+    setTimeout(() => {
+      setIsLoading({ status: false, message: "" });
+
+      // Show popup after loading is done
+      setShowPopup(true);
+
+      // Hide popup after 2 more seconds
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 2000);
+    }, 2000);
+  }
 };
 
   // kasambahay report
@@ -4878,161 +5029,11 @@ const handleGenerateIncidentSummaryPDF = async (
 
     }
   };
-  
-  
 
-
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedName = e.target.value;
-    const file = files.find((f) => f.name.replace(".docx", "") === selectedName) || null;
-    setSelectedFile(file);
-  };
-
-  const handleModuleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedModule(e.target.value);
-  };
-
-
-  const handleDownload = (file: FileData) => {
-    setPopupMessage(`${file.name.replace(".docx", "")} downloaded!`);
-    setShowSuccessPopup(true);
-    setTimeout(() => {
-      setShowSuccessPopup(false);
-    }, 3000);
-  };
-
-  const router = useRouter();
-  const hasInitialized = useRef(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatingMessage, setGeneratingMessage] = useState("");
-  const [showSuccessGenerateReportPopup, setShowSuccessGenerateReportPopup] = useState(false);
-  const [popupSuccessGenerateReportMessage, setPopupSuccessGenerateReportMessage] = useState("");
-  const [showErrorGenerateReportPopup, setShowErrorGenerateReportPopup] = useState(false);
-  const [popupErrorGenerateReportMessage, setPopupErrorGenerateReportMessage] = useState("");
-  const [activeSection, setActiveSection] = useState("generate");
-  const [currentPage, setCurrentPage] = useState(1);
-  const moduleTotalPages: { [key: string]: number } = {
-    "Resident Module": 2,
-    "Incident Module": 1,
-    "Services Module": 1,
-    "Programs Module": 1,
-  };
-  
-  const totalPages = selectedModule ? moduleTotalPages[selectedModule] || 1 : 1;
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedModule]);
-  
-
-  const handleBack = () => {
-    router.back();
-  };
-
-
-  useEffect(() => {
-    // Wait until session.user is available
-    if (!session?.user || hasInitialized.current) return;
-  
-    hasInitialized.current = true;
-  
-    if (session.user.role === "Barangay Official") {
-      const position = session.user.position;
-  
-      if (["Secretary", "Assistant Secretary", "Punong Barangay"].includes(position)) {
-        setSelectedModule("Resident Module");
-      } else if (position === "LF Staff") {
-        setSelectedModule("Incident Module");
-      } else if (position === "Admin Staff") {
-        setSelectedModule("Services Module");
-      }
-    }
-  }, [session?.user]);
-
-
-
-
-
-const ITEMS_PER_PAGE = 6;
-const [currentPageForms, setCurrentPageForms] = useState(0);
-
-const startIndex = currentPageForms * ITEMS_PER_PAGE;
-const paginatedFiles = files.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-
-const handleNextPage = () => {
-  if ((currentPageForms + 1) * ITEMS_PER_PAGE < files.length) {
-    setCurrentPageForms((prev) => prev + 1);
-  }
-};
-
-
- const handleBackPage = () => {
-  if (currentPageForms > 0) {
-    setCurrentPageForms((prev) => prev - 1);
-  }
-};
-
-
-  useEffect(() => {
-
-    const handleClickUploadFileOutside = (event: MouseEvent) => {
-
-      if(
-         uploadFilePopUpRef.current &&
-         !uploadFilePopUpRef.current.contains(event.target as Node)
-      ) {
-      setShowUploadFilePopup(false);        
-      }
-
-    };
-
-     document.addEventListener("mousedown", handleClickUploadFileOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickUploadFileOutside);
-    };
-    
-  }, []);
-
-  
-
-
-  const [activeSectionForms, setActiveSectionForms] = useState("resident");
-
-
-  
-
-  const uploadForms = async (url: string): Promise<void> => {
-    setIsLoading({ status: true, message: "Downloading Form, please wait..." });
-  
-    try {
-      window.location.href = url;
-  
-      await new Promise(resolve => setTimeout(resolve, 1000));
-  
-      setPopupMessage("File download successful!");
-    } catch (error) {
-      console.error("Error in uploadForms:", error);
-    } finally {
-      // End loading after 2 seconds
-      setTimeout(() => {
-        setIsLoading({ status: false, message: "" });
-  
-        // Show popup after loading is done
-        setShowPopup(true);
-  
-        // Hide popup after 2 more seconds
-        setTimeout(() => {
-          setShowPopup(false);
-        }, 2000);
-      }, 2000);
-    }
-  };
 
   return (
     <div className="generatereport-main-container">
 
-      {/* NEW*/}
       <div className="generatereport-redirectionpage-section">
         <button 
           className={` ${activeSection === "generate" ? "generate-reports-download-forms-selected" : "generatereport-redirection-buttons"}`}
@@ -5044,16 +5045,31 @@ const handleNextPage = () => {
           <h1>Generate Report</h1>
         </button>
 
-        <button 
-          className={` ${activeSection === "download" ? "generate-reports-download-forms-selected " : "generatereport-redirection-buttons"}`}
-          onClick={() => setActiveSection("download")}
-        >
-          <div className="generatereport-redirection-icons-section">
-            <img src="/images/form.png" alt="user info" className="redirection-icons-generatereport"/> 
-          </div>
-          <h1>Download Form</h1>
-        </button>
+          <button 
+            className={` ${activeSection === "download" ? "generate-reports-download-forms-selected " : "generatereport-redirection-buttons"}`}
+            onClick={() => {
+              setActiveSection("download");
 
+              // ⬇️ set the folder automatically based on their position
+              if (session?.user?.position === "Secretary" ||
+                  session?.user?.position === "Assistant Secretary" ||
+                  session?.user?.position === "Punong Barangay") {
+                setViewingFolder("ReportsModule/");
+              } else if (session?.user?.position === "Admin Staff") {
+                setViewingFolder("ReportsModule/AdminStaff/");
+              } else if (session?.user?.position === "LF Staff") {
+                setViewingFolder("ReportsModule/LFStaff/");
+              } else {
+                // fallback
+                setViewingFolder("ReportsModule/");
+              }
+            }}
+          >
+            <div className="generatereport-redirection-icons-section">
+              <img src="/images/form.png" alt="user info" className="redirection-icons-generatereport"/> 
+            </div>
+            <h1>Download Form</h1>
+          </button>
       </div>
 
 
@@ -5557,6 +5573,10 @@ const handleNextPage = () => {
       </>
     )}
 
+
+
+    {/* downloadable forms area  */}
+
     {activeSection === "download" && (
       <>
         <div className="generatereport-main-content">
@@ -5576,32 +5596,71 @@ const handleNextPage = () => {
 
           <div className="downloadble-report-header-body">
 
-                   <div className="downloadble-report-top-section">
+            <div className="downloadble-report-info-toggle-wrapper">
+              {(session?.user?.position === "Secretary" ||
+                session?.user?.position === "Assistant Secretary" ||
+                session?.user?.position === "Punong Barangay") && (
+                <>
+                  <button
+                    type="button"
+                    className={`info-toggle-btn ${viewingFolder === "ReportsModule/" ? "active" : ""}`}
+                    onClick={() => setViewingFolder("ReportsModule/")}
+                  >
+                    Reports Module Files
+                  </button>
+                  <button
+                    type="button"
+                    className={`info-toggle-btn ${viewingFolder === "ReportsModule/AdminStaff/" ? "active" : ""}`}
+                    onClick={() => setViewingFolder("ReportsModule/AdminStaff/")}
+                  >
+                    Admin Files
+                  </button>
+                  <button
+                    type="button"
+                    className={`info-toggle-btn ${viewingFolder === "ReportsModule/LFStaff/" ? "active" : ""}`}
+                    onClick={() => setViewingFolder("ReportsModule/LFStaff/")}
+                  >
+                    LF Files
+                  </button>
+                </>
+              )}
 
-                {/*
-                  TO DO JERICHO: 
-                  add logic na yung lalabas lang is yung modules na pwede sakanila
+              {session?.user?.position === "Admin Staff" && (
+                <button
+                  type="button"
+                  className={`info-toggle-btn ${viewingFolder === "ReportsModule/AdminStaff/" ? "active" : ""}`}
+                  onClick={() => setViewingFolder("ReportsModule/AdminStaff/")}
+                >
+                  Admin Staff
+                </button>
+              )}
 
-                  sample: If Lupon Staff , incident module lang lalabas fixed
-                          If Punong Barangay , Pwede siya mag generate report sa lahat
-                          Etc...
-                */}
+              {session?.user?.position === "LF Staff" && (
+                <button
+                  type="button"
+                  className={`info-toggle-btn ${viewingFolder === "ReportsModule/LFStaff/" ? "active" : ""}`}
+                  onClick={() => setViewingFolder("ReportsModule/LFStaff/")}
+                >
+                  LF Staff
+                </button>
+              )}
 
-              <div className="downloadble-report-info-toggle-wrapper">
-                 {["resident" ].map((section) => (
-                    <button
-                      key={section}
-                      type="button"
-                      className={`info-toggle-btn ${activeSectionForms === section ? "active" : ""}`}
-                      onClick={() => setActiveSectionForms(section)}
-                    >
-                      {section === "resident" && "Resident Module"}
-                     
-                    </button>
-                  ))}
-
-              </div>
-
+              {/* Fallback for everyone else — only see ReportsModule */}
+              {!(
+                session?.user?.position === "Secretary" ||
+                session?.user?.position === "Assistant Secretary" ||
+                session?.user?.position === "Punong Barangay" ||
+                session?.user?.position === "Admin Staff" ||
+                session?.user?.position === "LF Staff"
+              ) && (
+                <button
+                  type="button"
+                  className={`info-toggle-btn ${viewingFolder === "ReportsModule/" ? "active" : ""}`}
+                  onClick={() => setViewingFolder("ReportsModule/")}
+                >
+                  Reports Module
+                </button>
+              )}
             </div>
 
 
@@ -5714,136 +5773,102 @@ const handleNextPage = () => {
               )}
 
 
-          
+    {/*  ADDED: Upload Modal (only if Assistant Secretary) */}
+    {showUploadFilePopup && canUpload && (
+      <div className="fileupload-popup-overlay">
+        <div className="fileupload-popup" ref={uploadFilePopUpRef}>
+          <div className="file-upload-popup-section-1">
+            <h1> Upload File</h1>
+            <button
+              onClick={uploadFile}
+              disabled={!selectedUploadFile}
+              className="upload-button-section-1"
+            >
+              Upload
+            </button>
+          </div>
 
+          <div className="file-upload-popup-section-2">
+            <div className="upload-container-downloadable-forms">
+              <input
+                type="file"
+                onChange={handleFileUpload}
+                id="file-upload"
+                style={{ display: "none" }}
+              />
+              <label htmlFor="file-upload" className="upload-link">
+                Choose File
+              </label>
+              {selectedUploadFile && (
+                <div className="file-name-image-display">
+                  <ul className="file-list">
+                    <li className="file-name-image-display-indiv">
+                      <div className="file-item">
+                        <span className="file-name">{selectedUploadFile.name}</span>
+                        <div className="delete-container">
+                          <button
+                            type="button"
+                            onClick={onDeleteFile}
+                            className="delete-button-upload"
+                          >
+                            <img
+                              src="/Images/delete.png"
+                              alt="Delete"
+                              className="delete-icon-upload"
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
 
-    
-      {showUploadFilePopup && (
-        <div className="fileupload-popup-overlay">
-          <div className="fileupload-popup" ref = {uploadFilePopUpRef}>
-
-              <div className="file-upload-popup-section-1">
-
-                <h1> Upload File</h1>
-      
-                    <button 
-                    onClick={uploadFile} 
-                    disabled={!selectedUploadFile} 
-                    className="upload-button-section-1"
-                    >
-                    Upload
-                </button>
+          <div className="file-upload-section-3">
+            <div className="section-3-main-content">
+              <div className="main-content-section-1">
+                <h1>Select Folder</h1>
               </div>
-
-              <div className="file-upload-popup-section-2">
-
-                  <div className="upload-container-downloadable-forms">
-                      <input 
-                          type="file" 
-                          onChange={handleFileUpload} 
-                          id="file-upload"
-                          style={{ display: 'none' }} 
-                      />
-                      <label 
-                          htmlFor="file-upload" 
-                          className="upload-link"
-                      >
-                          Choose File
-                      </label>
-
-                      {selectedUploadFile && (
-                        <div className="file-name-image-display">
-                          <ul className="file-list">
-                            <li className="file-name-image-display-indiv">
-                              <div className="file-item">
-                                <span className="file-name">{selectedUploadFile.name}</span>
-                                <div className="delete-container">
-                                  <button
-                                    type="button"
-                                    onClick={onDeleteFile}
-                                    className="delete-button-upload"
-                                  >
-                                    <img
-                                      src="/Images/delete.png"
-                                      alt="Delete"
-                                      className="delete-icon-upload"
-                                    />
-                                  </button>
-                                </div>
-                              </div>
-                            </li>
-                          </ul>
-                        </div>
-                      )}
-
-                  </div>
-
-
-              </div>
-
-              <div className="file-upload-section-3">
-
-                <div className="section-3-main-content">
-                      
-                    <div className="main-content-section-1">
-                        <h1>Select Module</h1>
-                    </div>
-                     
-            
-                    <div className="section-3-fields-section">
-                        
-                        <div className="module-checkbox-container">
-                          <label className="module-checkbox-label">
-                              <input type="checkbox" />
-                              Resident Module
-                          </label>
-                        </div>
-
-                        <div className="module-checkbox-container">
-                          <label className="module-checkbox-label">
-                              <input type="checkbox" />
-                              Incident Module
-                          </label>
-                        </div>
-
-                         <div className="module-checkbox-container">
-                          <label className="module-checkbox-label">
-                              <input type="checkbox" />
-                              Services Module
-                          </label>
-                        </div>
-                       
-                    </div>
-
-                     <div className="section-3-fields-section">
-                        
-                        <div className="module-checkbox-container">
-                          <label className="module-checkbox-label">
-                              <input type="checkbox" />
-                           Reports Module
-                          </label>
-                        </div>
-
-                        <div className="module-checkbox-container">
-                          <label className="module-checkbox-label">
-                              <input type="checkbox" />
-                               Officials Module
-                          </label>
-                        </div>
-
-                         <div className="module-checkbox-container">
-                          <label className="module-checkbox-label">
-                              <input type="checkbox" />
-                              Announcement
-                          </label>
-                        </div>
-                       
-                    </div>
+              <div className="section-3-fields-section">
+                <div className="module-checkbox-container">
+                  <label className="module-checkbox-label">
+                    <input
+                      type="radio"
+                      name="folder"
+                      onChange={() => setSelectedFolder("ReportsModule/")}
+                    />
+                    Reports Module Folder
+                  </label>
+                </div>
+                <div className="module-checkbox-container">
+                  <label className="module-checkbox-label">
+                    <input
+                      type="radio"
+                      name="folder"
+                      onChange={() => setSelectedFolder("ReportsModule/AdminStaff/")}
+                    />
+                    Admin Files
+                  </label>
+                </div>
+                <div className="module-checkbox-container">
+                  <label className="module-checkbox-label">
+                    <input
+                      type="radio"
+                      name="folder"
+                      onChange={() => setSelectedFolder("ReportsModule/LFStaff/")}
+                    />
+                    LF Files
+                  </label>
                 </div>
               </div>
+            </div>
           </div>
         </div>
-      )}
+      </div>
+    )}
+
 
 
       {/* Success Pop-up */}
