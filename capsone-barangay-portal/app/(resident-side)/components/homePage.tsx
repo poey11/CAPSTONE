@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from 'next/link';
 import { db } from '@/app/db/firebase'  ;
 import {doc, setDoc, getDoc, updateDoc, increment} from "firebase/firestore";
+import { useRouter } from 'next/navigation';
 // @ts-ignore
 import Cookies from 'js-cookie';
 
@@ -144,6 +145,9 @@ useEffect(() => {
 }, []);
 
 
+const router = useRouter();
+
+
 	return (
 		
       
@@ -179,7 +183,7 @@ useEffect(() => {
           <div className="services-content-home">
 
               
-                <div className="services-card">
+              <div className="services-card" onClick={() => router.push('/services')}>
 
                     <div className="services-image">
                         <img src="/Images/document.png" alt="Document Request Icon" className="icon-image" />
@@ -192,7 +196,7 @@ useEffect(() => {
                     </div>
                 </div>
           
-               <div className="services-card">
+               <div className="services-card" onClick={() => router.push('/IncidentReport')}>
 
                   
                     <div className="services-image">
@@ -200,9 +204,9 @@ useEffect(() => {
 
                     </div>
 
-                    <div className="services-description">
+                    <div className="services-description"onClick={() => router.push('/Programs')}>
                         <h3>Incident Reports</h3>
-                <p>Secure barangay clearances, certificates, and other official documents online with ease.</p>
+                  <p>File incident reports online and stay informed on the status of your case with real-time updates.</p>
 
                     </div>
                 </div>
@@ -216,7 +220,7 @@ useEffect(() => {
 
                     <div className="services-description">
                         <h3>Programs</h3>
-                <p>Secure barangay clearances, certificates, and other official documents online with ease.</p>
+                <p>Explore various barangay programs and services designed to support the community, including health drives, livelihood training, and outreach activities.</p>
 
                     </div>
                 </div>

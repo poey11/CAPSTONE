@@ -509,6 +509,7 @@ TRY NEW
 
 
 
+
 .second-section-home-upper,
 .fourth-section-home-upper{
   width: 100%;
@@ -560,6 +561,7 @@ position: relative;
   padding: 1.5rem;
    backdrop-filter: blur(10px);
   transition: transform 0.3s ease;
+  cursor: pointer;
 }
 
 
