@@ -737,14 +737,15 @@ DOWNLOADABLE FORMS
 }
 
 .downloadble-report-info-toggle-wrapper {
-    display: flex;
-  justify-content: center; 
-  gap: 30px;
+  display: flex;
+  justify-content: center; /* horizontally centers */
+  gap: 1.5rem;             /* spacing between buttons */
   margin-bottom: 20px;
-  width: 70%;
+  width: 100%;
   align-items: center;
   border-bottom: 2px solid #e0e0e0;
 }
+
 
 
 
