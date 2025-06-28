@@ -80,10 +80,6 @@ export default function ViewOnlineReports() {
 
   }, []);
 
-  // useEffect(() => {
-  //   listOfStaffs.fi
-
-  // },[listOfStaffs]);
 
   console.log("List of Staffs:", listOfStaffs);
 
@@ -194,7 +190,7 @@ export default function ViewOnlineReports() {
 
 
 
-    const [activeSection, setActiveSection] = useState("complainant");
+  const [activeSection, setActiveSection] = useState("complainant");
 
 
 
@@ -705,7 +701,8 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 
                             </div>
 
-                        
+                        {initialRespondent.respondentName !== "" && (
+                          
                           <div className="online-report-box-container">
                               <div className="box-container-outer-image">
                                 <div className="title-image">
@@ -725,92 +722,97 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
 
                               </div>
                             </div>
+
+                        )}
                             
 
                         </div>
+                        
 
-                        <div className="online-report-section-right-side">
-
-                           <div className="online-report-box-container">
-                              <div className="box-container-outer-image">
-                                <div className="title-image">
-                                    Investigation Photo
-                                </div>
-
-                                <div className="box-container-investigation">
-                                  <div className="file-upload-container-investigation">
-
-                                    {/* Only show upload input if no existing respondent files */}
-                                    {formData.status !== "Acknowledged" && respondent.file.length === 0 && (
-                                      <>
-                                        <label htmlFor="file-upload2" className="upload-link">Click to Upload File</label>
-                                        <input
-                                          id="file-upload2"
-                                          type="file" 
-                                          name="file"
-                                        
-                                          className={`file-upload-input ${invalidFields.includes("file") ? "input-error" : ""}`}
-                                          multiple
-                                          accept=".jpg,.jpeg,.png"
-                                          onChange={handleFileChange}
-                                          disabled={formData.status === "Acknowledged" || user?.id !== respondent.respondentName}
-                                        />
-                                      </>
-                                    )}
-
-                                    <div className="uploadedFiles-container">
-                                      {(files.length > 0 || respondent.file.length > 0) ? (
-                                        <div className="file-name-image-display">
-                                          <ul>
-                                            {/* Existing files */}
-                                            {respondent.file.map((url: string, index: number) => (
-                                              <div className="file-name-image-display-indiv" key={`existing-${index}`}>
-                                                <li>
-                                                  <div className="filename&image-container">
-                                                    <img src={url} alt={`Investigation Photo ${index + 1}`} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
-                                                  </div>
-                                                  <a href={url} target="_blank" rel="noopener noreferrer">View</a>
-                                                </li>
-                                              </div>
-                                            ))}
-
-                                            {/* New files */}
-                                            {files.map((file, index) => (
-                                              <div className="file-name-image-display-indiv" key={`new-${index}`}>
-                                                <li>
-                                                  {file.preview && (
-                                                    <div className="filename&image-container">
-                                                      <img src={file.preview} alt={file.name} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
-                                                    </div>
-                                                  )}
-                                                  {file.name}
-                                                  <button type="button" onClick={() => handleFileDelete(file.name)} className="delete-button">
-                                                    <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                                                  </button>
-                                                </li>
-                                              </div>
-                                            ))}
-                                          </ul>
-                                        </div>
-                                      ) : (
-                                        <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>
-                                          No image available
-                                        </p>
-                                      )}
-                                    </div>
-                                    
+                        {initialRespondent.respondentName !== "" && (
+                          <div className="online-report-section-right-side">
+  
+                             <div className="online-report-box-container">
+                                <div className="box-container-outer-image">
+                                  <div className="title-image">
+                                      Investigation Photo
                                   </div>
+  
+                                  <div className="box-container-investigation">
+                                    <div className="file-upload-container-investigation">
+  
+                                      {/* Only show upload input if no existing respondent files */}
+                                      {formData.status !== "Acknowledged" && respondent.file.length === 0 && (
+                                        <>
+                                          <label htmlFor="file-upload2" className="upload-link">Click to Upload File</label>
+                                          <input
+                                            id="file-upload2"
+                                            type="file" 
+                                            name="file"
+                                          
+                                            className={`file-upload-input ${invalidFields.includes("file") ? "input-error" : ""}`}
+                                            multiple
+                                            accept=".jpg,.jpeg,.png"
+                                            onChange={handleFileChange}
+                                            disabled={formData.status === "Acknowledged" || user?.id !== respondent.respondentName}
+                                          />
+                                        </>
+                                      )}
+  
+                                      <div className="uploadedFiles-container">
+                                        {(files.length > 0 || respondent.file.length > 0) ? (
+                                          <div className="file-name-image-display">
+                                            <ul>
+                                              {/* Existing files */}
+                                              {respondent.file.map((url: string, index: number) => (
+                                                <div className="file-name-image-display-indiv" key={`existing-${index}`}>
+                                                  <li>
+                                                    <div className="filename&image-container">
+                                                      <img src={url} alt={`Investigation Photo ${index + 1}`} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
+                                                    </div>
+                                                    <a href={url} target="_blank" rel="noopener noreferrer">View</a>
+                                                  </li>
+                                                </div>
+                                              ))}
+  
+                                              {/* New files */}
+                                              {files.map((file, index) => (
+                                                <div className="file-name-image-display-indiv" key={`new-${index}`}>
+                                                  <li>
+                                                    {file.preview && (
+                                                      <div className="filename&image-container">
+                                                        <img src={file.preview} alt={file.name} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
+                                                      </div>
+                                                    )}
+                                                    {file.name}
+                                                    <button type="button" onClick={() => handleFileDelete(file.name)} className="delete-button">
+                                                      <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                                    </button>
+                                                  </li>
+                                                </div>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        ) : (
+                                          <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>
+                                            No image available
+                                          </p>
+                                        )}
+                                      </div>
+                                      
+                                    </div>
+                                  </div>
+  
+  
                                 </div>
-
-
+  
+  
                               </div>
+  
+                            
+                          </div>
 
-
-                            </div>
-
-                          
-                        </div>
-                    
+                        )}
                     
 
                       </div>
