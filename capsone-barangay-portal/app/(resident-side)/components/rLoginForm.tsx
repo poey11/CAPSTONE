@@ -170,34 +170,81 @@ const rLoginForm:React.FC = () => {
     return (   
 
         <div className="login-container-resident">
-            {showPopup && (
-                <div className="popup-overlay-login">
-                    <div className="popup-login">
-                    <img src="/Images/successful.png" alt="warning icon" className="successful-icon-popup" />
-                        <h1>Welcome, {firstName} {lastName}!</h1>
-                        <br/>
-                        <p>Redirecting to the Home Page...</p>
-                    </div>
+
+            <div className="login-card-wrapper">
+
+                <div className="login-left-panel">
+                    <h2 className="login-heading">Login</h2>
+                       <form onSubmit={handleLogin}>
+                            <div className="form-group-resident">
+                                <label htmlFor="Email" className="form-label-resident">Email:</label>
+                                <div className="input-icon-wrapper">
+                                    <input 
+                                        onChange={handleChange}
+                                        value={resident.email}
+                                        type="text"  
+                                        id="email"  
+                                        name="email"  
+                                        className="form-input-resident"  
+                                        required  
+                                    />
+                                
+                                    <i className="input-icon" />
+                                </div>
+                            </div>
+
+                            <div className="form-group-resident">
+                               <label htmlFor="password" className="form-label-resident">Password:</label>
+                                <div className="input-icon-wrapper">
+                                     <input 
+                                    onChange={handleChange}
+                                    value={resident.password}
+                                    type={showPassword ? "text" : "password"}
+                                    id="password"  
+                                    name="password"  
+                                    className="form-input-resident" 
+                                    required  
+                                />
+
+                                         <button
+                                                                    type="button"
+                                                                    className="toggle-password-btn"
+                                                                    onClick={() => setShowPassword(!showPassword)}
+                                                                >
+                                                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                                </button>
+                                </div>
+
+                                
+                            </div>
+
+
+                            <div className="section3-resident">
+                                <button type="submit" className="submit-button-resident">Login</button>
+                                </div>
+
+                        <div className="section2-resident">
+                                <span className="section2options-resident" onClick={handleForgotPassword}>Forgot Password?</span>
+                                <span className="section2options-resident" onClick={handleRegister}>Sign Up</span>
+                         </div>
+
+                       </form>
                 </div>
-            )}
-            {showVerifyPopup && (
-                <div className="popup-overlay-login">
-                    <div className="popup-login">
-                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
-                        <p>Please verify your email first.</p>
-                        <button onClick={() => setShowVerifyPopup(false)} className="continue-button">Continue</button>
-                    </div>
+
+                <div className="login-right-panel">
+                     <img src="/Images/QClogo.png" alt="Quezon City Logo" className="qc-logo" />
+                         <h2>WELCOME TO <br />BARANGAY FAIRVIEW</h2>
+                         <p>Log in to access services, updates, and connect with Barangay Fairview.</p>        
                 </div>
-            )}
-            {showErrorPopup && (
-                <div className="popup-overlay-login">
-                    <div className="popup-login">
-                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
-                        <p>{errorMessage}</p>
-                        <button onClick={() => setShowErrorPopup(false)} className="continue-button">Continue</button>
-                    </div>
-                </div>
-            )}
+
+            </div>
+
+
+           
+            {/*
+            
+                    OLD
+           
             <div className="login-contents-resident">
 
 
@@ -257,6 +304,37 @@ const rLoginForm:React.FC = () => {
                     </form>
                 </div>
             </div>
+
+            */}
+
+             {showPopup && (
+                <div className="popup-overlay-login">
+                    <div className="popup-login">
+                    <img src="/Images/successful.png" alt="warning icon" className="successful-icon-popup" />
+                        <h1>Welcome, {firstName} {lastName}!</h1>
+                        <br/>
+                        <p>Redirecting to the Home Page...</p>
+                    </div>
+                </div>
+            )}
+            {showVerifyPopup && (
+                <div className="popup-overlay-login">
+                    <div className="popup-login">
+                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
+                        <p>Please verify your email first.</p>
+                        <button onClick={() => setShowVerifyPopup(false)} className="continue-button">Continue</button>
+                    </div>
+                </div>
+            )}
+            {showErrorPopup && (
+                <div className="popup-overlay-login">
+                    <div className="popup-login">
+                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
+                        <p>{errorMessage}</p>
+                        <button onClick={() => setShowErrorPopup(false)} className="continue-button">Continue</button>
+                    </div>
+                </div>
+            )}
         </div>
 
     );
