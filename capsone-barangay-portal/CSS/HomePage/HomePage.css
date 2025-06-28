@@ -487,7 +487,8 @@ TRY NEW
 }
 
 .main-button-home:hover {
-  background-color: #e2e2e2;
+  background-color: #214666;
+  color: white;
 }
 
 
@@ -535,6 +536,11 @@ position: relative;
   height: 100%;
 }
 
+.services-card-container {
+  width: 100%;
+  height: 100%;
+}
+
 .section-content-home h2 {
    font-size: 3.5rem;
   font-weight: bold;
@@ -579,6 +585,7 @@ position: relative;
   height: 80px;
     transition: transform 0.3s ease;
 }
+
 
 
 .red-tint {

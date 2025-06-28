@@ -153,7 +153,9 @@ useEffect(() => {
        <div className="main-content-home fade-slide-up" ref={heroRef}>
           <h1 className="main-heading-home">Welcome to Barangay Fairview</h1>
           <p className="main-subheading-home">Delivering fast, transparent, and accessible local services for our community.</p>
+           <Link href="/aboutus"> 
           <button className="main-button-home">Learn More</button>
+          </Link>
         </div>
 
       </div>
@@ -175,6 +177,8 @@ useEffect(() => {
         <div className="second-section-home-lower fade-slide-up"  ref={servicesRef}>
 
           <div className="services-content-home">
+
+              
                 <div className="services-card">
 
                     <div className="services-image">
@@ -187,11 +191,12 @@ useEffect(() => {
 
                     </div>
                 </div>
-
+          
                <div className="services-card">
 
+                  
                     <div className="services-image">
-                       <img src="/Images/incident.png" alt="Incident Report Icon" className="icon-image red-tint" />
+                       <img src="/Images/incident.png" alt="Incident Report Icon" className="icon-image" />
 
                     </div>
 
@@ -206,7 +211,7 @@ useEffect(() => {
                    <div className="services-card">
 
                     <div className="services-image">
-                        <img src="/Images/training-program.png" alt="Document Request Icon" className="icon-image green-tint" />
+                        <img src="/Images/training-program.png" alt="Document Request Icon" className="icon-image" />
                     </div>
 
                     <div className="services-description">
@@ -248,7 +253,10 @@ useEffect(() => {
                             Captain Jonel Quebal and his vision for Barangay Fairview. Read his blog to stay
                             connected and inspired!
       </p>
+      
+       <Link href="/aboutus"> 
       <button className="captain-button">Contact Us</button>
+       </Link>
     </div>
   </div>
 </div>
