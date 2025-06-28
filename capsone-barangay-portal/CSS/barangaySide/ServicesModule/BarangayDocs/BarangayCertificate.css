@@ -260,14 +260,23 @@
     }
     
     .file-name-image-display-indiv {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 8px;
-        border-bottom: 1px solid #ddd;
-        background-color: #f8f8f8;
-        border-radius: 5px;
-        gap: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      background-color: #F0F2F8;
+      border-radius: 5px;
+      gap: 10px;
+      margin-bottom: 10px; 
+    }
+
+    .file-name-image-display-indiv li {
+      display: flex;
+      flex-grow: 1;
+      overflow: hidden; 
+      white-space: nowrap; 
+      text-overflow: ellipsis; 
     }
     
     .file-item {
@@ -275,6 +284,7 @@
         align-items: center;
         gap: 10px;
         width: 100%;
+        text-align: left;
     }
     
     .file-preview {
@@ -295,6 +305,7 @@
     }
     
     .delete-container {
+      margin-left: auto;
         flex-shrink: 0; /* Prevents the delete button from shrinking */
     }
     
@@ -585,6 +596,11 @@ p .required {
   margin-left: 5px;
 }
 
+h1 .required {
+  color: red;
+  margin-left: 5px;
+}
+
 .required-asterisk {
   color: red;
 position: absolute;
@@ -683,7 +699,7 @@ gap: 20px;
 
 .clear-icon {
   position: absolute;
-  right: 14px;
+  right: 20px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
@@ -699,10 +715,15 @@ gap: 20px;
 }
 
 .help-text {
-  font-size: 14px;
-  color: #666;
-  margin-top: 8px;
-  text-align: center;
+  width: 85%;
+  display: flex;
+  justify-content: center;
+}
+
+.help-text h2 {
+  font-size: 13px;
+  color: #00000090;
+  margin-top: 10px;
 }
 
 
@@ -824,22 +845,21 @@ gap: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 20px;
+  justify-content: center;
+  margin-top: 10px;
 }
 
 .createRequest-input-with-clear {
   position: relative;
-  width: 500px; 
+  width: 85%;
 }
 
 .createRequest-select-resident-input-field{
   padding: 8px;
   width: 100%;
-  margin-top: 10px;
-  border: 1.5px solid #f49028;
   border-radius: 5px;
   color: #000000;
-  text-align: center;
+  border: 1px solid rgba(36, 53, 76, 0.7);
 }
 
 .createRequest-select-resident-input-field:focus {
@@ -900,4 +920,80 @@ gap: 20px;
 
 .fields-section input,select{
   align-self: center; 
+}
+
+.box-container-outer-verificationdocs {
+  position: relative; 
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.box-container-verificationdocs {
+  position: relative;
+  width: 370px;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding-top: 30px;
+ padding-right: 20px;
+ padding-bottom: 50px;
+ padding-left: 20px;
+ padding-top: 40px;
+
+  margin-top: 30px;
+
+  display: flex;
+ justify-content: center;
+ align-items: center;
+}
+
+.box-container-verificationdocs:hover {
+ background-color: rgba(245, 143, 88, 0.2);
+}
+
+.title-verificationdocs {
+  position: absolute;
+  left: 7%; 
+  top: 0; 
+  transform: translate(25%, 25%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 5;
+  width: 210px;
+  text-align: center;
+}
+
+.others-main-container{
+  width: 100%;
+  height: 450px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-upload-container {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  display: block;
+  align-items: center; 
+  justify-content: center; 
+  text-align: center;
+  height: 220px; 
+  width: 350px;
+  overflow-y: auto;
+  margin-top: 10px;
+  align-self: center;
+}
+
+.upload-link {
+  color: rgb(245, 143, 88);
+  text-decoration: underline;
+  cursor: pointer;
 }

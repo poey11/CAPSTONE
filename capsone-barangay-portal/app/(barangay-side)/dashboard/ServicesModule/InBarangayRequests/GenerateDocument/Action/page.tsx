@@ -27,6 +27,7 @@ interface ClearanceInput {
     accID?: string;
     createdBy?: string;
     docType?: string;
+    requestType?: string;
     requestId?: string;
     purpose?: string;
     createdAt?: string;
@@ -105,6 +106,7 @@ export default function action() {
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
     const [isResidentSelected, setIsResidentSelected] = useState(false);
+    const [isRequestorSelected, setIsRequestorSelected] = useState(false);
     const [showResidentsPopup, setShowResidentsPopup] = useState(false);
     const [residents, setResidents] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -438,6 +440,8 @@ export default function action() {
 
 
     const [activeSection, setActiveSection] = useState("basic");
+    const isForMyself = clearanceInput.requestType === "forMyself";
+    const [selectingFor, setSelectingFor] = useState<"fullName" | "requestor" | null>(null);
 
     return (
         <main className="createRequest-main-container">
@@ -450,7 +454,7 @@ export default function action() {
                     <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
                   </button>
 
-                  <h1> {docType} {clearanceInput.requestId} </h1>
+                  <h1> {docType} </h1>
                 </div>
 
                 <div className="action-btn-section">
@@ -482,55 +486,10 @@ export default function action() {
                 <div className="createRequest-bottom-section-scroll">
                   {activeSection === "basic" && (
                     <>
-                
-                    <div className="createRequest-input-wrapper">
-                      <div className="createRequest-input-with-clear">
-                        <input 
-                          type="text" 
-                          className="createRequest-select-resident-input-field" 
-                          placeholder="Select Resident"
-                          value = {
-                            isResidentSelected ?
-                            `${clearanceInput.fullName}` :
-                            ""
-                          }
-                          onClick={handleResidentClick}
-                          readOnly 
-                        />
-
-                        {isResidentSelected && (
-                          <>
-                            <span
-                              className="clear-icon"
-                              title="Click to clear selected complainant"
-                              onClick={() => {
-                                setClearanceInput({
-                                  ...clearanceInput,
-                                  fullName: "",
-                                  address: "",
-                                  gender: "",
-                                  civilStatus: "",
-                                  birthday: "",
-                                  contact: "",
-                                });
-                                                    
-                                setIsResidentSelected(false);
-                              }}
-                            >
-                              ×
-                            </span>
-                          </>
-                        )}
-                      </div>
-                      {isResidentSelected && (
-                      <p className="help-text">Click the <strong>×</strong> to clear the selected complainant.</p>
-                      )}
-                    </div>
-
                     <div className="createRequest-section-2-full-top">
                       <div className="createRequest-section-2-left-side">
                         <div className="fields-section">
-                          <h1>Request ID</h1>
+                          <h1>Request ID<span className="required">*</span></h1>
                           <input 
                             value ={clearanceInput.requestId || ""}
                             onChange={handleChange} // Handle change to update state
@@ -544,27 +503,7 @@ export default function action() {
                         </div>
 
                         <div className="fields-section">
-                          <h1>{addOn}Full Name</h1>
-                          <input 
-                            value ={clearanceInput?.fullName || ""}
-                            onChange={handleChange} // Handle change to update state
-                            required
-                            id="fullName"
-                            name="fullName"
-                            type="text" 
-                            className="createRequest-input-field" 
-                            placeholder= {`Enter ${addOn}Full Name`} 
-                            disabled={isResidentSelected} // Disable input if a resident is selected
-                          />
-                        </div>
-                        
-
-                        
-                      </div>
-
-                      <div className="createRequest-section-2-right-side">
-                        <div className="fields-section">
-                          <h1>Purpose</h1>
+                          <h1>Purpose<span className="required">*</span></h1>
                           <select 
                             id="purpose" 
                             name="purpose" 
@@ -631,25 +570,949 @@ export default function action() {
                           </select>
                         </div>
 
+                        {clearanceInput.purpose === "No Income"  && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Purpose Of No Income:<span className="required">*</span></h1>
+                                  <select 
+                                    id="noIncomePurpose"  
+                                    name="noIncomePurpose"  
+                                    value={clearanceInput.noIncomePurpose}
+                                    onChange={handleChange}
+                                    className="createRequest-input-field"  
+                                    required 
+                                  >
+                                    <option value="" disabled>Select Purpose</option>
+                                    <option value="SPES Scholarship">SPES Scholarship</option>
+                                    <option value="ESC Voucher">DEPED Educational Services Contracting (ESC) Voucher</option>
+                                  </select>
+                              </div>                    
+                            </>
+                        )}
+
+                        {clearanceInput.purpose === "Guardianship" && (
+                          <>
+                            <div className="fields-section">
+                              <h1>Type of Guardianship Certificate<span className="required">*</span></h1>
+                              <select
+                                id="guardianshipType"  
+                                name="guardianshipType"  
+                                className="createRequest-input-field"  
+                                value={clearanceInput.guardianshipType}
+                                onChange={handleChange}
+                                required
+                              >
+                                <option value="" disabled>Select Type of Guardianship</option>
+                                <option value="School Purpose">For School Purpose</option>
+                                <option value="Legal Purpose">For Other Legal Purpose</option>
+                              </select>
+                            </div>
+                          </>
+                        )}
+
+                        {clearanceInput.purpose === "Good Moral and Probation" && (
+                          <>
+                            <div className="fields-section">
+                              <h1>Purpose of Good Moral and Probation:<span className="required">*</span></h1>
+                              <select
+                                id="goodMoralPurpose"
+                                name="goodMoralPurpose"
+                                className="createRequest-input-field"
+                                value={clearanceInput.goodMoralPurpose}
+                                onChange={handleChange}
+                                required
+                              >
+                                <option value="" disabled>Select Purpose</option>
+                                <option value = "Legal Purpose and Intent">Legal Purpose and Intent</option>
+                                <option value = "Others">Others</option>
+                              </select>
+                            </div>
+
+                            {clearanceInput.goodMoralPurpose === "Others" && (
+                              <>
+                                <div className="fields-section">
+                                  <h1>Please Specify Other Purpose:<span className="required">*</span></h1>
+                                  <input 
+                                    type="text"  
+                                    id="goodMoralOtherPurpose"  
+                                    name="goodMoralOtherPurpose"  
+                                    value={clearanceInput.goodMoralOtherPurpose}
+                                    onChange={handleChange}
+                                    className="createRequest-input-field"  
+                                    required 
+                                    placeholder="Enter Other Purpose"
+                                  />
+                                </div>
+                              </>
+                            )}
+                          </>
+                        )}
+
+                        {clearanceInput.purpose === "Garage/PUV" && (
+                          <>
+                            <div className="fields-section">
+                              <h1>Certificate Purpose<span className="required">*</span></h1>
+                              <input 
+                                type="text"
+                                id="goodMoralOtherPurpose"  
+                                name="goodMoralOtherPurpose"  
+                                className="createRequest-input-field"  
+                                required 
+                                value={clearanceInput.goodMoralOtherPurpose || ""}
+                                onChange={handleChange}
+                                placeholder="Enter Certificate Purpose"
+                              />    
+                            </div>   
+                          </>
+                        )}
+
                         <div className="fields-section">
-                          <h1>Resident Since</h1>
-                          <input 
-                            value ={clearanceInput?.dateOfResidency || ""}
-                            onChange={handleChange} // Handle change to update state
-                            required
-                            type="date"
-                            id="dateOfResidency"
-                            name="dateOfResidency" 
+                          <h1>Request Type<span className="required">*</span></h1>
+                          <select 
+                            id="requestType" 
+                            name="requestType" 
                             className="createRequest-input-field" 
-                            max = {maxDate}
-                            onKeyDown={(e) => e.preventDefault()}
-                          />
+                            required
+                            value ={clearanceInput?.requestType || ""}
+                            onChange={handleChange} // Handle change to update state
+                          >
+                            <option value="" disabled>Select Request Type</option>
+                            <option value="forMyself">For Myself</option>
+                            <option value="forOthers">For Others</option>
+
+                          </select>
                         </div>
                       </div>
 
+                      <div className="createRequest-section-2-right-side">
+                        {clearanceInput.purpose !== "No Income" && clearanceInput.purpose !== "Cohabitation" && (
+                          <>
+                            <div className="fields-section">
+                              <h1>{addOn}Full Name<span className="required">*</span></h1>
+
+                              <div className="createRequest-input-wrapper">
+                                <div className="createRequest-input-with-clear">
+                                  <input 
+                                    type="text" 
+                                    className="createRequest-select-resident-input-field" 
+                                    placeholder={`Enter ${addOn}Full Name`}
+                                    value={
+                                      isResidentSelected
+                                        ? clearanceInput.fullName
+                                        : clearanceInput.fullName || ""
+                                    }
+                                    onClick={() => {
+                                      setSelectingFor("fullName");
+                                      setShowResidentsPopup(true);
+                                    }}
+                                    onChange={handleChange}
+                                    required
+                                    id="fullName"
+                                    name="fullName"
+                                    readOnly
+                                    disabled={false} // Keep enabled to allow onClick even if readOnly
+                                  />
+
+                                  {isResidentSelected && (
+                                    <span
+                                      className="clear-icon"
+                                      title="Click to clear selected resident"
+                                      onClick={() => {
+                                        setClearanceInput({
+                                          ...clearanceInput,
+                                          fullName: "",
+                                          address: "",
+                                          gender: "",
+                                          civilStatus: "",
+                                          birthday: "",
+                                          contact: "",
+                                        });
+                                        setIsResidentSelected(false);
+                                      }}
+                                    >
+                                      ×
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/*
+                                {isResidentSelected && (
+                                  <div className="help-text">
+                                    <h2>Click the <strong>×</strong> to clear the selected resident.</h2>
+                                  </div>
+                                )}
+                                  */}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        
+
+                        <div className="fields-section">
+                          <h1>Requestor's Name<span className="required">*</span></h1>
+
+                          <div className="createRequest-input-wrapper">
+                            <div className="createRequest-input-with-clear">
+                              <input 
+                                type="text" 
+                                className="createRequest-select-resident-input-field" 
+                                placeholder="Enter Requestor's Name"
+                                value={
+                                  isForMyself
+                                    ? clearanceInput.fullName ?? ""
+                                    : clearanceInput.requestorFname ?? ""
+                                }
+                                
+                                onClick={
+                                  !isForMyself && !isRequestorSelected ? () => {
+                                    setSelectingFor("requestor");
+                                    setShowResidentsPopup(true);
+                                  } : undefined
+                                }
+                                onChange={handleChange}
+                                readOnly={isForMyself || isRequestorSelected}
+                                disabled={
+                                  isForMyself &&
+                                  !["Occupancy /  Moving Out"].includes(clearanceInput.purpose ?? "")
+                                }
+                                required
+                                id="requestorFname"
+                                name="requestorFname"
+                              />
+
+                              {!isForMyself && isRequestorSelected && (
+                                <span
+                                  className="clear-icon"
+                                  title="Click to clear selected resident"
+                                  onClick={() => {
+                                    setClearanceInput({
+                                      ...clearanceInput,
+                                      requestorFname: "",
+                                      address: "",
+                                      gender: "",
+                                      civilStatus: "",
+                                      birthday: "",
+                                      contact: "",
+                                    });
+                                    setIsRequestorSelected(false);
+                                  }}
+                                >
+                                  ×
+                                </span>
+                              )}
+                            </div>
+                            
+                            {/*
+                            {!isForMyself && isRequestorSelected && (
+                              <div className="help-text">
+                                <h2>Click the <strong>×</strong> to clear the selected resident.</h2>
+                              </div>
+                            )}
+                              */}
+                          </div>
+                        </div>
+
+                        <div className="fields-section">
+                          <h1>Requestor's Title<span className="required">*</span></h1>
+                          <select 
+                            id="requestorMrMs" 
+                            name="requestorMrMs" 
+                            className="createRequest-input-field" 
+                            required
+                            value ={clearanceInput?.requestorMrMs || ""}
+                            onChange={handleChange} // Handle change to update state
+                          >
+                            <option value="" disabled>Select title</option>
+                            <option value="Mr.">Mr.</option>
+                            <option value="Ms.">Ms.</option>
+                          </select>
+                        </div>
+
+                        {clearanceInput.purpose === "No Income"  && (
+                          <>               
+                            <div className="fields-section">
+                              <h1>Son/Daugther's Name<span className="required">*</span></h1>
+                              <input 
+                                type="text"  
+                                id="noIncomeChildFName"  
+                                name="noIncomeChildFName"  
+                                value={clearanceInput.noIncomeChildFName}
+                                onChange={handleChange}
+                                className="createRequest-input-field"  
+                                required 
+                                placeholder={`Enter Child's Full Name`}
+                              />
+                            </div>                       
+                          </>
+                        )}
+
+                        {(clearanceInput.purpose === "Cohabitation") && (
+                          <>
+                            <div className="fields-section">
+                              <h1>Partner's/Wife's/Husband's Full Name<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="partnerWifeHusbandFullName"  
+                                  name="partnerWifeHusbandFullName"  
+                                  className="createRequest-input-field"  
+                                  required  
+                                  placeholder="Enter Full Name" 
+                                  value={clearanceInput.partnerWifeHusbandFullName}
+                                  onChange={handleChange}
+                                />
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
 
 
+                    </>
+                  )}
+
+                  {activeSection === "full" && (
+                    <>
+                      <div className="createRequest-section-2-full-top">
+                        <div className="createRequest-section-2-left-side">
+                          <div className="fields-section">
+                            <h1>Birthday<span className="required">*</span></h1>
+                            <input 
+                              type="date" 
+                              className="createRequest-input-field" 
+                              placeholder="Select Date From" 
+                              id="birthday"
+                              name="birthday"
+                              value ={clearanceInput?.birthday || ""}
+                              onChange={handleChange} // Handle change to update state
+                              required
+                              max={maxDate}  // Restrict the date to today or earlier
+                              onKeyDown={(e) => e.preventDefault()}  // Prevent manual input
+                              disabled={isResidentSelected} // Disable input if a resident is selected
+                            />    
+                          </div>
+
+                          <div className="fields-section">
+                            <h1>Age<span className="required">*</span></h1>
+                            <input 
+                              type="number"  // Ensures the input accepts only numbers
+                              id="age"  
+                              name="age" 
+                              value ={clearanceInput?.age || ""}
+                              onChange={handleChange} // Handle change to update state
+                              className="createRequest-input-field" 
+                              required 
+                              min="1"  // Minimum age (you can adjust this as needed)
+                              max="150"  // Maximum age (you can adjust this as needed)
+                              placeholder="Enter Age"  
+                              step="1"  // Ensures only whole numbers can be entered
+                              disabled={true}  // Disable input to prevent manual changes
+                            />
+                          </div>
+
+                          <div className="fields-section">
+                            <h1>Gender<span className="required">*</span></h1>
+                            <select 
+                              id="gender" 
+                              name="gender" 
+                              className="createRequest-input-field" 
+                              required
+                              defaultValue=""  
+                              value ={clearanceInput?.gender}
+                              onChange={handleChange} // Handle change to update state
+                              disabled={isResidentSelected}
+                            >
+                              <option value="" disabled>Select gender</option>
+                              <option value="Male">Male</option>
+                              <option value="Female">Female</option>
+                            </select>
+                          </div>
+
+                          <div className="fields-section">
+                            <h1>{addOn}Address<span className="required">*</span></h1>
+                            <input 
+                              type="text" 
+                              value ={clearanceInput?.address || ""}
+                              onChange={handleChange} // Handle change to update state
+                              required
+                              id="address"
+                              name="address"
+                              className="createRequest-input-field" 
+                              placeholder={`Enter ${addOn}Address`} 
+                              disabled={isResidentSelected} // Disable input if a resident is selected
+
+                            />
+                          </div>
+
+          
+                          {clearanceInput.purpose === "Residency" && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Cohabitation Year From:<span className="required">*</span></h1>
+                                <select
+                                  id="CYFrom"
+                                  name="CYFrom"
+                                  value={clearanceInput.CYFrom}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"
+                                  required
+                                >
+                                  <option value="" disabled>Select Year</option>
+                                  {[...Array(100)].map((_, i) => {
+                                    const year = new Date().getFullYear() - i;
+                                    const cyTo = parseInt(clearanceInput.CYTo || "");
+                                    const isDisabled = !isNaN(cyTo) && year >= cyTo;
+                                    return (
+                                    <option key={year} value={year} disabled={isDisabled}>
+                                      {year}
+                                    </option>
+                                    );
+                                  })}
+                                </select>
+                              </div>
+                                        
+                              <div className="fields-section">
+                                <h1>Cohabitation Year To:<span className="required">*</span></h1>
+                                <select
+                                  id="CYTo"
+                                  name="CYTo"
+                                  value={clearanceInput.CYTo}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"
+                                  required
+                                >
+                               <option value="" disabled>Select Year</option>
+                                {[...Array(100)].map((_, i) => {
+                                  const year = new Date().getFullYear() - i;
+                                  const cyFrom = parseInt(clearanceInput.CYFrom || "1");
+                                  const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
+                                  return (
+                                  <option key={year} value={year} disabled={isDisabled}>
+                                    {year}
+                                  </option>
+                                  );
+                                })}
+                                </select>
+                              </div>
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "Occupancy /  Moving Out" && (
+                            <>
+                              <div className="fields-section">
+                                <h1>To Address<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="toAddress"  
+                                  name="toAddress"  
+                                  value={clearanceInput.toAddress}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter To Address"  
+                                />
+                              </div>
+                            </>
+                          )}
+
+                          {(clearanceInput.purpose === "Death Residency"|| clearanceInput.purpose === "Estate Tax") && (
+                            <div className="fields-section">
+                              <h1>Date Of Death<span className="required">*</span></h1>
+                              <input 
+                                type="date" 
+                                id="dateofdeath" 
+                                name="dateofdeath" 
+                                className="createRequest-input-field" 
+                                value={clearanceInput.dateofdeath}
+                                onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                                onChange={handleChange}
+                                required 
+                                max={getLocalDateString(new Date())} // Set max date to today
+                              />
+                            </div>
+                          )}
+                          {(clearanceInput.purpose === "Cohabitation") && (
+                            <>
+                              <div className="fields-section">
+                                <h1> Type Of Relationship<span className="required">*</span></h1>
+                                <select
+                                  id="cohabitationRelationship"
+                                  name="cohabitationRelationship"
+                                  className="createRequest-input-field"
+                                  value={clearanceInput.cohabitationRelationship}
+                                  onChange={handleChange}
+                                  required
+                                >
+                                  <option value="" disabled>Select Type of Relationship</option>
+                                  <option value="Husband And Wife">Husband And Wife</option>
+                                  <option value="Partners">Partners</option>
+                                </select>
+                              </div>     
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "Guardianship" && (
+                            <>           
+                              <div className="fields-section">
+                                <h1>Ward's Full Name<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="wardFname"  
+                                  name="wardFname"  
+                                  value={clearanceInput.wardFname}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder={`Enter Ward's Full Name`}
+                                />
+                              </div>
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "Garage/PUV" && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Vehicle Description<span className="required">*</span></h1>
+                                <input 
+                                  type="text"
+                                  id="vehicleType"  
+                                  name="vehicleType"  
+                                  className="createRequest-input-field"  
+                                        required 
+                                        value={clearanceInput.vehicleType || ""}
+                                        onChange={handleChange}
+                                        placeholder="Enter Vehicle Description"
+                                />
+                              </div>
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "Garage/TRU" && (
+                            <>  
+                              <div className="fields-section">
+                                <h1>Business Name<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="businessname"  
+                                  name="businessName"  
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Business Name"  
+                                  value={clearanceInput.businessName}
+                                  onChange={handleChange}
+                                />
+                              </div>  
+
+                              <div className="fields-section">
+                                <h1>Nature of Business<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="businessnature"  
+                                  name="businessNature"  
+                                  value={clearanceInput.businessNature}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Business Nature"  
+                                />
+                              </div>   
+
+                              <div className="fields-section">
+                                <h1>Business Location<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="businessloc"  
+                                  name="businessLocation"  
+                                  className="createRequest-input-field"  
+                                  value={clearanceInput.businessLocation}
+                                  onChange={handleChange}
+                                  required 
+                                  placeholder="Enter Business Location"  
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Nos Of Tricycle<span className="required">*</span></h1>
+                                <input 
+                                  type="number"  
+                                  id="noOfVechicles"  
+                                  name="noOfVechicles"  
+                                  className="createRequest-input-field"  
+                                  required 
+                                  value={clearanceInput.noOfVechicles||1}
+                                  onChange={handleChange}
+                                  min={1}
+                                  onKeyDown={(e)=> {
+                                    if (e.key === 'e' || e.key === '-' || e.key === '+') {
+                                      e.preventDefault(); // Prevent scientific notation and negative/positive signs
+                                    }
+                                  }
+                                  } // Prevent manual input
+                                />
+                              </div>
+                                    
+                              <div className="fields-section">
+                                <h1>Tricycle Make<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="vehicleMake"  
+                                  name="vehicleMake"  
+                                  className="createRequest-input-field"  
+                                  required 
+                                  value={clearanceInput.vehicleMake}
+                                  onChange={handleChange}
+                                  placeholder="Enter Tricycle Make"  
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Tricycle Type<span className="required">*</span></h1>
+                                <select
+                                  id="vehicleType"  
+                                  name="vehicleType"  
+                                  className="createRequest-input-field"  
+                                  required 
+                                  value={clearanceInput.vehicleType}
+                                  onChange={handleChange}
+
+                                >
+                                  <option value="" disabled>Select Tricycle Type</option>
+                                  <option value="Motorcycle w/ Sidecar">Motorcycle w/ Sidecar</option>
+                                  <option value="Motorcycle w/o Sidecar">Motorcycle w/o Sidecar</option>
+                                </select>
+                              </div>      
+                            </>
+                          )}
+                        </div>
+
+                        <div className="createRequest-section-2-right-side">
+                          <div className="fields-section">
+                            <h1>Date of Residency<span className="required">*</span></h1>
+                            <input 
+                              value ={clearanceInput?.dateOfResidency || ""}
+                              onChange={handleChange} // Handle change to update state
+                              required
+                              type="date"
+                              id="dateOfResidency"
+                              name="dateOfResidency" 
+                              className="createRequest-input-field" 
+                              max = {maxDate}
+                              onKeyDown={(e) => e.preventDefault()}
+                            />
+                          </div>
+
+                          <div className="fields-section">     
+                            <h1>Contact Number<span className="required">*</span></h1>
+                            <input 
+                              type="tel"  
+                              id="contact"  
+                              name="contact"
+                              value ={clearanceInput?.contact || ""}
+                              onChange={(e) => {
+                                const input = e.target.value;
+                                // Only allow digits and limit to 11 characters
+                                if (/^\d{0,11}$/.test(input)) {
+                                  handleChange(e);
+                                }
+                              }}
+                              className="createRequest-input-field" 
+                              required 
+                              maxLength={11}  
+                              pattern="^[0-9]{11}$" 
+                              placeholder="Enter a valid 11-digit contact number" 
+                              title="Enter a valid 11-digit contact number. Format: 09XXXXXXXXX"        
+                              disabled={isResidentSelected}
+                            />
+                          </div>
+
+                          <div className="fields-section">
+                            <h1>Civil Status<span className="required">*</span></h1>  
+                            <select 
+                              value ={clearanceInput?.civilStatus}
+                              onChange={handleChange}
+                              id="civilStatus" 
+                              name="civilStatus" 
+                              className="createRequest-input-field" 
+                              required
+                              disabled={isResidentSelected} // Disable input if a resident is selected
+                            >
+                              <option value="" disabled>Select civil status</option>
+                              <option value="Single">Single</option>
+                              <option value="Married">Married</option>
+                              <option value="Widow">Widow</option>
+                              <option value="Separated">Separated</option>
+                            </select>
+                          </div>
+
+                          <div className="fields-section">
+                            <h1>Citizenship<span className="required">*</span></h1>
+                            <input 
+                              value ={clearanceInput?.citizenship || ""}
+                              onChange={handleChange} 
+                              required
+                              type="text" 
+                              id="citizenship"
+                              name="citizenship"
+                              className="createRequest-input-field" 
+                              placeholder="Input Citizenship" 
+                            />
+                          </div>
+                          
+                          {clearanceInput.purpose === "Residency" && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Attested By Hon Kagawad:<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="attestedBy"  
+                                  name="attestedBy"  
+                                  value={clearanceInput.attestedBy}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Hon Kagawad's Full Name"  
+                                />
+                              </div>             
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "Estate Tax" && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Estate Since:<span className="required">*</span></h1>
+                                <select
+                                  id="estateSince"
+                                  name="estateSince"
+                                  value={clearanceInput.estateSince}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"
+                                  required
+                                >
+                                  <option value="" disabled>Select Year</option>
+                                    {[...Array(150)].map((_, i) => {
+                                      const year = new Date().getFullYear() - i;
+                                      return (
+                                        <option key={year} value={year}>
+                                          {year}
+                                        </option>
+                                      );
+                                  })}
+                                </select>
+                              </div>
+                            </>
+                          )}
+
+                          {(clearanceInput.purpose === "Cohabitation") && (
+                            <>  
+                              <div className="fields-section">
+                                <h1>Start Of Cohabitation<span className="required">*</span></h1>
+                                <input 
+                                  type = "date" 
+                                  id="cohabitationStartDate"
+                                  name="cohabitationStartDate"
+                                  className="createRequest-input-field"
+                                  value={clearanceInput.cohabitationStartDate}
+                                  onChange={handleChange}
+                                  onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                                  required
+                                  max = {getLocalDateString(new Date())} // Set max date to today
+                                />
+                              </div>
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "Guardianship" && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Guardian's Relationship Towards the Ward<span className="required">*</span></h1>
+                                <select
+                                  id="wardRelationship"  
+                                  name="wardRelationship"  
+                                  className="createRequest-input-field"  
+                                  value={clearanceInput.wardRelationship}
+                                  onChange={handleChange}
+                                  required
+                                >
+                                  <option value="" disabled>Select Type of Relationship</option>
+                                  <option value="Grandmother">Grandmother</option>
+                                  <option value="Grandfather">Grandfather</option>
+                                  <option value="Father">Father</option>
+                                  <option value="Mother">Mother</option>
+                                  <option value="Aunt">Aunt</option>
+                                  <option value="Uncle">Uncle</option>
+                                  <option value="Sister">Sister</option>
+                                  <option value="Brother">Brother</option>
+                                </select>
+                              </div>
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "Garage/PUV" && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Nos Of Vehicle/s<span className="required">*</span></h1>
+                                <input 
+                                  type="number"  
+                                  id="noOfVechicles"  
+                                  name="noOfVechicles"  
+                                  className="createRequest-input-field"  
+                                  required 
+                                  value={clearanceInput.noOfVechicles || 1}
+                                  onChange={handleChange}
+                                  min={1}
+                                  onKeyDown={(e)=> {
+                                  if (e.key === 'e' || e.key === '-' || e.key === '+') {
+                                    e.preventDefault(); // Prevent scientific notation and negative/positive signs
+                                  }
+                                  }
+                                  } // Prevent manual input
+                                  />
+                              </div>
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "Garage/TRU" && (
+                            <>  
+                              <div className="fields-section">
+                                <h1>Tricycle Plate No.<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="vehiclePlateNo"  
+                                  name="vehiclePlateNo"  
+                                  className="createRequest-input-field"  
+                                  required 
+                                  value={clearanceInput.vehiclePlateNo}
+                                  onChange={handleChange}
+                                  placeholder="Enter Tricycle Plate No."  
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Tricycle Serial No.<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="vehicleSerialNo"  
+                                  name="vehicleSerialNo"  
+                                  className="createRequest-input-field"  
+                                  required 
+                                  value={clearanceInput.vehicleSerialNo}
+                                  onChange={handleChange}
+                                  placeholder="Enter Tricycle Serial No."  
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Tricycle Chassis No.<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="vehicleChassisNo"  
+                                  name="vehicleChassisNo"  
+                                  className="createRequest-input-field"  
+                                  required 
+                                  value={clearanceInput.vehicleChassisNo}
+                                  onChange={handleChange}
+                                  placeholder="Enter Tricycle Chassis No."  
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Tricycle Engine No.<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="vehicleEngineNo"  
+                                  name="vehicleEngineNo"  
+                                  className="createRequest-input-field"  
+                                  required 
+                                  value={clearanceInput.vehicleEngineNo}
+                                  onChange={handleChange}
+                                  placeholder="Enter Tricycle Engine No."  
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Tricycle File No.<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="vehicleFileNo"  
+                                  name="vehicleFileNo"  
+                                  className="createRequest-input-field"  
+                                  required 
+                                  value={clearanceInput.vehicleFileNo}
+                                  onChange={handleChange}
+                                  placeholder="Enter Tricycle File No."  
+                                />
+                              </div>     
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {activeSection === "others" && (
+                    <>
+                      <div className="others-main-container">
+                        <div className="box-container-outer-verificationdocs">
+                          <div className="title-verificationdocs">
+                            Verification Documents
+                          </div>
+
+                          <div className="box-container-verificationdocs">
+                            <span className="required-asterisk">*</span>
+
+                            {/* File Upload Section */}
+                            <div className="file-upload-container">
+                              <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
+                                <input
+                                  id="file-upload1"
+                                  type="file"
+                                  className="file-upload-input" 
+                                  multiple
+                                  accept=".jpg,.jpeg,.png"
+                                  name="file-upload1" // Use the same name as in the clearanceInput state                                       
+                                  onChange={handleFileChange('container1')} // Handle file selection
+                                />
+
+                                {/* Display the file names with image previews */}
+                                {files.container1.length > 0 && (
+                                  <div className="file-name-image-display">
+                                    {files.container1.map((file, index) => (
+                                      <div className="file-name-image-display-indiv" key={index}>
+                                        <li className="file-item"> 
+                                          {/* Display the image preview */}
+                                          {file.preview && (
+                                            <div className="filename-image-container">
+                                              <img
+                                                src={file.preview}
+                                                alt={file.name}
+                                                className="file-preview"
+                                              />
+                                            </div>
+                                          )}
+                                          <span className="file-name">{file.name}</span>  
+                                          <div className="delete-container">
+                                            {/* Delete button with image */}
+                                            <button
+                                              type="button"
+                                              onClick={() => handleFileDelete('container1', file.name)}
+                                              className="delete-button"
+                                            >
+                                            <img
+                                              src="/images/trash.png"  
+                                              alt="Delete"
+                                              className="delete-icon"
+                                            />
+                                            </button>
+                                          </div>
+                                        </li>
+                                      </div>
+                                    ))}           
+                                  </div>
+                                )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
                     </>
                   )}
                     
@@ -756,7 +1619,7 @@ export default function action() {
                                 <div className="section-right">
                                 <div className="fields-container">
                                     <div className="fields-section">
-                                        <p>Resident Since</p>
+                                        <p>Date of Since</p>
                                         <input 
                                             value ={clearanceInput?.dateOfResidency || ""}
                                             onChange={handleChange} // Handle change to update state
@@ -1039,23 +1902,7 @@ export default function action() {
                                       </div>
                                       </>
                                 )}
-                                {clearanceInput.purpose === "Occupancy /  Moving Out" && (
-                                  <>
-                                    <div className="fields-section">
-                                      <label htmlFor="toAddress" className="form-label">To Address<span className="required">*</span></label>
-                                      <input 
-                                        type="text"  
-                                        id="toAddress"  
-                                        name="toAddress"  
-                                        value={clearanceInput.toAddress}
-                                        onChange={handleChange}
-                                        className="headline"  
-                                        required 
-                                        placeholder="Enter To Address"  
-                                      />
-                                    </div>
-                                  </>
-                                )}
+
                                 {(clearanceInput.purpose === "Death Residency"|| clearanceInput.purpose === "Estate Tax") && (
                                   <div className="fields-section">
                                     <label htmlFor="dateofdeath" className="form-label">Date Of Death<span className="required">*</span></label>
@@ -1401,40 +2248,7 @@ export default function action() {
                                     </div>
                                   </>
                                 )}
-                                {clearanceInput.purpose === "No Income"  && (
-                                  <>
-                                    <div className="fields-section">
-                                      <label htmlFor="noIncomePurpose" className="form-label">Purpose Of No Income:<span className="required">*</span></label>
-                                        <select 
-                                          id="noIncomePurpose"  
-                                          name="noIncomePurpose"  
-                                          value={clearanceInput.noIncomePurpose}
-                                          onChange={handleChange}
-                                          className="headline"  
-                                          required 
-                                        >
-                                          <option value="" disabled>Select Purpose</option>
-                                          <option value="SPES Scholarship">SPES Scholarship</option>
-                                          <option value="ESC Voucher">DEPED Educational Services Contracting (ESC) Voucher</option>
-                                        </select>
-                                    </div>
-                                                    
-                                    <div className="fields-section">
-                                      <label htmlFor="noIncomeChildFName" className="form-label">Son/Daugther's Name<span className="required">*</span></label>
-                                        <input 
-                                          type="text"  
-                                          id="noIncomeChildFName"  
-                                          name="noIncomeChildFName"  
-                                          value={clearanceInput.noIncomeChildFName}
-                                          onChange={handleChange}
-                                          className="headline"  
-                                          required 
-                                          placeholder={`Enter Child's Full Name`}
-                                        />
-                                    </div>
-                                                    
-                                  </>
-                                )}
+                                
                                 {(clearanceInput.purpose === "Cohabitation") && (<>
                                   <div className="fields-section">
                                     <label htmlFor="partnerWifeHusbandFullName" className="form-label">Partner's/Wife's/Husband's Full Name<span className="required">*</span></label>
@@ -1647,30 +2461,54 @@ export default function action() {
                               className="employers-table-row"
                               onClick={async () => {
                                 try {
-                                
-                                  setClearanceInput({
-                                    ...clearanceInput,
-                                    residentId: resident.id,
-                                    fullName: `${resident.firstName} ${resident.middleName} ${resident.lastName}`,
-                                    gender: resident.sex || '',
-                                    birthday: resident.dateOfBirth|| '',
-                                    civilStatus: resident.civilStatus || '',
-                                    address: resident.address || '',
-                                    contact: resident.contacztNumber || '',
-                                    age: resident.age || '',
-                                  });
+                                  const selectedFullName = `${resident.firstName} ${resident.middleName} ${resident.lastName}`;
+                                  
+                                  if (clearanceInput.requestType === "forMyself") {
+                                    setClearanceInput({
+                                      ...clearanceInput,
+                                      residentId: resident.id,
+                                      fullName: selectedFullName,
+                                      requestorFname: selectedFullName,
+                                      requestorMrMs: resident.sex === "Male" ? "Mr." : "Ms.",
+                                      gender: resident.sex || '',
+                                      birthday: resident.dateOfBirth || '',
+                                      civilStatus: resident.civilStatus || '',
+                                      address: resident.address || '',
+                                      contact: resident.contacztNumber || '',
+                                      age: resident.age || '',
+                                    });
                                     setIsResidentSelected(true);
-                                    setShowResidentsPopup(false);
+                                    setIsRequestorSelected(true);
+                                  } else {
+                                    // If forOthers, assume separate logic
+                                    if (selectingFor === "fullName") {
+                                      setClearanceInput({
+                                        ...clearanceInput,
+                                        fullName: selectedFullName,
+                                        residentId: resident.id,
+                                        gender: resident.sex || '',
+                                        birthday: resident.dateOfBirth || '',
+                                        civilStatus: resident.civilStatus || '',
+                                        address: resident.address || '',
+                                        contact: resident.contacztNumber || '',
+                                        age: resident.age || '',
+                                      });
+                                      setIsResidentSelected(true);
+                                    } else if (selectingFor === "requestor") {
+                                      setClearanceInput({
+                                        ...clearanceInput,
+                                        requestorFname: selectedFullName,
+                                        requestorMrMs: resident.sex === "Male" ? "Mr." : "Ms.",
+                                      });
+                                      setIsRequestorSelected(true);
+                                    }
+                                  }
                               
-                                  setTimeout(() => {
-                                    console.log("Complainant updated:", resident);
-                                  }, 0);
+                                  setShowResidentsPopup(false);
                                 } catch (error) {
                                   setPopupMessage("An error occurred. Please try again.");
                                   setShowPopup(true);
-                                  setTimeout(() => {
-                                    setShowPopup(false);
-                                  }, 3000);
+                                  setTimeout(() => setShowPopup(false), 3000);
                                 }
                               }}
                               style={{ cursor: 'pointer' }}
