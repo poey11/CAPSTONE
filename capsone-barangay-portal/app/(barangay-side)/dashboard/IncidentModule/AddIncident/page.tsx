@@ -167,10 +167,11 @@ export default function AddIncident() {
     }, []);
 
     const filteredComplainantResidents = residents.filter((resident) =>
-    `${resident.firstName} ${resident.middleName} ${resident.lastName}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
+      resident.id !== respondent.residentId && // 🛑 Exclude respondent
+      `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    );
 
   // respondent resident search pop up
   const handleRespondentsClick = () => {
@@ -195,6 +196,7 @@ export default function AddIncident() {
   }, []);
 
   const filteredRespondentResidents = residents.filter((resident) =>
+  resident.id !== complainant.residentId && // 🛑 Exclude complainant
   `${resident.firstName} ${resident.middleName} ${resident.lastName}`
     .toLowerCase()
     .includes(searchTerm.toLowerCase())
@@ -309,7 +311,7 @@ export default function AddIncident() {
             staffId: user?.id,
             isDialogue: false,
             typeOfIncident: reportInfo.typeOfIncident,
-            areaOfincident: reportInfo.areaOfincident,
+            areaOfIncident: reportInfo.areaOfIncident,
             hearing:0,
             generatedHearingSummons:0,
             createdAt: new Date(),
@@ -715,7 +717,7 @@ const handleSubmit = (event: React.FormEvent) => {
                       setIsComplainantResidentSelected(false);
                     }}
                   >
-                    
+                    ×
                   </span>
                 )}
               </div>

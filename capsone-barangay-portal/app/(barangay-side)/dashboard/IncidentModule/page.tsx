@@ -22,8 +22,8 @@ export default function MainPageIncident() {
  
 
 
+  /*Revised this. Copy from Online Request in Service Module. */
   useEffect(() => {
-    /*Revised this. Copy from Online Request in Service Module. */
     const unsubscribe = getAllSpecificDocument(
       "IncidentReports",
       "department",
@@ -32,8 +32,8 @@ export default function MainPageIncident() {
       (data: any[]) => {
         // Sort by dateFiled and timeFiled, newest first
         const sortedData = [...data].sort((a, b) => {
-          const dateA = new Date(`${a.dateFiled} ${a.timeFiled}`);
-          const dateB = new Date(`${b.dateFiled} ${b.timeFiled}`);
+          const dateA = new Date(a.createdAt);
+          const dateB = new Date(b.createdAt);
           return dateB.getTime() - dateA.getTime(); // newest first
         });
       
@@ -169,8 +169,9 @@ export default function MainPageIncident() {
               <thead>
                 <tr>
                   <th>Case #</th>
-                  <th>Department</th>
                   <th>Date & Time of the Incident</th>
+                  <th>Department</th>
+                  <th>Area Of Incident</th>
                   <th>Nature of Complaint</th>
                   <th>Status</th>
                 </tr>
@@ -183,10 +184,11 @@ export default function MainPageIncident() {
                     className="clickable-row cursor-pointer hover:bg-gray-200"
                   >
                     <td>{incident.caseNumber}</td>
-                    <td>{incident.department}</td>
                     <td>
                       {incident.dateFiled} {incident.timeFiled}
                     </td>
+                    <td>{incident.department}</td>
+                    <td>{incident.areaOfIncident}</td>
                     <td>{incident.nature}</td>
                     <td>
                       <span

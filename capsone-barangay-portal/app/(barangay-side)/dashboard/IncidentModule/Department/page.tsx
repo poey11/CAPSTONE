@@ -114,9 +114,10 @@ export default function Department() {
   };
   
 
+/*Revised this. Copy from Online Request in Service Module. */
 
   useEffect(() => {
-    if (departmentId) {
+      if (departmentId) {
       try {
         const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", departmentId, (data) => {
           setIncidentData(data);
@@ -293,6 +294,7 @@ useEffect(() => {
         <tr>
           <th>Case #</th>
           <th>Date & Time of the Incident</th>
+          <th>Area Of Incident</th>
           <th>Nature of Complaint</th>
           <th>Status</th>
           <th>Actions</th>
@@ -306,8 +308,8 @@ useEffect(() => {
         >
             <td>{incident.caseNumber}</td>
             <td>{incident.dateFiled} {incident.timeFiled}</td>
+            <td>{incident.areaOfIncident}</td>
             {incident.nature === "Others" ? (<td>{incident.specifyNature}</td>):(<td>{incident.nature}</td>)}
-            
             <td>
               <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
                 {incident.status}
