@@ -24,6 +24,8 @@ interface UploadedFile {
   preview?: string;
 }
 
+
+
 interface ClearanceInput {
     residentId?: string;
     accID?: string;
@@ -114,6 +116,8 @@ export default function action() {
     const [residents, setResidents] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
+   
+    const [otherDocFields, setOtherDocFields] = useState<{ [title: string]: string[] }>({});
     const [idPicture, setIdPicture] = useState<UploadedFile[]>([]);
 
     
@@ -160,22 +164,26 @@ export default function action() {
             const snapshot = await getDocs(otherDocsRef);
       
             const groupedTitles: { [key: string]: string[] } = {};
+            const fieldMap: { [key: string]: string[] } = {};
       
-            snapshot.docs.forEach(doc => {
+            snapshot.docs.forEach((doc) => {
               const data = doc.data();
-              const type = data.type;
-              const title = data.title;
+              const { type, title, fields } = data;
       
-              if (!groupedTitles[type]) {
-                groupedTitles[type] = [];
-              }
-      
-              if (title && type) {
+              if (type && title) {
+                if (!groupedTitles[type]) groupedTitles[type] = [];
                 groupedTitles[type].push(title);
+      
+                if (Array.isArray(fields)) {
+                  fieldMap[title] = fields.map((f: any) => f.name);
+                }
               }
             });
+
+            console.log("Mapped OtherDoc Fields:", fieldMap); // <-- Add it here
       
             setOtherDocPurposes(groupedTitles);
+            setOtherDocFields(fieldMap);
           } catch (error) {
             console.error("Error fetching OtherDocuments:", error);
           }
@@ -469,6 +477,49 @@ export default function action() {
       
     const [addOn, setAddOn] = useState<string>("");
     
+
+    const allPurposeCertificate = [
+      "Residency",
+      "Occupancy /  Moving Out",
+      "Estate Tax",
+      "Death Residency",
+      "No Income",
+      "Cohabitation",
+      "Guardianship",
+      "Good Moral and Probation",
+      "Garage/PUV",
+      "Garage/TRU",   
+    ];
+
+    const excludedPurposesFullName = [
+      "Residency",
+      "Garage/PUV",
+      "Garage/TRU",
+      "No Income",
+      "Good Moral and Probation",
+      "Cohabitation"
+    ];
+
+    const fixedPredefinedFields = [
+      "fullName",
+      "requestorFname",
+      "requestorMrMs",
+      "address",
+      "dateOfResidency",
+      "birthday",
+      "age",  
+      "gender",   
+      "civilStatus",
+      "contact",
+      "citizenship",
+    ];
+
+    const currentPurpose = clearanceInput.purpose || "";
+    const customFields = (otherDocFields[currentPurpose] || []).filter(
+      (fieldName) => !fixedPredefinedFields.includes(fieldName)
+    );
+
+
     
     useEffect(() => {
       if ((clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax" ) && docType === "Barangay Certificate") setAddOn("Deceased's ");
@@ -482,6 +533,8 @@ export default function action() {
     const [activeSection, setActiveSection] = useState("basic");
     const isForMyself = clearanceInput.requestType === "forMyself";
     const [selectingFor, setSelectingFor] = useState<"fullName" | "requestor" | null>(null);
+    const isOtherDocumentPurpose = Object.keys(otherDocFields).includes(clearanceInput.purpose || "");
+
 
     return (
         <main className="createRequest-main-container">
@@ -526,6 +579,7 @@ export default function action() {
                 <div className="createRequest-bottom-section-scroll">
                   {activeSection === "basic" && (
                     <>
+
                     <div className="createRequest-section-2-full-top">
                       <div className="createRequest-section-2-left-side">
                         <div className="fields-section">
@@ -541,8 +595,14 @@ export default function action() {
                             disabled
                           />
                         </div>
+                        
 
-                        {clearanceInput.purpose !== "Residency" && clearanceInput.purpose !== "No Income" && clearanceInput.purpose !== "Cohabitation" && (
+                        {(
+                          (!isOtherDocumentPurpose &&
+                            !excludedPurposesFullName.includes(clearanceInput.purpose || "")) ||
+                          (isOtherDocumentPurpose &&
+                            otherDocFields[clearanceInput.purpose || ""]?.includes("name"))
+                        ) && (
                           <>
                             <div className="fields-section">
                               <h1>{addOn}Full Name<span className="required">*</span></h1>
@@ -597,7 +657,14 @@ export default function action() {
                           </>
                         )}
 
-                        <div className="fields-section">
+                        {(
+                          (!isOtherDocumentPurpose &&
+                            allPurposeCertificate.includes(clearanceInput.purpose || "")) ||
+                          (isOtherDocumentPurpose &&
+                            otherDocFields[clearanceInput.purpose || ""]?.includes("requestor"))
+                        ) && (
+                          <>
+                            <div className="fields-section">
                               <h1>Requestor's Full Name<span className="required">*</span></h1>
 
                               <div className="createRequest-input-wrapper">
@@ -645,6 +712,11 @@ export default function action() {
                                 </div>
                               </div>
                             </div>
+
+                          </>
+                        )}
+
+                          
                         
                         <div className="fields-section">
                           <h1>Requestor's Title<span className="required">*</span></h1>
@@ -661,6 +733,44 @@ export default function action() {
                             <option value="Ms.">Ms.</option>
                           </select>
                         </div>
+
+                        {clearanceInput.purpose === "Good Moral and Probation" && (
+                          <>
+                            <div className="fields-section">
+                              <h1>Purpose of Good Moral and Probation:<span className="required">*</span></h1>
+                              <select
+                                id="goodMoralPurpose"
+                                name="goodMoralPurpose"
+                                className="createRequest-input-field"
+                                value={clearanceInput.goodMoralPurpose}
+                                onChange={handleChange}
+                                required
+                              >
+                                <option value="" disabled>Select Purpose</option>
+                                <option value = "Legal Purpose and Intent">Legal Purpose and Intent</option>
+                                <option value = "Others">Others</option>
+                              </select>
+                            </div>
+                          </>
+                        )}
+
+                        {clearanceInput.purpose === "Garage/PUV" && (
+                          <>
+                            <div className="fields-section">
+                              <h1>Certificate Purpose<span className="required">*</span></h1>
+                              <input 
+                                type="text"
+                                id="goodMoralOtherPurpose"  
+                                name="goodMoralOtherPurpose"  
+                                className="createRequest-input-field"  
+                                required 
+                                value={clearanceInput.goodMoralOtherPurpose || ""}
+                                onChange={handleChange}
+                                placeholder="Enter Certificate Purpose"
+                              />    
+                            </div>   
+                          </>
+                        )}
 
                         {clearanceInput.purpose === "No Income"  && (
                             <>
@@ -792,62 +902,6 @@ export default function action() {
                           </>
                         )}
 
-                        {clearanceInput.purpose === "Good Moral and Probation" && (
-                          <>
-                            <div className="fields-section">
-                              <h1>Purpose of Good Moral and Probation:<span className="required">*</span></h1>
-                              <select
-                                id="goodMoralPurpose"
-                                name="goodMoralPurpose"
-                                className="createRequest-input-field"
-                                value={clearanceInput.goodMoralPurpose}
-                                onChange={handleChange}
-                                required
-                              >
-                                <option value="" disabled>Select Purpose</option>
-                                <option value = "Legal Purpose and Intent">Legal Purpose and Intent</option>
-                                <option value = "Others">Others</option>
-                              </select>
-                            </div>
-
-                            {clearanceInput.goodMoralPurpose === "Others" && (
-                              <>
-                                <div className="fields-section">
-                                  <h1>Please Specify Other Purpose:<span className="required">*</span></h1>
-                                  <input 
-                                    type="text"  
-                                    id="goodMoralOtherPurpose"  
-                                    name="goodMoralOtherPurpose"  
-                                    value={clearanceInput.goodMoralOtherPurpose}
-                                    onChange={handleChange}
-                                    className="createRequest-input-field"  
-                                    required 
-                                    placeholder="Enter Other Purpose"
-                                  />
-                                </div>
-                              </>
-                            )}
-                          </>
-                        )}
-
-                        {clearanceInput.purpose === "Garage/PUV" && (
-                          <>
-                            <div className="fields-section">
-                              <h1>Certificate Purpose<span className="required">*</span></h1>
-                              <input 
-                                type="text"
-                                id="goodMoralOtherPurpose"  
-                                name="goodMoralOtherPurpose"  
-                                className="createRequest-input-field"  
-                                required 
-                                value={clearanceInput.goodMoralOtherPurpose || ""}
-                                onChange={handleChange}
-                                placeholder="Enter Certificate Purpose"
-                              />    
-                            </div>   
-                          </>
-                        )}
-
                         <div className="fields-section">
                           <h1>{addOn}Address<span className="required">*</span></h1>
                           <input 
@@ -879,6 +933,29 @@ export default function action() {
                             />
                           </div>
 
+                          {clearanceInput.purpose === "Good Moral and Probation" && (
+                          <>
+
+                            {clearanceInput.goodMoralPurpose === "Others" && (
+                              <>
+                                <div className="fields-section">
+                                  <h1>Please Specify Other Purpose:<span className="required">*</span></h1>
+                                  <input 
+                                    type="text"  
+                                    id="goodMoralOtherPurpose"  
+                                    name="goodMoralOtherPurpose"  
+                                    value={clearanceInput.goodMoralOtherPurpose}
+                                    onChange={handleChange}
+                                    className="createRequest-input-field"  
+                                    required 
+                                    placeholder="Enter Other Purpose"
+                                  />
+                                </div>
+                              </>
+                            )}
+                          </>
+                        )}
+
 
                         {clearanceInput.purpose === "No Income"  && (
                           <>               
@@ -906,6 +983,26 @@ export default function action() {
 
                   {activeSection === "full" && (
                     <>
+                    {/*
+                      {/* Fields for Added Barangay Certificate Document Purpose */}
+                      {/*
+                      {customFields.map((fieldName) => (
+                        <div key={fieldName} className="fields-section">
+                          <h1>{fieldName}<span className="required">*</span></h1>
+                          <input
+                            type="text"
+                            name={fieldName}
+                            id={fieldName}
+                            value={(clearanceInput as any)[fieldName] || ""}
+                            onChange={handleChange}
+                            required
+                            className="createRequest-input-field"
+                            placeholder={`Enter ${fieldName}`}
+                          />
+                        </div>
+                      ))}
+                      */}
+
                       <div className="createRequest-section-2-full-top">
                         <div className="createRequest-section-2-left-side">
                           <div className="fields-section">
@@ -1446,6 +1543,44 @@ export default function action() {
                           )}
                         </div>
                       </div>
+
+                      <div className="createRequest-section-2-full-bottom">
+  <div className="createRequest-section-2-left-side">
+    {customFields.filter((_, i) => i % 2 === 0).map((fieldName) => (
+      <div key={fieldName} className="fields-section">
+        <h1>{fieldName}<span className="required">*</span></h1>
+        <input
+          type="text"
+          id={fieldName}
+          name={fieldName}
+          className="createRequest-input-field"
+          required
+          value={(clearanceInput as any)[fieldName] || ""}
+          onChange={handleChange}
+          placeholder={`Enter ${fieldName}`}
+        />
+      </div>
+    ))}
+  </div>
+
+  <div className="createRequest-section-2-right-side">
+    {customFields.filter((_, i) => i % 2 === 1).map((fieldName) => (
+      <div key={fieldName} className="fields-section">
+        <h1>{fieldName}<span className="required">*</span></h1>
+        <input
+          type="text"
+          id={fieldName}
+          name={fieldName}
+          className="createRequest-input-field"
+          required
+          value={(clearanceInput as any)[fieldName] || ""}
+          onChange={handleChange}
+          placeholder={`Enter ${fieldName}`}
+        />
+      </div>
+    ))}
+  </div>
+</div>
                     </>
                   )}
 

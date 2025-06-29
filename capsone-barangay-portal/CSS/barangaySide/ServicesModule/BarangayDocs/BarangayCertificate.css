@@ -838,6 +838,8 @@ gap: 20px;
   overflow-y: auto;
   height: 480px;
   padding-bottom: 110px;
+  display: flex;
+  flex-direction: column;
 }
 
 .createRequest-input-wrapper {
@@ -868,6 +870,12 @@ gap: 20px;
 }
 
 .createRequest-section-2-full-top{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.createRequest-section-2-full-bottom{
   display: flex;
   flex-direction: row;
   width: 100%;
