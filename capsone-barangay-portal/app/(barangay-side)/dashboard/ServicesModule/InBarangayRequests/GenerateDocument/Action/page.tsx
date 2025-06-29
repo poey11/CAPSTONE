@@ -601,7 +601,7 @@ export default function action() {
                           (!isOtherDocumentPurpose &&
                             !excludedPurposesFullName.includes(clearanceInput.purpose || "")) ||
                           (isOtherDocumentPurpose &&
-                            otherDocFields[clearanceInput.purpose || ""]?.includes("name"))
+                            otherDocFields[clearanceInput.purpose || ""]?.includes("fullName"))
                         ) && (
                           <>
                             <div className="fields-section">
@@ -661,7 +661,7 @@ export default function action() {
                           (!isOtherDocumentPurpose &&
                             allPurposeCertificate.includes(clearanceInput.purpose || "")) ||
                           (isOtherDocumentPurpose &&
-                            otherDocFields[clearanceInput.purpose || ""]?.includes("requestor"))
+                            otherDocFields[clearanceInput.purpose || ""]?.includes("requestorFname"))
                         ) && (
                           <>
                             <div className="fields-section">
@@ -983,26 +983,6 @@ export default function action() {
 
                   {activeSection === "full" && (
                     <>
-                    {/*
-                      {/* Fields for Added Barangay Certificate Document Purpose */}
-                      {/*
-                      {customFields.map((fieldName) => (
-                        <div key={fieldName} className="fields-section">
-                          <h1>{fieldName}<span className="required">*</span></h1>
-                          <input
-                            type="text"
-                            name={fieldName}
-                            id={fieldName}
-                            value={(clearanceInput as any)[fieldName] || ""}
-                            onChange={handleChange}
-                            required
-                            className="createRequest-input-field"
-                            placeholder={`Enter ${fieldName}`}
-                          />
-                        </div>
-                      ))}
-                      */}
-
                       <div className="createRequest-section-2-full-top">
                         <div className="createRequest-section-2-left-side">
                           <div className="fields-section">
@@ -1544,43 +1524,44 @@ export default function action() {
                         </div>
                       </div>
 
+                      {/* Fields for Added Barangay Certificate Document Purpose */}
                       <div className="createRequest-section-2-full-bottom">
-  <div className="createRequest-section-2-left-side">
-    {customFields.filter((_, i) => i % 2 === 0).map((fieldName) => (
-      <div key={fieldName} className="fields-section">
-        <h1>{fieldName}<span className="required">*</span></h1>
-        <input
-          type="text"
-          id={fieldName}
-          name={fieldName}
-          className="createRequest-input-field"
-          required
-          value={(clearanceInput as any)[fieldName] || ""}
-          onChange={handleChange}
-          placeholder={`Enter ${fieldName}`}
-        />
-      </div>
-    ))}
-  </div>
+                        <div className="createRequest-section-2-left-side">
+                          {customFields.filter((_, i) => i % 2 === 0).map((fieldName) => (
+                            <div key={fieldName} className="fields-section">
+                              <h1>{fieldName}<span className="required">*</span></h1>
+                              <input
+                                type="text"
+                                id={fieldName}
+                                name={fieldName}
+                                className="createRequest-input-field"
+                                required
+                                value={(clearanceInput as any)[fieldName] || ""}
+                                onChange={handleChange}
+                                placeholder={`Enter ${fieldName}`}
+                              />
+                            </div>
+                          ))}
+                        </div>
 
-  <div className="createRequest-section-2-right-side">
-    {customFields.filter((_, i) => i % 2 === 1).map((fieldName) => (
-      <div key={fieldName} className="fields-section">
-        <h1>{fieldName}<span className="required">*</span></h1>
-        <input
-          type="text"
-          id={fieldName}
-          name={fieldName}
-          className="createRequest-input-field"
-          required
-          value={(clearanceInput as any)[fieldName] || ""}
-          onChange={handleChange}
-          placeholder={`Enter ${fieldName}`}
-        />
-      </div>
-    ))}
-  </div>
-</div>
+                        <div className="createRequest-section-2-right-side">
+                          {customFields.filter((_, i) => i % 2 === 1).map((fieldName) => (
+                            <div key={fieldName} className="fields-section">
+                              <h1>{fieldName}<span className="required">*</span></h1>
+                              <input
+                                type="text"
+                                id={fieldName}
+                                name={fieldName}
+                                className="createRequest-input-field"
+                                required
+                                value={(clearanceInput as any)[fieldName] || ""}
+                                onChange={handleChange}
+                                placeholder={`Enter ${fieldName}`}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </>
                   )}
 

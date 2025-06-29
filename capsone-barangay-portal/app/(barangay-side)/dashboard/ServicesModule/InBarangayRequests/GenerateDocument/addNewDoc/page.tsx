@@ -131,7 +131,7 @@ export default function AddNewDoc() {
         });
     };
 
-    const newFields = [...fields, { name: "name" }, { name: "requestor" }];
+    const newFields = [...fields, { name: "fullName" }, { name: "requestorFname" }, { name: "requestorMrMs" }, { name: "dateOfResidency" }, {name: "address"} ];
 
     
 
@@ -408,7 +408,7 @@ export default function AddNewDoc() {
                                         <div className="predefined-fields-content">
                                             <div className="predefined-field-row">
                                                 <div className="predefined-field-name">
-                                                    <h1>1. Field Name: 'name'</h1>
+                                                    <h1>1. Field Name: 'fullName'</h1>
                                                 </div>
                                                 <div className="predefined-field-description">
                                                     <h1>*Use this field to display who the document is for*</h1>
@@ -416,15 +416,39 @@ export default function AddNewDoc() {
                                             </div>
                                             <div className="predefined-field-row">
                                                 <div className="predefined-field-name">
-                                                    <h1>2. Field Name: 'requestor'</h1>
+                                                    <h1>2. Field Name: 'requestorFname'</h1>
                                                 </div>
                                                 <div className="predefined-field-description">
-                                                    <h1>*Use this field to display the name of requestor*</h1>
+                                                    <h1>*Use this field to display the requestor's name*</h1>
                                                 </div>
                                             </div>
                                             <div className="predefined-field-row">
                                                 <div className="predefined-field-name">
-                                                    <h1>3. Field Name: 'day'</h1>
+                                                    <h1>3. Field Name: 'requestorMrMs'</h1>
+                                                </div>
+                                                <div className="predefined-field-description">
+                                                    <h1>*Use this field to display the requestor's title*</h1>
+                                                </div>
+                                            </div>
+                                            <div className="predefined-field-row">
+                                                <div className="predefined-field-name">
+                                                    <h1>4. Field Name: 'address'</h1>
+                                                </div>
+                                                <div className="predefined-field-description">
+                                                    <h1>*Use this field to display the requestor's address*</h1>
+                                                </div>
+                                            </div>
+                                            <div className="predefined-field-row">
+                                                <div className="predefined-field-name">
+                                                    <h1>5. Field Name: 'dateOfResidency'</h1>
+                                                </div>
+                                                <div className="predefined-field-description">
+                                                    <h1>*Use this field to display the requestor's dateOfResidency*</h1>
+                                                </div>
+                                            </div>
+                                            <div className="predefined-field-row">
+                                                <div className="predefined-field-name">
+                                                    <h1>6. Field Name: 'day'</h1>
                                                 </div>
                                                 <div className="predefined-field-description">
                                                     <h1>*Use this field to display the day today*</h1>
@@ -432,7 +456,7 @@ export default function AddNewDoc() {
                                             </div>
                                             <div className="predefined-field-row">
                                                 <div className="predefined-field-name">
-                                                    <h1>4. Field Name: 'month'</h1>
+                                                    <h1>7. Field Name: 'month'</h1>
                                                 </div>
                                                 <div className="predefined-field-description">
                                                     <h1>*Use this field to display the month today*</h1>
@@ -440,7 +464,7 @@ export default function AddNewDoc() {
                                             </div>
                                             <div className="predefined-field-row">
                                                 <div className="predefined-field-name">
-                                                    <h1>5. Field Name: 'year'</h1>
+                                                    <h1>8. Field Name: 'year'</h1>
                                                 </div>
                                                 <div className="predefined-field-description">
                                                     <h1>*Use this field to display the year today*</h1>
@@ -474,7 +498,7 @@ export default function AddNewDoc() {
                                         <div className="notes-content">
                                             <div className="notes-row">
                                                 <h1>
-                                                    To insert dynamic values into the document body, use the following format: {'{day}'}, {'{month}'}, {'{year}'}, {'{name}'}, and {'{requestor}'}.
+                                                    To insert dynamic values into the document body, use the following format: <strong>{'{fullName}'}</strong>.
                                                 </h1>
                                             </div>
                                             <div className="notes-row">
@@ -484,7 +508,7 @@ export default function AddNewDoc() {
                                             </div>
                                             <div className="notes-row">
                                                 <h1>
-                                                    If you add your own fields (e.g., a field named "address"), you can include them in the document body using the same format: {`{address}`}.
+                                                    If you add your own fields (e.g., a field named "businessName"), you can include them in the document body using the same format: {`{businessName}`}.
                                                 </h1>
                                             </div>
                                             <div className="notes-row-sample">
@@ -492,10 +516,10 @@ export default function AddNewDoc() {
                                                     Sample Body:
                                                 </h2>
                                                 <h1>
-                                                    This is to certify that {`{name}`} is a resident of Barangay Fairview. <br/>
+                                                    This is to certify that {`{fullName}`} from {`{address}`} is a resident of Barangay Fairview. <br/>
                                                 </h1>
                                                 <h1>
-                                                    This document is issued upon the request of {`{requestor}`}.
+                                                    This document is issued upon the request of {`{requestorMrMs}`} {`{requestorFname}`}.
                                                 </h1>
                                                 <h1>
                                                     Issued on {`{month}`} {`{day}`}, {`{year}`}.
