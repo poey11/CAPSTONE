@@ -595,6 +595,74 @@ export default function action() {
                             disabled
                           />
                         </div>
+
+                        <div className="fields-section">
+                          <h1>Purpose<span className="required">*</span></h1>
+                          <select 
+                            id="purpose" 
+                            name="purpose" 
+                            className="createRequest-input-field" 
+                            required
+                            value ={clearanceInput?.purpose || ""}
+                            onChange={handleChange} // Handle change to update state
+                          >
+                          <option value="" disabled>Select purpose</option>
+                            {docType === "Barangay Certificate" ? (<>
+                              <option value="Residency">Residency</option>
+                              <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
+                              <option value="Estate Tax">Estate Tax</option>
+                              <option value="Death Residency">Death Residency</option>
+                              <option value="No Income">No Income</option>
+                              <option value="Cohabitation">Cohabitation</option>
+                              <option value="Guardianship">Guardianship</option>
+                              <option value="Good Moral and Probation">Good Moral and Probation</option>
+                              <option value="Garage/PUV">Garage/PUV</option>
+                              <option value="Garage/TRU">Garage/TRU</option>
+
+                              {/* Dynamically fetched purposes from OtherDocuments */}
+
+                              {otherDocPurposes["Barangay Certificate"]?.map((title, index) => (
+                                <option key={index} value={title}>{title}</option>
+                              ))}
+                                            
+                            </>):docType === "Barangay Clearance" ? (<>
+                              <option value="Loan">Loan</option>
+                              <option value="Bank Transaction">Bank Transaction</option>
+                              <option value="Residency">Residency</option>
+                              <option value="Local Employment">Local Employment</option>
+                              <option value="Maynilad">Maynilad</option>
+                              <option value="Meralco">Meralco</option>
+                              <option value="Bail Bond">Bail Bond</option>
+
+                              {/* Dynamically fetched purposes from OtherDocuments */}
+
+                              {otherDocPurposes["Barangay Clearance"]?.map((title, index) => (
+                                <option key={index} value={title}>{title}</option>
+                              ))}
+
+                              </>):docType === "Barangay Indigency" ? ( <>
+                                <option value="No Income">No Income</option>
+                                <option value="Public Attorneys Office">Public Attorneys Office</option>
+                                <option value="AKAP">AKAP</option>
+                                <option value="Financial Subsidy of Solo Parent">Financial Subsidy of Solo Parent</option>
+                                <option value="Fire Emergency">Fire Emergency</option>
+                                <option value="Flood Victims">Flood Victims</option>
+                                <option value="Philhealth Sponsor">Philhealth Sponsor</option>
+                                <option value="Medical Assistance">Medical Assistance</option>
+
+                                {/* Dynamically fetched purposes from OtherDocuments */}
+                                              
+                                {otherDocPurposes["Barangay Indigency"]?.map((title, index) => (
+                                  <option key={index} value={title}>{title}</option>
+                                ))}
+
+                              </>): (docType === "Business Permit" ||docType === "Temporary Business Permit") && (
+                                 <>
+                                <option value="New">New</option>
+                                <option value="Renewal">Renewal</option>
+                            </>)}
+                          </select>
+                        </div>
                         
 
                         {(
@@ -716,24 +784,6 @@ export default function action() {
                           </>
                         )}
 
-                          
-                        
-                        <div className="fields-section">
-                          <h1>Requestor's Title<span className="required">*</span></h1>
-                          <select 
-                            id="requestorMrMs" 
-                            name="requestorMrMs" 
-                            className="createRequest-input-field" 
-                            required
-                            value ={clearanceInput?.requestorMrMs || ""}
-                            onChange={handleChange} // Handle change to update state
-                          >
-                            <option value="" disabled>Select title</option>
-                            <option value="Mr.">Mr.</option>
-                            <option value="Ms.">Ms.</option>
-                          </select>
-                        </div>
-
                         {clearanceInput.purpose === "Good Moral and Probation" && (
                           <>
                             <div className="fields-section">
@@ -814,73 +864,7 @@ export default function action() {
 
                       <div className="createRequest-section-2-right-side">
 
-                        <div className="fields-section">
-                          <h1>Purpose<span className="required">*</span></h1>
-                          <select 
-                            id="purpose" 
-                            name="purpose" 
-                            className="createRequest-input-field" 
-                            required
-                            value ={clearanceInput?.purpose || ""}
-                            onChange={handleChange} // Handle change to update state
-                          >
-                          <option value="" disabled>Select purpose</option>
-                            {docType === "Barangay Certificate" ? (<>
-                              <option value="Residency">Residency</option>
-                              <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
-                              <option value="Estate Tax">Estate Tax</option>
-                              <option value="Death Residency">Death Residency</option>
-                              <option value="No Income">No Income</option>
-                              <option value="Cohabitation">Cohabitation</option>
-                              <option value="Guardianship">Guardianship</option>
-                              <option value="Good Moral and Probation">Good Moral and Probation</option>
-                              <option value="Garage/PUV">Garage/PUV</option>
-                              <option value="Garage/TRU">Garage/TRU</option>
-
-                              {/* Dynamically fetched purposes from OtherDocuments */}
-
-                              {otherDocPurposes["Barangay Certificate"]?.map((title, index) => (
-                                <option key={index} value={title}>{title}</option>
-                              ))}
-                                            
-                            </>):docType === "Barangay Clearance" ? (<>
-                              <option value="Loan">Loan</option>
-                              <option value="Bank Transaction">Bank Transaction</option>
-                              <option value="Residency">Residency</option>
-                              <option value="Local Employment">Local Employment</option>
-                              <option value="Maynilad">Maynilad</option>
-                              <option value="Meralco">Meralco</option>
-                              <option value="Bail Bond">Bail Bond</option>
-
-                              {/* Dynamically fetched purposes from OtherDocuments */}
-
-                              {otherDocPurposes["Barangay Clearance"]?.map((title, index) => (
-                                <option key={index} value={title}>{title}</option>
-                              ))}
-
-                              </>):docType === "Barangay Indigency" ? ( <>
-                                <option value="No Income">No Income</option>
-                                <option value="Public Attorneys Office">Public Attorneys Office</option>
-                                <option value="AKAP">AKAP</option>
-                                <option value="Financial Subsidy of Solo Parent">Financial Subsidy of Solo Parent</option>
-                                <option value="Fire Emergency">Fire Emergency</option>
-                                <option value="Flood Victims">Flood Victims</option>
-                                <option value="Philhealth Sponsor">Philhealth Sponsor</option>
-                                <option value="Medical Assistance">Medical Assistance</option>
-
-                                {/* Dynamically fetched purposes from OtherDocuments */}
-                                              
-                                {otherDocPurposes["Barangay Indigency"]?.map((title, index) => (
-                                  <option key={index} value={title}>{title}</option>
-                                ))}
-
-                              </>): (docType === "Business Permit" ||docType === "Temporary Business Permit") && (
-                                 <>
-                                <option value="New">New</option>
-                                <option value="Renewal">Renewal</option>
-                            </>)}
-                          </select>
-                        </div>
+                        
 
                         {clearanceInput.purpose === "Guardianship" && (
                           <>
@@ -901,6 +885,22 @@ export default function action() {
                             </div>
                           </>
                         )}
+
+                        <div className="fields-section">
+                          <h1>Requestor's Title<span className="required">*</span></h1>
+                          <select 
+                            id="requestorMrMs" 
+                            name="requestorMrMs" 
+                            className="createRequest-input-field" 
+                            required
+                            value ={clearanceInput?.requestorMrMs || ""}
+                            onChange={handleChange} // Handle change to update state
+                          >
+                            <option value="" disabled>Select title</option>
+                            <option value="Mr.">Mr.</option>
+                            <option value="Ms.">Ms.</option>
+                          </select>
+                        </div>
 
                         <div className="fields-section">
                           <h1>{addOn}Address<span className="required">*</span></h1>
