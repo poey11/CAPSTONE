@@ -41,6 +41,13 @@ const RegisterForm: React.FC = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
 
+    /*
+      For pop up overlay errors
+    */
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+
+
 
 const [invalidFields, setInvalidFields] = useState<string[]>([]);
 const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
@@ -211,10 +218,10 @@ if (!resident.address.trim()) invalidFields.push("email");
 
     if (invalidFields.length > 0) {
       setInvalidFields(invalidFields);
-    
-  
+    setPopupErrorMessage("Please fill up all required fields.");
+    setShowErrorPopup(true);
       setTimeout(() => {
-       
+       setShowErrorPopup(false);
       }, 3000);
       return;
     }
@@ -551,6 +558,15 @@ const confirmSubmit = async () => {
                     </div>
                 </div>
             )}
+
+            {showErrorPopup && (
+                <div className={`error-popup-overlay-register show`}>
+                    <div className="popup-ad-register">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                        <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
         </main>
 
         
