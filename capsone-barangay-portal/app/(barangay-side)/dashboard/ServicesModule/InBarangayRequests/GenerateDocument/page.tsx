@@ -89,9 +89,11 @@ export default function GenerateDocument() {
                                     <h1>Barangay Indigency</h1>
                                 </div>
 
+                                {/*
                                 <div className="generate-documents-documents-card" onClick={handleSubmit} id="Barangay ID">
                                     <h1>Barangay ID</h1>
                                 </div>
+                                */}
                             </div>
 
                             <div className="generate-documents-container-column">
@@ -123,16 +125,20 @@ export default function GenerateDocument() {
                                     <h1>Barangay Clearance</h1>
                                 </div>
 
+
+                            {/*
                                 <div className="generate-documents-documents-card" onClick={handleSubmit} id="First Time Jobseeker">
                                     <h1>First Time Jobseeker</h1>
                                 </div>
+
+                            */}
 
                             </div>
                         </div>
                     </div>
                     <div className="generatedocument-inbrgy-bottom-section">
                         <div className="generate-documents-othernewdocs-container">
-                            <div className="generate-documents-documents-card-othernewdocs" onClick={handleOtherNewDocument}>
+                            <div className="generate-documents-documents-card-othernewdocs" onClick={handleSubmit} id="Other Documents">
                                 <h1>Other Documents</h1>
                             </div>
                          </div>           
