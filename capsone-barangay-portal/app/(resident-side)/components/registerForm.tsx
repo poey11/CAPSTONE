@@ -40,6 +40,11 @@ const RegisterForm: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+
+
+const [invalidFields, setInvalidFields] = useState<string[]>([]);
+const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
+
     const [resident, setResident] = useState<residentUser>({
         sex: "",
         first_name: "",
@@ -81,6 +86,13 @@ const RegisterForm: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+
+       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+         if (!emailRegex.test(resident.email)) {
+    setErrorPopup({ show: true, message: "Invalid email format. Please enter a valid email address." });
+    return;
+  }
     
         if(!isValidPhilippineMobileNumber(resident.phone)) {
             setErrorPopup({ show: true, message: "Invalid phone number format. Please enter a valid Philippine mobile number." });
@@ -92,6 +104,37 @@ const RegisterForm: React.FC = () => {
         setConfirmPassword("");
         return;
       }
+
+
+        // Check if Terms is unchecked
+        if (!isTermChecked) {
+            setErrorPopup({ show: true, message: "Please agree to the terms and conditions." });
+            return;
+        }
+
+        // Check if captchaToken is missing
+        if (!captchaToken) {
+            setErrorPopup({ show: true, message: "Please complete the CAPTCHA verification." });
+            return;
+        }
+
+
+          // Age check - must be 18 or older
+            const birthDate = new Date(resident.dateOfBirth);
+            const today = new Date();
+            const age = today.getFullYear() - birthDate.getFullYear();
+            const hasHadBirthdayThisYear = (
+                today.getMonth() > birthDate.getMonth() ||
+                (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate())
+            );
+            const actualAge = hasHadBirthdayThisYear ? age : age - 1;
+
+            if (actualAge < 18) {
+                setErrorPopup({ show: true, message: "You must be at least 18 years old to register." });
+                return;
+            }
+
+
     
       let user = null;
       let docRef = null;
@@ -147,6 +190,47 @@ const RegisterForm: React.FC = () => {
         if (user) await user.delete();
     }
     };
+
+const handleSubmitClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  e.preventDefault();
+
+  const invalidFields: string[] = [];
+
+  if (!resident.first_name.trim()) invalidFields.push("first_name");
+  if (!resident.last_name.trim()) invalidFields.push("last_name");
+  if (!resident.dateOfBirth) invalidFields.push("dateOfBirth");
+  if (!resident.sex) invalidFields.push("sex");
+  if (!resident.address.trim()) invalidFields.push("address");
+if (!resident.address.trim()) invalidFields.push("email");
+  if (!resident.address.trim()) invalidFields.push("password");
+  if (!resident.address.trim()) invalidFields.push("sex");
+  if (!resident.phone.trim()) invalidFields.push("phone");
+  if (!resident.upload) invalidFields.push("upload"); // file upload check
+
+//  if (!isTermChecked) invalidFields.push("terms");
+
+    if (invalidFields.length > 0) {
+      setInvalidFields(invalidFields);
+    
+  
+      setTimeout(() => {
+       
+      }, 3000);
+      return;
+    }
+
+  setInvalidFields([]);
+ setShowSubmitPopup(true);
+};
+
+
+const confirmSubmit = async () => {
+  setShowSubmitPopup(false);
+
+  const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
+  await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
+};
+
     
     
     const handleCheckBox = (e: ChangeEvent<HTMLInputElement>) => {
@@ -189,26 +273,14 @@ const RegisterForm: React.FC = () => {
     }
   };
 
+
+
+
+
+
     return (
         <main className="main-container-register-form">
-            {showPopup && (
-                <div className="popup-overlay">
-                    <div className="popup">
-                        <img src="/Images/successful.png" alt="warning icon" className="successful-icon-popup" />
-                        <p>Registration Successful!</p>
-                        <p>Redirecting to Login Page...</p>
-                    </div>
-                </div>
-            )}
-            {errorPopup.show && (
-                <div className="popup-overlay error">
-                    <div className="popup">
-                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
-                        <p>{errorPopup.message}</p>
-                        <button onClick={() => setErrorPopup({ show: false, message: "" })} className="close-button">Close</button>
-                    </div>
-                </div>
-            )}
+        
 
             <div className="headerpic-reg">
                 <p>REGISTER</p>
@@ -219,7 +291,8 @@ const RegisterForm: React.FC = () => {
                 <h1>Sign Up</h1>
 
                 <hr/>
-                <form className="register-form" onSubmit={handleSubmit}>
+            <form className="register-form" autoComplete="off">
+
                     
                     <div className="form-container">
 
@@ -229,7 +302,7 @@ const RegisterForm: React.FC = () => {
                         <div className="form-container-left-side">
                               <div className="form-group-register-form">
                                     <label htmlFor="sex" className="form-label-register-form">Sex:<span className="required">*</span></label>
-                                    <select value={resident.sex} onChange={handleChange} id="sex" name="sex" className="form-input-register-form" required>
+                                    <select value={resident.sex} onChange={handleChange} id="sex" name="sex"  className={`form-input-register-form ${invalidFields.includes("sex") ? "input-error" : ""}`} required>
                                         <option value="" disabled>Select a Sex</option>
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
@@ -250,7 +323,7 @@ const RegisterForm: React.FC = () => {
                                 <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
                                 <input  value={resident.email} onChange={handleChange} id="email" 
                                 type="email" name="email" 
-                                className="form-input-register-form " 
+                               className={`form-input-register-form ${invalidFields.includes("email") ? "input-error" : ""}`}
                                 placeholder="Enter Email"
                                 required />
                             </div>
@@ -259,7 +332,7 @@ const RegisterForm: React.FC = () => {
                                 <label htmlFor="email" className="form-label-register-form" >Date of Birth:<span className="required">*</span> </label>
                                 <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
                                 type="date" name="dateOfBirth" 
-                                className="form-input-register-form " 
+                                 className={`form-input-register-form ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
                                 placeholder="Enter Email"
                                 max={today}
                                 required />
@@ -271,7 +344,7 @@ const RegisterForm: React.FC = () => {
                                         <input value={resident.password} onChange={handleChange} id="password"
                                             type={showPassword ? "text" : "password"}
                                             name="password" 
-                                            className="form-input-register-form"
+                                             className={`form-input-register-form ${invalidFields.includes("password") ? "input-error" : ""}`}
                                             placeholder="Enter Password"
                                             required/>
                                             <button
@@ -291,7 +364,7 @@ const RegisterForm: React.FC = () => {
                                 <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
                                 <input value={resident.first_name} onChange={handleChange} id="first_name" 
                                 type="text" name="first_name" 
-                                className="form-input-register-form "
+                                 className={`form-input-register-form ${invalidFields.includes("first_name") ? "input-error" : ""}`}
                                 placeholder= "Enter First Name"
                                 required />
 
@@ -303,7 +376,7 @@ const RegisterForm: React.FC = () => {
 
                                 <input value={resident.last_name} onChange={handleChange} id="last_name" 
                                 type="text" name="last_name" 
-                                className="form-input-register-form " 
+                               className={`form-input-register-form ${invalidFields.includes("last_name") ? "input-error" : ""}`}
                                 placeholder="Enter Last Name"
                                 required/>
 
@@ -313,7 +386,7 @@ const RegisterForm: React.FC = () => {
                                 <label htmlFor="phone" className="form-label-register-form" >Phone Number:<span className="required">*</span> </label>
                                 <input  value={resident.phone} id="phone" 
                                 type="tel" name="phone"
-                                className="form-input-register-form " 
+                                className={`form-input-register-form ${invalidFields.includes("phone") ? "input-error" : ""}`}
                                 maxLength={11}
                                 pattern="^[0-9]{11}$" 
                                 placeholder="Enter Phone Number"
@@ -331,7 +404,7 @@ const RegisterForm: React.FC = () => {
                                 <label htmlFor="address" className="form-label-register-form">Address:<span className="required">*</span> </label>
                                 <input value={resident.address} onChange={handleChange} id="address" 
                                 type="text" name="address" 
-                                className="form-input-register-form " 
+                               className={`form-input-register-form ${invalidFields.includes("address") ? "input-error" : ""}`}
                                 placeholder="Enter Address"
                                 required />
                             </div>
@@ -345,7 +418,7 @@ const RegisterForm: React.FC = () => {
                                 name="confirm_password"
                                 value={confirmPassword}
                                 onChange={handleChange}
-                                className="form-input-register-form"
+                              className={`form-input-register-form ${invalidFields.includes("password") ? "input-error" : ""}`}
                                 placeholder="Confirm Password"
                                 required
                             />
@@ -367,10 +440,11 @@ const RegisterForm: React.FC = () => {
 
                          <div className="form-container-lower">
 
-                                  <div className="signature/printedname-container">
+                          <div className="signature/printedname-container">
                         <label className="form-label-register-form">Upload Valid ID with address:<span className="required">*</span></label>
                         
-                        <div className="file-upload-container-register">
+                       <div className={`file-upload-container-register ${invalidFields.includes("upload") ? "input-error" : ""}`}>
+
                             <label htmlFor="file-upload-register" className="upload-link">Click to Upload File</label>
                             <input
                             id="file-upload-register"
@@ -432,8 +506,8 @@ const RegisterForm: React.FC = () => {
                         <ReCAPTCHA sitekey={captchaSiteKey} onChange={handleToken} />
                     </div>
 
-                    <button type="submit" className="submit-button" disabled={!isTermChecked}>
-                        Register
+                 <button type="button" onClick={handleSubmitClick} className="submit-button">
+                    Register
                     </button>
 
                          </div>
@@ -444,7 +518,39 @@ const RegisterForm: React.FC = () => {
             </div>
 
 
-    
+
+            {showSubmitPopup && (
+            <div className="confirmation-popup-overlay-register">
+                <div className="confirmation-popup-register">
+                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                <p>Are you sure you want to submit?</p>
+                <div className="yesno-container-add">
+                    <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
+                    <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
+                </div>
+                </div>
+            </div>
+            )}
+
+
+        {showPopup && (
+                <div className="popup-overlay">
+                    <div className="popup">
+                        <img src="/Images/successful.png" alt="warning icon" className="successful-icon-popup" />
+                        <p>Registration Successful!</p>
+                        <p>Redirecting to Login Page...</p>
+                    </div>
+                </div>
+            )}
+            {errorPopup.show && (
+                <div className="popup-overlay error">
+                    <div className="popup">
+                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
+                        <p>{errorPopup.message}</p>
+                        <button onClick={() => setErrorPopup({ show: false, message: "" })} className="close-button">Close</button>
+                    </div>
+                </div>
+            )}
         </main>
 
         
