@@ -1,5 +1,5 @@
 .headerpic-report {
-  position: relative; 
+ position: relative;
   height: 250px;
   display: flex;
   align-items: center;
@@ -8,52 +8,27 @@
   font-size: 50px;
   font-weight:bolder;
   overflow: hidden; 
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+   background-position: center 55%; 
 
 }
 
-.headerpic-report::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('/images/brgyheaderpic.JPG');
-  background-size: cover;
-  background-position: 50% 60%;
-  background-repeat: no-repeat;
-  filter: blur(1.2px); 
-  z-index: 1;
-}
-
-.headerpic-report::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.150); 
-  z-index: 2; 
-}
-
-.headerpic-report > * {
-  position: relative;
-  z-index: 3; 
-}
   
 
   .main-container-incident-report {
-    background-color: #D8DFE5;
+     background-image: url('/Images/bghome.jpg');
     display: flex;
     flex-direction: column;  
-    min-height: 100vh; 
+    height: 100%;
+    width: 100%;
  }
 
   .register-section-incident-report {
   display: flex;
   flex-direction: column;
-  background-color: rgba(255, 255, 255, 0.7);
+  background: #FFFFFF;
+   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   border-radius: 10px;
   padding: 2rem;
   margin: auto;
@@ -72,9 +47,9 @@
 
   .register-section-incident-report h1 {
     font-size: 30px; 
-    color: #DF7426;
+    color: #2C3E50;
     text-align: center;
-    font-weight: bold;  
+    font-weight: 750;  
     margin-top: 20px;
     margin-bottom: 10px;
     text-transform: uppercase;
@@ -90,26 +65,26 @@
   }
 
   .form-group-incident-report {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 10px;
+     display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
   }
 
   .form-group-incident-report input,
   .form-group-incident-report select {
-    padding: 8px;
+   padding: 8px;
     width: 100%;
-    max-width: 100%;
-    border: 1px solid #ccc;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
-    color: rgba(0, 0, 0, 0.4);
-    padding-right: 40px;
+    color: #000000;
+    text-align: left; 
   }
 
   .form-label-incident-report {
-    font-size: 16px;
-    font-weight: bold;
-    color: gray;
+     font-size: 16px;
+  font-weight: bold;
+  color: #2C3E50;
   }
 
   .form-input-incident-report {
@@ -121,6 +96,13 @@
     color: #555;
     
   }
+
+    .form-input-incident-report:focus {
+      border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+
 
   .resident-module-filter {
     width: 100%;
@@ -139,11 +121,6 @@
   }
 
 
-  .form-input-incident-report:focus {
-    border-color: #DF7426;
-    outline: none;
-    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
-  }
 
   .submit-button-incident-report {
     background-color: #DF7426;
@@ -320,3 +297,54 @@
     height: 35px;
     margin-bottom: 10px;
   }
+
+
+
+
+
+  /*
+Redirection
+  */
+
+
+  .info-toggle-wrapper,
+.main-residents-info-toggle-wrapper,
+.voters-info-toggle-wrapper,
+.kasambahay-info-toggle-wrapper,
+.jobseeker-info-toggle-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.info-toggle-btn {
+  background-color: transparent;
+  border: none;
+  padding: 10px 16px; 
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  color: #2C3E50;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.info-toggle-btn:hover {
+  color: #ED7014;
+}
+
+.info-toggle-btn.active {
+  color: #ED7014;
+  border-bottom: 3px solid #ED7014;
+  background-color: transparent;
+}
+
+.register-section-upper {
+    padding-top: 25px;
+  padding-left: 35px;
+  padding-right: 35px;
+  height: 100%;
+}

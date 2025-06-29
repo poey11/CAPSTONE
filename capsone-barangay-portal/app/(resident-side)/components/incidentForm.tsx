@@ -285,6 +285,8 @@ const incidentForm:React.FC = () => {
       }
     };
 
+    const [activeSection, setActiveSection] = useState("complainant");
+
 
 
 
@@ -312,7 +314,30 @@ const incidentForm:React.FC = () => {
         <div className="register-section-incident-report">
           <h1>MINOR INCIDENT REPORT</h1>
 
-          <hr/>
+         {/* <hr/>*/} 
+
+         <div className="register-section-upper">
+
+           <nav className="main-residents-info-toggle-wrapper">
+                  {["complainant", "incident", "others"].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "complainant" && "Complainant Info"}
+                      {section === "incident" && "Incident Info"}
+                      {section === "others" && "Others"}
+                    </button>
+                  ))}
+              </nav>
+
+         </div>
+
+          
+
+
           <form className="register-form-incident-report" onSubmit={handleSubmit}> {/* Use onSubmit to trigger the redirect */}
             <div className="form-group-incident-report">
               <label htmlFor="firstname" className="form-label-incident-report">
