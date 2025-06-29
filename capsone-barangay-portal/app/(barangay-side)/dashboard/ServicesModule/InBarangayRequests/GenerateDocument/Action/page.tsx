@@ -96,6 +96,7 @@ interface ClearanceInput {
     statusPriority?: number; // Optional, can be added if 
     reqType?: string; // Optional, can be added if needed
     identificationPicture?: File[];
+    isResident?: boolean;
 }
 
 
@@ -557,6 +558,14 @@ const handleChange = (
       "First Time Jobseeker"
     ];
 
+
+
+    const allExistingPermits = [
+      "Business Permit",
+      "Temporary Business Permit",
+      "Construction"
+    ];
+
     const fixedPredefinedFields = [
       "fullName",
       "requestorFname",
@@ -734,13 +743,33 @@ const handleChange = (
                             ) : null}
                           </select>
                         </div>
+
+                        {allExistingPermits.includes(docType || "") && (
+                          <>
+                            <div className="beneficiary-checkbox-container">
+                              <input 
+                                type="checkbox" 
+                                name="isResident"  
+                                checked={clearanceInput?.isResident || false}
+                                onChange={handleChange}
+                              />   
+                              <label className="beneficiary-checkbox-label" htmlFor="forResidentOnly" >
+                                <p>Is requestor a resident?<span className="required">*</span></p> 
+                              </label>
+                                   
+                            </div>
+                          </>
+                        )}
                         
 
                         {(
-                          (!isOtherDocumentPurpose &&
-                            !excludedPurposesFullName.includes(clearanceInput.purpose || "")) ||
-                          (isOtherDocumentPurpose &&
-                            otherDocFields[clearanceInput.purpose || ""]?.includes("fullName"))
+                          (
+                            (!isOtherDocumentPurpose &&
+                              !excludedPurposesFullName.includes(clearanceInput.purpose || "")) ||
+                            (isOtherDocumentPurpose &&
+                              otherDocFields[clearanceInput.purpose || ""]?.includes("fullName"))
+                          ) &&
+                          !allExistingPermits.includes(docType || "")
                         ) && (
                           <>
                             <div className="fields-section">
@@ -800,7 +829,8 @@ const handleChange = (
                           (!isOtherDocumentPurpose &&
                             allExistingPurpose.includes(clearanceInput.purpose || "")) ||
                           (isOtherDocumentPurpose &&
-                            otherDocFields[clearanceInput.purpose || ""]?.includes("requestorFname"))
+                            otherDocFields[clearanceInput.purpose || ""]?.includes("requestorFname")) ||
+                          allExistingPermits.includes(docType || "")
                         ) && (
                           <>
                             <div className="fields-section">
@@ -808,26 +838,36 @@ const handleChange = (
 
                               <div className="createRequest-input-wrapper">
                                 <div className="createRequest-input-with-clear">
-                                <input 
-                                  type="text" 
-                                  className="createRequest-select-resident-input-field" 
-                                  placeholder="Enter Requestor's Name"
-                                  value={
-                                    isForMyself
-                                      ? clearanceInput.fullName ?? ""
-                                      : clearanceInput.requestorFname ?? ""
-                                  }
-                                  onClick={() => {
-                                    setSelectingFor("requestor");
-                                    setShowResidentsPopup(true);
-                                  }}
-                                  onChange={handleChange}
-                                  required
-                                  id="requestorFname"
-                                  name="requestorFname"
-                                />
+                                  <input 
+                                    type="text" 
+                                    className="createRequest-select-resident-input-field" 
+                                    placeholder="Enter Requestor's Name"
+                                    value={clearanceInput.requestorFname ?? ""}
+                                    onChange={handleChange}
+                                    required
+                                    id="requestorFname"
+                                    name="requestorFname"
+                                    readOnly={
+                                      // 🔒 Only enable resident selection if docType is not a permit OR isResident is true
+                                      !allExistingPermits.includes(docType || "") ||
+                                      clearanceInput?.isResident
+                                    }
+                                    onClick={() => {
+                                      // ✅ Trigger popup only if selecting is allowed
+                                      if (
+                                        !allExistingPermits.includes(docType || "") ||
+                                        clearanceInput?.isResident
+                                      ) {
+                                        setSelectingFor("requestor");
+                                        setShowResidentsPopup(true);
+                                      }
+                                    }}
+                                  />
 
-                                  {isRequestorSelected && (
+                                  {((
+                                    !allExistingPermits.includes(docType || "") ||
+                                    clearanceInput?.isResident
+                                  ) && isRequestorSelected) && (
                                     <span
                                       className="clear-icon"
                                       title="Click to clear selected resident"
@@ -851,7 +891,6 @@ const handleChange = (
                                 </div>
                               </div>
                             </div>
-
                           </>
                         )}
 
@@ -930,13 +969,9 @@ const handleChange = (
                             </div>
                           </>
                         )}
-
                       </div>
 
                       <div className="createRequest-section-2-right-side">
-
-                        
-
                         {clearanceInput.purpose === "Guardianship" && (
                           <>
                             <div className="fields-section">
@@ -1046,9 +1081,9 @@ const handleChange = (
                           </>
                         )}
                       </div>
+                      
                     </div>
-
-
+                    
                     </>
                   )}
 
