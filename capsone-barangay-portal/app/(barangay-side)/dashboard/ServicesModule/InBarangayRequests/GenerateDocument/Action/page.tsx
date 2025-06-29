@@ -64,7 +64,7 @@ interface ClearanceInput {
     citizenship?: string;
     educationalAttainment?: string;
     course?: string;
-    isBeneficiary?: string;
+    isBeneficiary?: boolean;
     birthplace?: string;
     religion?: string;
     nationality?: string;
@@ -435,6 +435,7 @@ export default function action() {
                 
     };
 
+    /*
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
     
@@ -473,12 +474,59 @@ export default function action() {
           };
         });
     };
+*/
 
+const handleChange = (
+  e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => {
+  const { name, value } = e.target;
+
+  const newValue =
+    e.target.type === "checkbox"
+      ? (e.target as HTMLInputElement).checked
+      : value;
+
+  // Special case for birthday
+  if (name === "birthday") {
+    const birthDate = new Date(value);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    setClearanceInput((prev: any) => ({
+      ...prev,
+      birthday: value,
+      age: age.toString(),
+    }));
+    return;
+  }
+
+  setClearanceInput((prev: any) => {
+    const keys = name.split(".");
+    if (keys.length === 2) {
+      return {
+        ...prev,
+        [keys[0]]: {
+          ...prev[keys[0]],
+          [keys[1]]: newValue,
+        },
+      };
+    }
+    return {
+      ...prev,
+      [name]: newValue,
+    };
+  });
+};
       
     const [addOn, setAddOn] = useState<string>("");
     
 
-    const allPurposeCertificate = [
+    const allExistingPurpose = [
+      /* Barangay Certificate */
       "Residency",
       "Occupancy /  Moving Out",
       "Estate Tax",
@@ -488,16 +536,25 @@ export default function action() {
       "Guardianship",
       "Good Moral and Probation",
       "Garage/PUV",
-      "Garage/TRU",   
+      "Garage/TRU",  
+      
+      /* Other Documents */
+      "Barangay ID",
+      "First Time Jobseeker"
     ];
 
     const excludedPurposesFullName = [
+      /* Barangay Certificate */
       "Residency",
       "Garage/PUV",
       "Garage/TRU",
       "No Income",
       "Good Moral and Probation",
-      "Cohabitation"
+      "Cohabitation",
+
+      /* Other Documents */
+      "Barangay ID",
+      "First Time Jobseeker"
     ];
 
     const fixedPredefinedFields = [
@@ -607,40 +664,43 @@ export default function action() {
                             onChange={handleChange} // Handle change to update state
                           >
                           <option value="" disabled>Select purpose</option>
-                            {docType === "Barangay Certificate" ? (<>
-                              <option value="Residency">Residency</option>
-                              <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
-                              <option value="Estate Tax">Estate Tax</option>
-                              <option value="Death Residency">Death Residency</option>
-                              <option value="No Income">No Income</option>
-                              <option value="Cohabitation">Cohabitation</option>
-                              <option value="Guardianship">Guardianship</option>
-                              <option value="Good Moral and Probation">Good Moral and Probation</option>
-                              <option value="Garage/PUV">Garage/PUV</option>
-                              <option value="Garage/TRU">Garage/TRU</option>
+                            {docType === "Barangay Certificate" ? (
+                              <>
+                                <option value="Residency">Residency</option>
+                                <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
+                                <option value="Estate Tax">Estate Tax</option>
+                                <option value="Death Residency">Death Residency</option>
+                                <option value="No Income">No Income</option>
+                                <option value="Cohabitation">Cohabitation</option>
+                                <option value="Guardianship">Guardianship</option>
+                                <option value="Good Moral and Probation">Good Moral and Probation</option>
+                                <option value="Garage/PUV">Garage/PUV</option>
+                                <option value="Garage/TRU">Garage/TRU</option>
 
-                              {/* Dynamically fetched purposes from OtherDocuments */}
+                                {/* Dynamically fetched purposes from OtherDocuments */}
 
-                              {otherDocPurposes["Barangay Certificate"]?.map((title, index) => (
-                                <option key={index} value={title}>{title}</option>
-                              ))}
-                                            
-                            </>):docType === "Barangay Clearance" ? (<>
-                              <option value="Loan">Loan</option>
-                              <option value="Bank Transaction">Bank Transaction</option>
-                              <option value="Residency">Residency</option>
-                              <option value="Local Employment">Local Employment</option>
-                              <option value="Maynilad">Maynilad</option>
-                              <option value="Meralco">Meralco</option>
-                              <option value="Bail Bond">Bail Bond</option>
+                                {otherDocPurposes["Barangay Certificate"]?.map((title, index) => (
+                                  <option key={index} value={title}>{title}</option>
+                                ))}               
+                              </>
+                            ):docType === "Barangay Clearance" ? (
+                              <>
+                                <option value="Loan">Loan</option>
+                                <option value="Bank Transaction">Bank Transaction</option>
+                                <option value="Residency">Residency</option>
+                                <option value="Local Employment">Local Employment</option>
+                                <option value="Maynilad">Maynilad</option>
+                                <option value="Meralco">Meralco</option>
+                                <option value="Bail Bond">Bail Bond</option>
 
-                              {/* Dynamically fetched purposes from OtherDocuments */}
+                                {/* Dynamically fetched purposes from OtherDocuments */}
 
-                              {otherDocPurposes["Barangay Clearance"]?.map((title, index) => (
-                                <option key={index} value={title}>{title}</option>
-                              ))}
-
-                              </>):docType === "Barangay Indigency" ? ( <>
+                                {otherDocPurposes["Barangay Clearance"]?.map((title, index) => (
+                                  <option key={index} value={title}>{title}</option>
+                                ))}
+                              </>
+                            ):docType === "Barangay Indigency" ? (
+                              <>
                                 <option value="No Income">No Income</option>
                                 <option value="Public Attorneys Office">Public Attorneys Office</option>
                                 <option value="AKAP">AKAP</option>
@@ -656,11 +716,22 @@ export default function action() {
                                   <option key={index} value={title}>{title}</option>
                                 ))}
 
-                              </>): (docType === "Business Permit" ||docType === "Temporary Business Permit") && (
-                                 <>
+                              </>
+                            ) : docType === "Business Permit" || docType === "Temporary Business Permit" ? (
+                              <>
                                 <option value="New">New</option>
                                 <option value="Renewal">Renewal</option>
-                            </>)}
+                              </>
+                            ) : docType === "Other Documents" ? (
+                              <>
+                                <option value="Barangay ID">Barangay ID</option>
+                                <option value="First Time Jobseeker">First Time Jobseeker</option>
+
+                                {otherDocPurposes["Other"]?.map((title, index) => (
+                                  <option key={index} value={title}>{title}</option>
+                                ))}
+                              </>
+                            ) : null}
                           </select>
                         </div>
                         
@@ -727,7 +798,7 @@ export default function action() {
 
                         {(
                           (!isOtherDocumentPurpose &&
-                            allPurposeCertificate.includes(clearanceInput.purpose || "")) ||
+                            allExistingPurpose.includes(clearanceInput.purpose || "")) ||
                           (isOtherDocumentPurpose &&
                             otherDocFields[clearanceInput.purpose || ""]?.includes("requestorFname"))
                         ) && (
@@ -1275,6 +1346,85 @@ export default function action() {
                               </div>      
                             </>
                           )}
+
+                          {clearanceInput.purpose === "Barangay ID" && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Birthplace<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="birthplace"  
+                                  name="birthplace"  
+                                  value={clearanceInput.birthplace || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Birthplace"  
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Religion<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="religion"  
+                                  name="religion"  
+                                  value={clearanceInput.religion || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Religion"  
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Nationality<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="nationality"  
+                                  name="nationality"  
+                                  value={clearanceInput.nationality || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Nationality"  
+                                />
+                              </div>
+                              
+                              <div className="fields-section">
+                                <h1>Precinct Number<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="precinctnumber"  
+                                  name="precinctnumber"  
+                                  value={clearanceInput.precinctnumber || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Precinct Number"  
+                                />
+                              </div>
+                              
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "First Time Jobseeker" && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Educational Attainment<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="educationalAttainment"  
+                                  name="educationalAttainment"  
+                                  value={clearanceInput.educationalAttainment  || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Educational Attainment"  
+                                />
+                              </div>
+                            </>
+                          )}
                         </div>
 
                         <div className="createRequest-section-2-right-side">
@@ -1521,6 +1671,84 @@ export default function action() {
                               </div>     
                             </>
                           )}
+
+                          {clearanceInput.purpose === "Barangay ID" && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Occupation<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="occupation"  
+                                  name="occupation"  
+                                  value={clearanceInput.occupation  || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Occupation"  
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Blood Type<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="bloodtype"  
+                                  name="bloodtype"  
+                                  value={clearanceInput.bloodtype || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Occupation"  
+                                />
+                              </div>
+                              
+                              <div className="fields-section">
+                                <h1>Height<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="height"  
+                                  name="height"  
+                                  value={clearanceInput.height || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Height"  
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Weight<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="weight"  
+                                  name="weight"  
+                                  value={clearanceInput.weight || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Weight"  
+                                />
+                              </div>
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "First Time Jobseeker" && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Course<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="course"  
+                                  name="course"  
+                                  value={clearanceInput.course  || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Course"  
+                                />
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
 
@@ -1561,6 +1789,25 @@ export default function action() {
                             </div>
                           ))}
                         </div>
+                      </div>
+
+                      <div className="createRequest-section-2-full-bottom-beneficiary">
+                      {clearanceInput.purpose === "First Time Jobseeker" && (
+                          <>
+                            <div className="beneficiary-checkbox-container">
+                            <input 
+                                        type="checkbox" 
+                                        name="isBeneficiary"  
+                                        checked={clearanceInput?.isBeneficiary || false}
+                                        onChange={handleChange}
+                                    />   
+                              <label className="beneficiary-checkbox-label" htmlFor="forResidentOnly" >
+                                <p>Is beneficiary of a JobStart Program under RA No. 10869, otherwise known as “An Act Institutionalizing the Nationwide Implementation of the Jobstart Philippines Program and Providing Funds therefor”?<span className="required">*</span></p> 
+                              </label>
+                                   
+                            </div>
+                          </>
+                        )}
                       </div>
                     </>
                   )}
@@ -1791,6 +2038,8 @@ export default function action() {
                                               address: resident.address || '',
                                               contact: resident.contactNumber || '',
                                               age: resident.age || '',
+                                              occupation: resident.occupation || '',
+                                              precinctnumber: resident.precinctNumber || '',
                                             });
                                             setIsRequestorSelected(true);
                                           }
