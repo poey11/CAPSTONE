@@ -338,22 +338,369 @@ const incidentForm:React.FC = () => {
           
 
 
-          <form className="register-form-incident-report" onSubmit={handleSubmit}> {/* Use onSubmit to trigger the redirect */}
-            <div className="form-group-incident-report">
-              <label htmlFor="firstname" className="form-label-incident-report">
-                First Name<span className="required">*</span>
-                </label>
-              <input
-                type="text"
-                id="firstname"
-                name="firstname"
-                className="form-input-incident-report"
-                required
-                placeholder="Enter First Name"
-                value={incidentReport.firstname}
-                onChange={handleFormChange}
-              />
-            </div>
+          <form className="register-form-incident-report" onSubmit={handleSubmit}> 
+
+            {activeSection === "complainant" && (
+                        <>
+            <div className="incident-report-form-container">
+
+              <div className="incident-report-container-left-side-complainant">
+
+                      <div className="form-group-incident-report">
+                        <label htmlFor="firstname" className="form-label-incident-report">
+                          First Name<span className="required">*</span>
+                          </label>
+                        <input
+                          type="text"
+                          id="firstname"
+                          name="firstname"
+                          className="form-input-incident-report"
+                          required
+                          placeholder="Enter First Name"
+                          value={incidentReport.firstname}
+                          onChange={handleFormChange}
+                        />
+                      </div>
+
+                     <div className="form-group-incident-report">
+
+                        <label htmlFor="lastname" className="form-label-incident-report">
+                          Last Name<span className="required">*</span>
+                        </label>
+
+                      
+                        <input
+                          type="text"
+                          id="lastname"
+                          name="lastname"
+                          className="form-input-incident-report"
+                          required
+                          placeholder="Enter Last Name"
+                          value={incidentReport.lastname}
+                          onChange={handleFormChange}
+                        />
+                      </div>
+
+              </div>
+
+              
+              <div className="incident-report-container-right-side-complainant">
+
+                   <div className="form-group-incident-report">
+
+                      <label htmlFor="middlename" className="form-label-incident-report">
+                        Middle Name<span className="required">*</span>
+                      </label>
+
+                      
+                        <input
+                          type="text"
+                          id="middlename"
+                          name="middlename"
+                          className="form-input-incident-report"
+                          required
+                          placeholder="Enter Middle Name"
+                          value={incidentReport.middlename}
+                          onChange={handleFormChange}
+                        />
+                    </div>
+
+
+                      <div className="form-group-incident-report">
+                      <label htmlFor="contactNos" className="form-label-incident-report">
+                        Phone Number<span className="required">*</span>
+                        </label>
+                      <input
+                        type="text"
+                        id="contactNos"
+                        name="contactNos"
+                        className="form-input-incident-report"
+                        required
+                        value={incidentReport.contactNos}
+                        onChange={(e) => {
+                          const input = e.target.value;
+                          // Only allow digits and limit to 11 characters
+                          if (/^\d{0,11}$/.test(input)) {
+                            handleFormChange(e);
+                          }
+                        }}
+                        maxLength={11}  
+                        pattern="^[0-9]{11}$" 
+                        placeholder="Please enter a valid 11-digit contact number" 
+                        title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX"
+                      />
+                    </div>
+        
+
+              </div>
+
+          
+              </div>
+                  </>
+                      )}
+
+
+                {activeSection === "incident" && (
+                        <>
+                <div className="incident-report-form-container">
+
+                  <div className="incident-report-container-left-side ">
+
+                      <div className="form-group-incident-report">
+                          <label htmlFor="concerns" className="form-label-incident-report">
+                            Concerns<span className="required">*</span>
+                          </label>
+                          <select
+                            id="concerns"
+                            name="concerns"
+                            className="form-input-incident-report"
+                            value={incidentReport.concerns}
+                            onChange={handleFormChange}
+                            required
+                          >
+                            <option value="">Incident Type</option>
+                            <option value="Noise Complaint">Noise Complaint</option>
+                            <option value="Pet-Related Issues">Pet-Related Issues</option>
+                            <option value="Littering">Littering</option>
+                            <option value="Obstruction of Pathways">Obstruction of Pathways</option>
+                            <option value="Minor Verbal Altercation">Minor Verbal Altercation</option>
+                            <option value="Lost and Found Items">Lost and Found Items</option>
+                            <option value="Damaged Streetlights">Damaged Streetlights</option>
+                            <option value="Unauthorized Public Gatherings">Unauthorized Public Gatherings</option>
+                            <option value="Vandalism">Vandalism</option>
+                            <option value="Water Leakage">Water Leakage</option>
+                            <option value="Other">Other</option>
+                          </select>
+                          {incidentReport.concerns === "Other" && (
+                            <input
+                              type="text"
+                              id="otherConcern"
+                              name="otherConcern"
+                              className="form-input-incident-report"
+                              placeholder="Specify your concern"
+                              value={incidentReport.otherConcern}
+                              onChange={handleFormChange}
+                              required
+                            />
+                          )}
+                        </div>
+
+                        <div className="form-group-incident-report">
+                          <label htmlFor="time" className="form-label-incident-report">
+                            Time of Incident<span className="required">*</span>
+                            </label>
+                          <input
+                            type="time"
+                            id="time"
+                            name="time"
+                            className="form-input-incident-report"
+                            required
+                            placeholder="Enter Time of Incident"
+                            value={incidentReport.time}
+                            onChange={handleFormChange}
+                          />
+                        </div>
+
+                         <div className="form-group-incident-report">
+                    <label htmlFor="address" className="form-label-incident-report">
+                      Area of Incident <span className="required">*</span>
+                      </label>
+
+                    <select
+                      id="area"
+                      name="area"
+                      className="form-input-incident-report"
+                      required
+                      value={incidentReport.area}
+                      onChange={handleFormChange}>
+
+                      <option value="" disabled>Select Area</option>
+                      <option value="South Fairview">South Fairview</option>
+                      <option value="West Fairview">West Fairview</option>
+                      <option value="East Fairview">East Fairview</option>
+                    </select>
+                  </div>
+
+                  </div>
+
+
+                   <div className="incident-report-container-right-side ">
+
+                      <div className="form-group-incident-report">
+                        <label htmlFor="date" className="form-label-incident-report">
+                          Date of Incident<span className="required">*</span>
+                          </label>
+                        <input
+                          type="date"
+                          id="dateFiled"
+                          name="dateFiled"
+                          className="form-input-incident-report"
+                          required
+                          max={minDate}
+                          onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                          placeholder="Enter Date of Incident"
+                          value={incidentReport.dateFiled}
+                          onChange={handleFormChange}
+                        />
+                      </div>
+
+                      <div className="form-group-incident-report">
+                        <label htmlFor="address" className="form-label-incident-report">
+                          Address of Incident<span className="required">*</span>
+                          </label>
+                        <input
+                          type="text"
+                          id="address"
+                          name="address"
+                          className="form-input-incident-report"
+                          required
+                          placeholder="Enter Location"
+                          value={incidentReport.address}
+                          onChange={handleFormChange}
+                        />
+                      </div>
+
+                  <div className="form-group-incident-report">
+                    <label htmlFor="addInfo" className="form-label-incident-report">
+                    Additional Info Regarding the Concern<span className="required">*</span>
+                    </label>
+                    <textarea 
+                      id="addInfo"
+                      name="addInfo"
+                      className="form-input-incident-report resize-none"
+                      required
+                      placeholder="Enter Additonal Information/Remarks"
+                      value={incidentReport.addInfo}
+                      onChange={handleFormChange}
+                      rows={4} cols={50}
+                    
+                    />
+                  </div>
+        
+      
+                  </div>
+
+
+                  
+
+                  
+            
+
+              
+                  </div>
+                      </>
+                    )}
+
+
+                  {activeSection === "others" && (
+                    <>
+
+                    <div className="incident-report-form-container">
+
+                       <div className="signatureprintedname-container">
+                          <label className="form-label-incident-report-file">Upload Proof of Incident (If Applicable)</label>
+                    
+                          <div className="file-upload-container-incident-report">
+                            <label htmlFor="file-upload1" className="upload-link-incident-report">Click to Upload File</label>
+                            <input
+                              id="file-upload1"
+                              type="file"
+                              className="file-upload-input-incident-report"
+                              accept=".jpg,.jpeg,.png"
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                handleFileChangeContainer1(e);
+                                handleFormChange(e);
+                              }} // Handle file selection
+                            />
+                            <div className="uploadedFiles-container-incident-report">
+                              {filesContainer1.length > 0 && (
+                                <div className="file-name-image-display-incident-report">
+                                  <ul>
+                                    {filesContainer1.map((file, index) => (
+                                      <div className="file-name-image-display-indiv-incident-report" key={index}>
+                                        <li>
+                                          {file.preview && (
+                                            <div className="filename-image-container-incident-report">
+                                              <img
+                                                src={file.preview}
+                                                alt={file.name}
+                                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                              />
+                                            </div>
+                                          )}
+                                          {file.name}
+                                          <div className="delete-container-incident-report">
+                                            <button
+                                              type="button"
+                                              onClick={() => handleFileDeleteContainer1()}
+                                              className="delete-button-incident-report"
+                                            >
+                                              <img
+                                                src="/images/trash.png"
+                                                alt="Delete"
+                                                className="delete-icon-incident-report"
+                                              />
+                                            </button>
+                                          </div>
+                                        </li>
+                                      </div>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                    </div>
+                       
+
+                </>
+              )}
+
+
+
+          <button type="submit" className="submit-button-incident-report">Submit</button>
+
+          </form>
+        </div>
+
+
+
+
+
+    {/* COPY*/} 
+
+
+           <div className="register-section-incident-report">
+          <h1>MINOR INCIDENT REPORT</h1>
+
+         {/* <hr/>*/} 
+
+         <div className="register-section-upper">
+
+           <nav className="main-residents-info-toggle-wrapper">
+                  {["complainant", "incident", "others"].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "complainant" && "Complainant Info"}
+                      {section === "incident" && "Incident Info"}
+                      {section === "others" && "Others"}
+                    </button>
+                  ))}
+              </nav>
+
+         </div>
+
+          
+
+
+          <form className="register-form-incident-report" onSubmit={handleSubmit}> 
+      
 
             <div className="form-group-incident-report">
 
