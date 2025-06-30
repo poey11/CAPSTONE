@@ -121,6 +121,8 @@ export default function action() {
     const [showCreatePopup, setShowCreatePopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
     const [isResidentSelected, setIsResidentSelected] = useState(false);
     const [isRequestorSelected, setIsRequestorSelected] = useState(false);
     const [showResidentsPopup, setShowResidentsPopup] = useState(false);
@@ -476,6 +478,8 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
         ...prev,
         signaturejpg: file,
       }));
+
+      e.target.value = "";
     
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
@@ -500,6 +504,8 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
         ...prev,
         barangayIDjpg: file,
       }));
+
+      e.target.value = "";
     
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
@@ -524,6 +530,8 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
         ...prev,
         validIDjpg: file,
       }));
+
+      e.target.value = "";
     
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
@@ -548,6 +556,8 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
         ...prev,
         letterjpg: file,
       }));
+
+      e.target.value = "";
     
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
@@ -572,6 +582,8 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
         ...prev,
         letterjpg: file,
       }));
+
+      e.target.value = "";
     
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
@@ -596,6 +608,8 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
         ...prev,
         letterjpg: file,
       }));
+
+      e.target.value = "";
     
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
@@ -620,6 +634,8 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
         ...prev,
         letterjpg: file,
       }));
+
+      e.target.value = "";
     
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
@@ -644,6 +660,8 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
         ...prev,
         letterjpg: file,
       }));
+
+      e.target.value = "";
     
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
@@ -668,6 +686,9 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
         ...prev,
         letterjpg: file,
       }));
+
+      
+      e.target.value = "";
     
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
@@ -692,6 +713,9 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
         ...prev,
         letterjpg: file,
       }));
+
+      
+      e.target.value = "";
     
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
@@ -770,9 +794,9 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
     
       // Signature
       if (!files1 || files1.length === 0) {
-        setPopupMessage("Please upload Signature Over Printed Name.");
-        setShowPopup(true);
-        setTimeout(() => setShowPopup(false), 3000);
+        setPopupErrorMessage("Please upload Signature Over Printed Name.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
         return;
       }
     
@@ -786,72 +810,72 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
         const hasLetter = files4 && files4.length > 0;
     
         if (!hasBarangayID && !hasValidID && !hasLetter) {
-          setPopupMessage("Please upload at least one of: Barangay ID, Valid ID, or Endorsement Letter.");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 3000);
+          setPopupErrorMessage("Please upload at least one of: Barangay ID, Valid ID, or Endorsement Letter.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
       } else {
         // Only check Endorsement Letter if not in the Barangay Permit category
         if (!files4 || files4.length === 0) {
-          setPopupMessage("Please upload Endorsement Letter.");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 3000);
+          setPopupErrorMessage("Please upload Endorsement Letter.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
       }
     
       if (isBusinessPermit) {
         if (!files5 || files5.length === 0) {
-          setPopupMessage("Please upload Title of the Property/Contract of Lease.");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 3000);
+          setPopupErrorMessage("Please upload Title of the Property/Contract of Lease.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
     
         if (!files6 || files6.length === 0) {
-          setPopupMessage("Please upload DTI Registration.");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 3000);
+          setPopupErrorMessage("Please upload DTI Registration.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
     
         if (!files7 || files7.length === 0) {
-          setPopupMessage("Please upload Picture of CCTV Installed.");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 3000);
+          setPopupErrorMessage("Please upload Picture of CCTV Installed.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
       }
     
       if (isConstruction) {
         if (!files5 || files5.length === 0) {
-          setPopupMessage("Please upload Title of the Property/Contract of Lease.");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 3000);
+          setPopupErrorMessage("Please upload Title of the Property/Contract of Lease.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
     
         if (!files8 || files8.length === 0) {
-          setPopupMessage("Please upload Tax Declaration.");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 3000);
+          setPopupErrorMessage("Please upload Tax Declaration.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
     
         if (!files9 || files9.length === 0) {
-          setPopupMessage("Please upload Building/Construction Plan.");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 3000);
+          setPopupErrorMessage("Please upload Building/Construction Plan.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
       }
     
       if (["Estate Tax", "Death Residency"].includes(clearanceInput.purpose ?? "")) {
         if (!files10 || files10.length === 0) {
-          setPopupMessage("Please upload Death Certificate.");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 3000);
+          setPopupErrorMessage("Please upload Death Certificate.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
       }
@@ -3209,13 +3233,22 @@ const handleChange = (
                     )}
 
                     {showPopup && (
-                        <div className={`popup-overlay show`}>
+                        <div className={`popup-overlay-inbarangay-docreq show`}>
                             <div className="popup">
                             <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
                                 <p>{popupMessage}</p>
                             </div>
                         </div>
                     )}
+
+              {showErrorPopup && (
+                <div className={`error-popup-overlay-inbarangay-docreq show`}>
+                    <div className="popup-add-kasambahay">
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                      <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
 
 
                     {showResidentsPopup && (
@@ -3296,9 +3329,9 @@ const handleChange = (
                                       
                                           setShowResidentsPopup(false);
                                         } catch (error) {
-                                          setPopupMessage("An error occurred. Please try again.");
-                                          setShowPopup(true);
-                                          setTimeout(() => setShowPopup(false), 3000);
+                                          setPopupErrorMessage("An error occurred. Please try again.");
+                                          setShowErrorPopup(true);
+                                          setTimeout(() => setShowErrorPopup(false), 3000);
                                         }
                                       }}
                                       style={{ cursor: 'pointer' }}

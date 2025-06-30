@@ -359,13 +359,13 @@
         }
       }
     
-    .popup-overlay {
+    .popup-overlay-inbarangay-docreq {
         position: fixed;
         top: 13%;
         right: -3px;
         background: #777575;
         color: white;
-        width: 400px;
+        width: 480px;
         height: 50px;
         border-radius: 5px;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -386,11 +386,11 @@
         gap: 20px;
       }
       
-      .popup-overlay.show {
+      .popup-overlay-inbarangay-docreq.show {
         animation: slideIn 0.5s ease-out;
       }
       
-      .popup-overlay.hide {
+      .popup-overlay-inbarangay-docreq.hide {
         animation: slideOut 0.5s ease-out;
       }
     
@@ -463,6 +463,41 @@
       .no-button:hover {
         background-color:  #c2352b; 
       } 
+
+
+
+.error-popup-overlay-inbarangay-docreq{
+  position: fixed;
+  top: 13%;
+  right: -3px;
+  background: #777575;
+  color: white;
+  width: 500px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1002;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 10px solid #403f3e;
+  }
+
+  .error-popup-overlay-inbarangay-docreq{
+    background: #cc3434;
+    border-left: 10px solid #8a0f0f;
+  }
+
+  .error-popup-overlay-inbarangay-docreq.show {
+    animation: slideIn 0.5s ease-out;
+  }
+
+  .error-popup-overlay-inbarangay-docreq.hide {
+    animation: slideOut 0.5s ease-out;
+  }
 
 
 
