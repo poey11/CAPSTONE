@@ -35,6 +35,7 @@ const incidentForm:React.FC = () => {
     department: "",
     status: "Pending",
     addInfo:"",
+    reasonForLateFiling: "",
   });
 
 
@@ -291,6 +292,10 @@ const incidentForm:React.FC = () => {
           status: incidentReport.status,
           statusPriority: 1,
           isViewed: false,
+          ...(incidentReport.isReportLate && { 
+            isReportLate: incidentReport.isReportLate,
+            reasonForLateFiling: incidentReport.reasonForLateFiling,
+          }), 
           addInfo: incidentReport.addInfo,
           createdAt: new Date().toLocaleString(),
           
@@ -305,7 +310,36 @@ const incidentForm:React.FC = () => {
     };
 
 
-
+      const isOneWeekOrMore = (dateFiled: string | Date, createdAt: string | Date): boolean => {
+        const filedDate = new Date(dateFiled);
+        const createdDate = new Date(createdAt);
+    
+        const differenceInMilliseconds =  createdDate.getTime()-filedDate.getTime();
+        const differenceInDays = differenceInMilliseconds / (1000 * 60 * 60 * 24);
+    
+        return differenceInDays >= 7;
+      };
+      
+    
+      const [isIncidentLate, setIsIncidentLate] = useState(false);
+    
+      useEffect(() => {
+        if (!incidentReport?.dateFiled) return;
+    
+        const dateFiled = new Date(incidentReport.dateFiled);
+        const createdAt = new Date();
+    
+        const isLate = isOneWeekOrMore(dateFiled, createdAt);
+        setIsIncidentLate(isLate);
+    
+        if (isLate) {
+          setIncidentReport((prev: any) => ({
+            ...prev,
+            isReportLate: true,
+          }));
+        }
+      }, [incidentReport?.dateFiled]);
+    
 
     return(
       <main className="main-container-incident-report">
@@ -525,7 +559,6 @@ const incidentForm:React.FC = () => {
                 <option value="East Fairview">East Fairview</option>
               </select>
             </div>
-
             <div className="form-group-incident-report">
               <label htmlFor="addInfo" className="form-label-incident-report">
                Additional Information/Remarks Regarding the Concern<span className="required">*</span>
@@ -542,6 +575,26 @@ const incidentForm:React.FC = () => {
               
               />
             </div>
+
+            { isIncidentLate && (
+              <>
+                <div className="form-group-incident-report">
+                  <label htmlFor="reasonForLateFiling" className="form-label-incident-report">
+                    Reason For Late Filing/Reporting<span className="required">*</span>
+                  </label>
+                  <textarea 
+                    id="reasonForLateFiling"
+                    name="reasonForLateFiling"
+                    className="form-input-incident-report resize-none"
+                    required
+                    placeholder="Enter Reason For Late Filing/Reporting"
+                    value={incidentReport.reasonForLateFiling}
+                    onChange={handleFormChange}
+                    rows={4} cols={50}
+                  />
+                </div>
+              </>
+            )}
         
             <div className="signature/printedname-container">
               <label className="form-label-incident-report">Upload Proof of Incident (If Applicable)</label>

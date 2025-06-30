@@ -82,6 +82,7 @@ export default function AddIncident() {
     file: null,
     typeOfIncident: "",
     recommendedEvent: "",
+    reasonForLateFiling: "",
   });
   const [deskStaff, setdeskStaff] = useState<any>({
     fname: "",
@@ -315,6 +316,10 @@ export default function AddIncident() {
             hearing:0,
             generatedHearingSummons:0,
             createdAt: new Date(),
+            ...(isIncidentLate && {
+              isReportLate: reportInfo.isReportLate,
+              reasonForLateFiling: reportInfo.reasonForLateFiling,
+            }),
             ...(reportInfo.typeOfIncident === "Minor" && {
               recommendedEvent: reportInfo.recommendedEvent,
             }),
@@ -373,7 +378,7 @@ export default function AddIncident() {
        setShowSubmitPopup(false);
             // Save filtered data to Firestore and get the reference
         const docRef = await addDoc(collection(db, "IncidentReports"), filteredData);
-        return docRef.id;
+        return docRef;
     } catch (e: any) {
         console.log(e);
     }
@@ -388,11 +393,6 @@ const delayedSubmit = (e: React.FormEvent) => {
 
 const handleSubmit = (event: React.FormEvent) => {
   event.preventDefault(); 
-
-  console.log("Complainant at submit:", complainant);
-  console.log("Respondent at submit:", respondent);
-  console.log("Report at submit:", reportInfo);
-  console.log("desk staff at submit:", deskStaff);
 
   setShowFieldErrors(true);
 
@@ -569,6 +569,7 @@ const handleSubmit = (event: React.FormEvent) => {
       setHasSubmitted(true);
       const docId = await handleUpload();
       
+      
       setPopupMessage("Incident Successfully Submitted!");
       setShowPopup(true);
 
@@ -577,8 +578,7 @@ const handleSubmit = (event: React.FormEvent) => {
         setShowPopup(false);
         
         if (docId) {
-          router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
-
+          router.push(`/dashboard/IncidentModule/ViewIncident?id=${docId.id}`);
         } 
       }, 3000);
   
@@ -634,7 +634,36 @@ const handleSubmit = (event: React.FormEvent) => {
     }
   };
 
+  const isOneWeekOrMore = (dateFiled: string | Date, createdAt: string | Date): boolean => {
+    const filedDate = new Date(dateFiled);
+    const createdDate = new Date(createdAt);
+
+    const differenceInMilliseconds =  createdDate.getTime()-filedDate.getTime();
+    const differenceInDays = differenceInMilliseconds / (1000 * 60 * 60 * 24);
+
+    return differenceInDays >= 7;
+  };
   
+
+  const [isIncidentLate, setIsIncidentLate] = useState(false);
+
+  useEffect(() => {
+    if (!reportInfo.dateFiled || !reportInfo.dateReceived) return;
+
+    const dateFiled = new Date(reportInfo.dateFiled);
+    const createdAt = new Date(reportInfo.dateReceived);
+
+    const isLate = isOneWeekOrMore(dateFiled, createdAt);
+    setIsIncidentLate(isLate);
+
+    if (isLate) {
+      setReportInfo((prev: any) => ({
+        ...prev,
+        isReportLate: true,
+      }));
+    }
+  }, [reportInfo.dateFiled, reportInfo.dateReceived]);
+
 
   const handleBack = () => {
     router.back();
@@ -1230,17 +1259,16 @@ const handleSubmit = (event: React.FormEvent) => {
                     </>
                   )}
 
-                   <div className="fields-section-add">
-                        <p>Time Filed<span className="required">*</span></p>
-                        <input type="time" className="add-incident-input-field" id="timeFiled" name="timeFiled" 
-                        value = {reportInfo.timeFiled} onChange={handleFormChange} required />
-                   </div>
-
-
-                   <div className="fields-section-add">
+              <div className="fields-section-add">
                   <p>Date Filed<span className="required">*</span></p>
                   <input type="date" className="add-incident-input-field" max={currentDate} id="dateFiled" name="dateFiled" 
                     value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
+              </div>
+
+              <div className="fields-section-add">
+                   <p>Time Filed<span className="required">*</span></p>
+                   <input type="time" className="add-incident-input-field" id="timeFiled" name="timeFiled" 
+                   value = {reportInfo.timeFiled} onChange={handleFormChange} required />
               </div>
 
               <div className="fields-section-add">
@@ -1317,9 +1345,9 @@ const handleSubmit = (event: React.FormEvent) => {
                         </div>
 
                     </div>
+                   
 
-
-              </div>
+          </div>
 
           </div>
 
@@ -1353,8 +1381,25 @@ const handleSubmit = (event: React.FormEvent) => {
 
 
           <div className="add-incident-section-bottom-side">
-
-            <div className="box-container-outer-resclassification-add">
+             {isIncidentLate && (
+                <div className="box-container-outer-resclassification-add">
+                    <div className="title-remarks-add">
+                      <p>Reason For Late Filing/Reporting <span className="required">*</span></p>
+                    </div>
+              
+                  <div className="box-container-remarks-add">
+                    <textarea 
+                      required
+                      placeholder="Enter Reason for Late Filing/Reporting"
+                      value={reportInfo.reasonForLateFiling}
+                      id="reasonForLateFiling"
+                      name="reasonForLateFiling"
+                      onChange={handleFormChange}
+                      rows={3}/>
+                    </div>
+                </div>
+             )}
+              <div className="box-container-outer-resclassification-add">
                     <div className="title-remarks-add">
                         <p>Nature of Facts<span className="required">*</span></p>
                     </div>
@@ -1377,7 +1422,7 @@ const handleSubmit = (event: React.FormEvent) => {
             </div>
                   
 
-            </div>
+          </div>
 
 
 

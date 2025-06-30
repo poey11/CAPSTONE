@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { deleteDocument, getAllSpecificDocument } from "@/app/helpers/firestorehelper";
 import Heatmap from "@/app/(barangay-side)/components/heatmap";
+import { collection, onSnapshot, or, orderBy, query, where } from "firebase/firestore";
+import { db } from "@/app/db/firebase";
 
 const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
 const departmentOptions = ["GAD", "BCPC", "VAWC", "Lupon"];
@@ -24,25 +26,28 @@ export default function MainPageIncident() {
 
   /*Revised this. Copy from Online Request in Service Module. */
   useEffect(() => {
-    const unsubscribe = getAllSpecificDocument(
-      "IncidentReports",
-      "department",
-      "!=",
-      "Online",
-      (data: any[]) => {
-        // Sort by dateFiled and timeFiled, newest first
-        const sortedData = [...data].sort((a, b) => {
-          const dateA = new Date(a.createdAt);
-          const dateB = new Date(b.createdAt);
-          return dateB.getTime() - dateA.getTime(); // newest first
-        });
-      
-        // Take only the latest 20 incidents
-        const latest20 = sortedData.slice(0, 20);
-      
-        setIncidentData(latest20);
-      }
+    const Collection = query(
+      collection(db,"IncidentReports"),
+      where("department", "!=", "Online"), // Exclude "Online" department
+      orderBy("createdAt", "desc") // Order by createdAt in descending order
     );
+
+    const unsubscribe = onSnapshot(Collection, (snapshot) => {
+      const data:any[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+       data.sort((a, b) => {
+        if(a.statusPriority !== b.statusPriority) {
+          return a.statusPriority - b.statusPriority; // Sort by status priority first
+        }
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA; // Sort by createdAt in descending order
+      });
+      setIncidentData(data);
+      setFilteredIncidents(data); // Initialize filteredIncidents with the full data set
+    })
     
     return () => {
       if (unsubscribe) {

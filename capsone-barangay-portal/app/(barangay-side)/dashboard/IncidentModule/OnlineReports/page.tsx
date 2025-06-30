@@ -48,7 +48,7 @@ const getViewedRequests = (): string[] => {
       orderBy("createdAt", "desc"));
   
       const unsubscribe = onSnapshot(Collection, (snapshot) => {
-          let data:any[] = snapshot.docs.map((doc) => ({
+          const data:any[] = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
             isNew: doc.data().isViewed === false, // Check if the request is new
@@ -69,9 +69,9 @@ const getViewedRequests = (): string[] => {
             unsubscribe();
           }
         };
-
-
   }, []);
+
+  console.log(incidentData)
 
   console.log("Incident Data:", incidentData);
   useEffect(() => {
@@ -82,7 +82,7 @@ const getViewedRequests = (): string[] => {
         orderBy("createdAt", "desc"));
 
         const unsubscribe = onSnapshot(Collection, (snapshot) => {
-          let data:any[] = snapshot.docs.map((doc) => ({
+          const data:any[] = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
             isNew: doc.data().isViewed === false, // Check if the request is new

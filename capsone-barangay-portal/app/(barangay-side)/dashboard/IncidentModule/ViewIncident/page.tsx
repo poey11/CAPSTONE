@@ -405,7 +405,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                         <h1>Date Filed</h1>
                       </div>
                     </div>
-                    <p>{reportData?.dateFiled || "N/A"}</p>
+                    <p>{`${reportData?.dateFiled}${reportData?.isReportLate ? " (Late Filing)" : ""} `  || ""}</p>
                   </div>
 
                   <div className="incident-location-section">
@@ -611,6 +611,19 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                         </div>
 
                         <div className="view-incident-content-bottomsection">
+
+                          {reportData?.isReportLate && (
+                            <div className="box-container-outer-natureoffacts">
+                                <div className="title-remarks-partyA">
+                                    Reason For Late Filing/Reporting
+                                </div>
+                                <div className="box-container-partyA">
+                                  <textarea className="natureoffacts-input-field" name="reasonForLateFiling" id="reasonForLateFiling" value={reportData.reasonForLateFiling || "NA"} readOnly/>
+                                </div>
+                            </div>
+
+                          )}
+
                           <div className="view-incident-partyA-container">
                             <div className="box-container-outer-natureoffacts">
                               <div className="title-remarks-partyA">

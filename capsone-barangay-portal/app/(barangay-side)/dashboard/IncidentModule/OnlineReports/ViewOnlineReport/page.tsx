@@ -24,6 +24,8 @@ export default function ViewOnlineReports() {
     reportID: "",
     caseNumber: "",
     time: "",
+    isReportLate:false,
+    reasonForLateFiling:""
   });
   
   const user = useSession().data?.user;
@@ -107,6 +109,8 @@ export default function ViewOnlineReports() {
           reportID: data.reportID || "",
           caseNumber: data.caseNumber || "",
           time: data.time || "",
+          isReportLate: data.isReportLate || false,
+          reasonForLateFiling: data.reasonForLateFiling || "",
         });
   
         // ✅ Fetch respondent details and files as an array
@@ -538,6 +542,29 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                     </div>
 
                     <div className="online-report-section-bottom-side-2">
+                       {formData?.isReportLate && (
+                        <>
+                            <div className="online-report-box-container">
+                              <div className="box-container-outer-image">
+                                <div className="title-image">
+                                    Reason For Late Filing/Reporting
+                                </div>
+
+                                <div className="box-container-investigation-report">
+                                   <textarea   
+                                     className= "investigation-report-input-field"
+                                    value={formData.reasonForLateFiling} 
+                                     disabled    
+                                    />
+                                     
+                                </div>
+
+                              </div>
+                            </div>
+
+
+                        </>
+                      )}
 
                         <div className="online-report-box-container">
                               <div className="box-container-outer-image">
@@ -555,7 +582,9 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 </div>
 
                               </div>
-                            </div>                        
+                            </div>
+
+                          
 
                     </div>
 
@@ -599,11 +628,10 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                  <input
                                   type="text"
                                   className="online-incident-input-field"
-                                  value={`${formData.dateFiled} ${formData.time}`}
+                                  value={`${formData.dateFiled} ${formData.time}${formData?.isReportLate ? " - (Late Filing)" : ""}`}
                                   disabled          
                                  />
                               </div>
-
                               <div className="fields-section-online">
                                 <p>Area Of Incident</p>
                                  <input

@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/firestorehelper";
 import { doc, updateDoc, collection, where, getDocs, query, onSnapshot} from "firebase/firestore";
 import { db } from "../../../../db/firebase";
-import { isValidPhilippineMobileNumber } from "@/app/helpers/helpers";
 import React from "react";
 
 
@@ -162,10 +161,16 @@ export default function EditLuponIncident() {
         // Determine statusPriority based on status
         let statusValue = mergeData(reportData.status, toUpdate.status);
         let statusPriority = 1;
-        if (statusValue === "settled") {
+        if (statusValue === "archived") {
           statusPriority = 2;
-        } else {
+        } else if(statusValue === "settled") {
           statusPriority = 3;
+        }
+        else if (statusValue === "pending") {
+          statusPriority = 1;
+        }
+        else if(statusValue === "CFA") {
+          statusPriority = 4;
         }
 
         const cleanedData = removeUndefined({
@@ -210,21 +215,11 @@ export default function EditLuponIncident() {
       event.preventDefault();
       const form = event.target as HTMLFormElement;
       console.log(toUpdate);  //
-    
+     
 
-      const complainantContact = toUpdate.complainant.contact || reportData?.complainant?.contact || "";
-      const respondentContact = toUpdate.respondent.contact || reportData?.respondent?.contact || "";
 
       if (form.checkValidity()) {
 
-        if (!isValidPhilippineMobileNumber(complainantContact) || 
-            !isValidPhilippineMobileNumber(respondentContact)) {
-
-          setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
-          setShowErrorPopup(true);
-          setTimeout(() => setShowErrorPopup(false), 3000);
-          return;
-        }
     
         setShowSubmitPopup(true); // ✅ Show confirmation only
       } else {
@@ -543,8 +538,9 @@ const confirmSubmit = async () => {
                           onChange={handleFormChange}               
                         >
                           <option value="pending">Pending</option>
-                          <option value="settled">Settled</option>
                           <option value="archived">Archived</option>
+                          <option value="settled">Settled</option>
+                          <option value="CFA">CFA</option>
                         </select>
                       </div> 
                     </div>
@@ -561,7 +557,8 @@ const confirmSubmit = async () => {
                             <h1>Date Filed</h1>
                           </div>
                         </div>
-                        <p>{reportData?.dateFiled || "N/A"}</p>
+                        <p>{`${reportData?.dateFiled}${reportData.isReportLate ? " (Late Filing)" : ""} `  || "N/A"}</p>
+
                       </div>
 
                       <div className="incident-location-section">
@@ -836,6 +833,19 @@ const confirmSubmit = async () => {
                             </div>
 
                             <div className="edit-incident-content-bottomsection">
+                              
+                            {reportData?.isReportLate && (
+                              <div className="box-container-outer-natureoffacts">
+                                  <div className="title-remarks-partyA">
+                                    Reason For Late Filing/Reporting
+                                  </div>
+
+                                  <div className="box-container-partyA">
+                                    <textarea className="natureoffacts-input-field" name="reasonForLateFiling" id="reasonForLateFiling" value={reportData.reasonForLateFiling} onChange={handleFormChange} onFocusCapture={(e) => {e.target.blur();}} />
+                                  </div>
+                                </div>
+                            )}
+
                               <div className="view-incident-partyA-container">
                                 <div className="box-container-outer-natureoffacts">
                                   <div className="title-remarks-partyA">
