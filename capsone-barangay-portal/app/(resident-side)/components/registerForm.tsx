@@ -208,9 +208,9 @@ const handleSubmitClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
   if (!resident.dateOfBirth) invalidFields.push("dateOfBirth");
   if (!resident.sex) invalidFields.push("sex");
   if (!resident.address.trim()) invalidFields.push("address");
-if (!resident.address.trim()) invalidFields.push("email");
-  if (!resident.address.trim()) invalidFields.push("password");
-  if (!resident.address.trim()) invalidFields.push("sex");
+    if (!resident.email.trim()) invalidFields.push("email");
+    if (!resident.password.trim()) invalidFields.push("password");
+    if (!resident.sex.trim()) invalidFields.push("sex");
   if (!resident.phone.trim()) invalidFields.push("phone");
   if (!resident.upload) invalidFields.push("upload"); // file upload check
 
@@ -550,8 +550,8 @@ const confirmSubmit = async () => {
                 </div>
             )}
             {errorPopup.show && (
-                <div className="popup-overlay error">
-                    <div className="popup">
+                <div className="popup-overlay-register-error error">
+                    <div className="popup-register-error">
                         <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
                         <p>{errorPopup.message}</p>
                         <button onClick={() => setErrorPopup({ show: false, message: "" })} className="close-button">Close</button>
