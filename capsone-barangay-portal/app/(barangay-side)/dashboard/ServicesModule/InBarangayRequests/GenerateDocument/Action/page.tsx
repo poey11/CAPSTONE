@@ -1325,6 +1325,7 @@ const handleChange = (
                                           civilStatus: "",
                                           birthday: "",
                                           contact: "",
+                                          dateOfResidency: ""
                                         };
                                     
                                         // ✅ Only clear the address if NOT 'Estate Tax' or 'Death Residency'
@@ -3281,6 +3282,7 @@ const handleChange = (
                                               occupation: resident.occupation || '',
                                               precinctnumber: resident.precinctNumber || '',
                                               residentId: resident.id,
+                                              dateOfResidency: resident.dateOfResidency || '',
                                             };
                                       
                                             // ✅ Only set requestor's address if NOT Estate Tax or Death Residency
