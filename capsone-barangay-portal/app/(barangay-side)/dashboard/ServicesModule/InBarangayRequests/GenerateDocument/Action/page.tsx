@@ -18,11 +18,7 @@ interface EmergencyDetails {
   relationship?: string;
   contactNumber?: string;
 }
-interface UploadedFile {
-  name: string;
-  file?: Blob | globalThis.File;
-  preview?: string;
-}
+
 
 
 
@@ -99,6 +95,18 @@ interface ClearanceInput {
     reqType?: string; // Optional, can be added if needed
     identificationPicture?: File[];
     isResident?: boolean;
+
+
+    signaturejpg: File | null;
+    barangayIDjpg: File | null;
+    validIDjpg: File | null;
+    letterjpg: File | null;
+    copyOfPropertyTitle: File | null;
+    dtiRegistration: File | null;
+    isCCTV: File | null;
+    taxDeclaration: File | null;
+    approvedBldgPlan: File | null;
+    deathCertificate: File | null;
 }
 
 
@@ -121,7 +129,21 @@ export default function action() {
     const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
     const [forResidentOnlyMap, setForResidentOnlyMap] = useState<{ [title: string]: boolean }>({});
     const [otherDocFields, setOtherDocFields] = useState<{ [title: string]: string[] }>({});
-    const [idPicture, setIdPicture] = useState<UploadedFile[]>([]);
+    
+
+    // State for all file containers
+const [files1, setFiles1] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files2, setFiles2] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files3, setFiles3] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files4, setFiles4] = useState<{ name: string, preview: string | undefined }[]>([]);
+
+const [files5, setFiles5] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files6, setFiles6] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files7, setFiles7] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files8, setFiles8] = useState<{ name: string, preview: string | undefined }[]>([]);
+
+const [files9, setFiles9] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files10, setFiles10] = useState<{ name: string, preview: string | undefined }[]>([]);
 
     
     const employerPopupRef = useRef<HTMLDivElement>(null);
@@ -199,17 +221,111 @@ export default function action() {
         fetchOtherDocumentPurposes();
       }, []);
 
+
+      const removeNullFields = (obj: Record<string, any>) => {
+        const cleaned: Record<string, any> = {};
+        for (const key in obj) {
+          const value = obj[key];
+          if (value !== null && value !== undefined && value !== "") {
+            cleaned[key] = value;
+          }
+        }
+        return cleaned;
+      };
+
+      const [clearanceInput, setClearanceInput] = useState<ClearanceInput>({
+   accID: "INBRGY-REQ",
+   reqType: "InBarangay",
+   docType: docType || "",
+   status: "Pending",
+   createdAt: new Date().toLocaleString(),
+   createdBy: user?.id || "",
+   statusPriority: 1,
+   docsRequired: [],
+   signaturejpg: null,
+   barangayIDjpg: null,
+   validIDjpg: null,
+   letterjpg: null,
+   copyOfPropertyTitle: null,
+   dtiRegistration: null,
+   isCCTV: null,
+   taxDeclaration: null,
+   approvedBldgPlan: null,
+   deathCertificate: null,
+   identificationPicture: [],
+   isResident: false,
+ 
+   // ADD THESE TO AVOID WARNINGS
+   residentId: "",
+   requestType: "",
+   requestId: "",
+   purpose: "",
+   fullName: "",
+   dateOfResidency: "",
+   dateofdeath: "",
+   address: "",
+   homeOrOfficeAddress: "",
+   toAddress: "",
+   businessLocation: "",
+   businessNature: "",
+   noOfVechicles: "",
+   vehicleMake: "",
+   vehicleType: "",
+   vehiclePlateNo: "",
+   vehicleSerialNo: "",
+   vehicleChassisNo: "",
+   vehicleEngineNo: "",
+   vehicleFileNo: "",
+   estimatedCapital: "",
+   businessName: "",
+   birthday: "",
+   age: "",
+   gender: "",
+   civilStatus: "",
+   contact: "",
+   typeofconstruction: "",
+   typeofbldg: "",
+   othersTypeofbldg: "",
+   projectName: "",
+   projectLocation: "",
+   citizenship: "",
+   educationalAttainment: "",
+   course: "",
+   birthplace: "",
+   religion: "",
+   nationality: "",
+   height: "",
+   weight: "",
+   bloodtype: "",
+   occupation: "",
+   precinctnumber: "",
+   requestorMrMs: "",
+   requestorFname: "",
+   partnerWifeHusbandFullName: "",
+   cohabitationStartDate: "",
+   cohabitationRelationship: "",
+   wardFname: "",
+   wardRelationship: "",
+   guardianshipType: "",
+   CYFrom: "",
+   CYTo: "",
+   attestedBy: "",
+   goodMoralPurpose: "",
+   goodMoralOtherPurpose: "",
+   noIncomePurpose: "",
+   noIncomeChildFName: "",
+   deceasedEstateName: "",
+   estateSince: "",
+ 
+   emergencyDetails: {
+     fullName: "",
+     address: "",
+     relationship: "",
+     contactNumber: "",
+   },
+ });
+    
       
-    const [clearanceInput, setClearanceInput] = useState<ClearanceInput>({
-        accID:"INBRGY-REQ",
-        reqType: "InBarangay",
-        docType: docType || "",
-        status: "Pending",
-        createdAt: new Date().toLocaleString(),
-        createdBy: user?.id || "",
-        statusPriority: 1, // Default priority for pending requests
-        docsRequired: [],
-    });
     const [maxDate, setMaxDate] = useState<any>()
     
 
@@ -258,28 +374,8 @@ export default function action() {
         container1: [],
     });
 
-    const handleResidentClick = () => {
-      setShowResidentsPopup(true);
-    };
-
-    const handleIDPictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
     
-      const preview = URL.createObjectURL(file);
     
-      setIdPicture([
-        {
-          file,
-          name: file.name,
-          preview,
-        },
-      ]);
-    };
-
-    const handleIDPictureDelete = () => {
-      setIdPicture([]);
-    };
 
     // Close popup when clicking outside
     useEffect(() => {
@@ -317,13 +413,288 @@ export default function action() {
         }
     };
   
-      // Handle file deletion for any container
-    const handleFileDelete = (container: string, fileName: string) => {
-        setFiles((prevFiles) => ({
-          ...prevFiles,
-          [container]: prevFiles[container].filter((file) => file.name !== fileName),
-        }));
-            
+      // Handle file deletion for documents container
+      const handleSignatureDelete = (fileName: string) => {
+        setFiles1((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+
+      const handleBarangayIDDelete = (fileName: string) => {
+        setFiles2((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+
+      const handleValidIDDelete = (fileName: string) => {
+        setFiles3((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+
+      const handleEndorsementDelete = (fileName: string) => {
+        setFiles4((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+
+      const handlePropertyContractDelete = (fileName: string) => {
+        setFiles5((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+
+      const handleDTIDelete = (fileName: string) => {
+        setFiles6((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+
+      const handleCCTVDelete = (fileName: string) => {
+        setFiles7((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+
+      const handleTaxDeclarationDelete = (fileName: string) => {
+        setFiles8((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+
+      const handleBldgConstructionPlanDelete = (fileName: string) => {
+        setFiles9((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+
+      const handleDeathCertificateDelete = (fileName: string) => {
+        setFiles10((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+
+      
+
+
+    const handleSignatureUpload = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles1([{ name: file.name, preview }]);
+    
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        signaturejpg: file,
+      }));
+    
+      // Optional: revoke URL after timeout
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
+    };
+
+    const handleBarangayIDUpload = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles2([{ name: file.name, preview }]);
+    
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        barangayIDjpg: file,
+      }));
+    
+      // Optional: revoke URL after timeout
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
+    };
+
+    const handleValidIDUpload = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles3([{ name: file.name, preview }]);
+    
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        validIDjpg: file,
+      }));
+    
+      // Optional: revoke URL after timeout
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
+    };
+
+    const handleEndorsementUpload = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles4([{ name: file.name, preview }]);
+    
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        letterjpg: file,
+      }));
+    
+      // Optional: revoke URL after timeout
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
+    };
+
+    const handlePropertyContractUpload = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles5([{ name: file.name, preview }]);
+    
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        letterjpg: file,
+      }));
+    
+      // Optional: revoke URL after timeout
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
+    };
+
+    const handleDTIUpload = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles6([{ name: file.name, preview }]);
+    
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        letterjpg: file,
+      }));
+    
+      // Optional: revoke URL after timeout
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
+    };
+
+    const handleCCTVUpload = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles7([{ name: file.name, preview }]);
+    
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        letterjpg: file,
+      }));
+    
+      // Optional: revoke URL after timeout
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
+    };
+
+    const handleTaxDeclarationUpload = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles8([{ name: file.name, preview }]);
+    
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        letterjpg: file,
+      }));
+    
+      // Optional: revoke URL after timeout
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
+    };
+
+    const handleBldgConstructionPlanUpload = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles9([{ name: file.name, preview }]);
+    
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        letterjpg: file,
+      }));
+    
+      // Optional: revoke URL after timeout
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
+    };
+
+    const handleDeathCertificateUpload = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles10([{ name: file.name, preview }]);
+    
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        letterjpg: file,
+      }));
+    
+      // Optional: revoke URL after timeout
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
     };
 
     
@@ -343,64 +714,47 @@ export default function action() {
                 }, 3000);
     };
 
-    const handleUploadImage = async () => {
-      const uploadedFiles: { name: string }[] = [];
-      let idPictureUrls: { name: string }[] = [];
-  
-      try {
-          let i = 0;
-          for (const file of files.container1) {
-              const fileExtension = file.name.split('.').pop();
-              const fileName = `${clearanceInput.requestId}-file${i}.${fileExtension}`;
-              const storageRef = ref(storage, `ServiceRequests/${fileName}`);
-  
-              const snapshot = await uploadBytes(storageRef, file.file as Blob);
-              const url = await getDownloadURL(snapshot.ref);
-              uploadedFiles.push({ name: url });
-              i++;
-          }
-  
-         
-          if (idPicture.length > 0) {
-              const file = idPicture[0]; // only one allowed
-              const ext = file.name.split('.').pop();
-              const fileName = `${clearanceInput.requestId}-idpicture.${ext}`;
-              const storageRef = ref(storage, `ServiceRequests/${fileName}`);
-              const snapshot = await uploadBytes(storageRef, file.file as Blob);
-              const url = await getDownloadURL(snapshot.ref);
-              idPictureUrls = [{ name: url }];
-          }
-  
-          return {
-              docsRequired: uploadedFiles,
-              identificationPicture: idPictureUrls
-          };
-      } catch (error) {
-          console.error("Error uploading images:", error);
-          return {
-              docsRequired: [],
-              identificationPicture: []
-          };
-      }
-  };
+
     let id: string | undefined;
     const handleUploadClick = async () => {
       try {
-        const uploadedFiles = await handleUploadImage(); // returns an object with two arrays
-        console.log("Uploaded Files:", uploadedFiles);
-    
         const docRef = collection(db, "ServiceRequests");
     
+        const uploadedFileUrls: Record<string, string> = {};
+        const fileKeys = [
+          "signaturejpg",
+          "barangayIDjpg",
+          "validIDjpg",
+          "letterjpg",
+          "copyOfPropertyTitle",
+          "dtiRegistration",
+          "isCCTV",
+          "taxDeclaration",
+          "approvedBldgPlan",
+          "deathCertificate"
+        ];
+    
+        for (const key of fileKeys) {
+          const file = clearanceInput[key as keyof ClearanceInput];
+          if (file instanceof File) {
+            const ext = file.name.split('.').pop();
+            const filename = `${clearanceInput.requestId}-${key}.${ext}`;
+            const storageRef = ref(storage, `ServiceRequests/${filename}`);
+            const snapshot = await uploadBytes(storageRef, file);
+            const url = await getDownloadURL(snapshot.ref);
+            uploadedFileUrls[key] = url;
+          }
+        }
+    
         const docData = {
-          ...clearanceInput,
+          ...removeNullFields(clearanceInput),
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
-          docsRequired: uploadedFiles.docsRequired,
-          identificationPicture: uploadedFiles.identificationPicture, 
+          ...uploadedFileUrls, // include uploaded file URLs in Firestore
         };
     
         console.log("Document Data:", docData);
         const doc = await addDoc(docRef, docData);
-        console.log("Document written with ID: ", docData.requestId, " - ", doc.id);
+        console.log("Document written with ID: ", doc.id);
         id = doc.id;
       } catch (error) {
         console.error("Error:", error);
@@ -411,19 +765,100 @@ export default function action() {
         setShowCreatePopup(true);
     }
 
-    const handleSubmit = (e:React.FormEvent) => {
-        e.preventDefault();
-        if(!files["container1"]||files.container1.length === 0) {
-            setPopupMessage("Please upload at least one file.");
-            setShowPopup(true);
-            setTimeout(() => {
-                setShowPopup(false);
-            }, 3000);
-            return;
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+    
+      // Signature
+      if (!files1 || files1.length === 0) {
+        setPopupMessage("Please upload Signature Over Printed Name.");
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 3000);
+        return;
+      }
+    
+      const isBarangayDocumentAndNewPermit =
+        isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "");
+    
+      // 🆕 If it's a Barangay Permit type, require at least one of the three
+      if (isBarangayDocumentAndNewPermit) {
+        const hasBarangayID = files2 && files2.length > 0;
+        const hasValidID = files3 && files3.length > 0;
+        const hasLetter = files4 && files4.length > 0;
+    
+        if (!hasBarangayID && !hasValidID && !hasLetter) {
+          setPopupMessage("Please upload at least one of: Barangay ID, Valid ID, or Endorsement Letter.");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 3000);
+          return;
         }
-        
-        handleConfirmClick();
-    }
+      } else {
+        // Only check Endorsement Letter if not in the Barangay Permit category
+        if (!files4 || files4.length === 0) {
+          setPopupMessage("Please upload Endorsement Letter.");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 3000);
+          return;
+        }
+      }
+    
+      if (isBusinessPermit) {
+        if (!files5 || files5.length === 0) {
+          setPopupMessage("Please upload Title of the Property/Contract of Lease.");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 3000);
+          return;
+        }
+    
+        if (!files6 || files6.length === 0) {
+          setPopupMessage("Please upload DTI Registration.");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 3000);
+          return;
+        }
+    
+        if (!files7 || files7.length === 0) {
+          setPopupMessage("Please upload Picture of CCTV Installed.");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 3000);
+          return;
+        }
+      }
+    
+      if (isConstruction) {
+        if (!files5 || files5.length === 0) {
+          setPopupMessage("Please upload Title of the Property/Contract of Lease.");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 3000);
+          return;
+        }
+    
+        if (!files8 || files8.length === 0) {
+          setPopupMessage("Please upload Tax Declaration.");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 3000);
+          return;
+        }
+    
+        if (!files9 || files9.length === 0) {
+          setPopupMessage("Please upload Building/Construction Plan.");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 3000);
+          return;
+        }
+      }
+    
+      if (["Estate Tax", "Death Residency"].includes(clearanceInput.purpose ?? "")) {
+        if (!files10 || files10.length === 0) {
+          setPopupMessage("Please upload Death Certificate.");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 3000);
+          return;
+        }
+      }
+    
+      // If all validations pass
+      handleConfirmClick();
+    };
 
 
     const confirmCreate = async () => {
@@ -544,6 +979,20 @@ const handleChange = (
       "contact",
       "citizenship",
     ];
+
+
+    const isBarangayDocument = [
+      "Barangay Certificate",
+       "Barangay Indigency", 
+       "Barangay Clearance"
+    ].includes(clearanceInput.docType || "");
+
+    const isBusinessPermit = [
+      "Business Permit", 
+      "Temporary Business Permit"]
+      .includes(clearanceInput.docType || "");
+      
+    const isConstruction = clearanceInput.docType === "Construction";
 
     const isPermitLike =
     allExistingPermits.includes(docType || "") ||
@@ -879,7 +1328,7 @@ const handleChange = (
                                         };
                                     
                                         // ✅ Only clear the address if NOT 'Estate Tax' or 'Death Residency'
-                                        if (!["Estate Tax", "Death Residency"].includes(purpose)) {
+                                        if (!["Estate Tax", "Death Residency", "Occupancy /  Moving Out"].includes(purpose)) {
                                           updatedInput.address = "";
                                         }
                                     
@@ -1182,17 +1631,31 @@ const handleChange = (
                                   className="createRequest-input-field"
                                   required
                                 >
-                               <option value="" disabled>Select Year</option>
-                                {[...Array(100)].map((_, i) => {
-                                  const year = new Date().getFullYear() - i;
-                                  const cyFrom = parseInt(clearanceInput.CYFrom || "1");
-                                  const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
-                                  return (
-                                  <option key={year} value={year} disabled={isDisabled}>
-                                    {year}
-                                  </option>
-                                  );
-                                })}
+                                  <option value="" disabled>Select Year</option>
+                                  {(() => {
+                                    const currentYear = new Date().getFullYear();
+                                    const cyFrom = parseInt(clearanceInput.CYFrom || "");
+
+                                    if (cyFrom === currentYear) {
+                                      // Only show current year
+                                      return (
+                                        <option key={currentYear} value={currentYear}>
+                                          {currentYear}
+                                        </option>
+                                      );
+                                    }
+
+                                    // Default behavior if Year From is not current year
+                                    return [...Array(100)].map((_, i) => {
+                                      const year = currentYear - i;
+                                      const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
+                                      return (
+                                        <option key={year} value={year} disabled={isDisabled}>
+                                          {year}
+                                        </option>
+                                      );
+                                    });
+                                  })()}
                                 </select>
                               </div>
                             </>
@@ -1913,7 +2376,7 @@ const handleChange = (
                               <div className="fields-section">
                                 <h1>Estimated Capital<span className="required">*</span></h1>
                                 <input 
-                                  type="text"  
+                                  type="number"  
                                   id="estimatedCapital"  
                                   name="estimatedCapital"  
                                   value={clearanceInput.estimatedCapital || ""}
@@ -2033,8 +2496,8 @@ const handleChange = (
                     <>
                       <div className="others-main-container">
                         <div className="box-container-outer-verificationdocs">
-                          <div className="title-verificationdocs">
-                            Verification Documents
+                          <div className="title-verificationdocs-signature">
+                            Signature Over Printed Name
                           </div>
 
                           <div className="box-container-verificationdocs">
@@ -2049,14 +2512,13 @@ const handleChange = (
                                   className="file-upload-input" 
                                   multiple
                                   accept=".jpg,.jpeg,.png"
-                                  name="file-upload1" // Use the same name as in the clearanceInput state                                       
-                                  onChange={handleFileChange('container1')} // Handle file selection
+                                  onChange={handleSignatureUpload}
                                 />
 
                                 {/* Display the file names with image previews */}
-                                {files.container1.length > 0 && (
+                                {files1.length > 0 && (
                                   <div className="file-name-image-display">
-                                    {files.container1.map((file, index) => (
+                                    {files1.map((file, index) => (
                                       <div className="file-name-image-display-indiv" key={index}>
                                         <li className="file-item"> 
                                           {/* Display the image preview */}
@@ -2074,7 +2536,7 @@ const handleChange = (
                                             {/* Delete button with image */}
                                             <button
                                               type="button"
-                                              onClick={() => handleFileDelete('container1', file.name)}
+                                              onClick={() => handleSignatureDelete(file.name)}
                                               className="delete-button"
                                             >
                                             <img
@@ -2093,11 +2555,13 @@ const handleChange = (
                           </div>
                         </div>
 
-                        {clearanceInput.purpose === "Residency" && (
-                          <>
-                            <div className="box-container-outer-verificationdocs">
-                            <div className="title-verificationdocs">
-                              Identification Picture
+                        
+
+                      {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "")) && (
+                        <>
+                          <div className="box-container-outer-verificationdocs">
+                            <div className="title-verificationdocs-barangayID">
+                              Barangay ID
                             </div>
 
                             <div className="box-container-verificationdocs">
@@ -2105,48 +2569,610 @@ const handleChange = (
 
                               {/* File Upload Section */}
                               <div className="file-upload-container">
-                                <label htmlFor="id-picture-upload" className="upload-link">
-                                  Click to Upload Picture
-                                </label>
+                                <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
+                                  <input
+                                    id="file-upload2"
+                                    type="file"
+                                    className="file-upload-input" 
+                                    multiple
+                                    accept=".jpg,.jpeg,.png"
+                                    onChange={handleBarangayIDUpload}
+                                  />
 
+                                  {/* Display the file names with image previews */}
+                                  {files2.length > 0 && (
+                                    <div className="file-name-image-display">
+                                      {files2.map((file, index) => (
+                                        <div className="file-name-image-display-indiv" key={index}>
+                                          <li className="file-item"> 
+                                            {/* Display the image preview */}
+                                            {file.preview && (
+                                              <div className="filename-image-container">
+                                                <img
+                                                  src={file.preview}
+                                                  alt={file.name}
+                                                  className="file-preview"
+                                                />
+                                              </div>
+                                            )}
+                                            <span className="file-name">{file.name}</span>  
+                                            <div className="delete-container">
+                                              {/* Delete button with image */}
+                                              <button
+                                                type="button"
+                                                onClick={() => handleBarangayIDDelete(file.name)}
+                                                className="delete-button"
+                                              >
+                                              <img
+                                                src="/images/trash.png"  
+                                                alt="Delete"
+                                                className="delete-icon"
+                                              />
+                                              </button>
+                                            </div>
+                                          </li>
+                                        </div>
+                                      ))}           
+                                    </div>
+                                  )}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="box-container-outer-verificationdocs">
+                            <div className="title-verificationdocs-validID">
+                              Valid ID
+                            </div>
+
+                            <div className="box-container-verificationdocs">
+                              <span className="required-asterisk">*</span>
+
+                              {/* File Upload Section */}
+                              <div className="file-upload-container">
+                                <label htmlFor="file-upload3"  className="upload-link">Click to Upload File</label>
+                                  <input
+                                    id="file-upload3"
+                                    type="file"
+                                    className="file-upload-input" 
+                                    multiple
+                                    accept=".jpg,.jpeg,.png"
+                                    onChange={handleValidIDUpload}
+                                  />
+
+                                  {/* Display the file names with image previews */}
+                                  {files3.length > 0 && (
+                                    <div className="file-name-image-display">
+                                      {files3.map((file, index) => (
+                                        <div className="file-name-image-display-indiv" key={index}>
+                                          <li className="file-item"> 
+                                            {/* Display the image preview */}
+                                            {file.preview && (
+                                              <div className="filename-image-container">
+                                                <img
+                                                  src={file.preview}
+                                                  alt={file.name}
+                                                  className="file-preview"
+                                                />
+                                              </div>
+                                            )}
+                                            <span className="file-name">{file.name}</span>  
+                                            <div className="delete-container">
+                                              {/* Delete button with image */}
+                                              <button
+                                                type="button"
+                                                onClick={() => handleValidIDDelete(file.name)}
+                                                className="delete-button"
+                                              >
+                                              <img
+                                                src="/images/trash.png"  
+                                                alt="Delete"
+                                                className="delete-icon"
+                                              />
+                                              </button>
+                                            </div>
+                                          </li>
+                                        </div>
+                                      ))}           
+                                    </div>
+                                  )}
+                              </div>
+                            </div>
+                          </div>
+                          
+                        </>
+                      )}
+
+                        <div className="box-container-outer-verificationdocs">
+                          <div className="title-verificationdocs-endorsement">
+                            Endorsement Letter
+                          </div>
+
+                          <div className="box-container-verificationdocs">
+                            <span className="required-asterisk">*</span>
+
+                            {/* File Upload Section */}
+                            <div className="file-upload-container">
+                              <label htmlFor="file-upload4"  className="upload-link">Click to Upload File</label>
                                 <input
-                                  id="id-picture-upload"
+                                  id="file-upload4"
                                   type="file"
-                                  className="file-upload-input"
+                                  className="file-upload-input" 
+                                  multiple
                                   accept=".jpg,.jpeg,.png"
-                                  name="idPicture"
-                                  onChange={(e) => handleIDPictureChange(e)}
+                                  onChange={handleEndorsementUpload}
                                 />
 
-                                {/* Display the image preview (only one) */}
-                                { idPicture.length > 0 && (
+                                {/* Display the file names with image previews */}
+                                {files4.length > 0 && (
                                   <div className="file-name-image-display">
-                                    {idPicture.map((file, index) => (
+                                    {files4.map((file, index) => (
                                       <div className="file-name-image-display-indiv" key={index}>
-                                        <li className="file-item">
+                                        <li className="file-item"> 
+                                          {/* Display the image preview */}
                                           {file.preview && (
                                             <div className="filename-image-container">
-                                              <img src={file.preview} alt={file.name} className="file-preview" />
+                                              <img
+                                                src={file.preview}
+                                                alt={file.name}
+                                                className="file-preview"
+                                              />
                                             </div>
                                           )}
-                                          <span className="file-name">{file.name}</span>
+                                          <span className="file-name">{file.name}</span>  
                                           <div className="delete-container">
-                                            <button type="button" onClick={handleIDPictureDelete} className="delete-button">
-                                              <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                            {/* Delete button with image */}
+                                            <button
+                                              type="button"
+                                              onClick={() => handleEndorsementDelete(file.name)}
+                                              className="delete-button"
+                                            >
+                                            <img
+                                              src="/images/trash.png"  
+                                              alt="Delete"
+                                              className="delete-icon"
+                                            />
                                             </button>
                                           </div>
                                         </li>
                                       </div>
-                                    ))}
+                                    ))}           
                                   </div>
                                 )}
-                              </div>
                             </div>
                           </div>
+                        </div>
+
+                        {isBusinessPermit && (
+                          <>
+                            <div className="box-container-outer-verificationdocs">
+                              <div className="title-verificationdocs-propertyContract">
+                                Title of the Property/Contract of Lease
+                              </div>
+
+                              <div className="box-container-verificationdocs">
+                                <span className="required-asterisk">*</span>
+
+                                {/* File Upload Section */}
+                                <div className="file-upload-container">
+                                  <label htmlFor="file-upload5"  className="upload-link">Click to Upload File</label>
+                                    <input
+                                      id="file-upload5"
+                                      type="file"
+                                      className="file-upload-input" 
+                                      multiple
+                                      accept=".jpg,.jpeg,.png"
+                                      onChange={handlePropertyContractUpload}
+                                    />
+
+                                    {/* Display the file names with image previews */}
+                                    {files5.length > 0 && (
+                                      <div className="file-name-image-display">
+                                        {files5.map((file, index) => (
+                                          <div className="file-name-image-display-indiv" key={index}>
+                                            <li className="file-item"> 
+                                              {/* Display the image preview */}
+                                              {file.preview && (
+                                                <div className="filename-image-container">
+                                                  <img
+                                                    src={file.preview}
+                                                    alt={file.name}
+                                                    className="file-preview"
+                                                  />
+                                                </div>
+                                              )}
+                                              <span className="file-name">{file.name}</span>  
+                                              <div className="delete-container">
+                                                {/* Delete button with image */}
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handlePropertyContractDelete(file.name)}
+                                                  className="delete-button"
+                                                >
+                                                <img
+                                                  src="/images/trash.png"  
+                                                  alt="Delete"
+                                                  className="delete-icon"
+                                                />
+                                                </button>
+                                              </div>
+                                            </li>
+                                          </div>
+                                        ))}           
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="box-container-outer-verificationdocs">
+                              <div className="title-verificationdocs-dti">
+                                DTI Registration
+                              </div>
+
+                              <div className="box-container-verificationdocs">
+                                <span className="required-asterisk">*</span>
+
+                                {/* File Upload Section */}
+                                <div className="file-upload-container">
+                                  <label htmlFor="file-upload6"  className="upload-link">Click to Upload File</label>
+                                    <input
+                                      id="file-upload6"
+                                      type="file"
+                                      className="file-upload-input" 
+                                      multiple
+                                      accept=".jpg,.jpeg,.png"
+                                      onChange={handleDTIUpload}
+                                    />
+
+                                    {/* Display the file names with image previews */}
+                                    {files6.length > 0 && (
+                                      <div className="file-name-image-display">
+                                        {files6.map((file, index) => (
+                                          <div className="file-name-image-display-indiv" key={index}>
+                                            <li className="file-item"> 
+                                              {/* Display the image preview */}
+                                              {file.preview && (
+                                                <div className="filename-image-container">
+                                                  <img
+                                                    src={file.preview}
+                                                    alt={file.name}
+                                                    className="file-preview"
+                                                  />
+                                                </div>
+                                              )}
+                                              <span className="file-name">{file.name}</span>  
+                                              <div className="delete-container">
+                                                {/* Delete button with image */}
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleDTIDelete(file.name)}
+                                                  className="delete-button"
+                                                >
+                                                <img
+                                                  src="/images/trash.png"  
+                                                  alt="Delete"
+                                                  className="delete-icon"
+                                                />
+                                                </button>
+                                              </div>
+                                            </li>
+                                          </div>
+                                        ))}           
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="box-container-outer-verificationdocs">
+                              <div className="title-verificationdocs-cctv">
+                                Picture of CCTV Installed
+                              </div>
+
+                              <div className="box-container-verificationdocs">
+                                <span className="required-asterisk">*</span>
+
+                                {/* File Upload Section */}
+                                <div className="file-upload-container">
+                                  <label htmlFor="file-upload7"  className="upload-link">Click to Upload File</label>
+                                    <input
+                                      id="file-upload7"
+                                      type="file"
+                                      className="file-upload-input" 
+                                      multiple
+                                      accept=".jpg,.jpeg,.png"
+                                      onChange={handleCCTVUpload}
+                                    />
+
+                                    {/* Display the file names with image previews */}
+                                    {files7.length > 0 && (
+                                      <div className="file-name-image-display">
+                                        {files7.map((file, index) => (
+                                          <div className="file-name-image-display-indiv" key={index}>
+                                            <li className="file-item"> 
+                                              {/* Display the image preview */}
+                                              {file.preview && (
+                                                <div className="filename-image-container">
+                                                  <img
+                                                    src={file.preview}
+                                                    alt={file.name}
+                                                    className="file-preview"
+                                                  />
+                                                </div>
+                                              )}
+                                              <span className="file-name">{file.name}</span>  
+                                              <div className="delete-container">
+                                                {/* Delete button with image */}
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleCCTVDelete(file.name)}
+                                                  className="delete-button"
+                                                >
+                                                <img
+                                                  src="/images/trash.png"  
+                                                  alt="Delete"
+                                                  className="delete-icon"
+                                                />
+                                                </button>
+                                              </div>
+                                            </li>
+                                          </div>
+                                        ))}           
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+                            </div>
                           </>
                         )}
 
-                        
+                        {isConstruction && (
+                          <>
+                            <div className="box-container-outer-verificationdocs">
+                              <div className="title-verificationdocs-propertyContract">
+                                Title of the Property/Contract of Lease
+                              </div>
+
+                              <div className="box-container-verificationdocs">
+                                <span className="required-asterisk">*</span>
+
+                                {/* File Upload Section */}
+                                <div className="file-upload-container">
+                                  <label htmlFor="file-upload5"  className="upload-link">Click to Upload File</label>
+                                    <input
+                                      id="file-upload5"
+                                      type="file"
+                                      className="file-upload-input" 
+                                      multiple
+                                      accept=".jpg,.jpeg,.png"
+                                      onChange={handlePropertyContractUpload}
+                                    />
+
+                                    {/* Display the file names with image previews */}
+                                    {files5.length > 0 && (
+                                      <div className="file-name-image-display">
+                                        {files5.map((file, index) => (
+                                          <div className="file-name-image-display-indiv" key={index}>
+                                            <li className="file-item"> 
+                                              {/* Display the image preview */}
+                                              {file.preview && (
+                                                <div className="filename-image-container">
+                                                  <img
+                                                    src={file.preview}
+                                                    alt={file.name}
+                                                    className="file-preview"
+                                                  />
+                                                </div>
+                                              )}
+                                              <span className="file-name">{file.name}</span>  
+                                              <div className="delete-container">
+                                                {/* Delete button with image */}
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handlePropertyContractDelete(file.name)}
+                                                  className="delete-button"
+                                                >
+                                                <img
+                                                  src="/images/trash.png"  
+                                                  alt="Delete"
+                                                  className="delete-icon"
+                                                />
+                                                </button>
+                                              </div>
+                                            </li>
+                                          </div>
+                                        ))}           
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="box-container-outer-verificationdocs">
+                              <div className="title-verificationdocs-taxDeclaration">
+                                Tax Declaration
+                              </div>
+
+                              <div className="box-container-verificationdocs">
+                                <span className="required-asterisk">*</span>
+
+                                {/* File Upload Section */}
+                                <div className="file-upload-container">
+                                  <label htmlFor="file-upload8"  className="upload-link">Click to Upload File</label>
+                                    <input
+                                      id="file-upload8"
+                                      type="file"
+                                      className="file-upload-input" 
+                                      multiple
+                                      accept=".jpg,.jpeg,.png"
+                                      onChange={handleTaxDeclarationUpload}
+                                    />
+
+                                    {/* Display the file names with image previews */}
+                                    {files8.length > 0 && (
+                                      <div className="file-name-image-display">
+                                        {files8.map((file, index) => (
+                                          <div className="file-name-image-display-indiv" key={index}>
+                                            <li className="file-item"> 
+                                              {/* Display the image preview */}
+                                              {file.preview && (
+                                                <div className="filename-image-container">
+                                                  <img
+                                                    src={file.preview}
+                                                    alt={file.name}
+                                                    className="file-preview"
+                                                  />
+                                                </div>
+                                              )}
+                                              <span className="file-name">{file.name}</span>  
+                                              <div className="delete-container">
+                                                {/* Delete button with image */}
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleTaxDeclarationDelete(file.name)}
+                                                  className="delete-button"
+                                                >
+                                                <img
+                                                  src="/images/trash.png"  
+                                                  alt="Delete"
+                                                  className="delete-icon"
+                                                />
+                                                </button>
+                                              </div>
+                                            </li>
+                                          </div>
+                                        ))}           
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="box-container-outer-verificationdocs">
+                              <div className="title-verificationdocs-bldgconstruction">
+                                Building/Construction Plan
+                              </div>
+
+                              <div className="box-container-verificationdocs">
+                                <span className="required-asterisk">*</span>
+
+                                {/* File Upload Section */}
+                                <div className="file-upload-container">
+                                  <label htmlFor="file-upload9"  className="upload-link">Click to Upload File</label>
+                                    <input
+                                      id="file-upload9"
+                                      type="file"
+                                      className="file-upload-input" 
+                                      multiple
+                                      accept=".jpg,.jpeg,.png"
+                                      onChange={handleBldgConstructionPlanUpload}
+                                    />
+
+                                    {/* Display the file names with image previews */}
+                                    {files9.length > 0 && (
+                                      <div className="file-name-image-display">
+                                        {files9.map((file, index) => (
+                                          <div className="file-name-image-display-indiv" key={index}>
+                                            <li className="file-item"> 
+                                              {/* Display the image preview */}
+                                              {file.preview && (
+                                                <div className="filename-image-container">
+                                                  <img
+                                                    src={file.preview}
+                                                    alt={file.name}
+                                                    className="file-preview"
+                                                  />
+                                                </div>
+                                              )}
+                                              <span className="file-name">{file.name}</span>  
+                                              <div className="delete-container">
+                                                {/* Delete button with image */}
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleBldgConstructionPlanDelete(file.name)}
+                                                  className="delete-button"
+                                                >
+                                                <img
+                                                  src="/images/trash.png"  
+                                                  alt="Delete"
+                                                  className="delete-icon"
+                                                />
+                                                </button>
+                                              </div>
+                                            </li>
+                                          </div>
+                                        ))}           
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        )}
+
+                        {["Estate Tax", "Death Residency"].includes(clearanceInput.purpose ?? "") && (
+                          <>
+                            <div className="box-container-outer-verificationdocs">
+                              <div className="title-verificationdocs-deathCertificate">
+                                Death Certificate
+                              </div>
+
+                              <div className="box-container-verificationdocs">
+                                <span className="required-asterisk">*</span>
+
+                                {/* File Upload Section */}
+                                <div className="file-upload-container">
+                                  <label htmlFor="file-upload10"  className="upload-link">Click to Upload File</label>
+                                    <input
+                                      id="file-upload10"
+                                      type="file"
+                                      className="file-upload-input" 
+                                      multiple
+                                      accept=".jpg,.jpeg,.png"
+                                      onChange={handleDeathCertificateUpload}
+                                    />
+
+                                    {/* Display the file names with image previews */}
+                                    {files10.length > 0 && (
+                                      <div className="file-name-image-display">
+                                        {files10.map((file, index) => (
+                                          <div className="file-name-image-display-indiv" key={index}>
+                                            <li className="file-item"> 
+                                              {/* Display the image preview */}
+                                              {file.preview && (
+                                                <div className="filename-image-container">
+                                                  <img
+                                                    src={file.preview}
+                                                    alt={file.name}
+                                                    className="file-preview"
+                                                  />
+                                                </div>
+                                              )}
+                                              <span className="file-name">{file.name}</span>  
+                                              <div className="delete-container">
+                                                {/* Delete button with image */}
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleDeathCertificateDelete(file.name)}
+                                                  className="delete-button"
+                                                >
+                                                <img
+                                                  src="/images/trash.png"  
+                                                  alt="Delete"
+                                                  className="delete-icon"
+                                                />
+                                                </button>
+                                              </div>
+                                            </li>
+                                          </div>
+                                        ))}           
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </>
                   )}
@@ -2235,7 +3261,7 @@ const handleChange = (
                                               residentId: resident.id,
                                             };
                                       
-                                            if (["Estate Tax", "Death Residency"].includes(purpose)) {
+                                            if (["Estate Tax", "Death Residency", "Occupancy /  Moving Out"].includes(purpose)) {
                                               update.address = resident.address || '';
                                             }
                                       
@@ -2258,7 +3284,7 @@ const handleChange = (
                                             };
                                       
                                             // ✅ Only set requestor's address if NOT Estate Tax or Death Residency
-                                            if (!["Estate Tax", "Death Residency"].includes(purpose)) {
+                                            if (!["Estate Tax", "Death Residency", "Occupancy /  Moving Out" ].includes(purpose)) {
                                               update.address = resident.address || '';
                                             }
                                       
