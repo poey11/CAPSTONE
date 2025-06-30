@@ -260,7 +260,9 @@ export default function AddResident() {
         residentsRef,
         where("firstName", "==", formData.firstName.trim()),
         where("lastName", "==", formData.lastName.trim()),
-        where("middleName", "==", formData.middleName?.trim() || "")
+        where("middleName", "==", formData.middleName?.trim() || ""),
+        where("dateOfBirth", "==", formData.dateOfBirth)
+
       );
   
       const querySnapshot = await getDocs(q);
