@@ -26,6 +26,10 @@ interface IncidentReport {
   file?: string;
   respondent?: Respondent;
   time?: string;
+  area?: string;
+  addInfo?: string;
+  contactNos?: string;
+  
 }
 
 export default function IncidentTransactionsDetails() {
@@ -37,6 +41,9 @@ export default function IncidentTransactionsDetails() {
   const [loading, setLoading] = useState(true);
   const [fileURL, setFileURL] = useState<string | null>(null);
 
+   const [activeSection, setActiveSection] = useState("info");
+
+  
   useEffect(() => {
     if (!referenceId) return;
 
@@ -91,11 +98,13 @@ export default function IncidentTransactionsDetails() {
 
   const incidentFields = [
     { label: "ID", key: "caseNumber" },
-    { label: "Date and Time of Incident", key: "dateTime" },
     { label: "Name", key: "fullName" },
+    { label: "Date and Time of Incident", key: "dateTime" },
     { label: "Location", key: "address" },
+    { label: "Area in Fairview", key: "area" },
     { label: "Concern", key: "concerns" },
     { label: "Additional Information", key: "addInfo" },
+    { label: "Contact Number", key: "contactNos" },
   ];
 
   const respondentFields = [
@@ -118,11 +127,155 @@ export default function IncidentTransactionsDetails() {
     },
   ];
 
+
+
+
+
+
   return (
     <main className="incident-transaction-container">
       <div className="headerpic-specific-transactions">
         <p>TRANSACTIONS</p>
       </div>
+
+      <div className="incident-content">
+        <div className="incident-content-section-1">
+          <button type="button" className="back-button" onClick={handleBack}></button>
+          <h1>Online Incident Report</h1>
+          <div className="status-container">
+            <p className={`status-dropdown-transactions ${transactionData.status?.toLowerCase() || ""}`}>
+              {transactionData.status || "N/A"}
+            </p> 
+          </div>
+        </div>
+
+        <div className="incident-main-content">
+
+          <div className="incident-main-content-upper">
+
+             <nav className="incidents-transactions-info-toggle-wrapper">
+                  {["info", "barangay" ].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "info" && "Report Info"}
+                       {section === "barangay" && "Barangay Response"}
+                    </button>
+                  ))}
+              </nav>
+
+          </div>
+      
+      <div className="incident-main-content-lower">
+      <div className="incident-main-left">
+        {incidentFields
+          .filter((_, index) => index % 2 === 0)
+          .map((field) => (
+            <div className="details-section" key={field.key}>
+              <div className="title">
+                <p>{field.label}</p>
+              </div>
+              <div className="description">
+                <p>{(extendedData as Record<string, any>)[field.key] || "N/A"}</p>
+              </div>
+            </div>
+          ))}
+      </div>
+
+      <div className="incident-main-right">
+        {incidentFields
+          .filter((_, index) => index % 2 !== 0)
+          .map((field) => (
+            <div className="details-section" key={field.key}>
+              <div className="title">
+                <p>{field.label}</p>
+              </div>
+              <div className="description">
+                <p>{(extendedData as Record<string, any>)[field.key] || "N/A"}</p>
+              </div>
+            </div>
+          ))}
+      </div>
+    </div>
+
+
+    <div className="incident-main-center">
+
+        <div className="details-section-upload">
+          <div className="title">
+            <p>Proof of Incident</p>
+          </div>
+          <div className="description">
+            {fileURL ? (
+              <div className="proof-incident-transactions">
+                <img src={fileURL} alt="Proof of Incident" className="proofOfIncident-image" onError={(e) => (e.currentTarget.style.display = "none")} />
+                <p>
+                  <a href={fileURL} target="_blank" rel="noopener noreferrer">View Full Image</a>
+                </p>
+              </div>
+            ) : (
+              <p>No proof uploaded.</p>
+            )}
+          </div>
+        </div>
+
+    </div>
+
+
+            
+
+        </div>
+
+  
+{/*
+
+
+        <div className="details-section">
+          <div className="title">
+            <p>Proof of Incident</p>
+          </div>
+          <div className="description">
+            {fileURL ? (
+              <div className="proof-incident-transactions">
+                <img src={fileURL} alt="Proof of Incident" className="proofOfIncident-image" onError={(e) => (e.currentTarget.style.display = "none")} />
+                <p>
+                  <a href={fileURL} target="_blank" rel="noopener noreferrer">View Full Image</a>
+                </p>
+              </div>
+            ) : (
+              <p>No proof uploaded.</p>
+            )}
+          </div>
+        </div>
+
+       */}
+      </div>
+
+      {transactionData?.status === "Acknowledged" && (
+          <div className="incident-content">
+            <div className="incident-content-section-1">
+              <p>Respondent Report Details</p>
+            </div>
+            {respondentFields.map((field) => (
+              <div className="details-section" key={field.key}>
+                <div className="title">
+                  <p>{field.label}</p>
+                </div>
+                <div className="description">
+                  {field.render ? field.render(transactionData?.respondent?.[field.key as keyof Respondent]) : transactionData?.respondent?.[field.key as keyof Respondent] || "N/A"}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+
+
+
+
 
       <div className="incident-content">
         <div className="incident-content-section-1">
@@ -183,7 +336,7 @@ export default function IncidentTransactionsDetails() {
               </div>
             ))}
           </div>
-        )}
+        )}   
     </main>
   );
 }

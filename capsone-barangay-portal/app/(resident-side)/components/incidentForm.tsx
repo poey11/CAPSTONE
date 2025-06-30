@@ -385,7 +385,7 @@ const confirmSubmit = async () => {
 
          <div className="register-section-upper">
 
-           <nav className="main-residents-info-toggle-wrapper">
+           <nav className="incidents-form-info-toggle-wrapper">
                   {["complainant", "incident", "others"].map((section) => (
                     <button
                       key={section}
