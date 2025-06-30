@@ -26,7 +26,7 @@ export default function AddResident() {
     occupation: "",
     contactNumber: "",
     emailAddress: "",
-    precinctNumber: "",
+    dateOfResidency: "",
     generalLocation: "",
     cluster: "",
     isStudent: false,
@@ -80,7 +80,7 @@ export default function AddResident() {
     occupation: "full",
     contactNumber: "full",
     emailAddress: "full",
-    precinctNumber: "full",
+    dateOfResidency: "full",
     verificationFiles: "others",
   };
 
@@ -510,8 +510,21 @@ const [activeSection, setActiveSection] = useState("basic");
                       {activeSection === "full" && (
                         <>
                         <div className="add-main-resident-section-2-full-top">
+                          
 
                           <div className="add-main-resident-section-2-left-side">
+
+                                <div className="fields-section">
+                                          <p>Date of Residency<span className="required">*</span></p>
+                                          <input 
+                                            type="date"
+                                            className={`add-resident-input-field ${invalidFields.includes("dateOfResidency") ? "input-error" : ""}`}
+                                            name="dateOfResidency"
+                                            value={formData.dateOfResidency}
+                                            onChange={handleChange}
+                                            max={new Date().toISOString().split("T")[0]}
+                                            required />
+                                        </div>
                                 <div className="fields-section">
                                   <p>Age<span className="required">*</span></p>
                                   <input 
@@ -595,10 +608,6 @@ const [activeSection, setActiveSection] = useState("basic");
                                       <input type="email" className="add-resident-input-field" placeholder="Enter Email Address" name="emailAddress" value={formData.emailAddress} onChange={handleChange} />
                                     </div>
 
-                                    <div className="fields-section">
-                                      <p>Precinct Number</p>
-                                      <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
-                                    </div> 
                                     
                             </div>
 
