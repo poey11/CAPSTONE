@@ -147,6 +147,32 @@ useEffect(() => {
   fetchIncidentReports();
 }, [residentId]);
 
+const [serviceRequests, setServiceRequests] = useState<any[]>([]);
+
+useEffect(() => {
+  const fetchServiceRequests = async () => {
+    if (!residentId) return;
+
+    try {
+      const requestsRef = collection(db, "ServiceRequests");
+      const q = query(requestsRef, where("residentId", "==", residentId));
+      const snapshot = await getDocs(q);
+
+      const requests: any[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      setServiceRequests(requests);
+    } catch (error) {
+      console.error("Error fetching service requests:", error);
+    }
+  };
+
+  fetchServiceRequests();
+}, [residentId]);
+
+
 
   const [activeSection, setActiveSection] = useState("basic");
 
@@ -196,7 +222,7 @@ useEffect(() => {
           </div>
               
           <div className="view-resident-info-toggle-wrapper">
-            {["basic", "full", "others" , "history", "incidents"].map((section) => (
+            {["basic", "full", "others" , "history", "incidents", "services"].map((section) => (
               <button
                 key={section}
                 type="button"
@@ -208,6 +234,7 @@ useEffect(() => {
                 {section === "others" && "Others"}
                 {section === "history" && "History"}
                 {section === "incidents" && "Incidents"}
+                {section === "services" && "Services"}
               </button>
             ))}
           </div>  
@@ -525,6 +552,61 @@ useEffect(() => {
                       </div>
                     </>
                   )}
+{activeSection === "services" && (
+  <>
+    <div className="view-resident-incident-table-container">
+      {serviceRequests.length === 0 ? (
+        <div className="no-incident-message">
+          <p>No service requests found for this resident.</p>
+        </div>
+      ) : (
+        <table className="incident-table-section">
+          <thead>
+            <tr>
+              <th className="w-[200px] text-center">Account ID</th>
+              <th className="w-[250px] text-center">Purpose</th>
+              <th className="w-[200px] text-center">Document Type</th>
+              <th className="w-[150px] text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {serviceRequests.map((req) => (
+              <tr key={req.id} className="clickable-row">
+                <td>
+                  <Link href={`/dashboard/ServicesModule/ViewRequest?id=${req.id}`}>
+                    {req.requestId}
+                  </Link>
+                </td>
+                <td>
+                  <Link href={`/dashboard/ServicesModule/ViewRequest?id=${req.id}`}>
+                    {req.purpose}
+                  </Link>
+                </td>
+                <td>
+                  <Link href={`/dashboard/ServicesModule/ViewRequest?id=${req.id}`}>
+                    {req.docType}
+                  </Link>
+                  
+                </td>
+                <td>
+                  <Link href={`/dashboard/ServicesModule/ViewRequest?id=${req.id}`}>
+                    <span
+                      className={`status-badge-departments ${req.status
+                        ?.toLowerCase()
+                        .replace(/\s+/g, "-")}`}
+                    >
+                      {req.status?.charAt(0).toUpperCase() + req.status?.slice(1).toLowerCase()}
+                    </span>
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  </>
+)}
 
               </div>
                 
