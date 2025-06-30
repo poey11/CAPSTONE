@@ -39,6 +39,7 @@ interface ClearanceInput {
     dateOfResidency?: string;
     dateofdeath?: string;
     address?: string;
+    homeOrOfficeAddress?: string;
     toAddress?: string;
     businessLocation?: string;
     businessNature?: string;
@@ -61,6 +62,7 @@ interface ClearanceInput {
     typeofbldg?: string;
     othersTypeofbldg?: string;
     projectName?: string;
+    projectLocation?: string;
     citizenship?: string;
     educationalAttainment?: string;
     course?: string;
@@ -117,7 +119,7 @@ export default function action() {
     const [residents, setResidents] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
-   
+    const [forResidentOnlyMap, setForResidentOnlyMap] = useState<{ [title: string]: boolean }>({});
     const [otherDocFields, setOtherDocFields] = useState<{ [title: string]: string[] }>({});
     const [idPicture, setIdPicture] = useState<UploadedFile[]>([]);
 
@@ -166,10 +168,11 @@ export default function action() {
       
             const groupedTitles: { [key: string]: string[] } = {};
             const fieldMap: { [key: string]: string[] } = {};
+            const residentOnlyMap: { [key: string]: boolean } = {};
       
             snapshot.docs.forEach((doc) => {
               const data = doc.data();
-              const { type, title, fields } = data;
+              const { type, title, fields, forResidentOnly } = data;
       
               if (type && title) {
                 if (!groupedTitles[type]) groupedTitles[type] = [];
@@ -178,6 +181,8 @@ export default function action() {
                 if (Array.isArray(fields)) {
                   fieldMap[title] = fields.map((f: any) => f.name);
                 }
+
+                residentOnlyMap[title] = !!forResidentOnly;
               }
             });
 
@@ -185,6 +190,7 @@ export default function action() {
       
             setOtherDocPurposes(groupedTitles);
             setOtherDocFields(fieldMap);
+            setForResidentOnlyMap(residentOnlyMap); 
           } catch (error) {
             console.error("Error fetching OtherDocuments:", error);
           }
@@ -436,47 +442,6 @@ export default function action() {
                 
     };
 
-    /*
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-    
-        // Handle birthday and compute age
-        if (name === "birthday") {
-          const birthDate = new Date(value);
-          const today = new Date();
-          let age = today.getFullYear() - birthDate.getFullYear();
-          const m = today.getMonth() - birthDate.getMonth();
-          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-          }
-        
-          setClearanceInput((prev: any) => ({
-            ...prev,
-            birthday: value,
-            age: age.toString(), // Ensure it's string if your input expects string
-          }));
-          return;
-        }
-      
-        setClearanceInput((prev: any) => {
-          const keys = name.split(".");
-          if (keys.length === 2) {
-            return {
-              ...prev,
-              [keys[0]]: {
-                ...prev[keys[0]],
-                [keys[1]]: value,
-              },
-            };
-          }
-          return {
-            ...prev,
-            [name]: value,
-          };
-        });
-    };
-*/
-
 const handleChange = (
   e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
 ) => {
@@ -580,10 +545,29 @@ const handleChange = (
       "citizenship",
     ];
 
+    /*
     const currentPurpose = clearanceInput.purpose || "";
     const customFields = (otherDocFields[currentPurpose] || []).filter(
       (fieldName) => !fixedPredefinedFields.includes(fieldName)
     );
+    */
+
+
+
+
+    const currentPurpose = clearanceInput.purpose || "";
+    const currentDocType = docType || "";
+    
+    const isOtherDocumentPurpose = Object.keys(otherDocFields).includes(currentPurpose);
+    const isBarangayPermitType = otherDocPurposes["Barangay Permit"]?.includes(currentDocType);
+    
+    const customFields = (
+      isOtherDocumentPurpose
+        ? otherDocFields[currentPurpose]
+        : isBarangayPermitType
+          ? otherDocFields[currentDocType]
+          : []
+    )?.filter((fieldName) => !fixedPredefinedFields.includes(fieldName)) || [];
 
 
     
@@ -599,7 +583,7 @@ const handleChange = (
     const [activeSection, setActiveSection] = useState("basic");
     const isForMyself = clearanceInput.requestType === "forMyself";
     const [selectingFor, setSelectingFor] = useState<"fullName" | "requestor" | null>(null);
-    const isOtherDocumentPurpose = Object.keys(otherDocFields).includes(clearanceInput.purpose || "");
+    
 
 
     return (
@@ -662,6 +646,8 @@ const handleChange = (
                           />
                         </div>
 
+                        {docType !== "Construction" && !otherDocPurposes["Barangay Permit"]?.includes(docType || "") && (
+                        <>
                         <div className="fields-section">
                           <h1>Purpose<span className="required">*</span></h1>
                           <select 
@@ -743,8 +729,16 @@ const handleChange = (
                             ) : null}
                           </select>
                         </div>
+                      </>
+                      )}
 
-                        {allExistingPermits.includes(docType || "") && (
+{(
+  allExistingPermits.includes(docType || "") ||
+  (
+    otherDocPurposes["Barangay Permit"]?.includes(docType || "") && 
+    forResidentOnlyMap[docType || ""] === true
+  )
+) && (
                           <>
                             <div className="beneficiary-checkbox-container">
                               <input 
@@ -769,7 +763,8 @@ const handleChange = (
                             (isOtherDocumentPurpose &&
                               otherDocFields[clearanceInput.purpose || ""]?.includes("fullName"))
                           ) &&
-                          !allExistingPermits.includes(docType || "")
+                          !allExistingPermits.includes(docType || "") &&
+                          !otherDocPurposes["Barangay Permit"]?.includes(docType || "")
                         ) && (
                           <>
                             <div className="fields-section">
@@ -830,7 +825,8 @@ const handleChange = (
                             allExistingPurpose.includes(clearanceInput.purpose || "")) ||
                           (isOtherDocumentPurpose &&
                             otherDocFields[clearanceInput.purpose || ""]?.includes("requestorFname")) ||
-                          allExistingPermits.includes(docType || "")
+                          allExistingPermits.includes(docType || "") ||
+                          otherDocPurposes["Barangay Permit"]?.includes(docType || "")
                         ) && (
                           <>
                             <div className="fields-section">
@@ -1460,6 +1456,112 @@ const handleChange = (
                               </div>
                             </>
                           )}
+
+                          {(docType === "Business Permit" || docType === "Temporary Business Permit") && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Business Name<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="businessName"  
+                                  name="businessName"  
+                                  value={clearanceInput.businessName || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Business Name"  
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Business Location<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="businessLocation"  
+                                  name="businessLocation"  
+                                  value={clearanceInput.businessLocation || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Business Location"  
+                                />
+                              </div>
+
+                            </>
+                          )}
+
+                          {docType === "Construction"  && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Type of Construction Activity<span className="required">*</span></h1>
+                                <select 
+                                  id="typeofconstruction" 
+                                  name="typeofconstruction" 
+                                  className="createRequest-input-field" 
+                                  required
+                                  value ={clearanceInput?.typeofconstruction}
+                                  onChange={handleChange} // Handle change to update state
+                                >
+                                  <option value="" disabled>Select Construction Activity</option>
+                                  <option value="Structure">Structure</option>
+                                  <option value="Renovation">Renovation</option>
+                                  <option value="Excavation">Excavation</option>
+                                  <option value="Demolition">Demolition</option>
+                                </select>
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Type of Building<span className="required">*</span></h1>
+                                <select 
+                                  id="typeofbldg" 
+                                  name="typeofbldg" 
+                                  className="createRequest-input-field" 
+                                  required
+                                  value ={clearanceInput?.typeofbldg}
+                                  onChange={handleChange} // Handle change to update state
+                                >
+                                  <option value="" disabled>Select Type of Building</option>
+                                  <option value="Residential">Residential</option>
+                                  <option value="Commercial">Commercial</option>
+                                  <option value="Institutional">Institutional</option>
+                                  <option value="Industrial">Industrial</option>
+                                  <option value="Mixed-Use">Mixed-Use</option>
+                                  <option value="Others">Others</option>
+                                </select>
+                              </div>
+                              
+                                {clearanceInput.typeofbldg === "Others" && (
+                                <div className="fields-section">
+                                  <input
+                                    type="text"
+                                    id="othersTypeofbldg"
+                                    name="othersTypeofbldg"
+                                    className="createRequest-input-field" 
+                                    value ={clearanceInput?.othersTypeofbldg}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="Enter Other Type of Building"
+                                  />
+                                </div>
+                                )}
+                              
+
+                              <div className="fields-section">
+                                <h1>Home / Office Address<span className="required">*</span></h1>
+                                <input 
+                                  value ={clearanceInput?.homeOrOfficeAddress || ""}
+                                  onChange={handleChange} 
+                                  required
+                                  type="text" 
+                                  id="homeOrOfficeAddress"
+                                  name="homeOrOfficeAddress"
+                                  className="createRequest-input-field" 
+                                  placeholder="Enter Home / Office Address" 
+                                />
+                              </div>
+
+                            </>
+                          )}
                         </div>
 
                         <div className="createRequest-section-2-right-side">
@@ -1516,7 +1618,7 @@ const handleChange = (
                               id="citizenship"
                               name="citizenship"
                               className="createRequest-input-field" 
-                              placeholder="Input Citizenship" 
+                              placeholder="Enter Citizenship" 
                             />
                           </div>
                           
@@ -1784,12 +1886,80 @@ const handleChange = (
                               </div>
                             </>
                           )}
+
+                          {(docType === "Business Permit" || docType === "Temporary Business Permit") && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Business Nature<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="businessNature"  
+                                  name="businessNature"  
+                                  value={clearanceInput.businessNature || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Business Nature"  
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Estimated Capital<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="estimatedCapital"  
+                                  name="estimatedCapital"  
+                                  value={clearanceInput.estimatedCapital || ""}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder="Enter Estimated Capital"  
+                                />
+                              </div>
+
+                            </>
+                          )}
+
+                          {docType === "Construction"  && (
+                            <>
+
+                              <div className="fields-section">
+                                <h1>Project Name<span className="required">*</span></h1>
+                                <input 
+                                  value ={clearanceInput?.projectName || ""}
+                                  onChange={handleChange} 
+                                  required
+                                  type="text" 
+                                  id="projectName"
+                                  name="projectName"
+                                  className="createRequest-input-field" 
+                                  placeholder="Enter Project Name" 
+                                />
+                              </div>
+
+                              <div className="fields-section">
+                                <h1>Project Location<span className="required">*</span></h1>
+                                <input 
+                                  value ={clearanceInput?.projectLocation || ""}
+                                  onChange={handleChange} 
+                                  required
+                                  type="text" 
+                                  id="projectLocation"
+                                  name="projectLocation"
+                                  className="createRequest-input-field" 
+                                  placeholder="Enter Project Location" 
+                                />
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
 
-                      {/* Fields for Added Barangay Certificate Document Purpose */}
+                      
                       <div className="createRequest-section-2-full-bottom">
+
                         <div className="createRequest-section-2-left-side">
+                          {/* Fields for Added Barangay Certificate Document Purpose */}
                           {customFields.filter((_, i) => i % 2 === 0).map((fieldName) => (
                             <div key={fieldName} className="fields-section">
                               <h1>{fieldName}<span className="required">*</span></h1>
@@ -1805,9 +1975,12 @@ const handleChange = (
                               />
                             </div>
                           ))}
+
+                          {/* Add Fields for Added Barangay Permit Document  */}
                         </div>
 
                         <div className="createRequest-section-2-right-side">
+                          {/* Fields for Added Barangay Certificate Document Purpose */}
                           {customFields.filter((_, i) => i % 2 === 1).map((fieldName) => (
                             <div key={fieldName} className="fields-section">
                               <h1>{fieldName}<span className="required">*</span></h1>
@@ -1823,6 +1996,8 @@ const handleChange = (
                               />
                             </div>
                           ))}
+
+                           {/* Add Fields for Added Barangay Permit Document  */}
                         </div>
                       </div>
 
