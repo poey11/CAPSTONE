@@ -359,6 +359,7 @@ export default function Action() {
             birthplace: residentData.placeOfBirth || "",
             birthday: residentData.dateOfBirth || "",
             age: age.toString(),
+            dateOfResidency: residentData.dateOfResidency || "",
             precinctnumber: residentData.precinctNumber || "",
             requestorFname: fullName,
             requestorMrMs: mrms,
