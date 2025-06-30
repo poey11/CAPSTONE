@@ -1,12 +1,13 @@
 .main-container-transactions {
-  background-color: #D8DFE5;
+  background-image: url('/Images/bghome.jpg');
     display: flex;
     flex-direction: column;
-    height: 100vh;
+       height: 100%;
+    width: 100%;
 }
 
 .headerpic-transactions {
-  position: relative; 
+ position: relative;
   height: 250px;
   display: flex;
   align-items: center;
@@ -15,65 +16,88 @@
   font-size: 50px;
   font-weight:bolder;
   overflow: hidden; 
-
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+   background-position: center 55%; 
 }
 
-.headerpic-transactions::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('/images/brgyheaderpic.JPG');
-  background-size: cover;
-  background-position: 50% 60%;
-  background-repeat: no-repeat;
-  filter: blur(1.2px); 
-  z-index: 1;
-}
-
-.headerpic-transactions::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.150); 
-  z-index: 2; 
-}
-
-.headerpic-transactions > * {
-  position: relative;
-  z-index: 3; 
-}
   
 
+/*
+.transactions-history-transactions {
+  width: 100%;
+  max-width: 1200px;
+  height: 500px; 
+  border-radius: 16px;
+  text-align: center;
+  overflow: hidden; 
+  align-self: center;
+  margin: 2rem auto 3rem auto;
+  background: #FFFFFF;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+
+}
+*/
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+
+.transacntions-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+
+}
+
+
 .table-section-transactions {
-    flex: 1; 
-    display: flex; 
-    flex-direction: column;
-    padding: 0;
-    margin: 0; 
-    overflow: auto; 
-    width: 100%;
-    border: 2px solid  #ddd;
-    overflow-y: scroll;
-    height: 100%;
+  flex: 1; 
+  display: flex; 
+  flex-direction: column;
+  padding: 0;
+  margin: 0; 
+  width: 100%;
+ border: 2px solid rgba(36, 53, 76, 0.7);
+  overflow-y: scroll;
+  height: 100%;
+  max-width: 1500px;
+  min-width: 1500px;
+  height: 500px; 
+  border-radius: 16px;
+  text-align: center;
+  overflow-x: hidden; 
+  align-self: center;
+  background: #FFFFFF;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  margin-top: 2rem;
+  margin-bottom: 2.5rem;
+
+    
 }
 
 .table-section-transactions thead{
   position: sticky;
-  top: 0;
-  background-color: rgb(232, 228, 228);
+
+  background: linear-gradient(to right, #1b3840, #214666, #2c5e73);
   z-index: 10; 
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); 
-  
+
 }
 
 .table-section-transactions table {
-    width: 100%;
+    width: 1500px;
     border-collapse: collapse;
     background-color: rgba(255, 255, 255, 0.7);
 }
@@ -84,10 +108,10 @@
     padding: 1rem;
     text-align: center;
     border-bottom: 2px solid #ddd;
-    color:#F7FCF8 ;
+    color:#FFFFFF ;
     cursor: pointer;
     white-space: nowrap;
-    background-color: #618FB9;
+    
     font-weight: bold;
     font-size: 18px;
 }
@@ -97,19 +121,22 @@
     padding: 1rem;
     text-align: center;
     border-bottom: 2px solid #ddd;
-    color: grey;
+    color: #000000;
     white-space: nowrap;
     background-color: rgba(255, 255, 255, 0.7);
     font-size: 18px;
    
 }
 
-.table-section-transactions tr:hover {
-    background-color: #e0e0e0; 
-    cursor: pointer; 
-    transition: background-color 0.2s ease; 
+.table-section-transactions tr {
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
+.table-section-transactions tbody tr:hover {
+  background-color: #c9c4c4; 
+  cursor: pointer; 
+  transform: scale(1.01);
+}
 
 
 
@@ -134,7 +161,7 @@
 }
 
 .no-transactions p {
-  color: gray;
+  color: red;
   font-size: 2rem;
   font-weight: bold;
   text-transform: uppercase;
@@ -146,10 +173,11 @@
   padding: 8px;
   width: 200px;
   margin-top: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid rgba(36, 53, 76, 0.7);
   border-radius: 5px;
-  color: rgba(0, 0, 0, 0.4);
+  color: #000000;
   text-align: center;
+  
 }
 
 .resident-module-filter:focus {
@@ -159,7 +187,7 @@
 }
 
 .resident-module-filter option {
-  color: rgba(0, 0, 0, 0.4); 
+  color: #000000; 
 }
 
 .filter-section-transactions{
@@ -168,6 +196,7 @@
   display: flex;
   justify-content: center;
   gap: 15px;
+  
 }
 
 .filter-section-transactions p{
@@ -175,38 +204,48 @@
   color: rgb(106, 106, 106);
 }
 
-.filter-section-transactions-inner{
-  width: 570px;
-  background-color: rgba(255, 255, 255, 0.7);
+.filter-section-transactions-inner {
+  width: 100%;
+  max-width: 500px;
   border-radius: 10px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   display: flex;
-  gap: 20px;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-bottom: 20px;
-  padding-top: 10px;
+  flex-wrap: wrap; 
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  gap: 2rem;
+ background-color: #214666;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
-.filter-section-transactions-type{
+.filter-section-transactions-type {
   display: flex;
-  gap: 10;
+  align-items: center;
+  gap: 10px; 
+  flex: 1 1 200px; 
+  min-width: 150px; 
 }
 
-.transactions-history-transactions {
-  width: 90%;
-  padding: 2rem;
-  background-color: rgba(255, 255, 255, 0.7);
-  border-radius: 16px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  overflow-x: auto;
-  height: 80%;
-  align-self: center;
-  margin-bottom: 3rem;
-  margin-top: 2rem;
-    
+@media (max-width: 600px) {
+  .filter-section-transactions-inner {
+    gap: 1rem;
+  }
+
+  .filter-section-transactions-type {
+    justify-content: center;
+  }
 }
+
+.filter-section-transactions-type p {
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+
+
+
+
+
 
 
 
