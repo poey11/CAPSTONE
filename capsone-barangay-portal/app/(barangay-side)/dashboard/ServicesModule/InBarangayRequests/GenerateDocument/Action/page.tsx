@@ -732,13 +732,13 @@ const handleChange = (
                       </>
                       )}
 
-{(
-  allExistingPermits.includes(docType || "") ||
-  (
-    otherDocPurposes["Barangay Permit"]?.includes(docType || "") && 
-    forResidentOnlyMap[docType || ""] === true
-  )
-) && (
+                      {(
+                        allExistingPermits.includes(docType || "") ||
+                        (
+                          otherDocPurposes["Barangay Permit"]?.includes(docType || "") && 
+                          forResidentOnlyMap[docType || ""] === true
+                        )
+                      ) && (
                           <>
                             <div className="beneficiary-checkbox-container">
                               <input 
@@ -889,6 +889,7 @@ const handleChange = (
                             </div>
                           </>
                         )}
+
 
                         {clearanceInput.purpose === "Good Moral and Probation" && (
                           <>
@@ -2250,6 +2251,7 @@ const handleChange = (
                                               age: resident.age || '',
                                               occupation: resident.occupation || '',
                                               precinctnumber: resident.precinctNumber || '',
+                                              residentId: resident.id,
                                             });
                                             setIsRequestorSelected(true);
                                           }
