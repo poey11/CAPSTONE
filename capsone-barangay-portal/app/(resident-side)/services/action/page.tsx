@@ -21,6 +21,7 @@ interface EmergencyDetails {
 interface ClearanceInput {
   [key: string]: string | number | File | boolean |null | EmergencyDetails | undefined;
   accountId: string;
+  residentId: string;
   docType: string;
   requestId: string;
   purpose: string;
@@ -104,8 +105,13 @@ export default function Action() {
   const docType = searchParam.get("doc");
   const router = useRouter();
   const [nos, setNos] = useState(0);
+
+  const [userData, setUserData] = useState<any>(null); // moved UP here
+
+
   const [clearanceInput, setClearanceInput] =  useState<ClearanceInput>({
     accountId: user?.uid || "Guest",
+    residentId: userData?.residentId || "Guest",
     docType: docType || "" ,
     requestId: "",
     purpose: "",
@@ -231,9 +237,6 @@ export default function Action() {
 
 
  
-
-  const [userData, setUserData] = useState<any>(null);
-
   const isVerified = userData?.status === "Verified";
   const isReadOnly = isVerified;
   useEffect(() => {
@@ -363,6 +366,7 @@ export default function Action() {
             precinctnumber: residentData.precinctNumber || "",
             requestorFname: fullName,
             requestorMrMs: mrms,
+            residentId: residentData.id
           }));
         }
   
