@@ -868,16 +868,24 @@ const handleChange = (
                                       className="clear-icon"
                                       title="Click to clear selected resident"
                                       onClick={() => {
-                                        setClearanceInput({
+                                        const purpose = clearanceInput.purpose ?? "";
+                                    
+                                        const updatedInput: any = {
                                           ...clearanceInput,
                                           requestorFname: "",
                                           requestorMrMs: "",
-                                          address: "",
                                           gender: "",
                                           civilStatus: "",
                                           birthday: "",
                                           contact: "",
-                                        });
+                                        };
+                                    
+                                        // ✅ Only clear the address if NOT 'Estate Tax' or 'Death Residency'
+                                        if (!["Estate Tax", "Death Residency"].includes(purpose)) {
+                                          updatedInput.address = "";
+                                        }
+                                    
+                                        setClearanceInput(updatedInput);
                                         setIsRequestorSelected(false);
                                       }}
                                     >
@@ -2221,7 +2229,7 @@ const handleChange = (
                                         try {
                                           const selectedFullName = `${resident.firstName} ${resident.middleName} ${resident.lastName}`;
                                           const purpose = clearanceInput.purpose ?? "";
-
+                                      
                                           if (selectingFor === "fullName") {
                                             const update: any = {
                                               ...clearanceInput,
@@ -2229,30 +2237,34 @@ const handleChange = (
                                               residentId: resident.id,
                                             };
                                       
-                                            // If the purpose requires subject's address
                                             if (["Estate Tax", "Death Residency"].includes(purpose)) {
                                               update.address = resident.address || '';
                                             }
                                       
                                             setClearanceInput(update);
                                             setIsResidentSelected(true);
-
+                                      
                                           } else if (selectingFor === "requestor") {
-                                            // Set requestor's full details
-                                            setClearanceInput({
+                                            const update: any = {
                                               ...clearanceInput,
                                               requestorFname: selectedFullName,
                                               requestorMrMs: resident.sex === "Male" ? "Mr." : "Ms.",
                                               gender: resident.sex || '',
                                               birthday: resident.dateOfBirth || '',
                                               civilStatus: resident.civilStatus || '',
-                                              address: resident.address || '',
                                               contact: resident.contactNumber || '',
                                               age: resident.age || '',
                                               occupation: resident.occupation || '',
                                               precinctnumber: resident.precinctNumber || '',
                                               residentId: resident.id,
-                                            });
+                                            };
+                                      
+                                            // ✅ Only set requestor's address if NOT Estate Tax or Death Residency
+                                            if (!["Estate Tax", "Death Residency"].includes(purpose)) {
+                                              update.address = resident.address || '';
+                                            }
+                                      
+                                            setClearanceInput(update);
                                             setIsRequestorSelected(true);
                                           }
                                       
