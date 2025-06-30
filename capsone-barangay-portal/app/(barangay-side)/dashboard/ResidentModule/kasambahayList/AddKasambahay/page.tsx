@@ -891,7 +891,8 @@ export default function AddKasambahay() {
                     return (
                       data.lastName?.toLowerCase() === resident.lastName?.toLowerCase() &&
                       data.firstName?.toLowerCase() === resident.firstName?.toLowerCase() &&
-                      data.middleName?.toLowerCase() === resident.middleName?.toLowerCase()
+                      data.middleName?.toLowerCase() === resident.middleName?.toLowerCase() &&
+                      data.dateOfBirth === resident.dateOfBirth
                     );
                   });
 
