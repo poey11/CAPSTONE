@@ -195,7 +195,7 @@ export default function ResidentModule() {
     if (!deleteUserId) return;
   
     try {
-      // 🔴 Delete related records that match the residentId (Firestore document ID)
+      //  Delete related records that match the residentId (Firestore document ID)
       const collectionsToClean = ["JobSeekerList", "KasambahayList", "VotersList"];
       for (const collectionName of collectionsToClean) {
         const q = query(
@@ -280,7 +280,6 @@ export default function ResidentModule() {
         ) : (
           <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Import Residents from Excel</button>
         )}
-
 
         {/*<h1>Main Residents</h1>*/}
         {isAuthorized ? (
