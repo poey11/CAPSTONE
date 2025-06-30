@@ -545,12 +545,9 @@ const handleChange = (
       "citizenship",
     ];
 
-    /*
-    const currentPurpose = clearanceInput.purpose || "";
-    const customFields = (otherDocFields[currentPurpose] || []).filter(
-      (fieldName) => !fixedPredefinedFields.includes(fieldName)
-    );
-    */
+    const isPermitLike =
+    allExistingPermits.includes(docType || "") ||
+    otherDocPurposes["Barangay Permit"]?.includes(docType || "");
 
 
 
@@ -834,31 +831,32 @@ const handleChange = (
 
                               <div className="createRequest-input-wrapper">
                                 <div className="createRequest-input-with-clear">
-                                  <input 
-                                    type="text" 
-                                    className="createRequest-select-resident-input-field" 
-                                    placeholder="Enter Requestor's Name"
-                                    value={clearanceInput.requestorFname ?? ""}
-                                    onChange={handleChange}
-                                    required
-                                    id="requestorFname"
-                                    name="requestorFname"
-                                    readOnly={
-                                      // 🔒 Only enable resident selection if docType is not a permit OR isResident is true
-                                      !allExistingPermits.includes(docType || "") ||
-                                      clearanceInput?.isResident
+                                <input 
+                                  type="text" 
+                                  className="createRequest-select-resident-input-field" 
+                                  placeholder="Enter Requestor's Name"
+                                  value={clearanceInput.requestorFname ?? ""}
+                                  onChange={handleChange}
+                                  required
+                                  id="requestorFname"
+                                  name="requestorFname"
+                                  readOnly={
+                                    !(
+                                      !isPermitLike || // not a permit
+                                      clearanceInput?.isResident // or isResident is checked
+                                    )
+                                  }
+                                  onClick={() => {
+                                    if (
+                                      !isPermitLike || // not a permit
+                                      clearanceInput?.isResident // or resident is checked
+                                    ) {
+                                      setSelectingFor("requestor");
+                                      setShowResidentsPopup(true);
                                     }
-                                    onClick={() => {
-                                      // ✅ Trigger popup only if selecting is allowed
-                                      if (
-                                        !allExistingPermits.includes(docType || "") ||
-                                        clearanceInput?.isResident
-                                      ) {
-                                        setSelectingFor("requestor");
-                                        setShowResidentsPopup(true);
-                                      }
-                                    }}
-                                  />
+                                  }}
+                                />
+
 
                                   {((
                                     !allExistingPermits.includes(docType || "") ||
