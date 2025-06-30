@@ -170,59 +170,79 @@ export default function IncidentTransactionsDetails() {
           </div>
       
       <div className="incident-main-content-lower">
-      <div className="incident-main-left">
-        {incidentFields
-          .filter((_, index) => index % 2 === 0)
-          .map((field) => (
-            <div className="details-section" key={field.key}>
-              <div className="title">
-                <p>{field.label}</p>
-              </div>
-              <div className="description">
-                <p>{(extendedData as Record<string, any>)[field.key] || "N/A"}</p>
-              </div>
-            </div>
-          ))}
-      </div>
 
-      <div className="incident-main-right">
-        {incidentFields
-          .filter((_, index) => index % 2 !== 0)
-          .map((field) => (
-            <div className="details-section" key={field.key}>
-              <div className="title">
-                <p>{field.label}</p>
+        <div className="incident-main-container">
+
+          <div className="incident-container-upper">
+
+               <div className="incident-main-left">
+                {incidentFields
+                  .filter((_, index) => index % 2 === 0)
+                  .map((field) => (
+                    <div className="details-section" key={field.key}>
+                      <div className="title">
+                        <p>{field.label}</p>
+                      </div>
+                      <div className="description">
+                        <p>{(extendedData as Record<string, any>)[field.key] || "N/A"}</p>
+                      </div>
+                    </div>
+                  ))}
               </div>
-              <div className="description">
-                <p>{(extendedData as Record<string, any>)[field.key] || "N/A"}</p>
+
+              <div className="incident-main-right">
+                {incidentFields
+                  .filter((_, index) => index % 2 !== 0)
+                  .map((field) => (
+                    <div className="details-section" key={field.key}>
+                      <div className="title">
+                        <p>{field.label}</p>
+                      </div>
+                      <div className="description">
+                        <p>{(extendedData as Record<string, any>)[field.key] || "N/A"}</p>
+                      </div>
+                    </div>
+                  ))}
               </div>
-            </div>
-          ))}
-      </div>
-    </div>
+              
 
-
-    <div className="incident-main-center">
-
-        <div className="details-section-upload">
-          <div className="title">
-            <p>Proof of Incident</p>
           </div>
-          <div className="description">
-            {fileURL ? (
-              <div className="proof-incident-transactions">
-                <img src={fileURL} alt="Proof of Incident" className="proofOfIncident-image" onError={(e) => (e.currentTarget.style.display = "none")} />
-                <p>
-                  <a href={fileURL} target="_blank" rel="noopener noreferrer">View Full Image</a>
-                </p>
-              </div>
-            ) : (
-              <p>No proof uploaded.</p>
-            )}
+
+          <div className="incident-container-lower">
+
+                <div className="details-section-upload">
+                    <div className="title">
+                      <p>Proof of Incident</p>
+                    </div>
+                    <div className="description">
+                      {fileURL ? (
+                        <div className="proof-incident-transactions">
+                          <img src={fileURL} alt="Proof of Incident" className="proofOfIncident-image" onError={(e) => (e.currentTarget.style.display = "none")} />
+                          <p>
+                            <a href={fileURL} target="_blank" rel="noopener noreferrer">View Full Image</a>
+                          </p>
+                        </div>
+                      ) : (
+                        <p style={{ color: 'red', fontWeight: 'bold' }}>No proof uploaded.</p>
+
+                      )}
+                    </div>
+                  </div>
+
           </div>
+
+
+           
+
         </div>
 
+        
+    
+        
     </div>
+
+
+   
 
 
             
