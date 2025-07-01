@@ -392,7 +392,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                   <h1> Status</h1>
 
                   <div className="status-section-view">
-                      <p className={`status-badge-view ${getStatusClass(status)}`}>{status}</p> 
+                      <p className={`status-badge-view ${status}`}>{status}</p> 
                   </div>
                 </div>
                 <div className="incident-main-details-description">

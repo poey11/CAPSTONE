@@ -1,7 +1,7 @@
 
 import { db } from "@/app/db/firebase";
 import {getLocalDateTimeString} from "@/app/helpers/helpers";
-import { doc, onSnapshot,collection, setDoc, query, where } from "firebase/firestore";
+import { doc, onSnapshot,collection, setDoc, query, where, updateDoc } from "firebase/firestore";
 import { useState,useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -19,7 +19,6 @@ type DialogueDetails = {
     partyA: string;
     partyB: string;
     HearingOfficer: string;
-    dialogueMeetingDateTime: string;
     Cstatus: string;
     Rstatus: string;
   };
@@ -50,7 +49,6 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         remarks: "",
         partyA: "",
         partyB: "",
-        dialogueMeetingDateTime:"",
         Cstatus: "",
         Rstatus: "",
     });
@@ -103,11 +101,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         return () => unsubscribe();
     },[])
 
-    
-    const handleToggleClick = () => {
-        if(!isDialogue) return; 
-        setShowDialogueContent(prevState => !prevState);
-    };
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement|HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -135,75 +129,63 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             };
         });
     };
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        try {
-            const subColRef = collection(db, "IncidentReports", id, "DialogueMeeting");
-            const docRef = doc(subColRef, id);
-            await setDoc(docRef, {
-                ...details,
-                filled:true,
-            });
-            console.log("Document written with ID: ", docRef.id);
-        } catch (error:any) {
-            console.error("Error saving data:", error.message);
-        }
-        console.log(details);
-    }
+    
 
     const usersAbsent = () => details.Cstatus === "Absent" || details.Rstatus === "Absent";
-
-    /*
-
-    */
-    useEffect(() => {
-        const updatedDetails = { ...details };
     
-        let minutes = details.minutesOfDialogue || "";
-        let remarks = details.remarks || "";
+    useEffect(() => {
+      setDetails((prev) => {
+        // Clean previous status-related strings from minutes and remarks
+        let minutes = (prev.minutesOfDialogue || "")
+          .replace(/Complainant Absent\.?\s*/g, "")
+          .replace(/Respondent Absent\.?\s*/g, "")
+          .replace(/Complainant Present\.?\s*/g, "")
+          .replace(/Respondent Present\.?\s*/g, "")
+          .trim();
+    
+        let remarks = (prev.remarks || "")
+          .replace(/Complainant Absent\.?\s*/g, "")
+          .replace(/Respondent Absent\.?\s*/g, "")
+          .replace(/Complainant Present\.?\s*/g, "")
+          .replace(/Respondent Present\.?\s*/g, "")
+          .trim();
     
         let partyA = "";
         let partyB = "";
     
-        // Handle Complainant status
-        if (details.Cstatus === "Absent") {
-            partyA = "Complainant Absent.";
-            partyB = "Respondent Present.";
+        const complainantAbsent = prev.Cstatus === "Absent";
+        const respondentAbsent = prev.Rstatus === "Absent";
     
-            if (!minutes.includes("Complainant Absent")) {
-                minutes += (minutes ? " " : "") + "Complainant Absent.";
-            }
-            if (!remarks.includes("Complainant Absent")) {
-                remarks += (remarks ? " " : "") + "Complainant Absent.";
-            }
+        if (complainantAbsent && respondentAbsent) {
+          partyA = "Complainant Absent";
+          partyB = "Respondent Absent";
+          minutes = (minutes ? " " : "") + "Complainant Absent. Respondent Absent.";
+          remarks = (remarks ? " " : "") + "Complainant Absent. Respondent Absent.";
+        } else if (complainantAbsent) {
+          partyA = "Complainant Absent";
+          partyB = "Respondent Present";
+          minutes = (minutes ? " " : "") + "Complainant Absent.";
+          remarks = (remarks ? " " : "") + "Complainant Absent.";
+        } else if (respondentAbsent) {
+          partyA = "Complainant Present";
+          partyB = "Respondent Absent";
+          minutes = (minutes ? " " : "") + "Respondent Absent.";
+          remarks = (remarks ? " " : "") + "Respondent Absent.";
         } else {
-            minutes = minutes.replace(/Complainant Absent\.?\s*/g, "").trim();
-            remarks = remarks.replace(/Complainant Absent\.?\s*/g, "").trim();
+          partyA = "";
+          partyB = "";
         }
     
-        // Handle Respondent status
-        if (details.Rstatus === "Absent") {
-            partyB = "Respondent Absent";
-            partyA = "Complainant Present";
-    
-            if (!minutes.includes("Respondent Absent")) {
-                minutes += (minutes ? " " : "") + "Respondent Absent.";
-            }
-            if (!remarks.includes("Respondent Absent")) {
-                remarks += (remarks ? " " : "") + "Respondent Absent.";
-            }
-        } else {
-            minutes = minutes.replace(/Respondent Absent\.?\s*/g, "").trim();
-            remarks = remarks.replace(/Respondent Absent\.?\s*/g, "").trim();
-        }
-    
-        updatedDetails.partyA = partyA;
-        updatedDetails.partyB = partyB;
-        updatedDetails.minutesOfDialogue = minutes;
-        updatedDetails.remarks = remarks;
-    
-        setDetails(updatedDetails);
+        return {
+          ...prev,
+          minutesOfDialogue: minutes,
+          remarks: remarks,
+          partyA,
+          partyB,
+        };
+      });
     }, [details.Cstatus, details.Rstatus]);
+
 
     // New handler to show confirmation popup on Save click
     {/*
@@ -243,13 +225,26 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
 
     const saveDialogue = async () => {
         try {
-          const subColRef = collection(db, "IncidentReports", id, "DialogueMeeting");
-          const docRef = doc(subColRef, id);
-          await setDoc(docRef, {
-            ...details,
-            filled:true,
-          });
-          console.log("Document written with ID: ", docRef.id);
+            const subColRef = collection(db, "IncidentReports", id, "DialogueMeeting");
+            const docRef = doc(subColRef, id);
+            await setDoc(docRef, {
+              ...details,
+              filled:true,
+            });
+
+            const mainDocRef = doc(db, "IncidentReports", id); 
+            if(details.Cstatus === "Absent" || details.Rstatus === "Absent")
+                await updateDoc(mainDocRef, 
+                {
+                    status: "archived",
+                    statusPriority: 2
+                }
+            )
+            
+
+            
+            console.log("Saving dialogue data:", details);
+          //console.log("Document written with ID: ", docRef.id);
         } catch (error: any) {
           console.error("Error saving data:", error.message);
           throw error;
@@ -267,7 +262,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
       
           setTimeout(() => {
             setShowPopup(false);
-            router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
+            //router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
           }, 3000);
         } catch (error) {
           console.error("Error during confirmation submit:", error);
@@ -295,7 +290,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             <div className="edit-incident-main-content">
                 <div className="edit-incident-main-section1">
                     <div className="edit-incident-main-section1-left">
-                        <button onClick={handleBack}>
+                        <button type="button" onClick={handleBack}>
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 

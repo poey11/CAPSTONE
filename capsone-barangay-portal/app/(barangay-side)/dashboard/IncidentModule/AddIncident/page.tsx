@@ -302,7 +302,7 @@ export default function AddIncident() {
             nature: reportInfo.nature,
             specifyNature: reportInfo.specifyNature,
             concern: reportInfo.concern,
-            status: "Pending",
+            status: "pending",
             statusPriority: 1,
             receivedBy: `${deskStaff.fname} ${deskStaff.lname}`,
             dateReceived: reportInfo.dateReceived,

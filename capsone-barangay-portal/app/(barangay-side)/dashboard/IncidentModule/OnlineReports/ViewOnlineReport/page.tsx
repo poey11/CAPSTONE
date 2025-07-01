@@ -64,7 +64,9 @@ export default function ViewOnlineReports() {
 
   useEffect(() => {
     try {
-      const collectionRef = query(collection(db, "BarangayUsers"), where("position", "==", "LF Staff"));
+      const collectionRef = query(collection(db, "BarangayUsers"), 
+      where("position", "==", "LF Staff"),
+      where("firstTimelogin", "==", false));
       const unsubscribe = getDocs(collectionRef).then((querySnapshot) => {
         const staffList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
