@@ -7,6 +7,7 @@ import { deleteDocument, getAllSpecificDocument } from "@/app/helpers/firestoreh
 import Heatmap from "@/app/(barangay-side)/components/heatmap";
 import { collection, onSnapshot, or, orderBy, query, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
+import LegendColorBox from "../../components/legendColorBox";
 
 const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
 const departmentOptions = ["GAD", "BCPC", "VAWC", "Lupon"];
@@ -258,12 +259,23 @@ export default function MainPageIncident() {
       <div className="incidentmap-section-all-department">
         <div className="titlesection-all-department">
           <p>Incident Heat Map</p>
+          <div className="ml-2 mt-2 p-2 bg-white shadow rounded w-fit text-sm border border-gray-300">
+          <div className="font-semibold mb-1">Incident Intensity</div>
+          <div className="flex gap-2 items-center">
+            <LegendColorBox color="#00ff00" label="Low" />
+            <LegendColorBox color="#ffff00" label="Medium" />
+            <LegendColorBox color="#ff0000" label="High" />
+          </div>
+        </div>
+
         </div>
 
         <div className="heatmap-container">
           <Heatmap incidents={reportData}/>
         </div>
+        
       </div>
+          
 
         </div>
     </main>
