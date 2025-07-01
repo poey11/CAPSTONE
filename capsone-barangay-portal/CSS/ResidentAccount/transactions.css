@@ -364,7 +364,7 @@
     flex-direction: column;
     align-self: center;
     width: 70%;
-    border-radius: 1rem;
+     border-radius: 10px;
     border: 1px solid #ddd;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); 
     background: rgba(255, 255, 255, 0.9);
@@ -656,17 +656,24 @@ align-items: center;
   .document-requirements-container{
     width: 50%;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
   
   .requirements-image{
-    width: 100%;
+    width: 75%;
+    height: 80%;
   }
   
 
   .view-file-link{
     margin-top: 10px;
-    display: inline-block;
+   display: flex;
+   justify-content: center;
+   align-items: center;
     color: #007bff;
     text-decoration: underline;
     cursor: pointer;

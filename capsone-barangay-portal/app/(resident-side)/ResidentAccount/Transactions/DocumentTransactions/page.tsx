@@ -362,23 +362,22 @@ export default function DocumentTransactionsDetails() {
                 <div className="incident-main-content">
 
                     <div className="incident-main-content-upper">
-
-
-                               <nav className="incidents-transactions-info-toggle-wrapper">
-                                {["info", "reqs"].map((section) => (
-                                    <button
-                                    key={section}
-                                    type="button"
-                                    className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                                    onClick={() => setActiveSection(section)}
-                                    >
-                                    {section === "info" && "Document Info"}
-                                    {section === "reqs" && "Requirements"}
-                                    </button>
-                                ))}
-                            </nav>
-
+                    <nav className="incidents-transactions-info-toggle-wrapper">
+                        {["info", "reqs", ...(transactionData?.docType === "Barangay ID" ? ["emergency"] : [])].map((section) => (
+                        <button
+                            key={section}
+                            type="button"
+                            className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                            onClick={() => setActiveSection(section)}
+                        >
+                            {section === "info" && "Document Info"}
+                            {section === "reqs" && "Requirements"}
+                            {section === "emergency" && "Emergency Details"}
+                        </button>
+                        ))}
+                    </nav>
                     </div>
+
 
 
                     <div className="incident-main-content-lower">
@@ -473,7 +472,7 @@ export default function DocumentTransactionsDetails() {
                                             </div>
                                         ))
                                     ) : (
-                                        <p>N/A</p>
+                                        <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
                                     )}
 
                                 </div>
@@ -497,7 +496,7 @@ export default function DocumentTransactionsDetails() {
                                     ))
 
                                 ) : (
-                                    <p>N/A</p>
+                                    <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
                                 )}
 
                                 </div>
@@ -577,7 +576,7 @@ export default function DocumentTransactionsDetails() {
                                         </div>
                                     ))
                                 ) : (
-                                    <p>N/A</p>
+                                     <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
                                 )}
                             </div>
 
@@ -607,7 +606,7 @@ export default function DocumentTransactionsDetails() {
                                             </div>
                                         ))
                                     ) : (
-                                        <p>N/A</p>
+                                        <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
                                     )}
                                 </div>
                              </div>
@@ -630,7 +629,7 @@ export default function DocumentTransactionsDetails() {
                                             </div>
                                         ))
                                     ) : (
-                                        <p>N/A</p>
+                                        <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
                                     )}
                                     </div>
 
@@ -661,7 +660,7 @@ export default function DocumentTransactionsDetails() {
                                             </div>
                                         ))
                                     ) : (
-                                        <p>N/A</p>
+                                         <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
                                     )}
                                  </div>
 
@@ -685,7 +684,7 @@ export default function DocumentTransactionsDetails() {
                                             </div>
                                         ))
                                     ) : (
-                                        <p>N/A</p>
+                                         <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
                                     )}
                                     </div>
 
@@ -704,93 +703,99 @@ export default function DocumentTransactionsDetails() {
                          )}
 
 
+                          {/*FOR BARANGAY ID*/}
+                    {activeSection === "emergency" && (
+                        <>
+                        {transactionData.docType === "Barangay ID" && (
+
+                     <div className="incident-main-container">
+                            {transactionData.emergencyDetails && (
+                                <>
+
+                            <div className="incident-container-upper">
+
+                                <div className="incident-main-left">
+                                    <div className="details-section-document">
+                                        <div className="title">
+                                            <p>First Name</p>
+                                        </div>
+                                        <div className="description">
+                                            <p>{transactionData.emergencyDetails.firstName || "N/A"}</p>
+                                        </div>
+                                    </div>
+
+
+                                    <div className="details-section-document">
+                                        <div className="title">
+                                            <p>Last Name</p>
+                                        </div>
+                                        <div className="description">
+                                            <p>{transactionData.emergencyDetails.lastName || "N/A"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="details-section-document">
+                                        <div className="title">
+                                            <p>Contact Number</p>
+                                        </div>
+                                        <div className="description">
+                                            <p>{transactionData.emergencyDetails.contactNumber || "N/A"}</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                
+                                <div className="incident-main-right">
+
+                                      <div className="details-section-document">
+                                        <div className="title">
+                                            <p>Middle Name</p>
+                                        </div>
+                                        <div className="description">
+                                            <p>{transactionData.emergencyDetails.middleName || "N/A"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="details-section-document">
+                                        <div className="title">
+                                            <p>Address</p>
+                                        </div>
+                                        <div className="description">
+                                            <p>{transactionData.emergencyDetails.address || "N/A"}</p>
+                                        </div>
+                                    </div>
+
+                                        <div className="details-section-document">
+                                            <div className="title">
+                                                <p>Relationship</p>
+                                            </div>
+                                            <div className="description">
+                                            <p>{transactionData.emergencyDetails.relationship || "N/A"}</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                                </>
+                                
+                                
+                            )}
+                            </div>
+
+
+                        )}
+
+                        </>
+                     )}
                     </div>
 
                 </div>
 
             </div>
 
-
-
-
-
-        {/*FOR BARANGAY ID*/}
-
-
-        {transactionData.docType === "Barangay ID" && (
-        <div className="incident-content">
-          <div className="incident-content-section-1">
-            <p>Emergency Details</p>
-          </div>
-
-          {transactionData.emergencyDetails && (
-            <>
-                <div className="details-section">
-                    <div className="title">
-                        <p>First Name</p>
-                    </div>
-                    <div className="description">
-                        <p>{transactionData.emergencyDetails.firstName || "N/A"}</p>
-                    </div>
-                </div>
-        
-               
-                <div className="details-section">
-                    <div className="title">
-                        <p>Middle Name</p>
-                    </div>
-                    <div className="description">
-                        <p>{transactionData.emergencyDetails.middleName || "N/A"}</p>
-                    </div>
-                </div>
-        
-                
-                <div className="details-section">
-                    <div className="title">
-                        <p>Last Name</p>
-                    </div>
-                    <div className="description">
-                        <p>{transactionData.emergencyDetails.lastName || "N/A"}</p>
-                    </div>
-                </div>
-        
-             
-                <div className="details-section">
-                    <div className="title">
-                        <p>Address</p>
-                    </div>
-                    <div className="description">
-                        <p>{transactionData.emergencyDetails.address || "N/A"}</p>
-                    </div>
-                </div>
-        
-
-                <div className="details-section">
-                    <div className="title">
-                        <p>Contact Number</p>
-                    </div>
-                    <div className="description">
-                        <p>{transactionData.emergencyDetails.contactNumber || "N/A"}</p>
-                    </div>
-                </div>
-        
-                
-                <div className="details-section">
-                    <div className="title">
-                        <p>Relationship</p>
-                    </div>
-                    <div className="description">
-                        <p>{transactionData.emergencyDetails.relationship || "N/A"}</p>
-                    </div>
-                </div>
-            </>
-            
-            
-          )}
-        </div>
-      )}
-
-
+    
     </main>
 
     )
