@@ -327,11 +327,16 @@
   }
 
   .acknowledged {
-    background-color: #d69e4f;
+    background-color: #4caf50;   
     color: white;
     font-size: 15px;
-    
   }
+
+  .In-Progress {
+    background-color: #325bd4;
+  }
+
+
 
   .rejected {
     background-color: red;
@@ -377,7 +382,7 @@
   
   .incident-content-section-1{
     display: flex;
-    align-items: center;
+    justify-content: space-between;
     padding: 2rem;
 background-color: #214666;
     color: white;
@@ -395,6 +400,10 @@ background-color: #214666;
     text-transform: uppercase;
   }
   
+
+  .section-1-left {
+    display: flex;
+  }
   .back-button {
     background-image: url('/Images/left-arrow.png');
     background-size: contain;

@@ -197,8 +197,10 @@ updated
 
       <div className="incident-content">
         <div className="incident-content-section-1">
-          <button type="button" className="back-button" onClick={handleBack}></button>
-          <h1>Online Incident Report</h1>
+          <div className="section-1-left">
+              <button type="button" className="back-button" onClick={handleBack}></button>
+              <h1>Online Incident Report</h1>
+          </div>
         
           <div className="status-container">
             <p className={`status-dropdown-transactions ${transactionData.status?.toLowerCase() || ""}`}>

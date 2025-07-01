@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { doc, updateDoc } from "firebase/firestore";
 import {db} from "@/app/db/firebase";
 
-const statusOptions = ["All", "Acknowledged", "Pending"];
+const statusOptions = ["All", "Acknowledged", "Pending", "In - Progress"];
 
 export default function OnlineReports() {
   const [incidentData, setIncidentData] = useState<any[]>([]);
