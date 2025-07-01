@@ -241,7 +241,7 @@ const handleSubmitClick = async () => {
   const confirmSubmit = async () => {
     setShowConfirmation(false);
     
-    if(formData.status !== "In - Progress" && formData.status !== "Acknowledged") {
+    if(formData.status === "pending" ) {
       setFormData((prevData) => ({
         ...prevData,
         status: "In - Progress", // Set status to "In - Progress" if not already set
@@ -254,7 +254,7 @@ const handleSubmitClick = async () => {
       }));
 
     }
-    else{
+     else if(formData.status !== "Acknowledged"){
       setFormData((prevData) => ({
         ...prevData,
         status: "Acknowledged", // Set status to "Acknowledged" if not already set
@@ -262,6 +262,8 @@ const handleSubmitClick = async () => {
       }));
 
     }
+
+
 
 
       const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
@@ -306,11 +308,11 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): 
     );
 
     await updateDoc(incidentRef, {
-      status: formData.status === "Pending"
+      status: formData.status === "pending"
         ? "In - Progress"
         : formData.status === "In - Progress" &&
         "Acknowledged", 
-      statusPriority: formData.status === "Pending"
+      statusPriority: formData.status === "pending"
         ? 2
         : formData.status === "In - Progress"
         ? 3

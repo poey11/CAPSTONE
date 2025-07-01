@@ -17,6 +17,7 @@ interface incidentProps{
   createdAt: string;
   areaOfIncident: string;
   status: string;
+  department: string;
 }
 
 export default function MainPageIncident() {
@@ -69,19 +70,21 @@ export default function MainPageIncident() {
 
     const q = query(
       incidentCollection,
-      where("typeOfIncident", "!=", ""),      // Only one '!=' allowed
       where("status", "in", ["pending", "In - Progress"]),
-      orderBy("typeOfIncident"),              // Required when using '!='
-      orderBy("status")                       // Also needed for compound index
+      orderBy("createdAt", "desc") // Order by createdAt in descending order
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const filtered = snapshot.docs
         .map((doc) => ({
+          ...(doc.data() as incidentProps),
           id: doc.id,
-          ...doc.data(),
-        }))
-        .filter((report: any) => report.areaOfIncident !== ""); // filter 2nd inequality locally
+        })).filter(
+    (incident) =>
+    (incident.status === "pending" && incident.department !== "Online") ||
+    (incident.status === "In - Progress" && incident.department === "Online")
+)
+
 
       setData(filtered as incidentProps[]);
     });
