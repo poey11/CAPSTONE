@@ -1,7 +1,7 @@
 "use client";
 import "@/CSS/IncidentModule/AllDepartments.css";
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, use } from "react";
 import { useRouter } from "next/navigation";
 import { deleteDocument, getAllSpecificDocument } from "@/app/helpers/firestorehelper";
 import Heatmap from "@/app/(barangay-side)/components/heatmap";
@@ -10,6 +10,13 @@ import { db } from "@/app/db/firebase";
 
 const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
 const departmentOptions = ["GAD", "BCPC", "VAWC", "Lupon"];
+interface incidentProps{
+  id: string;
+  typeOfIncident: string;
+  createdAt: string;
+  areaOfIncident: string;
+  status: string;
+}
 
 export default function MainPageIncident() {
   const [incidentData, setIncidentData] = useState<any[]>([]);
@@ -28,7 +35,7 @@ export default function MainPageIncident() {
   useEffect(() => {
     const Collection = query(
       collection(db,"IncidentReports"),
-      where("department", "!=", "Online"), // Exclude "Online" department
+      where("department", "!=", "Online"), 
       orderBy("createdAt", "desc") // Order by createdAt in descending order
     );
 
@@ -48,13 +55,43 @@ export default function MainPageIncident() {
       setIncidentData(data);
       setFilteredIncidents(data); // Initialize filteredIncidents with the full data set
     })
-    
     return () => {
       if (unsubscribe) {
         unsubscribe();
       }
     };
   }, []);
+
+  const [data, setData] = useState<incidentProps[]>([]);
+
+  useEffect(() => {
+    const CollectionRef = query(
+      collection(db, "IncidentReports"),
+      where("typeOfIncident", "!=", ""),
+      orderBy("typeOfIncident"),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(CollectionRef, (snapshot) => {
+      const reports: incidentProps[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as incidentProps[];
+      setData(reports);
+    });
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  },[])
+
+  console.log("Incident Datac:", data);
+  
+  // Memoize reportData for Heatmap, based on incidentData
+  const reportData: incidentProps[] = useMemo(() => {
+    return [...data]
+  }, [data]);
 
 
 
@@ -218,11 +255,11 @@ export default function MainPageIncident() {
 
       <div className="incidentmap-section-all-department">
         <div className="titlesection-all-department">
-          <p>Incident HeatMap</p>
+          <p>Incident Heat Map</p>
         </div>
 
         <div className="heatmap-container">
-          <Heatmap />
+          <Heatmap incidents={reportData}/>
         </div>
       </div>
 

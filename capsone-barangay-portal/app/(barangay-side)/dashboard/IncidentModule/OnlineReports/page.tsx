@@ -322,7 +322,7 @@ const getViewedRequests = (): string[] => {
                     <td>{fullName}</td>
                     <td>{incident.createdAt}</td>
                     <td>{incident.dateFiled} {incident.time}</td>
-                    <td>{incident.area}</td>
+                    <td>{incident.areaOfIncident}</td>
                     <td>{incident.concerns}</td>
                     <td>
                       <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>

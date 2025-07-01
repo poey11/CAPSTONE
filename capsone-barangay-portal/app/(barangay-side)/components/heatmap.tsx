@@ -3,52 +3,46 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 
-const incidents = [
-  { lat: 14.676, lng: 121.0437, area: "South Fairview" },
-  { lat: 14.675, lng: 121.044, area: "South Fairview" },
-  { lat: 14.686, lng: 121.0437, area: "South Fairview" },
-  { lat: 14.695, lng: 121.044, area: "South Fairview" },
-  { lat: 14.706, lng: 121.0437, area: "South Fairview" },
-  { lat: 14.715, lng: 121.044, area: "South Fairview" },
-  { lat: 14.678, lng: 121.045, area: "East Fairview" },
-];
+interface incidentProps{
+  id: string;
+  typeOfIncident: string;
+  createdAt: string;
+  areaOfIncident: string;
+  status: string;
+}
 
-// Define area boundaries (polygon coordinates for each area)
-const areaBoundaries = {
-  "South Fairview": [
-    [121.042, 14.674], [121.046, 14.674], [121.046, 14.678], [121.042, 14.678], [121.042, 14.674]
-  ],
-  "East Fairview": [
-    [121.046, 14.674], [121.050, 14.674], [121.050, 14.678], [121.046, 14.678], [121.046, 14.674]
-  ],
-  "West Fairview": [
-    [121.038, 14.678], [121.044, 14.678], [121.044, 14.682], [121.038, 14.682], [121.038, 14.678]
-  ],
-};
+interface props {
+  incidents: incidentProps[];
+}
 
-// Count incidents per area
-const areaCounts = incidents.reduce((acc: { [key: string]: number }, incident) => {
-  acc[incident.area] = (acc[incident.area] || 0) + 1;
-  return acc;
-}, {});
-
-// Sort areas by incident count (highest first)
-const sortedAreas = Object.entries(areaCounts).sort((a, b) => b[1] - a[1]);
-
-// Assign colors based on ranking
-const areaColors = {
-  [sortedAreas[0]?.[0]]: "#FF0000", // Highest incident area → Red
-  [sortedAreas[1]?.[0]]: "#FFFF00", // Second highest → Yellow
-  [sortedAreas[2]?.[0]]: "#00FF00", // Lowest → Green
-};
-
-const IncidentHeatmap = () => {
+const IncidentHeatmap:React.FC<props> = ({incidents}) => {
+  console.log("Incident Heatmap Component Rendered: ", incidents);
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<maplibregl.Map | null>(null);
-  const [isClient, setIsClient] = useState(false);
+  const [isClient, setIsClient] = useState(false); // Ensures client-side rendering
+
+  // Define area boundaries (polygon coordinates for each area)
+  const areaBoundaries = {
+    "South Fairview": [
+      [121.042, 14.674], [121.046, 14.674], [121.046, 14.678], [121.042, 14.678], [121.042, 14.674]
+    ],
+    "East Fairview": [
+      [121.046, 14.674], [121.050, 14.674], [121.050, 14.678], [121.046, 14.678], [121.046, 14.674]
+    ],
+    "West Fairview": [
+      [121.038, 14.678], [121.044, 14.678], [121.044, 14.682], [121.038, 14.682], [121.038, 14.678]
+    ],
+  };
+  // Assign a color to each area 
+  const areaColors: { [key: string]: string } = {
+    "South Fairview": "#0000FF", // blue
+    "East Fairview": "#FFA500",  // orage 
+    "West Fairview": "#00FF00", // green
+  };
+
 
   useEffect(() => {
-    setIsClient(true);
+    setIsClient(true); // Mark component as client-side
   }, []);
 
   useEffect(() => {
@@ -57,75 +51,72 @@ const IncidentHeatmap = () => {
     map.current = new maplibregl.Map({
       container: mapContainer.current as HTMLElement,
       style: "https://tiles.stadiamaps.com/styles/osm_bright.json",
+
       center: [121.0437, 14.678],
-      zoom: 13, // More noticeable zoom-out
-      minZoom: 12,
-      maxBounds: [
-        [121.035, 14.670], // Southwest corner
-        [121.055, 14.685]  // Northeast corner
-      ]
+      zoom: 15.35,
+      interactive: false,
     });
-    
-  
 
     map.current.on("load", () => {
-      map.current?.addSource("incidents", {
-        type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: incidents.map((incident) => ({
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [incident.lng, incident.lat],
-            },
-            properties: { area: incident.area, color: areaColors[incident.area] || "#00FF00" },
-          })),
-        },
-      });
-
-      map.current?.addLayer({
-        id: "area-intensity-points",
-        type: "circle",
-        source: "incidents",
-        paint: {
-          "circle-radius": 6,
-          "circle-opacity": 0.9,
-          "circle-color": ["get", "color"],
-        },
-      });
-
-      // Add area boundaries as a layer
-      map.current?.addSource("area-boundaries", {
-        type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: Object.entries(areaBoundaries).map(([area, coordinates]) => ({
-            type: "Feature",
-            geometry: {
-              type: "Polygon",
-              coordinates: [coordinates],
-            },
-            properties: { name: area, color: areaColors[area] || "#00FF00" },
-          })),
-        },
-      });
-
-      map.current?.addLayer({
-        id: "area-boundary-layer",
-        type: "fill",
-        source: "area-boundaries",
-        paint: {
-          "fill-color": ["get", "color"],
-          "fill-opacity": 0.2,
-        },
-      });
+    // Convert area boundaries to GeoJSON features
+    const areaFeatures = Object.entries(areaBoundaries).map(([name, coords]) => ({
+      type: "Feature" as const,
+      geometry: {
+        type: "Polygon" as const,
+        coordinates: [coords], // Wrap in array (GeoJSON format)
+      },
+      properties: {
+        name,
+        color: areaColors[name],
+      },
+    }));
+  
+    // Add GeoJSON source
+    map.current?.addSource("area-boundaries", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: areaFeatures,
+      },
     });
 
+    // Add fill layer to show colored areas
+    map.current?.addLayer({
+      id: "area-fill",
+      type: "fill",
+      source: "area-boundaries",
+      paint: {
+        "fill-color": ["get", "color"],
+        "fill-opacity": 0.3,
+      },
+    });
+
+    // 🏷️ Add symbol (text label) layer
+    map.current?.addLayer({
+      id: "area-labels",
+      type: "symbol",
+      source: "area-boundaries",
+      layout: {
+        "text-field": ["get", "name"], // Get area name from properties
+        "text-size": 14,
+        "text-anchor": "center",
+        "text-justify": "center",
+      },
+      paint: {
+        "text-color": "#000000",       // Black text
+        "text-halo-color": "#ffffff",  // White outline for contrast
+        "text-halo-width": 1,
+      },
+    });
+
+  });
+
+
     return () => map.current?.remove();
-  }, [isClient]);
+  }, [isClient]); // Ensure it only runs on client
 
   return <div ref={mapContainer} style={{ width: "100%", height: "500px" }} />;
 };
+
 
 export default IncidentHeatmap;
