@@ -95,7 +95,9 @@ interface ClearanceInput {
     reqType?: string; // Optional, can be added if needed
     identificationPicture?: File[];
     isResident?: boolean;
-
+    nameOfTyphoon?: string;
+    dateOfTyphoon?: string;
+    dateOfFireIncident?: string;
 
     signaturejpg: File | null;
     barangayIDjpg: File | null;
@@ -323,7 +325,10 @@ export default function action() {
       noIncomeChildFName: "",
       deceasedEstateName: "",
       estateSince: "",
-    
+      nameOfTyphoon: "",
+      dateOfTyphoon: "",
+      dateOfFireIncident: "",  
+
       emergencyDetails: {
         fullName: "",
         address: "",
@@ -991,6 +996,48 @@ const handleChange = (
     return;
   }
 
+  if (name === "dateOfTyphoon") {
+    const selectedDate = new Date(value);
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-indexed
+
+    if (
+      selectedDate.getFullYear() !== currentYear ||
+      selectedDate.getMonth() !== currentMonth
+    ) {
+      alert("Please select a date within the current month only.");
+      return;
+    }
+
+    setClearanceInput((prev: any) => ({
+      ...prev,
+      [name]: value,
+    }));
+    return;
+  }
+
+  if (name === "dateOfFireIncident") {
+    const selectedDate = new Date(value);
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-indexed
+
+    if (
+      selectedDate.getFullYear() !== currentYear ||
+      selectedDate.getMonth() !== currentMonth
+    ) {
+      alert("Please select a date within the current month only.");
+      return;
+    }
+
+    setClearanceInput((prev: any) => ({
+      ...prev,
+      [name]: value,
+    }));
+    return;
+  }
+
   setClearanceInput((prev: any) => {
     const keys = name.split(".");
     if (keys.length === 2) {
@@ -1024,6 +1071,14 @@ const handleChange = (
       "Good Moral and Probation",
       "Garage/PUV",
       "Garage/TRU",  
+
+      /* Barangay Indigency */
+      "Public Attorneys Office",
+      "Financial Subsidy of Solo Parent",
+      "Fire Victims",
+      "Flood Victims",
+      "Philhealth Sponsor",
+      "Medical Assistance",
       
       /* Other Documents */
       "Barangay ID",
@@ -1038,6 +1093,14 @@ const handleChange = (
       "No Income",
       "Good Moral and Probation",
       "Cohabitation",
+
+      /* Barangay Indigency */
+      "Public Attorneys Office",
+      "Financial Subsidy of Solo Parent",
+      "Fire Victims",
+      "Flood Victims",
+      "Philhealth Sponsor",
+      "Medical Assistance",
 
       /* Other Documents */
       "Barangay ID",
@@ -1152,6 +1215,9 @@ const handleChange = (
     const [selectingFor, setSelectingFor] = useState<"fullName" | "requestor" | null>(null);
     
 
+    const today = new Date();
+    const minDateTyphoon = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0]; // 1st of this month
+    const maxDateTyphoon = today.toISOString().split("T")[0];
 
     return (
         <main className="createRequest-main-container">
@@ -1265,9 +1331,9 @@ const handleChange = (
                               <>
                                 <option value="No Income">No Income</option>
                                 <option value="Public Attorneys Office">Public Attorneys Office</option>
-                                <option value="AKAP">AKAP</option>
+                                {/*<option value="AKAP">AKAP</option>*/}
                                 <option value="Financial Subsidy of Solo Parent">Financial Subsidy of Solo Parent</option>
-                                <option value="Fire Emergency">Fire Emergency</option>
+                                <option value="Fire Victims">Fire Victims</option>
                                 <option value="Flood Victims">Flood Victims</option>
                                 <option value="Philhealth Sponsor">Philhealth Sponsor</option>
                                 <option value="Medical Assistance">Medical Assistance</option>
@@ -2154,6 +2220,66 @@ const handleChange = (
 
                             </>
                           )}
+
+                        
+                          {clearanceInput.purpose === "Financial Subsidy of Solo Parent"  && (
+                            <>               
+                              <div className="fields-section">
+                                <h1>Son/Daugther's Name<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="noIncomeChildFName"  
+                                  name="noIncomeChildFName"  
+                                  value={clearanceInput.noIncomeChildFName}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder={`Enter Child's Full Name`}
+                                />
+                              </div>                       
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "Flood Victims"  && (
+                            <>               
+                              <div className="fields-section">
+                                <h1>Name of Typhoon<span className="required">*</span></h1>
+                                <input 
+                                  type="text"  
+                                  id="nameOfTyphoon"  
+                                  name="nameOfTyphoon"  
+                                  value={clearanceInput.nameOfTyphoon}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                  placeholder={`Enter Typhoon Name`}
+                                />
+                              </div>           
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "Fire Victims"  && (
+                            <>               
+                             <div className="fields-section">
+                              <h1>Date of Fire Incident <span className="required">*</span></h1>
+                              <input 
+                                type="date" 
+                                className="createRequest-input-field" 
+                                id="dateOfFireIncident"
+                                name="dateOfFireIncident"
+                                value={clearanceInput?.dateOfFireIncident || ""}
+                                onChange={handleChange}
+                                required
+                                /* will only allow current month and year for typhoon dates*/
+                                min={new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0]}
+                                max={new Date().toISOString().split("T")[0]}
+                                onKeyDown={(e) => e.preventDefault()}  
+                              />    
+                            </div>            
+                            </>
+                          )}
+
+                      
                         </div>
 
                         <div className="createRequest-section-2-right-side">
@@ -2542,6 +2668,27 @@ const handleChange = (
                                   placeholder="Enter Project Location" 
                                 />
                               </div>
+                            </>
+                          )}
+
+                          {clearanceInput.purpose === "Flood Victims"  && (
+                            <>               
+                             <div className="fields-section">
+                              <h1>Date of Typhoon <span className="required">*</span></h1>
+                              <input 
+                                type="date" 
+                                className="createRequest-input-field" 
+                                id="dateOfTyphoon"
+                                name="dateOfTyphoon"
+                                value={clearanceInput?.dateOfTyphoon || ""}
+                                onChange={handleChange}
+                                required
+                                /* will only allow current month and year for typhoon dates*/
+                                min={new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0]}
+                                max={new Date().toISOString().split("T")[0]}
+                                onKeyDown={(e) => e.preventDefault()}  
+                              />    
+                            </div>            
                             </>
                           )}
                         </div>
