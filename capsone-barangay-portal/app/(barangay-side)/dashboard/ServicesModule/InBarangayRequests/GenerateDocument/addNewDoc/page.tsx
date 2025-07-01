@@ -131,7 +131,20 @@ export default function AddNewDoc() {
         });
     };
 
-    const newFields = [...fields, { name: "requestorFname" }, { name: "requestorMrMs" }, { name: "dateOfResidency" }, {name: "address"} ];
+    const preDefinedFields: FieldInputs[] = [
+        { name: "requestorFname" },
+        { name: "requestorMrMs" },
+        { name: "dateOfResidency" },
+        { name: "address" },
+      ];
+      
+      const preDefinedRequirements: FieldInputs[] = [
+        { name: "signaturejpg" },
+        { name: "barangayIDjpg" },
+        { name: "validIDjpg" },
+        { name: "letterjpg" },
+      ];
+
 
     
 
@@ -142,10 +155,10 @@ export default function AddNewDoc() {
         const docRef = collection(db, "OtherDocuments");
         const docData = {
             ...formValue,
-            fields:newFields,
-            imageFields: imageFields,
+            fields: [...preDefinedFields, ...fields],
+            imageFields: [...preDefinedRequirements, ...imageFields],
             newDoc: true,
-        }
+        };
         console.log("Document submitted with fields:", fields);
         console.log("Document body:", formValue);
         console.log("Document data:", docData);
@@ -254,7 +267,7 @@ export default function AddNewDoc() {
                                     
                                     <div className="box-container-doc-fields">
                                         <div className="instructions-container">
-                                            <h1>* Enter the fields needed for the document. No need to input pre-defined fields. *</h1>
+                                            <h1>* Enter the fields needed for the document. No need to input pre-defined fields. FORMAT: sample_field *</h1>
                                         </div>
                                         <span className="required-asterisk">*</span>
                                         <div className="add-doc-field-container">
@@ -320,7 +333,7 @@ export default function AddNewDoc() {
                                     </div>
                                     <div className="box-container-doc-reqs">
                                         <div className="instructions-container">
-                                            <h1>* Enter the requirements needed for this document. *</h1>
+                                            <h1>* Enter the requirements needed for this document. FORMAT: sample_field *</h1>
                                         </div>
                                         <span className="required-asterisk">*</span>
                                         <div className="add-doc-field-container">
@@ -461,7 +474,40 @@ export default function AddNewDoc() {
                                                 <div className="predefined-field-description">
                                                     <h1>*Use this field to display the year today*</h1>
                                                 </div>
+                                            </div>  
+
+                                            <div className="predefined-field-row">
+                                                <div className="predefined-field-name">
+                                                    <h1>8. Field Name: 'signaturejpg'</h1>
+                                                </div>
+                                                <div className="predefined-field-description">
+                                                    <h1>*Requirements field for Signature requirement*</h1>
+                                                </div>
                                             </div>    
+                                            <div className="predefined-field-row">
+                                                <div className="predefined-field-name">
+                                                    <h1>9. Field Name: 'barangayIDjpg'</h1>
+                                                </div>
+                                                <div className="predefined-field-description">
+                                                    <h1>*Requirements field for Barangay ID requirement*</h1>
+                                                </div>
+                                            </div>  
+                                            <div className="predefined-field-row">
+                                                <div className="predefined-field-name">
+                                                    <h1>10. Field Name: 'validIDjpg'</h1>
+                                                </div>
+                                                <div className="predefined-field-description">
+                                                    <h1>*Requirements field for Valid ID requirement*</h1>
+                                                </div>
+                                            </div>
+                                            <div className="predefined-field-row">
+                                                <div className="predefined-field-name">
+                                                    <h1>11. Field Name: 'letterjpg'</h1>
+                                                </div>
+                                                <div className="predefined-field-description">
+                                                    <h1>*Requirements field for Endorsement Letter requirement*</h1>
+                                                </div>
+                                            </div>       
                                         </div>
                                     )}
                                 </div>
