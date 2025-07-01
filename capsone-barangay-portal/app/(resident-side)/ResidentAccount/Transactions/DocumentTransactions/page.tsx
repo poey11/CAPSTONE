@@ -455,101 +455,91 @@ export default function DocumentTransactionsDetails() {
                      {activeSection === "reqs" && (
                         <>
                         <div className="incident-main-container">
-
-                           <div className="details-section-response-upload">
-                              <div className="title">
-                                 <p>Signature</p>
-                              </div>
-
-                                <div className="description">
-                                     {fileURLs.filter(({ field }) => field === "signaturejpg").length > 0 ? (
-                                        fileURLs.filter(({ field }) => field === "signaturejpg").map(({ url }, index) => (
-                                            <div key={index} className="document-requirements-container">
-                                                <img src={url} alt="Signature - Uploaded File" className="requirements-image"/>
-                                                <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                                    View File
-                                                </a>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
-                                    )}
-
-                                </div>
-
-                            </div>
-
-                         <div className="details-section-response-upload">
-                              <div className="title">
-                                 <p>Barangay ID</p>
-                              </div>
-
-                                <div className="description">
-                            {fileURLs.filter(({ field }) => field === "barangayIDjpg").length > 0 ? (
-                                    fileURLs.filter(({ field }) => field === "barangayIDjpg").map(({ url }, index) => (
-                                        <div key={index} className="document-requirements-container">
-                                            <img src={url} alt="Barangay ID - Uploaded File" className="requirements-image"/>
-                                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                                View File
-                                            </a>
-                                        </div>
-                                    ))
-
-                                ) : (
-                                    <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
-                                )}
-
-                                </div>
-
-                            </div>
-
-
-                             <div className="details-section-response-upload">
-                              <div className="title">
-                                 <p>Valid ID</p>
-                              </div>
-
-                                <div className="description">
-                            {fileURLs.filter(({ field }) => field === "validIDjpg").length > 0 ? (
-                                    fileURLs.filter(({ field }) => field === "validIDjpg").map(({ url }, index) => (
-                                        <div key={index} className="document-requirements-container">
-                                            <img src={url} alt="Valid ID - Uploaded File" className="requirements-image"/>
-                                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                                View File
-                                            </a>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
-                                )}
-
-                                </div>
-
-                            </div>
-
-                            
+                            {fileURLs.some(({ field }) => field === "signaturejpg") && (
                             <div className="details-section-response-upload">
                                 <div className="title">
-                                    <p>Endorsement Letter</p>
+                                <p>Signature</p>
                                 </div>
 
-                                    <div className="description">
-                                    {fileURLs.filter(({ field }) => field === "endorsementLetter").length > 0 ? (
-                                            fileURLs.filter(({ field }) => field === "endorsementLetter").map(({ url }, index) => (
-                                                <div key={index} className="document-requirements-container">
-                                                    <img src={url} alt="Endorsement Letter - Uploaded File" className="requirements-image"/>
-                                                    <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                                        View File
-                                                    </a>
-                                                </div>
-                                            ))
-                                        ) : (
-                                             <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
-                                        )}
+                                <div className="description">
+                                {fileURLs
+                                    .filter(({ field }) => field === "signaturejpg")
+                                    .map(({ url }, index) => (
+                                    <div key={index} className="document-requirements-container">
+                                        <img src={url} alt="Signature - Uploaded File" className="requirements-image" />
+                                        <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                        View File
+                                        </a>
+                                    </div>
+                                    ))}
+                                </div>
+                            </div>
+                            )}
 
+
+                            {fileURLs.some(({ field }) => field === "barangayIDjpg") && (
+                            <div className="details-section-response-upload">
+                                <div className="title">
+                                <p>Barangay ID</p>
+                                </div>
+
+                                <div className="description">
+                                {fileURLs
+                                    .filter(({ field }) => field === "barangayIDjpg")
+                                    .map(({ url }, index) => (
+                                    <div key={index} className="document-requirements-container">
+                                        <img src={url} alt="Barangay ID - Uploaded File" className="requirements-image" />
+                                        <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                        View File
+                                        </a>
+                                    </div>
+                                    ))}
+                                </div>
+                            </div>
+                            )}
+
+                                {fileURLs.some(({ field }) => field === "validIDjpg") && (
+                                <div className="details-section-response-upload">
+                                    <div className="title">
+                                    <p>Valid ID</p>
                                     </div>
 
+                                    <div className="description">
+                                    {fileURLs
+                                        .filter(({ field }) => field === "validIDjpg")
+                                        .map(({ url }, index) => (
+                                        <div key={index} className="document-requirements-container">
+                                            <img src={url} alt="Valid ID - Uploaded File" className="requirements-image" />
+                                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                            View File
+                                            </a>
+                                        </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                )}
+                            
+                            {fileURLs.some(({ field }) => field === "endorsementLetter") && (
+                            <div className="details-section-response-upload">
+                                <div className="title">
+                                <p>Endorsement Letter</p>
+                                </div>
+
+                                <div className="description">
+                                {fileURLs
+                                    .filter(({ field }) => field === "endorsementLetter")
+                                    .map(({ url }, index) => (
+                                    <div key={index} className="document-requirements-container">
+                                        <img src={url} alt="Endorsement Letter - Uploaded File" className="requirements-image" />
+                                        <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                        View File
+                                        </a>
+                                    </div>
+                                    ))}
+                                </div>
                             </div>
+                            )}
+
 
 
 

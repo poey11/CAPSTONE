@@ -448,7 +448,7 @@ background-color: #214666;
   margin-top: 5px;
   margin-bottom: 10px;
   border-bottom: 2px solid #e0e0e0;
-  width: 50%;
+  width: 100%;
 }
 
 .info-toggle-btn {
@@ -517,7 +517,7 @@ background-color: #214666;
 justify-content: center;
 align-items: center;
   border-bottom: 2px solid #ddd;
-   gap: 1.5rem;
+ gap: 1.5rem;
  padding-top: 2rem;
  padding-bottom: 2rem;
 
@@ -700,7 +700,7 @@ Barangay Response
 .details-section-response {
  display: flex;
   flex-direction: column;
-  border-top: 2px solid #ddd;
+  border-bottom: 2px solid #ddd;
   padding: 1rem;
   height: 170px;
   min-height: 170px; 
@@ -712,9 +712,13 @@ Barangay Response
     background: #D8DFE5
   }
 
+
+
+
+  
   .details-section-response-upload {
- display: flex;
-  border-top: 2px solid #ddd;
+  display: flex;
+  border-bottom: 2px solid #ddd;
   padding: 1rem;
   height: 280px;
   min-height: 280px; 
