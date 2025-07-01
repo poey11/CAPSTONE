@@ -1397,8 +1397,16 @@ const handleChange = (
                       {(
                         allExistingPermits.includes(docType || "") ||
                         (
-                          otherDocPurposes["Barangay Permit"]?.includes(docType || "") && 
-                          forResidentOnlyMap[docType || ""] === true
+                          (
+                            otherDocPurposes["Barangay Permit"]?.includes(docType || "") &&
+                            forResidentOnlyMap[docType || ""] === false
+                          ) || 
+                          (
+                            docType === "Other Documents" &&
+                            clearanceInput.purpose !== "Barangay ID" &&
+                            clearanceInput.purpose !== "First Time Jobseeker" &&
+                            forResidentOnlyMap[clearanceInput.purpose || ""] === false
+                          )
                         )
                       ) && (
                           <>
@@ -1507,15 +1515,31 @@ const handleChange = (
                                   name="requestorFname"
                                   readOnly={
                                     !(
-                                      !isPermitLike || // not a permit
-                                      clearanceInput?.isResident // or isResident is checked
+                                      forResidentOnlyMap[docType || ""] === true ||
+                                      (!isPermitLike && docType !== "Other Documents") ||
+                                      (docType === "Other Documents" && clearanceInput?.isResident) ||
+                                      clearanceInput?.isResident
                                     )
                                   }
                                   onClick={() => {
-                                    if (
-                                      !isPermitLike || // not a permit
-                                      clearanceInput?.isResident // or resident is checked
-                                    ) {
+                                    const isExplicitResidentOnly = forResidentOnlyMap[docType || ""] === true;
+                                  
+                                    const isOtherDocs = docType === "Other Documents";
+                                  
+                                    const allowPopup =
+                                      // Always allow for system-defined resident-only types
+                                      isExplicitResidentOnly ||
+                                  
+                                      // Allow for all non-permit types EXCEPT Other Documents
+                                      (!isPermitLike && !isOtherDocs) ||
+                                  
+                                      // Allow for Other Documents ONLY IF user manually selects resident
+                                      (isOtherDocs && clearanceInput?.isResident) ||
+                                  
+                                      // User manually selected resident
+                                      clearanceInput?.isResident;
+                                  
+                                    if (allowPopup) {
                                       setSelectingFor("requestor");
                                       setShowResidentsPopup(true);
                                     }
