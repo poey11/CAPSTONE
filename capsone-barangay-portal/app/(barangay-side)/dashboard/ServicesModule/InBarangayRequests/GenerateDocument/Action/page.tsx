@@ -1079,6 +1079,15 @@ const handleChange = (
       "Flood Victims",
       "Philhealth Sponsor",
       "Medical Assistance",
+
+      /* Barangay Clearance */
+      "Loan",
+      "Bank Transaction",
+      "Residency",
+      "Local Employment",
+      "Maynilad",
+      "Meralco",
+      "Bail Bond",
       
       /* Other Documents */
       "Barangay ID",
@@ -1101,6 +1110,15 @@ const handleChange = (
       "Flood Victims",
       "Philhealth Sponsor",
       "Medical Assistance",
+
+      /* Barangay Clearance */
+      "Loan",
+      "Bank Transaction",
+      "Residency",
+      "Local Employment",
+      "Maynilad",
+      "Meralco",
+      "Bail Bond",
 
       /* Other Documents */
       "Barangay ID",
