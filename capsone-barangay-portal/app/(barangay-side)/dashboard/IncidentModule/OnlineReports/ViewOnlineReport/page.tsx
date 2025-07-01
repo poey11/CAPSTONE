@@ -14,7 +14,7 @@ export default function ViewOnlineReports() {
     firstname: "",
     lastname: "",
     contactNos: "",
-    area: "",
+    areaOfIncident: "",
     address: "",
     dateFiled: "",
     addInfo: "",
@@ -101,7 +101,7 @@ export default function ViewOnlineReports() {
           firstname: data.firstname || "",
           lastname: data.lastname || "",
           contactNos: data.contactNos || "",
-          area: data.area || "",
+          areaOfIncident: data.areaOfIncident || "",
           address: data.address || "",
           dateFiled: data.dateFiled || "",
           addInfo:data.addInfo || "",
@@ -639,7 +639,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                  <input
                                   type="text"
                                   className="online-incident-input-field"
-                                  value={formData.area}  
+                                  value={formData.areaOfIncident}  
                                   disabled          
                                  />
                               </div>

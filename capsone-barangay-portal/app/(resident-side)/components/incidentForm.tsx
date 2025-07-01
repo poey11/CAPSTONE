@@ -78,22 +78,7 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
 
     fetchUserData();
   }, [currentUser]);
-  
-  const [onlineReportCollection, setOnlineReportCollection] = useState<any[]>([]);
-  useEffect(() => {
-    try {
-      const unsubscribe =  getAllSpecificDocument("IncidentReports", "department", "==", "Online",  setOnlineReportCollection);
-      return () => {
-        if (unsubscribe) {
-          unsubscribe(); 
-        }
-      }
-    } catch (error) {
-      setOnlineReportCollection([]);
-    }
-   
-  }, []);
-  
+    
     const [nos, setNos] = useState<number>(0); // Initialize with a default value
   
     useEffect(() => {
@@ -101,7 +86,7 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
         const fetchCount = async () => {
           try {
             const count = await getSpecificCountofCollection("IncidentReports", "reportID", user.uid);
-            setNos(count || 1);
+            setNos(count || 0);
           } catch (error) {
             console.error("Error fetching count:", error);
           }
@@ -112,7 +97,7 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
         const fetchCount = async () => {
           try {
             const count = await getSpecificCountofCollection("IncidentReports", "reportID", "Guest");
-            setNos(count || 1);
+            setNos(count || 0);
           } catch (error) {
             console.error("Error fetching count:", error);
           }
@@ -622,6 +607,7 @@ const confirmSubmit = async () => {
                           />
                         </div>
 
+                
                          <div className="form-group-incident-report">
                     <label htmlFor="address" className="form-label-incident-report">
                       Area of Incident <span className="required">*</span>
@@ -680,7 +666,26 @@ const confirmSubmit = async () => {
                           onChange={handleFormChange}
                         />
                       </div>
-
+                    
+                  { isIncidentLate && (
+                    <>
+                      <div className="form-group-incident-report">
+                        <label htmlFor="reasonForLateFiling" className="form-label-incident-report">
+                          Reason for Late Filing<span className="required">*</span>
+                        </label>
+                        <textarea
+                          id="reasonForLateFiling"
+                          name="reasonForLateFiling"
+                          className={`form-input-incident-report ${invalidFields.includes("reasonForLateFiling") ? "input-error" : ""}`}
+                          required
+                          placeholder="Enter Reason for Late Filing"
+                          value={incidentReport.reasonForLateFiling}
+                          onChange={handleFormChange}
+                          rows={4} cols={50}
+                        />
+                      </div>
+                    </>    
+                  )}
                   <div className="form-group-incident-report">
                     <label htmlFor="addInfo" className="form-label-incident-report">
                     Additional Info Regarding the Concern<span className="required">*</span>
