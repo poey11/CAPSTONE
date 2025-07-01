@@ -33,12 +33,6 @@ const IncidentHeatmap:React.FC<props> = ({incidents}) => {
       [121.038, 14.678], [121.044, 14.678], [121.044, 14.682], [121.038, 14.682], [121.038, 14.678]
     ],
   };
-  // Assign a color to each area 
-  const areaColors: { [key: string]: string } = {
-    "South Fairview": "#0000FF", // blue
-    "East Fairview": "#FFA500",  // orage 
-    "West Fairview": "#00FF00", // green
-  };
 
 
   useEffect(() => {
@@ -48,72 +42,114 @@ const IncidentHeatmap:React.FC<props> = ({incidents}) => {
   useEffect(() => {
     if (!isClient || !mapContainer.current) return;
 
+    // 1. Group incidents by area with severity weight
+    const areaScores: { [area: string]: number } = {};
+    incidents.forEach((incident) => {
+      const area = incident.areaOfIncident;
+      const weight = incident.typeOfIncident === "Major" ? 2 : 1;
+      if (!areaScores[area]) areaScores[area] = 0;
+      areaScores[area] += weight;
+    });
+
+    // 2. Find max score to normalize
+    const maxScore = Math.max(...Object.values(areaScores), 1); // Avoid div by 0
+
+    console.log("Area Scores: ", areaScores);
+    // 3. Helper: interpolate green → yellow → red
+    const interpolateColor = (t: number) => {
+      const r = t < 0.5 ? (t * 2) * 255 : 255;
+      const g = t < 0.5 ? 255 : (1 - (t - 0.5) * 2) * 255;
+      const b = 0;
+      return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+    };
+
+    // 4. Compute areaColors based on normalized scores
+    const computedColors: { [area: string]: string } = {};
+    Object.entries(areaBoundaries).forEach(([area]) => {
+      const score = areaScores[area] || 0;
+      const normalized = score / maxScore;
+      computedColors[area] = interpolateColor(normalized);
+    });
+
+    console.log("Computed Colors: ", computedColors);
+    // 5. Init map
     map.current = new maplibregl.Map({
       container: mapContainer.current as HTMLElement,
       style: "https://tiles.stadiamaps.com/styles/osm_bright.json",
-
       center: [121.0437, 14.678],
       zoom: 15.35,
       interactive: false,
     });
 
     map.current.on("load", () => {
-    // Convert area boundaries to GeoJSON features
-    const areaFeatures = Object.entries(areaBoundaries).map(([name, coords]) => ({
-      type: "Feature" as const,
-      geometry: {
-        type: "Polygon" as const,
-        coordinates: [coords], // Wrap in array (GeoJSON format)
-      },
-      properties: {
-        name,
-        color: areaColors[name],
-      },
-    }));
-  
-    // Add GeoJSON source
-    map.current?.addSource("area-boundaries", {
-      type: "geojson",
-      data: {
-        type: "FeatureCollection",
-        features: areaFeatures,
-      },
+      // 6. Build GeoJSON with dynamic color
+      const areaFeatures = Object.entries(areaBoundaries).map(([name, coords]) => ({
+        type: "Feature" as const,
+        geometry: {
+          type: "Polygon" as const,
+          coordinates: [coords],
+        },
+        properties: {
+          name,
+          color: computedColors[name] || "#CCCCCC", // fallback color
+        },
+      }));
+
+      map.current?.addSource("area-boundaries", {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: areaFeatures,
+        },
+      });
+
+      // 7. Fill layer
+      map.current?.addLayer({
+        id: "area-fill",
+        type: "fill",
+        source: "area-boundaries",
+        paint: {
+          "fill-color": ["get", "color"],
+          "fill-opacity": 0.4,
+        },
+      });
+
+      // 8. Labels
+      map.current?.addLayer({
+        id: "area-labels",
+        type: "symbol",
+        source: "area-boundaries",
+        layout: {
+          "text-field": ["get", "name"],
+          "text-size": 14,
+          "text-anchor": "center",
+          "text-justify": "center",
+        },
+        paint: {
+          "text-color": "#000",
+          "text-halo-color": "#fff",
+          "text-halo-width": 1,
+        },
+      });
+
+      
+      // Optional: Add borders for each area
+      map.current?.addLayer({
+        id: "area-outline",
+        type: "line",
+        source: "area-boundaries",
+        paint: {
+          "line-color": "#000000",
+          "line-width": 0.5,
+        },
+      });
     });
 
-    // Add fill layer to show colored areas
-    map.current?.addLayer({
-      id: "area-fill",
-      type: "fill",
-      source: "area-boundaries",
-      paint: {
-        "fill-color": ["get", "color"],
-        "fill-opacity": 0.3,
-      },
-    });
-
-    // 🏷️ Add symbol (text label) layer
-    map.current?.addLayer({
-      id: "area-labels",
-      type: "symbol",
-      source: "area-boundaries",
-      layout: {
-        "text-field": ["get", "name"], // Get area name from properties
-        "text-size": 14,
-        "text-anchor": "center",
-        "text-justify": "center",
-      },
-      paint: {
-        "text-color": "#000000",       // Black text
-        "text-halo-color": "#ffffff",  // White outline for contrast
-        "text-halo-width": 1,
-      },
-    });
-
-  });
-
+    
 
     return () => map.current?.remove();
-  }, [isClient]); // Ensure it only runs on client
+  }, [isClient, incidents]);
+
 
   return <div ref={mapContainer} style={{ width: "100%", height: "500px" }} />;
 };

@@ -33,7 +33,7 @@ const incidentForm:React.FC = () => {
     area:"",
     reportID: "",
     department: "",
-    status: "Pending",
+    status: "pending",
     addInfo:"",
     reasonForLateFiling: "",
   });

@@ -31,7 +31,6 @@ export default function MainPageIncident() {
  
 
 
-  /*Revised this. Copy from Online Request in Service Module. */
   useEffect(() => {
     const Collection = query(
       collection(db,"IncidentReports"),
@@ -65,26 +64,29 @@ export default function MainPageIncident() {
   const [data, setData] = useState<incidentProps[]>([]);
 
   useEffect(() => {
-    const CollectionRef = query(
-      collection(db, "IncidentReports"),
-      where("typeOfIncident", "!=", ""),
-      orderBy("typeOfIncident"),
-      orderBy("createdAt", "desc")
+    const incidentCollection = collection(db, "IncidentReports");
+
+    const q = query(
+      incidentCollection,
+      where("typeOfIncident", "!=", ""),      // Only one '!=' allowed
+      where("status", "in", ["pending", "In - Progress"]),
+      orderBy("typeOfIncident"),              // Required when using '!='
+      orderBy("status")                       // Also needed for compound index
     );
 
-    const unsubscribe = onSnapshot(CollectionRef, (snapshot) => {
-      const reports: incidentProps[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as incidentProps[];
-      setData(reports);
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const filtered = snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((report: any) => report.areaOfIncident !== ""); // filter 2nd inequality locally
+
+      setData(filtered as incidentProps[]);
     });
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  },[])
+
+    return () => unsubscribe();
+  }, []);
 
   console.log("Incident Datac:", data);
   
