@@ -3,12 +3,9 @@ import "@/CSS/IncidentModule/EditIncident.css";
 import { ChangeEvent,useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/firestorehelper";
-import { doc, updateDoc, collection, where, getDocs, query, onSnapshot} from "firebase/firestore";
+import { doc, updateDoc, collection, where, getDocs, query, onSnapshot, deleteDoc, orderBy} from "firebase/firestore";
 import { db } from "../../../../db/firebase";
-import { isValidPhilippineMobileNumber } from "@/app/helpers/helpers";
 import React from "react";
-import Dialogue from "@/app/(barangay-side)/components/dialogueForm"
-import Hearing from "@/app/(barangay-side)/components/hearingForm";
 
 
 export default function EditLuponIncident() {
@@ -16,6 +13,7 @@ export default function EditLuponIncident() {
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [showContinuePopup, setShowContinuePopup] = useState(false);
     const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
 
@@ -55,7 +53,32 @@ export default function EditLuponIncident() {
       status: reportData?.status,
       nosofMaleChildren: "",
       nosofFemaleChildren: "",
+      reopenRequester: "",
     });
+
+    const [summonLetterData, setSummonLetterData] = useState<any[]>([]);
+    useEffect(()=>{
+        if (!docId) return;
+        const colRef = query(
+            collection(db, "IncidentReports", docId, "SummonsMeeting"),
+            orderBy("createdAt", "desc")
+        );
+        const unsubscribe = onSnapshot(colRef, (snapshot) => {
+            const fetchedData = snapshot.docs.map(doc => doc.data());
+            setSummonLetterData(fetchedData);
+        });
+        return () => unsubscribe();
+    },[docId]);
+
+    const [showDoneIncidentPopup, setShowDoneIncidentPopup] = useState(false);
+
+    useEffect(() => {
+      if(summonLetterData[2]?.filled && (reportData?.status === "pending")  ){
+        setShowDoneIncidentPopup(true);
+      }
+    },[summonLetterData]);
+
+    console.log("Summon Letter Data:", summonLetterData);
 
     useEffect(() => {
       if(docId){
@@ -78,7 +101,6 @@ export default function EditLuponIncident() {
 
 
     const department =  reportData?.department;
-    const caseNumber = reportData?.caseNumber;
     
     const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       const { name, value, type } = e.target;
@@ -153,38 +175,53 @@ export default function EditLuponIncident() {
     
     const HandleEditDoc = async () => {
       
-      
       if (docId) {
         const docRef = doc(db, "IncidentReports", docId);
-    
+
         // Fixing receivedBy handling (avoiding split on undefined)
         const receivedByParts = reportData.receivedBy?.split(" ") || ["", ""];
         const receivedByFname = mergeData(receivedByParts[0], toUpdate.fname);
         const receivedByLname = mergeData(receivedByParts[1], toUpdate.lname);
-    
+
+        // Determine statusPriority based on status
+        let statusValue = mergeData(reportData.status, toUpdate.status);
+        let statusPriority = 1;
+        if (statusValue === "archived") {
+          statusPriority = 2;
+        } else if(statusValue === "settled") {
+          statusPriority = 3;
+        }
+        else if (statusValue === "pending") {
+          statusPriority = 1;
+        }
+        else if(statusValue === "CFA") {
+          statusPriority = 4;
+        }
+
         const cleanedData = removeUndefined({
           complainant: {
-            fname: mergeData(reportData.complainant?.fname, toUpdate.complainant?.fname),
-            lname: mergeData(reportData.complainant?.lname, toUpdate.complainant?.lname),
-            sex: mergeData(reportData.complainant?.sex, toUpdate.complainant?.sex),
-            age: mergeData(reportData.complainant?.age, toUpdate.complainant?.age),
-            civilStatus: mergeData(reportData.complainant?.civilStatus, toUpdate.complainant?.civilStatus),
-            address: mergeData(reportData.complainant?.address, toUpdate.complainant?.address),
-            contact: mergeData(reportData.complainant?.contact, toUpdate.complainant?.contact),
+        fname: mergeData(reportData.complainant?.fname, toUpdate.complainant?.fname),
+        lname: mergeData(reportData.complainant?.lname, toUpdate.complainant?.lname),
+        sex: mergeData(reportData.complainant?.sex, toUpdate.complainant?.sex),
+        age: mergeData(reportData.complainant?.age, toUpdate.complainant?.age),
+        civilStatus: mergeData(reportData.complainant?.civilStatus, toUpdate.complainant?.civilStatus),
+        address: mergeData(reportData.complainant?.address, toUpdate.complainant?.address),
+        contact: mergeData(reportData.complainant?.contact, toUpdate.complainant?.contact),
           },
           respondent: {
-            fname: mergeData(reportData.respondent?.fname, toUpdate.respondent?.fname),
-            lname: mergeData(reportData.respondent?.lname, toUpdate.respondent?.lname),
-            sex: mergeData(reportData.respondent?.sex, toUpdate.respondent?.sex),
-            age: mergeData(reportData.respondent?.age, toUpdate.respondent?.age),
-            civilStatus: mergeData(reportData.respondent?.civilStatus, toUpdate.respondent?.civilStatus),
-            address: mergeData(reportData.respondent?.address, toUpdate.respondent?.address),
-            contact: mergeData(reportData.respondent?.contact, toUpdate.respondent?.contact),
+        fname: mergeData(reportData.respondent?.fname, toUpdate.respondent?.fname),
+        lname: mergeData(reportData.respondent?.lname, toUpdate.respondent?.lname),
+        sex: mergeData(reportData.respondent?.sex, toUpdate.respondent?.sex),
+        age: mergeData(reportData.respondent?.age, toUpdate.respondent?.age),
+        civilStatus: mergeData(reportData.respondent?.civilStatus, toUpdate.respondent?.civilStatus),
+        address: mergeData(reportData.respondent?.address, toUpdate.respondent?.address),
+        contact: mergeData(reportData.respondent?.contact, toUpdate.respondent?.contact),
           },
           receivedBy: `${receivedByFname} ${receivedByLname}`,
           nature: mergeData(reportData.nature, toUpdate.nature),
           location: mergeData(reportData.location, toUpdate.location),
-          status: mergeData(reportData.status, toUpdate.status),
+          status: statusValue,
+          statusPriority: statusPriority,
           nosofFemaleChildren: mergeData(reportData.nosofFemaleChildren, toUpdate.nosofFemaleChildren),
           nosofMaleChildren: mergeData(reportData.nosofMaleChildren, toUpdate.nosofMaleChildren),
 
@@ -192,7 +229,7 @@ export default function EditLuponIncident() {
           isConciliation: toUpdate.isConciliation ?? false,
           isArbitration: toUpdate.isArbitration ?? false,
         });
-       
+
         await updateDoc(docRef, cleanedData);
       }
     };
@@ -203,21 +240,9 @@ export default function EditLuponIncident() {
       event.preventDefault();
       const form = event.target as HTMLFormElement;
       console.log(toUpdate);  //
-    
-
-const complainantContact = toUpdate.complainant.contact || reportData?.complainant?.contact || "";
-const respondentContact = toUpdate.respondent.contact || reportData?.respondent?.contact || "";
-
+     
       if (form.checkValidity()) {
 
-        if (!isValidPhilippineMobileNumber(complainantContact) || 
-            !isValidPhilippineMobileNumber(respondentContact)) {
-
-          setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
-          setShowErrorPopup(true);
-          setTimeout(() => setShowErrorPopup(false), 3000);
-          return;
-        }
     
         setShowSubmitPopup(true); // ✅ Show confirmation only
       } else {
@@ -227,27 +252,27 @@ const respondentContact = toUpdate.respondent.contact || reportData?.respondent?
     
 
 
-const confirmSubmit = async () => {
-  setShowSubmitPopup(false);
+  const confirmSubmit = async () => {
+    setShowSubmitPopup(false);
 
-  try {
-    await HandleEditDoc(); // ✅ Only update when Yes is clicked
+    try {
+      await HandleEditDoc(); // ✅ Only update when Yes is clicked
 
-    setPopupMessage("Incident Successfully Updated!");
-    setShowPopup(true);
+      setPopupMessage("Incident Successfully Updated!");
+      setShowPopup(true);
 
-    setTimeout(() => {
-      setShowPopup(false);
-      if (docId && departmentId) {
-        router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
-      }
-    }, 3000);
-  } catch (error) {
-    console.error("Error during confirmation submit:", error);
-    setPopupErrorMessage("Error updating incident. Please try again.");
-    setShowErrorPopup(true);
-    setTimeout(() => setShowErrorPopup(false), 3000);
-  }
+      setTimeout(() => {
+        setShowPopup(false);
+        if (docId && departmentId) {
+          router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
+        }
+      }, 3000);
+    } catch (error) {
+      console.error("Error during confirmation submit:", error);
+      setPopupErrorMessage("Error updating incident. Please try again.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+    }
 };
 
 
@@ -269,39 +294,6 @@ const confirmSubmit = async () => {
     };
 
       
-
-    const handleDeleteForm=()=>{
-        setToUpdate({
-          complainant: {
-            fname: "",
-            lname: "",
-            sex: "",
-            age: "",
-            civilStatus: "",
-            address: "",
-            contact: "",
-          },
-          respondent: {
-            fname: "",
-            lname: "",
-            sex: "",
-            age: "",
-            civilStatus: "",
-            address: "",
-            contact: "",
-          },
-          fname: "",
-          lname: "",
-          nature: "",
-          location: "",
-          status:"",
-          nosofFemaleChildren: "",
-          nosofMaleChildren: "",
-        });
-    }
-
-    
-
 
     useEffect(() => {
       if (reportData) {
@@ -340,16 +332,6 @@ const confirmSubmit = async () => {
       }
     }, [reportData]);
 
-
-  const [showRecordDetails, setShowRecordDetails] = useState(false);
-  const [showComplainantDetails, setShowComplainantDetails] = useState(false);
-  const [showInvestigatedDetails, setShowInvestigatedDetails] = useState(false);
-  const [showOtherDetails, setShowOtherDetails] = useState(false);
-
-  const toggleRecordDetails = () => setShowRecordDetails(prev => !prev);
-  const toggleComplainantDetails = () => setShowComplainantDetails(prev => !prev);
-  const toggleInvestigatedDetails = () => setShowInvestigatedDetails(prev => !prev);
-  const toggleOtherDetails = () => setShowOtherDetails(prev => !prev);
 
   const [activeSection, setActiveSection] = useState("complainant");
 
@@ -395,6 +377,99 @@ const confirmSubmit = async () => {
   }, [docId]);
   
 
+
+
+  
+    const [dialogueReset, setDialogueReset] = useState(false);
+    const [hearingReset, setHearingReset] = useState(false);
+    useEffect(() => {
+      if(reportData?.status !== "archived") return;
+      if(reportData.isDialogue && reportData.hearing === 0){
+        /*WHen in the dialogue section, has a absent it will ask which one requested to reopen the incident case */
+        console.log("Dialogue Section is respondent/compainant absent. one of them requested to reopen the incident case");
+        setShowContinuePopup(true);
+        setDialogueReset(true);
+      }
+      else if(reportData.hearingId){
+        /* When in the hearing section, has a absent it will ask which one requested to reopen the incident case */
+        console.log("Hearing Section is respondent/compainant absent. one of them requested to reopen the incident case");
+        setShowContinuePopup(true);
+        setHearingReset(true);
+      }
+
+
+    },[reportData])
+
+
+  const handleReopen = async(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.preventDefault();
+    if (!docId) return;
+
+    try {
+      const docRef = doc(db, "IncidentReports", docId);
+      // Only update the reopenRequester field and set status to "pending"
+      await updateDoc(docRef, {
+        reopenRequester: toUpdate.reopenRequester,
+        status: "pending",
+        statusPriority: 1,
+      });
+
+      if(dialogueReset) await deleteDoc(doc(db, "IncidentReports", docId, "DialogueMeeting", docId)); // Delete the summon letter if it exists
+      if(hearingReset) await deleteDoc(doc(db, "IncidentReports", docId, "SummonsMeeting", reportData.hearingId)); // Delete the hearing section if it exists
+
+      setShowContinuePopup(false);
+      setPopupMessage("Incident case has been reopened.");
+      setShowPopup(true);
+
+      setTimeout(() => {
+        setShowPopup(false);
+        router.refresh(); // Refresh the page to reflect changes
+        if (docId && departmentId) {
+          window.location.reload(); // Reload the page to ensure all data is fresh
+        }
+      }, 3000);
+    } catch (error) {
+      setPopupErrorMessage("Failed to reopen the case. Please try again.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+    }
+  }
+
+  const handleClosingCase = async(status:boolean) => {
+    if (!docId) return;
+    setShowDoneIncidentPopup(false);
+    const docRef = doc(db, "IncidentReports", docId);
+    if(status) {
+      // If the case is closed, update the status to "Settled" and reset other fields
+      setPopupMessage("Incident case has been Settled.");
+      setShowPopup(true);
+      await updateDoc(docRef, {
+        status: "settled",
+        statusPriority: 3,
+      });
+      setTimeout(() => {
+        setShowPopup(false);
+        //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
+        window.location.reload(); // Reload the page to ensure all data is fresh
+      }, 3000);
+    }
+    else{
+      // If the case is not closed, update the status to "cfa"
+      setPopupMessage("Incident case has been set to CFA.");
+      setShowPopup(true);
+      await updateDoc(docRef, {
+        status: "CFA",
+        statusPriority: 4,
+      });
+      setTimeout(() => {
+        setShowPopup(false);
+        //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
+        window.location.reload(); // Reload the page to ensure all data is fresh
+      }, 3000);
+    }
+
+  }
+
   return (
     <>
       {loading ? (       <p></p> ) : (
@@ -408,105 +483,109 @@ const confirmSubmit = async () => {
               </div>
               <h1>Incident Information</h1>
             </button>
-
-            <div className="dialogue-dropdown">
-              <button className="edit-incident-redirection-buttons">
-                <div className="edit-incident-redirection-icons-section">
-                  <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
-                </div>
-                <h1>Dialogue Meeting</h1>
-              </button>
-
-              <div className="dialogue-submenu">
-                <button className="submenu-button" name="dialogue" onClick={handleGenerateLetterAndInvitation}>
-                  <h1>Generate Dialogue Letters</h1>
-                </button>
-
-                {reportData.isDialogue ? (
-                  <button className="submenu-button" name="section" onClick={handleDialogueSection}>
-                    <h1>Dialogue Section</h1>
+          
+            {reportData?.typeOfIncident === "Major" && (
+              <>
+                <div className="dialogue-dropdown">
+                  <button className="edit-incident-redirection-buttons">
+                    <div className="edit-incident-redirection-icons-section">
+                      <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
+                    </div>
+                    <h1>Dialogue Meeting</h1>
                   </button>
-                ) : (
-                  <button
-                    className="submenu-button"
-                    name="section"
-                    onClick={() => {
-                      setPopupErrorMessage("Generate A Dialogue Letter First");
-                      setShowErrorPopup(true);
-                      setTimeout(() => setShowErrorPopup(false), 3000);
-                    }}
-                  >
-                    <h1>Dialogue Section</h1>
-                  </button>
-                )}
 
-                
-                
-              </div>
-            </div>
-
-            <div className="hearing-dropdown">
-              <button className="edit-incident-redirection-buttons">
-                <div className="edit-incident-redirection-icons-section">
-                  <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing"/> 
-                </div>
-                <h1>Hearing Section</h1>
-              </button>
-
-              <div className="hearing-submenu">
-                {reportData.isDialogue ? (
-                  isDialogueSectionFilled ? (
-                    <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
-                      <h1>Generate Summon Letters</h1>
+                  <div className="dialogue-submenu">
+                    <button className="submenu-button" name="dialogue" onClick={handleGenerateLetterAndInvitation}>
+                      <h1>Generate Dialogue Letters</h1>
                     </button>
-                  ) : (
-                    <button
-                      className="submenu-button"
-                      name="summon"
-                      onClick={() => {
-                        setPopupErrorMessage("Fill out the Dialogue Section first.");
-                        setShowErrorPopup(true);
-                        setTimeout(() => setShowErrorPopup(false), 3000);
-                      }}
-                    >
-                      <h1>Generate Summon Letters</h1>
-                    </button>
-                  )
-                ) : (
-                  <button
-                    className="submenu-button"
-                    name="summon"
-                    onClick={() => {
-                      setPopupErrorMessage("Generate a Dialogue Letter first.");
-                      setShowErrorPopup(true);
-                      setTimeout(() => setShowErrorPopup(false), 3000);
-                    }}
-                  >
-                    <h1>Generate Summon Letters</h1>
-                  </button>
-                )}
 
-                {hasSummonLetter ? (
-                  <button className="submenu-button" name="section" onClick={handleHearingSection}>
+                    {reportData.isDialogue ? (
+                      <button className="submenu-button" name="section" onClick={handleDialogueSection}>
+                        <h1>Dialogue Section</h1>
+                      </button>
+                    ) : (
+                      <button
+                        className="submenu-button"
+                        name="section"
+                        onClick={() => {
+                          setPopupErrorMessage("Generate A Dialogue Letter First");
+                          setShowErrorPopup(true);
+                          setTimeout(() => setShowErrorPopup(false), 3000);
+                        }}
+                      >
+                        <h1>Dialogue Section</h1>
+                      </button>
+                    )}
+
+                    
+                    
+                  </div>
+                </div>
+
+                <div className="hearing-dropdown">
+                  <button className="edit-incident-redirection-buttons">
+                    <div className="edit-incident-redirection-icons-section">
+                      <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing"/> 
+                    </div>
                     <h1>Hearing Section</h1>
                   </button>
-                ) : (
-                  <button
-                    className="submenu-button"
-                    name="section"
-                    onClick={() => {
-                      setPopupErrorMessage("Generate a Summon Letter First");
-                      setShowErrorPopup(true);
-                      setTimeout(() => setShowErrorPopup(false), 3000);
-                    }}
-                  >
-                    <h1>Hearing Section</h1>
-                  </button>
-                )}
-              </div>
 
-            </div>
+                  <div className="hearing-submenu">
+                    {reportData.isDialogue ? (
+                      isDialogueSectionFilled ? (
+                        <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
+                          <h1>Generate Summon Letters</h1>
+                        </button>
+                      ) : (
+                        <button
+                          className="submenu-button"
+                          name="summon"
+                          onClick={() => {
+                            setPopupErrorMessage("Fill out the Dialogue Section first.");
+                            setShowErrorPopup(true);
+                            setTimeout(() => setShowErrorPopup(false), 3000);
+                          }}
+                        >
+                          <h1>Generate Summon Letters</h1>
+                        </button>
+                      )
+                    ) : (
+                      <button
+                        className="submenu-button"
+                        name="summon"
+                        onClick={() => {
+                          setPopupErrorMessage("Generate a Dialogue Letter first.");
+                          setShowErrorPopup(true);
+                          setTimeout(() => setShowErrorPopup(false), 3000);
+                        }}
+                      >
+                        <h1>Generate Summon Letters</h1>
+                      </button>
+                    )}
 
+                    {hasSummonLetter ? (
+                      <button className="submenu-button" name="section" onClick={handleHearingSection}>
+                        <h1>Hearing Section</h1>
+                      </button>
+                    ) : (
+                      <button
+                        className="submenu-button"
+                        name="section"
+                        onClick={() => {
+                          setPopupErrorMessage("Generate a Summon Letter First");
+                          setShowErrorPopup(true);
+                          setTimeout(() => setShowErrorPopup(false), 3000);
+                        }}
+                      >
+                        <h1>Hearing Section</h1>
+                      </button>
+                    )}
+                  </div>
+
+                </div>
+              
+              </>
+            )}
           </div>
           
           <div className="edit-incident-main-content">
@@ -562,17 +641,21 @@ const confirmSubmit = async () => {
                           className={`status-dropdown-edit ${toUpdate.status?.toLowerCase() || reportData.status?.toLowerCase() || "pending"}`}
                           name="status"
                           value={toUpdate.status ?? reportData.status ?? "pending"}  // changed to small
-                          onChange={handleFormChange}               
+                          onChange={handleFormChange}
+                          onFocus ={(e) => e.target.blur()} // Prevents focus outline
+                          disabled
                         >
                           <option value="pending">Pending</option>
-                          <option value="resolved">Resolved</option>
-                          <option value="settled">Settled</option>
                           <option value="archived">Archived</option>
+                          <option value="settled">Settled</option>
+                          <option value="CFA">CFA</option>
                         </select>
                       </div> 
                     </div>
 
+
                     <div className="edit-incident-main-details-description">
+
                       <div className="incident-date-section">
                         <div className="incident-date-topsection">
                           <div className="incident-main-details-icons-section">
@@ -582,7 +665,8 @@ const confirmSubmit = async () => {
                             <h1>Date Filed</h1>
                           </div>
                         </div>
-                        <p>{reportData?.dateFiled || "N/A"}</p>
+                        <p>{`${reportData?.dateFiled}${reportData.isReportLate ? " (Late Filing)" : ""} `  || "N/A"}</p>
+
                       </div>
 
                       <div className="incident-location-section">
@@ -594,7 +678,7 @@ const confirmSubmit = async () => {
                             <h1>Location</h1>
                           </div>
                         </div>
-                        <p>{reportData?.location || "N/A"}</p>
+                        <p>{`${reportData?.location} - ${reportData.areaOfIncident}` || "N/A"}</p>
                       </div>
                         
                       <div className="incident-description-section">
@@ -622,12 +706,14 @@ const confirmSubmit = async () => {
                               <div className="edit-incident-content-left-side">
                                 <div className="edit-incident-fields-section">
                                   <p>Last Name</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.complainant.lname} value={toUpdate.complainant.lname} name="complainant.lname" id="complainant.lname" onChange={handleFormChange} />
+                                  <input type="text" className="edit-incident-input-field" 
+                                  placeholder= {reportData.complainant.lname} value={toUpdate.complainant.lname} 
+                                  name="complainant.lname" id="complainant.lname" onChange={handleFormChange} disabled/>
                                 </div>
 
                                 <div className="edit-incident-fields-section">
                                   <p>First Name</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.complainant.fname} value={toUpdate.complainant.fname} name="complainant.fname" id="complainant.fname" onChange={handleFormChange} />
+                                  <input type="text" className="edit-incident-input-field" disabled placeholder= {reportData.complainant.fname} value={toUpdate.complainant.fname} name="complainant.fname" id="complainant.fname" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
@@ -635,7 +721,7 @@ const confirmSubmit = async () => {
                                   <select   className="edit-incident-input-field"    
                                     value={toUpdate.complainant.civilStatus || reportData.complainant.civilStatus || ""} // Show db value or user-updated value
                                     name="complainant.civilStatus"
-                                    id="complainant.civilStatus"
+                                    id="complainant.civilStatus" disabled
                                     onChange={handleFormChange}
                                     required>
                                     <option value="" disabled>Choose A Civil Status</option>
@@ -651,7 +737,7 @@ const confirmSubmit = async () => {
                               <div className="edit-incident-content-right-side">
                                 <div className="edit-incident-fields-section">
                                   <p>Age</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.complainant.age} value={toUpdate.complainant.age} name="complainant.age" id="complainant.age" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.complainant.age} value={toUpdate.complainant.age} name="complainant.age" id="complainant.age" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
@@ -659,7 +745,7 @@ const confirmSubmit = async () => {
                                   <select 
                                     className="edit-incident-input-field"                     
                                     name="complainant.sex" 
-                                    id="complainant.sex"
+                                    id="complainant.sex" disabled
                                     value={toUpdate.complainant.sex || reportData.complainant.sex || ""} // Show db value or user-updated value
                                     onChange={handleFormChange}
                                     >
@@ -671,7 +757,7 @@ const confirmSubmit = async () => {
 
                                 <div className="edit-incident-fields-section">
                                   <p>Address</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.complainant.address} value={toUpdate.complainant.address} name="complainant.address" id="complainant.address" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.complainant.address} value={toUpdate.complainant.address} name="complainant.address" id="complainant.address" onChange={handleFormChange} />
                                 </div>
                               </div>
                             </div>
@@ -679,7 +765,7 @@ const confirmSubmit = async () => {
                             <div className="bottom-middle-section">
                               <div className="bottom-middle-incidentfields">
                                 <p>Contact Number</p>
-                                <input type="text" className="edit-incident-input-field" placeholder={reportData.complainant.contact} value={toUpdate.complainant.contact} name="complainant.contact" id="complainant.contact" onChange={handleFormChange} />
+                                <input type="text" disabled className="edit-incident-input-field" placeholder={reportData.complainant.contact} value={toUpdate.complainant.contact} name="complainant.contact" id="complainant.contact" onChange={handleFormChange} />
                               </div>
                             </div>
                           </div>
@@ -693,19 +779,19 @@ const confirmSubmit = async () => {
                               <div className="edit-incident-content-left-side">
                                 <div className="edit-incident-fields-section">
                                   <p>Last Name</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.respondent.lname} value={toUpdate.respondent.lname} name="respondent.lname" id="respondent.lname" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.respondent.lname} value={toUpdate.respondent.lname} name="respondent.lname" id="respondent.lname" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
                                   <p>First Name</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.respondent.fname} value={toUpdate.respondent.fname} name="respondent.fname" id="respondent.fname" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.respondent.fname} value={toUpdate.respondent.fname} name="respondent.fname" id="respondent.fname" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
                                   <p>Civil Status</p>
                                   <select   className="edit-incident-input-field"    
                                     value={toUpdate.respondent.civilStatus || reportData.respondent.civilStatus || ""} // Show db value or user-updated value
-                                    name="respondent.civilStatus"
+                                    name="respondent.civilStatus" disabled
                                     id="respondent.civilStatus"
                                     onChange={handleFormChange}
                                     required>
@@ -722,7 +808,7 @@ const confirmSubmit = async () => {
                               <div className="edit-incident-content-right-side">
                                 <div className="edit-incident-fields-section">
                                   <p>Age</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.respondent.age} value={toUpdate.respondent.age} name="respondent.age" id="respondent.age" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.respondent.age} value={toUpdate.respondent.age} name="respondent.age" id="respondent.age" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
@@ -730,7 +816,7 @@ const confirmSubmit = async () => {
                                   <select 
                                     className="edit-incident-input-field"                     
                                     name="respondent.sex" 
-                                    id="respondent.sex"
+                                    id="respondent.sex" disabled
                                     value={toUpdate.respondent.sex || reportData.respondent.sex || ""} // Show db value or user-updated value
                                     onChange={handleFormChange}
                                     >
@@ -742,7 +828,7 @@ const confirmSubmit = async () => {
 
                                 <div className="edit-incident-fields-section">
                                   <p>Address</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder= {reportData.respondent.address} value={toUpdate.respondent.address} name="respondent.address" id="respondent.address" onChange={handleFormChange} />
+                                  <input type="text"  disabled className="edit-incident-input-field" placeholder= {reportData.respondent.address} value={toUpdate.respondent.address} name="respondent.address" id="respondent.address" onChange={handleFormChange} />
                                 </div>
                               </div>
                             </div>
@@ -750,7 +836,7 @@ const confirmSubmit = async () => {
                             <div className="bottom-middle-section">
                               <div className="bottom-middle-incidentfields">
                                 <p>Contact Number</p>
-                                <input type="text" className="edit-incident-input-field" placeholder={reportData.respondent.contact} value={toUpdate.respondent.contact} name="respondent.contact" id="respondent.contact" onChange={handleFormChange} />
+                                <input type="text" disabled className="edit-incident-input-field" placeholder={reportData.respondent.contact} value={toUpdate.respondent.contact} name="respondent.contact" id="respondent.contact" onChange={handleFormChange} />
                               </div>
                             </div>
                           </div>
@@ -790,8 +876,20 @@ const confirmSubmit = async () => {
                                         value={toUpdate.nosofMaleChildren || reportData.nosofMaleChildren}
                                         onChange={handleFormChange}
                                         name="nosofMaleChildren"
-                                        required 
+                                        disabled
                                       />   
+                                    </div>
+                                  </>
+                                )}
+                                {/* I will be reusint the classname for recommendedEvent*/}
+                                { reportData?.typeOfIncident === "Minor" && (
+                                  <>
+                                    <div className="edit-incident-content-middle-section">
+                                      <div className="edit-incident-fields-section">
+                                        <p>Recommended Event To Join By Desk Officer</p>
+                                        <input type="text" className="edit-incident-input-field" 
+                                        value={`${reportData.recommendedEvent}`} name="recommendedEvent" id="recommendedEvent" disabled/>
+                                      </div>
                                     </div>
                                   </>
                                 )}
@@ -801,7 +899,7 @@ const confirmSubmit = async () => {
                                   <p>Location</p>
                                   <input type="text" className="edit-incident-input-field" 
                                     placeholder={reportData.location} 
-                                    value={toUpdate.location}
+                                    value={`${toUpdate.location} - ${reportData.areaOfIncident}`}
                                     name="location"
                                     id="location"
                                     onChange={handleFormChange} disabled
@@ -818,22 +916,44 @@ const confirmSubmit = async () => {
                                         value={toUpdate.nosofFemaleChildren||reportData.nosofFemaleChildren}
                                         name="nosofFemaleChildren"
                                         onChange={handleFormChange}
-                                        required 
+                                        disabled
                                       />   
                                     </div>
                                   </>
                                 )}
+                                { reportData?.typeOfIncident === "Minor" && (
+                                    <div className="edit-incident-fields-section">
+                                      <p>Date & Time Filed</p>
+                                      <input type="text" className="edit-incident-input-field" placeholder={`${reportData.dateFiled} ${reportData.timeFiled}`} disabled/>
+                                    </div>
+                                )}
+                               
                               </div>
                             </div>
-
+                            
                             <div className="bottom-middle-section">
-                              <div className="bottom-middle-incidentfields">
-                                <p>Date & Time Filed</p>
-                                <input type="text" className="edit-incident-input-field" placeholder={`${reportData.dateFiled} ${reportData.timeFiled}`} disabled/>
-                              </div>
+                              {reportData?.typeOfIncident === "Major" && (
+                                 <div className="bottom-middle-incidentfields">
+                                  <p>Date & Time Filed</p>
+                                  <input type="text" className="edit-incident-input-field" placeholder={`${reportData.dateFiled} ${reportData.timeFiled}`} disabled/>
+                                </div>
+                              )}
                             </div>
 
                             <div className="edit-incident-content-bottomsection">
+                              
+                            {reportData?.isReportLate && (
+                              <div className="box-container-outer-natureoffacts">
+                                  <div className="title-remarks-partyA">
+                                    Reason For Late Filing/Reporting
+                                  </div>
+
+                                  <div className="box-container-partyA">
+                                    <textarea className="natureoffacts-input-field" name="reasonForLateFiling" id="reasonForLateFiling" value={reportData.reasonForLateFiling} onChange={handleFormChange} onFocusCapture={(e) => {e.target.blur();}} />
+                                  </div>
+                                </div>
+                            )}
+
                               <div className="view-incident-partyA-container">
                                 <div className="box-container-outer-natureoffacts">
                                   <div className="title-remarks-partyA">
@@ -928,91 +1048,91 @@ const confirmSubmit = async () => {
           </div>
 
 
-{showSubmitPopup && (
-  <div className="confirmation-popup-overlay-add">
-    <div className="confirmation-popup-add">
+        {showSubmitPopup && (
+          <div className="confirmation-popup-overlay-add">
+            <div className="confirmation-popup-add">
 
-      {toUpdate.status === "settled" ? (
-        <>
-          <p>How was the case settled?</p>
-          <div className="settlement-options">
-            <label>
-              <input
-                type="radio"
-                name="settlementMethod"
-                checked={toUpdate.isMediation === true}
-                onChange={() => setToUpdate((prev: any) => ({
-                  ...prev,
-                  isMediation: true,
-                  isConciliation: false,
-                  isArbitration: false,
-                }))}
-              />
-              Mediation
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="settlementMethod"
-                checked={toUpdate.isConciliation === true}
-                onChange={() => setToUpdate((prev: any) => ({
-                  ...prev,
-                  isMediation: false,
-                  isConciliation: true,
-                  isArbitration: false,
-                }))}
-              />
-              Conciliation
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="settlementMethod"
-                checked={toUpdate.isArbitration === true}
-                onChange={() => setToUpdate((prev: any) => ({
-                  ...prev,
-                  isMediation: false,
-                  isConciliation: false,
-                  isArbitration: true,
-                }))}
-              />
-              Arbitration
-            </label>
-          </div>
+              {toUpdate.status === "settled" ? (
+                <>
+                  <p>How was the case settled?</p>
+                  <div className="settlement-options">
+                    <label>
+                      <input
+                        type="radio"
+                        name="settlementMethod"
+                        checked={toUpdate.isMediation === true}
+                        onChange={() => setToUpdate((prev: any) => ({
+                          ...prev,
+                          isMediation: true,
+                          isConciliation: false,
+                          isArbitration: false,
+                        }))}
+                      />
+                      Mediation
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="settlementMethod"
+                        checked={toUpdate.isConciliation === true}
+                        onChange={() => setToUpdate((prev: any) => ({
+                          ...prev,
+                          isMediation: false,
+                          isConciliation: true,
+                          isArbitration: false,
+                        }))}
+                      />
+                      Conciliation
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="settlementMethod"
+                        checked={toUpdate.isArbitration === true}
+                        onChange={() => setToUpdate((prev: any) => ({
+                          ...prev,
+                          isMediation: false,
+                          isConciliation: false,
+                          isArbitration: true,
+                        }))}
+                      />
+                      Arbitration
+                    </label>
+                  </div>
 
-          <div className="yesno-container-add">
-            <button
-              onClick={() => setShowSubmitPopup(false)}
-              className="no-button-add"
-            >
-              Cancel
-            </button>
-            <button onClick={confirmSubmit} className="yes-button-add">
-              Submit
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-         <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
-          <p>Are you sure you want to submit?</p>
-          <div className="yesno-container-add">
-            <button
-              onClick={() => setShowSubmitPopup(false)}
-              className="no-button-add"
-            >
-              No
-            </button>
-            <button onClick={confirmSubmit} className="yes-button-add">
-              Yes
-            </button>
-          </div>
-        </>
-      )}
+                  <div className="yesno-container-add">
+                    <button
+                      onClick={() => setShowSubmitPopup(false)}
+                      className="no-button-add"
+                    >
+                      Cancel
+                    </button>
+                    <button onClick={confirmSubmit} className="yes-button-add">
+                      Submit
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                  <p>Are you sure you want to submit?</p>
+                  <div className="yesno-container-add">
+                    <button
+                      onClick={() => setShowSubmitPopup(false)}
+                      className="no-button-add"
+                    >
+                      No
+                    </button>
+                    <button onClick={confirmSubmit} className="yes-button-add">
+                      Yes
+                    </button>
+                  </div>
+                </>
+              )}
 
-    </div>
-  </div>
-)}
+            </div>
+          </div>
+        )}
 
 
         {showPopup && (
@@ -1034,7 +1154,76 @@ const confirmSubmit = async () => {
                 )}
 
 
+        {showContinuePopup && (
+          <div className="confirmation-popup-overlay-add">
+            <div className="confirmation-popup-add">
+              <p>Who requested to reopen the incident case?</p>
+              <div className="settlement-options">
+                <label className="mr-4">
+                  <input
+                    type="radio"
+                    className="mr-2"
+                    name="reopenRequester"
+                    checked={toUpdate.reopenRequester === "complainant"}
+                    onChange={() => setToUpdate((prev: any) => ({
+                      ...prev,
+                      reopenRequester: "complainant",
+                    }))}
+                  />
+                  Complainant
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="reopenRequester"
+                    className="mr-2"
+                    checked={toUpdate.reopenRequester === "respondent"}
+                    onChange={() => setToUpdate((prev: any) => ({
+                      ...prev,
+                      reopenRequester: "respondent",
+                    }))}
+                  />
+                  Respondent
+                </label>
+              </div>
 
+              <div className="yesno-container-add">
+                <button
+                  onClick={() => setShowContinuePopup(false)}
+                  className="no-button-add"
+                >
+                  Cancel
+                </button>
+                <button onClick={handleReopen} className="yes-button-add">
+                  Reopen
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showDoneIncidentPopup && (
+          <div className="confirmation-popup-overlay-add">
+            <div className="confirmation-popup-add">
+              <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
+              <p>Has the incident case been settled?</p>
+              <div className="yesno-container-add">
+                <button
+                  onClick={() => handleClosingCase(false)}
+                  className="no-button-add"
+                >
+                  No
+                </button>
+                <button  
+                  onClick={() => handleClosingCase(true)}
+                  className="yes-button-add"
+                >
+                  Yes
+                </button>
+              </div>
+            </div>
+          </div>    
+        )}
 
      </main>
       )}

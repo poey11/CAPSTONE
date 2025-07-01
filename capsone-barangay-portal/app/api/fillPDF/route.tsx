@@ -40,13 +40,16 @@ export async function POST(req: NextRequest, res: NextResponse) {
                         if (centerField.includes(key)) {
                             field.setAlignment(TextAlignment.Center);
                         }
-                        
+                        field.enableReadOnly(); // ✅ Make this field uneditable
+
                     } else {
                         console.warn(`⚠️ Skipping non-text field: ${key} (Type: ${field.constructor.name})`);
                     }
                 }
-                form.flatten();
-                   
+                //form.flatten(); causes an issue with the PDF, so we will not use it (4 0 R error)
+                  
+                
+
                 const pdfBytes = await pdfDoc.save();
             
                 return new NextResponse(pdfBytes, {

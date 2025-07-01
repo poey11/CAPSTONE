@@ -6,7 +6,7 @@ import { useAuth } from "@/app/context/authContext";
 import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection, doc, getDoc} from "firebase/firestore";
 import { db,storage, auth } from "@/app/db/firebase";
-import { getAllSpecificDocument } from "@/app/helpers/firestorehelper";
+import { getAllSpecificDocument, getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import {isPastDate,isToday,isPastOrCurrentTime,getLocalDateString} from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
 
@@ -52,17 +52,16 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
     area:"",
     reportID: "",
     department: "",
-    status: "Pending",
+    status: "pending",
     addInfo:"",
-   //  isViewed: false,
+    reasonForLateFiling: "",
   });
 
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const docRef = doc(db, "ResidentUsers", user.uid);
+      if (currentUser && currentUser !== "Guest") {
+        const docRef = doc(db, "ResidentUsers", currentUser);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -78,7 +77,8 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
     };
 
     fetchUserData();
-  }, []);
+  }, [currentUser]);
+  
   const [onlineReportCollection, setOnlineReportCollection] = useState<any[]>([]);
   useEffect(() => {
     try {
@@ -94,33 +94,52 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
    
   }, []);
   
-  useEffect(() => {
-    const getCaseNumber = () => {
-      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      const randomId = customAlphabet(alphabet, 6);
-      const randomIdString = randomId();
-      let formattedNumber = ""
-      if(onlineReportCollection.length < 1){
-        formattedNumber = String(1).padStart(4, "0");
+    const [nos, setNos] = useState<number>(0); // Initialize with a default value
+  
+    useEffect(() => {
+      if(user){;
+        const fetchCount = async () => {
+          try {
+            const count = await getSpecificCountofCollection("IncidentReports", "reportID", user.uid);
+            setNos(count || 1);
+          } catch (error) {
+            console.error("Error fetching count:", error);
+          }
+        }
+        fetchCount();
       }
       else{
-        const lastReport = onlineReportCollection[0].caseNumber.split("-");
-        const number = parseInt(lastReport[lastReport.length - 1]);
-        formattedNumber = String(number+1).padStart(4, "0");
+        const fetchCount = async () => {
+          try {
+            const count = await getSpecificCountofCollection("IncidentReports", "reportID", "Guest");
+            setNos(count || 1);
+          } catch (error) {
+            console.error("Error fetching count:", error);
+          }
+        }
+        fetchCount();
       }
-      const user = currentUser !== "Guest"
-      ? currentUser.substring(0, 6).toUpperCase()
-      : "GUEST";  
-      const caseValue =`${user} - ${randomIdString} - ${formattedNumber}` ;
-      console.log("Generated Case Number:", caseValue);
-      setIncidentReport((prev: any) => ({
-        ...prev,
-        caseNumber: caseValue, // ex : "ABCDEF - ABCDEF - 0001" or "GUEST - ABCDEF - 0001"
-      }));
-    };
+  
+    },[user]);
+    useEffect(() => {
+       const getServiceRequestId =  () => {
+         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+         const randomId = customAlphabet(alphabet, 6);
+         const requestId = randomId();
+         const number = String(nos+1).padStart(4, '0'); // Ensure 3 digits
+         let format = `${user?.uid.substring(0,6).toUpperCase()|| "GUEST"} - ${requestId} - ${number}`;
+          setIncidentReport((prev: any) => ({
+            ...prev,
+            caseNumber: format,
+          }));
+         console.log("format", format);
+       }
+       getServiceRequestId();
+     
+     }, [user,nos]);
 
-    getCaseNumber();
-  },[user, onlineReportCollection]);
+
+ 
 
   
     const clearForm = () => {
@@ -275,7 +294,7 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
         console.log(currentUser);
         
         const toAdd = [{
-          ...(currentUser !== "Guest" && { reportID: currentUser }), // Include reportID only if currentUser is not Guest
+          ...(currentUser !== "Guest" ? { reportID: currentUser } :{reportID: "Guest"}), // Include reportID only if currentUser is not Guest
           caseNumber: incidentReport.caseNumber,
           firstname: incidentReport.firstname,
           middlename: incidentReport.middlename,
@@ -286,14 +305,20 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
           dateFiled: incidentReport.dateFiled,
           time: incidentReport.time,
           address: incidentReport.address,
-          area: incidentReport.area,
+          areaOfIncident: incidentReport.area,
+          typeOfIncident: "Minor",
           file: filename,
           department: "Online",
           status: incidentReport.status,
-          isFiled: false,
+          statusPriority: 1,
           isViewed: false,
+          ...(incidentReport.isReportLate && { 
+            isReportLate: incidentReport.isReportLate,
+            reasonForLateFiling: incidentReport.reasonForLateFiling,
+          }), 
           addInfo: incidentReport.addInfo,
           createdAt: new Date().toLocaleString(),
+          
         }];
         console.log(toAdd);
         handleReportUpload(toAdd, storageRef);
@@ -364,6 +389,36 @@ const confirmSubmit = async () => {
 
 
 
+      const isOneWeekOrMore = (dateFiled: string | Date, createdAt: string | Date): boolean => {
+        const filedDate = new Date(dateFiled);
+        const createdDate = new Date(createdAt);
+    
+        const differenceInMilliseconds =  createdDate.getTime()-filedDate.getTime();
+        const differenceInDays = differenceInMilliseconds / (1000 * 60 * 60 * 24);
+    
+        return differenceInDays >= 7;
+      };
+      
+    
+      const [isIncidentLate, setIsIncidentLate] = useState(false);
+    
+      useEffect(() => {
+        if (!incidentReport?.dateFiled) return;
+    
+        const dateFiled = new Date(incidentReport.dateFiled);
+        const createdAt = new Date();
+    
+        const isLate = isOneWeekOrMore(dateFiled, createdAt);
+        setIsIncidentLate(isLate);
+    
+        if (isLate) {
+          setIncidentReport((prev: any) => ({
+            ...prev,
+            isReportLate: true,
+          }));
+        }
+      }, [incidentReport?.dateFiled]);
+    
 
     return(
       <main className="main-container-incident-report">

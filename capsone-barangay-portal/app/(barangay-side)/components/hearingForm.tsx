@@ -26,6 +26,7 @@ interface HearingDetails {
     hearingMeetingDateTime: string;
     Cstatus: string;
     Rstatus:string;
+    createdAt: Date;
 }
 
 
@@ -63,6 +64,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
         hearingMeetingDateTime: "",
         Cstatus: "",
         Rstatus: "",
+        createdAt: new Date()
     }); 
     
     const [summonLetterData, setSummonLetterData] = useState<any[]>([]);
@@ -233,17 +235,30 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
     const saveSummon = async () => {
         try {
             const docRef = collection(db, "IncidentReports", id, "SummonsMeeting");
-            await addDoc(docRef, {
+            const success = await addDoc(docRef, {
                 ...details,
                 nosHearing: index,
                 nos: nos,
                 filled: true
             });
+
+        
+
+            const mainDocRef = doc(db, "IncidentReports", id); 
+            if(details.Cstatus === "Absent" || details.Rstatus === "Absent")
+                await updateDoc(mainDocRef, 
+                {
+                    status: "archived",
+                    statusPriority: 2,
+                    hearingId:  success.id,
+                }
+            )
+        
             
         } catch (error:any) {
             console.error("Error saving data:", error.message);
         }
-          };
+    };
 
           const confirmSubmit = async () => {
             setShowSubmitPopup(false);
@@ -256,7 +271,12 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
           
               setTimeout(() => {
                 setShowPopup(false);
-              }, 3000);
+                if(index === 2) {
+                    window.location.reload(); // Reload the page to reflect changes
+                }
+            }, 3000);
+            router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
+              
             } catch (error) {
               console.error("Error during confirmation submit:", error);
               setPopupErrorMessage("Error saving summon. Please try again.");
@@ -268,52 +288,60 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
 
     const usersAbsent = () => details.Cstatus === "Absent" || details.Rstatus === "Absent";
 
+        
     useEffect(() => {
-        const updatedDetails = { ...details };
+      setDetails((prev) => {
+        // Clean previous status-related strings from minutes and remarks
+        let minutes = (prev.minutesOfCaseProceedings || "")
+          .replace(/Complainant Absent\.?\s*/g, "")
+          .replace(/Respondent Absent\.?\s*/g, "")
+          .replace(/Complainant Present\.?\s*/g, "")
+          .replace(/Respondent Present\.?\s*/g, "")
+          .trim();
     
-        let absentMinutes: string[] = [];
-        let absentRemarks: string[] = [];
+        let remarks = (prev.remarks || "")
+          .replace(/Complainant Absent\.?\s*/g, "")
+          .replace(/Respondent Absent\.?\s*/g, "")
+          .replace(/Complainant Present\.?\s*/g, "")
+          .replace(/Respondent Present\.?\s*/g, "")
+          .trim();
     
-        // Initialize partyA and partyB as empty strings
         let partyA = "";
         let partyB = "";
     
-        // Handle Complainant status
-        if (details.Cstatus === "Absent") {
-            partyA = "Complainant Absent.";
-            partyB = "Respondent Present.";
-            absentMinutes.push("Complainant Absent.");
-            absentRemarks.push("Complainant Absent.");
+        const complainantAbsent = prev.Cstatus === "Absent";
+        const respondentAbsent = prev.Rstatus === "Absent";
+    
+        if (complainantAbsent && respondentAbsent) {
+          partyA = "Complainant Absent";
+          partyB = "Respondent Absent";
+          minutes = (minutes ? " " : "") + "Complainant Absent. Respondent Absent.";
+          remarks = (remarks ? " " : "") + "Complainant Absent. Respondent Absent.";
+        } else if (complainantAbsent) {
+          partyA = "Complainant Absent";
+          partyB = "Respondent Present";
+          minutes = (minutes ? " " : "") + "Complainant Absent.";
+          remarks = (remarks ? " " : "") + "Complainant Absent.";
+        } else if (respondentAbsent) {
+          partyA = "Complainant Present";
+          partyB = "Respondent Absent";
+          minutes = (minutes ? " " : "") + "Respondent Absent.";
+          remarks = (remarks ? " " : "") + "Respondent Absent.";
         } else {
-
+          partyA = "";
+          partyB = "";
         }
     
-        // Handle Respondent status
-        if (details.Rstatus === "Absent") {
-            partyB = "Respondent Absent.";
-            partyA = "Complainant Present";  // If Respondent is absent, complainant is present
-            absentMinutes.push("Respondent Absent.");
-            absentRemarks.push("Respondent Absent.");
-        } else {
-
-        }
-    
-        updatedDetails.partyA = partyA;
-        updatedDetails.partyB = partyB;
-    
-        // If any user is marked absent, overwrite minutes and remarks with absent messages
-        if (absentMinutes.length > 0) {
-            updatedDetails.minutesOfCaseProceedings = absentMinutes.join(" ");
-            updatedDetails.remarks = absentRemarks.join(" ");
-        } else {
-            // If both are present, clear minutes and remarks
-            updatedDetails.minutesOfCaseProceedings = "";
-            updatedDetails.remarks = "";
-        }
-    
-        setDetails(updatedDetails);
+        return {
+          ...prev,
+          minutesOfCaseProceedings: minutes,
+          remarks: remarks,
+          partyA,
+          partyB,
+        };
+      });
     }, [details.Cstatus, details.Rstatus]);
-    
+
 
     const router = useRouter();
 
