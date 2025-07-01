@@ -870,7 +870,7 @@ export default function action() {
       const isBarangayDocumentAndNewPermit =
         isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "");
     
-      // 🆕 If it's a Barangay Permit type, require at least one of the three
+      //  If it's a Barangay Permit type, require at least one of the three
       if (isBarangayDocumentAndNewPermit) {
         const hasBarangayID = files2 && files2.length > 0;
         const hasValidID = files3 && files3.length > 0;
@@ -886,6 +886,16 @@ export default function action() {
         // Only check Endorsement Letter if not in the Barangay Permit category
         if (!files4 || files4.length === 0) {
           setPopupErrorMessage("Please upload Endorsement Letter.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+          return;
+        }
+      }
+
+      // New condition for Valid ID required for certain purposes
+      if (["Barangay ID", "First Time Jobseeker"].includes(clearanceInput.purpose || "")) {
+        if (!files3 || files3.length === 0) {
+          setPopupErrorMessage("Please upload Valid ID.");
           setShowErrorPopup(true);
           setTimeout(() => setShowErrorPopup(false), 3000);
           return;
@@ -1263,7 +1273,7 @@ const handleChange = (
 
               <div className="createRequest-bottom-section">
                 <nav className="createRequest-info-toggle-wrapper">
-                  {["basic", "full", "others"].map((section) => (
+                  {["basic", "full", ...(clearanceInput.purpose === "Barangay ID" ? ["emergency"] : []), "others"].map((section) => (
                     <button
                       key={section}
                       type="button"
@@ -1272,6 +1282,7 @@ const handleChange = (
                     > 
                       {section === "basic" && "Basic Info"}
                       {section === "full" && "Full Info"}
+                      {section === "emergency" && "Emergency Info"}
                       {section === "others" && "Others"}
                     </button>
                   ))}
@@ -2779,6 +2790,81 @@ const handleChange = (
                     </>
                   )}
 
+                  {activeSection === "emergency" && (
+                      <>
+                        <div className="createRequest-section-2-full-top">
+                          <div className="createRequest-section-2-left-side">
+                            <div className="fields-section">
+                                <h1>Emergency Contact Full Name<span className="required">*</span></h1>
+                                <input 
+                                  type="text" 
+                                  id="emergencyDetails.fullName"
+                                  name="emergencyDetails.fullName"
+                                  value={clearanceInput?.emergencyDetails?.fullName || ""}
+                                  onChange={handleChange}
+                                  required
+                                  className="createRequest-input-field" 
+                                  placeholder="Enter Full Name"
+                                />
+                            </div>
+
+                            <div className="fields-section">
+                                <h1>Emergency Contact Address<span className="required">*</span></h1>
+                                <input 
+                                  type="text" 
+                                  id="emergencyDetails.address"
+                                  name="emergencyDetails.address"
+                                  value={clearanceInput?.emergencyDetails?.address || ""}
+                                  onChange={handleChange}
+                                  required
+                                  className="createRequest-input-field" 
+                                  placeholder="Enter Address"
+                                />
+                            </div>
+                          </div>
+                        
+                          <div className="createRequest-section-2-right-side">
+                            <div className="fields-section">     
+                              <h1>Emergency Contact Number<span className="required">*</span></h1>
+                              <input 
+                                type="tel"  
+                                id="emergencyDetails.contactNumber"  
+                                name="emergencyDetails.contactNumber"
+                                value={clearanceInput?.emergencyDetails?.contactNumber || ""}
+                                onChange={(e) => {
+                                  const input = e.target.value;
+                                  if (/^\d{0,11}$/.test(input)) {
+                                    handleChange(e);
+                                  }
+                                }}
+                                className="createRequest-input-field" 
+                                required 
+                                maxLength={11}  
+                                pattern="^[0-9]{11}$" 
+                                placeholder="Enter a valid 11-digit contact number" 
+                                title="Enter a valid 11-digit contact number. Format: 09XXXXXXXXX"        
+                              />
+                            </div>
+
+                            <div className="fields-section">
+                              <h1>Relationship<span className="required">*</span></h1>
+                              <input 
+                                type="text" 
+                                id="emergencyDetails.relationship"
+                                name="emergencyDetails.relationship"
+                                value={clearanceInput?.emergencyDetails?.relationship || ""}
+                                onChange={handleChange}
+                                required
+                                className="createRequest-input-field" 
+                                placeholder="Enter Relationship"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                  )}
+
+
                   {activeSection === "others" && (
                     <>
                       <div className="others-main-container">
@@ -2905,69 +2991,72 @@ const handleChange = (
                                 </div>
                               </div>
                             </div>
-                            
-                            <div className="box-container-outer-verificationdocs">
-                              <div className="title-verificationdocs-validID">
-                                Valid ID
-                              </div>
-
-                              <div className="box-container-verificationdocs">
-                                <span className="required-asterisk">*</span>
-
-                                {/* File Upload Section */}
-                                <div className="file-upload-container">
-                                  <label htmlFor="file-upload3"  className="upload-link">Click to Upload File</label>
-                                    <input
-                                      id="file-upload3"
-                                      type="file"
-                                      className="file-upload-input" 
-                                      multiple
-                                      accept=".jpg,.jpeg,.png"
-                                      onChange={handleValidIDUpload}
-                                    />
-
-                                    {/* Display the file names with image previews */}
-                                    {files3.length > 0 && (
-                                      <div className="file-name-image-display">
-                                        {files3.map((file, index) => (
-                                          <div className="file-name-image-display-indiv" key={index}>
-                                            <li className="file-item"> 
-                                              {/* Display the image preview */}
-                                              {file.preview && (
-                                                <div className="filename-image-container">
-                                                  <img
-                                                    src={file.preview}
-                                                    alt={file.name}
-                                                    className="file-preview"
-                                                  />
-                                                </div>
-                                              )}
-                                              <span className="file-name">{file.name}</span>  
-                                              <div className="delete-container">
-                                                {/* Delete button with image */}
-                                                <button
-                                                  type="button"
-                                                  onClick={() => handleValidIDDelete(file.name)}
-                                                  className="delete-button"
-                                                >
-                                                <img
-                                                  src="/images/trash.png"  
-                                                  alt="Delete"
-                                                  className="delete-icon"
-                                                />
-                                                </button>
-                                              </div>
-                                            </li>
-                                          </div>
-                                        ))}           
-                                      </div>
-                                    )}
-                                </div>
-                              </div>
-                            </div>
-                            
                           </>
                         )}
+
+                        {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "Barangay ID" || clearanceInput.purpose === "First Time Jobseeker") && (
+                              <>
+                                <div className="box-container-outer-verificationdocs">
+                                  <div className="title-verificationdocs-validID">
+                                    Valid ID
+                                  </div>
+
+                                  <div className="box-container-verificationdocs">
+                                    <span className="required-asterisk">*</span>
+
+                                    {/* File Upload Section */}
+                                    <div className="file-upload-container">
+                                      <label htmlFor="file-upload3"  className="upload-link">Click to Upload File</label>
+                                        <input
+                                          id="file-upload3"
+                                          type="file"
+                                          className="file-upload-input" 
+                                          multiple
+                                          accept=".jpg,.jpeg,.png"
+                                          onChange={handleValidIDUpload}
+                                        />
+
+                                        {/* Display the file names with image previews */}
+                                        {files3.length > 0 && (
+                                          <div className="file-name-image-display">
+                                            {files3.map((file, index) => (
+                                              <div className="file-name-image-display-indiv" key={index}>
+                                                <li className="file-item"> 
+                                                  {/* Display the image preview */}
+                                                  {file.preview && (
+                                                    <div className="filename-image-container">
+                                                      <img
+                                                        src={file.preview}
+                                                        alt={file.name}
+                                                        className="file-preview"
+                                                      />
+                                                    </div>
+                                                  )}
+                                                  <span className="file-name">{file.name}</span>  
+                                                  <div className="delete-container">
+                                                    {/* Delete button with image */}
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => handleValidIDDelete(file.name)}
+                                                      className="delete-button"
+                                                    >
+                                                    <img
+                                                      src="/images/trash.png"  
+                                                      alt="Delete"
+                                                      className="delete-icon"
+                                                    />
+                                                    </button>
+                                                  </div>
+                                                </li>
+                                              </div>
+                                            ))}           
+                                          </div>
+                                        )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </>
+                            )}
 
                         <div className="box-container-outer-verificationdocs">
                           <div className="title-verificationdocs-endorsement">
