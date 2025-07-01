@@ -131,21 +131,22 @@ export default function action() {
     const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
     const [forResidentOnlyMap, setForResidentOnlyMap] = useState<{ [title: string]: boolean }>({});
     const [otherDocFields, setOtherDocFields] = useState<{ [title: string]: string[] }>({});
-    
+    const [otherDocImageFields, setOtherDocImageFields] = useState<{ [title: string]: string[] }>({});
+
 
     // State for all file containers
-const [files1, setFiles1] = useState<{ name: string, preview: string | undefined }[]>([]);
-const [files2, setFiles2] = useState<{ name: string, preview: string | undefined }[]>([]);
-const [files3, setFiles3] = useState<{ name: string, preview: string | undefined }[]>([]);
-const [files4, setFiles4] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const [files1, setFiles1] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const [files2, setFiles2] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const [files3, setFiles3] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const [files4, setFiles4] = useState<{ name: string, preview: string | undefined }[]>([]);
 
-const [files5, setFiles5] = useState<{ name: string, preview: string | undefined }[]>([]);
-const [files6, setFiles6] = useState<{ name: string, preview: string | undefined }[]>([]);
-const [files7, setFiles7] = useState<{ name: string, preview: string | undefined }[]>([]);
-const [files8, setFiles8] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const [files5, setFiles5] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const [files6, setFiles6] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const [files7, setFiles7] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const [files8, setFiles8] = useState<{ name: string, preview: string | undefined }[]>([]);
 
-const [files9, setFiles9] = useState<{ name: string, preview: string | undefined }[]>([]);
-const [files10, setFiles10] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const [files9, setFiles9] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const [files10, setFiles10] = useState<{ name: string, preview: string | undefined }[]>([]);
 
     
     const employerPopupRef = useRef<HTMLDivElement>(null);
@@ -192,11 +193,12 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
       
             const groupedTitles: { [key: string]: string[] } = {};
             const fieldMap: { [key: string]: string[] } = {};
+            const imageFieldMap: { [key: string]: string[] } = {};
             const residentOnlyMap: { [key: string]: boolean } = {};
       
             snapshot.docs.forEach((doc) => {
               const data = doc.data();
-              const { type, title, fields, forResidentOnly } = data;
+              const { type, title, fields, imageFields, forResidentOnly } = data;
       
               if (type && title) {
                 if (!groupedTitles[type]) groupedTitles[type] = [];
@@ -205,16 +207,19 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
                 if (Array.isArray(fields)) {
                   fieldMap[title] = fields.map((f: any) => f.name);
                 }
-
+      
+                if (Array.isArray(imageFields)) {
+                  imageFieldMap[title] = imageFields;
+                }
+      
                 residentOnlyMap[title] = !!forResidentOnly;
               }
             });
-
-            console.log("Mapped OtherDoc Fields:", fieldMap); // <-- Add it here
       
             setOtherDocPurposes(groupedTitles);
             setOtherDocFields(fieldMap);
-            setForResidentOnlyMap(residentOnlyMap); 
+            setOtherDocImageFields(imageFieldMap);
+            setForResidentOnlyMap(residentOnlyMap);
           } catch (error) {
             console.error("Error fetching OtherDocuments:", error);
           }
@@ -236,96 +241,96 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
       };
 
       const [clearanceInput, setClearanceInput] = useState<ClearanceInput>({
-   accID: "INBRGY-REQ",
-   reqType: "InBarangay",
-   docType: docType || "",
-   status: "Pending",
-   createdAt: new Date().toLocaleString(),
-   createdBy: user?.id || "",
-   statusPriority: 1,
-   docsRequired: [],
-   signaturejpg: null,
-   barangayIDjpg: null,
-   validIDjpg: null,
-   letterjpg: null,
-   copyOfPropertyTitle: null,
-   dtiRegistration: null,
-   isCCTV: null,
-   taxDeclaration: null,
-   approvedBldgPlan: null,
-   deathCertificate: null,
-   identificationPicture: [],
-   isResident: false,
- 
-   // ADD THESE TO AVOID WARNINGS
-   residentId: "",
-   requestType: "",
-   requestId: "",
-   purpose: "",
-   fullName: "",
-   dateOfResidency: "",
-   dateofdeath: "",
-   address: "",
-   homeOrOfficeAddress: "",
-   toAddress: "",
-   businessLocation: "",
-   businessNature: "",
-   noOfVechicles: "",
-   vehicleMake: "",
-   vehicleType: "",
-   vehiclePlateNo: "",
-   vehicleSerialNo: "",
-   vehicleChassisNo: "",
-   vehicleEngineNo: "",
-   vehicleFileNo: "",
-   estimatedCapital: "",
-   businessName: "",
-   birthday: "",
-   age: "",
-   gender: "",
-   civilStatus: "",
-   contact: "",
-   typeofconstruction: "",
-   typeofbldg: "",
-   othersTypeofbldg: "",
-   projectName: "",
-   projectLocation: "",
-   citizenship: "",
-   educationalAttainment: "",
-   course: "",
-   birthplace: "",
-   religion: "",
-   nationality: "",
-   height: "",
-   weight: "",
-   bloodtype: "",
-   occupation: "",
-   precinctnumber: "",
-   requestorMrMs: "",
-   requestorFname: "",
-   partnerWifeHusbandFullName: "",
-   cohabitationStartDate: "",
-   cohabitationRelationship: "",
-   wardFname: "",
-   wardRelationship: "",
-   guardianshipType: "",
-   CYFrom: "",
-   CYTo: "",
-   attestedBy: "",
-   goodMoralPurpose: "",
-   goodMoralOtherPurpose: "",
-   noIncomePurpose: "",
-   noIncomeChildFName: "",
-   deceasedEstateName: "",
-   estateSince: "",
- 
-   emergencyDetails: {
-     fullName: "",
-     address: "",
-     relationship: "",
-     contactNumber: "",
-   },
- });
+      accID: "INBRGY-REQ",
+      reqType: "InBarangay",
+      docType: docType || "",
+      status: "Pending",
+      createdAt: new Date().toLocaleString(),
+      createdBy: user?.id || "",
+      statusPriority: 1,
+      docsRequired: [],
+      signaturejpg: null,
+      barangayIDjpg: null,
+      validIDjpg: null,
+      letterjpg: null,
+      copyOfPropertyTitle: null,
+      dtiRegistration: null,
+      isCCTV: null,
+      taxDeclaration: null,
+      approvedBldgPlan: null,
+      deathCertificate: null,
+      identificationPicture: [],
+      isResident: false,
+    
+      // ADD THESE TO AVOID WARNINGS
+      residentId: "",
+      requestType: "",
+      requestId: "",
+      purpose: "",
+      fullName: "",
+      dateOfResidency: "",
+      dateofdeath: "",
+      address: "",
+      homeOrOfficeAddress: "",
+      toAddress: "",
+      businessLocation: "",
+      businessNature: "",
+      noOfVechicles: "",
+      vehicleMake: "",
+      vehicleType: "",
+      vehiclePlateNo: "",
+      vehicleSerialNo: "",
+      vehicleChassisNo: "",
+      vehicleEngineNo: "",
+      vehicleFileNo: "",
+      estimatedCapital: "",
+      businessName: "",
+      birthday: "",
+      age: "",
+      gender: "",
+      civilStatus: "",
+      contact: "",
+      typeofconstruction: "",
+      typeofbldg: "",
+      othersTypeofbldg: "",
+      projectName: "",
+      projectLocation: "",
+      citizenship: "",
+      educationalAttainment: "",
+      course: "",
+      birthplace: "",
+      religion: "",
+      nationality: "",
+      height: "",
+      weight: "",
+      bloodtype: "",
+      occupation: "",
+      precinctnumber: "",
+      requestorMrMs: "",
+      requestorFname: "",
+      partnerWifeHusbandFullName: "",
+      cohabitationStartDate: "",
+      cohabitationRelationship: "",
+      wardFname: "",
+      wardRelationship: "",
+      guardianshipType: "",
+      CYFrom: "",
+      CYTo: "",
+      attestedBy: "",
+      goodMoralPurpose: "",
+      goodMoralOtherPurpose: "",
+      noIncomePurpose: "",
+      noIncomeChildFName: "",
+      deceasedEstateName: "",
+      estateSince: "",
+    
+      emergencyDetails: {
+        fullName: "",
+        address: "",
+        relationship: "",
+        contactNumber: "",
+      },
+    });
     
       
     const [maxDate, setMaxDate] = useState<any>()
@@ -454,6 +459,34 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
 
       const handleDeathCertificateDelete = (fileName: string) => {
         setFiles10((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+
+
+      const handleDynamicImageUpload = (fieldName: string, file: File) => {
+        const preview = URL.createObjectURL(file);
+        setDynamicFileStates((prev) => ({
+          ...prev,
+          [fieldName]: [{ name: file.name, preview }],
+        }));
+      
+        setClearanceInput((prev: any) => ({
+          ...prev,
+          [fieldName]: file,
+        }));
+      
+        setTimeout(() => URL.revokeObjectURL(preview), 10000);
+      };
+      
+      const handleDynamicImageDelete = (fieldName: string, fileName: string) => {
+        setDynamicFileStates((prev) => ({
+          ...prev,
+          [fieldName]: prev[fieldName]?.filter((file) => file.name !== fileName) || [],
+        }));
+      
+        setClearanceInput((prev: any) => ({
+          ...prev,
+          [fieldName]: null,
+        }));
       };
 
       
@@ -745,6 +778,8 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
         const docRef = collection(db, "ServiceRequests");
     
         const uploadedFileUrls: Record<string, string> = {};
+    
+        // Upload predefined files
         const fileKeys = [
           "signaturejpg",
           "barangayIDjpg",
@@ -770,10 +805,27 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
           }
         }
     
+        // 🆕 Upload dynamic image fields
+        for (const fieldName in dynamicFileStates) {
+          const fileList = dynamicFileStates[fieldName];
+          if (fileList && fileList.length > 0) {
+            const file = fileList[0]; // Assuming 1 file per field
+            const ext = file.name.split(".").pop();
+            const filename = `${clearanceInput.requestId}-${fieldName}.${ext}`;
+            const storageRef = ref(storage, `ServiceRequests/${filename}`);
+            const fileBlob = clearanceInput[fieldName as keyof typeof clearanceInput] as File | undefined;
+            if (fileBlob instanceof File) {
+              const snapshot = await uploadBytes(storageRef, fileBlob);
+              const url = await getDownloadURL(snapshot.ref);
+              uploadedFileUrls[fieldName] = url;
+            }
+          }
+        }
+    
         const docData = {
           ...removeNullFields(clearanceInput),
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
-          ...uploadedFileUrls, // include uploaded file URLs in Firestore
+          ...uploadedFileUrls,
         };
     
         console.log("Document Data:", docData);
@@ -791,6 +843,16 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
+
+      // Check if any required dynamic image field is missing
+      for (const fieldName of dynamicImageFields) {
+        if (!dynamicFileStates[fieldName] || dynamicFileStates[fieldName].length === 0) {
+          setPopupErrorMessage(`Please upload ${formatFieldName(fieldName.replace(/jpg$/, "").trim())}.`);
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+          return;
+        }
+  }
     
       // Signature
       if (!files1 || files1.length === 0) {
@@ -1004,6 +1066,15 @@ const handleChange = (
       "citizenship",
     ];
 
+    const existingImageFields = [
+      "signaturejpg",
+      "barangayIDjpg",
+      "validIDjpg",
+      "letterjpg",
+    ];
+    
+    
+
 
     const isBarangayDocument = [
       "Barangay Certificate",
@@ -1030,6 +1101,11 @@ const handleChange = (
     
     const isOtherDocumentPurpose = Object.keys(otherDocFields).includes(currentPurpose);
     const isBarangayPermitType = otherDocPurposes["Barangay Permit"]?.includes(currentDocType);
+
+
+    const [dynamicFileStates, setDynamicFileStates] = useState<{
+      [fieldName: string]: { name: string; preview: string | undefined }[];
+    }>({});
     
     const customFields = (
       isOtherDocumentPurpose
@@ -1040,7 +1116,28 @@ const handleChange = (
     )?.filter((fieldName) => !fixedPredefinedFields.includes(fieldName)) || [];
 
 
-    
+    const matchedImageFieldsRaw = [
+      ...(otherDocImageFields[currentPurpose] || []),
+      ...(otherDocPurposes["Barangay Permit"]?.includes(docType || "")
+        ? otherDocImageFields[docType || ""] || []
+        : []),
+    ];
+
+    // Normalize: support both [{ name: "..." }] and ["..."]
+    const matchedImageFields: string[] = matchedImageFieldsRaw.map((field: any) =>
+      typeof field === "string" ? field : field?.name
+    );
+
+    const dynamicImageFields = matchedImageFields.filter(
+      (name) => !existingImageFields.includes(name)
+    );
+
+    const formatFieldName = (name: string) =>
+      name
+        .replace(/_/g, " ") // Replace underscores with spaces
+        .replace(/\b\w/g, (c) => c.toUpperCase()); // Capitalize first letter of each word
+
+
     useEffect(() => {
       if ((clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax" ) && docType === "Barangay Certificate") setAddOn("Deceased's ");
       else if(clearanceInput.purpose === "Occupancy /  Moving Out" && docType === "Barangay Certificate")setAddOn("From ");
@@ -2582,130 +2679,130 @@ const handleChange = (
 
                         
 
-                      {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "")) && (
-                        <>
-                          <div className="box-container-outer-verificationdocs">
-                            <div className="title-verificationdocs-barangayID">
-                              Barangay ID
-                            </div>
+                        {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "")) && (
+                          <>
+                            <div className="box-container-outer-verificationdocs">
+                              <div className="title-verificationdocs-barangayID">
+                                Barangay ID
+                              </div>
 
-                            <div className="box-container-verificationdocs">
-                              <span className="required-asterisk">*</span>
+                              <div className="box-container-verificationdocs">
+                                <span className="required-asterisk">*</span>
 
-                              {/* File Upload Section */}
-                              <div className="file-upload-container">
-                                <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
-                                  <input
-                                    id="file-upload2"
-                                    type="file"
-                                    className="file-upload-input" 
-                                    multiple
-                                    accept=".jpg,.jpeg,.png"
-                                    onChange={handleBarangayIDUpload}
-                                  />
+                                {/* File Upload Section */}
+                                <div className="file-upload-container">
+                                  <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
+                                    <input
+                                      id="file-upload2"
+                                      type="file"
+                                      className="file-upload-input" 
+                                      multiple
+                                      accept=".jpg,.jpeg,.png"
+                                      onChange={handleBarangayIDUpload}
+                                    />
 
-                                  {/* Display the file names with image previews */}
-                                  {files2.length > 0 && (
-                                    <div className="file-name-image-display">
-                                      {files2.map((file, index) => (
-                                        <div className="file-name-image-display-indiv" key={index}>
-                                          <li className="file-item"> 
-                                            {/* Display the image preview */}
-                                            {file.preview && (
-                                              <div className="filename-image-container">
+                                    {/* Display the file names with image previews */}
+                                    {files2.length > 0 && (
+                                      <div className="file-name-image-display">
+                                        {files2.map((file, index) => (
+                                          <div className="file-name-image-display-indiv" key={index}>
+                                            <li className="file-item"> 
+                                              {/* Display the image preview */}
+                                              {file.preview && (
+                                                <div className="filename-image-container">
+                                                  <img
+                                                    src={file.preview}
+                                                    alt={file.name}
+                                                    className="file-preview"
+                                                  />
+                                                </div>
+                                              )}
+                                              <span className="file-name">{file.name}</span>  
+                                              <div className="delete-container">
+                                                {/* Delete button with image */}
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleBarangayIDDelete(file.name)}
+                                                  className="delete-button"
+                                                >
                                                 <img
-                                                  src={file.preview}
-                                                  alt={file.name}
-                                                  className="file-preview"
+                                                  src="/images/trash.png"  
+                                                  alt="Delete"
+                                                  className="delete-icon"
                                                 />
+                                                </button>
                                               </div>
-                                            )}
-                                            <span className="file-name">{file.name}</span>  
-                                            <div className="delete-container">
-                                              {/* Delete button with image */}
-                                              <button
-                                                type="button"
-                                                onClick={() => handleBarangayIDDelete(file.name)}
-                                                className="delete-button"
-                                              >
-                                              <img
-                                                src="/images/trash.png"  
-                                                alt="Delete"
-                                                className="delete-icon"
-                                              />
-                                              </button>
-                                            </div>
-                                          </li>
-                                        </div>
-                                      ))}           
-                                    </div>
-                                  )}
+                                            </li>
+                                          </div>
+                                        ))}           
+                                      </div>
+                                    )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          
-                          <div className="box-container-outer-verificationdocs">
-                            <div className="title-verificationdocs-validID">
-                              Valid ID
-                            </div>
+                            
+                            <div className="box-container-outer-verificationdocs">
+                              <div className="title-verificationdocs-validID">
+                                Valid ID
+                              </div>
 
-                            <div className="box-container-verificationdocs">
-                              <span className="required-asterisk">*</span>
+                              <div className="box-container-verificationdocs">
+                                <span className="required-asterisk">*</span>
 
-                              {/* File Upload Section */}
-                              <div className="file-upload-container">
-                                <label htmlFor="file-upload3"  className="upload-link">Click to Upload File</label>
-                                  <input
-                                    id="file-upload3"
-                                    type="file"
-                                    className="file-upload-input" 
-                                    multiple
-                                    accept=".jpg,.jpeg,.png"
-                                    onChange={handleValidIDUpload}
-                                  />
+                                {/* File Upload Section */}
+                                <div className="file-upload-container">
+                                  <label htmlFor="file-upload3"  className="upload-link">Click to Upload File</label>
+                                    <input
+                                      id="file-upload3"
+                                      type="file"
+                                      className="file-upload-input" 
+                                      multiple
+                                      accept=".jpg,.jpeg,.png"
+                                      onChange={handleValidIDUpload}
+                                    />
 
-                                  {/* Display the file names with image previews */}
-                                  {files3.length > 0 && (
-                                    <div className="file-name-image-display">
-                                      {files3.map((file, index) => (
-                                        <div className="file-name-image-display-indiv" key={index}>
-                                          <li className="file-item"> 
-                                            {/* Display the image preview */}
-                                            {file.preview && (
-                                              <div className="filename-image-container">
+                                    {/* Display the file names with image previews */}
+                                    {files3.length > 0 && (
+                                      <div className="file-name-image-display">
+                                        {files3.map((file, index) => (
+                                          <div className="file-name-image-display-indiv" key={index}>
+                                            <li className="file-item"> 
+                                              {/* Display the image preview */}
+                                              {file.preview && (
+                                                <div className="filename-image-container">
+                                                  <img
+                                                    src={file.preview}
+                                                    alt={file.name}
+                                                    className="file-preview"
+                                                  />
+                                                </div>
+                                              )}
+                                              <span className="file-name">{file.name}</span>  
+                                              <div className="delete-container">
+                                                {/* Delete button with image */}
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleValidIDDelete(file.name)}
+                                                  className="delete-button"
+                                                >
                                                 <img
-                                                  src={file.preview}
-                                                  alt={file.name}
-                                                  className="file-preview"
+                                                  src="/images/trash.png"  
+                                                  alt="Delete"
+                                                  className="delete-icon"
                                                 />
+                                                </button>
                                               </div>
-                                            )}
-                                            <span className="file-name">{file.name}</span>  
-                                            <div className="delete-container">
-                                              {/* Delete button with image */}
-                                              <button
-                                                type="button"
-                                                onClick={() => handleValidIDDelete(file.name)}
-                                                className="delete-button"
-                                              >
-                                              <img
-                                                src="/images/trash.png"  
-                                                alt="Delete"
-                                                className="delete-icon"
-                                              />
-                                              </button>
-                                            </div>
-                                          </li>
-                                        </div>
-                                      ))}           
-                                    </div>
-                                  )}
+                                            </li>
+                                          </div>
+                                        ))}           
+                                      </div>
+                                    )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          
-                        </>
-                      )}
+                            
+                          </>
+                        )}
 
                         <div className="box-container-outer-verificationdocs">
                           <div className="title-verificationdocs-endorsement">
@@ -3198,6 +3295,73 @@ const handleChange = (
                             </div>
                           </>
                         )}
+
+                        {dynamicImageFields.map((fieldName) => (
+                          <div className="box-container-outer-verificationdocs" key={fieldName}>
+                            <div className="title-verificationdocs-added-imagefield">
+                              {formatFieldName(fieldName.replace(/jpg$/, "").trim())}
+                            </div>
+
+                            <div className="box-container-verificationdocs">
+                              <span className="required-asterisk">*</span>
+
+                              <div className="file-upload-container">
+                                <label htmlFor={`file-upload-${fieldName}`} className="upload-link">
+                                  Click to Upload File
+                                </label>
+
+                                <input
+                                  id={`file-upload-${fieldName}`}
+                                  type="file"
+                                  className="file-upload-input"
+                                  accept=".jpg,.jpeg,.png"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleDynamicImageUpload(fieldName, file);
+                                    e.target.value = "";
+                                  }}
+                                />
+
+
+                                {/* Image Preview */}
+                                {dynamicFileStates[fieldName] && dynamicFileStates[fieldName].length > 0 && (
+                                  <div className="file-name-image-display">
+                                    {dynamicFileStates[fieldName].map((file, index) => (
+                                      <div className="file-name-image-display-indiv" key={index}>
+                                        <li className="file-item">
+                                          {file.preview && (
+                                            <div className="filename-image-container">
+                                              <img
+                                                src={file.preview}
+                                                alt={file.name}
+                                                className="file-preview"
+                                              />
+                                            </div>
+                                          )}
+                                          <span className="file-name">{file.name}</span>
+                                          <div className="delete-container">
+                                            <button
+                                              type="button"
+                                              className="delete-button"
+                                              onClick={() => handleDynamicImageDelete(fieldName, file.name)}
+                                            >
+                                              <img
+                                                src="/images/trash.png"
+                                                alt="Delete"
+                                                className="delete-icon"
+                                              />
+                                            </button>
+                                          </div>
+                                        </li>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
                       </div>
                     </>
                   )}

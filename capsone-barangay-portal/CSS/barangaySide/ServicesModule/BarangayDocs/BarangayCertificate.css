@@ -1160,6 +1160,22 @@ gap: 20px;
     text-align: center;
   }
 
+  .title-verificationdocs-added-imagefield {
+    position: absolute;
+    top: 15px; /* stays above the box */
+    left: 50%; /* center horizontally */
+    transform: translateX(-50%); /* offset by 50% of its own width */
+    background-color: #1f3b57;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    z-index: 10;
+    width: fit-content;
+    text-align: center;
+    }
+
   .others-main-container {
     width: 100%;
     display: flex;
