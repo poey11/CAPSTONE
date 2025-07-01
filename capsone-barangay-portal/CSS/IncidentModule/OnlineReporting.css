@@ -170,9 +170,13 @@ width: 100px;
 }
 
 .status-badge.pending {
-    background-color: #325bd4;  
+    background-color: #d4d64f;  
 }
 
+.status-badge.In\ \-\ Progress
+ {
+   background-color: #d420ad;  
+}
 
 
 /*

@@ -1,12 +1,13 @@
 .main-container-transactions {
-  background-color: #D8DFE5;
+  background-image: url('/Images/bghome.jpg');
     display: flex;
     flex-direction: column;
-    height: 100vh;
+       height: 100%;
+    width: 100%;
 }
 
 .headerpic-transactions {
-  position: relative; 
+ position: relative;
   height: 250px;
   display: flex;
   align-items: center;
@@ -15,65 +16,88 @@
   font-size: 50px;
   font-weight:bolder;
   overflow: hidden; 
-
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+   background-position: center 55%; 
 }
 
-.headerpic-transactions::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('/images/brgyheaderpic.JPG');
-  background-size: cover;
-  background-position: 50% 60%;
-  background-repeat: no-repeat;
-  filter: blur(1.2px); 
-  z-index: 1;
-}
-
-.headerpic-transactions::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.150); 
-  z-index: 2; 
-}
-
-.headerpic-transactions > * {
-  position: relative;
-  z-index: 3; 
-}
   
 
+/*
+.transactions-history-transactions {
+  width: 100%;
+  max-width: 1200px;
+  height: 500px; 
+  border-radius: 16px;
+  text-align: center;
+  overflow: hidden; 
+  align-self: center;
+  margin: 2rem auto 3rem auto;
+  background: #FFFFFF;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+
+}
+*/
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+
+.transacntions-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+
+}
+
+
 .table-section-transactions {
-    flex: 1; 
-    display: flex; 
-    flex-direction: column;
-    padding: 0;
-    margin: 0; 
-    overflow: auto; 
-    width: 100%;
-    border: 2px solid  #ddd;
-    overflow-y: scroll;
-    height: 100%;
+  flex: 1; 
+  display: flex; 
+  flex-direction: column;
+  padding: 0;
+  margin: 0; 
+  width: 100%;
+ border: 2px solid rgba(36, 53, 76, 0.7);
+  overflow-y: scroll;
+  height: 100%;
+  max-width: 1500px;
+  min-width: 1500px;
+  height: 500px; 
+  border-radius: 16px;
+  text-align: center;
+  overflow-x: hidden; 
+  align-self: center;
+  background: #FFFFFF;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  margin-top: 2rem;
+  margin-bottom: 2.5rem;
+
+    
 }
 
 .table-section-transactions thead{
   position: sticky;
-  top: 0;
-  background-color: rgb(232, 228, 228);
+
+  background: linear-gradient(to right, #1b3840, #214666, #2c5e73);
   z-index: 10; 
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); 
-  
+
 }
 
 .table-section-transactions table {
-    width: 100%;
+    width: 1500px;
     border-collapse: collapse;
     background-color: rgba(255, 255, 255, 0.7);
 }
@@ -84,10 +108,10 @@
     padding: 1rem;
     text-align: center;
     border-bottom: 2px solid #ddd;
-    color:#F7FCF8 ;
+    color:#FFFFFF ;
     cursor: pointer;
     white-space: nowrap;
-    background-color: #618FB9;
+    
     font-weight: bold;
     font-size: 18px;
 }
@@ -97,19 +121,22 @@
     padding: 1rem;
     text-align: center;
     border-bottom: 2px solid #ddd;
-    color: grey;
+    color: #000000;
     white-space: nowrap;
     background-color: rgba(255, 255, 255, 0.7);
     font-size: 18px;
    
 }
 
-.table-section-transactions tr:hover {
-    background-color: #e0e0e0; 
-    cursor: pointer; 
-    transition: background-color 0.2s ease; 
+.table-section-transactions tr {
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
+.table-section-transactions tbody tr:hover {
+  background-color: #c9c4c4; 
+  cursor: pointer; 
+  transform: scale(1.01);
+}
 
 
 
@@ -134,7 +161,7 @@
 }
 
 .no-transactions p {
-  color: gray;
+  color: red;
   font-size: 2rem;
   font-weight: bold;
   text-transform: uppercase;
@@ -146,10 +173,11 @@
   padding: 8px;
   width: 200px;
   margin-top: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid rgba(36, 53, 76, 0.7);
   border-radius: 5px;
-  color: rgba(0, 0, 0, 0.4);
+  color: #000000;
   text-align: center;
+  
 }
 
 .resident-module-filter:focus {
@@ -159,7 +187,7 @@
 }
 
 .resident-module-filter option {
-  color: rgba(0, 0, 0, 0.4); 
+  color: #000000; 
 }
 
 .filter-section-transactions{
@@ -168,6 +196,7 @@
   display: flex;
   justify-content: center;
   gap: 15px;
+  
 }
 
 .filter-section-transactions p{
@@ -175,38 +204,48 @@
   color: rgb(106, 106, 106);
 }
 
-.filter-section-transactions-inner{
-  width: 570px;
-  background-color: rgba(255, 255, 255, 0.7);
+.filter-section-transactions-inner {
+  width: 100%;
+  max-width: 500px;
   border-radius: 10px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   display: flex;
-  gap: 20px;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-bottom: 20px;
-  padding-top: 10px;
+  flex-wrap: wrap; 
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  gap: 2rem;
+ background-color: #214666;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
-.filter-section-transactions-type{
+.filter-section-transactions-type {
   display: flex;
-  gap: 10;
+  align-items: center;
+  gap: 10px; 
+  flex: 1 1 200px; 
+  min-width: 150px; 
 }
 
-.transactions-history-transactions {
-  width: 90%;
-  padding: 2rem;
-  background-color: rgba(255, 255, 255, 0.7);
-  border-radius: 16px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  overflow-x: auto;
-  height: 80%;
-  align-self: center;
-  margin-bottom: 3rem;
-  margin-top: 2rem;
-    
+@media (max-width: 600px) {
+  .filter-section-transactions-inner {
+    gap: 1rem;
+  }
+
+  .filter-section-transactions-type {
+    justify-content: center;
+  }
 }
+
+.filter-section-transactions-type p {
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+
+
+
+
+
 
 
 
@@ -226,9 +265,17 @@
 
 /*Specific Incident Transactions*/
 
+.incident-transaction-container {
+  background-image: url('/Images/bghome.jpg');
+    display: flex;
+    flex-direction: column;
+       height: 100%;
+    width: 100%;
+  }
+
 
 .headerpic-specific-transactions {
-  position: relative; 
+ position: relative;
   height: 250px;
   display: flex;
   align-items: center;
@@ -237,45 +284,17 @@
   font-size: 50px;
   font-weight:bolder;
   overflow: hidden; 
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+   background-position: center 55%; 
 
 }
 
-.headerpic-specific-transactions::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('/images/brgyheaderpic.JPG');
-  background-size: cover;
-  background-position: 50% 60%;
-  background-repeat: no-repeat;
-  filter: blur(1.2px); 
-  z-index: 1;
-}
 
-.headerpic-specific-transactions::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.150); 
-  z-index: 2; 
-}
-
-.headerpic-specific-transactions > * {
-  position: relative;
-  z-index: 3; 
-}
-  
 
 
 .title-section {
     display: flex;
-
     margin-bottom: 2rem;
 }
 
@@ -308,11 +327,16 @@
   }
 
   .acknowledged {
-    background-color: #d69e4f;
+    background-color: #4caf50;   
     color: white;
     font-size: 15px;
-    
   }
+
+  .In-Progress {
+    background-color: #325bd4;
+  }
+
+
 
   .rejected {
     background-color: red;
@@ -332,20 +356,15 @@
     font-size: 15px;
   }
 
-.incident-transaction-container {
-  background-color: #D8DFE5;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; 
-  }
+
   
   .incident-content,
   .emergency-content{
     display: flex;
     flex-direction: column;
     align-self: center;
-    width: 60%;
-    border-radius: 1rem;
+    width: 70%;
+     border-radius: 10px;
     border: 1px solid #ddd;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); 
     background: rgba(255, 255, 255, 0.9);
@@ -353,6 +372,7 @@
     margin-bottom: 3rem;
     transition: transform 0.3s ease;
     margin-top: 3rem;
+    height: 100%;
   }
   
   .incident-content:hover,
@@ -360,12 +380,11 @@
     transform: translateY(-5px); 
   }
   
-  .incident-content-section-1,
-  .emergency-content-section-1{
+  .incident-content-section-1{
     display: flex;
-    align-items: center;
+    justify-content: space-between;
     padding: 2rem;
-    background-color: #618FB9;
+background-color: #214666;
     color: white;
     font-size: 1.5rem;
     font-weight: bold;
@@ -381,6 +400,10 @@
     text-transform: uppercase;
   }
   
+
+  .section-1-left {
+    display: flex;
+  }
   .back-button {
     background-image: url('/Images/left-arrow.png');
     background-size: contain;
@@ -394,31 +417,169 @@
     filter: brightness(0) invert(1);
   }
   
- 
-  
-  .details-section {
+
+
+  .incident-main-content {
     display: flex;
-    border-bottom: 1px solid #ddd;
-    padding: 1.5rem;
-    transition: background 0.3s ease;
+    flex-direction: column;
     justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding-bottom: 1rem;
   }
+
+
+  .incident-main-content-upper {
+     padding-top: 25px;
+  padding-left: 35px;
+  padding-right: 35px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  }
+
+
+
   
-  .details-section:hover {
+  .incidents-transactions-info-toggle-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #e0e0e0;
+  width: 100%;
+}
+
+.info-toggle-btn {
+  background-color: transparent;
+  border: none;
+  padding: 10px 16px; 
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  color: #2C3E50;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.info-toggle-btn:hover {
+  color: #ED7014;
+}
+
+.info-toggle-btn.active {
+  color: #ED7014;
+  border-bottom: 3px solid #ED7014;
+  background-color: transparent;
+}
+
+.register-section-upper {
+    padding-top: 25px;
+  padding-left: 35px;
+  padding-right: 35px;
+  height: 100%;
+}
+
+.incident-main-content-lower {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 20px;
+}
+ 
+
+
+.incident-main-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 400px;
+  overflow-y: auto; 
+}
+
+.incident-container-upper {
+  display: flex;
+  width: 100%;
+  
+}
+
+
+.incident-container-lower {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+
+
+
+.details-section-upload {
+ display: flex;
+justify-content: center;
+align-items: center;
+  border-bottom: 2px solid #ddd;
+ gap: 1.5rem;
+ padding-top: 2rem;
+ padding-bottom: 2rem;
+
+  height: 100%; /* important for equal height */
+  width: 70%;
+  transition: background 0.3s ease;
+  box-sizing: border-box;
+
+  }
+
+    
+  .details-section-upload:hover {
     background: #D8DFE5
   }
   
+  .details-section {
+ display: flex;
+  flex-direction: column;
+  border-bottom: 2px solid #ddd;
+  padding: 1rem;
+  height: 180;
+  min-height: 175px; 
+  transition: background 0.3s ease;
+  box-sizing: border-box;
+  }
+
+    .details-section:hover {
+    background: #D8DFE5
+  }
+
+  
+.incident-main-left,
+.incident-main-right {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  gap: 1.5rem;
+  padding: 1rem 2rem;
+}
+
+.incident-main-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+   gap: 1.5rem;
+  padding: 1rem 2rem;
+  width: 100%;
+}
+  
+
+  
   .title {
-    width: 25%; 
+    width: 100%; 
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+   
   }
   
   .title p {
     font-weight: bold;
-    font-size: 1.15rem;
-    color: #DF7426;
+    font-size: 1.25rem;
+     color: #2C3E50;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     text-align: center;
@@ -426,16 +587,29 @@
   }
   
   .description {
-    width: 75%;
+    width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
+    overflow-y: auto;       
+  max-height: 100%;     
+  padding-right: 0.5rem;  
   }
   
   .description p {
-    color: #555;
-    font-size: 1.20rem;
+    color: #000000;
+    font-size: 1.22rem;
     line-height: 1.6;
   }
+
+
+
+
+
+
+
+
+
+
 
   .proofOfIncident-image,
   .Requirements{
@@ -482,17 +656,24 @@
   .document-requirements-container{
     width: 50%;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
   
   .requirements-image{
-    width: 100%;
+    width: 75%;
+    height: 80%;
   }
   
 
   .view-file-link{
     margin-top: 10px;
-    display: inline-block;
+   display: flex;
+   justify-content: center;
+   align-items: center;
     color: #007bff;
     text-decoration: underline;
     cursor: pointer;
@@ -502,3 +683,114 @@
 .status-container{
   margin-left: 30%; 
 }
+
+
+.no-proof-text {
+  color: red;
+  font-weight: bold;
+}
+
+
+
+
+/*
+Barangay Response
+*/
+
+.details-section-response {
+ display: flex;
+  flex-direction: column;
+  border-bottom: 2px solid #ddd;
+  padding: 1rem;
+  height: 170px;
+  min-height: 170px; 
+  transition: background 0.3s ease;
+  box-sizing: border-box;
+  }
+
+    .details-section-response:hover {
+    background: #D8DFE5
+  }
+
+
+
+
+  
+  .details-section-response-upload {
+  display: flex;
+  border-bottom: 2px solid #ddd;
+  padding: 1rem;
+  height: 280px;
+  min-height: 280px; 
+  transition: background 0.3s ease;
+  box-sizing: border-box;
+  }
+
+    .details-section-response-upload:hover {
+    background: #D8DFE5
+  }
+
+
+
+
+
+  /*
+  Document Transaction
+  */
+
+  
+  .details-section-document {
+ display: flex;
+  flex-direction: column;
+  border-bottom: 2px solid #ddd;
+  padding: 1rem;
+  height: 140px;
+  min-height: 140px; 
+  transition: background 0.3s ease;
+  box-sizing: border-box;
+  }
+
+    .details-section-document:hover {
+    background: #D8DFE5
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+  
+.incident-main-container-upload {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 400px;
+  overflow-y: auto; 
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+
+
+.incident-main-container-incident-response {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 400px;
+  overflow-y: auto; 
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+
+
+
+
+
+

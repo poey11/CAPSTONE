@@ -26,9 +26,9 @@
 }
 
 .dropdown-item-resident:hover {  
-  color: #294c6b;
-  background-color: #82b0d8;
-  box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
+  color: #FFFFFF;
+ background: linear-gradient(to right, #294c6b, #356f86, #3a849e);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .dropdown-item-no-hover {
@@ -53,7 +53,7 @@
   position: absolute;
   top: 100%; 
   left: 0;
-  background-color: #618FB9;
+ background: linear-gradient(to right, #294c6b, #356f86, #3a849e);
   padding: 10px;
   z-index: 2; 
   width: 250px;
@@ -71,9 +71,9 @@
 }
 
 .Dropdown p:hover {
-  color: #294c6b;
-  background-color: #82b0d8;
-  box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
+  color: #FFFFFF;
+  background: linear-gradient(to right, #3a7ca5, #529dc2, #7bbfe4); /* lighter blend of gradient */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .navbar-container{
@@ -85,7 +85,7 @@
 }
 
 .navbar-card {
-  background-color: #214666;
+   background: linear-gradient(to right, #1b3840, #214666, #2c5e73);
   display: flex;
   justify-content: space-between; 
   align-items: center; 

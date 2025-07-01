@@ -86,7 +86,8 @@ export default function Transactions() {
                 <p>TRANSACTIONS</p>
             </div>
 
-            <div className="filter-section-transactions">
+        <div className="transacntions-container fade-in">
+             <div className="filter-section-transactions">
                 <div className="filter-section-transactions-inner">
 
                     <div className="filter-section-transactions-type">
@@ -159,6 +160,9 @@ export default function Transactions() {
                     )}
                 </div>
             </div>
+
+        </div>
+           
         </main>
     );
 }
