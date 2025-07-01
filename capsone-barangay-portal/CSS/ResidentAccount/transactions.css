@@ -753,3 +753,44 @@ Barangay Response
     .details-section-document:hover {
     background: #D8DFE5
   }
+
+
+
+
+
+
+
+
+
+
+
+
+  
+.incident-main-container-upload {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 400px;
+  overflow-y: auto; 
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+
+
+.incident-main-container-incident-response {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 400px;
+  overflow-y: auto; 
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+
+
+
+
+
+

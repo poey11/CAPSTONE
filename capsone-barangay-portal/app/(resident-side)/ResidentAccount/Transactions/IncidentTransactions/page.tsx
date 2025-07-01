@@ -312,7 +312,7 @@ updated
 
               {activeSection === "barangay" && (
                 <>
-                  <div className="incident-main-container">
+                  <div className="incident-main-container-incident-response">
                     {transactionData?.status === "Acknowledged" && (
                       <>
                         {respondentFields

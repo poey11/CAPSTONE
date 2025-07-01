@@ -454,7 +454,7 @@ export default function DocumentTransactionsDetails() {
 
                      {activeSection === "reqs" && (
                         <>
-                        <div className="incident-main-container">
+                        <div className="incident-main-container-upload">
                             {fileURLs.some(({ field }) => field === "signaturejpg") && (
                             <div className="details-section-response-upload">
                                 <div className="title">
