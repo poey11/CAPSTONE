@@ -375,8 +375,7 @@
     transform: translateY(-5px); 
   }
   
-  .incident-content-section-1,
-  .emergency-content-section-1{
+  .incident-content-section-1{
     display: flex;
     align-items: center;
     padding: 2rem;
@@ -536,6 +535,10 @@ align-items: center;
   box-sizing: border-box;
   }
 
+    .details-section:hover {
+    background: #D8DFE5
+  }
+
   
 .incident-main-left,
 .incident-main-right {
@@ -555,9 +558,7 @@ align-items: center;
   width: 100%;
 }
   
-  .details-section:hover {
-    background: #D8DFE5
-  }
+
   
   .title {
     width: 100%; 
@@ -672,3 +673,39 @@ align-items: center;
   color: red;
   font-weight: bold;
 }
+
+
+
+
+/*
+Barangay Response
+*/
+
+.details-section-response {
+ display: flex;
+  flex-direction: column;
+  border-top: 2px solid #ddd;
+  padding: 1rem;
+  height: 170px;
+  min-height: 170px; 
+  transition: background 0.3s ease;
+  box-sizing: border-box;
+  }
+
+    .details-section-response:hover {
+    background: #D8DFE5
+  }
+
+  .details-section-response-upload {
+ display: flex;
+  border-top: 2px solid #ddd;
+  padding: 1rem;
+  height: 280px;
+  min-height: 280px; 
+  transition: background 0.3s ease;
+  box-sizing: border-box;
+  }
+
+    .details-section-response-upload:hover {
+    background: #D8DFE5
+  }
