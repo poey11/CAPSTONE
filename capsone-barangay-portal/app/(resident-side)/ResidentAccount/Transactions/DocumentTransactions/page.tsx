@@ -199,7 +199,7 @@ export default function DocumentTransactionsDetails() {
         ),
 
         
-          
+          /* TO ADD*/
          ...(transactionData?.purpose === "Guardanship" ? 
             [
                 { label: "Guardian's Full Name", key: "fullName" },
@@ -413,32 +413,7 @@ export default function DocumentTransactionsDetails() {
                                                 </p>
                                             </div>
                                         </div>
-
-                                        {/*
-                                          {field.key === "docType" && transactionData.purpose && (
-                                            <div className="details-section-document" key="purpose">
-                                                <div className="title">
-                                                <p>Purpose</p>
-                                                </div>
-                                                <div className="description">
-                                                <p>{transactionData.purpose || "N/A"}</p>
-                                                </div>
-                                            </div>
-                                            )}
-
-                                            {field.key === "status" && transactionData.appointmentDate && (
-                                            <div className="details-section-document" key="appointmentDate">
-                                                <div className="title">
-                                                <p>Appointment Date</p>
-                                                </div>
-                                                <div className="description">
-                                                <p>{transactionData.appointmentDate || "N/A"}</p>
-                                                </div>
-                                            </div>
-                                            )}
-                                        */}
-
-                                          
+                             
                                         </div>
                                         ))}
                                     </div>
@@ -468,30 +443,6 @@ export default function DocumentTransactionsDetails() {
                                                 </div>
                                             </div>
 
-
-                                            {/*
-                                                {field.key === "docType" && transactionData.purpose && (
-                                                    <div className="details-section-document" key="purpose-right">
-                                                        <div className="title">
-                                                        <p>Purpose</p>
-                                                        </div>
-                                                        <div className="description">
-                                                        <p>{transactionData.purpose || "N/A"}</p>
-                                                        </div>
-                                                    </div>
-                                                    )}
-
-                                                    {field.key === "status" && transactionData.appointmentDate && (
-                                                    <div className="details-section-document" key="appointmentDate-right">
-                                                        <div className="title">
-                                                        <p>Appointment Date</p>
-                                                        </div>
-                                                        <div className="description">
-                                                        <p>{transactionData.appointmentDate || "N/A"}</p>
-                                                        </div>
-                                                    </div>
-                                                    )}
-                                            */}
                                         </div>
                                     ))}
                                 </div>
@@ -499,6 +450,256 @@ export default function DocumentTransactionsDetails() {
                         </div>
 
                               
+                        </>
+                         )}
+
+                     {activeSection === "reqs" && (
+                        <>
+                        <div className="incident-main-container">
+
+                           <div className="details-section-response-upload">
+                              <div className="title">
+                                 <p>Signature</p>
+                              </div>
+
+                                <div className="description">
+                                     {fileURLs.filter(({ field }) => field === "signaturejpg").length > 0 ? (
+                                        fileURLs.filter(({ field }) => field === "signaturejpg").map(({ url }, index) => (
+                                            <div key={index} className="document-requirements-container">
+                                                <img src={url} alt="Signature - Uploaded File" className="requirements-image"/>
+                                                <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                                    View File
+                                                </a>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p>N/A</p>
+                                    )}
+
+                                </div>
+
+                            </div>
+
+                         <div className="details-section-response-upload">
+                              <div className="title">
+                                 <p>Barangay ID</p>
+                              </div>
+
+                                <div className="description">
+                            {fileURLs.filter(({ field }) => field === "barangayIDjpg").length > 0 ? (
+                                    fileURLs.filter(({ field }) => field === "barangayIDjpg").map(({ url }, index) => (
+                                        <div key={index} className="document-requirements-container">
+                                            <img src={url} alt="Barangay ID - Uploaded File" className="requirements-image"/>
+                                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                                View File
+                                            </a>
+                                        </div>
+                                    ))
+
+                                ) : (
+                                    <p>N/A</p>
+                                )}
+
+                                </div>
+
+                            </div>
+
+
+                             <div className="details-section-response-upload">
+                              <div className="title">
+                                 <p>Valid ID</p>
+                              </div>
+
+                                <div className="description">
+                            {fileURLs.filter(({ field }) => field === "validIDjpg").length > 0 ? (
+                                    fileURLs.filter(({ field }) => field === "validIDjpg").map(({ url }, index) => (
+                                        <div key={index} className="document-requirements-container">
+                                            <img src={url} alt="Valid ID - Uploaded File" className="requirements-image"/>
+                                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                                View File
+                                            </a>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
+                                )}
+
+                                </div>
+
+                            </div>
+
+                            
+                            <div className="details-section-response-upload">
+                                <div className="title">
+                                    <p>Endorsement Letter</p>
+                                </div>
+
+                                    <div className="description">
+                                    {fileURLs.filter(({ field }) => field === "endorsementLetter").length > 0 ? (
+                                            fileURLs.filter(({ field }) => field === "endorsementLetter").map(({ url }, index) => (
+                                                <div key={index} className="document-requirements-container">
+                                                    <img src={url} alt="Endorsement Letter - Uploaded File" className="requirements-image"/>
+                                                    <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                                        View File
+                                                    </a>
+                                                </div>
+                                            ))
+                                        ) : (
+                                             <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
+                                        )}
+
+                                    </div>
+
+                            </div>
+
+
+
+                            {/* Additional fields for Business Permit and Temporary Business Permit */}
+                            
+                            
+                         {(transactionData.docType === "Business Permit" || transactionData.docType === "Temporary Business Permit" || transactionData.docType === "Construction Permit") && (
+                          <>
+                            <div className="details-section-response-upload">
+
+                            <div className="title">
+                                <p>Copy of Property Title / Contract of Lease</p>
+                                </div>
+                                <div className="description">
+                                {fileURLs.filter(({ field }) => field === "copyOfPropertyTitle").length > 0 ? (
+                                    fileURLs
+                                    .filter(({ field }) => field === "copyOfPropertyTitle")
+                                    .map(({ url }, index) => (
+                                        <div key={index} className="document-requirements-container">
+                                        <img src={url} alt="Copy of Property Title" className="requirements-image" />
+                                        <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                            View File
+                                        </a>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p>N/A</p>
+                                )}
+                            </div>
+
+                            </div>
+
+
+                            </>
+                              )}
+
+                         {(transactionData.docType === "Business Permit" || transactionData.docType === "Temporary Business Permit") && (
+                            <>
+                             <div className="details-section-response-upload">
+
+                                  <div className="title">
+                                    <p>DTI Registration</p>
+                                    </div>
+                                    <div className="description">
+                                    {fileURLs.filter(({ field }) => field === "dtiRegistration").length > 0 ? (
+                                        fileURLs
+                                        .filter(({ field }) => field === "dtiRegistration")
+                                        .map(({ url }, index) => (
+                                            <div key={index} className="document-requirements-container">
+                                            <img src={url} alt="DTI Registration" className="requirements-image" />
+                                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                                View File
+                                            </a>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p>N/A</p>
+                                    )}
+                                </div>
+                             </div>
+
+                             <div className="details-section-response-upload">
+
+                                  <div className="title">
+                                    <p>CCTV Picture</p>
+                                    </div>
+                                    <div className="description">
+                                    {fileURLs.filter(({ field }) => field === "isCCTV").length > 0 ? (
+                                        fileURLs
+                                        .filter(({ field }) => field === "isCCTV")
+                                        .map(({ url }, index) => (
+                                            <div key={index} className="document-requirements-container">
+                                            <img src={url} alt="CCTV Picture" className="requirements-image" />
+                                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                                View File
+                                            </a>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p>N/A</p>
+                                    )}
+                                    </div>
+
+                             </div>
+
+                           </>
+                           )}
+
+
+                         {(transactionData.docType === "Construction Permit") && (
+                            <>
+
+                            <div className="details-section-response-upload">
+
+                                <div className="title">
+                                    <p>Approved Building / Construction Plan</p>
+                                    </div>
+                                    <div className="description">
+                                    {fileURLs.filter(({ field }) => field === "approvedBldgPlan").length > 0 ? (
+                                        fileURLs
+                                        .filter(({ field }) => field === "approvedBldgPlan")
+                                        .map(({ url }, index) => (
+                                            <div key={index} className="document-requirements-container">
+                                            <img src={url} alt="Approved Building / Construction Plan" className="requirements-image" />
+                                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                                View File
+                                            </a>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p>N/A</p>
+                                    )}
+                                 </div>
+
+                            </div>
+
+                            <div className="details-section-response-upload">
+
+                                <div className="title">
+                                    <p>Certified True Copy of Tax Declaration</p>
+                                    </div>
+                                    <div className="description">
+                                    {fileURLs.filter(({ field }) => field === "taxDeclaration").length > 0 ? (
+                                        fileURLs
+                                        .filter(({ field }) => field === "taxDeclaration")
+                                        .map(({ url }, index) => (
+                                            <div key={index} className="document-requirements-container">
+                                            <img src={url} alt="Tax Declaration" className="requirements-image" />
+                                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                                View File
+                                            </a>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p>N/A</p>
+                                    )}
+                                    </div>
+
+                            </div>
+
+
+
+                           </>
+                           )}
+
+
+
+                        </div>
+                          
                         </>
                          )}
 
@@ -513,64 +714,8 @@ export default function DocumentTransactionsDetails() {
 
 
 
-        {/*delete below */}
+        {/*FOR BARANGAY ID*/}
 
-        <div className="incident-content">
-            <div className="incident-content-section-1">
-                <button type="button" className="back-button" onClick={handleBack}></button>
-                <h1>Online Document Request</h1>
-                <div className="status-container">
-                    <p className={`status-dropdown-transactions ${transactionData.status?.toLowerCase() || ""}`}>
-                    {transactionData.status || "N/A"}
-                    </p> 
-                    
-                </div>
-
-            </div>
-
-            {barangayDocumentFields
-                    .filter((field) => field.key !== "appointmentDate" && field.key !== "purpose" && !field.key.startsWith("emergencyDetails"))
-                    .map((field) => (
-                        <div key={field.key}>
-                            <div className="details-section">
-                                <div className="title">
-                                    <p>{field.label}</p>
-                                </div>
-                                <div className="description">
-                                    <p>
-                                        {field.key === "educationalAttainment"
-                                            ? getEducationalAttainmentLabel((transactionData as Record<string, any>)[field.key])
-                                            : (transactionData as Record<string, any>)[field.key] || "N/A"}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Conditionally insert Purpose right after Document Type */}
-                            {field.key === "docType" && (transactionData.purpose ? (
-                                <div className="details-section" key="appointmentDate">
-                                    <div className="title">
-                                        <p>Purpose</p>
-                                    </div>
-                                    <div className="description">
-                                        <p>{transactionData.purpose || "N/A"}</p>
-                                    </div>
-                                </div>
-                            ) : null)}
-
-                            {/* Conditionally insert Appointment Date right after Status */}
-                            {field.key === "status" && (transactionData.appointmentDate ? (
-                                <div className="details-section" key="appointmentDate">
-                                    <div className="title">
-                                        <p>Appointment Date</p>
-                                    </div>
-                                    <div className="description">
-                                        <p>{transactionData.appointmentDate || "N/A"}</p>
-                                    </div>
-                                </div>
-                            ) : null)}
-                        </div>
-                    ))}
-        </div>
 
         {transactionData.docType === "Barangay ID" && (
         <div className="incident-content">
@@ -645,225 +790,7 @@ export default function DocumentTransactionsDetails() {
         </div>
       )}
 
-        <div className="incident-content">
-            <div className="incident-content-section-1">
-              <h1>Requirements</h1>
-            </div>
 
-
-            {/* Additional fields for Business Permit and Temporary Business Permit */}
-            {(transactionData.docType === "Business Permit" || transactionData.docType === "Temporary Business Permit" || transactionData.docType === "Construction Permit") && (
-                <>
-                <div className="details-section">
-                    <div className="title">
-                    <p>Copy of Property Title / Contract of Lease</p>
-                    </div>
-                    <div className="description">
-                    {fileURLs.filter(({ field }) => field === "copyOfPropertyTitle").length > 0 ? (
-                        fileURLs
-                        .filter(({ field }) => field === "copyOfPropertyTitle")
-                        .map(({ url }, index) => (
-                            <div key={index} className="document-requirements-container">
-                            <img src={url} alt="Copy of Property Title" className="requirements-image" />
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                View File
-                            </a>
-                            </div>
-                        ))
-                    ) : (
-                        <p>N/A</p>
-                    )}
-                    </div>
-                </div>
-
-                </>
-            )}
-
-            {(transactionData.docType === "Business Permit" || transactionData.docType === "Temporary Business Permit") && (
-                <>
-
-                <div className="details-section">
-                    <div className="title">
-                    <p>DTI Registration</p>
-                    </div>
-                    <div className="description">
-                    {fileURLs.filter(({ field }) => field === "dtiRegistration").length > 0 ? (
-                        fileURLs
-                        .filter(({ field }) => field === "dtiRegistration")
-                        .map(({ url }, index) => (
-                            <div key={index} className="document-requirements-container">
-                            <img src={url} alt="DTI Registration" className="requirements-image" />
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                View File
-                            </a>
-                            </div>
-                        ))
-                    ) : (
-                        <p>N/A</p>
-                    )}
-                    </div>
-                </div>
-
-                <div className="details-section">
-                    <div className="title">
-                    <p>CCTV Picture</p>
-                    </div>
-                    <div className="description">
-                    {fileURLs.filter(({ field }) => field === "isCCTV").length > 0 ? (
-                        fileURLs
-                        .filter(({ field }) => field === "isCCTV")
-                        .map(({ url }, index) => (
-                            <div key={index} className="document-requirements-container">
-                            <img src={url} alt="CCTV Picture" className="requirements-image" />
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                View File
-                            </a>
-                            </div>
-                        ))
-                    ) : (
-                        <p>N/A</p>
-                    )}
-                    </div>
-                </div>
-                </>
-            )}
-
-
-            {/* Additional fields for Construction Permit */}
-            {(transactionData.docType === "Construction Permit") && (
-                <>
-                <div className="details-section">
-                    <div className="title">
-                    <p>Approved Building / Construction Plan</p>
-                    </div>
-                    <div className="description">
-                    {fileURLs.filter(({ field }) => field === "approvedBldgPlan").length > 0 ? (
-                        fileURLs
-                        .filter(({ field }) => field === "approvedBldgPlan")
-                        .map(({ url }, index) => (
-                            <div key={index} className="document-requirements-container">
-                            <img src={url} alt="Approved Building / Construction Plan" className="requirements-image" />
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                View File
-                            </a>
-                            </div>
-                        ))
-                    ) : (
-                        <p>N/A</p>
-                    )}
-                    </div>
-                </div>
-
-                <div className="details-section">
-                    <div className="title">
-                    <p>Certified True Copy of Tax Declaration</p>
-                    </div>
-                    <div className="description">
-                    {fileURLs.filter(({ field }) => field === "taxDeclaration").length > 0 ? (
-                        fileURLs
-                        .filter(({ field }) => field === "taxDeclaration")
-                        .map(({ url }, index) => (
-                            <div key={index} className="document-requirements-container">
-                            <img src={url} alt="Tax Declaration" className="requirements-image" />
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                View File
-                            </a>
-                            </div>
-                        ))
-                    ) : (
-                        <p>N/A</p>
-                    )}
-                    </div>
-                </div>
-                </>
-            )}
-
-            <div className="details-section">
-                <div className="title">
-                    <p>Signature</p>
-                </div>
-                <div className="description">
-                    {fileURLs.filter(({ field }) => field === "signaturejpg").length > 0 ? (
-                            fileURLs.filter(({ field }) => field === "signaturejpg").map(({ url }, index) => (
-                                <div key={index} className="document-requirements-container">
-                                    <img src={url} alt="Signature - Uploaded File" className="requirements-image"/>
-                                    <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                        View File
-                                    </a>
-                                </div>
-                            ))
-                        ) : (
-                            <p>N/A</p>
-                        )}
-                </div>
-            </div>
-
-            {(transactionData.docType !== "Construction Permit" && transactionData.docType !== "Temporary Business Permit" && transactionData.docType !== "Business Permit") && (
-                <>
-
-                <div className="details-section">
-                        <div className="title">
-                            <p>Barangay ID</p>
-                        </div>
-                        <div className="description">
-                            {fileURLs.filter(({ field }) => field === "barangayIDjpg").length > 0 ? (
-                                    fileURLs.filter(({ field }) => field === "barangayIDjpg").map(({ url }, index) => (
-                                        <div key={index} className="document-requirements-container">
-                                            <img src={url} alt="Barangay ID - Uploaded File" className="requirements-image"/>
-                                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                                View File
-                                            </a>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p>N/A</p>
-                                )}
-                        </div>
-                    </div>
-
-                    <div className="details-section">
-                        <div className="title">
-                            <p>Valid ID</p>
-                        </div>
-                        <div className="description">
-                            {fileURLs.filter(({ field }) => field === "validIDjpg").length > 0 ? (
-                                    fileURLs.filter(({ field }) => field === "validIDjpg").map(({ url }, index) => (
-                                        <div key={index} className="document-requirements-container">
-                                            <img src={url} alt="Valid ID - Uploaded File" className="requirements-image"/>
-                                            <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                                View File
-                                            </a>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p>N/A</p>
-                                )}
-                        </div>
-                    </div>
-
-                </>
-            )}
-
-            <div className="details-section">
-                <div className="title">
-                    <p>Endorsement Letter</p>
-                </div>
-                <div className="description">
-                    {fileURLs.filter(({ field }) => field === "endorsementLetter").length > 0 ? (
-                            fileURLs.filter(({ field }) => field === "endorsementLetter").map(({ url }, index) => (
-                                <div key={index} className="document-requirements-container">
-                                    <img src={url} alt="Endorsement Letter - Uploaded File" className="requirements-image"/>
-                                    <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
-                                        View File
-                                    </a>
-                                </div>
-                            ))
-                        ) : (
-                            <p>N/A</p>
-                        )}
-                </div>
-            </div>
-        </div>
     </main>
 
     )
