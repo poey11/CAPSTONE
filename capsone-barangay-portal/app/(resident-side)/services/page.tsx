@@ -66,7 +66,7 @@ export default function Services() {
                         {isGuest && !isAllowedForGuest("Barangay Indigency") && (
                           <span className="tooltip-text">Login required to request this document</span>
                         )}
-                  </div>
+                      </div>
 
                 
                </div>
@@ -84,8 +84,9 @@ export default function Services() {
                       </div>
                     </div>
 
-    
-                      <div
+                    <div className="tooltip-wrapper">
+
+                        <div
                         className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Clearance") ? "disabled-card" : ""}`}
                         onClick={goToServices}
                         id="Barangay Clearance"
@@ -96,6 +97,9 @@ export default function Services() {
                       {isGuest && !isAllowedForGuest("Barangay Clearance") && (
                         <span className="tooltip-text">Login required to request this document</span>
                       )}
+
+                    </div>
+
 
                </div>
 

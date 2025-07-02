@@ -29,9 +29,9 @@
   border: 1px solid #ddd;
   border-radius: 10px;
   padding: 2rem;
-  width: 65%;
-  height: 375px;
-  margin: 5rem auto; /* <-- center horizontally */
+  max-width: 1000px; /* or 90vw for flexible layout */
+  width: 100%;
+  margin: 5rem auto;
 }
 
 
@@ -233,7 +233,7 @@ to {
 /* Tooltip container */
 .tooltip-wrapper {
   position: relative;
-  display: inline-block;
+ 
 }
 
 /* Tooltip text style */
