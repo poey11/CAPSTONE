@@ -1008,47 +1008,6 @@ const handleChange = (
     return;
   }
 
-  if (name === "dateOfTyphoon") {
-    const selectedDate = new Date(value);
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth(); // 0-indexed
-
-    if (
-      selectedDate.getFullYear() !== currentYear ||
-      selectedDate.getMonth() !== currentMonth
-    ) {
-      alert("Please select a date within the current month only.");
-      return;
-    }
-
-    setClearanceInput((prev: any) => ({
-      ...prev,
-      [name]: value,
-    }));
-    return;
-  }
-
-  if (name === "dateOfFireIncident") {
-    const selectedDate = new Date(value);
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth(); // 0-indexed
-
-    if (
-      selectedDate.getFullYear() !== currentYear ||
-      selectedDate.getMonth() !== currentMonth
-    ) {
-      alert("Please select a date within the current month only.");
-      return;
-    }
-
-    setClearanceInput((prev: any) => ({
-      ...prev,
-      [name]: value,
-    }));
-    return;
-  }
 
   setClearanceInput((prev: any) => {
     const keys = name.split(".");
@@ -1522,12 +1481,9 @@ const handleChange = (
                                   id="requestorFname"
                                   name="requestorFname"
                                   readOnly={
-                                    !(
-                                      forResidentOnlyMap[docType || ""] === true ||
-                                      (!isPermitLike && docType !== "Other Documents") ||
-                                      (docType === "Other Documents" && clearanceInput?.isResident) ||
-                                      clearanceInput?.isResident
-                                    )
+                                    forResidentOnlyMap[docType || ""] === true ||
+                                    (docType === "Other Documents" && clearanceInput?.isResident) ||
+                                    clearanceInput?.isResident
                                   }
                                   onClick={() => {
                                     const isExplicitResidentOnly = forResidentOnlyMap[docType || ""] === true;
@@ -1545,7 +1501,9 @@ const handleChange = (
                                       (isOtherDocs && clearanceInput?.isResident) ||
                                   
                                       // User manually selected resident
-                                      clearanceInput?.isResident;
+                                      clearanceInput?.isResident ||
+
+                                      (clearanceInput.purpose === "Barangay ID" || clearanceInput.purpose === "First Time Jobseeker");
                                   
                                     if (allowPopup) {
                                       setSelectingFor("requestor");
@@ -2163,24 +2121,23 @@ const handleChange = (
                             </>
                           )}
 
-                          {clearanceInput.purpose === "Fire Victims"  && (
-                            <>               
-                             <div className="fields-section">
-                              <h1>Date of Fire Incident <span className="required">*</span></h1>
-                              <input 
-                                type="date" 
-                                className="createRequest-input-field" 
-                                id="dateOfFireIncident"
-                                name="dateOfFireIncident"
-                                value={clearanceInput?.dateOfFireIncident || ""}
-                                onChange={handleChange}
-                                required
-                                /* will only allow current month and year for typhoon dates*/
-                                min={new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0]}
-                                max={new Date().toISOString().split("T")[0]}
-                                onKeyDown={(e) => e.preventDefault()}  
-                              />    
-                            </div>            
+                          {clearanceInput.purpose === "Fire Victims" && (
+                            <>
+                              <div className="fields-section">
+                                <h1>Date of Fire Incident <span className="required">*</span></h1>
+                                <input 
+                                  type="date" 
+                                  className="createRequest-input-field" 
+                                  id="dateOfFireIncident"
+                                  name="dateOfFireIncident"
+                                  value={clearanceInput?.dateOfFireIncident || ""}
+                                  onChange={handleChange}
+                                  required
+                                  min={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]} // 30 days before today
+                                  max={new Date().toISOString().split("T")[0]} // today
+                                  onKeyDown={(e) => e.preventDefault()}  
+                                />    
+                              </div>            
                             </>
                           )}
 
@@ -2704,9 +2661,8 @@ const handleChange = (
                                 value={clearanceInput?.dateOfTyphoon || ""}
                                 onChange={handleChange}
                                 required
-                                /* will only allow current month and year for typhoon dates*/
-                                min={new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0]}
-                                max={new Date().toISOString().split("T")[0]}
+                                min={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]} // 30 days before today
+                                max={new Date().toISOString().split("T")[0]} // today
                                 onKeyDown={(e) => e.preventDefault()}  
                               />    
                             </div>            
