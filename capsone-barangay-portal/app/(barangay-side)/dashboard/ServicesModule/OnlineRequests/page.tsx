@@ -154,7 +154,8 @@ import { db } from "@/app/db/firebase";
         router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest/otherDocument?id=${id}`);
       }
       else{
-        router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
+        router.push(`/dashboard/ServicesModule/ViewRequest?id=${id}`);
+        
       }
     };
 
