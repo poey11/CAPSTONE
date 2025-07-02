@@ -38,7 +38,6 @@ interface EmergencyDetails {
     fullName: string;
     nosOfPUV: string;
     puvPurpose: string;
-    vehicleType: string;
     appointmentDate: string;
     dateOfResidency: string;
     address: string; // Will also be the home address
@@ -71,7 +70,7 @@ interface EmergencyDetails {
     signaturejpg: string;
     barangayIDjpg: string;
     validIDjpg:string ;
-    endorsementLetter: string;
+    letterjpg: string;
     copyOfPropertyTitle: string;
     dtiRegistration: string;
     isCCTV: string;
@@ -91,15 +90,17 @@ interface EmergencyDetails {
     deceasedEstateName: string;
     estateSince: string;
     noOfTRU: string;
-    tricycleMake: string;
-    tricycleType: string;
-    tricyclePlateNo: string;
-    tricycleSerialNo: string;
-    tricycleChassisNo: string;
-    tricycleEngineNo: string;
-    tricycleFileNo: string;
+    vehicleMake: string;
+    vehicleType: string;
+    vehiclePlateNo: string;
+    vehicleSerialNo: string;
+    vehicleChassisNo: string;
+    vehicleEngineNo: string;
+    vehicleFileNo: string;
     docsRequired: File[]; // Changed to File[] to match the file structure
-   
+    fromAddress: string;
+    goodMoralOtherPurpose: string;
+    noOfVechicles: string;
 }
 
 interface File {
@@ -141,7 +142,7 @@ const ViewOnlineRequest = () => {
         "signaturejpg",
         "barangayIDjpg",
         "validIDjpg",
-        "endorsementLetter",
+        "letterjpg",
         "copyOfPropertyTitle",
         "dtiRegistration",
         "isCCTV",
@@ -179,7 +180,7 @@ const ViewOnlineRequest = () => {
 
    useEffect(() => {
       if (!requestData) return;
-      if(!(requestData?.reqType === "InBarangay")) {
+      if(!(requestData?.reqType === "In Barangay")) {
         const fetchUrls = async () => {
           const updated = await handleDownloadUrl(requestData);
 
@@ -191,7 +192,6 @@ const ViewOnlineRequest = () => {
         fetchUrls();
       }
     }, [requestData]);
-
 
     
     {/*}
@@ -246,18 +246,18 @@ const ViewOnlineRequest = () => {
         { key: "vehicleType", label: "Vehicle Description"  },            
         { key: "nosOfPUV", label: "No of Vehicles"  },
         { key: "noOfTRU", label: "No Of Tricycle" },
-        { key: "tricycleMake", label: "Tricycle Make" },
-        { key: "tricycleType", label: "Tricycle Type"  },
-        { key: "tricyclePlateNo", label: "Tricycle Plate No"  },
-        { key: "tricycleSerialNo", label: "Tricycle Serial No"  },
-        { key: "tricycleChassisNo", label: "Tricycle Chassis No" },
-        { key: "tricycleEngineNo", label: "Tricycle Engine No" },
-        { key: "tricycleFileNo", label: "Tricycle File No"  },
+        { key: "vehicleMake", label: "Tricycle Make" },
+        { key: "vehicleType", label: "Tricycle Type"  },
+        { key: "vehiclePlateNo", label: "Tricycle Plate No"  },
+        { key: "vehicleSerialNo", label: "Tricycle Serial No"  },
+        { key: "vehicleChassisNo", label: "Tricycle Chassis No" },
+        { key: "vehicleEngineNo", label: "Tricycle Engine No" },
+        { key: "vehicleFileNo", label: "Tricycle File No"  },
         { key: "cohabitationStartDate", label: "Start of Cohabitation" },
         { key: "cohabitationRelationship", label: "Cohabitation Relationship"},
-        { key: "noIncomePurpose", label: "Purpose Of No Income" },
+        { key: "noIncomePurpose", label: "No Income Purpose" },
         { key: "noIncomeChildFName", label: "Son/Daughther's Name For No Income" },
-        { key: "address", label: "Address" },
+        { key: "address", label: "Requestor's Address" },
         { key: "estateSince", label: "Estate Since" },
         { key: "guardianshipType", label: "Guardianship Type" },
         { key: "wardRelationship", label: "Ward's Relationship" },
@@ -267,14 +267,14 @@ const ViewOnlineRequest = () => {
         { key: "CYFrom", label: "Cohabitation Year From" },
         { key: "CYTo", label: "Cohabitation Year To" },
         { key: "goodMoralPurpose", label: "Purpose Of Good Moral" },
-        { key: "age", label: "Age" },
-        { key: "dateOfResidency", label: "Date of Residency" },
+        { key: "age", label: "Requestor's Age" },
+        { key: "dateOfResidency", label: "Requestor's Date of Residency" },
         { key: "occupation", label: "Occupation" },
-        { key: "civilStatus", label: "Civil Status" },
-        { key: "citizenship", label: "Citizenship" },
-        { key: "gender", label: "Gender" },
-        { key: "contact", label: "Contact" },
-        { key: "birthday", label: "Birthday" },
+        { key: "civilStatus", label: "Requestor's Civil Status" },
+        { key: "citizenship", label: "Requestor's Citizenship" },
+        { key: "gender", label: "Requestor's Gender" },
+        { key: "contact", label: "Requestor's Contact" },
+        { key: "birthday", label: "Requestor's Birthday" },
         { key: "dateofdeath", label: "Date Of Death" },
         { key: "estimatedCapital", label: "Estimated Capital" },
         { key: "typeofconstruction", label: "Type of Construction" },
@@ -285,7 +285,9 @@ const ViewOnlineRequest = () => {
         { key: "isBeneficiary", label: "Is Beneficiary" },
         { key: "birthplace", label: "Birthplace" },
         { key: "religion", label: "Religion" },
-
+        { key: "fromAddress", label: "From Address"},
+        { key: "goodMoralOtherPurpose", label: "Certificate Purpose"}, // for Garage/PUV purpose iba lang kasi yung field name sa db
+        { key: "noOfVechicles", label: "No of Vehicles"},
         
         // Emergency Details Fields
         { key: "emergencyDetails.firstName", label: "Emergency Contact First Name" },
@@ -295,7 +297,7 @@ const ViewOnlineRequest = () => {
         { key: "emergencyDetails.relationship", label: "Emergency Contact Relationship" },
         { key: "emergencyDetails.contactNumber", label: "Emergency Contact Number" },
 
-        {key: "requestor", label: "Requestor Name"},
+        {key: "requestor", label: "Requestor's Full Name"},
 
         {key: "rejectionReason", label: "Reason for Rejection"},
 
@@ -303,7 +305,7 @@ const ViewOnlineRequest = () => {
         { key: "signaturejpg", label: "Signature" },
         { key: "barangayIDjpg", label: "Barangay ID" },
         { key: "validIDjpg", label: "Valid ID" },
-        { key: "endorsementLetter", label: "Endorsement Letter" },
+        { key: "letterjpg", label: "Endorsement Letter" },
         { key: "copyOfPropertyTitle", label: "Copy of Property Title" },
         { key: "dtiRegistration", label: "DTI Registration" },
         { key: "isCCTV", label: "CCTV Requirement" },
@@ -321,301 +323,326 @@ const ViewOnlineRequest = () => {
           }> = {
             "Death Residency": {
               basic: [
-                "createdAt",
-                "docType",
-                "purpose",
-                "fullName",
-                "dateofdeath",
-                "requestor",
+                "createdAt", 
+                "requestor", 
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address", 
                 "rejectionReason",
               ],
               full: [
-                "address",
-                "age",
-                "dateOfResidency",
-                "civilStatus",
-                "citizenship",
-                "gender",
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "fullName",
+                "dateofdeath",
+                "estateSince",
               ],
               others: [
                 "signaturejpg",
-                "deathCertificate",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
+                "deathCertificate",
               ],
             },
             "Cohabitation": {
               basic: [
-                "createdAt",
-                "docType",
-                "purpose",
-                "fullName",
-                "partnerWifeHusbandFullName",
-                "requestor",
+                "createdAt", 
+                "requestor", 
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address", 
                 "rejectionReason",
               ],
               full: [
+                "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "partnerWifeHusbandFullName",
                 "cohabitationStartDate",
                 "cohabitationRelationship",
-                "address",
-                "age",
-                "dateOfResidency",
-                "civilStatus",
-                "citizenship",
-                "gender",
-                "contact",
-                "birthday",
+
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],  
           },
          "Occupancy /  Moving Out": {
               basic: [
                 "createdAt",
-                "docType",
-                "purpose",
-                "fullName",
                 "requestor",
-                "toAddress",
+                "docType",
+                "dateOfResidency",
+                "purpose",
+                "address",
                 "rejectionReason",
               ],
               full: [
-                "address",
-                "age",
-                "dateOfResidency",
-                "civilStatus",
-                "citizenship",
-                "gender",
-                "contact",
                 "birthday",
+                "contact",
+                "age",
+                "civilStatus",
+                "gender",
+                "citizenship",
+                "fullName",
+                "fromAddress",
+                "toAddress",
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
           "Guardianship": {
               basic: [
-                "createdAt",
-                "docType",
-                "purpose",
-                "fullName",
+                "createdAt", 
+                "requestor", 
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address", 
                 "guardianshipType",
-                "requestor",
                 "rejectionReason",
               ],
               full: [
-                "address",
+                "birthday",
+                "contact",
+                "age",
+                "civilStatus",
+                "gender",
+                "citizenship",
+                "fullName",
                 "wardRelationship",
                 "wardFname",
-                "age",
-                "dateOfResidency",
-                "civilStatus",
-                "citizenship",
-                "gender",
-                "contact",
-                "birthday",
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
           "Residency": {
               basic: [
                 "createdAt", 
-                "docType", 
-                "purpose", 
-                "fullName", 
                 "requestor", 
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address", 
                 "appointmentDate",
                 "rejectionReason",
               ],
               full: [
-                "attestedBy", 
-                "CYFrom", 
-                "CYTo", 
-                "address", 
-                "age", 
-                "dateOfResidency", 
-                "civilStatus", 
-                "citizenship", 
-                "gender", 
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "CYFrom", 
+                "attestedBy", 
+                "CYTo", 
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
           "Good Moral and Probation": {
               basic: [
                 "createdAt", 
-                "docType", 
-                "purpose", 
-                "fullName", 
-                "goodMoralPurpose",
                 "requestor", 
+                "docType", 
+                "dateOfResidency",               
+                "purpose", 
+                "address", 
+                "goodMoralPurpose",
                 "rejectionReason",
               ],
               full: [
-                "address", 
-                "age", 
-                "dateOfResidency", 
-                "civilStatus", 
-                "citizenship", 
-                "gender", 
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
           "No Income": {
               basic: [
                 "createdAt", 
-                "docType", 
-                "purpose", 
-                "fullName", 
-                "noIncomePurpose",
                 "requestor", 
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address", 
+                "noIncomePurpose",
                 "rejectionReason",
               ],
               full: [
-                "noIncomeChildFName",
-                "address", 
-                "age", 
-                "dateOfResidency", 
-                "civilStatus", 
-                "citizenship", 
-                "gender", 
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "noIncomeChildFName",
+                
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
           "Estate Tax": {
               basic: [
                 "createdAt", 
+                "requestor", 
                 "docType", 
+                "dateOfResidency", 
                 "purpose", 
-                "fullName",
-                "estateSince", 
-                "requestor",
+                "address", 
                 "rejectionReason",
               ],
               full: [
-                "address", 
-                "age", 
-                "dateOfResidency", 
-                "dateofdeath",
-                "civilStatus", 
-                "citizenship", 
-                "gender", 
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "fullName",
+                "dateofdeath",
+                "estateSince",
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
+                "deathCertificate",
             ],
           },
           "Garage/TRU": {
               basic: [
                "createdAt", 
+               "requestor",
                 "docType", 
+                "dateOfResidency", 
                 "purpose", 
-                "fullName",
-                "address", 
-                "requestor",
+                "address",
                 "rejectionReason",
               ],
               full: [
-                "businessName", 
-                "businessNature",
-                "businessLocation",
-                "noOfTRU",
-                "tricycleMake",
-                "tricycleType",
-                "tricyclePlateNo",
-                "tricycleSerialNo",
-                "tricycleChassisNo",
-                "tricycleEngineNo",
-                "tricycleFileNo",
-                "age", 
-                "dateOfResidency", 
-                "civilStatus", 
-                "citizenship", 
-                "gender", 
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "businessName", 
+                "vehiclePlateNo",
+                "businessNature",
+                "vehicleSerialNo",
+                "businessLocation",
+                "vehicleChassisNo",
+                "noOfVechicles",
+                "vehicleEngineNo",
+                "vehicleMake",
+                "vehicleFileNo",   
+                "vehicleType",
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
           "Garage/PUV": {
               basic: [
                "createdAt", 
+               "requestor",
                 "docType", 
+                "dateOfResidency", 
                 "purpose", 
-                "fullName",
-                "puvPurpose",
-                "requestor",
+                "address",
+                "goodMoralOtherPurpose",
                 "rejectionReason",
               ],
               full: [
-                "vehicleType",
-                "nosOfPUV",
-                "address",
-                "age", 
-                "dateOfResidency", 
-                "civilStatus", 
-                "citizenship", 
-                "gender", 
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "vehicleType",
+                "noOfVechicles",
+   
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
         }
         
+        const formatFieldName = (name: string) =>
+          name
+            .replace(/_/g, " ") // Replace underscores with spaces
+            .replace(/\b\w/g, (c) => c.toUpperCase()); // Capitalize first letter of each word
 
-    const getLabel = (key: string): string =>
-        requestField.find((field) => field.key === key)?.label || key;
+        const getLabel = (key: string): string => {
+          const baseLabel = requestField.find((field) => field.key === key)?.label || formatFieldName(key);
+        
+          if (key === "fullName") {
+            // Customize label for fullName depending on docType or purpose
+            if (requestData?.purpose === "Occupancy /  Moving Out") {
+              return `From ${baseLabel}`;
+            }
+
+            if (requestData?.purpose === "Estate Tax" || requestData?.purpose === "Death Residency") {
+              return `Deceased's ${baseLabel}`;
+            }
+        
+            if (requestData?.purpose === "Guardianship") {
+              return `Guardian's ${baseLabel}`;
+            }
+        
+            // Default fallback
+            return baseLabel;
+          }
+        
+          return baseLabel;
+        };
       
     const currentPurpose = requestData?.purpose as keyof typeof fieldSections;
     const currentSections = fieldSections[currentPurpose] || {};
@@ -937,13 +964,13 @@ const ViewOnlineRequest = () => {
                 "Text3": requestData?.businessLocation,
                 "Text4": `${toWords(parseInt(requestData?.noOfTRU)).toUpperCase()} (${requestData?.noOfTRU})`,
                 "Text5": requestData?.businessNature,
-                "Text6": requestData?.tricycleMake.toUpperCase(),
-                "Text7": requestData?.tricycleType,
-                "Text8": requestData?.tricyclePlateNo,
-                "Text9": requestData?.tricycleSerialNo,
-                "Text10": requestData?.tricycleChassisNo,
-                "Text11": requestData?.tricycleEngineNo,
-                "Text12": requestData?.tricycleFileNo,
+                "Text6": requestData?.vehicleMake.toUpperCase(),
+                "Text7": requestData?.vehicleType,
+                "Text8": requestData?.vehiclePlateNo,
+                "Text9": requestData?.vehicleSerialNo,
+                "Text10": requestData?.vehicleChassisNo,
+                "Text11": requestData?.vehicleEngineNo,
+                "Text12": requestData?.vehicleFileNo,
                 "Text13": requestData?.requestor.toUpperCase(),
                 "Text14": dayToday,
                 "Text15": `${monthToday} ${yearToday}`,
@@ -1045,7 +1072,7 @@ const ViewOnlineRequest = () => {
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
-                        <h1> {requestData?.reqType || "Online"} Request Details </h1>
+                        <h1> {requestData?.reqType || "Online"} Document Request Details </h1>
                     </div>
                 </div>
 

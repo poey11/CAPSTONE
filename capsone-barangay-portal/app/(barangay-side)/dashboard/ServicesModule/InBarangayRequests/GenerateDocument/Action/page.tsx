@@ -245,7 +245,7 @@ export default function action() {
 
       const [clearanceInput, setClearanceInput] = useState<ClearanceInput>({
       accID: "INBRGY-REQ",
-      reqType: "InBarangay",
+      reqType: "In Barangay",
       docType: docType || "",
       status: "Pending",
       createdAt: new Date().toLocaleString(),
@@ -620,7 +620,7 @@ export default function action() {
     
       setClearanceInput((prev: any) => ({
         ...prev,
-        letterjpg: file,
+        copyOfPropertyTitle: file,
       }));
 
       e.target.value = "";
@@ -646,7 +646,7 @@ export default function action() {
     
       setClearanceInput((prev: any) => ({
         ...prev,
-        letterjpg: file,
+        dtiRegistration: file,
       }));
 
       e.target.value = "";
@@ -672,7 +672,7 @@ export default function action() {
     
       setClearanceInput((prev: any) => ({
         ...prev,
-        letterjpg: file,
+        isCCTV: file,
       }));
 
       e.target.value = "";
@@ -698,7 +698,7 @@ export default function action() {
     
       setClearanceInput((prev: any) => ({
         ...prev,
-        letterjpg: file,
+        taxDeclaration: file,
       }));
 
       e.target.value = "";
@@ -724,7 +724,7 @@ export default function action() {
     
       setClearanceInput((prev: any) => ({
         ...prev,
-        letterjpg: file,
+        approvedBldgPlan: file,
       }));
 
       
@@ -751,7 +751,7 @@ export default function action() {
     
       setClearanceInput((prev: any) => ({
         ...prev,
-        letterjpg: file,
+        deathCertificate: file,
       }));
 
       
@@ -1889,7 +1889,7 @@ const handleChange = (
                               </div>
 
                               <div className="fields-section">
-                                <h1>Nos Of Tricycle<span className="required">*</span></h1>
+                                <h1>Nos of Tricycle<span className="required">*</span></h1>
                                 <input 
                                   type="number"  
                                   id="noOfVechicles"  
@@ -2453,7 +2453,7 @@ const handleChange = (
                           {clearanceInput.purpose === "Garage/PUV" && (
                             <>
                               <div className="fields-section">
-                                <h1>Nos Of Vehicle/s<span className="required">*</span></h1>
+                                <h1>Nos of Vehicle/s<span className="required">*</span></h1>
                                 <input 
                                   type="number"  
                                   id="noOfVechicles"  
