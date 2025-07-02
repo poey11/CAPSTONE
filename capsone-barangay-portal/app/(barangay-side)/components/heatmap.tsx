@@ -20,6 +20,7 @@ const IncidentHeatmap:React.FC<props> = ({incidents}) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [isClient, setIsClient] = useState(false); // Ensures client-side rendering
+  
 
   // Define area boundaries (polygon coordinates for each area)
   const areaBoundaries = {
@@ -49,6 +50,16 @@ const IncidentHeatmap:React.FC<props> = ({incidents}) => {
       [121.067921,14.701693],[121.067522,14.699888],
       [121.067486,14.697248]
     ],
+  };
+
+
+  const getCentroid = (coords: [number, number][]): [number, number] => {
+  const total = coords.length;
+  const sum = coords.reduce(
+    (acc, [lng, lat]) => [acc[0] + lng, acc[1] + lat],
+    [0, 0]
+  );
+    return [sum[0] / total, sum[1] / total];
   };
 
 
@@ -148,6 +159,7 @@ const IncidentHeatmap:React.FC<props> = ({incidents}) => {
           "text-halo-width": 1,
         },
       });
+      
       // Uncomment below to add individual point markers for each coordinate in areaBoundaries
       // // 9. Add individual point markers for each coordinate in areaBoundaries
       // const allPoints = Object.entries(areaBoundaries).flatMap(([areaName, coords]) =>
