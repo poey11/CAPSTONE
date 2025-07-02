@@ -216,22 +216,22 @@ WITH INFO
   right: -250px;
   width: 380px;
   height: 600px;
-  background-color: #e8eaed;
-  border-radius: 8px;
+  background-color: #f9fafb;
+border-radius: 12px;
   /*padding: 20px;*/
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
   z-index: 100;
   display: flex;
   flex-direction: column;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+ 
 }
 
 .notification-title {
-  font-size: 25px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  text-align: left;
-  color: #FFFFFF;
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 12px;
 }
 
 
@@ -240,12 +240,27 @@ WITH INFO
   max-height: 450px;
   overflow-y: auto; /* Enable vertical scrolling */
   padding-right: 5px; /* Avoid cutting off scrollbar */
+    scrollbar-width: medium;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
 .notification-content p{
-  color: #294c6b;
+  color: #000000;
 }
 
+.notification-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-content::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+
+
+/*
+
+OLD
 .notification-item {
   cursor: pointer;
   border-bottom: 1px solid #d4cdc8;
@@ -256,8 +271,19 @@ WITH INFO
   transition: background-color 0.3s ease-in-out;
 }
 
+*/
+
+.notification-item {
+    cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 0;
+  transition: background 0.2s ease;
+}
 .notification-item:hover {
-  background-color: #5290c62f;
+ background-color: #f1f5f9;
   box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -268,7 +294,6 @@ WITH INFO
   box-sizing: border-box;
   height: 100px;
   line-height: 1.5em;
-
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3; /* Limit to two lines */
@@ -279,6 +304,7 @@ WITH INFO
   text-overflow: ellipsis;
   white-space: normal;
   word-break: break-word; /* Ensures words wrap properly */
+  
 }
 
 .notification-badge {
@@ -300,36 +326,43 @@ WITH INFO
 
 .filter-container{
   display: flex;
-  flex-direction: row;
   gap: 20px;
-  margin-bottom: 20px;
   color: #FFFFFF
 }
 
 .filter-option{
-  transition: color 0.5s ease-in-out;
+   background: transparent;
+  border: none;
+  color: #e0e0e0;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.3s, color 0.3s;
+  cursor: pointer;
 }
 
-.filter-option:hover{
-  color: #f6f7fa;
+.filter-option:hover,
+.filter-option.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 .top-section{
 background: linear-gradient(to right, #1b3840, #214666, #2c5e73);
-  padding-top: 20px;
-  padding-left: 20px;
-  padding-right: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+/*background: linear-gradient(to right, #1f2e49, #284a66);*/
+padding: 20px;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .bottom-section{
   padding: 20px;
   background-color: #FFFFFF;
+    flex-grow: 1;
+  overflow: hidden;
 }
 
 .unread-icon{
-  max-width: 100%; 
-  height: auto;
   width: 10px;
   filter: brightness(0) saturate(100%) invert(49%) sepia(85%) saturate(500%) hue-rotate(-10deg);
 }
