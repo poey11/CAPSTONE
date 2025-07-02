@@ -7,9 +7,10 @@ import { useSession } from "next-auth/react";
 import { getDownloadURL, ref } from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
-import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc, getDocs, query } from "firebase/firestore";
 import { getLocalDateString } from "@/app/helpers/helpers";
 import { toWords } from 'number-to-words';
+import { useMemo } from "react";
 import OnlineRequests from "../OnlineRequests/page";
 import OnlineReports from "../../IncidentModule/OnlineReports/page";
 
@@ -121,6 +122,10 @@ const ViewOnlineRequest = () => {
     const [pendingStatus, setPendingStatus] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+    const [matchedOtherDocFields, setMatchedOtherDocFields] = useState<string[]>([]);
+    const [otherDocuments, setOtherDocuments] = useState<
+      { type: string; title: string; fields: { name: string }[] }[]
+    >([]);
 
 
     useEffect(() => {
@@ -176,6 +181,54 @@ const ViewOnlineRequest = () => {
     };
 
     
+    useEffect(() => {
+      const fetchMatchedOtherDocFields = async () => {
+        try {
+          if (!requestData?.docType || !requestData?.purpose) return;
+    
+          const snapshot = await getDocs(collection(db, "OtherDocuments"));
+    
+          const matchedDoc = snapshot.docs.find(
+            (doc) =>
+              doc.data().type === requestData.docType &&
+              doc.data().title === requestData.purpose
+          );
+    
+          if (matchedDoc) {
+            const fields = matchedDoc.data().fields || [];
+            const fieldNames = fields.map((f: any) => f.name);
+            setMatchedOtherDocFields(fieldNames);
+          } else {
+            setMatchedOtherDocFields([]); // no match
+          }
+        } catch (error) {
+          console.error("Error fetching matched OtherDocuments fields:", error);
+        }
+      };
+    
+      fetchMatchedOtherDocFields();
+    }, [requestData?.docType, requestData?.purpose]);
+
+
+  
+  
+  useEffect(() => {
+    const fetchOtherDocs = async () => {
+      const q = query(collection(db, "OtherDocuments"));
+      const snapshot = await getDocs(q);
+      const docs = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          type: data.type,
+          title: data.title,
+          fields: data.fields || [],
+        };
+      });
+      setOtherDocuments(docs);
+    };
+  
+    fetchOtherDocs();
+  }, []);
 
 
    useEffect(() => {
@@ -316,7 +369,7 @@ const ViewOnlineRequest = () => {
 
 
         
-        const fieldSections: Record<string, {
+        const predefinedFieldSections: Record<string, {
             basic?: string[];
             full?: string[];
             others?: string[];
@@ -614,6 +667,89 @@ const ViewOnlineRequest = () => {
             ],
           },
         }
+
+        
+        const otherDocPredefinedFields = {
+          basic: [
+            "createdAt", 
+            "requestor", 
+            "docType", 
+            "dateOfResidency", 
+            "purpose", 
+            "address", 
+            "rejectionReason",
+          ],
+          full: [
+            "birthday",
+            "contact",
+            "age", 
+            "civilStatus", 
+            "gender", 
+            "citizenship", 
+          ],
+          others: [
+            "signaturejpg",
+            "barangayIDjpg",
+            "validIDjpg",
+            "letterjpg",
+          ],
+        };
+        
+
+        const defaultFieldSections = {
+          basic: ["createdAt", "requestor", "docType", "dateOfResidency", "purpose", "address", "rejectionReason",],
+          full: ["birthday", "contact", "age", "civilStatus", "gender", "citizenship"],
+          others: ["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg"],
+        };
+        
+        const excludedImageFields = [
+          "signaturejpg",
+          "barangayIDjpg",
+          "validIDjpg",
+          "letterjpg",
+        ];
+        
+        const fieldSections = useMemo(() => {
+          if (!requestData?.purpose) return defaultFieldSections;
+      
+
+          const matchedOtherDoc = otherDocuments.find(
+            (doc) =>
+              doc.title === requestData.purpose &&
+              doc.type === requestData.docType
+          );
+        
+          const dynamicFields = matchedOtherDoc?.fields?.map((f) => f.name) || [];
+        
+          const dynamicToFull = dynamicFields.filter(
+            (field) => !excludedImageFields.includes(field)
+          );
+          const dynamicToOthers = dynamicFields.filter((field) =>
+            excludedImageFields.includes(field)
+          );
+        
+          const predefined = predefinedFieldSections[requestData.purpose];
+        
+          if (predefined) {
+            // ✅ If found in predefinedFieldSections, use it + add dynamic
+            return {
+              basic: [...(predefined.basic || [])],
+              full: [...(predefined.full || []), ...dynamicToFull],
+              others: [...(predefined.others || []), ...dynamicToOthers],
+            };
+          } else if (matchedOtherDoc) {
+            // ✅ If purpose is from OtherDocuments, use shared predefined + dynamic
+            return {
+              basic: [...otherDocPredefinedFields.basic],
+              full: [...otherDocPredefinedFields.full, ...dynamicToFull],
+              others: [...otherDocPredefinedFields.others, ...dynamicToOthers],
+            };
+          } else {
+            // Fallback if nothing matched
+            return defaultFieldSections;
+          }
+        }, [requestData?.purpose, otherDocuments]);
+
         
         const formatFieldName = (name: string) =>
           name
@@ -644,103 +780,106 @@ const ViewOnlineRequest = () => {
           return baseLabel;
         };
       
-    const currentPurpose = requestData?.purpose as keyof typeof fieldSections;
-    const currentSections = fieldSections[currentPurpose] || {};
+    const currentPurpose = requestData?.purpose as keyof typeof predefinedFieldSections;
+    const currentSections = predefinedFieldSections[currentPurpose] || {};
       
     const renderSection = (sectionName: "basic" | "full" | "others") => {
-        const fieldKeys = currentSections[sectionName] || [];
-      
-        // Render 'others' section differently (image display)
-        if (sectionName === "others") {
-            return (
-                <div className="others-image-section" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
-                  {requestData?.reqType === "InBarangay" ? 
-                  (
-                    <>
-                      {requestData?.docsRequired?.map((file, index) => {
-                        return(
-                          <div key={index} className="services-onlinereq-verification-requirements-section">
-                            <span className="verification-requirements-label">Image {index+1}</span>
-                            <div className="services-onlinereq-verification-requirements-container">
-                              <a href={file.name} target="_blank" rel="noopener noreferrer">
-                                <img
-                                  src={file.name}
-                                  alt={`Image ${index}`}
-                                  className="verification-reqs-pic uploaded-picture"
-                                  style={{ cursor: 'pointer' }}
-                                />
-                              </a>
-                            </div>
-                          </div>
-                        )
-
-                      })}
-                    </>
-                  ):(
-                    <>
-                      {fieldKeys.map((key) => {
-                        const fileUrl = (requestData as any)?.[key];
-
-                        // Skip if no image
-                        if (!fileUrl) return null;
-                        return (
-                          <div key={key} className="services-onlinereq-verification-requirements-section">
-                            <span className="verification-requirements-label">{getLabel(key)}</span>
-                            <div className="services-onlinereq-verification-requirements-container">
-                              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                                <img
-                                  src={fileUrl}
-                                  alt={getLabel(key)}
-                                  className="verification-reqs-pic uploaded-picture"
-                                  style={{ cursor: 'pointer' }}
-                                />
-                              </a>
-                            </div>
-                          </div>
-                        );
-                      })}   
-                    </>
-                  )}
-                
-              </div>
-            );
-          }
-      
-        // Default layout for 'basic' and 'full'
-        const leftFields = fieldKeys.filter((_, i) => i % 2 === 0);
-        const rightFields = fieldKeys.filter((_, i) => i % 2 !== 0);
-      
-        const renderField = (key: string) => {
-          const value = key.includes(".")
-            ? key.split(".").reduce((obj, k) => (obj as any)?.[k], requestData)
-            : (requestData as any)?.[key];
-      
-          if (!value) return null;
-      
-          return (
-            <div key={key} className="services-onlinereq-fields-section">
-              <p>{getLabel(key)}</p>
-              <input
-                type="text"
-                className="services-onlinereq-input-field"
-                value={value}
-                readOnly
-              />
-            </div>
-          );
-        };
-      
+      let fieldKeys = fieldSections[sectionName] || [];
+  
+    
+      if (sectionName === "others") {
         return (
-          <div className="services-onlinereq-content" style={{ display: 'flex', gap: '2rem' }}>
-            <div className="services-onlinereq-content-left-side" style={{ flex: 1 }}>
-              {leftFields.map(renderField)}
-            </div>
-            <div className="services-onlinereq-content-right-side" style={{ flex: 1 }}>
-              {rightFields.map(renderField)}
-            </div>
+          <div className="others-image-section" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
+            {requestData?.reqType === "InBarangay" ? (
+              <>
+                {requestData?.docsRequired?.map((file, index) => (
+                  <div key={index} className="services-onlinereq-verification-requirements-section">
+                    <span className="verification-requirements-label">Image {index + 1}</span>
+                    <div className="services-onlinereq-verification-requirements-container">
+                      <a href={file.name} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={file.name}
+                          alt={`Image ${index}`}
+                          className="verification-reqs-pic uploaded-picture"
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
+               {requestData &&
+  [
+    ...fieldKeys,
+    ...Object.keys(requestData).filter(
+      (key) =>
+        !fieldKeys.includes(key) &&
+        typeof requestData[key as keyof OnlineRequest] === "string" &&
+        String(requestData[key as keyof OnlineRequest]).startsWith("https://firebasestorage")
+    ),
+  ].map((key) => {
+    const fileUrl = (requestData as any)?.[key];
+    if (!fileUrl) return null;
+
+    return (
+      <div key={key} className="services-onlinereq-verification-requirements-section">
+        <span className="verification-requirements-label">{getLabel(key)}</span>
+        <div className="services-onlinereq-verification-requirements-container">
+          <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+            <img
+              src={fileUrl}
+              alt={getLabel(key)}
+              className="verification-reqs-pic uploaded-picture"
+              style={{ cursor: 'pointer' }}
+            />
+          </a>
+        </div>
+      </div>
+    );
+  })}
+              </>
+            )}
+          </div>
+        );
+      }
+    
+      // 🧩 Layout for basic/full with dynamic fields included
+      const leftFields = fieldKeys.filter((_, i) => i % 2 === 0);
+      const rightFields = fieldKeys.filter((_, i) => i % 2 !== 0);
+    
+      const renderField = (key: string) => {
+        const value = key.includes(".")
+          ? key.split(".").reduce((obj, k) => (obj as any)?.[k], requestData)
+          : (requestData as any)?.[key];
+    
+        if (!value) return null;
+    
+        return (
+          <div key={key} className="services-onlinereq-fields-section">
+            <p>{getLabel(key)}</p>
+            <input
+              type="text"
+              className="services-onlinereq-input-field"
+              value={value}
+              readOnly
+            />
           </div>
         );
       };
+    
+      return (
+        <div className="services-onlinereq-content" style={{ display: 'flex', gap: '2rem' }}>
+          <div className="services-onlinereq-content-left-side" style={{ flex: 1 }}>
+            {leftFields.map(renderField)}
+          </div>
+          <div className="services-onlinereq-content-right-side" style={{ flex: 1 }}>
+            {rightFields.map(renderField)}
+          </div>
+        </div>
+      );
+    };
      
     const handleBack = () => {
         router.back();
