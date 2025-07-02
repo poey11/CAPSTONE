@@ -29,7 +29,7 @@
   border: 1px solid #ddd;
   border-radius: 10px;
   padding: 2rem;
-  width: 60%;
+  width: 65%;
   height: 375px;
   margin: 5rem auto; /* <-- center horizontally */
 }
@@ -85,7 +85,7 @@ padding-top: 30px;
 
 .documents-card {
     flex: 1 1 calc(50% - 20px);
-    background-color: #F0F2F8;
+ background: linear-gradient(to right, #1b3840, #214666, #2c5e73);
     padding: 20px;
     padding-left: 20px;
     border: 1px solid rgba(44, 62, 80, 0.7);
@@ -106,7 +106,7 @@ padding-top: 30px;
 }
 
 .documents-card h1 {
-      color: #2C3E50;
+      color: #FFFFFF;
     font-weight: bolder;
     font-size: 16px;
 }
@@ -145,31 +145,33 @@ padding-top: 30px;
     position: absolute;
     top: 70px;
     left: 0;
-    background-color: #0C508F;
-    border: 1px solid #ddd;
-    border-radius: 0px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+ background: linear-gradient(to right, #3a5a63, #4b7088, #5e8ca3);
+
+    border: 1px solid rgba(44, 62, 80, 0.7); /* similar border */
+    border-radius: 10px; /* match card radius */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* deeper shadow for depth */
     padding: 10px;
-    z-index: 100; 
-    width: 332px; 
+    z-index: 100;
+    width: 332px;
 }
 
 .dropdown p {
     margin: 0;
-    padding: 8px 10px;
-    color: #ece9e7;
-    font-size: 16px;
+    padding: 10px 12px;
+    color: #f2f6fa; /* soft white */
+    font-size: 15px;
     cursor: pointer;
-    transition: color 0.2s ease-in-out;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    border-radius: 8px;
 }
 
 .dropdown p:hover {
-    background-color: rgb(91, 152, 206); 
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.386);
-    color: #294c6b;
-    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.25); /* lighter hover effect */
+    color: #224e61; /* deep muted blue for contrast */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
 
-} 
+
 
 
 @keyframes fadeIn {
