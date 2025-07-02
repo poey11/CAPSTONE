@@ -265,9 +265,11 @@ const Menu = () => {
                   <Link href="/services">
                     <p>Request Documents</p>
                   </Link>
+                  {/*}
                   <Link href="/Programs">
                     <p>Programs</p>
                   </Link>
+                  */}
                   <Link href="/IncidentReport">
                     <p>File an Incident</p>
                   </Link>
@@ -275,6 +277,8 @@ const Menu = () => {
               
             </div>
             
+
+            {/*}
 
               <div className="navbar-indiv-container">
               <div className="dropdown-Container">
@@ -284,6 +288,9 @@ const Menu = () => {
                 
               </div>
             </div>
+            */}
+
+            {/*}
 
               <div className="dropdown-Container">
                 <div className="menu-section-container">
@@ -302,17 +309,23 @@ const Menu = () => {
                 </Link>
               </div>
             </div>
+              */}
 
+
+              {/*
+               FOR NOTIFICATIONS
+              */}
 
             {!loading && user ? (
               <div className="logged-in-container">
-                <div className="dropdown-Container">
-                  <div className="dropdown-item-no-hover">
+                <div className="dropdown-Container-notifications">
+                  <div className="dropdown-item-no-hover-notifications">
                     <p id="inbox-link" onClick={toggleNotificationSection} className="inbox-container">
                       <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
                       {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
                     </p>
                   </div>
+                  
                   {isOpen && (
                     <div className="notification-section" ref={dropdownRef}>
                       <div className="top-section">
@@ -349,6 +362,13 @@ const Menu = () => {
                   </div>
                 )}
               </div>
+
+
+
+
+
+
+
               <div className="dropdown-Container">
                 <div className="dropdown-item-no-hover" ref={loginMenuRef}>
                   <p
