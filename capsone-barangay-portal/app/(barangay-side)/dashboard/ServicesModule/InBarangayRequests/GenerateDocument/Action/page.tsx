@@ -89,16 +89,15 @@ interface ClearanceInput {
     noIncomeChildFName?: string;
     deceasedEstateName?: string;
     estateSince?: string;
-    docsRequired: File[]; // Changed to File[] to match the file structure
     status?: string; // Optional, can be added if needed
     statusPriority?: number; // Optional, can be added if 
     reqType?: string; // Optional, can be added if needed
-    identificationPicture?: File[];
     isResident?: boolean;
     nameOfTyphoon?: string;
     dateOfTyphoon?: string;
     dateOfFireIncident?: string;
     fromAddress?: string;
+
 
     signaturejpg: File | null;
     barangayIDjpg: File | null;
@@ -110,6 +109,7 @@ interface ClearanceInput {
     taxDeclaration: File | null;
     approvedBldgPlan: File | null;
     deathCertificate: File | null;
+    identificationPic: File | null;
 }
 
 
@@ -147,9 +147,9 @@ export default function action() {
     const [files6, setFiles6] = useState<{ name: string, preview: string | undefined }[]>([]);
     const [files7, setFiles7] = useState<{ name: string, preview: string | undefined }[]>([]);
     const [files8, setFiles8] = useState<{ name: string, preview: string | undefined }[]>([]);
-
     const [files9, setFiles9] = useState<{ name: string, preview: string | undefined }[]>([]);
     const [files10, setFiles10] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const [files11, setFiles11] = useState<{ name: string, preview: string | undefined }[]>([]);
 
     
     const employerPopupRef = useRef<HTMLDivElement>(null);
@@ -251,7 +251,6 @@ export default function action() {
       createdAt: new Date().toLocaleString(),
       createdBy: user?.id || "",
       statusPriority: 1,
-      docsRequired: [],
       signaturejpg: null,
       barangayIDjpg: null,
       validIDjpg: null,
@@ -262,7 +261,7 @@ export default function action() {
       taxDeclaration: null,
       approvedBldgPlan: null,
       deathCertificate: null,
-      identificationPicture: [],
+      identificationPic: null,
       isResident: false,
     
       // ADD THESE TO AVOID WARNINGS
@@ -466,6 +465,10 @@ export default function action() {
 
       const handleDeathCertificateDelete = (fileName: string) => {
         setFiles10((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+
+      const handleIdentificationPicDelete = (fileName: string) => {
+        setFiles11((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
       };
 
 
@@ -761,6 +764,33 @@ export default function action() {
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
     };
 
+    const handleIdentificationPicUpload = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles11([{ name: file.name, preview }]);
+    
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        identificationPic: file,
+      }));
+
+      
+      e.target.value = "";
+    
+      // Optional: revoke URL after timeout
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
+    };
+
     
     const handleDiscardClick = async () => {
         setShowDiscardPopup(true);
@@ -797,7 +827,8 @@ export default function action() {
           "isCCTV",
           "taxDeclaration",
           "approvedBldgPlan",
-          "deathCertificate"
+          "deathCertificate",
+          "identificationPic"
         ];
     
         for (const key of fileKeys) {
@@ -859,7 +890,20 @@ export default function action() {
           setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
-  }
+      }
+
+
+    if (
+      clearanceInput.docType === "Barangay Certificate" &&
+      ["Residency"].includes(clearanceInput.purpose || "")
+    ) {
+      if (!files11 || files11.length === 0) {
+        setPopupErrorMessage("Please upload Identification Picture.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
+    }
     
       // Signature
       if (!files1 || files1.length === 0) {
@@ -894,7 +938,6 @@ export default function action() {
         }
       }
 
-      // New condition for Valid ID required for certain purposes
       if (["Barangay ID", "First Time Jobseeker"].includes(clearanceInput.purpose || "")) {
         if (!files3 || files3.length === 0) {
           setPopupErrorMessage("Please upload Valid ID.");
@@ -903,6 +946,8 @@ export default function action() {
           return;
         }
       }
+
+      
     
       if (isBusinessPermit) {
         if (!files5 || files5.length === 0) {
@@ -2851,16 +2896,76 @@ const handleChange = (
                   {activeSection === "others" && (
                     <>
                       <div className="others-main-container">
-                        <div className="box-container-outer-verificationdocs">
+                      <div className="box-container-outer-inbrgy">
+                          <div className="title-verificationdocs-signature">
+                            Identification Picture
+                          </div>
+
+                          <div className="box-container-inbrgy">
+                            <span className="required-asterisk">*</span>
+
+                            {/* File Upload Section */}
+                            <div className="file-upload-container-inbrgy">
+                              <label htmlFor="file-upload11"  className="upload-link">Click to Upload File</label>
+                                <input
+                                  id="file-upload11"
+                                  type="file"
+                                  className="file-upload-input" 
+                                  multiple
+                                  accept=".jpg,.jpeg,.png"
+                                  onChange={handleIdentificationPicUpload}
+                                />
+
+                                {/* Display the file names with image previews */}
+                                {files11.length > 0 && (
+                                  <div className="file-name-image-display">
+                                    {files11.map((file, index) => (
+                                      <div className="file-name-image-display-indiv" key={index}>
+                                        <li className="file-item"> 
+                                          {/* Display the image preview */}
+                                          {file.preview && (
+                                            <div className="filename-image-container">
+                                              <img
+                                                src={file.preview}
+                                                alt={file.name}
+                                                className="file-preview"
+                                              />
+                                            </div>
+                                          )}
+                                          <span className="file-name">{file.name}</span>  
+                                          <div className="delete-container">
+                                            {/* Delete button with image */}
+                                            <button
+                                              type="button"
+                                              onClick={() => handleIdentificationPicDelete(file.name)}
+                                              className="delete-button"
+                                            >
+                                            <img
+                                              src="/images/trash.png"  
+                                              alt="Delete"
+                                              className="delete-icon"
+                                            />
+                                            </button>
+                                          </div>
+                                        </li>
+                                      </div>
+                                    ))}           
+                                  </div>
+                                )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="box-container-outer-inbrgy">
                           <div className="title-verificationdocs-signature">
                             Signature Over Printed Name
                           </div>
 
-                          <div className="box-container-verificationdocs">
+                          <div className="box-container-inbrgy">
                             <span className="required-asterisk">*</span>
 
                             {/* File Upload Section */}
-                            <div className="file-upload-container">
+                            <div className="file-upload-container-inbrgy">
                               <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
                                 <input
                                   id="file-upload1"
@@ -2915,16 +3020,16 @@ const handleChange = (
 
                         {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "")) && (
                           <>
-                            <div className="box-container-outer-verificationdocs">
+                            <div className="box-container-outer-inbrgy">
                               <div className="title-verificationdocs-barangayID">
                                 Barangay ID
                               </div>
 
-                              <div className="box-container-verificationdocs">
+                              <div className="box-container-inbrgy">
                                 <span className="required-asterisk">*</span>
 
                                 {/* File Upload Section */}
-                                <div className="file-upload-container">
+                                <div className="file-upload-container-inbrgy">
                                   <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
                                     <input
                                       id="file-upload2"
@@ -2979,16 +3084,16 @@ const handleChange = (
 
                         {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "Barangay ID" || clearanceInput.purpose === "First Time Jobseeker") && (
                               <>
-                                <div className="box-container-outer-verificationdocs">
+                                <div className="box-container-outer-inbrgy">
                                   <div className="title-verificationdocs-validID">
                                     Valid ID
                                   </div>
 
-                                  <div className="box-container-verificationdocs">
+                                  <div className="box-container-inbrgy">
                                     <span className="required-asterisk">*</span>
 
                                     {/* File Upload Section */}
-                                    <div className="file-upload-container">
+                                    <div className="file-upload-container-inbrgy">
                                       <label htmlFor="file-upload3"  className="upload-link">Click to Upload File</label>
                                         <input
                                           id="file-upload3"
@@ -3041,16 +3146,16 @@ const handleChange = (
                               </>
                             )}
 
-                        <div className="box-container-outer-verificationdocs">
+                        <div className="box-container-outer-inbrgy">
                           <div className="title-verificationdocs-endorsement">
                             Endorsement Letter
                           </div>
 
-                          <div className="box-container-verificationdocs">
+                          <div className="box-container-inbrgy">
                             <span className="required-asterisk">*</span>
 
                             {/* File Upload Section */}
-                            <div className="file-upload-container">
+                            <div className="file-upload-container-inbrgy">
                               <label htmlFor="file-upload4"  className="upload-link">Click to Upload File</label>
                                 <input
                                   id="file-upload4"
@@ -3103,16 +3208,16 @@ const handleChange = (
 
                         {isBusinessPermit && (
                           <>
-                            <div className="box-container-outer-verificationdocs">
+                            <div className="box-container-outer-inbrgy">
                               <div className="title-verificationdocs-propertyContract">
                                 Title of the Property/Contract of Lease
                               </div>
 
-                              <div className="box-container-verificationdocs">
+                              <div className="box-container-inbrgy">
                                 <span className="required-asterisk">*</span>
 
                                 {/* File Upload Section */}
-                                <div className="file-upload-container">
+                                <div className="file-upload-container-inbrgy">
                                   <label htmlFor="file-upload5"  className="upload-link">Click to Upload File</label>
                                     <input
                                       id="file-upload5"
@@ -3163,16 +3268,16 @@ const handleChange = (
                               </div>
                             </div>
 
-                            <div className="box-container-outer-verificationdocs">
+                            <div className="box-container-outer-inbrgy">
                               <div className="title-verificationdocs-dti">
                                 DTI Registration
                               </div>
 
-                              <div className="box-container-verificationdocs">
+                              <div className="box-container-inbrgy">
                                 <span className="required-asterisk">*</span>
 
                                 {/* File Upload Section */}
-                                <div className="file-upload-container">
+                                <div className="file-upload-container-inbrgy">
                                   <label htmlFor="file-upload6"  className="upload-link">Click to Upload File</label>
                                     <input
                                       id="file-upload6"
@@ -3223,16 +3328,16 @@ const handleChange = (
                               </div>
                             </div>
 
-                            <div className="box-container-outer-verificationdocs">
+                            <div className="box-container-outer-inbrgy">
                               <div className="title-verificationdocs-cctv">
                                 Picture of CCTV Installed
                               </div>
 
-                              <div className="box-container-verificationdocs">
+                              <div className="box-container-inbrgy">
                                 <span className="required-asterisk">*</span>
 
                                 {/* File Upload Section */}
-                                <div className="file-upload-container">
+                                <div className="file-upload-container-inbrgy">
                                   <label htmlFor="file-upload7"  className="upload-link">Click to Upload File</label>
                                     <input
                                       id="file-upload7"
@@ -3287,16 +3392,16 @@ const handleChange = (
 
                         {isConstruction && (
                           <>
-                            <div className="box-container-outer-verificationdocs">
+                            <div className="box-container-outer-inbrgy">
                               <div className="title-verificationdocs-propertyContract">
                                 Title of the Property/Contract of Lease
                               </div>
 
-                              <div className="box-container-verificationdocs">
+                              <div className="box-container-inbrgy">
                                 <span className="required-asterisk">*</span>
 
                                 {/* File Upload Section */}
-                                <div className="file-upload-container">
+                                <div className="file-upload-container-inbrgy">
                                   <label htmlFor="file-upload5"  className="upload-link">Click to Upload File</label>
                                     <input
                                       id="file-upload5"
@@ -3347,16 +3452,16 @@ const handleChange = (
                               </div>
                             </div>
 
-                            <div className="box-container-outer-verificationdocs">
+                            <div className="box-container-outer-inbrgy">
                               <div className="title-verificationdocs-taxDeclaration">
                                 Tax Declaration
                               </div>
 
-                              <div className="box-container-verificationdocs">
+                              <div className="box-container-inbrgy">
                                 <span className="required-asterisk">*</span>
 
                                 {/* File Upload Section */}
-                                <div className="file-upload-container">
+                                <div className="file-upload-container-inbrgy">
                                   <label htmlFor="file-upload8"  className="upload-link">Click to Upload File</label>
                                     <input
                                       id="file-upload8"
@@ -3407,16 +3512,16 @@ const handleChange = (
                               </div>
                             </div>
 
-                            <div className="box-container-outer-verificationdocs">
+                            <div className="box-container-outer-inbrgy">
                               <div className="title-verificationdocs-bldgconstruction">
                                 Building/Construction Plan
                               </div>
 
-                              <div className="box-container-verificationdocs">
+                              <div className="box-container-inbrgy">
                                 <span className="required-asterisk">*</span>
 
                                 {/* File Upload Section */}
-                                <div className="file-upload-container">
+                                <div className="file-upload-container-inbrgy">
                                   <label htmlFor="file-upload9"  className="upload-link">Click to Upload File</label>
                                     <input
                                       id="file-upload9"
@@ -3471,16 +3576,16 @@ const handleChange = (
 
                         {["Estate Tax", "Death Residency"].includes(clearanceInput.purpose ?? "") && (
                           <>
-                            <div className="box-container-outer-verificationdocs">
+                            <div className="box-container-outer-inbrgy">
                               <div className="title-verificationdocs-deathCertificate">
                                 Death Certificate
                               </div>
 
-                              <div className="box-container-verificationdocs">
+                              <div className="box-container-inbrgy">
                                 <span className="required-asterisk">*</span>
 
                                 {/* File Upload Section */}
-                                <div className="file-upload-container">
+                                <div className="file-upload-container-inbrgy">
                                   <label htmlFor="file-upload10"  className="upload-link">Click to Upload File</label>
                                     <input
                                       id="file-upload10"
@@ -3534,15 +3639,15 @@ const handleChange = (
                         )}
 
                         {dynamicImageFields.map((fieldName) => (
-                          <div className="box-container-outer-verificationdocs" key={fieldName}>
+                          <div className="box-container-outer-inbrgy" key={fieldName}>
                             <div className="title-verificationdocs-added-imagefield">
                               {formatFieldName(fieldName.replace(/jpg$/, "").trim())}
                             </div>
 
-                            <div className="box-container-verificationdocs">
+                            <div className="box-container-inbrgy">
                               <span className="required-asterisk">*</span>
 
-                              <div className="file-upload-container">
+                              <div className="file-upload-container-inbrgy">
                                 <label htmlFor={`file-upload-${fieldName}`} className="upload-link">
                                   Click to Upload File
                                 </label>

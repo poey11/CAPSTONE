@@ -76,6 +76,7 @@ interface EmergencyDetails {
     taxDeclaration: string;
     approvedBldgPlan: string;
     deathCertificate: string;
+    identificationPic: string;
     dateofdeath: string;
     wardFname: string;
     wardRelationship: string;
@@ -157,6 +158,7 @@ const ViewOnlineRequest = () => {
         "taxDeclaration",
         "approvedBldgPlan",
         "deathCertificate",
+        "identificationPic",
       ] as const;
 
       const updatedData = { ...data };
@@ -368,6 +370,7 @@ const ViewOnlineRequest = () => {
         { key: "taxDeclaration", label: "Tax Declaration" },
         { key: "approvedBldgPlan", label: "Approved Building Plan" },
         { key: "deathCertificate", label: "Death Certificate" },
+        { key: "identificationPic", label: "Identification Picture" },
         ];
 
 
@@ -515,6 +518,7 @@ const ViewOnlineRequest = () => {
                 "CYTo", 
               ],
               others: [
+                "identificationPic",
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",

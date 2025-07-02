@@ -972,7 +972,7 @@ gap: 20px;
 }
 
 
-.box-container-outer-verificationdocs {
+.box-container-outer-inbrgy {
   flex: 0 1 45%;
   box-sizing: border-box;
   display: flex;
@@ -983,12 +983,12 @@ gap: 20px;
 }
 
 @media (max-width: 768px) {
-  .box-container-outer-verificationdocs {
+  .box-container-outer-inbrgy {
     flex: 0 1 100%;
   }
 }
 
-.box-container-verificationdocs {
+.box-container-inbrgy {
   position: relative;
   width: 370px;
   border: 1px solid #5a6b7c;
@@ -1007,7 +1007,7 @@ gap: 20px;
  align-items: center;
 }
 
-.box-container-verificationdocs:hover {
+.box-container-inbrgy:hover {
  background-color: rgba(245, 143, 88, 0.2);
 }
 
@@ -1197,7 +1197,7 @@ gap: 20px;
   }
   
 
-.file-upload-container {
+.file-upload-container-inbrgy {
   margin-bottom: 20px;
   border-radius: 8px;
   transition: background-color 0.3s ease;
