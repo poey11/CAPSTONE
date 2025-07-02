@@ -1013,8 +1013,9 @@ gap: 20px;
 
   .title-verificationdocs-signature {
     position: absolute;
-    top: 15px; /* ⬅️ moves the title above the box */
-    left: 25%; /* adjust as needed */
+    top: 15px; /* stays above the box */
+    left: 50%; /* center horizontally */
+    transform: translateX(-50%); /* offset by 50% of its own width */
     background-color: #1f3b57;
     color: white;
     padding: 6px 12px;
@@ -1028,8 +1029,9 @@ gap: 20px;
 
   .title-verificationdocs-barangayID {
     position: absolute;
-    top: 15px; /* ⬅️ moves the title above the box */
-    left: 38%; /* adjust as needed */
+    top: 15px; /* stays above the box */
+    left: 50%; /* center horizontally */
+    transform: translateX(-50%); /* offset by 50% of its own width */
     background-color: #1f3b57;
     color: white;
     padding: 6px 12px;
@@ -1043,8 +1045,9 @@ gap: 20px;
 
   .title-verificationdocs-validID {
     position: absolute;
-    top: 15px; /* ⬅️ moves the title above the box */
-    left: 42%; /* adjust as needed */
+    top: 15px; /* stays above the box */
+    left: 50%; /* center horizontally */
+    transform: translateX(-50%); /* offset by 50% of its own width */
     background-color: #1f3b57;
     color: white;
     padding: 6px 12px;
@@ -1058,8 +1061,9 @@ gap: 20px;
 
   .title-verificationdocs-endorsement {
     position: absolute;
-    top: 15px; /* ⬅️ moves the title above the box */
-    left: 32%; /* adjust as needed */
+    top: 15px; /* stays above the box */
+    left: 50%; /* center horizontally */
+    transform: translateX(-50%); /* offset by 50% of its own width */
     background-color: #1f3b57;
     color: white;
     padding: 6px 12px;
@@ -1073,8 +1077,9 @@ gap: 20px;
 
   .title-verificationdocs-propertyContract {
     position: absolute;
-    top: 15px; /* ⬅️ moves the title above the box */
-    left: 18%; /* adjust as needed */
+    top: 15px; /* stays above the box */
+    left: 50%; /* center horizontally */
+    transform: translateX(-50%); /* offset by 50% of its own width */
     background-color: #1f3b57;
     color: white;
     padding: 6px 12px;
@@ -1088,8 +1093,9 @@ gap: 20px;
 
   .title-verificationdocs-dti {
     position: absolute;
-    top: 15px; /* ⬅️ moves the title above the box */
-    left: 35%; /* adjust as needed */
+    top: 15px; /* stays above the box */
+    left: 50%; /* center horizontally */
+    transform: translateX(-50%); /* offset by 50% of its own width */
     background-color: #1f3b57;
     color: white;
     padding: 6px 12px;
@@ -1103,8 +1109,9 @@ gap: 20px;
 
   .title-verificationdocs-cctv {
     position: absolute;
-    top: 15px; /* ⬅️ moves the title above the box */
-    left: 28%; /* adjust as needed */
+    top: 15px; /* stays above the box */
+    left: 50%; /* center horizontally */
+    transform: translateX(-50%); /* offset by 50% of its own width */
     background-color: #1f3b57;
     color: white;
     padding: 6px 12px;
@@ -1118,8 +1125,9 @@ gap: 20px;
 
   .title-verificationdocs-taxDeclaration {
     position: absolute;
-    top: 15px; /* ⬅️ moves the title above the box */
-    left: 35%; /* adjust as needed */
+    top: 15px; /* stays above the box */
+    left: 50%; /* center horizontally */
+    transform: translateX(-50%); /* offset by 50% of its own width */
     background-color: #1f3b57;
     color: white;
     padding: 6px 12px;
@@ -1132,8 +1140,9 @@ gap: 20px;
   }
   .title-verificationdocs-bldgconstruction {
     position: absolute;
-    top: 15px; /* ⬅️ moves the title above the box */
-    left: 27%; /* adjust as needed */
+    top: 15px; /* stays above the box */
+    left: 50%; /* center horizontally */
+    transform: translateX(-50%); /* offset by 50% of its own width */
     background-color: #1f3b57;
     color: white;
     padding: 6px 12px;
@@ -1147,8 +1156,9 @@ gap: 20px;
 
   .title-verificationdocs-deathCertificate {
     position: absolute;
-    top: 15px; /* ⬅️ moves the title above the box */
-    left: 35%; /* adjust as needed */
+    top: 15px; /* stays above the box */
+    left: 50%; /* center horizontally */
+    transform: translateX(-50%); /* offset by 50% of its own width */
     background-color: #1f3b57;
     color: white;
     padding: 6px 12px;

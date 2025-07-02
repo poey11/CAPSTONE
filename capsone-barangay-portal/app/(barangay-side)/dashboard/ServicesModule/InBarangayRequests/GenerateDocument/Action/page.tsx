@@ -971,7 +971,7 @@ export default function action() {
         console.log("Files:", files);
         console.log("Clearance Input:", clearanceInput);
         handleUploadClick().then(() => {
-            router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
+            router.push(`/dashboard/ServicesModule/ViewRequest?id=${id}`);
         });
         // Hide the popup after 3 seconds
         setTimeout(() => {

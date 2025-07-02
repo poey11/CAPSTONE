@@ -152,9 +152,10 @@ import { db } from "@/app/db/firebase";
       markAsViewed(id); // mark before navigating
       if(request.type === "OtherDocument") {
         router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest/otherDocument?id=${id}`);
+        router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest/otherDocument?id=${id}`);
       }
       else{
-        router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${id}`);
+        router.push(`/dashboard/ServicesModule/ViewRequest?id=${id}`);
       }
     };
 
