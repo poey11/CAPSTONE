@@ -1,11 +1,13 @@
 
-.services-container {
-    height: 100%;
+
+.services-container-document {
+      height: 100vh;
     width: 100%;
+     background-image: url('/Images/bghome.jpg');
 }
 
 .headerpic-services {
-  position: relative;
+ position: relative;
   height: 250px;
   display: flex;
   align-items: center;
@@ -14,61 +16,41 @@
   font-size: 50px;
   font-weight:bolder;
   overflow: hidden; 
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+   background-position: center 55%; 
 }
 
-.headerpic-services::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('/images/brgyheaderpic.JPG');
-  background-size: cover;
-  background-position: 50% 60%;
-  background-repeat: no-repeat;
-  filter: blur(1.2px); 
-  z-index: 1;
-}
-
-.headerpic-services::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.150); 
-  z-index: 2; 
-}
-
-.headerpic-services > * {
-  position: relative;
-  z-index: 3; 
+.services-main-container {
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 2rem;
+  width: 60%;
+  height: 375px;
+  margin: 5rem auto; /* <-- center horizontally */
 }
 
 
-.services-main-container{
+
+.documents-container{
+gap: 40px;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+.documents-upper {
+padding-top: 30px;
+}
+
+.documents-lower {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #D8DFE5;
- 
-}
-
-.documents-container{
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 10px;
-    margin-top: 70px;
-    margin-bottom:70px;
-    border: 1px solid #ddd;
-    padding: 30px;
-    gap: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 90%; 
-    max-width: 1000px; 
 
 }
 
@@ -77,38 +59,64 @@
   font-size: 20px;
 }
 
-.documents-container-column {
-  margin-top: 20px;
-  display: block;
-  flex-wrap: wrap;
+.documents-container-left{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  height: 100%;
 }
 
-.documents-card {
-  flex: 1 1 calc(50% - 20px);
-  background-color: #547ba0;
-  padding: 20px;
-  padding-left: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(244, 90, 24, 0.906);
-  height: 70px;
-  margin-bottom: 20px;
-  margin-left: 20px;
-  transition: all 0.3s ease;
+.documents-container-right{
   display: flex;
-  gap: 55px;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  z-index: 10;
-  width: 350px;
-  max-width: 90%; 
+  width: 50%;
+  height: 100%;
+
+
+}
+
+
+
+
+
+.documents-card {
+    flex: 1 1 calc(50% - 20px);
+    background-color: #F0F2F8;
+    padding: 20px;
+    padding-left: 20px;
+    border: 1px solid rgba(44, 62, 80, 0.7);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.142);
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 70px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    display: flex;
+    gap: 55px;
+    align-items: center;
+    z-index: 10;
+    width: 350px; /* Adjusted for better fit */
+    max-width: 90%; /* Responsive width */
+    text-align: center;
+    justify-content: center;
+}
+
+.documents-card h1 {
+      color: #2C3E50;
+    font-weight: bolder;
+    font-size: 16px;
 }
 
 .documents-card:hover {
-  transform: scale(1.10);
-  box-shadow: 0 8px 10px rgba(244, 90, 24, 0.906);
-  background-color: #0C508F;
-  cursor: pointer;
+      transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.444);
+    cursor: pointer;
 }
+
 
 .document-icon {
   max-width: 100%;
@@ -129,6 +137,7 @@
     flex-wrap: wrap; 
     gap: 0;
     padding-left: 0;
+    z-index: 20;
 }
 
 .dropdown {
@@ -249,4 +258,19 @@ to {
 .tooltip-wrapper:hover .tooltip-text {
   visibility: visible;
   opacity: 1;
+}
+
+
+
+.documents-container-column {
+      margin-top: 20px;
+    display: block;
+    flex-wrap: wrap;
+    
+}
+
+.documents-container-column-other {
+     width: 380px;
+   display: flex;
+   justify-content: center;
 }
