@@ -381,7 +381,7 @@ const confirmSubmit = async () => {
         const differenceInMilliseconds =  createdDate.getTime()-filedDate.getTime();
         const differenceInDays = differenceInMilliseconds / (1000 * 60 * 60 * 24);
     
-        return differenceInDays >= 7;
+        return differenceInDays >= 1;
       };
       
     
@@ -391,7 +391,7 @@ const confirmSubmit = async () => {
         if (!incidentReport?.dateFiled) return;
     
         const dateFiled = new Date(incidentReport.dateFiled);
-        const createdAt = new Date();
+        const createdAt = new Date(getLocalDateString(new Date())); // Use the current date as createdAt
     
         const isLate = isOneWeekOrMore(dateFiled, createdAt);
         setIsIncidentLate(isLate);

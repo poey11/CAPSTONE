@@ -62,7 +62,7 @@ const AppointmentCalendar: React.FC<Props> = ({ appointments }) => {
   };
   const hanndleClickEvent = (info: any) => {
     const appointmentId = info.event.id;
-    router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest?id=${appointmentId}`);
+    router.push(`/dashboard/ServicesModule/ViewRequest?id=${appointmentId}`);
   }
 
   return (
