@@ -290,5 +290,19 @@
 }
 
 
+/* for heatmap */
 
+.dashboard-heatmap-section {
+    flex: 1;
+ min-width: 300px;
+ background: #ffffff;
+ border: 2px solid rgba(36, 53, 76, 0.7);
+ box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+ border-radius: 1rem;
+ padding: 1.5rem;
+ box-sizing: border-box;
+ height: fit-content;
+ }
+
+  
 
