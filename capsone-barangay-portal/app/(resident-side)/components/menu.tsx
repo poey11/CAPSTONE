@@ -119,7 +119,8 @@ const Menu = () => {
   
 
   const [isOpen, setIsOpen] = useState(false);
-  const [filter, setFilter] = useState("all");
+ const [filter, setFilter] = useState<"all" | "unread" | "incident" | "document">("all");
+
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const toggleNotificationSection = () => setIsOpen((prev) => !prev);
 
@@ -163,9 +164,21 @@ const Menu = () => {
   
 
   const unreadCount = notifications.filter((msg) => msg.isRead === false).length;
-  const filteredMessages = filter === "all"
-  ? notifications
-  : notifications.filter((msg) => !msg.isRead);
+const filteredMessages = notifications.filter((msg) => {
+  switch (filter) {
+    case "unread":
+      return !msg.isRead;
+    case "incident":
+      return msg.transactionType.toLowerCase().includes("incident");
+case "document":
+  return msg.transactionType.toLowerCase().includes("document") || 
+         msg.message.toLowerCase().includes("document request");
+
+    default:
+      return true;
+  }
+});
+
 
   const pathname = usePathname();
   const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages
@@ -330,10 +343,14 @@ const Menu = () => {
                     <div className="notification-section" ref={dropdownRef}>
                       <div className="top-section">
                         <p className="notification-title">Notification Inbox</p>
-                        <div className="filter-container">
-                          <button className={`filter-option ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
-                          <button className={`filter-option ${filter === "unread" ? "active" : ""}`} onClick={() => setFilter("unread")}>Unread</button>
-                        </div>
+                          <div className="filter-container">
+                            <button className={`filter-option ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
+                            <button className={`filter-option ${filter === "unread" ? "active" : ""}`} onClick={() => setFilter("unread")}>Unread</button>
+                            <button className={`filter-option ${filter === "incident" ? "active" : ""}`} onClick={() => setFilter("incident")}>Incident</button>
+                            <button className={`filter-option ${filter === "document" ? "active" : ""}`} onClick={() => setFilter("document")}>Documents</button>
+                          </div>
+
+
                       </div>
                       <div className="bottom-section">
                         <div className="notification-content">
@@ -355,7 +372,8 @@ const Menu = () => {
                               </div>
                             ))
                           ) : (
-                            <p>No messages found</p>
+                            <p style={{ color: "red" }}>No messages found</p>
+
                           )}
                       </div>
                     </div>
