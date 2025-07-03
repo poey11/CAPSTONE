@@ -348,10 +348,10 @@ const getViewedRequests = (): string[] => {
                     <td>{incident.areaOfIncident}</td>
                     <td>{incident.concerns}</td>
                     <td>
-                      <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
-                        {incident.status}
-                      </span>
-                    </td>
+                  <span className={`status-badge ${incident.status.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
+                    {incident.status}
+                  </span>
+                  </td>
                     <td>
                       <div className="actions-services">
                         <button className="action-edit-services " onClick={() => handleViewOnlineReport(incident.id)}><img src="/Images/edit.png" alt="Edit" /></button>
@@ -410,9 +410,7 @@ const getViewedRequests = (): string[] => {
                   Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
                 </th>
                 <th>Complainant's Full Name</th>
-                <th>Date Filed</th>
-                <th>Incident Date and Time</th>
-                <th>Area of Incident</th>
+               
                 <th>Concern</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -425,9 +423,7 @@ const getViewedRequests = (): string[] => {
                    <tr key={index} className={tasks.isNew ? "highlight-new-request" : ""}>
                     <td>{tasks.caseNumber || "N/A"}</td>
                     <td>{fullName}</td>
-                    <td>{tasks.createdAt}</td>
-                    <td>{tasks.dateFiled} {tasks.time}</td>
-                    <td>{tasks.area}</td>
+               
                     <td>{tasks.concerns}</td>
                     <td>
                       <span className={`status-badge ${tasks.status.toLowerCase().replace(" ", "-")}`}>

@@ -173,10 +173,10 @@ width: 100px;
     background-color: #d4d64f;  
 }
 
-.status-badge.In\ \-\ Progress
- {
-   background-color: #d420ad;  
+.status-badge.in-progress {
+  background-color: #dd5312;
 }
+
 
 
 
@@ -184,7 +184,7 @@ width: 100px;
 
 .section-1-online-reports {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   margin-bottom: 1.5rem;
   padding: 0.5rem 0;
   background: transparent;
