@@ -7,7 +7,7 @@ import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "f
 import {db} from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 
-const statusOptions = ["All", "Acknowledged", "Pending", "In - Progress"];
+const statusOptions = ["All", "Settled  ", "pending", "In - Progress"];
 
 export default function OnlineReports() {
   const [incidentData, setIncidentData] = useState<any[]>([]);
@@ -75,6 +75,7 @@ const getViewedRequests = (): string[] => {
 
   console.log("Incident Data:", incidentData);
   useEffect(() => {
+    
     try {
       const Collection = query(
         collection(db, "IncidentReports"), 
@@ -87,6 +88,10 @@ const getViewedRequests = (): string[] => {
             ...doc.data(),
             isNew: doc.data().isViewed === false, // Check if the request is new
             }));
+
+        // ✅ FILTER HERE BEFORE setting state
+          const activeTasks = data.filter(task => task.status !== "Settled");
+
           data.sort((a, b) => {
             if(a.statusPriority !== b.statusPriority) {
               return a.statusPriority - b.statusPriority; // Sort by status priority first
@@ -95,7 +100,7 @@ const getViewedRequests = (): string[] => {
             const dateB = new Date(b.createdAt).getTime();
             return dateB - dateA; // Sort by createdAt in descending order
           });
-          setTaskAssignedData(data);
+          setTaskAssignedData(activeTasks); //updated from "data" MEE
         });
         return () => {
           if (unsubscribe) {
@@ -250,9 +255,62 @@ const getViewedRequests = (): string[] => {
       return pageNumbersToShow;
     };
 
+    const [activeSection, setActiveSection] = useState("main");
+
   return (
     <main className="main-container-online-reports">
-    
+
+
+      <div className="section-1-online-reports">
+            <div className="edit-incident-info-toggle-wrapper">
+
+              {/*
+
+               {["main", "tasks" ].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "main" && "Online Records"}
+                      {section === "tasks" && "Assigned Tasks"}
+                    </button>
+                  ))}
+              
+              */}
+
+
+              {["main", "tasks"].map((section) => (
+            <button
+              key={section}
+              type="button"
+              className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+              onClick={() => setActiveSection(section)}
+              style={{ position: "relative" }}
+            >
+              {section === "main" && "Online Records"}
+              {section === "tasks" && (
+                <>
+                  Assigned Tasks
+                  {taskAssignedData.length > 0 && (
+                    <span className="task-badge">{taskAssignedData.length}</span>
+                  )}
+                </>
+              )}
+            </button>
+          ))}
+
+
+
+                  
+          </div> 
+
+      </div>
+
+      {activeSection === "main" && (
+        <>
+
       <div className="section-2-online-reports">
         <input
           type="text"
@@ -302,7 +360,7 @@ const getViewedRequests = (): string[] => {
             <thead>
               <tr>
                 <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
-                  Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
+                  Case Number 
                 </th>
                 <th>Complainant's Full Name</th>
                 <th>Date Filed</th>
@@ -325,10 +383,10 @@ const getViewedRequests = (): string[] => {
                     <td>{incident.areaOfIncident}</td>
                     <td>{incident.concerns}</td>
                     <td>
-                      <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
-                        {incident.status}
-                      </span>
-                    </td>
+                  <span className={`status-badge ${incident.status.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
+                    {incident.status}
+                  </span>
+                  </td>
                     <td>
                       <div className="actions-services">
                         <button className="action-edit-services " onClick={() => handleViewOnlineReport(incident.id)}><img src="/Images/edit.png" alt="Edit" /></button>
@@ -357,48 +415,57 @@ const getViewedRequests = (): string[] => {
       </div>
 
 
+
+                        </>
+                      )}
+
+
+
+
+
         {/* this table shows all assigned task of the current user. 
         for now it will be for LF staff but will be change to barangay officer
         i will not include the pagination for now
          */}
-        <p className="text-2xl">Assigned Tasks</p>
+
+
+     {activeSection === "tasks" && (
+        <>
         <div className="main-section-online-reports">
         {taskAssignedData.length === 0 ? (
-          <div className="no-result-card">
-            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
-            <p className="no-results-department">No Results Found</p>
+          <div className="no-task-card">
+            <img src="/images/customer-service.png" alt="No results icon" className="no-task-icon" />
+            <p className="no-task-department">You have no Tasks For Today!</p>
           </div>
         ) : (
           <table>
             <thead>
               <tr>
                 <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
-                  Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
+                  Case Number 
                 </th>
                 <th>Complainant's Full Name</th>
-                <th>Date Filed</th>
-                <th>Incident Date and Time</th>
-                <th>Area of Incident</th>
+               
                 <th>Concern</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {taskAssignedData.map((tasks, index) => {
+              {taskAssignedData
+                .filter((task) => task.status !== "Settled")
+                .map((tasks, index) => {
                 const fullName = `${tasks.lastname || ""}, ${tasks.firstname || ""}`.trim();
                 return (
                    <tr key={index} className={tasks.isNew ? "highlight-new-request" : ""}>
                     <td>{tasks.caseNumber || "N/A"}</td>
                     <td>{fullName}</td>
-                    <td>{tasks.createdAt}</td>
-                    <td>{tasks.dateFiled} {tasks.time}</td>
-                    <td>{tasks.area}</td>
+               
                     <td>{tasks.concerns}</td>
                     <td>
-                      <span className={`status-badge ${tasks.status.toLowerCase().replace(" ", "-")}`}>
-                        {tasks.status}
-                      </span>
+                  <span className={`status-badge ${tasks.status.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
+                    {tasks.status}
+                  </span>
                     </td>
                     <td>
                       <div className="actions-services">
@@ -428,7 +495,8 @@ const getViewedRequests = (): string[] => {
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
 
-
+                        </>
+                      )}
     </main>
   );
 }

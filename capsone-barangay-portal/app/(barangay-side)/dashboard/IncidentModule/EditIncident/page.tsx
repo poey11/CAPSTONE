@@ -609,21 +609,7 @@ export default function EditLuponIncident() {
 
             <div className="edit-incident-header-body">
               <div className="edit-incident-header-body-top-section">
-                <div className="edit-incident-info-toggle-wrapper">
-                  {["complainant", "respondent", "incident" , "barangay desk" ].map((section) => (
-                    <button
-                      key={section}
-                      type="button"
-                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                      onClick={() => setActiveSection(section)}
-                    >
-                      {section === "complainant" && "Complainant"}
-                      {section === "respondent" && "Respondent"}
-                      {section === "incident" && "Incident"}
-                      {section === "barangay desk" && "Desk Officer"}
-                    </button>
-                  ))}
-                </div> 
+
               </div>
 
               <div className="edit-incident-header-body-bottom-section">
