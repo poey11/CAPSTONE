@@ -7,7 +7,7 @@ import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "f
 import {db} from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 
-const statusOptions = ["All", "Settled", "Pending", "In - Progress"];
+const statusOptions = ["All", "Settled  ", "pending", "In - Progress"];
 
 export default function OnlineReports() {
   const [incidentData, setIncidentData] = useState<any[]>([]);
@@ -75,6 +75,7 @@ const getViewedRequests = (): string[] => {
 
   console.log("Incident Data:", incidentData);
   useEffect(() => {
+    
     try {
       const Collection = query(
         collection(db, "IncidentReports"), 
@@ -258,7 +259,10 @@ const getViewedRequests = (): string[] => {
 
       <div className="section-1-online-reports">
             <div className="edit-incident-info-toggle-wrapper">
-                  {["main", "tasks" ].map((section) => (
+
+              {/*
+
+               {["main", "tasks" ].map((section) => (
                     <button
                       key={section}
                       type="button"
@@ -269,6 +273,33 @@ const getViewedRequests = (): string[] => {
                       {section === "tasks" && "Assigned Tasks"}
                     </button>
                   ))}
+              
+              */}
+
+
+              {["main", "tasks"].map((section) => (
+            <button
+              key={section}
+              type="button"
+              className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+              onClick={() => setActiveSection(section)}
+              style={{ position: "relative" }}
+            >
+              {section === "main" && "Online Records"}
+              {section === "tasks" && (
+                <>
+                  Assigned Tasks
+                  {taskAssignedData.length > 0 && (
+                    <span className="task-badge">{taskAssignedData.length}</span>
+                  )}
+                </>
+              )}
+            </button>
+          ))}
+
+
+
+                  
           </div> 
 
       </div>
