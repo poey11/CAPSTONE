@@ -1331,3 +1331,39 @@ FILE UPLOAD SECTION DAMI KASI TANGINA!
   font-size: 20px;
   }
   
+
+
+
+
+
+
+  
+
+.no-task-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+   border: 2px solid #dbeafe; /* light blue border */
+  width: 500px;
+  border-radius: 1rem;
+background-color: #f0f9ff; /* very light blue background */
+  margin-top: 5rem;
+ box-shadow: 0 0 12px rgba(0, 0, 0, 0.04); /* softer shadow */
+  align-self: center;
+}
+
+
+.no-task-icon {
+  width: 46px;
+  height: 46px;
+  margin-bottom: 0.5rem;
+opacity: 0.65; /* slightly more transparent for softer look */
+}
+
+.no-task-department {
+  font-weight: bold;
+  font-size: 1.25rem;
+   color: #2563eb; /* soft blue text */
+}

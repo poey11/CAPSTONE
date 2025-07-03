@@ -88,6 +88,10 @@ const getViewedRequests = (): string[] => {
             ...doc.data(),
             isNew: doc.data().isViewed === false, // Check if the request is new
             }));
+
+        // ✅ FILTER HERE BEFORE setting state
+          const activeTasks = data.filter(task => task.status !== "Settled");
+
           data.sort((a, b) => {
             if(a.statusPriority !== b.statusPriority) {
               return a.statusPriority - b.statusPriority; // Sort by status priority first
@@ -96,7 +100,7 @@ const getViewedRequests = (): string[] => {
             const dateB = new Date(b.createdAt).getTime();
             return dateB - dateA; // Sort by createdAt in descending order
           });
-          setTaskAssignedData(data);
+          setTaskAssignedData(activeTasks); //updated from "data" MEE
         });
         return () => {
           if (unsubscribe) {
@@ -429,16 +433,16 @@ const getViewedRequests = (): string[] => {
         <>
         <div className="main-section-online-reports">
         {taskAssignedData.length === 0 ? (
-          <div className="no-result-card">
-            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
-            <p className="no-results-department">No Results Found</p>
+          <div className="no-task-card">
+            <img src="/images/customer-service.png" alt="No results icon" className="no-task-icon" />
+            <p className="no-task-department">You have no Tasks For Today!</p>
           </div>
         ) : (
           <table>
             <thead>
               <tr>
                 <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
-                  Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
+                  Case Number 
                 </th>
                 <th>Complainant's Full Name</th>
                
