@@ -477,10 +477,10 @@ FOR ONLINE INCIDENT REPORTING CSS
 
 .online-report-section-bottom-side-2 {
    display: flex;
-  flex-direction: column;
+
   justify-content: center;
   align-items: center;
-  width: 50%;
+  width: 100%;
 }
 
 
@@ -515,7 +515,7 @@ margin-top: 2rem;
 }
 .box-container-incidentimage-online {
    position: relative;
-    width: 70%;
+    width: 100%;
     border: 1px solid #5a6b7c;
     border-radius: 10px;
     background-color: #ffffff;
@@ -536,6 +536,9 @@ margin-top: 2rem;
   cursor: pointer;
   object-fit: contain;
 }
+
+
+
 
 .no-image-text {
   color: red;

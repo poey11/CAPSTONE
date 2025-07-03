@@ -570,22 +570,28 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                         </>
                       )}
 
-                        <div className="online-report-box-container">
-                              <div className="box-container-outer-image">
-                                <div className="title-image">
-                                  Summary of Concern
-                                </div>
 
-                                <div className="box-container-investigation-report">
-                                   <textarea   
-                                     className= "investigation-report-input-field"
-                                    value={formData.addInfo} 
-                                     disabled    
-                                    />
-                                     
-                                </div>
+                            <div className="fields-section-online">
+                                <p>Barangay Officer<span className="required">*</span></p>
+                                <select
+                                  className={`online-incident-input-field ${invalidFields.includes("respondentName") ? "input-error" : ""}`}
+                                  name="respondentName" 
+                                  value={respondent.respondentName}
+                                  onChange={handleChange}
+                                  disabled = {formData.status === "Settled" || initialRespondent.respondentName !== "" ||user?.position !== "LF Staff"}                                  
+                                >
+                                  <option value="" disabled>Select Officer</option>
+                                  {listOfStaffs.filter(staff => !(staff.id == user?.id && respondent.respondentName =="") ) 
+                                  .map((staff,index) => (
+                                    <option key={index} 
+                                      value={staff.id}
+                                      >
+                                      {staff.firstName} {staff.lastName}
+                                    </option>
+                                  ))}
 
-                              </div>
+                                </select>
+                                
                             </div>
 
                           
@@ -694,7 +700,27 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                           )}
                         </div>
                       </div>
+
+                      
                     </div>
+                        <div className="online-report-box-container">
+                              <div className="box-container-outer-image">
+                                <div className="title-image">
+                                  Summary of Concern
+                                </div>
+
+                                <div className="box-container-investigation-report">
+                                   <textarea   
+                                     className= "investigation-report-input-field"
+                                    value={formData.addInfo} 
+                                     disabled    
+                                    />
+                                     
+                                </div>
+
+                              </div>
+                            </div>
+
 
 
                     </div>
