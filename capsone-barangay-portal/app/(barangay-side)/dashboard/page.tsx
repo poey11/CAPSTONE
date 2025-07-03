@@ -6,6 +6,7 @@ import { db } from "@/app/db/firebase";
 import { doc, collection, getDoc, getDocs, query, where, orderBy, onSnapshot } from "firebase/firestore";
 import {Area, AreaChart, PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import Heatmap from "@/app/(barangay-side)/components/heatmap";
+import LegendColorBox from "../components/legendColorBox";
 
 
 interface incidentProps{
@@ -1011,10 +1012,19 @@ useEffect(() => {
             <div className="dashboard-heatmap-section">
               <div className="title">
                 <p>Incident Heat Map</p>
+                <div className="ml-2 mt-2 p-2 bg-white shadow rounded w-fit text-sm border border-gray-300">
+                <div className="font-semibold mb-1">Incident Intensity</div>
+                <div className="flex gap-2 items-center">
+                  <LegendColorBox color="#00ff00" label="Low" />
+                  <LegendColorBox color="#ffff00" label="Medium" />
+                  <LegendColorBox color="#ff0000" label="High" />
+                </div>
+              </div>
+
               </div>
 
               <div className="heatmap-container">
-              <Heatmap />
+                <Heatmap incidents={reportData}/>
               </div>
               
             </div>
