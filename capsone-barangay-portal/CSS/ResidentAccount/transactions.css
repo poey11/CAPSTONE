@@ -58,34 +58,32 @@
   align-items: center;
   width: 100%;
   height: 100%;
-
 }
 
 
 .table-section-transactions {
-  flex: 1; 
-  display: flex; 
-  flex-direction: column;
-  padding: 0;
-  margin: 0; 
   width: 100%;
- border: 2px solid rgba(36, 53, 76, 0.7);
-  overflow-y: scroll;
-  height: 100%;
-  max-width: 1500px;
-  min-width: 1500px;
-  height: 500px; 
+   min-width: 1000px;
+  overflow-x: auto;
+  height: 500px;
+  border: 2px solid rgba(36, 53, 76, 0.7);
   border-radius: 16px;
   text-align: center;
-  overflow-x: hidden; 
-  align-self: center;
   background: #FFFFFF;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   margin-top: 2rem;
   margin-bottom: 2.5rem;
-
-    
 }
+
+.table-section-transactions table {
+  width: 100%;
+  min-width: 768px; 
+  border-collapse: collapse;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+
+
 
 .table-section-transactions thead{
   position: sticky;
@@ -94,12 +92,6 @@
   z-index: 10; 
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); 
 
-}
-
-.table-section-transactions table {
-    width: 1500px;
-    border-collapse: collapse;
-    background-color: rgba(255, 255, 255, 0.7);
 }
 
 
