@@ -46,7 +46,7 @@ export default function Dashboard() {
   // for online incidents
   const [onlineIncidentReportsPendingCount, setOnlineIncidentReportsPendingCount] = useState(0);
   const [onlineIncidentReportsInProgressCount, setOnlineIncidentReportsInProgressCount] = useState(0);
-  const [onlineIncidentReportsAcknowledgedCount, setOnlineIncidentReportsAcknowledgedCount] = useState(0);
+  const [onlineIncidentReportsSettledCount, setOnlineIncidentReportsSettledCount] = useState(0);
   
   // generel incident count
   const [BCPCReportsCount, setBCPCReportsCount] = useState(0);
@@ -179,15 +179,15 @@ useEffect(() => {
         const documentStatus = data.status;
         const accID = data.accID;
       
-        if (accID) { // if accID exists then online request
+        if (accID && accID != "Guest") { // if accID exists then online request
           if (documentStatus === "Pending") documentOnlinePending++;
-          else if (documentStatus === "Pick-Up") documentOnlinePickUp++;
+          else if (documentStatus === "Pick-up") documentOnlinePickUp++;
           else if (documentStatus === "Completed") documentOnlineCompleted++;
           else if (documentStatus === "Rejected") documentOnlineRejected++;
         } else {
             // If accID does NOT exist then in-barangay
             if (documentStatus === "Pending") documentNew++;
-            else if (documentStatus === "Pick-Up") documentInProgress++;
+            else if (documentStatus === "Pick-up") documentInProgress++;
             else if (documentStatus === "Completed") documentCompleted++;
           }
         });
@@ -322,7 +322,7 @@ useEffect(() => {
           resolved = 0,
           onlineInProgress = 0,
           onlinePending = 0,
-          onlineAcknowledged = 0;
+          onlineSettled = 0;
       
       incidentReportsSnapshot.docs.forEach((doc) => {
         const data = doc.data();
@@ -332,14 +332,14 @@ useEffect(() => {
         if (department === "Online") {
           // ONLINE INCIDENT REPORTS
           if (status === "pending") onlinePending++;
-          else if (status === "acknowledged") onlineAcknowledged++;
+          else if (status === "Settled") onlineSettled++;
           else if (status === "In - Progress") onlineInProgress++;
 
         } else {
           // IN-BARANGAY INCIDENT REPORTS
           if (status === "pending") pending++;
           else if (status === "In - Progress") inprogress++;
-          else if (status === "settled") settled++;
+          else if (status === "Settled") settled++;
           else if (status === "archived") archived++;
           else if (status === "resolved") resolved++;
         }
@@ -352,7 +352,7 @@ useEffect(() => {
       setResolvedIncidentReportsCount(resolved);
       setOnlineIncidentReportsInProgressCount(onlineInProgress);
       setOnlineIncidentReportsPendingCount(onlinePending);
-      setOnlineIncidentReportsAcknowledgedCount(onlineAcknowledged);
+      setOnlineIncidentReportsSettledCount(onlineSettled);
   
           let online = 0,
           gad = 0,
@@ -510,11 +510,11 @@ useEffect(() => {
     }
   : {
       title: "Statuses of Online Incident Reports",
-      count: onlineIncidentReportsPendingCount + onlineIncidentReportsAcknowledgedCount + onlineIncidentReportsInProgressCount,
+      count: onlineIncidentReportsPendingCount + onlineIncidentReportsSettledCount + onlineIncidentReportsInProgressCount,
       data: [
         { name: "Pending", value: onlineIncidentReportsPendingCount },
-        { name: "In-Prog", value: onlineIncidentReportsInProgressCount },
-        { name: "ACK", value: onlineIncidentReportsAcknowledgedCount },
+        { name: "In-Progress", value: onlineIncidentReportsInProgressCount },
+        { name: "Settled", value: onlineIncidentReportsSettledCount },
       ],
       colors: ["#FF9800", "#03A9F4"],
     };
