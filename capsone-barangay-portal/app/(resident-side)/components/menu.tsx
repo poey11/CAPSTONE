@@ -232,6 +232,18 @@ case "document":
 
 
   };
+
+const handleDeleteNotification = async (notificationId: string) => {
+  try {
+    await deleteDoc(doc(db, "Notifications", notificationId));
+    setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+    console.log("Notification deleted successfully");
+  } catch (err) {
+    console.error("Error deleting notification:", err);
+    alert("Failed to delete notification");
+  }
+};
+
   
   
 
@@ -369,6 +381,17 @@ case "document":
                                     <img src="/images/unread-icon.png" alt="Unread Icon" className="unread-icon" />
                                 )}
                                 </div>
+                                <div className="delete-icon-section">
+                                  <button
+                                    className="delete-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // 👈 stops the parent div's onClick
+                                      handleDeleteNotification(message.id);
+                                    }}
+                                  >
+                                    🗑️
+                                  </button>
+                             </div>
                               </div>
                             ))
                           ) : (

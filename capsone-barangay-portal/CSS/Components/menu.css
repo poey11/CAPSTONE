@@ -386,3 +386,25 @@ padding: 20px;
   margin-top: 18px;
   filter: invert(100%);
 }
+
+
+
+.delete-icon-section {
+  width: 10%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn {
+  background: transparent;
+  border: none;
+  color: #d11a2a;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.delete-btn:hover {
+  transform: scale(1.2);
+}
