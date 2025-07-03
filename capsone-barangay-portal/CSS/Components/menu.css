@@ -394,6 +394,7 @@ padding: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-right: 2px;
 }
 
 .delete-btn {
@@ -406,5 +407,17 @@ padding: 20px;
 }
 
 .delete-btn:hover {
+  transform: scale(1.2);
+}
+
+
+.delete-icon-image {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%) invert(18%) sepia(96%) saturate(7491%) hue-rotate(-8deg) brightness(94%) contrast(107%);
+  transition: transform 0.2s ease;
+}
+
+.delete-btn:hover .delete-icon-image {
   transform: scale(1.2);
 }

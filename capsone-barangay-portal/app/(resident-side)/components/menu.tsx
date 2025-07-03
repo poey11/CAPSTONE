@@ -22,6 +22,7 @@ type Notification = {
   timestamp?: Timestamp; 
   transactionType: string;
   incidentID: string;
+  requestID: string;
   isRead?: boolean;
 };
 
@@ -221,6 +222,15 @@ case "document":
     } else {
       console.log("Transaction is not an Online Incident. No navigation performed.");
     }
+
+     // NAVIGATION for Documents
+    if (notification.transactionType === "Online Request") {
+      const targetUrl = `/ResidentAccount/Transactions/DocumentTransactions?id=${notification.requestID}`;
+      router.push(targetUrl);
+    } else {
+      console.log("Transaction is not an Document Request. No navigation performed.");
+    }
+  
   
     // NAVIGATION for VERIFICATION
     if (
@@ -389,7 +399,7 @@ const handleDeleteNotification = async (notificationId: string) => {
                                       handleDeleteNotification(message.id);
                                     }}
                                   >
-                                    🗑️
+                                    <img src="/images/Delete.png" alt="Delete" className="delete-icon-image" />
                                   </button>
                              </div>
                               </div>
