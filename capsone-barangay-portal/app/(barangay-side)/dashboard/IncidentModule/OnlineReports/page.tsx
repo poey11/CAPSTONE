@@ -7,7 +7,7 @@ import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "f
 import {db} from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 
-const statusOptions = ["All", "Acknowledged", "Pending", "In - Progress"];
+const statusOptions = ["All", "Settled", "Pending", "In - Progress"];
 
 export default function OnlineReports() {
   const [incidentData, setIncidentData] = useState<any[]>([]);
@@ -325,7 +325,7 @@ const getViewedRequests = (): string[] => {
             <thead>
               <tr>
                 <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
-                  Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
+                  Case Number 
                 </th>
                 <th>Complainant's Full Name</th>
                 <th>Date Filed</th>

@@ -398,29 +398,6 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
 
            
 
-
-
-      {/*}
-        <div className="letters-content-edit">
-                      
-        <select
-          name="status"
-          value={formData.status}
-          onChange={handleChange}
-          className={`status-badge-view ${formData.status.toLowerCase()}`}
-        >
-          {statusOptions.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-
-
-        
-          </div>
-*/}
-
       <div className="main-content-view-online-report">
         <div className="section-1-online-report">
          

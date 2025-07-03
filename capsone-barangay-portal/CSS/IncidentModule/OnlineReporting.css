@@ -23,10 +23,10 @@
     height: 100%; /* Full height */
     margin-top: 2rem;
     max-height: 70%;
-    border: 2px solid rgba(36, 53, 76, 0.7);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
    background-color: #ffffff;
    border-radius: 6px;
+   border: 1px solid rgba(36, 53, 76, 0.7); /* update*/
 }
 
 .main-section-online-reports table {
@@ -37,9 +37,9 @@
 .main-section-online-reports td {
    padding: 1rem; 
   text-align: center; 
-  border-bottom: 2px solid #ddd;
 color: rgb(44, 42, 42);
   font-weight: normal;
+  border-bottom: 1px solid #ddd; /* update*/
 }
 
 .main-section-online-reports th {
@@ -57,6 +57,47 @@ color: rgb(44, 42, 42);
   z-index: 10; /* Ensures it stays above other content */
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
   height: 80px;
+}
+
+
+
+
+/*
+Newly added for tables
+*/
+
+.main-section-online-reports tbody tr:nth-child(even) {
+  background-color: #f0f4f8; /* Softer modern gray-blue tone */
+}
+
+.main-section-online-reports tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* Crisp white */
+}
+
+.main-section-online-reports tbody tr:hover {
+  background-color: #d0e4f5 !important; /* Light pastel blue hover */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+
+
+/* Base style for newly highlighted requests */
+.highlight-new-request {
+  background-color: #d6f8c0 !important; /* soft pastel green */
+  transition: background-color 0.3s ease;
+}
+
+/* Custom hover ONLY for new requests */
+.highlight-new-request:hover {
+  background-color: #b4eba1 !important; /* subtle but visible green on hover */
+}
+
+/* Fallback hover for regular rows (non-highlighted) stays the same */
+.main-section-online-reports tbody tr:not(.highlight-new-request):hover {
+  background-color: #d0e4f5 !important;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 
@@ -134,16 +175,6 @@ color: rgb(44, 42, 42);
     outline: none;
     box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
-
-
-.highlight-new-request {
-  background-color: #bdf8a0ba !important;
-  transition: background-color 0.5s ease;
-}
-
-.highlight-new-request:hover {
-  background-color: #a6e68d !important; /* slightly darker green on hover */
-}
 
 
 
