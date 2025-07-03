@@ -3,7 +3,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 import {useAuth} from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 import {useSearchParams } from "next/navigation";
-import { addDoc, collection, doc, getDoc} from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs} from "firebase/firestore";
 import { db, storage, auth } from "@/app/db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/navigation";
@@ -65,6 +65,7 @@ interface ClearanceInput {
   bloodtype: string;
   occupation: string;
   precinctnumber: string;
+  fromAddress: string;
   emergencyDetails: EmergencyDetails;
   requestorMrMs: string;
   requestorFname: string;
@@ -74,6 +75,9 @@ interface ClearanceInput {
   wardFname: string;
   wardRelationship: string;
   guardianshipType: string;
+  dateOfFireIncident: string;
+  dateOfTyphoon: string;
+  nameOfTyphoon: string;
   CYFrom: string;
   CYTo: string;
   attestedBy: string;
@@ -107,6 +111,14 @@ export default function Action() {
   const [nos, setNos] = useState(0);
 
   const [userData, setUserData] = useState<any>(null); // moved UP here
+  const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
+  const [otherDocFieldsByType, setOtherDocFieldsByType] = useState<{ [type: string]: string[] }>({});
+  const [otherDocImageFields, setOtherDocImageFields] = useState<{ [title: string]: string[] }>({});
+  const [forResidentOnlyMap, setForResidentOnlyMap] = useState<{ [title: string]: boolean }>({});
+
+  const [dynamicFileStates, setDynamicFileStates] = useState<{
+    [key: string]: { name: string; preview: string | undefined }[];
+  }>({});
 
 
   const [clearanceInput, setClearanceInput] =  useState<ClearanceInput>({
@@ -140,6 +152,7 @@ export default function Action() {
     civilStatus: "",
     contact: "",
     typeofconstruction: "",
+    dateOfFireIncident: "",
     typeofbldg:"",
     othersTypeofbldg:"",
     projectName:"",
@@ -163,6 +176,7 @@ export default function Action() {
     },
     requestorMrMs: "",
     requestorFname: "",
+    fromAddress: "",
     partnerWifeHusbandFullName: "",
     cohabitationStartDate: "",
     cohabitationRelationship: "",
@@ -174,6 +188,8 @@ export default function Action() {
     attestedBy: "",
     goodMoralPurpose: "",
     goodMoralOtherPurpose: "",
+    nameOfTyphoon: "",
+    dateOfTyphoon: "",
     noIncomePurpose: "",
     noIncomeChildFName: "",
     deceasedEstateName: "",
@@ -354,7 +370,6 @@ export default function Action() {
           //  Fill all fields for self
           setClearanceInput((prev: any) => ({
             ...prev,
-            fullName,
             contact: residentData.contactNumber || "",
             address: residentData.address || "",
             gender: residentData.sex || "",
@@ -391,8 +406,87 @@ export default function Action() {
     fetchUserData();
   }, [user, clearanceInput.purpose, clearanceInput.dateofdeath]);
   
+
+  useEffect(() => {
+    const fetchOtherDocumentPurposes = async () => {
+      try {
+        const otherDocsRef = collection(db, "OtherDocuments");
+        const snapshot = await getDocs(otherDocsRef);
+  
+        const groupedTitles: { [key: string]: string[] } = {};
+        const fieldMap: { [key: string]: string[] } = {};
+        const imageFieldMap: { [key: string]: string[] } = {};
+        const residentOnlyMap: { [key: string]: boolean } = {};
+  
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          const { type, title, fields, imageFields, forResidentOnly } = data;
+  
+          if (type && title) {
+            if (!groupedTitles[type]) groupedTitles[type] = [];
+            groupedTitles[type].push(title);
+  
+            if (Array.isArray(fields)) {
+              fieldMap[title] = fields.map((f: any) => f.name);
+            }
+  
+            if (Array.isArray(imageFields)) {
+              imageFieldMap[title] = imageFields;
+            }
+  
+            residentOnlyMap[title] = !!forResidentOnly;
+          }
+        });
+  
+        setOtherDocPurposes(groupedTitles);
+        setOtherDocFieldsByType(fieldMap);
+        setOtherDocImageFields(imageFieldMap);
+        setForResidentOnlyMap(residentOnlyMap);
+      } catch (error) {
+        console.error("Error fetching OtherDocuments:", error);
+      }
+    };
+  
+    fetchOtherDocumentPurposes();
+  }, []);
   
   
+  const handleDynamicImageUpload = (fieldName: string, file: File) => {
+    const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+    if (!validImageTypes.includes(file.type)) {
+      alert("Only JPG, JPEG, and PNG files are allowed.");
+      return;
+    }
+  
+    const preview = URL.createObjectURL(file);
+    setDynamicFileStates((prev) => ({
+      ...prev,
+      [fieldName]: [{ name: file.name, preview }],
+    }));
+  
+    setClearanceInput((prev: any) => ({
+      ...prev,
+      [fieldName]: file,
+    }));
+  
+    setTimeout(() => URL.revokeObjectURL(preview), 10000);
+  };
+
+  const handleDynamicImageDelete = (fieldName: string, fileName: string) => {
+    setDynamicFileStates((prev) => ({
+      ...prev,
+      [fieldName]: [],
+    }));
+  
+    setClearanceInput((prev: any) => {
+      const updated = { ...prev };
+      delete updated[fieldName];
+      return updated;
+    });
+  
+    const input = document.getElementById(`file-upload-${fieldName}`) as HTMLInputElement;
+    if (input) input.value = "";
+  };
   
   
 // State for all file containers
@@ -602,7 +696,7 @@ const handleFileChange = (
           return;
         }
     
-        const clearanceVars = {
+        const clearanceVars: Record<string, any> = {
           createdAt: clearanceInput.dateRequested,
           requestId: clearanceInput.requestId,
           reqType: "Online",
@@ -612,7 +706,6 @@ const handleFileChange = (
           accID: clearanceInput.accountId,
           docType: docType,
           purpose: clearanceInput.purpose,
-          fullName: clearanceInput.fullName,
           dateOfResidency: clearanceInput.dateOfResidency,
           address: clearanceInput.address,
           ...(clearanceInput.purpose === "Residency" && {
@@ -621,13 +714,17 @@ const handleFileChange = (
             attestedBy: clearanceInput.attestedBy,
           }),
           ...(clearanceInput.purpose === "Guardianship" && {
+            fullName: clearanceInput.fullName,
             wardFname: clearanceInput.wardFname,
             wardRelationship: clearanceInput.wardRelationship,
             guardianshipType: clearanceInput.guardianshipType,
           }),
           ...(clearanceInput.purpose === "Occupancy /  Moving Out" && {
-            toAddress: clearanceInput.toAddress, // Include toAddress only for this specific purpose
+            fullName: clearanceInput.fullName,
+            toAddress: clearanceInput.toAddress, 
+            fromAddress: clearanceInput.fromAddress,
           }),
+          
           ...(clearanceInput.purpose === "Garage/TRU" && {
             businessName: clearanceInput.businessName,
             businessLocation: clearanceInput.businessLocation,
@@ -659,10 +756,12 @@ const handleFileChange = (
             cohabitationRelationship: clearanceInput.cohabitationRelationship,
           }),
           ...(clearanceInput.purpose === "Estate Tax" && {
+            fullName: clearanceInput.fullName,
             dateofdeath: clearanceInput.dateofdeath,
             estateSince: clearanceInput.estateSince,
           }),
           ...( clearanceInput.purpose === "Death Residency"  && {
+            fullName: clearanceInput.fullName,
             dateofdeath: clearanceInput.dateofdeath,
             deathCertificate: filenames.deathCertificate,
           }),
@@ -683,6 +782,20 @@ const handleFileChange = (
             purpose: clearanceInput.purpose,
           }),
 
+          ...(clearanceInput.purpose === "Financial Subsidy of Solo Parent" && {
+            noIncomeChildFName: clearanceInput.noIncomeChildFName,
+          }),
+
+          ...(clearanceInput.purpose === "Fire Victims" && {
+            dateOfFireIncident: clearanceInput.dateOfFireIncident,
+            dateOfTyphoon: clearanceInput.dateOfTyphoon,
+          }),
+
+          ...(clearanceInput.purpose === "Flood Victims" && {
+            nameOfTyphoon: clearanceInput.nameOfTyphoon,
+
+          }),
+
           ...(docType === "Barangay ID" && {
             birthplace: clearanceInput.birthplace,
             religion: clearanceInput.religion,
@@ -700,6 +813,16 @@ const handleFileChange = (
             isBeneficiary: clearanceInput.isBeneficiary,
           })
         };
+
+        filteredDynamicFields.forEach((fieldName) => {
+          if (
+            !["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg"].includes(fieldName) &&
+            clearanceInput[fieldName] !== undefined
+          ) {
+            clearanceVars[fieldName] = clearanceInput[fieldName];
+          }
+        });
+        
         console.log(clearanceVars, storageRefs);
         handleReportUpload(clearanceVars, storageRefs);
    
@@ -766,6 +889,7 @@ const handleFileChange = (
     //  router.push("/services");
     };
 
+    
 
     const [addOn, setAddOn] = useState<string>("");
     
@@ -779,13 +903,1596 @@ const handleFileChange = (
     }, [clearanceInput.purpose, docType]);
 
 
+    
+
+    const [activeSection, setActiveSection] = useState("details");
+
+    const formatFieldName = (name: string) =>
+      name
+        .replace(/_/g, " ") // Replace underscores with spaces
+        .replace(/\b\w/g, (c) => c.toUpperCase()); // Capitalize first letter of each word
+
+    const fixedPredefinedFields = [
+      "fullName",
+      "requestorFname",
+      "requestorMrMs",
+      "address",
+      "dateOfResidency",
+      "birthday",
+      "age",
+      "gender",
+      "civilStatus",
+      "contact",
+      "citizenship",
+    ];
+
+    const existingImageFields = [
+      "signaturejpg",
+      "barangayIDjpg",
+      "validIDjpg",
+      "letterjpg",
+    ];
+    
+    const customFieldsFromDocType =
+      otherDocFieldsByType[clearanceInput.docType] || [];
+    
+    const filteredCustomFields = customFieldsFromDocType.filter(
+      (fieldName) => !fixedPredefinedFields.includes(fieldName)
+    );
+
+    
+    const excludedDynamicFields = ["requestorFname", "requestorMrMs", "dateOfResidency", "address"];
+
+
+    const filteredDynamicFields =
+    otherDocFieldsByType[clearanceInput.purpose]?.filter(
+      (fieldName) => !excludedDynamicFields.includes(fieldName)
+    ) || [];
+
+    const matchedImageFieldsRaw = [
+      ...(otherDocImageFields[clearanceInput.purpose] || []),
+      ...(otherDocPurposes["Barangay Permit"]?.includes(docType || "")
+        ? otherDocImageFields[docType || ""] || []
+        : []),
+    ];
+
+    // Normalize: support both [{ name: "..." }] and ["..."]
+    const matchedImageFields: string[] = matchedImageFieldsRaw.map((field: any) =>
+      typeof field === "string" ? field : field?.name
+    );
+
+    const dynamicImageFields = matchedImageFields.filter(
+      (name) => !existingImageFields.includes(name)
+    );
+
+   
+
+  const half = Math.ceil(filteredDynamicFields.length / 2);
+  const leftFields = filteredDynamicFields.slice(0, half);
+  const rightFields = filteredDynamicFields.slice(half);
+
   return (
 
     <main className="main-form-container">
-      <div className="headerpic-documentreq">
-        <p>SERVICES</p>
+        <div className="headerpic-report">
+          <p>Document Request</p>
+        </div>
+
+
+      <div className="document-req-section">
+        <h1>{docType} Request Form</h1>
+      
+
+        <div className="document-req-section-upper">
+          <nav className="document-req-section-toggle-wrapper">
+            {["details", "others"].map((section) => (
+              <button
+                key={section}
+                type="button"
+                        className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                        onClick={() => setActiveSection(section)}
+              >
+                        {section === "details" && "Details"}
+                        {section === "others" && "Others"}
+              </button>
+            ))}
+          </nav> 
+        </div>
+
+        <form className="document-req-form" onSubmit={handleSubmit}>
+          {activeSection === "details" && (
+            <>
+              <div className="document-req-form-container">
+                <div className="document-req-form-container-left-side">
+                  {(docType === "Barangay Certificate" || docType === "Barangay Clearance" 
+                  ||  docType === "Barangay Indigency" || docType === "Business Permit" || docType === "Temporary Business Permit" ) 
+                  && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="purpose" className="form-label-document-req">
+                          {docType} Purpose<span className="required">*</span>
+                        </label>
+                        <select
+                          id="purpose"
+                          name="purpose"
+                          className="form-input-document-req"
+                          required
+                          value={clearanceInput.purpose}
+                          onChange={handleChange}
+                        >
+                          <option value="" disabled>Select purpose</option>
+
+                          {docType === "Barangay Certificate" ? (
+                            <>
+                              <option value="Residency">Residency</option>
+                              <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
+                              <option value="Estate Tax">Estate Tax</option>
+                              <option value="Death Residency">Death Residency</option>
+                              <option value="No Income">No Income</option>
+                              <option value="Cohabitation">Cohabitation</option>
+                              <option value="Guardianship">Guardianship</option>
+                              <option value="Good Moral and Probation">Good Moral and Probation</option>
+                              <option value="Garage/PUV">Garage/PUV</option>
+                              <option value="Garage/TRU">Garage/TRU</option>
+
+                              {/* Dynamically added */}
+                              {otherDocPurposes["Barangay Certificate"]?.map((title, index) => (
+                                <option key={index} value={title}>{title}</option>
+                              ))}
+                            </>
+                          ) : docType === "Barangay Clearance" ? (
+                            <>
+                              <option value="Loan">Loan</option>
+                              <option value="Bank Transaction">Bank Transaction</option>
+                              <option value="Residency">Residency</option>
+                              <option value="Local Employment">Local Employment</option>
+                              <option value="Maynilad">Maynilad</option>
+                              <option value="Meralco">Meralco</option>
+                              <option value="Bail Bond">Bail Bond</option>
+
+                              {/* Dynamically added */}
+                              {otherDocPurposes["Barangay Clearance"]?.map((title, index) => (
+                                <option key={index} value={title}>{title}</option>
+                              ))}
+                            </>
+                          ) : docType === "Barangay Indigency" ? (
+                            <>
+                              <option value="No Income">No Income</option>
+                              <option value="Public Attorneys Office">Public Attorneys Office</option>
+                              <option value="Financial Subsidy of Solo Parent">Financial Subsidy of Solo Parent</option>
+                              <option value="Fire Victims">Fire Victims</option>
+                              <option value="Flood Victims">Flood Victims</option>
+                              <option value="Philhealth Sponsor">Philhealth Sponsor</option>
+                              <option value="Medical Assistance">Medical Assistance</option>
+
+                              {/* Dynamically added */}
+                              {otherDocPurposes["Barangay Indigency"]?.map((title, index) => (
+                                <option key={index} value={title}>{title}</option>
+                              ))}
+                            </>
+                          ) : docType === "Business Permit" || docType === "Temporary Business Permit" ? (
+                            <>
+                              <option value="New">New</option>
+                              <option value="Renewal">Renewal</option>
+                            </>
+                          ) : docType === "Other Documents" ? (
+                            <>
+                              <option value="Barangay ID">Barangay ID</option>
+                              <option value="First Time Jobseeker">First Time Jobseeker</option>
+
+                              {/* Dynamically added */}
+                              {otherDocPurposes["Other"]?.map((title, index) => (
+                                <option key={index} value={title}>{title}</option>
+                              ))}
+                            </>
+                          ) : null}
+                        </select>
+                      </div>
+                  </>
+                  )}
+
+                  {(clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Indigency")&& (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="noIncomePurpose" className="form-label-document-req">Purpose Of No Income:<span className="required">*</span></label>
+                          <select 
+                            id="noIncomePurpose"  
+                            name="noIncomePurpose"  
+                            value={clearanceInput.noIncomePurpose}
+                            onChange={handleChange}
+                            className="form-input-document-req"  
+                            required 
+                          >
+                            <option value="" disabled>Select Purpose</option>
+                            <option value="SPES Scholarship">SPES Scholarship</option>
+                            <option value="ESC Voucher">DEPED Educational Services Contracting (ESC) Voucher</option>
+                          </select>
+                      </div>
+                    </>
+                  )}
+                
+                  <div className="form-group-document-req">
+                    <label htmlFor="requestorFname" className="form-label-document-req">Requestor Full Name<span className="required">*</span></label>
+                    <input 
+                      type="text"  
+                      id="requestorFname"  
+                      name="requestorFname"  
+                      className="form-input-document-req" 
+                      value={clearanceInput.requestorFname}
+                      onChange={handleChange}
+                      required  
+                      placeholder="Enter Requestor's Full Name"  
+                    />
+                  </div>
+
+                  <div className="form-group-document-req">
+                    <label htmlFor="requestorMrMs" className="form-label-document-req">Requestor's Title<span className="required">*</span></label>
+                    <select
+                      id="requestorMrMs" 
+                      name="requestorMrMs" 
+                      className="form-input-document-req" 
+                      required
+                      value={
+                        ["Mr.", "Ms."].includes(clearanceInput.requestorMrMs)
+                          ? clearanceInput.requestorMrMs
+                          : ""
+                      }
+                      onChange={handleChange}
+                    >
+                      <option value="" disabled>Select Requestor's Title</option>
+                      <option value="Mr.">Mr.</option>
+                      <option value="Ms.">Ms.</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group-document-req">
+                    <label htmlFor="gender" className="form-label-document-req">Requestor's Gender<span className="required">*</span></label>
+                    <select 
+                      id="gender" 
+                      name="gender" 
+                      className="form-input-document-req" 
+                      required
+                      disabled = {isReadOnly}
+                      value={clearanceInput.gender}
+                      onChange={handleChange}
+                    >
+                      <option value="" disabled>Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group-document-req">
+                    <label htmlFor="dateOfResidency" className="form-label-document-req">Requestor's Date of Residency<span className="required">*</span></label>
+                    <input 
+                      type="date" 
+                      id="dateOfResidency" 
+                      name="dateOfResidency" 
+                      value={clearanceInput.dateOfResidency}
+                      onChange={handleChange}
+                      className="form-input-document-req" 
+                      onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+
+                      required 
+                      max={getLocalDateString(new Date())}
+                    />
+                  </div>
+
+                  <div className="form-group-document-req">
+                    <label htmlFor="address" className="form-label-document-req">Requestor's Address<span className="required">*</span></label>
+                    <input 
+                      type="text"  
+                      id="address"  
+                      name="address"  
+                      value={clearanceInput.address}
+                      onChange={handleChange}
+                      className="form-input-document-req"  
+                      required 
+                      placeholder={`Enter Requestor's Address`}
+                      readOnly={isReadOnly}
+
+                    />
+                  </div>
+
+                  {(clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="CYFrom" className="form-label-document-req">Cohabitation Year From:<span className="required">*</span></label>
+                        <select
+                          id="CYFrom"
+                          name="CYFrom"
+                          value={clearanceInput.CYFrom}
+                          onChange={handleChange}
+                          className="form-input-document-req"
+                          required
+                        >
+                          <option value="" disabled>Select Year</option>
+                          {[...Array(100)].map((_, i) => {
+                            const year = new Date().getFullYear() - i;
+                            const cyTo = parseInt(clearanceInput.CYTo);
+                            const isDisabled = !isNaN(cyTo) && year >= cyTo;
+                            return (
+                              <option key={year} value={year} disabled={isDisabled}>
+                                {year}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+
+                      <div className="form-group-document-req">
+                        <label htmlFor="CYTo" className="form-label-document-req">Cohabitation Year To:<span className="required">*</span></label>
+                        <select
+                          id="CYTo"
+                          name="CYTo"
+                          value={clearanceInput.CYTo}
+                          onChange={handleChange}
+                          className="form-input-document-req"
+                          required
+                        >
+                          <option value="" disabled>Select Year</option>
+                          {[...Array(100)].map((_, i) => {
+                            const year = new Date().getFullYear() - i;
+                            const cyFrom = parseInt(clearanceInput.CYFrom);
+                            const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
+                            return (
+                              <option key={year} value={year} disabled={isDisabled}>
+                                {year}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+
+                    </>
+                  )}
+
+                  {(clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Clearance") && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="CYFrom" className="form-label-document-req">Cohabitation Year From:<span className="required">*</span></label>
+                        <select
+                          id="CYFrom"
+                          name="CYFrom"
+                          value={clearanceInput.CYFrom}
+                          onChange={handleChange}
+                          className="form-input-document-req"
+                          required
+                        >
+                          <option value="" disabled>Select Year</option>
+                          {[...Array(100)].map((_, i) => {
+                            const year = new Date().getFullYear() - i;
+                            const cyTo = parseInt(clearanceInput.CYTo);
+                            const isDisabled = !isNaN(cyTo) && year >= cyTo;
+                            return (
+                              <option key={year} value={year} disabled={isDisabled}>
+                                {year}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+
+                    </>
+                  )}
+
+
+                  {(clearanceInput.purpose === "Occupancy /  Moving Out" || clearanceInput.purpose === "Estate Tax" || clearanceInput.purpose === "Death Residency" 
+                    || clearanceInput.purpose === "Guardianship"
+                  ) && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="fullName" className="form-label-document-req">{addOn}Full Name<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="fullName"  
+                          name="fullName"  
+                          className="form-input-document-req"  
+                          required  
+                          placeholder="Enter Full Name" 
+                          value={clearanceInput.fullName}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    </>
+                  )}
+                  {(clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Certificate") || clearanceInput.purpose === "Financial Subsidy of Solo Parent" && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="noIncomeChildFName" className="form-label-document-req">Son/Daughter's Name<span className="required">*</span></label>
+                          <input 
+                            type="text"  
+                            id="noIncomeChildFName"  
+                            name="noIncomeChildFName"  
+                            value={clearanceInput.noIncomeChildFName}
+                            onChange={handleChange}
+                            className="form-input-document-req"  
+                            required 
+                            placeholder={`Enter Child's Full Name`}
+                          />
+                      </div>
+                    </>
+                  )}
+
+                  {(docType === "Barangay Certificate" && clearanceInput.purpose === "Cohabitation") && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="partnerWifeHusbandFullName" className="form-label-document-req">Partner's/Wife's/Husband's Full Name<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="partnerWifeHusbandFullName"  
+                          name="partnerWifeHusbandFullName"  
+                          className="form-input-document-req"  
+                          required  
+                          placeholder="Enter Full Name" 
+                          value={clearanceInput.partnerWifeHusbandFullName}
+                          onChange={handleChange}
+                        />
+                      </div>      
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Guardianship" && (
+                    <>
+                      <div className="form-group-document-req">
+                      <label htmlFor="wardFname" className="form-label-document-req">Ward's Full Name<span className="required">*</span></label>
+                          <input 
+                            type="text"  
+                            id="wardFname"  
+                            name="wardFname"  
+                            value={clearanceInput.wardFname}
+                            onChange={handleChange}
+                            className="form-input-document-req"  
+                            required 
+                            placeholder={`Enter Ward's Full Name`}
+                          />
+                      </div>
+
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Garage/PUV" && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="vehicleType" className="form-label-document-req">Vehicle Description<span className="required">*</span></label>
+                        <input 
+                          type="text"
+                          id="vehicleType"  
+                          name="vehicleType"  
+                          className="form-input-document-req"  
+                          required 
+                          value={clearanceInput.vehicleType}
+                          onChange={handleChange}   
+                          placeholder="Enter Vehicle Description"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Garage/TRU" && (
+                    <>  
+                      <div className="form-group-document-req">
+                        <label htmlFor="businessname" className="form-label-document-req">Business Name<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="businessname"  
+                          name="businessName"  
+                          className="form-input-document-req"  
+                          required 
+                          placeholder="Enter Business Name"  
+                          value={clearanceInput.businessName}
+                          onChange={handleChange}
+                        />
+                      </div>   
+
+                      <div className="form-group-document-req">
+                        <label htmlFor="businessnature" className="form-label-document-req">Nature of Business<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="businessnature"  
+                          name="businessNature"  
+                          value={clearanceInput.businessNature}
+                          onChange={handleChange}
+                          className="form-input-document-req"  
+                          required 
+                          placeholder="Enter Business Nature"  
+                        />
+                      </div>      
+
+                      <div className="form-group-document-req">
+                        <label htmlFor="businessloc" className="form-label-document-req">Business Location<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="businessloc"  
+                          name="businessLocation"  
+                          className="form-input-document-req"  
+                          value={clearanceInput.businessLocation}
+                          onChange={handleChange}
+                          required 
+                          placeholder="Enter Business Location"  
+                        />
+                      </div>
+                      <div className="form-group-document-req">
+                        <label htmlFor="noOfVechicles" className="form-label-document-req">Nos of Tricycle<span className="required">*</span></label>
+                        <input 
+                          type="number"  
+                          id="noOfVechicles"  
+                          name="noOfVechicles"  
+                          className="form-input-document-req"  
+                          required 
+                          value={clearanceInput.noOfVechicles}
+                          onChange={handleChange}
+                          min={1}
+                          onKeyDown={(e)=> {
+                            if (e.key === 'e' || e.key === '-' || e.key === '+') {
+                              e.preventDefault(); // Prevent scientific notation and negative/positive signs
+                            }
+                          }
+                          } // Prevent manual input
+                        />
+                      </div>
+                      
+                      <div className="form-group-document-req">
+                        <label htmlFor="vehicleMake" className="form-label-document-req">Tricycle Make<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="vehicleMake"  
+                          name="vehicleMake"  
+                          className="form-input-document-req"  
+                          required 
+                          value={clearanceInput.vehicleMake}
+                          onChange={handleChange}
+                          placeholder="Enter Tricycle Make"  
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Fire Victims" && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="dateOfFireIncident" className="form-label-document-req">Date of Fire Incident<span className="required">*</span></label>
+                        <input 
+                          type="date" 
+                          className="form-input-document-req" 
+                          id="dateOfFireIncident"
+                          name="dateOfFireIncident"
+                          value={clearanceInput?.dateOfFireIncident || ""}
+                          onChange={handleChange}
+                          required
+                          min={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]} // 30 days before today
+                          max={new Date().toISOString().split("T")[0]} // today
+                          onKeyDown={(e) => e.preventDefault()}  
+                        />    
+                      </div>            
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Flood Victims" && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="nameOfTyphoon" className="form-label-document-req">Name of Typhoon<span className="required">*</span></label>
+                        <input 
+                          type="text" 
+                          className="form-input-document-req" 
+                          id="nameOfTyphoon"
+                          name="nameOfTyphoon"
+                          value={clearanceInput?.nameOfTyphoon || ""}
+                          onChange={handleChange}
+                          required
+                          placeholder="Enter Typhoon Name"
+                        />    
+                      </div>            
+                    </>
+                  )}
+
+                  {/* Display Added Fields from New Docs*/}
+                  {leftFields.map((fieldName) => (
+                    <div className="form-group-document-req" key={fieldName}>
+                      <label htmlFor={fieldName} className="form-label-document-req">
+                        {formatFieldName(fieldName)}<span className="required">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id={fieldName}
+                        name={fieldName}
+                        value={
+                          typeof clearanceInput[fieldName] === "string" ||
+                          typeof clearanceInput[fieldName] === "number"
+                            ? clearanceInput[fieldName]
+                            : ""
+                        }
+                        onChange={handleChange}
+                        className="form-input-document-req"
+                        required
+                        placeholder={`Enter ${formatFieldName(fieldName)}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                
+                <div className="document-req-form-container-right-side">
+                  {(clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Certificate")&& (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="noIncomePurpose" className="form-label-document-req">Purpose Of No Income:<span className="required">*</span></label>
+                          <select 
+                            id="noIncomePurpose"  
+                            name="noIncomePurpose"  
+                            value={clearanceInput.noIncomePurpose}
+                            onChange={handleChange}
+                            className="form-input-document-req"  
+                            required 
+                          >
+                            <option value="" disabled>Select Purpose</option>
+                            <option value="SPES Scholarship">SPES Scholarship</option>
+                            <option value="ESC Voucher">DEPED Educational Services Contracting (ESC) Voucher</option>
+                          </select>
+                      </div>
+                    </>
+                  )}
+                  {clearanceInput.purpose === "Guardianship" && (
+                    <>
+                      <div className="form-group-document-req">
+                      <label htmlFor="guardianshipType" className="form-label-document-req">Type of Guardianship Certificate<span className="required">*</span></label>
+                          <select
+                            id="guardianshipType"  
+                            name="guardianshipType"  
+                            className="form-input-document-req"  
+                            value={clearanceInput.guardianshipType}
+                            onChange={handleChange}
+                            required
+                          >
+                            <option value="" disabled>Select Type of Guardianship</option>
+                            <option value="School Purpose">For School Purpose</option>
+                            <option value="Legal Purpose">For Other Legal Purpose</option>
+                          </select>
+                      </div>
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Good Moral and Probation" && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="goodMoralPurpose" className="form-label-document-req">Purpose of Good Moral and Probation:<span className="required">*</span></label>
+                        <select
+                          id="goodMoralPurpose"
+                          name="goodMoralPurpose"
+                          className="form-input-document-req"
+                          value={clearanceInput.goodMoralPurpose}
+                          onChange={handleChange}
+                          required
+                          >
+                          <option value="" disabled>Select Purpose</option>
+                          <option value = "Legal Purpose and Intent">Legal Purpose and Intent</option>
+                          <option value = "Others">Others</option>
+                        </select>
+                      </div>
+                      {clearanceInput.goodMoralPurpose === "Others" && (
+                        <>
+                          <div className="form-group-document-req">
+                            <label htmlFor="goodMoralOtherPurpose" className="form-label-document-req">Please Specify Other Purpose:<span className="required">*</span></label>
+                            <input 
+                              type="text"  
+                              id="goodMoralOtherPurpose"  
+                              name="goodMoralOtherPurpose"  
+                              value={clearanceInput.goodMoralOtherPurpose}
+                              onChange={handleChange}
+                              className="form-input-document-req"  
+                              required 
+                              placeholder="Enter Other Purpose"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Garage/PUV" && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="goodMoralOtherPurpose" className="form-label-document-req">Certificate Purpose<span className="required">*</span></label>
+                        <input 
+                          type="text"
+                          id="goodMoralOtherPurpose"  
+                          name="goodMoralOtherPurpose"  
+                          className="form-input-document-req"  
+                          required 
+                          value={clearanceInput.goodMoralOtherPurpose}
+                          onChange={handleChange}
+                          placeholder="Enter Certificate Purpose"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {(docType === "Barangay Indigency" || (clearanceInput.purpose === "Residency" && docType === "Barangay Certificate")) && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="appointmentDate" className="form-label-document-req">Set An Appointment<span className="required">*</span></label>
+                        <input 
+                          type="date" 
+                          id="appointmentDate" 
+                          min={minDate} // Set minimum date to tomorrow
+                          onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                          name="appointmentDate" 
+                          value={clearanceInput.appointmentDate||""}
+                          onChange={handleChange}
+                          className="form-input-document-req" 
+                          required
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="form-group-document-req">
+                    <label htmlFor="contact" className="form-label-document-req">Requestor's Contact Number<span className="required">*</span></label>
+                    <input 
+                      type="tel"  
+                      id="contact"  
+                      name="contact"  
+                      className="form-input-document-req" 
+                      required 
+                      value={clearanceInput.contact}
+                      onChange={(e) => {
+                        const input = e.target.value;
+                        // Only allow digits and limit to 11 characters
+                        if (/^\d{0,11}$/.test(input)) {
+                          handleChange(e);
+                        }
+                      }}
+                      maxLength={11}  
+                      pattern="^[0-9]{11}$" 
+                      placeholder="Please enter a valid 11-digit contact number" 
+                      title="Please enter a valid 11-digit contact number. Format: 09XXXXXXXXX"
+                    />
+                  </div>
+
+                  <div className="form-group-document-req">
+                    <label htmlFor="birthday" className="form-label-document-req">Requestor's Birthday<span className="required">*</span></label>
+                    <input 
+                      type="date" 
+                      id="birthday" 
+                      name="birthday" 
+                      className="form-input-document-req" 
+                      value={clearanceInput.birthday}
+                      onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                      onChange={handleChange}
+                      required 
+                      max={getLocalDateString(new Date())}
+                      readOnly={isReadOnly}
+
+                    />
+                  </div>
+
+                  <div className="form-group-document-req">
+                    <label htmlFor="age" className="form-label-document-req">Requestor's Age<span className="required">*</span></label>
+                    <input 
+                      type="number"  // Ensures the input accepts only numbers
+                      id="age"  
+                      name="age"  
+                      className="form-input-document-req" 
+                      value={clearanceInput.age}
+                      onChange={handleChange}
+                      readOnly 
+                      min="1"  
+                      max="150"  
+                      placeholder="Enter Age"  
+                      step="1" 
+                      disabled={true}
+                    />
+                  </div>
+
+                  <div className="form-group-document-req">
+                    <label htmlFor="civilStatus" className="form-label-document-req">Requestor's Civil Status<span className="required">*</span></label>
+                    <select 
+                      id="civilStatus" 
+                      name="civilStatus" 
+                      className="form-input-document-req" 
+                      required
+                      value={clearanceInput.civilStatus}
+                      onChange={handleChange}
+                      disabled={isReadOnly}
+                    >
+                      <option value="" disabled>Select Civil Status</option>
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Widow">Widow</option>
+                      <option value="Separated">Separated</option>                
+                    </select>
+                  </div>
+
+                  <div className="form-group-document-req">
+                    <label htmlFor="citizenship" className="form-label-document-req">
+                      Requestor's Citizenship<span className="required">*</span>
+                    </label>
+                    <select
+                      id="citizenship"
+                      name="citizenship"
+                      className="form-input-document-req"
+                      value={
+                        ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(clearanceInput.citizenship.split("(")[0])
+                          ? clearanceInput.citizenship.split("(")[0]
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const selected = e.target.value;
+                        if (selected === "Dual Citizen" || selected === "Others") {
+                          setClearanceInput((prev: any) => ({
+                            ...prev,
+                            citizenship: selected,
+                          }));
+                        } else {
+                          setClearanceInput((prev: any) => ({
+                            ...prev,
+                            citizenship: selected,
+                          }));
+                        }
+                      }}
+                      required
+                    >
+                      <option value="" disabled>Select Citizenship</option>
+                      <option value="Filipino">Filipino</option>
+                      <option value="Dual Citizen">Dual Citizen</option>
+                      <option value="Naturalized">Naturalized</option>
+                      <option value="Others">Others</option>
+                    </select>
+
+                    {/* Input field for Dual Citizen */}
+                    {clearanceInput.citizenship === "Dual Citizen" && (
+                      <input
+                        type="text"
+                        className="form-input-document-req"
+                        placeholder="Specify other citizenship (e.g., American)"
+                        value={
+                          clearanceInput.citizenship.includes("(")
+                            ? clearanceInput.citizenship.split("(")[1].replace(")", "")
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const second = e.target.value.trim();
+                          setClearanceInput((prev: any) => ({
+                            ...prev,
+                            citizenship: second ? `Dual Citizen(${second})` : "Dual Citizen",
+                          }));
+                        }}
+                        required
+                      />
+                    )}
+
+                    {/* Input field for Others */}
+                    {clearanceInput.citizenship === "Others" && (
+                      <input
+                        type="text"
+                        className="form-input-document-req"
+                        placeholder="Please specify your citizenship"
+                        value={
+                          ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(clearanceInput.citizenship)
+                            ? ""
+                            : clearanceInput.citizenship
+                        }
+                        onChange={(e) =>
+                          setClearanceInput((prev: any) => ({
+                            ...prev,
+                            citizenship: e.target.value,
+                          }))
+                        }
+                        required
+                      />
+                    )}
+                  </div>
+
+                  {clearanceInput.purpose === "Residency" && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="attestedBy" className="form-label-document-req">Attested By Hon Kagawad: <span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="attestedBy"  
+                          name="attestedBy"  
+                          value={clearanceInput.attestedBy}
+                          onChange={handleChange}
+                          className="form-input-document-req"  
+                          required 
+                          placeholder="Enter Hon Kagawad's Full Name"  
+                        />
+                      </div>
+                    </>
+                  )}
+
+
+                  {(clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Indigency")&& (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="noIncomeChildFName" className="form-label-document-req">Son/Daughter's Name<span className="required">*</span></label>
+                          <input 
+                            type="text"  
+                            id="noIncomeChildFName"  
+                            name="noIncomeChildFName"  
+                            value={clearanceInput.noIncomeChildFName}
+                            onChange={handleChange}
+                            className="form-input-document-req"  
+                            required 
+                            placeholder={`Enter Child's Full Name`}
+                          />
+                      </div>
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Occupancy /  Moving Out" && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="toAddress" className="form-label-document-req">To Address<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="toAddress"  
+                          name="toAddress"  
+                          value={clearanceInput.toAddress}
+                          onChange={handleChange}
+                          className="form-input-document-req"  
+                          required 
+                          placeholder="Enter To Address"  
+                        />
+                      </div>
+
+                      <div className="form-group-document-req">
+                        <label htmlFor="fromAddress" className="form-label-document-req">From Address<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="fromAddress"  
+                          name="fromAddress"  
+                          value={clearanceInput.toAddress}
+                          onChange={handleChange}
+                          className="form-input-document-req"  
+                          required 
+                          placeholder="Enter From Address"  
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Estate Tax" && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="estateSince" className="form-label-document-req">Estate Since:<span className="required">*</span></label>
+                        <select
+                          id="estateSince"
+                          name="estateSince"
+                          value={clearanceInput.estateSince}
+                          onChange={handleChange}
+                          className="form-input-document-req"
+                          required
+                        >
+                          <option value="" disabled>Select Year</option>
+                          {[...Array(150)].map((_, i) => {
+                            const year = new Date().getFullYear() - i;
+                            return (
+                              <option key={year} value={year}>
+                                {year}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+                    </>
+                  )}
+
+                  {(clearanceInput.purpose === "Death Residency"|| clearanceInput.purpose === "Estate Tax") && (
+                    <div className="form-group-document-req">
+                      <label htmlFor="dateofdeath" className="form-label-document-req">Date Of Death<span className="required">*</span></label>
+                      <input 
+                        type="date" 
+                        id="dateofdeath" 
+                        name="dateofdeath" 
+                        className="form-input" 
+                        value={clearanceInput.dateofdeath}
+                        onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+
+                        onChange={handleChange}
+                        required 
+                        max={getLocalDateString(new Date())} // Set max date to today
+                      />
+                    </div>
+                  )}
+
+                  {(clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Clearance") && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="CYTo" className="form-label-document-req">Cohabitation Year To:<span className="required">*</span></label>
+                        <select
+                          id="CYTo"
+                          name="CYTo"
+                          value={clearanceInput.CYTo}
+                          onChange={handleChange}
+                          className="form-input-document-req"
+                          required
+                        >
+                          <option value="" disabled>Select Year</option>
+                          {[...Array(100)].map((_, i) => {
+                            const year = new Date().getFullYear() - i;
+                            const cyFrom = parseInt(clearanceInput.CYFrom);
+                            const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
+                            return (
+                              <option key={year} value={year} disabled={isDisabled}>
+                                {year}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+
+                    </>
+                  )}
+
+                  {(docType === "Barangay Certificate" && clearanceInput.purpose === "Cohabitation") && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="cohabitationStartDate" className="form-label-document-req">
+                          Start Of Cohabitation<span className="required">*</span>
+                        </label>
+                        <input 
+                          type = "date" 
+                          id="cohabitationStartDate"
+                          name="cohabitationStartDate"
+                          className="form-input-document-req"
+                          value={clearanceInput.cohabitationStartDate}
+                          onChange={handleChange}
+                          onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                          required
+                          max = {getLocalDateString(new Date())} // Set max date to today
+                          />
+                      </div>
+                      <div className="form-group-document-req">
+                        <label htmlFor="cohabitationRelationship" className="form-label-document-req">
+                          Type Of Relationship<span className="required">*</span>
+                        </label>
+                        <select
+                          id="cohabitationRelationship"
+                          name="cohabitationRelationship"
+                          className="form-input-document-req"
+                          value={clearanceInput.cohabitationRelationship}
+                          onChange={handleChange}
+                          required
+                        >
+                          <option value="" disabled>Select Type of Relationship</option>
+                          <option value="Husband And Wife">Husband And Wife</option>
+                          <option value="Partners">Partners</option>
+                        </select>
+                      </div>
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Guardianship" && (
+                    <>
+                      <div className="form-group-document-req">
+                      <label htmlFor="wardRelationship" className="form-label-document-req">Guardian's Relationship Towards the Ward<span className="required">*</span></label>
+                          <select
+                            id="wardRelationship"  
+                            name="wardRelationship"  
+                            className="form-input-document-req"  
+                            value={clearanceInput.wardRelationship}
+                            onChange={handleChange}
+                            required
+                          >
+                            <option value="" disabled>Select Type of Relationship</option>
+                            <option value="Grandmother">Grandmother</option>
+                            <option value="Grandfather">Grandfather</option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Aunt">Aunt</option>
+                            <option value="Uncle">Uncle</option>
+                            <option value="Sister">Sister</option>
+                            <option value="Brother">Brother</option>
+                          </select>
+                      </div>
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Garage/PUV" && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="noOfVechicles" className="form-label-document-req">Nos Of Vehicle/s<span className="required">*</span></label>
+                        <input 
+                          type="number"  
+                          id="noOfVechicles"  
+                          name="noOfVechicles"  
+                          className="form-input-document-req"  
+                          required 
+                          value={clearanceInput.noOfVechicles}
+                          onChange={handleChange}
+                          min={1}
+                          onKeyDown={(e)=> {
+                            if (e.key === 'e' || e.key === '-' || e.key === '+') {
+                              e.preventDefault(); // Prevent scientific notation and negative/positive signs
+                            }
+                          }
+                          } // Prevent manual input
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Flood Victims" && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="dateOfTyphoon" className="form-label-document-req">Date of Typhoon<span className="required">*</span></label>
+                        <input 
+                          type="date" 
+                          className="form-input-document-req" 
+                          id="dateOfTyphoon"
+                          name="dateOfTyphoon"
+                          value={clearanceInput?.dateOfTyphoon || ""}
+                          onChange={handleChange}
+                          required
+                          min={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]} // 30 days before today
+                          max={new Date().toISOString().split("T")[0]} // today
+                          onKeyDown={(e) => e.preventDefault()}  
+                        />    
+                      </div>            
+                    </>
+                  )}
+
+                  {clearanceInput.purpose === "Garage/TRU" && (
+                    <>  
+                      <div className="form-group-document-req">
+                        <label htmlFor="vehicleType" className="form-label-document-req">Tricycle Type<span className="required">*</span></label>
+                        <select
+                          id="vehicleType"  
+                          name="vehicleType"  
+                          className="form-input-document-req"  
+                          required 
+                          value={clearanceInput.vehicleType}
+                          onChange={handleChange}
+                          
+                        >
+                          <option value="" disabled>Select Tricycle Type</option>
+                          <option value="Motorcycle w/ Sidecar">Motorcycle w/ Sidecar</option>
+                          <option value="Motorcycle w/o Sidecar">Motorcycle w/o Sidecar</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group-document-req">
+                        <label htmlFor="vehiclePlateNo" className="form-label-document-req">Tricycle Plate No.<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="vehiclePlateNo"  
+                          name="vehiclePlateNo"  
+                          className="form-input-document-req"  
+                          required 
+                          value={clearanceInput.vehiclePlateNo}
+                          onChange={handleChange}
+                          placeholder="Enter Tricycle Plate No."  
+                        />
+                      </div>
+                      <div className="form-group-document-req">
+                        <label htmlFor="vehicleSerialNo" className="form-label-document-req">Tricycle Serial No.<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="vehicleSerialNo"  
+                          name="vehicleSerialNo"  
+                          className="form-input-document-req"  
+                          required 
+                          value={clearanceInput.vehicleSerialNo}
+                          onChange={handleChange}
+                          placeholder="Enter Tricycle Serial No."  
+                        />
+                      </div>
+                      <div className="form-group-document-req">
+                        <label htmlFor="vehicleChassisNo" className="form-label-document-req">Tricycle Chassis No.<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="vehicleChassisNo"  
+                          name="vehicleChassisNo"  
+                          className="form-input-document-req"  
+                          required 
+                          value={clearanceInput.vehicleChassisNo}
+                          onChange={handleChange}
+                          placeholder="Enter Tricycle Chassis No."  
+                        />
+                      </div>
+                      <div className="form-group-document-req">
+                        <label htmlFor="vehicleEngineNo" className="form-label-document-req">Tricycle Engine No.<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="vehicleEngineNo"  
+                          name="vehicleEngineNo"  
+                          className="form-input-document-req"  
+                          required 
+                          value={clearanceInput.vehicleEngineNo}
+                          onChange={handleChange}
+                          placeholder="Enter Tricycle Engine No."  
+                        />
+                      </div>
+                      <div className="form-group-document-req">
+                        <label htmlFor="vehicleFileNo" className="form-label-document-req">Tricycle File No.<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="vehicleFileNo"  
+                          name="vehicleFileNo"  
+                          className="form-input-document-req"  
+                          required 
+                          value={clearanceInput.vehicleFileNo}
+                          onChange={handleChange}
+                          placeholder="Enter Tricycle File No."  
+                        />
+                      </div>
+                      
+                    </>
+                  )}
+
+                  {/* Display Added Fields from New Docs*/}
+                  {rightFields.map((fieldName) => (
+                    <div className="form-group-document-req" key={fieldName}>
+                      <label htmlFor={fieldName} className="form-label-document-req">
+                        {formatFieldName(fieldName)}<span className="required">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id={fieldName}
+                        name={fieldName}
+                        value={
+                          typeof clearanceInput[fieldName] === "string" ||
+                          typeof clearanceInput[fieldName] === "number"
+                            ? clearanceInput[fieldName]
+                            : ""
+                        }
+                        onChange={handleChange}
+                        className="form-input-document-req"
+                        required
+                        placeholder={`Enter ${formatFieldName(fieldName)}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+
+              
+              
+            </>
+          )}
+
+          {/* hereothers*/}
+          {activeSection === "others" && (
+            <>
+              <div className="document-req-form-container-requirements">
+                <div className="required-documents-container">
+                  <label className="form-label-required-documents"> Upload Signature Over Printed Name<span className="required">*</span></label>
+
+                  <div className="file-upload-container-required-documents">
+                    <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
+                      <input
+                        id="file-upload1"
+                        type="file"
+                        accept=".jpg,.jpeg,.png"
+                        required
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          handleFileChange(e, setFiles, 'signaturejpg');
+                        }} 
+                        
+                        style={{ display: "none" }}
+                      />
+                      
+                    <div className="uploadedFiles-container">
+                      {/* Display the file names with image previews */}
+                      {files.length > 0 && (
+                        <div className="file-name-image-display">
+                          <ul>
+                            {files.map((file, index) => (
+                              <div className="file-name-image-display-indiv" key={index}>
+                                <li> 
+                                    {/* Display the image preview */}
+                                    {file.preview && (
+                                      <div className="filename&image-container">
+                                        <img
+                                          src={file.preview}
+                                          alt={file.name}
+                                          style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                        />
+                                      </div>
+                                      )}
+                                    {file.name}  
+                                  <div className="delete-container">
+                                    {/* Delete button with image */}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleFileDelete('file-upload1', setFiles)}
+                                        className="delete-button"
+                                      >
+                                        <img
+                                          src="/images/trash.png"  
+                                          alt="Delete"
+                                          className="delete-icon"
+                                        />
+                                      </button>
+                                  </div>   
+                                </li>
+                              </div>
+                            ))}  
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction Permit" ) && (
+                  <>
+                    <label className="form-label-required-documents-uploadany"> Upload any of the following requirements<span className="required">*</span></label>
+                  </>
+                )}
+
+                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction Permit") &&(
+                  <>
+                    <div className="required-documents-container">
+                      <label className="form-label-required-documents"> Barangay ID</label>
+
+                      <div className="file-upload-container-required-documents">
+                        <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
+                        <input
+                            id="file-upload2"
+                            type="file"
+                            accept=".jpg,.jpeg,.png"
+                            required={docType === "Temporary Business Permit" || docType === "Business Permit"}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              handleFileChange(e, setFiles2, 'barangayIDjpg');
+                            }}
+                            style={{ display: "none" }}
+                        />
+
+                        <div className="uploadedFiles-container">
+                          {/* Display the file names with image previews */}
+                          {files2.length > 0 && (
+                            <div className="file-name-image-display">
+                              <ul>
+                                {files2.map((file, index) => (
+                                  <div className="file-name-image-display-indiv" key={index}>
+                                    <li> 
+                                        {/* Display the image preview */}
+                                        {file.preview && (
+                                          <div className="filename&image-container">
+                                            <img
+                                              src={file.preview}
+                                              alt={file.name}
+                                              style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                            />
+                                          </div>
+                                          )}
+                                        {file.name}  
+                                      <div className="delete-container">
+                                        {/* Delete button with image */}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleFileDelete('file-upload2', setFiles2)}
+                                            className="delete-button"
+                                          >
+                                            <img
+                                              src="/images/trash.png"  
+                                              alt="Delete"
+                                              className="delete-icon"
+                                            />
+                                          </button>
+
+                                      </div>
+                                                  
+                                        
+                                    </li>
+                                  </div>
+                                ))}  
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="required-documents-container">
+                      <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairvirew</label>
+                      <label className="form-sub-label-required-documents"> (for residents with no Barangay ID)</label>
+                    
+                      <div className="file-upload-container-required-documents">
+                        {/* Only show upload button if no uploaded file exists */}
+                        {!userData?.upload && (
+                          <>
+                            <label htmlFor="file-upload3" className="upload-link">Click to Upload File</label>
+                            <input
+                              id="file-upload3"
+                              type="file"
+                              accept=".jpg,.jpeg,.png"
+                              required={(docType === "Temporary Business Permit" || docType === "Business Permit")}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                handleFileChange(e, setFiles3, 'validIDjpg');
+                              }}
+                              style={{ display: "none" }}
+                            />
+                          </>
+                        )}
+
+                        {/* Always show file preview if exists */}
+                        {files3.length > 0 && (
+                          <div className="file-name-image-display">
+                            <ul>
+                              {files3.map((file, index) => (
+                                <div className="file-name-image-display-indiv" key={index}>
+                                  <li>
+                                    <div className="filename-image-container">
+                                      <img
+                                        src={file.preview}
+                                        alt={file.name}
+                                        style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                      />
+                                    </div>
+                                    <div className="file-name-truncated">{file.name}</div>
+                                    {!userData?.upload && (
+                                      <div className="delete-container">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleFileDelete('file-upload3', setFiles3)}
+                                          className="delete-button"
+                                        >
+                                          <img
+                                            src="/images/trash.png"
+                                            alt="Delete"
+                                            className="delete-icon"
+                                          />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </li>
+                                </div>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div className="required-documents-container">
+                  <label className="form-label-required-documents"> Endorsement Letter from Homeowner/Sitio President</label>
+                  <label className="form-sub-label-required-documents"> (for residents of Barangay Fairview for less than 6 months)</label>
+
+                  <div className="file-upload-container-required-documents">
+                    <label htmlFor="file-upload4"  className="upload-link">Click to Upload File</label>
+                      <input
+                        id="file-upload4"
+                        type="file"
+                        accept=".jpg,.jpeg,.png"
+                        required={(docType === "Temporary Business Permit" || docType === "Business Permit"|| docType === "Construction Permit")}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          handleFileChange(e,setFiles4, 'letterjpg');
+                        
+                        }} // Handle file selection
+
+                        style={{ display: "none" }}
+                      />
+
+                    <div className="uploadedFiles-container">
+                      {/* Display the file names with image previews */}
+                      {files4.length > 0 && (
+                        <div className="file-name-image-display">
+                          <ul>
+                            {files4.map((file, index) => (
+                              <div className="file-name-image-display-indiv" key={index}>
+                                <li> 
+                                    {/* Display the image preview */}
+                                    {file.preview && (
+                                      <div className="filename&image-container">
+                                        <img
+                                          src={file.preview}
+                                          alt={file.name}
+                                          style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                        />
+                                      </div>
+                                      )}
+                                    {file.name}  
+                                  <div className="delete-container">
+                                    {/* Delete button with image */}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleFileDelete('file-upload4', setFiles4)}
+                                        className="delete-button"
+                                      >
+                                        <img
+                                          src="/images/trash.png"  
+                                          alt="Delete"
+                                          className="delete-icon"
+                                        />
+                                      </button>
+
+                                  </div>
+                                              
+                                    
+                                </li>
+                              </div>
+                            ))}  
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+
+                {/* Dynamically Render Extra Image Upload Fields */}
+{dynamicImageFields.map((fieldName) => (
+  <div className="required-documents-container" key={fieldName}>
+    <label className="form-label-required-documents">
+      {formatFieldName(fieldName.replace(/jpg$/, "").trim())}
+      <span className="required">*</span>
+    </label>
+
+    <div className="file-upload-container-required-documents">
+      <label htmlFor={`file-upload-${fieldName}`} className="upload-link">Click to Upload File</label>
+
+      <input
+        id={`file-upload-${fieldName}`}
+        type="file"
+        accept=".jpg,.jpeg,.png"
+        style={{ display: "none" }}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleDynamicImageUpload(fieldName, file);
+          e.target.value = ""; // reset input
+        }}
+      />
+
+      {/* Show Preview if Files Exist */}
+      {dynamicFileStates[fieldName] && dynamicFileStates[fieldName].length > 0 && (
+        <div className="file-name-image-display">
+          <ul>
+            {dynamicFileStates[fieldName].map((file, index) => (
+              <div className="file-name-image-display-indiv" key={index}>
+                <li className="file-item">
+                  {file.preview && (
+                    <div className="filename-image-container">
+                      <img
+                        src={file.preview}
+                        alt={file.name}
+                        className="file-preview"
+                        style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                      />
+                    </div>
+                  )}
+                  <div className="file-name-truncated">{file.name}</div>
+
+                  <div className="delete-container">
+                    <button
+                      type="button"
+                      className="delete-button"
+                      onClick={() => handleDynamicImageDelete(fieldName, file.name)}
+                    >
+                      <img
+                        src="/images/trash.png"
+                        alt="Delete"
+                        className="delete-icon"
+                      />
+                    </button>
+                  </div>
+                </li>
+              </div>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  </div>
+))}
+              </div>
+            </>
+          )}
+
+          <button type="submit" className="submit-button-document-req">Submit</button>
+          
+
+        </form>
       </div>
 
+
+
+    {/* OLD */}
       <div className="form-content">
         <h1 className="form-title">
         {docType} Request Form
@@ -1346,7 +3053,7 @@ const handleFileChange = (
 
               </>
             )}
-            {}
+            
             {clearanceInput.purpose === "Guardianship" && (
               <>
                 <div className="form-group">
@@ -1672,7 +3379,7 @@ const handleFileChange = (
             </div>
 
             <div className="form-group">
-              <label htmlFor="gender" className="form-label">Gender<span className="required">*</span></label>
+              <label htmlFor="gender" className="form-label">Requestor's Gender<span className="required">*</span></label>
               <select 
                 id="gender" 
                 name="gender" 
@@ -1915,28 +3622,7 @@ const handleFileChange = (
 
             </>)}
 
-            <div className="form-group">
-              <label htmlFor="contact" className="form-label">Contact Number<span className="required">*</span></label>
-              <input 
-                type="tel"  
-                id="contact"  
-                name="contact"  
-                className="form-input" 
-                required 
-                value={clearanceInput.contact}
-                onChange={(e) => {
-                  const input = e.target.value;
-                  // Only allow digits and limit to 11 characters
-                  if (/^\d{0,11}$/.test(input)) {
-                    handleChange(e);
-                  }
-                }}
-                maxLength={11}  
-                pattern="^[0-9]{11}$" 
-                placeholder="Please enter a valid 11-digit contact number" 
-                 title="Please enter a valid 11-digit contact number. Format: 09XXXXXXXXX"
-              />
-            </div>
+            
 
             
 
@@ -2223,7 +3909,7 @@ const handleFileChange = (
 
 
           <div className="form-group">
-            <label htmlFor="requestorFname" className="form-label">Requestor Full Name<span className="required">*</span></label>
+            <label htmlFor="requestorFname" className="form-label">Requestor's Full Name<span className="required">*</span></label>
             <input 
               type="text"  
               id="requestorFname"  
