@@ -3,10 +3,11 @@ import "@/CSS/IncidentModule/OnlineReporting.css";
 import { useState, useEffect } from "react";
 import { getAllSpecificDocument } from "@/app/helpers/firestorehelper";
 import { useRouter } from "next/navigation";
-import { doc, updateDoc } from "firebase/firestore";
+import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import {db} from "@/app/db/firebase";
+import { useSession } from "next-auth/react";
 
-const statusOptions = ["All", "Acknowledged", "Pending"];
+const statusOptions = ["All", "Settled  ", "pending", "In - Progress"];
 
 export default function OnlineReports() {
   const [incidentData, setIncidentData] = useState<any[]>([]);
@@ -15,10 +16,11 @@ export default function OnlineReports() {
   const [searchNameQuery, setSearchNameQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-
+  const user = useSession().data?.user;
   const [caseNumberSearch, setCaseNumberSearch] = useState("");
   const [showCount, setShowCount] = useState<number>(0);
 
+  const [taskAssignedData, setTaskAssignedData] = useState<any[]>([]);
 
 
     // Helpers to manage viewed requests
@@ -37,90 +39,126 @@ const getViewedRequests = (): string[] => {
     }
   };
 
+  
 
-
-{/*}
   useEffect(() => {
-    const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", "Online", setIncidentData);
+    const Collection = query(
+      collection(db, "IncidentReports"), 
+      where("department", "==", "Online"),
+      orderBy("createdAt", "desc"));
+  
+      const unsubscribe = onSnapshot(Collection, (snapshot) => {
+          const data:any[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            isNew: doc.data().isViewed === false, // Check if the request is new
+            }));
+          data.sort((a, b) => {
+            if(a.statusPriority !== b.statusPriority) {
+              return a.statusPriority - b.statusPriority; // Sort by status priority first
+            }
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+            return dateB - dateA; // Sort by createdAt in descending order
+          });
+          setIncidentData(data);
+          setFilteredData(data);
+        });
+        return () => {
+          if (unsubscribe) {
+            unsubscribe();
+          }
+        };
+  }, []);
 
+  console.log(incidentData)
 
-     const viewed = getViewedRequests();
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
+  console.log("Incident Data:", incidentData);
+  useEffect(() => {
     
-  }, []);
-*/}
+    try {
+      const Collection = query(
+        collection(db, "IncidentReports"), 
+        where("respondent.respondentName", "==", user?.id),
+        orderBy("createdAt", "desc"));
+
+        const unsubscribe = onSnapshot(Collection, (snapshot) => {
+          const data:any[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            isNew: doc.data().isViewed === false, // Check if the request is new
+            }));
+
+        // ✅ FILTER HERE BEFORE setting state
+          const activeTasks = data.filter(task => task.status !== "Settled");
+
+          data.sort((a, b) => {
+            if(a.statusPriority !== b.statusPriority) {
+              return a.statusPriority - b.statusPriority; // Sort by status priority first
+            }
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+            return dateB - dateA; // Sort by createdAt in descending order
+          });
+          setTaskAssignedData(activeTasks); //updated from "data" MEE
+        });
+        return () => {
+          if (unsubscribe) {
+            unsubscribe();
+          }
+        };
+
+    } catch (error) {
+      console.error("Error fetching incident data:", error);
+      
+    }
+
+  }, [user]);
 
 
-  useEffect(() => {
-    const unsubscribe = getAllSpecificDocument(
-      "IncidentReports",
-      "department",
-      "==",
-      "Online",
-      (data: any[]) => {
-        const processed = data.map((item) => ({
-          ...item,
-          isNew: item.isViewed === false,
-        }));
-
-        setIncidentData(processed);
-        setFilteredData(processed);
-        
-      }
-    );
-
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }, []);
+  console.log("Task Assigned Data:", taskAssignedData);
 
   useEffect(() => {
     let data = [...incidentData];
-  
-    // Filter by case number segment
-  if (caseNumberSearch) {
-    data = data.filter((incident) => {
-      const segments = incident.caseNumber?.split(" - ");
-      const lastSegment = segments?.[2]?.trim();
-      return lastSegment?.includes(caseNumberSearch.trim());
-    });
-  }
-
-    if (searchNameQuery) {
-      const query = searchNameQuery.toLowerCase();
-      data = data.filter(
-        (incident) =>
-          (typeof incident.firstname === "string" && incident.firstname.toLowerCase().includes(query)) ||
-          (typeof incident.lastname === "string" && incident.lastname.toLowerCase().includes(query))
-      );
-    }
     
-    if (selectedStatus !== "All") {
-      data = data.filter((incident) => incident.status === selectedStatus);
+      // Filter by case number segment
+    if (caseNumberSearch) {
+      data = data.filter((incident) => {
+        const segments = incident.caseNumber?.split(" - ");
+        const lastSegment = segments?.[2]?.trim();
+        return lastSegment?.includes(caseNumberSearch.trim());
+      });
     }
-  
-    // Custom sorting function
-    data.sort((a, b) => {
-      const extractNumbers = (caseNum: string) => {
-        if (!caseNum || caseNum === "N/A") return [Infinity, Infinity]; // Push N/A to bottom
-        const match = caseNum.match(/^(\d{8})\s*-\s*(\d{4})$/); // Match "YYYYMMDD - XXXX"
-        return match ? [parseInt(match[1], 10), parseInt(match[2], 10)] : [Infinity, Infinity];
-      };
-  
-      const [dateA, seqA] = extractNumbers(a.caseNumber);
-      const [dateB, seqB] = extractNumbers(b.caseNumber);
-  
-      return dateA !== dateB ? dateB - dateA : seqA - seqB; // Sort by date (desc), then sequence (asc)
-    });
-  
-    setFilteredData(data);
-  }, [incidentData, searchQuery, searchNameQuery, selectedStatus, caseNumberSearch]);
+
+      if (searchNameQuery) {
+        const query = searchNameQuery.toLowerCase();
+        data = data.filter(
+          (incident) =>
+            (typeof incident.firstname === "string" && incident.firstname.toLowerCase().includes(query)) ||
+            (typeof incident.lastname === "string" && incident.lastname.toLowerCase().includes(query))
+        );
+      }
+
+      if (selectedStatus !== "All") {
+        data = data.filter((incident) => incident.status === selectedStatus);
+      }
+    
+      // Custom sorting function
+      data.sort((a, b) => {
+        const extractNumbers = (caseNum: string) => {
+          if (!caseNum || caseNum === "N/A") return [Infinity, Infinity]; // Push N/A to bottom
+          const match = caseNum.match(/^(\d{8})\s*-\s*(\d{4})$/); // Match "YYYYMMDD - XXXX"
+          return match ? [parseInt(match[1], 10), parseInt(match[2], 10)] : [Infinity, Infinity];
+        };
+      
+        const [dateA, seqA] = extractNumbers(a.caseNumber);
+        const [dateB, seqB] = extractNumbers(b.caseNumber);
+      
+        return dateA !== dateB ? dateB - dateA : seqA - seqB; // Sort by date (desc), then sequence (asc)
+      });
+    
+      setFilteredData(data);
+    }, [incidentData, searchQuery, searchNameQuery, selectedStatus, caseNumberSearch]);
   
   const sortData = (data: any[]) => {
     return [...data].sort((a, b) => {
@@ -143,9 +181,6 @@ const getViewedRequests = (): string[] => {
     });
   };
   
-  useEffect(() => {
-    console.log("Fetched Incident Data:", incidentData);
-  }, [incidentData]);
 
   useEffect(() => {
     let data = [...incidentData];
@@ -194,11 +229,11 @@ const getViewedRequests = (): string[] => {
    
     const [filteredIncidents, setFilteredIncidents] = useState<any[]>([]); // Ensure this is populated
     const [currentPage, setCurrentPage] = useState(1);
-  const incidentsPerPage = 10; // Can be changed
-  const indexOfLastIncident = currentPage * incidentsPerPage;
-  const indexOfFirstIncident = indexOfLastIncident - incidentsPerPage;
-  const currentIncidents = filteredData.slice(indexOfFirstIncident, indexOfLastIncident);
-  const totalPages = Math.ceil(filteredData.length / incidentsPerPage);
+    const incidentsPerPage = 10; // Can be changed
+    const indexOfLastIncident = currentPage * incidentsPerPage;
+    const indexOfFirstIncident = indexOfLastIncident - incidentsPerPage;
+    const currentIncidents = filteredData.slice(indexOfFirstIncident, indexOfLastIncident);
+    const totalPages = Math.ceil(filteredData.length / incidentsPerPage);
   
   
     const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
@@ -220,9 +255,62 @@ const getViewedRequests = (): string[] => {
       return pageNumbersToShow;
     };
 
+    const [activeSection, setActiveSection] = useState("main");
+
   return (
     <main className="main-container-online-reports">
-    
+
+
+      <div className="section-1-online-reports">
+            <div className="edit-incident-info-toggle-wrapper">
+
+              {/*
+
+               {["main", "tasks" ].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "main" && "Online Records"}
+                      {section === "tasks" && "Assigned Tasks"}
+                    </button>
+                  ))}
+              
+              */}
+
+
+              {["main", "tasks"].map((section) => (
+            <button
+              key={section}
+              type="button"
+              className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+              onClick={() => setActiveSection(section)}
+              style={{ position: "relative" }}
+            >
+              {section === "main" && "Online Records"}
+              {section === "tasks" && (
+                <>
+                  Assigned Tasks
+                  {taskAssignedData.length > 0 && (
+                    <span className="task-badge">{taskAssignedData.length}</span>
+                  )}
+                </>
+              )}
+            </button>
+          ))}
+
+
+
+                  
+          </div> 
+
+      </div>
+
+      {activeSection === "main" && (
+        <>
+
       <div className="section-2-online-reports">
         <input
           type="text"
@@ -262,54 +350,55 @@ const getViewedRequests = (): string[] => {
       </div>
 
       <div className="main-section-online-reports">
-  {currentIncidents.length === 0 ? (
-    <div className="no-result-card">
-      <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
-      <p className="no-results-department">No Results Found</p>
-    </div>
-  ) : (
-    <table>
-      <thead>
-        <tr>
-          <th>Filed</th>
-          <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
-            Case Number {sortOrder === "asc" ? "🔼" : "🔽"}
-          </th>
-          <th>Complainant's Full Name</th>
-          <th>Date Filed</th>
-          <th>Concern</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {currentIncidents.map((incident, index) => {
-          const fullName = `${incident.lastname || ""}, ${incident.firstname || ""}`.trim();
-          return (
-             <tr key={index} className={incident.isNew ? "highlight-new-request" : ""}>
-              <td>{incident.isFiled === true ? "Filed" : "Not Yet Filed"}</td>
-              <td>{incident.caseNumber || "N/A"}</td>
-              <td>{fullName}</td>
-              <td>{incident.dateFiled} {incident.time}</td>
-              <td>{incident.concerns}</td>
-              <td>
-                <span className={`status-badge ${incident.status.toLowerCase().replace(" ", "-")}`}>
-                  {incident.status}
-                </span>
-              </td>
-              <td>
-                <div className="actions-services">
-                  <button className="action-edit-services " onClick={() => handleViewOnlineReport(incident.id)}><img src="/Images/edit.png" alt="Edit" /></button>
-                </div>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  )}
-</div>
-
+        {currentIncidents.length === 0 ? (
+          <div className="no-result-card">
+            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+            <p className="no-results-department">No Results Found</p>
+          </div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
+                  Case Number 
+                </th>
+                <th>Complainant's Full Name</th>
+                <th>Date Filed</th>
+                <th>Incident Date and Time</th>
+                <th>Area of Incident</th>
+                <th>Concern</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentIncidents.map((incident, index) => {
+                const fullName = `${incident.lastname || ""}, ${incident.firstname || ""}`.trim();
+                return (
+                   <tr key={index} className={incident.isNew ? "highlight-new-request" : ""}>
+                    <td>{incident.caseNumber || "N/A"}</td>
+                    <td>{fullName}</td>
+                    <td>{incident.createdAt}</td>
+                    <td>{incident.dateFiled} {incident.time}</td>
+                    <td>{incident.areaOfIncident}</td>
+                    <td>{incident.concerns}</td>
+                    <td>
+                  <span className={`status-badge ${incident.status.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
+                    {incident.status}
+                  </span>
+                  </td>
+                    <td>
+                      <div className="actions-services">
+                        <button className="action-edit-services " onClick={() => handleViewOnlineReport(incident.id)}><img src="/Images/edit.png" alt="Edit" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
 
       <div className="redirection-section-online">
         <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
@@ -326,6 +415,88 @@ const getViewedRequests = (): string[] => {
       </div>
 
 
+
+                        </>
+                      )}
+
+
+
+
+
+        {/* this table shows all assigned task of the current user. 
+        for now it will be for LF staff but will be change to barangay officer
+        i will not include the pagination for now
+         */}
+
+
+     {activeSection === "tasks" && (
+        <>
+        <div className="main-section-online-reports">
+        {taskAssignedData.length === 0 ? (
+          <div className="no-task-card">
+            <img src="/images/customer-service.png" alt="No results icon" className="no-task-icon" />
+            <p className="no-task-department">You have no Tasks For Today!</p>
+          </div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")} style={{ cursor: "pointer" }}>
+                  Case Number 
+                </th>
+                <th>Complainant's Full Name</th>
+               
+                <th>Concern</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {taskAssignedData
+                .filter((task) => task.status !== "Settled")
+                .map((tasks, index) => {
+                const fullName = `${tasks.lastname || ""}, ${tasks.firstname || ""}`.trim();
+                return (
+                   <tr key={index} className={tasks.isNew ? "highlight-new-request" : ""}>
+                    <td>{tasks.caseNumber || "N/A"}</td>
+                    <td>{fullName}</td>
+               
+                    <td>{tasks.concerns}</td>
+                    <td>
+                  <span className={`status-badge ${tasks.status.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
+                    {tasks.status}
+                  </span>
+                    </td>
+                    <td>
+                      <div className="actions-services">
+                        <button className="action-edit-services " onClick={() => handleViewOnlineReport(tasks.id)}><img src="/Images/edit.png" alt="Edit" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+
+      <div className="redirection-section-online">
+        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+        {getPageNumbers().map((number, index) => (
+          <button
+            key={index}
+            onClick={() => typeof number === 'number' && paginate(number)}
+            className={currentPage === number ? "active" : ""}
+          >
+            {number}
+          </button>
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+      </div>
+
+                        </>
+                      )}
     </main>
   );
 }

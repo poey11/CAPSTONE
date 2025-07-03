@@ -6,7 +6,6 @@ import { addDoc,collection,doc, getDocs, onSnapshot, orderBy, query, updateDoc, 
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
 import { getLocalDateString, getLocalDateTimeString } from "@/app/helpers/helpers";
-import Letter from "@/app/(barangay-side)/components/letterForm"
 import { getSpecificDocument, generateDownloadLink } from "../../../../../helpers/firestorehelper";
 
 export default function GenerateDialogueLetter() {
@@ -51,7 +50,9 @@ export default function GenerateDialogueLetter() {
             fname: "",
             address: "",
             contact: "",
-        }
+        },
+        sendDialogueSms: false,
+        sendHearingSms: false,
     });
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -283,6 +284,20 @@ export default function GenerateDialogueLetter() {
        }
     }
   
+  
+    const [hearingB, setHearingB] =useState("");
+    console.log("hearing",hearing);
+    useEffect(() => { 
+        if(hearing === 0 ){ 
+            setHearingB("First");
+        }
+        else if (hearing === 1){
+            setHearingB("Second");
+        }
+        else if (hearing > 1){
+            setHearingB("Third");
+        }
+    }, [hearing]);
 
     const printDialogue = async () => {
          setIsLoading(true); // Start loading
@@ -397,16 +412,6 @@ export default function GenerateDialogueLetter() {
         const issueMonth = monthNames[issueMonthIndex];
         const issueYear = dayToday.split("T")[0].split("-")[0];
         
-        let hearingB ="";
-        if(hearing == 0 ){ 
-            hearingB = "First";
-        }
-        else if (hearing == 1){
-            hearingB = "Second";
-        }
-        else if (hearing == 2){
-            hearingB = "Third";
-        }
        
         
        try{ 
@@ -504,7 +509,8 @@ export default function GenerateDialogueLetter() {
                 DateOfDelivery: otherInfo.DateOfDelivery,
                 DateTimeOfMeeting: otherInfo.DateTimeOfMeeting,
                 LuponStaff: otherInfo.LuponStaff,
-                DateFiled: otherInfo.DateFiled,                
+                DateFiled: otherInfo.DateFiled,          
+                dialougeSMS: otherInfo.sendDialogueSms,    
             });
         }
         catch (error: string|any) {
@@ -525,7 +531,8 @@ export default function GenerateDialogueLetter() {
                 DateTimeOfMeeting: otherInfo.DateTimeOfMeeting,
                 LuponStaff: otherInfo.LuponStaff,
                 DateFiled: otherInfo.DateFiled,                
-               hearingNumber: hearing
+                hearingNumber: hearing,
+                hearingSms: otherInfo.sendHearingSms,
             });
 
             const docRef = doc(db, "IncidentReports", docId);
@@ -607,7 +614,9 @@ export default function GenerateDialogueLetter() {
                 fname: `${userInfo.respondent?.fname || ""} ${userInfo.respondent?.lname || ""}`.trim(),
                 address: userInfo.respondent?.address || "",
                 contact: userInfo.respondent?.contact || ""
-            }
+            },
+            sendDialogueSms: false,
+            sendHearingSms: false,
         })
     }
     
@@ -651,8 +660,8 @@ export default function GenerateDialogueLetter() {
         router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
     };
 
-const hearingLabels = ["First", "Second", "Third"];
-const hearingB = hearingLabels[hearing] || "First";
+// const hearingLabels = ["First", "Second", "Third"];
+// const hearingB = hearingLabels[hearing] || "First";
 
   return (
     <main className="main-container-letter">
@@ -850,6 +859,8 @@ const hearingB = hearingLabels[hearing] || "First";
                 <div className="actions-letter">
                           {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                         {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Generate Letter</button>)}
+                       
+                       {/* this button should disappear base on hearingSMS and summonsSMS and when pressed the button should disappear but for summon needs to be press 3 times before disppear */}
                         <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
                 </div>
 

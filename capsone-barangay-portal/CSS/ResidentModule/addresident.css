@@ -214,10 +214,10 @@
 
   .required-asterisk {
     color: red;
-  position: absolute;
-  top: 8px;
-  right: 12px;
-  font-size: 20px;
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 20px;
   }
   
 
@@ -846,7 +846,6 @@ FOR INFO
   border-bottom: 3px solid #ED7014;
   background-color: transparent;
 }
-
 
 
 

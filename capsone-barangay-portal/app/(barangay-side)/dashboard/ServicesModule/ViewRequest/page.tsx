@@ -7,17 +7,16 @@ import { useSession } from "next-auth/react";
 import { getDownloadURL, ref } from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
-import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc, getDocs, query } from "firebase/firestore";
 import { getLocalDateString } from "@/app/helpers/helpers";
 import { toWords } from 'number-to-words';
+import { useMemo } from "react";
 import OnlineRequests from "../OnlineRequests/page";
 import OnlineReports from "../../IncidentModule/OnlineReports/page";
 
 
 interface EmergencyDetails {
-    firstName: string;
-    middleName: string;
-    lastName: string;
+    fullName: string;
     address: string;
     relationship: string;
     contactNumber: string;
@@ -38,7 +37,6 @@ interface EmergencyDetails {
     fullName: string;
     nosOfPUV: string;
     puvPurpose: string;
-    vehicleType: string;
     appointmentDate: string;
     dateOfResidency: string;
     address: string; // Will also be the home address
@@ -71,13 +69,14 @@ interface EmergencyDetails {
     signaturejpg: string;
     barangayIDjpg: string;
     validIDjpg:string ;
-    endorsementLetter: string;
+    letterjpg: string;
     copyOfPropertyTitle: string;
     dtiRegistration: string;
     isCCTV: string;
     taxDeclaration: string;
     approvedBldgPlan: string;
     deathCertificate: string;
+    identificationPic: string;
     dateofdeath: string;
     wardFname: string;
     wardRelationship: string;
@@ -91,15 +90,22 @@ interface EmergencyDetails {
     deceasedEstateName: string;
     estateSince: string;
     noOfTRU: string;
-    tricycleMake: string;
-    tricycleType: string;
-    tricyclePlateNo: string;
-    tricycleSerialNo: string;
-    tricycleChassisNo: string;
-    tricycleEngineNo: string;
-    tricycleFileNo: string;
+    vehicleMake: string;
+    vehicleType: string;
+    vehiclePlateNo: string;
+    vehicleSerialNo: string;
+    vehicleChassisNo: string;
+    vehicleEngineNo: string;
+    vehicleFileNo: string;
     docsRequired: File[]; // Changed to File[] to match the file structure
-   
+    fromAddress: string;
+    goodMoralOtherPurpose: string;
+    noOfVechicles: string;
+    dateOfFireIncident: string;
+    nameOfTyphoon: string;
+    dateOfTyphoon: string;
+    projectLocation: string;
+    homeOrOfficeAddress: string;
 }
 
 interface File {
@@ -120,6 +126,10 @@ const ViewOnlineRequest = () => {
     const [pendingStatus, setPendingStatus] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+    const [matchedOtherDocFields, setMatchedOtherDocFields] = useState<string[]>([]);
+    const [otherDocuments, setOtherDocuments] = useState<
+      { type: string; title: string; fields: { name: string }[] }[]
+    >([]);
 
 
     useEffect(() => {
@@ -141,13 +151,14 @@ const ViewOnlineRequest = () => {
         "signaturejpg",
         "barangayIDjpg",
         "validIDjpg",
-        "endorsementLetter",
+        "letterjpg",
         "copyOfPropertyTitle",
         "dtiRegistration",
         "isCCTV",
         "taxDeclaration",
         "approvedBldgPlan",
         "deathCertificate",
+        "identificationPic",
       ] as const;
 
       const updatedData = { ...data };
@@ -175,11 +186,59 @@ const ViewOnlineRequest = () => {
     };
 
     
+    useEffect(() => {
+      const fetchMatchedOtherDocFields = async () => {
+        try {
+          if (!requestData?.docType || !requestData?.purpose) return;
+    
+          const snapshot = await getDocs(collection(db, "OtherDocuments"));
+    
+          const matchedDoc = snapshot.docs.find(
+            (doc) =>
+              doc.data().type === requestData.docType &&
+              doc.data().title === requestData.purpose
+          );
+    
+          if (matchedDoc) {
+            const fields = matchedDoc.data().fields || [];
+            const fieldNames = fields.map((f: any) => f.name);
+            setMatchedOtherDocFields(fieldNames);
+          } else {
+            setMatchedOtherDocFields([]); // no match
+          }
+        } catch (error) {
+          console.error("Error fetching matched OtherDocuments fields:", error);
+        }
+      };
+    
+      fetchMatchedOtherDocFields();
+    }, [requestData?.docType, requestData?.purpose]);
+
+
+  
+  
+  useEffect(() => {
+    const fetchOtherDocs = async () => {
+      const q = query(collection(db, "OtherDocuments"));
+      const snapshot = await getDocs(q);
+      const docs = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          type: data.type,
+          title: data.title,
+          fields: data.fields || [],
+        };
+      });
+      setOtherDocuments(docs);
+    };
+  
+    fetchOtherDocs();
+  }, []);
 
 
    useEffect(() => {
       if (!requestData) return;
-      if(!(requestData?.reqType === "InBarangay")) {
+      if(!(requestData?.reqType === "In Barangay")) {
         const fetchUrls = async () => {
           const updated = await handleDownloadUrl(requestData);
 
@@ -192,13 +251,6 @@ const ViewOnlineRequest = () => {
       }
     }, [requestData]);
 
-
-    
-    {/*}
-    if(loading) return <p>......</p>
-    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setStatus(e.target.value);
-    };*/}
 
     const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedStatus = e.target.value;
@@ -246,18 +298,18 @@ const ViewOnlineRequest = () => {
         { key: "vehicleType", label: "Vehicle Description"  },            
         { key: "nosOfPUV", label: "No of Vehicles"  },
         { key: "noOfTRU", label: "No Of Tricycle" },
-        { key: "tricycleMake", label: "Tricycle Make" },
-        { key: "tricycleType", label: "Tricycle Type"  },
-        { key: "tricyclePlateNo", label: "Tricycle Plate No"  },
-        { key: "tricycleSerialNo", label: "Tricycle Serial No"  },
-        { key: "tricycleChassisNo", label: "Tricycle Chassis No" },
-        { key: "tricycleEngineNo", label: "Tricycle Engine No" },
-        { key: "tricycleFileNo", label: "Tricycle File No"  },
+        { key: "vehicleMake", label: "Tricycle Make" },
+        { key: "vehicleType", label: "Tricycle Type"  },
+        { key: "vehiclePlateNo", label: "Tricycle Plate No"  },
+        { key: "vehicleSerialNo", label: "Tricycle Serial No"  },
+        { key: "vehicleChassisNo", label: "Tricycle Chassis No" },
+        { key: "vehicleEngineNo", label: "Tricycle Engine No" },
+        { key: "vehicleFileNo", label: "Tricycle File No"  },
         { key: "cohabitationStartDate", label: "Start of Cohabitation" },
         { key: "cohabitationRelationship", label: "Cohabitation Relationship"},
-        { key: "noIncomePurpose", label: "Purpose Of No Income" },
-        { key: "noIncomeChildFName", label: "Son/Daughther's Name For No Income" },
-        { key: "address", label: "Address" },
+        { key: "noIncomePurpose", label: "No Income Purpose" },
+        { key: "noIncomeChildFName", label: "Son/Daughther's Name" },
+        { key: "address", label: "Requestor's Address" },
         { key: "estateSince", label: "Estate Since" },
         { key: "guardianshipType", label: "Guardianship Type" },
         { key: "wardRelationship", label: "Ward's Relationship" },
@@ -267,14 +319,14 @@ const ViewOnlineRequest = () => {
         { key: "CYFrom", label: "Cohabitation Year From" },
         { key: "CYTo", label: "Cohabitation Year To" },
         { key: "goodMoralPurpose", label: "Purpose Of Good Moral" },
-        { key: "age", label: "Age" },
-        { key: "dateOfResidency", label: "Date of Residency" },
+        { key: "age", label: "Requestor's Age" },
+        { key: "dateOfResidency", label: "Requestor's Date of Residency" },
         { key: "occupation", label: "Occupation" },
-        { key: "civilStatus", label: "Civil Status" },
-        { key: "citizenship", label: "Citizenship" },
-        { key: "gender", label: "Gender" },
-        { key: "contact", label: "Contact" },
-        { key: "birthday", label: "Birthday" },
+        { key: "civilStatus", label: "Requestor's Civil Status" },
+        { key: "citizenship", label: "Requestor's Citizenship" },
+        { key: "gender", label: "Requestor's Gender" },
+        { key: "contact", label: "Requestor's Contact" },
+        { key: "birthday", label: "Requestor's Birthday" },
         { key: "dateofdeath", label: "Date Of Death" },
         { key: "estimatedCapital", label: "Estimated Capital" },
         { key: "typeofconstruction", label: "Type of Construction" },
@@ -285,7 +337,9 @@ const ViewOnlineRequest = () => {
         { key: "isBeneficiary", label: "Is Beneficiary" },
         { key: "birthplace", label: "Birthplace" },
         { key: "religion", label: "Religion" },
-
+        { key: "fromAddress", label: "From Address"},
+        { key: "goodMoralOtherPurpose", label: "Certificate Purpose"}, // for Garage/PUV purpose iba lang kasi yung field name sa db
+        { key: "noOfVechicles", label: "No of Vehicles"},
         
         // Emergency Details Fields
         { key: "emergencyDetails.firstName", label: "Emergency Contact First Name" },
@@ -295,425 +349,782 @@ const ViewOnlineRequest = () => {
         { key: "emergencyDetails.relationship", label: "Emergency Contact Relationship" },
         { key: "emergencyDetails.contactNumber", label: "Emergency Contact Number" },
 
-        {key: "requestor", label: "Requestor Name"},
-
-        {key: "rejectionReason", label: "Reason for Rejection"},
+        { key: "requestor", label: "Requestor's Full Name"},
+        { key: "rejectionReason", label: "Reason for Rejection"},
+        { key: "dateOfFireIncident", label: "Date of Fire Incident"},
+        { key: "nameOfTyphoon", label: "Name of Typhoon"},
+        { key: "dateOfTyphoon", label: "Date of Typhoon"},
+        { key: "projectLocation", label: "Project Location"},
+        { key: "homeOrOfficeAddress", label: "Home / Office Address"},
+        { key: "precinctnumber", label: "Precinct Number"},
+        { key: "bloodtype", label: "Blood Type"},
 
         // File Fields
         { key: "signaturejpg", label: "Signature" },
         { key: "barangayIDjpg", label: "Barangay ID" },
         { key: "validIDjpg", label: "Valid ID" },
-        { key: "endorsementLetter", label: "Endorsement Letter" },
+        { key: "letterjpg", label: "Endorsement Letter" },
         { key: "copyOfPropertyTitle", label: "Copy of Property Title" },
         { key: "dtiRegistration", label: "DTI Registration" },
         { key: "isCCTV", label: "CCTV Requirement" },
         { key: "taxDeclaration", label: "Tax Declaration" },
         { key: "approvedBldgPlan", label: "Approved Building Plan" },
         { key: "deathCertificate", label: "Death Certificate" },
+        { key: "identificationPic", label: "Identification Picture" },
         ];
 
 
         
-        const fieldSections: Record<string, {
+        const predefinedFieldSections: Record<string, {
             basic?: string[];
             full?: string[];
             others?: string[];
           }> = {
             "Death Residency": {
               basic: [
-                "createdAt",
-                "docType",
-                "purpose",
-                "fullName",
-                "dateofdeath",
-                "requestor",
+                "createdAt", 
+                "requestor", 
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address", 
                 "rejectionReason",
               ],
               full: [
-                "address",
-                "age",
-                "dateOfResidency",
-                "civilStatus",
-                "citizenship",
-                "gender",
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "fullName",
+                "dateofdeath",
+                "estateSince",
               ],
               others: [
                 "signaturejpg",
-                "deathCertificate",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
+                "deathCertificate",
               ],
             },
             "Cohabitation": {
               basic: [
-                "createdAt",
-                "docType",
-                "purpose",
-                "fullName",
-                "partnerWifeHusbandFullName",
-                "requestor",
+                "createdAt", 
+                "requestor", 
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address", 
                 "rejectionReason",
               ],
               full: [
+                "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "partnerWifeHusbandFullName",
                 "cohabitationStartDate",
                 "cohabitationRelationship",
-                "address",
-                "age",
-                "dateOfResidency",
-                "civilStatus",
-                "citizenship",
-                "gender",
-                "contact",
-                "birthday",
+
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],  
           },
          "Occupancy /  Moving Out": {
               basic: [
                 "createdAt",
-                "docType",
-                "purpose",
-                "fullName",
                 "requestor",
-                "toAddress",
+                "docType",
+                "dateOfResidency",
+                "purpose",
+                "address",
                 "rejectionReason",
               ],
               full: [
-                "address",
-                "age",
-                "dateOfResidency",
-                "civilStatus",
-                "citizenship",
-                "gender",
-                "contact",
                 "birthday",
+                "contact",
+                "age",
+                "civilStatus",
+                "gender",
+                "citizenship",
+                "fullName",
+                "fromAddress",
+                "toAddress",
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
           "Guardianship": {
               basic: [
-                "createdAt",
-                "docType",
-                "purpose",
-                "fullName",
+                "createdAt", 
+                "requestor", 
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address", 
                 "guardianshipType",
-                "requestor",
                 "rejectionReason",
               ],
               full: [
-                "address",
+                "birthday",
+                "contact",
+                "age",
+                "civilStatus",
+                "gender",
+                "citizenship",
+                "fullName",
                 "wardRelationship",
                 "wardFname",
-                "age",
-                "dateOfResidency",
-                "civilStatus",
-                "citizenship",
-                "gender",
-                "contact",
-                "birthday",
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
           "Residency": {
               basic: [
                 "createdAt", 
-                "docType", 
-                "purpose", 
-                "fullName", 
                 "requestor", 
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address", 
                 "appointmentDate",
                 "rejectionReason",
               ],
               full: [
-                "attestedBy", 
-                "CYFrom", 
-                "CYTo", 
-                "address", 
-                "age", 
-                "dateOfResidency", 
-                "civilStatus", 
-                "citizenship", 
-                "gender", 
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "CYFrom", 
+                "attestedBy", 
+                "CYTo", 
               ],
               others: [
+                "identificationPic",
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
           "Good Moral and Probation": {
               basic: [
                 "createdAt", 
-                "docType", 
-                "purpose", 
-                "fullName", 
-                "goodMoralPurpose",
                 "requestor", 
+                "docType", 
+                "dateOfResidency",               
+                "purpose", 
+                "address", 
+                "goodMoralPurpose",
                 "rejectionReason",
               ],
               full: [
-                "address", 
-                "age", 
-                "dateOfResidency", 
-                "civilStatus", 
-                "citizenship", 
-                "gender", 
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
           "No Income": {
               basic: [
                 "createdAt", 
-                "docType", 
-                "purpose", 
-                "fullName", 
-                "noIncomePurpose",
                 "requestor", 
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address", 
+                "noIncomePurpose",
                 "rejectionReason",
               ],
               full: [
-                "noIncomeChildFName",
-                "address", 
-                "age", 
-                "dateOfResidency", 
-                "civilStatus", 
-                "citizenship", 
-                "gender", 
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "noIncomeChildFName",    
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
           "Estate Tax": {
               basic: [
                 "createdAt", 
+                "requestor", 
                 "docType", 
+                "dateOfResidency", 
                 "purpose", 
-                "fullName",
-                "estateSince", 
-                "requestor",
+                "address", 
                 "rejectionReason",
               ],
               full: [
-                "address", 
-                "age", 
-                "dateOfResidency", 
-                "dateofdeath",
-                "civilStatus", 
-                "citizenship", 
-                "gender", 
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "fullName",
+                "dateofdeath",
+                "estateSince",
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
+                "deathCertificate",
             ],
           },
           "Garage/TRU": {
               basic: [
                "createdAt", 
+               "requestor",
                 "docType", 
+                "dateOfResidency", 
                 "purpose", 
-                "fullName",
-                "address", 
-                "requestor",
+                "address",
                 "rejectionReason",
               ],
               full: [
-                "businessName", 
-                "businessNature",
-                "businessLocation",
-                "noOfTRU",
-                "tricycleMake",
-                "tricycleType",
-                "tricyclePlateNo",
-                "tricycleSerialNo",
-                "tricycleChassisNo",
-                "tricycleEngineNo",
-                "tricycleFileNo",
-                "age", 
-                "dateOfResidency", 
-                "civilStatus", 
-                "citizenship", 
-                "gender", 
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "businessName", 
+                "vehiclePlateNo",
+                "businessNature",
+                "vehicleSerialNo",
+                "businessLocation",
+                "vehicleChassisNo",
+                "noOfVechicles",
+                "vehicleEngineNo",
+                "vehicleMake",
+                "vehicleFileNo",   
+                "vehicleType",
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
             ],
           },
           "Garage/PUV": {
               basic: [
                "createdAt", 
+               "requestor",
                 "docType", 
+                "dateOfResidency", 
                 "purpose", 
-                "fullName",
-                "puvPurpose",
-                "requestor",
+                "address",
+                "goodMoralOtherPurpose",
                 "rejectionReason",
               ],
               full: [
-                "vehicleType",
-                "nosOfPUV",
-                "address",
-                "age", 
-                "dateOfResidency", 
-                "civilStatus", 
-                "citizenship", 
-                "gender", 
-                "contact",
                 "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "vehicleType",
+                "noOfVechicles",
+   
               ],
               others: [
                 "signaturejpg",
                 "barangayIDjpg",
                 "validIDjpg",
-                "endorsementLetter",
+                "letterjpg",
+            ],
+          },
+          "Financial Subsidy of Solo Parent": {
+              basic: [
+               "createdAt", 
+               "requestor",
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address",
+                "goodMoralOtherPurpose",
+                "rejectionReason",
+              ],
+              full: [
+                "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "noIncomeChildFName"
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "letterjpg",
+            ],
+          },
+          "Fire Victims": {
+              basic: [
+               "createdAt", 
+               "requestor",
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address",
+                "rejectionReason",
+              ],
+              full: [
+                "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "dateOfFireIncident"
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "letterjpg",
+            ],
+          },
+          "Flood Victims": {
+              basic: [
+               "createdAt", 
+               "requestor",
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address",
+                "rejectionReason",
+              ],
+              full: [
+                "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "nameOfTyphoon",
+                "dateOfTyphoon",
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "letterjpg",
+            ],
+          },
+          "Barangay ID": {
+              basic: [
+               "createdAt", 
+               "requestor",
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address",
+                "rejectionReason",
+              ],
+              full: [
+                "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "birthplace",
+                "occupation",
+                "religion",
+                "bloodtype",
+                "nationality",
+                "height",
+                "precinctnumber",
+
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "letterjpg",
+            ],
+          },
+          /* for business permit/temporary business permit */
+          "New": {
+              basic: [
+               "createdAt", 
+               "requestor",
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address",
+                "rejectionReason",
+              ],
+              full: [
+                "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "businessName",
+                "businessNature",
+                "businessLocation",
+                "estimatedCapital",
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "letterjpg",
+            ],
+          },
+          "Renewal": {
+              basic: [
+               "createdAt", 
+               "requestor",
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address",
+                "rejectionReason",
+              ],
+              full: [
+                "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "businessName",
+                "businessNature",
+                "businessLocation",
+                "estimatedCapital",
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "letterjpg",
             ],
           },
         }
+
+        const constructionPermitFields = {
+          /* For Construction Permit */
+            basic: [
+             "createdAt", 
+             "requestor",
+              "docType", 
+              "dateOfResidency", 
+              "purpose", 
+              "address",
+              "rejectionReason",
+            ],
+            full: [
+              "birthday",
+              "contact",
+              "age", 
+              "civilStatus", 
+              "gender", 
+              "citizenship", 
+              "typeofconstruction",
+              "projectName",
+              "typeofbldg",
+              "projectLocation",
+              "homeOrOfficeAddress",
+            ],
+            others: [
+              "signaturejpg",
+              "barangayIDjpg",
+              "validIDjpg",
+              "letterjpg",
+          ],
+        }
+
+        
+        const otherDocPredefinedFields = {
+          basic: [
+            "createdAt", 
+            "requestor", 
+            "docType", 
+            "dateOfResidency", 
+            "purpose", 
+            "address", 
+            "rejectionReason",
+          ],
+          full: [
+            "birthday",
+            "contact",
+            "age", 
+            "civilStatus", 
+            "gender", 
+            "citizenship", 
+          ],
+          others: [
+            "signaturejpg",
+            "barangayIDjpg",
+            "validIDjpg",
+            "letterjpg",
+          ],
+        };
         
 
-    const getLabel = (key: string): string =>
-        requestField.find((field) => field.key === key)?.label || key;
-      
-    const currentPurpose = requestData?.purpose as keyof typeof fieldSections;
-    const currentSections = fieldSections[currentPurpose] || {};
-      
-    const renderSection = (sectionName: "basic" | "full" | "others") => {
-        const fieldKeys = currentSections[sectionName] || [];
-      
-        // Render 'others' section differently (image display)
-        if (sectionName === "others") {
-            return (
-                <div className="others-image-section" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
-                  {requestData?.reqType === "InBarangay" ? 
-                  (
-                    <>
-                      {requestData?.docsRequired?.map((file, index) => {
-                        return(
-                          <div key={index} className="services-onlinereq-verification-requirements-section">
-                            <span className="verification-requirements-label">Image {index+1}</span>
-                            <div className="services-onlinereq-verification-requirements-container">
-                              <a href={file.name} target="_blank" rel="noopener noreferrer">
-                                <img
-                                  src={file.name}
-                                  alt={`Image ${index}`}
-                                  className="verification-reqs-pic uploaded-picture"
-                                  style={{ cursor: 'pointer' }}
-                                />
-                              </a>
-                            </div>
-                          </div>
-                        )
-
-                      })}
-                    </>
-                  ):(
-                    <>
-                      {fieldKeys.map((key) => {
-                        const fileUrl = (requestData as any)?.[key];
-
-                        // Skip if no image
-                        if (!fileUrl) return null;
-                        return (
-                          <div key={key} className="services-onlinereq-verification-requirements-section">
-                            <span className="verification-requirements-label">{getLabel(key)}</span>
-                            <div className="services-onlinereq-verification-requirements-container">
-                              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                                <img
-                                  src={fileUrl}
-                                  alt={getLabel(key)}
-                                  className="verification-reqs-pic uploaded-picture"
-                                  style={{ cursor: 'pointer' }}
-                                />
-                              </a>
-                            </div>
-                          </div>
-                        );
-                      })}   
-                    </>
-                  )}
-                
-              </div>
-            );
+        const defaultFieldSections = {
+          basic: ["createdAt", "requestor", "docType", "dateOfResidency", "purpose", "address", "rejectionReason",],
+          full: ["birthday", "contact", "age", "civilStatus", "gender", "citizenship"],
+          others: ["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg"],
+        };
+        
+        const excludedImageFields = [
+          "signaturejpg",
+          "barangayIDjpg",
+          "validIDjpg",
+          "letterjpg",
+        ];
+        
+        const fieldSections = useMemo(() => {
+          if (requestData?.docType === "Construction") {
+            return {
+              basic: [...constructionPermitFields.basic],
+              full: [...constructionPermitFields.full],
+              others: [...constructionPermitFields.others],
+            };
           }
-      
-        // Default layout for 'basic' and 'full'
-        const leftFields = fieldKeys.filter((_, i) => i % 2 === 0);
-        const rightFields = fieldKeys.filter((_, i) => i % 2 !== 0);
-      
-        const renderField = (key: string) => {
-          const value = key.includes(".")
-            ? key.split(".").reduce((obj, k) => (obj as any)?.[k], requestData)
-            : (requestData as any)?.[key];
-      
-          if (!value) return null;
-      
-          return (
-            <div key={key} className="services-onlinereq-fields-section">
-              <p>{getLabel(key)}</p>
-              <input
-                type="text"
-                className="services-onlinereq-input-field"
-                value={value}
-                readOnly
-              />
-            </div>
+        
+          if (!requestData?.purpose && !requestData?.docType) return defaultFieldSections;
+        
+          // Match by (1) purpose + type
+          const matchedByPurpose = otherDocuments.find(
+            (doc) =>
+              doc.title === requestData?.purpose &&
+              doc.type === requestData?.docType
           );
+        
+          // Match by (2) docType === title
+          const matchedByDocType = otherDocuments.find(
+            (doc) => doc.title === requestData?.docType
+          );
+        
+          // ✅ Match by (3) title === purpose (regardless of type)
+          const matchedByTitleOnly = otherDocuments.find(
+            (doc) => doc.title === requestData?.purpose
+          );
+        
+          // ✅ Combine all matched fields
+          const combinedFields = [
+            ...(matchedByPurpose?.fields || []),
+            ...(matchedByDocType?.fields || []),
+            ...(matchedByTitleOnly?.fields || []),
+          ];
+        
+          const excludedDynamicFields = [
+            "requestorFname",
+            "requestorMrMs",
+            "dateOfResidency",
+            "address",
+          ];
+        
+          const dynamicFields = combinedFields
+            .map((f) => f.name)
+            .filter((name) => !excludedDynamicFields.includes(name));
+        
+          const dynamicToFull = dynamicFields.filter(
+            (field) => !excludedImageFields.includes(field)
+          );
+          const dynamicToOthers = dynamicFields.filter((field) =>
+            excludedImageFields.includes(field)
+          );
+        
+          const predefined = predefinedFieldSections[requestData?.purpose || ""];
+        
+          if (predefined) {
+            return {
+              basic: [...(predefined.basic || [])],
+              full: [...(predefined.full || []), ...dynamicToFull],
+              others: [...(predefined.others || []), ...dynamicToOthers],
+            };
+          } else if (matchedByPurpose || matchedByDocType || matchedByTitleOnly) {
+            return {
+              basic: [...otherDocPredefinedFields.basic],
+              full: [...otherDocPredefinedFields.full, ...dynamicToFull],
+              others: [...otherDocPredefinedFields.others, ...dynamicToOthers],
+            };
+          } else {
+            return defaultFieldSections;
+          }
+        }, [requestData?.purpose, requestData?.docType, otherDocuments]);
+        
+
+        
+        const formatFieldName = (name: string) =>
+          name
+            .replace(/_/g, " ") // Replace underscores with spaces
+            .replace(/\b\w/g, (c) => c.toUpperCase()); // Capitalize first letter of each word
+
+        const getLabel = (key: string): string => {
+          const baseLabel = requestField.find((field) => field.key === key)?.label || formatFieldName(key);
+        
+          if (key === "fullName") {
+            // Customize label for fullName depending on docType or purpose
+            if (requestData?.purpose === "Occupancy /  Moving Out") {
+              return `From ${baseLabel}`;
+            }
+
+            if (requestData?.purpose === "Estate Tax" || requestData?.purpose === "Death Residency") {
+              return `Deceased's ${baseLabel}`;
+            }
+        
+            if (requestData?.purpose === "Guardianship") {
+              return `Guardian's ${baseLabel}`;
+            }
+        
+            // Default fallback
+            return baseLabel;
+          }
+        
+          return baseLabel;
         };
       
+    const currentPurpose = requestData?.purpose as keyof typeof predefinedFieldSections;
+    const currentSections = predefinedFieldSections[currentPurpose] || {};
+
+      
+    const renderSection = (sectionName: "basic" | "full" | "others") => {
+      let fieldKeys = fieldSections[sectionName] || [];
+  
+    
+      if (sectionName === "others") {
         return (
-          <div className="services-onlinereq-content" style={{ display: 'flex', gap: '2rem' }}>
-            <div className="services-onlinereq-content-left-side" style={{ flex: 1 }}>
-              {leftFields.map(renderField)}
-            </div>
-            <div className="services-onlinereq-content-right-side" style={{ flex: 1 }}>
-              {rightFields.map(renderField)}
-            </div>
+          <div className="others-image-section" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
+            {requestData?.reqType === "InBarangay" ? (
+              <>
+                {requestData?.docsRequired?.map((file, index) => (
+                  <div key={index} className="services-onlinereq-verification-requirements-section">
+                    <span className="verification-requirements-label">Image {index + 1}</span>
+                    <div className="services-onlinereq-verification-requirements-container">
+                      <a href={file.name} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={file.name}
+                          alt={`Image ${index}`}
+                          className="verification-reqs-pic uploaded-picture"
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
+               {requestData &&
+                [
+                  ...fieldKeys,
+                  ...Object.keys(requestData).filter(
+                    (key) =>
+                      !fieldKeys.includes(key) &&
+                      typeof requestData[key as keyof OnlineRequest] === "string" &&
+                      String(requestData[key as keyof OnlineRequest]).startsWith("https://firebasestorage")
+                  ),
+                ].map((key) => {
+                  const fileUrl = (requestData as any)?.[key];
+                  if (!fileUrl) return null;
+
+                  return (
+                    <div key={key} className="services-onlinereq-verification-requirements-section">
+                      <span className="verification-requirements-label">{getLabel(key)}</span>
+                      <div className="services-onlinereq-verification-requirements-container">
+                        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                          <img
+                            src={fileUrl}
+                            alt={getLabel(key)}
+                            className="verification-reqs-pic uploaded-picture"
+                            style={{ cursor: 'pointer' }}
+                          />
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </div>
+        );
+      }
+    
+      
+
+      //  Layout for basic/full with dynamic fields included
+      const leftFields = fieldKeys.filter((_, i) => i % 2 === 0);
+      const rightFields = fieldKeys.filter((_, i) => i % 2 !== 0);
+    
+      const renderField = (key: string) => {
+        const value = key.includes(".")
+          ? key.split(".").reduce((obj, k) => (obj as any)?.[k], requestData)
+          : (requestData as any)?.[key];
+    
+        if (!value) return null;
+    
+        return (
+          <div key={key} className="services-onlinereq-fields-section">
+            <p>{getLabel(key)}</p>
+            <input
+              type="text"
+              className="services-onlinereq-input-field"
+              value={value}
+              readOnly
+            />
           </div>
         );
       };
+    
+      return (
+        <div className="services-onlinereq-content" style={{ display: 'flex', gap: '2rem' }}>
+          <div className="services-onlinereq-content-left-side" style={{ flex: 1 }}>
+            {leftFields.map(renderField)}
+          </div>
+          <div className="services-onlinereq-content-right-side" style={{ flex: 1 }}>
+            {rightFields.map(renderField)}
+          </div>
+        </div>
+      );
+    };
      
     const handleBack = () => {
         router.back();
@@ -754,7 +1165,7 @@ const ViewOnlineRequest = () => {
             // Update Firestore document
             await updateDoc(docRef, updatedData);
         
-            // ✅ Manually update local requestData state so UI changes immediately
+            //  Manually update local requestData state so UI changes immediately
             setRequestData((prev) => {
                 if (!prev) return prev;
                 return {
@@ -937,13 +1348,13 @@ const ViewOnlineRequest = () => {
                 "Text3": requestData?.businessLocation,
                 "Text4": `${toWords(parseInt(requestData?.noOfTRU)).toUpperCase()} (${requestData?.noOfTRU})`,
                 "Text5": requestData?.businessNature,
-                "Text6": requestData?.tricycleMake.toUpperCase(),
-                "Text7": requestData?.tricycleType,
-                "Text8": requestData?.tricyclePlateNo,
-                "Text9": requestData?.tricycleSerialNo,
-                "Text10": requestData?.tricycleChassisNo,
-                "Text11": requestData?.tricycleEngineNo,
-                "Text12": requestData?.tricycleFileNo,
+                "Text6": requestData?.vehicleMake.toUpperCase(),
+                "Text7": requestData?.vehicleType,
+                "Text8": requestData?.vehiclePlateNo,
+                "Text9": requestData?.vehicleSerialNo,
+                "Text10": requestData?.vehicleChassisNo,
+                "Text11": requestData?.vehicleEngineNo,
+                "Text12": requestData?.vehicleFileNo,
                 "Text13": requestData?.requestor.toUpperCase(),
                 "Text14": dayToday,
                 "Text15": `${monthToday} ${yearToday}`,
@@ -1045,7 +1456,7 @@ const ViewOnlineRequest = () => {
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
-                        <h1> {requestData?.reqType || "Online"} Request Details </h1>
+                        <h1> {requestData?.reqType || "Online"} Document Request Details </h1>
                     </div>
                 </div>
 
@@ -1053,16 +1464,17 @@ const ViewOnlineRequest = () => {
 
                     <div className="services-onlinereq-header-body-top-section">
                         <div className="services-onlinereq-info-toggle-wrapper">
-                            {["basic", "full", "others" ].map((section) => (
+                            {["basic", "full", ...(requestData?.purpose === "Barangay ID" ? ["emergency"] : []), "others"].map((section) => (
                                 <button
                                 key={section}
                                 type="button"
                                 className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
                                 onClick={() => setActiveSection(section)}
                                 >
-                                {section === "basic" && "Basic Information"}
-                                {section === "full" && "Full Information"}
-                                {section === "others" && "Other Information"}
+                                {section === "basic" && "Basic Info"}
+                                {section === "full" && "Full Info"}
+                                {section === "emergency" && "Emergency Info"}
+                                {section === "others" && "Others"}
                                 </button>
                             ))}
                         </div> 
@@ -1163,6 +1575,57 @@ const ViewOnlineRequest = () => {
                                 
                                 {activeSection === "full" && <> {renderSection("full")} </>}
 
+
+                                {activeSection === "emergency" && (
+                                <div className="services-onlinereq-content" style={{ display: 'flex', gap: '2rem' }}>
+                                  <div className="services-onlinereq-content-left-side" style={{ flex: 1 }}>
+                                    <div className="services-onlinereq-fields-section">
+                                      <p>Emergency Contact Full Name</p>
+                                      <input
+                                        type="text"
+                                        className="services-onlinereq-input-field"
+                                        value={requestData?.emergencyDetails?.fullName || ""}
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="services-onlinereq-fields-section">
+                                      <p>Emergency Contact Address</p>
+                                      <input
+                                        type="text"
+                                        className="services-onlinereq-input-field"
+                                        value={requestData?.emergencyDetails?.address || ""}
+                                        readOnly
+                                      />
+                                    </div>
+                                    
+                                  </div>
+
+                                  <div className="services-onlinereq-content-right-side" style={{ flex: 1 }}>
+                                    <div className="services-onlinereq-fields-section">
+                                      <p>Emergency Contact Number</p>
+                                      <input
+                                        type="text"
+                                        className="services-onlinereq-input-field"
+                                        value={requestData?.emergencyDetails?.contactNumber || ""}
+                                        readOnly
+                                      />
+                                    </div>
+
+                                    <div className="services-onlinereq-fields-section">
+                                      <p>Relationship</p>
+                                      <input
+                                        type="text"
+                                        className="services-onlinereq-input-field"
+                                        value={requestData?.emergencyDetails?.relationship || ""}
+                                        readOnly
+                                      />
+                                    </div>
+                                    
+                                  </div>
+                                </div>
+                              )}
+                                
+
                                 {activeSection === "others" && <> {renderSection("others")} </>}
 
                                         
@@ -1177,136 +1640,6 @@ const ViewOnlineRequest = () => {
 
 
             </div>
-
-            
-
-
-        
-            {/* OLD CODE 
-                commented kasi baka may need pa here
-            */}
-{/*
-            {(userPosition === "Assistant Secretary" || userPosition === "Admin Staff")&& (<>
-                <div className="viewonlinereq-actions-content">
-                    <div className="viewonlinereq-actions-content-section1">
-                        {(status !== "Completed" && status !== "Rejected")&& (
-                            <>
-                                <button type="button" className="actions-button-reject" onClick ={handlerejection} >Reject</button>
-                                <button type="button" className="actions-button" onClick={handlePrint}>Print</button>
-                        
-                            </>
-                        )}
-                        {requestData?.appointmentDate && (<>
-                            <button type="button" className="actions-button" onClick ={handleviewappointmentdetails}>View Appointment Details</button>
-                        </>)}
-
-                        <select
-                            id="status"
-                            className={`status-dropdown-viewonlinereq ${status ? status[0].toLowerCase() + status.slice(1):""}`}
-                            name="status"
-                            value={status}
-                            onChange={handleStatusChange}
-                            disabled={requestData?.status === "Completed" || requestData?.status === "Rejected"} // Disable if already completed or rejected
-                        >
-                            <option value="Pending">Pending</option>
-                            <option value="Pick-up">Pick-up</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Rejected" disabled>Rejected</option>
-                        </select>
-                        {(requestData?.status !== "Completed" && requestData?.status !== "Rejected")&& (
-                            <button type="button" className="status-dropdown-viewonlinereq completed" onClick={handleSave}>Save</button> 
-                        )}
-                    </div>
-
-                    <div className="viewonlinereq-actions-content-section2">
-                        {status === "Pick-up" && (
-                            <button type="button" className="actions-button" >Send Pick-up Notif</button>
-                        )}
-                    </div>
-                </div>
-            </>)}
-            
-
-            <div className="viewonlinereq-main-content">
-                <div className="viewonlinereq-section-1">
-                  <div className="viewonlinereq-main-section1-left">
-                        <button onClick={handleBack}>
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
-                        </button>
-
-                        <h1>Online Request Details</h1>
-                  </div>
-                    
-                </div>
-
-              {requestField
-              
-                .filter((field) => {
-                    if (!requestData) return false; // Ensure requestData is defined
-                
-                    // Check if it's a nested emergency detail
-                    if (field.key.startsWith("emergencyDetails.")) {
-                        const [, subKey] = field.key.split("."); // Extract the sub-key
-                        return subKey in (requestData.emergencyDetails ?? {}); // Only include if it exists
-                    }
-                
-                    return field.key in requestData; // Check if the field exists in requestData
-                })
-                .map( (field) => {
-                   // Extract field value safely
-                   let fieldValue: string | File | null | undefined;
-                   if (field.key.startsWith("emergencyDetails.")) {
-                       const [_, subKey] = field.key.split(".");
-                       fieldValue = requestData?.emergencyDetails?.[subKey as keyof EmergencyDetails] ?? "N/A";
-                   } else {
-                       fieldValue = requestData ? requestData[field.key as keyof OnlineRequest] as string | File | null | undefined : "N/A";
-                   }
-
-                   // Handle nested emergencyDetails fields
-                   if (field.key.startsWith("emergencyDetails.")) {
-                       const [_, subKey] = field.key.split("."); // Extract the sub-key
-                       fieldValue = requestData?.emergencyDetails?.[subKey as keyof EmergencyDetails] ?? "N/A";
-                   }
-                  
-                
-                
-                    return (
-                        <div className="viewonlinereq-details-section" key={field.key}>
-                            <div className="viewonlinereq-title">
-                                <p>{field.label}</p>
-                            </div>
-                         <div className="viewonlinereq-description">
-                            {/* Handle File/Image Fields */}
-
-
-{/*
-
-                            {["signaturejpg", "barangayIDjpg", "validIDjpg", "endorsementLetter", "copyOfPropertyTitle", "dtiRegistration", "isCCTV", "taxDeclaration", "approvedBldgPlan","deathCertificate"].includes(field.key) ? (
-                                fieldValue && typeof fieldValue === "string" ? (
-                                    <div className="resident-id-container">
-                                        
-                                        <a href={fieldValue} target="_blank" rel="noopener noreferrer" className="view-image-link">
-                                            <img src={fieldValue} alt={field.label} className="resident-id-image"  />
-                                        </a>
-                                        
-                                       
-                                    </div>
-                                ) : (
-                                    <p>No File Uploaded</p>
-                                )
-                            ) : (
-                                <p>{typeof fieldValue === "string" ? fieldValue : "N/A"}</p>
-                            )}
-                        </div>
-                        
-                        </div>
-                    );
-            })}
-
-            </div>
-
-        
-*/}
 
             {showSubmitPopup && (
                 <div className="confirmation-popup-overlay-services-onlinereq-status">

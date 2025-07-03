@@ -1,13 +1,24 @@
 "use client";
 import "@/CSS/IncidentModule/AllDepartments.css";
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, use } from "react";
 import { useRouter } from "next/navigation";
 import { deleteDocument, getAllSpecificDocument } from "@/app/helpers/firestorehelper";
 import Heatmap from "@/app/(barangay-side)/components/heatmap";
+import { collection, onSnapshot, or, orderBy, query, where } from "firebase/firestore";
+import { db } from "@/app/db/firebase";
+import LegendColorBox from "../../components/legendColorBox";
 
 const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
 const departmentOptions = ["GAD", "BCPC", "VAWC", "Lupon"];
+interface incidentProps{
+  id: string;
+  typeOfIncident: string;
+  createdAt: string;
+  areaOfIncident: string;
+  status: string;
+  department: string;
+}
 
 export default function MainPageIncident() {
   const [incidentData, setIncidentData] = useState<any[]>([]);
@@ -23,33 +34,70 @@ export default function MainPageIncident() {
 
 
   useEffect(() => {
-    /*Revised this. Copy from Online Request in Service Module. */
-    const unsubscribe = getAllSpecificDocument(
-      "IncidentReports",
-      "department",
-      "!=",
-      "Online",
-      (data: any[]) => {
-        // Sort by dateFiled and timeFiled, newest first
-        const sortedData = [...data].sort((a, b) => {
-          const dateA = new Date(`${a.dateFiled} ${a.timeFiled}`);
-          const dateB = new Date(`${b.dateFiled} ${b.timeFiled}`);
-          return dateB.getTime() - dateA.getTime(); // newest first
-        });
-      
-        // Take only the latest 20 incidents
-        const latest20 = sortedData.slice(0, 20);
-      
-        setIncidentData(latest20);
-      }
+    const Collection = query(
+      collection(db,"IncidentReports"),
+      where("department", "!=", "Online"), 
+      orderBy("createdAt", "desc") // Order by createdAt in descending order
     );
-    
+
+    const unsubscribe = onSnapshot(Collection, (snapshot) => {
+      const data:any[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+       data.sort((a, b) => {
+        if(a.statusPriority !== b.statusPriority) {
+          return a.statusPriority - b.statusPriority; // Sort by status priority first
+        }
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA; // Sort by createdAt in descending order
+      });
+      setIncidentData(data);
+      setFilteredIncidents(data); // Initialize filteredIncidents with the full data set
+    })
     return () => {
       if (unsubscribe) {
         unsubscribe();
       }
     };
   }, []);
+
+  const [data, setData] = useState<incidentProps[]>([]);
+
+  useEffect(() => {
+    const incidentCollection = collection(db, "IncidentReports");
+
+    const q = query(
+      incidentCollection,
+      where("status", "in", ["pending", "In - Progress"]),
+      orderBy("createdAt", "desc") // Order by createdAt in descending order
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const filtered = snapshot.docs
+        .map((doc) => ({
+          ...(doc.data() as incidentProps),
+          id: doc.id,
+        })).filter(
+    (incident) =>
+    (incident.status === "pending" && incident.department !== "Online") ||
+    (incident.status === "In - Progress" && incident.department === "Online")
+)
+
+
+      setData(filtered as incidentProps[]);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  console.log("Incident Datac:", data);
+  
+  // Memoize reportData for Heatmap, based on incidentData
+  const reportData: incidentProps[] = useMemo(() => {
+    return [...data]
+  }, [data]);
 
 
 
@@ -169,8 +217,9 @@ export default function MainPageIncident() {
               <thead>
                 <tr>
                   <th>Case #</th>
-                  <th>Department</th>
                   <th>Date & Time of the Incident</th>
+                  <th>Department</th>
+                  <th>Area Of Incident</th>
                   <th>Nature of Complaint</th>
                   <th>Status</th>
                 </tr>
@@ -183,10 +232,11 @@ export default function MainPageIncident() {
                     className="clickable-row cursor-pointer hover:bg-gray-200"
                   >
                     <td>{incident.caseNumber}</td>
-                    <td>{incident.department}</td>
                     <td>
                       {incident.dateFiled} {incident.timeFiled}
                     </td>
+                    <td>{incident.department}</td>
+                    <td>{incident.areaOfIncident}</td>
                     <td>{incident.nature}</td>
                     <td>
                       <span
@@ -211,13 +261,24 @@ export default function MainPageIncident() {
 
       <div className="incidentmap-section-all-department">
         <div className="titlesection-all-department">
-          <p>Incident HeatMap</p>
+          <p>Incident Heat Map</p>
+          <div className="ml-2 mt-2 p-2 bg-white shadow rounded w-fit text-sm border border-gray-300">
+          <div className="font-semibold mb-1">Incident Intensity</div>
+          <div className="flex gap-2 items-center">
+            <LegendColorBox color="#00ff00" label="Low" />
+            <LegendColorBox color="#ffff00" label="Medium" />
+            <LegendColorBox color="#ff0000" label="High" />
+          </div>
+        </div>
+
         </div>
 
         <div className="heatmap-container">
-          <Heatmap />
+          <Heatmap incidents={reportData}/>
         </div>
+        
       </div>
+          
 
         </div>
     </main>

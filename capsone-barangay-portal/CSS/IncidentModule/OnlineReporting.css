@@ -23,10 +23,10 @@
     height: 100%; /* Full height */
     margin-top: 2rem;
     max-height: 70%;
-    border: 2px solid rgba(36, 53, 76, 0.7);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
    background-color: #ffffff;
    border-radius: 6px;
+   border: 1px solid rgba(36, 53, 76, 0.7); /* update*/
 }
 
 .main-section-online-reports table {
@@ -37,9 +37,10 @@
 .main-section-online-reports td {
    padding: 1rem; 
   text-align: center; 
-  border-bottom: 2px solid #ddd;
 color: rgb(44, 42, 42);
   font-weight: normal;
+  border-bottom: 1px solid #ddd; /* update*/
+  
 }
 
 .main-section-online-reports th {
@@ -58,6 +59,49 @@ color: rgb(44, 42, 42);
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
   height: 80px;
 }
+
+
+
+
+/*
+Newly added for tables
+*/
+
+.main-section-online-reports tbody tr:nth-child(even) {
+  background-color: #f0f4f8; /* Softer modern gray-blue tone */
+}
+
+.main-section-online-reports tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* Crisp white */
+}
+
+.main-section-online-reports tbody tr:hover {
+  background-color: #d0e4f5 !important; /* Light pastel blue hover */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+
+
+/* Base style for newly highlighted requests */
+.highlight-new-request {
+  background-color: #d6f8c0 !important; /* soft pastel green */
+  transition: background-color 0.3s ease;
+}
+
+/* Custom hover ONLY for new requests */
+.highlight-new-request:hover {
+  background-color: #b4eba1 !important; /* subtle but visible green on hover */
+}
+
+/* Fallback hover for regular rows (non-highlighted) stays the same */
+.main-section-online-reports tbody tr:not(.highlight-new-request):hover {
+  background-color: #d0e4f5 !important;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+
 
 
 
@@ -136,16 +180,6 @@ color: rgb(44, 42, 42);
   }
 
 
-.highlight-new-request {
-  background-color: #bdf8a0ba !important;
-  transition: background-color 0.5s ease;
-}
-
-.highlight-new-request:hover {
-  background-color: #a6e68d !important; /* slightly darker green on hover */
-}
-
-
 
 
 
@@ -165,13 +199,124 @@ text-align: center;
 width: 100px; 
 }
 
-.status-badge.acknowledged {
+.status-badge.settled {
     background-color: #4caf50;   
 }
 
 .status-badge.pending {
-    background-color: #325bd4;  
+    background-color: #d4d64f;  
 }
+
+.status-badge.in-progress {
+  background-color: #dd5312;
+}
+
+
+
+
+
+
+.section-1-online-reports {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.edit-incident-info-toggle-wrapper {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.info-toggle-btn {
+  padding: 10px 20px;
+ /* border: 1px solid transparent;*/
+  border: 1px solid #214666;
+  border-radius: 20px;
+  background-color: transparent;
+  color: #214666;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  text-transform: capitalize;
+}
+
+.info-toggle-btn:hover {
+  background-color: rgba(33, 70, 102, 0.1);
+}
+
+.info-toggle-btn.active {
+  background-color: #214666;
+  color: #ffffff;
+  border: 1px solid #214666;
+}
+
+
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.task-badge {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background-color: #e53935; /* red badge */
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 999px;
+  min-width: 20px;
+  text-align: center;
+  display: inline-block;
+  box-shadow: 0 0 0 2px white;
+  pointer-events: none;
+  animation: popIn 0.3s ease;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -399,10 +544,10 @@ FOR ONLINE INCIDENT REPORTING CSS
 
 .online-report-section-bottom-side-2 {
    display: flex;
-  flex-direction: column;
+
   justify-content: center;
   align-items: center;
-  width: 50%;
+  width: 100%;
 }
 
 
@@ -437,7 +582,7 @@ margin-top: 2rem;
 }
 .box-container-incidentimage-online {
    position: relative;
-    width: 70%;
+    width: 100%;
     border: 1px solid #5a6b7c;
     border-radius: 10px;
     background-color: #ffffff;
@@ -459,6 +604,9 @@ margin-top: 2rem;
   object-fit: contain;
 }
 
+
+
+
 .no-image-text {
   color: red;
   font-style: italic;
@@ -479,7 +627,7 @@ margin-top: 2rem;
 
 .box-container-investigation-report {
    position: relative;
-    width: 93%;
+    width: 100%;
     border: 1px solid #5a6b7c;
     border-radius: 10px;
     background-color: #ffffff;
@@ -489,7 +637,23 @@ margin-top: 2rem;
 
 .box-container-investigation-report textarea {
   width: 100%;
-  height: 100%;
+  height: 90%;
+}
+
+
+.box-container-investigation-report-action {
+   position: relative;
+    width: 100%;
+    border: 1px solid #5a6b7c;
+    border-radius: 10px;
+    background-color: #ffffff;
+    margin-top: 30px;
+    height: 350px;
+}
+
+.box-container-investigation-report-action textarea {
+  width: 100%;
+  height:92%;
 }
 
 .investigation-report-input-field {
@@ -1167,3 +1331,39 @@ FILE UPLOAD SECTION DAMI KASI TANGINA!
   font-size: 20px;
   }
   
+
+
+
+
+
+
+  
+
+.no-task-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+   border: 2px solid #dbeafe; /* light blue border */
+  width: 500px;
+  border-radius: 1rem;
+background-color: #f0f9ff; /* very light blue background */
+  margin-top: 5rem;
+ box-shadow: 0 0 12px rgba(0, 0, 0, 0.04); /* softer shadow */
+  align-self: center;
+}
+
+
+.no-task-icon {
+  width: 46px;
+  height: 46px;
+  margin-bottom: 0.5rem;
+opacity: 0.65; /* slightly more transparent for softer look */
+}
+
+.no-task-department {
+  font-weight: bold;
+  font-size: 1.25rem;
+   color: #2563eb; /* soft blue text */
+}

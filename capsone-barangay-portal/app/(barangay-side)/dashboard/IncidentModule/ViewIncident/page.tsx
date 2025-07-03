@@ -276,7 +276,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
       "dialogue",
       "hearing",
     ];
-
+    
   const [activeSection, setActiveSection] = useState("complainant");
   const [page, setPage] = useState(0); 
   const visibleSections = sections.slice(page * 3, page * 3 + 3);
@@ -289,7 +289,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
       [index]: !prev[index],
     }));
   };
-
+  console.log(reportData)
   return (
     <main className="main-container-view">
       {/* should also include hearing and dialogue info*/}
@@ -340,21 +340,29 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
               
               <div className="toggle-main-section">
 
-                {visibleSections.map((section) => (
-                  <button
-                    key={section}
-                    type="button"
-                    className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                    onClick={() => setActiveSection(section)}
-                  >
-                    {section === "complainant" && "Complainant"}
-                    {section === "respondent" && "Respondent"}
-                    {section === "incident" && "Incident"}
-                    {section === "barangay desk" && "Desk Officer"}
-                    {section === "dialogue" && "Dialogue"}
-                    {section === "hearing" && "Hearing"}
-                  </button>
+                {visibleSections
+                  .filter((section) => {
+                    if (reportData?.typeOfIncident === "Minor") {
+                      return section !== "dialogue" && section !== "hearing";
+                    }
+                    return true;
+                  })
+                  .map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "complainant" && "Complainant"}
+                      {section === "respondent" && "Respondent"}
+                      {section === "incident" && "Incident"}
+                      {section === "dialogue" && "Dialogue"}
+                      {section === "hearing" && "Hearing"}
+                      {section === "barangay desk" && "Desk Officer"}
+                    </button>
                 ))}
+
 
               </div>
               
@@ -384,7 +392,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                   <h1> Status</h1>
 
                   <div className="status-section-view">
-                      <p className={`status-badge-view ${getStatusClass(status)}`}>{status}</p> 
+                      <p className={`status-badge-view ${status}`}>{status}</p> 
                   </div>
                 </div>
                 <div className="incident-main-details-description">
@@ -397,7 +405,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                         <h1>Date Filed</h1>
                       </div>
                     </div>
-                    <p>{reportData?.dateFiled || "N/A"}</p>
+                    <p>{`${reportData?.dateFiled}${reportData?.isReportLate ? " (Late Filing)" : ""} `  || ""}</p>
                   </div>
 
                   <div className="incident-location-section">
@@ -409,7 +417,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                         <h1>Location</h1>
                       </div>
                     </div>
-                    <p>{reportData?.location || "N/A"}</p>
+                    <p>{`${reportData?.location} - ${reportData?.areaOfIncident}` || "N/A"}</p>
                   </div>
 
                   <div className="incident-description-section">
@@ -559,13 +567,20 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                                 </div>
                               </>
                             )}
+
+                            {reportData?.typeOfIncident === "Minor" && (
+                              <div className="view-incident-fields-section">
+                                <p>Recommended Event To Join By Desk Officer</p>
+                                <input type="text" className="view-incident-input-field" name="recommendedEvent" value={reportData?.recommendedEvent || "N/A"} readOnly />
+                              </div>
+                            )}
                              
                           </div>
 
                           <div className="view-incident-content-right-side">
                             <div className="view-incident-fields-section">
                               <p>Location</p>
-                              <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.location || "N/A"} readOnly />
+                              <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={`${otherinformation.location} - ${reportData?.areaOfIncident}`|| "N/A"} readOnly />
                             </div>
 
                             {departId === "GAD" && (
@@ -578,16 +593,37 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                               </>
                             )}
 
+                            {reportData?.typeOfIncident === "Minor" && (
+                              <div className="view-incident-fields-section">
+                                <p>Date & Time Filed</p>
+                                <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.date || "N/A"} readOnly />
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="bottom-middle-section">
-                          <div className="bottom-middle-incidentfields">
+                          {reportData?.typeOfIncident === "Major" && (
+                            <div className="bottom-middle-incidentfields">
                               <p>Date & Time Filed</p>
                               <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.date || "N/A"} readOnly />
                             </div>
+                          )}
                         </div>
 
                         <div className="view-incident-content-bottomsection">
+
+                          {reportData?.isReportLate && (
+                            <div className="box-container-outer-natureoffacts">
+                                <div className="title-remarks-partyA">
+                                    Reason For Late Filing/Reporting
+                                </div>
+                                <div className="box-container-partyA">
+                                  <textarea className="natureoffacts-input-field" name="reasonForLateFiling" id="reasonForLateFiling" value={reportData.reasonForLateFiling || "NA"} readOnly/>
+                                </div>
+                            </div>
+
+                          )}
+
                           <div className="view-incident-partyA-container">
                             <div className="box-container-outer-natureoffacts">
                               <div className="title-remarks-partyA">

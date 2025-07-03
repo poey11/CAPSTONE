@@ -26,6 +26,10 @@ interface IncidentReport {
   file?: string;
   respondent?: Respondent;
   time?: string;
+  area?: string;
+  addInfo?: string;
+  contactNos?: string;
+  
 }
 
 export default function IncidentTransactionsDetails() {
@@ -36,7 +40,12 @@ export default function IncidentTransactionsDetails() {
   const [transactionData, setTransactionData] = useState<IncidentReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [fileURL, setFileURL] = useState<string | null>(null);
+  const [respondentFileURLs, setRespondentFileURLs] = useState<string[]>([]);
 
+
+   const [activeSection, setActiveSection] = useState("info");
+
+  
   useEffect(() => {
     if (!referenceId) return;
 
@@ -82,6 +91,45 @@ export default function IncidentTransactionsDetails() {
     });
   }, [transactionData]);
 
+
+
+  /*
+  added for respondennt image
+  */
+useEffect(() => {
+  const fetchRespondentFiles = async () => {
+    if (transactionData?.respondent?.file) {
+      const storage = getStorage();
+      const fileList = Array.isArray(transactionData.respondent.file)
+        ? transactionData.respondent.file
+        : [transactionData.respondent.file];
+
+      try {
+        const urls = await Promise.all(
+          fileList.map(async (fileName) => {
+            if (fileName.startsWith("http")) {
+              // Already a valid URL, use it directly
+              return fileName;
+            }
+            const fileRef = ref(storage, `IncidentReports/${fileName}`);
+            return await getDownloadURL(fileRef);
+          })
+        );
+
+        setRespondentFileURLs(urls);
+      } catch (error) {
+        console.error("Error fetching respondent file URLs:", error);
+        setRespondentFileURLs([]);
+      }
+    }
+  };
+
+  fetchRespondentFiles();
+}, [transactionData]);
+
+
+
+
   const handleBack = () => {
     router.push("/ResidentAccount/Transactions");
   };
@@ -91,38 +139,272 @@ export default function IncidentTransactionsDetails() {
 
   const incidentFields = [
     { label: "ID", key: "caseNumber" },
-    { label: "Date and Time of Incident", key: "dateTime" },
     { label: "Name", key: "fullName" },
+    { label: "Date and Time of Incident", key: "dateTime" },
     { label: "Location", key: "address" },
+    { label: "Area in Fairview", key: "area" },
     { label: "Concern", key: "concerns" },
     { label: "Additional Information", key: "addInfo" },
+    { label: "Contact Number", key: "contactNos" },
   ];
 
+
+
+
+  /*
+updated
+  */
+ 
   const respondentFields = [
-    { label: "Respondent Name", key: "respondentName" },
-    { label: "Investigation Report", key: "investigationReport" },
-    {
-      label: "Uploaded Investigation Files",
-      key: "file",
-      render: (files?: string[] | string) => {
-        if (!files) return <p>No files uploaded.</p>;
-        const fileArray = Array.isArray(files) ? files : [files];
-        return fileArray.map((fileUrl, index) => (
-          <p key={index}>
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-              View File {index + 1}
+  { label: "Respondent Name", key: "respondentName" },
+  { label: "Investigation Report", key: "investigationReport" },
+  {
+    label: "Uploaded Investigation Files",
+    key: "file",
+    render: () => {
+      if (respondentFileURLs.length === 0) {
+        return <p style={{ color: 'red', fontWeight: 'bold' }}>No files uploaded.</p>;
+      }
+      return respondentFileURLs.map((url, index) => (
+        <div key={index} className="proof-incident-transactions">
+          <img
+            src={url}
+            alt={`Respondent File ${index + 1}`}
+            className="proofOfIncident-image"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+          <p>
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              View Full Image {index + 1}
             </a>
           </p>
-        ));
-      },
+        </div>
+      ));
     },
-  ];
+  },
+];
+
+
+
+
+
 
   return (
     <main className="incident-transaction-container">
       <div className="headerpic-specific-transactions">
         <p>TRANSACTIONS</p>
       </div>
+
+      <div className="incident-content">
+        <div className="incident-content-section-1">
+          <div className="section-1-left">
+              <button type="button" className="back-button" onClick={handleBack}></button>
+              <h1>Online Incident Report</h1>
+          </div>
+        
+          <div className="status-container">
+            <p className={`status-dropdown-transactions ${transactionData.status?.toLowerCase() || ""}`}>
+              {transactionData.status || "N/A"}
+            </p> 
+          </div>
+        </div>
+
+        <div className="incident-main-content">
+
+          <div className="incident-main-content-upper">
+
+            <nav className="incidents-transactions-info-toggle-wrapper">
+              <button
+                type="button"
+                className={`info-toggle-btn ${activeSection === "info" ? "active" : ""}`}
+                onClick={() => setActiveSection("info")}
+              >
+                Report Info
+              </button>
+
+              {transactionData?.status === "Acknowledged" && (
+                <button
+                  type="button"
+                  className={`info-toggle-btn ${activeSection === "barangay" ? "active" : ""}`}
+                  onClick={() => setActiveSection("barangay")}
+                >
+                  Barangay Response
+                </button>
+              )}
+            </nav>
+
+
+          </div>
+      
+      <div className="incident-main-content-lower">
+
+
+          {activeSection === "info" && (
+                        <>
+        <div className="incident-main-container">
+
+          <div className="incident-container-upper">
+
+               <div className="incident-main-left">
+                {incidentFields
+                  .filter((_, index) => index % 2 === 0)
+                  .map((field) => (
+                    <div className="details-section" key={field.key}>
+                      <div className="title">
+                        <p>{field.label}</p>
+                      </div>
+                      <div className="description">
+                        <p>{(extendedData as Record<string, any>)[field.key] || "N/A"}</p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+
+              <div className="incident-main-right">
+                {incidentFields
+                  .filter((_, index) => index % 2 !== 0)
+                  .map((field) => (
+                    <div className="details-section" key={field.key}>
+                      <div className="title">
+                        <p>{field.label}</p>
+                      </div>
+                      <div className="description">
+                        <p>{(extendedData as Record<string, any>)[field.key] || "N/A"}</p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+              
+
+          </div>
+
+          <div className="incident-container-lower">
+
+                <div className="details-section-upload">
+                    <div className="title">
+                      <p>Proof of Incident</p>
+                    </div>
+                    <div className="description">
+                      {fileURL ? (
+                        <div className="proof-incident-transactions">
+                          <img src={fileURL} alt="Proof of Incident" className="proofOfIncident-image" onError={(e) => (e.currentTarget.style.display = "none")} />
+                          <p>
+                            <a href={fileURL} target="_blank" rel="noopener noreferrer">View Full Image</a>
+                          </p>
+                        </div>
+                      ) : (
+                        <p style={{ color: 'red', fontWeight: 'bold' }}>No proof uploaded.</p>
+
+                      )}
+                    </div>
+                  </div>
+
+          </div>
+
+
+           
+
+        </div>
+
+        
+                </>
+                      )}
+
+              {activeSection === "barangay" && (
+                <>
+                  <div className="incident-main-container-incident-response">
+                    {transactionData?.status === "Acknowledged" && (
+                      <>
+                        {respondentFields
+                          .filter((field) => field.key !== "file")
+                          .map((field) => (
+                            <div className="details-section-response" key={field.key}>
+                              <div className="title">
+                                <p>{field.label}</p>
+                              </div>
+                              <div className="description">
+                                {transactionData?.respondent?.[field.key as keyof Respondent] || "N/A"}
+                              </div>
+                            </div>
+                        ))}
+
+                        <div className="details-section-response-upload">
+                          <div className="title">
+                            <p>Uploaded Investigation Files</p>
+                          </div>
+                          <div className="description">
+                            {respondentFileURLs.length === 0 ? (
+                              <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
+                            ) : (
+                              respondentFileURLs.map((url, index) => (
+                                <div key={index} className="proof-incident-transactions">
+                                  <img
+                                    src={url}
+                                    alt={`Respondent File ${index + 1}`}
+                                    className="proofOfIncident-image"
+                                    onError={(e) => (e.currentTarget.style.display = "none")}
+                                  />
+                                  <p>
+                                    <a href={url} target="_blank" rel="noopener noreferrer">
+                                      View Full Image {index + 1}
+                                    </a>
+                                  </p>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+
+        
+    </div>
+
+    
+
+
+   
+
+
+            
+
+        </div>
+
+  
+{/*
+
+
+        <div className="details-section">
+          <div className="title">
+            <p>Proof of Incident</p>
+          </div>
+          <div className="description">
+            {fileURL ? (
+              <div className="proof-incident-transactions">
+                <img src={fileURL} alt="Proof of Incident" className="proofOfIncident-image" onError={(e) => (e.currentTarget.style.display = "none")} />
+                <p>
+                  <a href={fileURL} target="_blank" rel="noopener noreferrer">View Full Image</a>
+                </p>
+              </div>
+            ) : (
+              <p>No proof uploaded.</p>
+            )}
+          </div>
+        </div>
+
+       */}
+      </div>
+
+   
+
+
+
+{/*
+
+
 
       <div className="incident-content">
         <div className="incident-content-section-1">
@@ -183,7 +465,10 @@ export default function IncidentTransactionsDetails() {
               </div>
             ))}
           </div>
-        )}
+        )}   
+
+        
+*/}
     </main>
   );
 }

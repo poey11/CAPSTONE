@@ -22,7 +22,6 @@ import { useRef } from "react";
   address: string;
   contact: string;
   residentId: string,
-
 }
 
 
@@ -36,6 +35,9 @@ export default function AddIncident() {
   const [popupMessage, setPopupMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
+
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
 
   const currentDate = getLocalDateString(new Date());
   const currentTime = getLocalTimeString(new Date());
@@ -69,15 +71,18 @@ export default function AddIncident() {
     timeFiled: "",
     location: "",
     nature: "",
+    areaOfIncident: "",
     specifyNature: "",
     concern: "",
     status: "Pending",
-    receivedBy: "",
     dateReceived: currentDate,
     timeReceived: currentTime,
     nosofMaleChildren: "",
     nosofFemaleChildren: "",
     file: null,
+    typeOfIncident: "",
+    recommendedEvent: "",
+    reasonForLateFiling: "",
   });
   const [deskStaff, setdeskStaff] = useState<any>({
     fname: "",
@@ -163,10 +168,11 @@ export default function AddIncident() {
     }, []);
 
     const filteredComplainantResidents = residents.filter((resident) =>
-    `${resident.firstName} ${resident.middleName} ${resident.lastName}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
+      resident.id !== respondent.residentId && // 🛑 Exclude respondent
+      `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    );
 
   // respondent resident search pop up
   const handleRespondentsClick = () => {
@@ -191,6 +197,7 @@ export default function AddIncident() {
   }, []);
 
   const filteredRespondentResidents = residents.filter((resident) =>
+  resident.id !== complainant.residentId && // 🛑 Exclude complainant
   `${resident.firstName} ${resident.middleName} ${resident.lastName}`
     .toLowerCase()
     .includes(searchTerm.toLowerCase())
@@ -295,7 +302,8 @@ export default function AddIncident() {
             nature: reportInfo.nature,
             specifyNature: reportInfo.specifyNature,
             concern: reportInfo.concern,
-            status: "Pending",
+            status: "pending",
+            statusPriority: 1,
             receivedBy: `${deskStaff.fname} ${deskStaff.lname}`,
             dateReceived: reportInfo.dateReceived,
             timeReceived: reportInfo.timeReceived,
@@ -303,9 +311,18 @@ export default function AddIncident() {
             department: departmentId,
             staffId: user?.id,
             isDialogue: false,
+            typeOfIncident: reportInfo.typeOfIncident,
+            areaOfIncident: reportInfo.areaOfIncident,
             hearing:0,
             generatedHearingSummons:0,
             createdAt: new Date(),
+            ...(isIncidentLate && {
+              isReportLate: reportInfo.isReportLate,
+              reasonForLateFiling: reportInfo.reasonForLateFiling,
+            }),
+            ...(reportInfo.typeOfIncident === "Minor" && {
+              recommendedEvent: reportInfo.recommendedEvent,
+            }),
             ...(departmentId === "GAD" && { 
               nosofMaleChildren: reportInfo.nosofMaleChildren,
               nosofFemaleChildren: reportInfo.nosofFemaleChildren,
@@ -361,7 +378,7 @@ export default function AddIncident() {
        setShowSubmitPopup(false);
             // Save filtered data to Firestore and get the reference
         const docRef = await addDoc(collection(db, "IncidentReports"), filteredData);
-        return docRef.id;
+        return docRef;
     } catch (e: any) {
         console.log(e);
     }
@@ -376,11 +393,6 @@ const delayedSubmit = (e: React.FormEvent) => {
 
 const handleSubmit = (event: React.FormEvent) => {
   event.preventDefault(); 
-
-  console.log("Complainant at submit:", complainant);
-  console.log("Respondent at submit:", respondent);
-  console.log("Report at submit:", reportInfo);
-  console.log("desk staff at submit:", deskStaff);
 
   setShowFieldErrors(true);
 
@@ -411,13 +423,15 @@ const handleSubmit = (event: React.FormEvent) => {
     return;
   }
   
-  // Validate Respondent
-  if (!isValidPerson(respondent)) {
-    setPopupErrorMessage("Please fill out all required respondent fields.");
-    setShowErrorPopup(true);
-    setTimeout(() => setShowErrorPopup(false), 3000);
-    return;
+  if(reportInfo.typeOfIncident === "Major" ) {
+    if (!isValidPerson(respondent)) {
+      setPopupErrorMessage("Please fill out all required respondent fields.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+    }
   }
+  
   
   
     // Validate Report Info
@@ -430,9 +444,32 @@ const handleSubmit = (event: React.FormEvent) => {
       isEmpty(reportInfo.concern) ||
       isEmpty(reportInfo.status) ||
       isEmpty(reportInfo.dateReceived) ||
-      isEmpty(reportInfo.timeReceived)
+      isEmpty(reportInfo.timeReceived)||
+      isEmpty(reportInfo.typeOfIncident) ||
+      (reportInfo.typeOfIncident === "Minor" && isEmpty(reportInfo.recommendedEvent)) ||
+      isEmpty(reportInfo.areaOfIncident)
     ) {
-      setPopupErrorMessage("Please fill out all required fields.");
+      // Find the first empty field in reportInfo
+      const emptyField = Object.entries({
+        caseNumber: reportInfo.caseNumber,
+        dateFiled: reportInfo.dateFiled,
+        timeFiled: reportInfo.timeFiled,
+        location: reportInfo.location,
+        nature: reportInfo.nature,
+        concern: reportInfo.concern,
+        status: reportInfo.status,
+        dateReceived: reportInfo.dateReceived,
+        timeReceived: reportInfo.timeReceived,
+        typeOfIncident: reportInfo.typeOfIncident,
+        recommendedEvent: reportInfo.typeOfIncident === "Minor" ? reportInfo.recommendedEvent : undefined,
+        areaOfIncident: reportInfo.areaOfIncident,
+      }).find(([_, value]) => isEmpty(value));
+
+      setPopupErrorMessage(
+        emptyField
+          ? `Please fill out the required field: ${emptyField[0]}`
+          : "Please fill out all required fields."
+      );
       setShowErrorPopup(true);
       setTimeout(() => setShowErrorPopup(false), 3000);
       return;
@@ -464,12 +501,29 @@ const handleSubmit = (event: React.FormEvent) => {
       return;
     }
 
-    if(!isValidPhilippineMobileNumber(complainant.contact)|| !isValidPhilippineMobileNumber(respondent.contact)){
-      setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
-      setShowErrorPopup(true);
-      setTimeout(() => setShowErrorPopup(false), 3000);
-      return;
+    if(reportInfo.typeOfIncident === "Minor"  ) {
+      if(!isValidPhilippineMobileNumber(complainant.contact)){
+        setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
+      if(respondent.contact && !isValidPhilippineMobileNumber(respondent.contact)){
+        setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
     }
+    else{
+      if(!isValidPhilippineMobileNumber(complainant.contact)|| !isValidPhilippineMobileNumber(respondent.contact)){
+        setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+      return;
+      }
+    }
+    
     const dateFiled = reportInfo.dateFiled;
     const dateReceived = reportInfo.dateReceived;
     const timeFiled = reportInfo.timeFiled;
@@ -512,18 +566,19 @@ const handleSubmit = (event: React.FormEvent) => {
 
   const handleConfirmSubmit = async () => {
     try {
+      setHasSubmitted(true);
       const docId = await handleUpload();
-  
+      
+      
       setPopupMessage("Incident Successfully Submitted!");
       setShowPopup(true);
 
-  
+
       setTimeout(() => {
         setShowPopup(false);
         
         if (docId) {
-          router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
-
+          router.push(`/dashboard/IncidentModule/ViewIncident?id=${docId.id}`);
         } 
       }, 3000);
   
@@ -535,7 +590,7 @@ const handleSubmit = (event: React.FormEvent) => {
     }
   };
   
-
+ 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type, id } = e.target;
 
@@ -577,45 +632,38 @@ const handleSubmit = (event: React.FormEvent) => {
             [name]: updatedValue,
         }));
     }
-};
+  };
 
+  const isOneWeekOrMore = (dateFiled: string | Date, createdAt: string | Date): boolean => {
+    const filedDate = new Date(dateFiled);
+    const createdDate = new Date(createdAt);
+
+    const differenceInMilliseconds =  createdDate.getTime()-filedDate.getTime();
+    const differenceInDays = differenceInMilliseconds / (1000 * 60 * 60 * 24);
+
+    return differenceInDays >= 1;
+  };
   
-  const deleteForm = () => {
-    handleFileDeleteContainer1();
-    setReportInfo({
-        dateFiled: "",
-        timeFiled: "",
-        location: "",
-        nature: "",
-        concern: "",
-        status: "",
-        specifyNature: "",
-        receivedBy: "",
-        dateReceived: "",
-        timeReceived: "",
-        file: null,
-      });
-      setComplainant({
-        fname: "",
-        lname: "",
-        sex: "",
-        age: "",
-        contact: "",
-        civilStatus: "",
-        address: "",
-        residentId: "",
-      });
-      setRespondent({
-        fname: "",
-        lname: "",
-        sex: "",
-        age: "",
-        contact: "",
-        civilStatus: "",
-        address: "",
-        residentId: "",
-      });
-  }
+
+  const [isIncidentLate, setIsIncidentLate] = useState(false);
+
+  useEffect(() => {
+    if (!reportInfo.dateFiled || !reportInfo.dateReceived) return;
+
+    const dateFiled = new Date(reportInfo.dateFiled);
+    const createdAt = new Date(reportInfo.dateReceived);
+
+    const isLate = isOneWeekOrMore(dateFiled, createdAt);
+    setIsIncidentLate(isLate);
+
+    if (isLate) {
+      setReportInfo((prev: any) => ({
+        ...prev,
+        isReportLate: true,
+      }));
+    }
+  }, [reportInfo.dateFiled, reportInfo.dateReceived]);
+
 
   const handleBack = () => {
     router.back();
@@ -647,7 +695,9 @@ const handleSubmit = (event: React.FormEvent) => {
               </div>
 
                 <div className="actions-add">
-                   <button type="submit" className="action-view-add" >Save</button>
+                  {!hasSubmitted && (
+                    <button type="submit" className="action-view-add" >Save</button>
+                  )}
                  </div>
           
              </div>
@@ -655,17 +705,31 @@ const handleSubmit = (event: React.FormEvent) => {
 
               <div className="section-1-add-title">
                   <input 
-                            type="text" 
-                            className="search-bar-add-case" 
-                            value={reportInfo.caseNumber}
-                            name="caseNumber"
-                            id="caseNumber"
-                            disabled
-                            
-                      />
+                    type="text" 
+                    className="search-bar-add-case" 
+                    value={reportInfo.caseNumber}
+                    name="caseNumber"
+                    id="caseNumber"
+                    disabled    
+                  />
+                
               </div>
                     
-              
+              <div className="section-1-add-title flex-col">
+                Type of Incident
+                <div>
+                  <input type="radio" id="minor" name="typeOfIncident" 
+                  onChange={handleFormChange}
+                  className="mr-2" value="Minor" required/>
+                  <label htmlFor="minor">Minor Incident</label>
+                </div>
+                <div>
+                  <input type="radio" id="major"  name="typeOfIncident"  
+                  onChange={handleFormChange}
+                  className="mr-2" value="Major" required/>  
+                  <label htmlFor="major">Major Incident</label>
+                </div>
+              </div>
             
             <div className="add-incident-bottom-section">
 
@@ -727,7 +791,7 @@ const handleSubmit = (event: React.FormEvent) => {
                       setIsComplainantResidentSelected(false);
                     }}
                   >
-                    
+                    ×
                   </span>
                 )}
               </div>
@@ -941,7 +1005,7 @@ const handleSubmit = (event: React.FormEvent) => {
                             value={respondent.lname}
                             name="lname"
                             id="respondent"
-                            required
+                            required = {reportInfo.typeOfIncident === "Major"}
                             onChange={handleFormChange}
                             disabled={isRespondentResidentSelected}
                             />
@@ -953,7 +1017,7 @@ const handleSubmit = (event: React.FormEvent) => {
                           id="respondent"
                           name="sex" 
                           className={`add-incident-input-field ${showFieldErrors && !respondent.sex.trim() ? "input-error" : ""}`}   
-                          required
+                          required = {reportInfo.typeOfIncident === "Major"}
                           value={respondent.sex}
                           onChange={handleFormChange}
                           disabled={isRespondentResidentSelected}
@@ -973,7 +1037,7 @@ const handleSubmit = (event: React.FormEvent) => {
                           name="civilStatus"
                           id="respondent"
                           onChange={handleFormChange}
-                          required
+                          required = {reportInfo.typeOfIncident === "Major"}
                           disabled={isRespondentResidentSelected}
                           >
                             <option value="" disabled>Choose A Civil Status</option>
@@ -1002,7 +1066,7 @@ const handleSubmit = (event: React.FormEvent) => {
                           value={respondent.fname}
                           name="fname"
                           id="respondent"  
-                          required
+                          required = {reportInfo.typeOfIncident === "Major"}
                           onChange={handleFormChange}
                           disabled={isRespondentResidentSelected}
                           />
@@ -1017,7 +1081,7 @@ const handleSubmit = (event: React.FormEvent) => {
                             placeholder="Enter Age" 
                             value={respondent.age}
                             name="age"
-                            required
+                          required = {reportInfo.typeOfIncident === "Major"}
                             onChange={handleFormChange}
                             disabled={isRespondentResidentSelected}
 
@@ -1033,7 +1097,7 @@ const handleSubmit = (event: React.FormEvent) => {
                             placeholder="Enter Address" 
                             value={respondent.address}
                             name="address"
-                            required
+                            required = {reportInfo.typeOfIncident === "Major"}
                             onChange={handleFormChange}
                             disabled={isRespondentResidentSelected}
                             />
@@ -1059,8 +1123,7 @@ const handleSubmit = (event: React.FormEvent) => {
                           placeholder="Enter Contact Number" 
                           value={respondent.contact}
                           name="contact"
-                          required
-        
+                          required = {reportInfo.typeOfIncident === "Major"}
                           onChange={handleFormChange}
                           disabled={isRespondentResidentSelected}
 
@@ -1136,7 +1199,7 @@ const handleSubmit = (event: React.FormEvent) => {
                   </select>
 
                   </div>
-
+                    
                   {reportInfo.nature === "Others" && 
                    (<>
                   
@@ -1148,17 +1211,64 @@ const handleSubmit = (event: React.FormEvent) => {
                        
                    </>)}
 
-                   <div className="fields-section-add">
-                        <p>Time Filed<span className="required">*</span></p>
-                        <input type="time" className="add-incident-input-field" id="timeFiled" name="timeFiled" 
-                        value = {reportInfo.timeFiled} onChange={handleFormChange} required />
-                   </div>
+                    
+                  <div className="fields-section-add">
+                      <p>Area of Incident<span className="required">*</span></p>
+                      <select 
+                        className="add-incident-input-field" 
+                        required
+                        id="areaOfIncident" name="areaOfIncident" 
+                        value={reportInfo.areaOfIncident}
+                        onChange={handleFormChange}
+                        >
+                          <option value="" disabled>Choose An Area of Incident</option>
+                          <option value="South Fairview">South Fairview</option>
+                          <option value="West Fairview">West Fairview</option>
+                          <option value="East Fairview">East Fairview</option>
+                        </select>
+                  </div>
 
+                  {reportInfo.typeOfIncident === "Minor" && (
+                    <>
+                      <div className="fields-section-add">
+                        <p>Recommended To Join:<span className="required">*</span></p>
+                        <select 
+                          className="add-incident-input-field" 
+                          required
+                          id="recommendedEvent" name="recommendedEvent" 
+                          value={reportInfo.recommendedEvent}
+                          onChange={handleFormChange}
+                          >
+                            {/* the options are hard coded for now but will be revised when the program.s and event are implemented.
+                            Will be replaced with a dynamic list of events/programs from the database Not sure if the list will be based on the
+                            area of incident. or all events will be available to all areas.
+                            */}
+                            <option value="" disabled>Choose an Event/Program To Recommend</option>
+                            <option value="Livelihood Training Program">Livelihood Training Program</option>
+                            <option value="Parenting Seminar">Parenting Seminar</option>
+                            <option value="Community Clean-Up Drive">Community Clean-Up Drive</option>
+                            <option value="Drug Awareness Seminar">Drug Awareness Seminar</option>
+                            <option value="Youth Leadership Workshop">Youth Leadership Workshop</option>
+                            <option value="Barangay Sports Program">Barangay Sports Program</option>
+                            <option value="Health and Wellness Camp">Health and Wellness Camp</option>
+                            <option value="Solo Parent Support Group">Solo Parent Support Group</option>
+                            <option value="GAD (Gender and Development) Seminar">GAD (Gender and Development) Seminar</option>
+                            <option value="Barangay Livelihood Assistance Orientation">Barangay Livelihood Assistance Orientation</option>
+                          </select>
+                      </div>
+                    </>
+                  )}
 
-                   <div className="fields-section-add">
+              <div className="fields-section-add">
                   <p>Date Filed<span className="required">*</span></p>
                   <input type="date" className="add-incident-input-field" max={currentDate} id="dateFiled" name="dateFiled" 
                     value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
+              </div>
+
+              <div className="fields-section-add">
+                   <p>Time Filed<span className="required">*</span></p>
+                   <input type="time" className="add-incident-input-field" id="timeFiled" name="timeFiled" 
+                   value = {reportInfo.timeFiled} onChange={handleFormChange} required />
               </div>
 
               <div className="fields-section-add">
@@ -1167,7 +1277,7 @@ const handleSubmit = (event: React.FormEvent) => {
                   value = {reportInfo.location} onChange={handleFormChange} required />
 
               </div>
-
+              
 
           
           </div>
@@ -1235,9 +1345,9 @@ const handleSubmit = (event: React.FormEvent) => {
                         </div>
 
                     </div>
+                   
 
-
-              </div>
+          </div>
 
           </div>
 
@@ -1245,36 +1355,51 @@ const handleSubmit = (event: React.FormEvent) => {
 
 
         {departmentId === "GAD" && (
-                  <div className="add-incident-GAD-section">
-            
-                                <div className="fields-section-add">
-                                  <p>Nos of Male Children Victim/s<span className="required">*</span></p>
-                                  <input type="number" 
-                                  className="add-incident-input-field"
-                                  min="0"
-                                  value={reportInfo.nosofMaleChildren}
-                                  name="nosofMaleChildren"
-                                  onChange={handleFormChange}
-                                  required />    
-                                </div>
-
-                                <div className="fields-section-add">
-                                  <p>Nos of Female Children Victim/s<span className="required">*</span></p>
-                                  <input type="number"
-                                    className="add-incident-input-field"
-                                    min="0"
-                                    value={reportInfo.nosofFemaleChildren}
-                                    name="nosofFemaleChildren"  
-                                    onChange={handleFormChange}
-                                    required />    
-                                </div>
-                  </div>
+          <div className="add-incident-GAD-section">
+            <div className="fields-section-add">
+              <p>Nos of Male Children Victim/s<span className="required">*</span></p>
+              <input type="number" 
+              className="add-incident-input-field"
+              min="0"
+              value={reportInfo.nosofMaleChildren}
+              name="nosofMaleChildren"
+              onChange={handleFormChange}
+              required />    
+            </div>
+            <div className="fields-section-add">
+              <p>Nos of Female Children Victim/s<span className="required">*</span></p>
+              <input type="number"
+                className="add-incident-input-field"
+                min="0"
+                value={reportInfo.nosofFemaleChildren}
+                name="nosofFemaleChildren"  
+                onChange={handleFormChange}
+                required />    
+            </div>
+          </div>
         )}
 
 
           <div className="add-incident-section-bottom-side">
-
-            <div className="box-container-outer-resclassification-add">
+             {isIncidentLate && (
+                <div className="box-container-outer-resclassification-add">
+                    <div className="title-remarks-add">
+                      <p>Reason For Late Filing/Reporting <span className="required">*</span></p>
+                    </div>
+              
+                  <div className="box-container-remarks-add">
+                    <textarea 
+                      required
+                      placeholder="Enter Reason for Late Filing/Reporting"
+                      value={reportInfo.reasonForLateFiling}
+                      id="reasonForLateFiling"
+                      name="reasonForLateFiling"
+                      onChange={handleFormChange}
+                      rows={3}/>
+                    </div>
+                </div>
+             )}
+              <div className="box-container-outer-resclassification-add">
                     <div className="title-remarks-add">
                         <p>Nature of Facts<span className="required">*</span></p>
                     </div>
@@ -1297,7 +1422,7 @@ const handleSubmit = (event: React.FormEvent) => {
             </div>
                   
 
-            </div>
+          </div>
 
 
 

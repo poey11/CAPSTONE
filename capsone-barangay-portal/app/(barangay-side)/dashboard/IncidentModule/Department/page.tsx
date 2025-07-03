@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getAllSpecificDocument, deleteDocument } from "@/app/helpers/firestorehelper";
 import { useSession } from "next-auth/react";
 import { db,storage } from "@/app/db/firebase";
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 
 
 const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
@@ -114,26 +115,36 @@ export default function Department() {
   };
   
 
+/*Revised this. Copy from Online Request in Service Module. */
 
   useEffect(() => {
-    if (departmentId) {
-      try {
-        const unsubscribe = getAllSpecificDocument("IncidentReports", "department", "==", departmentId, (data) => {
-          setIncidentData(data);
-          setFilteredIncidents(data); // Update filteredIncidents when data is fetched
-        });
-  
-        return () => {
-          if (unsubscribe) {
-            unsubscribe();
+    if (!departmentId) return;
+    const Collection = query(
+      collection(db,"IncidentReports"),
+      where("department", "==", departmentId),
+      orderBy ("createdAt", "desc")); // Order by dateFiled in descending order
+    const unsubscribe = onSnapshot(Collection, (snapshot) => {
+      let data: any[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+       data.sort((a, b) => {
+          if(a.statusPriority !== b.statusPriority) {
+            return a.statusPriority - b.statusPriority; // Sort by status priority first
           }
-        };
-      } catch (error) {
-        console.error("Error fetching incident data:", error);
-        
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA; // Sort by createdAt in descending order
+        });
+      setIncidentData(data);
+      setFilteredIncidents(data); // Initialize filteredIncidents with fetched data
+    });
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
       }
+    };
     
-    }
   }, [departmentId]);
 
 
@@ -293,6 +304,7 @@ useEffect(() => {
         <tr>
           <th>Case #</th>
           <th>Date & Time of the Incident</th>
+          <th>Area Of Incident</th>
           <th>Nature of Complaint</th>
           <th>Status</th>
           <th>Actions</th>
@@ -306,8 +318,8 @@ useEffect(() => {
         >
             <td>{incident.caseNumber}</td>
             <td>{incident.dateFiled} {incident.timeFiled}</td>
+            <td>{incident.areaOfIncident}</td>
             {incident.nature === "Others" ? (<td>{incident.specifyNature}</td>):(<td>{incident.nature}</td>)}
-            
             <td>
               <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
                 {incident.status}
@@ -318,7 +330,7 @@ useEffect(() => {
                 <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}><img src="/Images/view.png" alt="View" /></button>
                 {isAuthorized && (
                   <>
-                   {incident.status !== "settled" && (
+                   {incident.status !== "settled" && incident.status !== "CFA" && (
                     <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}> <img src="/Images/edit.png" alt="Edit" /></button>
                   )}
                     <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}><img src="/Images/delete.png" alt="Delete" /></button>

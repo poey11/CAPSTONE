@@ -1,12 +1,12 @@
 "use client"
 import "@/CSS/IncidentReport/IncidentReport.css";
-import { ChangeEvent, useEffect, useState } from "react"; 
+import { ChangeEvent, useEffect, useState, useRef } from "react"; 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/authContext";
 import { ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection, doc, getDoc} from "firebase/firestore";
 import { db,storage, auth } from "@/app/db/firebase";
-import { getAllSpecificDocument } from "@/app/helpers/firestorehelper";
+import { getAllSpecificDocument, getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import {isPastDate,isToday,isPastOrCurrentTime,getLocalDateString} from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
 
@@ -18,6 +18,25 @@ const incidentForm:React.FC = () => {
   const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
   const minDate = getLocalDateString(new Date());
   const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
+
+
+const formRef = useRef<HTMLFormElement>(null);
+
+    /*
+      For pop up overlay errors
+    */
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+
+
+    const [invalidFields, setInvalidFields] = useState<string[]>([]);
+const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
+
+
+
+
+
+
   const [incidentReport, setIncidentReport] = useState<any>({
     caseNumber: "",
     firstname: "",
@@ -33,17 +52,16 @@ const incidentForm:React.FC = () => {
     area:"",
     reportID: "",
     department: "",
-    status: "Pending",
+    status: "pending",
     addInfo:"",
-   //  isViewed: false,
+    reasonForLateFiling: "",
   });
 
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const docRef = doc(db, "ResidentUsers", user.uid);
+      if (currentUser && currentUser !== "Guest") {
+        const docRef = doc(db, "ResidentUsers", currentUser);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -59,49 +77,54 @@ const incidentForm:React.FC = () => {
     };
 
     fetchUserData();
-  }, []);
-  const [onlineReportCollection, setOnlineReportCollection] = useState<any[]>([]);
-  useEffect(() => {
-    try {
-      const unsubscribe =  getAllSpecificDocument("IncidentReports", "department", "==", "Online",  setOnlineReportCollection);
-      return () => {
-        if (unsubscribe) {
-          unsubscribe(); 
-        }
-      }
-    } catch (error) {
-      setOnlineReportCollection([]);
-    }
-   
-  }, []);
+  }, [currentUser]);
+    
+    const [nos, setNos] = useState<number>(0); // Initialize with a default value
   
-  useEffect(() => {
-    const getCaseNumber = () => {
-      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      const randomId = customAlphabet(alphabet, 6);
-      const randomIdString = randomId();
-      let formattedNumber = ""
-      if(onlineReportCollection.length < 1){
-        formattedNumber = String(1).padStart(4, "0");
+    useEffect(() => {
+      if(user){;
+        const fetchCount = async () => {
+          try {
+            const count = await getSpecificCountofCollection("IncidentReports", "reportID", user.uid);
+            setNos(count || 0);
+          } catch (error) {
+            console.error("Error fetching count:", error);
+          }
+        }
+        fetchCount();
       }
       else{
-        const lastReport = onlineReportCollection[0].caseNumber.split("-");
-        const number = parseInt(lastReport[lastReport.length - 1]);
-        formattedNumber = String(number+1).padStart(4, "0");
+        const fetchCount = async () => {
+          try {
+            const count = await getSpecificCountofCollection("IncidentReports", "reportID", "Guest");
+            setNos(count || 0);
+          } catch (error) {
+            console.error("Error fetching count:", error);
+          }
+        }
+        fetchCount();
       }
-      const user = currentUser !== "Guest"
-      ? currentUser.substring(0, 6).toUpperCase()
-      : "GUEST";  
-      const caseValue =`${user} - ${randomIdString} - ${formattedNumber}` ;
-      console.log("Generated Case Number:", caseValue);
-      setIncidentReport((prev: any) => ({
-        ...prev,
-        caseNumber: caseValue, // ex : "ABCDEF - ABCDEF - 0001" or "GUEST - ABCDEF - 0001"
-      }));
-    };
+  
+    },[user]);
+    useEffect(() => {
+       const getServiceRequestId =  () => {
+         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+         const randomId = customAlphabet(alphabet, 6);
+         const requestId = randomId();
+         const number = String(nos+1).padStart(4, '0'); // Ensure 3 digits
+         let format = `${user?.uid.substring(0,6).toUpperCase()|| "GUEST"} - ${requestId} - ${number}`;
+          setIncidentReport((prev: any) => ({
+            ...prev,
+            caseNumber: format,
+          }));
+         console.log("format", format);
+       }
+       getServiceRequestId();
+     
+     }, [user,nos]);
 
-    getCaseNumber();
-  },[user, onlineReportCollection]);
+
+ 
 
   
     const clearForm = () => {
@@ -256,7 +279,7 @@ const incidentForm:React.FC = () => {
         console.log(currentUser);
         
         const toAdd = [{
-          ...(currentUser !== "Guest" && { reportID: currentUser }), // Include reportID only if currentUser is not Guest
+          ...(currentUser !== "Guest" ? { reportID: currentUser } :{reportID: "Guest"}), // Include reportID only if currentUser is not Guest
           caseNumber: incidentReport.caseNumber,
           firstname: incidentReport.firstname,
           middlename: incidentReport.middlename,
@@ -267,14 +290,20 @@ const incidentForm:React.FC = () => {
           dateFiled: incidentReport.dateFiled,
           time: incidentReport.time,
           address: incidentReport.address,
-          area: incidentReport.area,
+          areaOfIncident: incidentReport.area,
+          typeOfIncident: "Minor",
           file: filename,
           department: "Online",
           status: incidentReport.status,
-          isFiled: false,
+          statusPriority: 1,
           isViewed: false,
+          ...(incidentReport.isReportLate && { 
+            isReportLate: incidentReport.isReportLate,
+            reasonForLateFiling: incidentReport.reasonForLateFiling,
+          }), 
           addInfo: incidentReport.addInfo,
           createdAt: new Date().toLocaleString(),
+          
         }];
         console.log(toAdd);
         handleReportUpload(toAdd, storageRef);
@@ -287,20 +316,100 @@ const incidentForm:React.FC = () => {
 
 
 
+const handleSubmitClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  e.preventDefault();
+
+  const invalidFields: string[] = [];
+
+  if (!incidentReport.firstname.trim()) invalidFields.push("firstname");
+  if (!incidentReport.lastname.trim()) invalidFields.push("lastname");
+  if (!incidentReport.contactNos.trim()) invalidFields.push("contactNos"); 
+  if (!incidentReport.concerns.trim()) invalidFields.push("concerns");
+  if (!incidentReport.time.trim()) invalidFields.push("time");
+  if (!incidentReport.area.trim()) invalidFields.push("area");
+  if (!incidentReport.dateFiled.trim()) invalidFields.push("dateFiled");
+  if (!incidentReport.address.trim()) invalidFields.push("address");
+  if (!incidentReport.addInfo.trim()) invalidFields.push("addInfo");
+
+
+  if (invalidFields.length > 0) {
+    setInvalidFields(invalidFields);
+    setPopupErrorMessage("Please fill up all required fields. Check all sections");
+    setShowErrorPopup(true);
+    setTimeout(() => {
+      setShowErrorPopup(false);
+    }, 3000);
+    return;
+  }
+
+  setInvalidFields([]);
+  setShowSubmitPopup(true);
+};
+
+
+
+const confirmSubmit = async () => {
+  setShowSubmitPopup(false);
+
+  if (formRef.current) {
+    const form = formRef.current;
+
+    const fakeEvent = {
+      preventDefault: () => {},
+      target: form,
+    } as unknown as React.FormEvent<HTMLFormElement>;
+
+    await handleSubmit(fakeEvent);
+  } else {
+    console.error("Form reference is null");
+  }
+};
+
+
+
+
+
+
+    const [activeSection, setActiveSection] = useState("complainant");
+
+
+
+      const isOneWeekOrMore = (dateFiled: string | Date, createdAt: string | Date): boolean => {
+        const filedDate = new Date(dateFiled);
+        const createdDate = new Date(createdAt);
+    
+        const differenceInMilliseconds =  createdDate.getTime()-filedDate.getTime();
+        const differenceInDays = differenceInMilliseconds / (1000 * 60 * 60 * 24);
+    
+        return differenceInDays >= 1;
+      };
+      
+    
+      const [isIncidentLate, setIsIncidentLate] = useState(false);
+    
+      useEffect(() => {
+        if (!incidentReport?.dateFiled) return;
+    
+        const dateFiled = new Date(incidentReport.dateFiled);
+        const createdAt = new Date(getLocalDateString(new Date())); // Use the current date as createdAt
+    
+        const isLate = isOneWeekOrMore(dateFiled, createdAt);
+        setIsIncidentLate(isLate);
+    
+        if (isLate) {
+          setIncidentReport((prev: any) => ({
+            ...prev,
+            isReportLate: true,
+          }));
+        }
+      }, [incidentReport?.dateFiled]);
+    
 
     return(
       <main className="main-container-incident-report">
 
     
-        {errorPopup.show && (
-              <div className="popup-overlay-fileincident error">
-                  <div className="popup-fileincident">
-                    <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
-                    <p>{errorPopup.message}</p>
-                    <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
-                  </div>
-              </div>
-        )}
+
 
 
         <div className="headerpic-report">
@@ -312,272 +421,428 @@ const incidentForm:React.FC = () => {
         <div className="register-section-incident-report">
           <h1>MINOR INCIDENT REPORT</h1>
 
-          <hr/>
-          <form className="register-form-incident-report" onSubmit={handleSubmit}> {/* Use onSubmit to trigger the redirect */}
-            <div className="form-group-incident-report">
-              <label htmlFor="firstname" className="form-label-incident-report">
-                First Name<span className="required">*</span>
-                </label>
-              <input
-                type="text"
-                id="firstname"
-                name="firstname"
-                className="form-input-incident-report"
-                required
-                placeholder="Enter First Name"
-                value={incidentReport.firstname}
-                onChange={handleFormChange}
-              />
-            </div>
+         {/* <hr/>*/} 
 
-            <div className="form-group-incident-report">
+         <div className="register-section-upper">
 
-              <label htmlFor="middlename" className="form-label-incident-report">
-                Middle Name<span className="required">*</span>
-              </label>
+           <nav className="incidents-form-info-toggle-wrapper">
+                  {["complainant", "incident", "others"].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "complainant" && "Complainant Info"}
+                      {section === "incident" && "Incident Info"}
+                      {section === "others" && "Others"}
+                    </button>
+                  ))}
+              </nav>
+
+         </div>
+
+          
+
+
+          <form className="register-form-incident-report" ref={formRef} > 
+
+            {activeSection === "complainant" && (
+                        <>
+            <div className="incident-report-form-container">
+
+              <div className="incident-report-container-left-side-complainant">
+
+                      <div className="form-group-incident-report">
+                        <label htmlFor="firstname" className="form-label-incident-report">
+                          First Name<span className="required">*</span>
+                          </label>
+                        <input
+                          type="text"
+                          id="firstname"
+                          name="firstname"
+                          className={`form-input-incident-report ${invalidFields.includes("firstname") ? "input-error" : ""}`}
+                          required
+                          placeholder="Enter First Name"
+                          value={incidentReport.firstname}
+                          onChange={handleFormChange}
+                        />
+                      </div>
+
+                     <div className="form-group-incident-report">
+
+                        <label htmlFor="lastname" className="form-label-incident-report">
+                          Last Name<span className="required">*</span>
+                        </label>
+
+                      
+                        <input
+                          type="text"
+                          id="lastname"
+                          name="lastname"
+                             className={`form-input-incident-report ${invalidFields.includes("lastname") ? "input-error" : ""}`}
+                          required
+                          placeholder="Enter Last Name"
+                          value={incidentReport.lastname}
+                          onChange={handleFormChange}
+                        />
+                      </div>
+
+              </div>
 
               
-                <input
-                  type="text"
-                  id="middlename"
-                  name="middlename"
-                  className="form-input-incident-report"
-                  required
-                  placeholder="Enter Middle Name"
-                  value={incidentReport.middlename}
-                  onChange={handleFormChange}
-                />
-            </div>
+              <div className="incident-report-container-right-side-complainant">
+
+                   <div className="form-group-incident-report">
+
+                      <label htmlFor="middlename" className="form-label-incident-report">
+                        Middle Name
+                      </label>
+
+                      
+                        <input
+                          type="text"
+                          id="middlename"
+                          name="middlename"
+                          className="form-input-incident-report"
+                          placeholder="Enter Middle Name"
+                          value={incidentReport.middlename}
+                          onChange={handleFormChange}
+                        />
+                    </div>
+
+
+                      <div className="form-group-incident-report">
+                      <label htmlFor="contactNos" className="form-label-incident-report">
+                        Phone Number<span className="required">*</span>
+                        </label>
+                      <input
+                        type="text"
+                        id="contactNos"
+                        name="contactNos"
+                        className={`form-input-incident-report ${invalidFields.includes("contactNos") ? "input-error" : ""}`}
+                        required
+                        value={incidentReport.contactNos}
+                        onChange={(e) => {
+                          const input = e.target.value;
+                          // Only allow digits and limit to 11 characters
+                          if (/^\d{0,11}$/.test(input)) {
+                            handleFormChange(e);
+                          }
+                        }}
+                        maxLength={11}  
+                        pattern="^[0-9]{11}$" 
+                        placeholder="Please enter a valid 11-digit contact number" 
+                        title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX"
+                      />
+                    </div>
         
-            <div className="form-group-incident-report">
 
-              <label htmlFor="lastname" className="form-label-incident-report">
-                Last Name<span className="required">*</span>
-              </label>
+              </div>
 
-             
-              <input
-                type="text"
-                id="lastname"
-                name="lastname"
-                className="form-input-incident-report"
-                required
-                placeholder="Enter Last Name"
-                value={incidentReport.lastname}
-                onChange={handleFormChange}
-              />
-            </div>
+          
+              </div>
+                  </>
+                      )}
 
-            <div className="form-group-incident-report">
-              <label htmlFor="contactNos" className="form-label-incident-report">
-                Phone Number<span className="required">*</span>
-                </label>
-              <input
-                type="text"
-                id="contactNos"
-                name="contactNos"
-                className="form-input-incident-report"
-                required
-                value={incidentReport.contactNos}
-                onChange={(e) => {
-                  const input = e.target.value;
-                  // Only allow digits and limit to 11 characters
-                  if (/^\d{0,11}$/.test(input)) {
-                    handleFormChange(e);
-                  }
-                }}
-                maxLength={11}  
-                pattern="^[0-9]{11}$" 
-                placeholder="Please enter a valid 11-digit contact number" 
-                title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX"
-              />
-            </div>
-            <div className="form-group-incident-report">
-            <label htmlFor="concerns" className="form-label-incident-report">
-              Concerns<span className="required">*</span>
-            </label>
-            <select
-              id="concerns"
-              name="concerns"
-              className="form-input-incident-report"
-              value={incidentReport.concerns}
-              onChange={handleFormChange}
-              required
-            >
-              <option value="">Incident Type</option>
-              <option value="Noise Complaint">Noise Complaint</option>
-              <option value="Pet-Related Issues">Pet-Related Issues</option>
-              <option value="Littering">Littering</option>
-              <option value="Obstruction of Pathways">Obstruction of Pathways</option>
-              <option value="Minor Verbal Altercation">Minor Verbal Altercation</option>
-              <option value="Lost and Found Items">Lost and Found Items</option>
-              <option value="Damaged Streetlights">Damaged Streetlights</option>
-              <option value="Unauthorized Public Gatherings">Unauthorized Public Gatherings</option>
-              <option value="Vandalism">Vandalism</option>
-              <option value="Water Leakage">Water Leakage</option>
-              <option value="Other">Other</option>
-            </select>
-            {incidentReport.concerns === "Other" && (
-              <input
-                type="text"
-                id="otherConcern"
-                name="otherConcern"
-                className="form-input-incident-report"
-                placeholder="Specify your concern"
-                value={incidentReport.otherConcern}
-                onChange={handleFormChange}
-                required
-              />
-            )}
-          </div>
+
+                {activeSection === "incident" && (
+                        <>
+                <div className="incident-report-form-container">
+
+                  <div className="incident-report-container-left-side ">
+
+                      <div className="form-group-incident-report">
+                          <label htmlFor="concerns" className="form-label-incident-report">
+                            Concerns<span className="required">*</span>
+                          </label>
+                          <select
+                            id="concerns"
+                            name="concerns"
+                               className={`form-input-incident-report ${invalidFields.includes("concerns") ? "input-error" : ""}`}
+                            value={incidentReport.concerns}
+                            onChange={handleFormChange}
+                            required
+                          >
+                            <option value="">Incident Type</option>
+                            <option value="Noise Complaint">Noise Complaint</option>
+                            <option value="Pet-Related Issues">Pet-Related Issues</option>
+                            <option value="Littering">Littering</option>
+                            <option value="Obstruction of Pathways">Obstruction of Pathways</option>
+                            <option value="Minor Verbal Altercation">Minor Verbal Altercation</option>
+                            <option value="Lost and Found Items">Lost and Found Items</option>
+                            <option value="Damaged Streetlights">Damaged Streetlights</option>
+                            <option value="Unauthorized Public Gatherings">Unauthorized Public Gatherings</option>
+                            <option value="Vandalism">Vandalism</option>
+                            <option value="Water Leakage">Water Leakage</option>
+                            <option value="Other">Other</option>
+                          </select>
+                          {incidentReport.concerns === "Other" && (
+                            <input
+                              type="text"
+                              id="otherConcern"
+                              name="otherConcern"
+                              className="form-input-incident-report"
+                              placeholder="Specify your concern"
+                              value={incidentReport.otherConcern}
+                              onChange={handleFormChange}
+                              required
+                            />
+                          )}
+                        </div>
+
+                        <div className="form-group-incident-report">
+                          <label htmlFor="time" className="form-label-incident-report">
+                            Time of Incident<span className="required">*</span>
+                            </label>
+                          <input
+                            type="time"
+                            id="time"
+                            name="time"
+                            className={`form-input-incident-report ${invalidFields.includes("time") ? "input-error" : ""}`}
+                            required
+                            placeholder="Enter Time of Incident"
+                            value={incidentReport.time}
+                            onChange={handleFormChange}
+                          />
+                        </div>
+
+                
+                         <div className="form-group-incident-report">
+                    <label htmlFor="address" className="form-label-incident-report">
+                      Area of Incident <span className="required">*</span>
+                      </label>
+
+                    <select
+                      id="area"
+                      name="area"
+                      className={`form-input-incident-report ${invalidFields.includes("area") ? "input-error" : ""}`}
+                      required
+                      value={incidentReport.area}
+                      onChange={handleFormChange}>
+
+                      <option value="" disabled>Select Area</option>
+                      <option value="South Fairview">South Fairview</option>
+                      <option value="West Fairview">West Fairview</option>
+                      <option value="East Fairview">East Fairview</option>
+                    </select>
+                  </div>
+
+                  </div>
+
+
+                   <div className="incident-report-container-right-side ">
+
+                      <div className="form-group-incident-report">
+                        <label htmlFor="date" className="form-label-incident-report">
+                          Date of Incident<span className="required">*</span>
+                          </label>
+                        <input
+                          type="date"
+                          id="dateFiled"
+                          name="dateFiled"
+                          className={`form-input-incident-report ${invalidFields.includes("dateFiled") ? "input-error" : ""}`}
+                          required
+                          max={minDate}
+                          onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                          placeholder="Enter Date of Incident"
+                          value={incidentReport.dateFiled}
+                          onChange={handleFormChange}
+                        />
+                      </div>
+
+                      <div className="form-group-incident-report">
+                        <label htmlFor="address" className="form-label-incident-report">
+                          Address of Incident<span className="required">*</span>
+                          </label>
+                        <input
+                          type="text"
+                          id="address"
+                          name="address"
+                          className={`form-input-incident-report ${invalidFields.includes("address") ? "input-error" : ""}`}
+                          required
+                          placeholder="Enter Location"
+                          value={incidentReport.address}
+                          onChange={handleFormChange}
+                        />
+                      </div>
+                    
+                  { isIncidentLate && (
+                    <>
+                      <div className="form-group-incident-report">
+                        <label htmlFor="reasonForLateFiling" className="form-label-incident-report">
+                          Reason for Late Filing<span className="required">*</span>
+                        </label>
+                        <textarea
+                          id="reasonForLateFiling"
+                          name="reasonForLateFiling"
+                          className={`form-input-incident-report ${invalidFields.includes("reasonForLateFiling") ? "input-error" : ""}`}
+                          required
+                          placeholder="Enter Reason for Late Filing"
+                          value={incidentReport.reasonForLateFiling}
+                          onChange={handleFormChange}
+                          rows={4} cols={50}
+                        />
+                      </div>
+                    </>    
+                  )}
+                  <div className="form-group-incident-report">
+                    <label htmlFor="addInfo" className="form-label-incident-report">
+                    Additional Info Regarding the Concern<span className="required">*</span>
+                    </label>
+                    <textarea 
+                      id="addInfo"
+                      name="addInfo"
+                        className={`form-input-incident-report ${invalidFields.includes("addInfo") ? "input-error" : ""}`}
+                      required
+                      placeholder="Enter Additonal Information/Remarks"
+                      value={incidentReport.addInfo}
+                      onChange={handleFormChange}
+                      rows={4} cols={50}
+                    
+                    />
+                  </div>
         
-            <div className="form-group-incident-report">
-              <label htmlFor="date" className="form-label-incident-report">
-                Date of Incident<span className="required">*</span>
-                </label>
-              <input
-                type="date"
-                id="dateFiled"
-                name="dateFiled"
-                className="form-input-incident-report"
-                required
-                max={minDate}
-                onKeyDown={(e) => e.preventDefault()} // Prevent manual input
-                placeholder="Enter Date of Incident"
-                value={incidentReport.dateFiled}
-                onChange={handleFormChange}
-              />
-            </div>
-        
-            <div className="form-group-incident-report">
-              <label htmlFor="time" className="form-label-incident-report">
-                Time of Incident<span className="required">*</span>
-                </label>
-              <input
-                type="time"
-                id="time"
-                name="time"
-                className="form-input-incident-report"
-                required
-                placeholder="Enter Time of Incident"
-                value={incidentReport.time}
-                onChange={handleFormChange}
-              />
-            </div>
+      
+                  </div>
 
 
-            <div className="form-group-incident-report">
-              <label htmlFor="address" className="form-label-incident-report">
-                Address of Incident<span className="required">*</span>
-                </label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                className="form-input-incident-report"
-                required
-                placeholder="Enter Location"
-                value={incidentReport.address}
-                onChange={handleFormChange}
-              />
-            </div>
+                  
 
-            <div className="form-group-incident-report">
-              <label htmlFor="address" className="form-label-incident-report">
-                Area of Incident <span className="required">*</span>
-                </label>
+                  
+            
 
-              <select
-                id="area"
-                name="area"
-                className="form-input-incident-report"
-                required
-                value={incidentReport.area}
-                onChange={handleFormChange}>
-
-                <option value="" disabled>Select Area</option>
-                <option value="South Fairview">South Fairview</option>
-                <option value="West Fairview">West Fairview</option>
-                <option value="East Fairview">East Fairview</option>
-              </select>
-            </div>
-
-            <div className="form-group-incident-report">
-              <label htmlFor="addInfo" className="form-label-incident-report">
-               Additional Information/Remarks Regarding the Concern<span className="required">*</span>
-              </label>
-              <textarea 
-                id="addInfo"
-                name="addInfo"
-                className="form-input-incident-report resize-none"
-                required
-                placeholder="Enter Additonal Information/Remarks"
-                value={incidentReport.addInfo}
-                onChange={handleFormChange}
-                rows={4} cols={50}
               
-              />
-            </div>
-        
-            <div className="signature/printedname-container">
-              <label className="form-label-incident-report">Upload Proof of Incident (If Applicable)</label>
-        
-              <div className="file-upload-container-incident-report">
-                <label htmlFor="file-upload1" className="upload-link-incident-report">Click to Upload File</label>
-                <input
-                  id="file-upload1"
-                  type="file"
-                  className="file-upload-input-incident-report"
-                  accept=".jpg,.jpeg,.png"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleFileChangeContainer1(e);
-                    handleFormChange(e);
-                  }} // Handle file selection
-                />
-                <div className="uploadedFiles-container-incident-report">
-                  {filesContainer1.length > 0 && (
-                    <div className="file-name-image-display-incident-report">
-                      <ul>
-                        {filesContainer1.map((file, index) => (
-                          <div className="file-name-image-display-indiv-incident-report" key={index}>
-                            <li>
-                              {file.preview && (
-                                <div className="filename-image-container-incident-report">
-                                  <img
-                                    src={file.preview}
-                                    alt={file.name}
-                                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                  />
+                  </div>
+                      </>
+                    )}
+
+
+                  {activeSection === "others" && (
+                    <>
+
+                    <div className="incident-report-form-container">
+
+                       <div className="signatureprintedname-container">
+                          <label className="form-label-incident-report-file">Upload Proof of Incident (If Applicable)</label>
+                    
+                          <div className="file-upload-container-incident-report">
+                            <label htmlFor="file-upload1" className="upload-link-incident-report">Click to Upload File</label>
+                            <input
+                              id="file-upload1"
+                              type="file"
+                              className="file-upload-input-incident-report"
+                              accept=".jpg,.jpeg,.png"
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                handleFileChangeContainer1(e);
+                                handleFormChange(e);
+                              }} // Handle file selection
+                            />
+                            <div className="uploadedFiles-container-incident-report">
+                              {filesContainer1.length > 0 && (
+                                <div className="file-name-image-display-incident-report">
+                                  <ul>
+                                    {filesContainer1.map((file, index) => (
+                                      <div className="file-name-image-display-indiv-incident-report" key={index}>
+                                        <li>
+                                          {file.preview && (
+                                            <div className="filename-image-container-incident-report">
+                                              <img
+                                                src={file.preview}
+                                                alt={file.name}
+                                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                              />
+                                            </div>
+                                          )}
+                                          {file.name}
+                                          <div className="delete-container-incident-report">
+                                            <button
+                                              type="button"
+                                              onClick={() => handleFileDeleteContainer1()}
+                                              className="delete-button-incident-report"
+                                            >
+                                              <img
+                                                src="/images/trash.png"
+                                                alt="Delete"
+                                                className="delete-icon-incident-report"
+                                              />
+                                            </button>
+                                          </div>
+                                        </li>
+                                      </div>
+                                    ))}
+                                  </ul>
                                 </div>
                               )}
-                              {file.name}
-                              <div className="delete-container-incident-report">
-                                <button
-                                  type="button"
-                                  onClick={() => handleFileDeleteContainer1()}
-                                  className="delete-button-incident-report"
-                                >
-                                  <img
-                                    src="/images/trash.png"
-                                    alt="Delete"
-                                    className="delete-icon-incident-report"
-                                  />
-                                </button>
-                              </div>
-                            </li>
+                            </div>
                           </div>
-                        ))}
-                      </ul>
+                        </div>
+
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
-                
-            {/* Submit button */}
-            <button type="submit" className="submit-button-incident-report">Submit</button>
+                       
+
+                </>
+              )}
+
+
+
+          <button type="submit" className="submit-button-incident-report" onClick={handleSubmitClick}>Submit</button>
+
           </form>
         </div>
+
+
+
+
+            {showSubmitPopup && (
+            <div className="confirmation-popup-overlay-online">
+                <div className="confirmation-popup-online">
+                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                <p>Are you sure you want to submit?</p>
+                <div className="yesno-container-add">
+                    <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
+                    <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
+                </div>
+                </div>
+            </div>
+            )}
+
+              {errorPopup.show && (
+                <div className="popup-overlay error">
+                    <div className="popup">
+                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
+                        <p>{errorPopup.message}</p>
+                        <button onClick={() => setErrorPopup({ show: false, message: "" })} className="close-button">Close</button>
+                    </div>
+                </div>
+            )}
+
+            {showErrorPopup && (
+                <div className={`error-popup-overlay-online show`}>
+                    <div className="popup-ad-online">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                        <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
+
+
+
+                {/*
+                    for wrong inputs
+                */}
+   
+                   {errorPopup.show && (
+                        <div className="popup-overlay-fileincident error">
+                            <div className="popup-fileincident">
+                              <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
+                              <p>{errorPopup.message}</p>
+                              <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button>
+                            </div>
+                        </div>
+                  )}
+
+        
                 
                 
                 

@@ -22,6 +22,7 @@ type Notification = {
   timestamp?: Timestamp; 
   transactionType: string;
   incidentID: string;
+  requestID: string;
   isRead?: boolean;
 };
 
@@ -119,7 +120,8 @@ const Menu = () => {
   
 
   const [isOpen, setIsOpen] = useState(false);
-  const [filter, setFilter] = useState("all");
+ const [filter, setFilter] = useState<"all" | "unread" | "incident" | "document">("all");
+
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const toggleNotificationSection = () => setIsOpen((prev) => !prev);
 
@@ -163,9 +165,21 @@ const Menu = () => {
   
 
   const unreadCount = notifications.filter((msg) => msg.isRead === false).length;
-  const filteredMessages = filter === "all"
-  ? notifications
-  : notifications.filter((msg) => !msg.isRead);
+const filteredMessages = notifications.filter((msg) => {
+  switch (filter) {
+    case "unread":
+      return !msg.isRead;
+    case "incident":
+      return msg.transactionType.toLowerCase().includes("incident");
+case "document":
+  return msg.transactionType.toLowerCase().includes("document") || 
+         msg.message.toLowerCase().includes("document request");
+
+    default:
+      return true;
+  }
+});
+
 
   const pathname = usePathname();
   const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages
@@ -208,6 +222,15 @@ const Menu = () => {
     } else {
       console.log("Transaction is not an Online Incident. No navigation performed.");
     }
+
+     // NAVIGATION for Documents
+    if (notification.transactionType === "Online Request") {
+      const targetUrl = `/ResidentAccount/Transactions/DocumentTransactions?id=${notification.requestID}`;
+      router.push(targetUrl);
+    } else {
+      console.log("Transaction is not an Document Request. No navigation performed.");
+    }
+  
   
     // NAVIGATION for VERIFICATION
     if (
@@ -219,6 +242,18 @@ const Menu = () => {
 
 
   };
+
+const handleDeleteNotification = async (notificationId: string) => {
+  try {
+    await deleteDoc(doc(db, "Notifications", notificationId));
+    setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+    console.log("Notification deleted successfully");
+  } catch (err) {
+    console.error("Error deleting notification:", err);
+    alert("Failed to delete notification");
+  }
+};
+
   
   
 
@@ -265,9 +300,11 @@ const Menu = () => {
                   <Link href="/services">
                     <p>Request Documents</p>
                   </Link>
+                  {/*}
                   <Link href="/Programs">
                     <p>Programs</p>
                   </Link>
+                  */}
                   <Link href="/IncidentReport">
                     <p>File an Incident</p>
                   </Link>
@@ -275,6 +312,8 @@ const Menu = () => {
               
             </div>
             
+
+            {/*}
 
               <div className="navbar-indiv-container">
               <div className="dropdown-Container">
@@ -284,6 +323,9 @@ const Menu = () => {
                 
               </div>
             </div>
+            */}
+
+            {/*}
 
               <div className="dropdown-Container">
                 <div className="menu-section-container">
@@ -302,25 +344,35 @@ const Menu = () => {
                 </Link>
               </div>
             </div>
+              */}
 
+
+              {/*
+               FOR NOTIFICATIONS
+              */}
 
             {!loading && user ? (
               <div className="logged-in-container">
-                <div className="dropdown-Container">
-                  <div className="dropdown-item-no-hover">
+                <div className="dropdown-Container-notifications">
+                  <div className="dropdown-item-no-hover-notifications">
                     <p id="inbox-link" onClick={toggleNotificationSection} className="inbox-container">
                       <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
                       {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
                     </p>
                   </div>
+                  
                   {isOpen && (
                     <div className="notification-section" ref={dropdownRef}>
                       <div className="top-section">
                         <p className="notification-title">Notification Inbox</p>
-                        <div className="filter-container">
-                          <button className={`filter-option ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
-                          <button className={`filter-option ${filter === "unread" ? "active" : ""}`} onClick={() => setFilter("unread")}>Unread</button>
-                        </div>
+                          <div className="filter-container">
+                            <button className={`filter-option ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
+                            <button className={`filter-option ${filter === "unread" ? "active" : ""}`} onClick={() => setFilter("unread")}>Unread</button>
+                            <button className={`filter-option ${filter === "incident" ? "active" : ""}`} onClick={() => setFilter("incident")}>Incident</button>
+                            <button className={`filter-option ${filter === "document" ? "active" : ""}`} onClick={() => setFilter("document")}>Documents</button>
+                          </div>
+
+
                       </div>
                       <div className="bottom-section">
                         <div className="notification-content">
@@ -339,16 +391,35 @@ const Menu = () => {
                                     <img src="/images/unread-icon.png" alt="Unread Icon" className="unread-icon" />
                                 )}
                                 </div>
+                                <div className="delete-icon-section">
+                                  <button
+                                    className="delete-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // 👈 stops the parent div's onClick
+                                      handleDeleteNotification(message.id);
+                                    }}
+                                  >
+                                    <img src="/images/Delete.png" alt="Delete" className="delete-icon-image" />
+                                  </button>
+                             </div>
                               </div>
                             ))
                           ) : (
-                            <p>No messages found</p>
+                            <p style={{ color: "red" }}>No messages found</p>
+
                           )}
                       </div>
                     </div>
                   </div>
                 )}
               </div>
+
+
+
+
+
+
+
               <div className="dropdown-Container">
                 <div className="dropdown-item-no-hover" ref={loginMenuRef}>
                   <p
