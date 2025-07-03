@@ -417,7 +417,9 @@ const getViewedRequests = (): string[] => {
               </tr>
             </thead>
             <tbody>
-              {taskAssignedData.map((tasks, index) => {
+              {taskAssignedData
+                .filter((task) => task.status !== "Settled")
+                .map((tasks, index) => {
                 const fullName = `${tasks.lastname || ""}, ${tasks.firstname || ""}`.trim();
                 return (
                    <tr key={index} className={tasks.isNew ? "highlight-new-request" : ""}>
@@ -426,9 +428,9 @@ const getViewedRequests = (): string[] => {
                
                     <td>{tasks.concerns}</td>
                     <td>
-                      <span className={`status-badge ${tasks.status.toLowerCase().replace(" ", "-")}`}>
-                        {tasks.status}
-                      </span>
+                  <span className={`status-badge ${tasks.status.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
+                    {tasks.status}
+                  </span>
                     </td>
                     <td>
                       <div className="actions-services">

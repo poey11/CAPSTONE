@@ -254,10 +254,10 @@ const handleSubmitClick = async () => {
       }));
 
     }
-     else if(formData.status !== "Acknowledged"){
+     else if(formData.status !== "Settled"){
       setFormData((prevData) => ({
         ...prevData,
-        status: "Acknowledged", // Set status to "Acknowledged" if not already set
+        status: "Settled", // Set status to "Acknowledged" if not already set
         statusPriority: 3, // Set priority to 3 for "Acknowledged"
       }));
 
@@ -311,7 +311,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): 
       status: formData.status === "pending"
         ? "In - Progress"
         : formData.status === "In - Progress" &&
-        "Acknowledged", 
+        "Settled", 
       statusPriority: formData.status === "pending"
         ? 2
         : formData.status === "In - Progress"
@@ -431,7 +431,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
               <h1>Online Report Details</h1>
             </div>
 
-            {formData.status !== "Acknowledged" &&
+            {formData.status !== "Settled" &&
               user?.position === "LF Staff" &&
               (
                 initialRespondent.respondentName === "" ||  // No respondent assigned yet
@@ -717,7 +717,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                   name="respondentName" 
                                   value={respondent.respondentName}
                                   onChange={handleChange}
-                                  disabled = {formData.status === "Acknowledged" || initialRespondent.respondentName !== "" ||user?.position !== "LF Staff"}                                  
+                                  disabled = {formData.status === "Settled" || initialRespondent.respondentName !== "" ||user?.position !== "LF Staff"}                                  
                                 >
                                   <option value="" disabled>Select Officer</option>
                                   {listOfStaffs.filter(staff => !(staff.id == user?.id && respondent.respondentName =="") ) 
@@ -748,7 +748,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                    
                                    placeholder="Enter Investigation Details" name="investigationReport" 
                                    value={respondent.investigationReport} onChange={handleChange} 
-                                   disabled = {formData.status === "Acknowledged" || user?.id !== respondent.respondentName  } />
+                                   disabled = {formData.status === "Settled" || user?.id !== respondent.respondentName  } />
                                      
                                 </div>
 
@@ -774,7 +774,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                     <div className="file-upload-container-investigation">
   
                                       {/* Only show upload input if no existing respondent files */}
-                                      {formData.status !== "Acknowledged" && respondent.file.length === 0 && (
+                                      {formData.status !== "Settled" && respondent.file.length === 0 && (
                                         <>
                                           <label htmlFor="file-upload2" className="upload-link">Click to Upload File</label>
                                           <input
@@ -786,7 +786,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                             multiple
                                             accept=".jpg,.jpeg,.png"
                                             onChange={handleFileChange}
-                                            disabled={formData.status === "Acknowledged" || user?.id !== respondent.respondentName}
+                                            disabled={formData.status === "Settled" || user?.id !== respondent.respondentName}
                                           />
                                         </>
                                       )}

@@ -165,7 +165,7 @@ text-align: center;
 width: 100px; 
 }
 
-.status-badge.acknowledged {
+.status-badge.settled {
     background-color: #4caf50;   
 }
 
@@ -557,7 +557,7 @@ margin-top: 2rem;
 
 .box-container-investigation-report {
    position: relative;
-    width: 93%;
+    width: 100%;
     border: 1px solid #5a6b7c;
     border-radius: 10px;
     background-color: #ffffff;
@@ -567,7 +567,7 @@ margin-top: 2rem;
 
 .box-container-investigation-report textarea {
   width: 100%;
-  height: 100%;
+  height: 90%;
 }
 
 .investigation-report-input-field {
