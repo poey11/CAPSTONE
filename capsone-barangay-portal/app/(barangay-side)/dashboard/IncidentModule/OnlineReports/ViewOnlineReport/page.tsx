@@ -462,7 +462,13 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
         <div className="online-report-incident-bottom-section">
 
               <nav className="online-report-info-toggle-wrapper">
-                {["complainant", "incident", "action"].map((section) => (
+          {["complainant", "incident"]
+                .concat(
+                  formData.status === "Settled" || user?.id === initialRespondent.respondentName
+                    ? ["action"]
+                    : []
+                )
+                .map((section) => (
                     <button
                       key={section}
                       type="button"
@@ -728,157 +734,176 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                     </>
                     )}
 
-              <form onSubmit={handleSubmit} className="online-report-section-2">
-                    {activeSection === "action" && (
-                    <>
+                      {(formData.status === "Settled" || user?.id === initialRespondent.respondentName) && (
+                        <form onSubmit={handleSubmit} className="online-report-section-2">
+                          {activeSection === "action" && (
+                            <>
+                              <div className="online-report-full-top">
+                                <div className="online-report-section-left-side">
 
-                      <div className="online-report-full-top">
-
-                        <div className="online-report-section-left-side">
-
-                          <div className="fields-section-online">
-                                <p>Barangay Officer<span className="required">*</span></p>
-                                <select
-                                  className={`online-incident-input-field ${invalidFields.includes("respondentName") ? "input-error" : ""}`}
-                                  name="respondentName" 
-                                  value={respondent.respondentName}
-                                  onChange={handleChange}
-                                  disabled = {formData.status === "Settled" || initialRespondent.respondentName !== "" ||user?.position !== "LF Staff"}                                  
-                                >
-                                  <option value="" disabled>Select Officer</option>
-                                  {listOfStaffs.filter(staff => !(staff.id == user?.id && respondent.respondentName =="") ) 
-                                  .map((staff,index) => (
-                                    <option key={index} 
-                                      value={staff.id}
-                                      >
-                                      {staff.firstName} {staff.lastName}
-                                    </option>
-                                  ))}
-
-                                </select>
-                                
-                            </div>
-
-                        {initialRespondent.respondentName !== "" && (
-                          
-                          <div className="online-report-box-container">
-                              <div className="box-container-outer-image">
-                                <div className="title-image">
-                                  Investigation Report
-                                </div>
-
-                                <div className="box-container-investigation-report">
-                                  <span className="required-asterisk">*</span>
-
-                                  <textarea   className={`investigation-report-input-field ${invalidFields.includes("investigationReport") ? "input-error" : ""}`}  
-                                   
-                                   placeholder="Enter Investigation Details" name="investigationReport" 
-                                   value={respondent.investigationReport} onChange={handleChange} 
-                                   disabled = {formData.status === "Settled" || user?.id !== respondent.respondentName  } />
-                                     
-                                </div>
-
-                              </div>
-                            </div>
-
-                        )}
-                            
-
-                        </div>
-                        
-
-                        {initialRespondent.respondentName !== "" && (
-                          <div className="online-report-section-right-side">
-  
-                             <div className="online-report-box-container">
-                                <div className="box-container-outer-image">
-                                  <div className="title-image">
-                                      Investigation Photo
+                                  {/*}
+                                  <div className="fields-section-online">
+                                    <p>Barangay Officer<span className="required">*</span></p>
+                                    <select
+                                      className={`online-incident-input-field ${invalidFields.includes("respondentName") ? "input-error" : ""}`}
+                                      name="respondentName"
+                                      value={respondent.respondentName}
+                                      onChange={handleChange}
+                                      disabled={
+                                        formData.status === "Settled" ||
+                                        initialRespondent.respondentName !== "" ||
+                                        user?.position !== "LF Staff"
+                                      }
+                                    >
+                                      <option value="" disabled>Select Officer</option>
+                                      {listOfStaffs
+                                        .filter(
+                                          (staff) =>
+                                            !(staff.id == user?.id && respondent.respondentName === "")
+                                        )
+                                        .map((staff, index) => (
+                                          <option key={index} value={staff.id}>
+                                            {staff.firstName} {staff.lastName}
+                                          </option>
+                                        ))}
+                                    </select>
                                   </div>
-  
-                                  <div className="box-container-investigation">
-                                    <div className="file-upload-container-investigation">
-  
-                                      {/* Only show upload input if no existing respondent files */}
-                                      {formData.status !== "Settled" && respondent.file.length === 0 && (
-                                        <>
-                                          <label htmlFor="file-upload2" className="upload-link">Click to Upload File</label>
-                                          <input
-                                            id="file-upload2"
-                                            type="file" 
-                                            name="file"
-                                          
-                                            className={`file-upload-input ${invalidFields.includes("file") ? "input-error" : ""}`}
-                                            multiple
-                                            accept=".jpg,.jpeg,.png"
-                                            onChange={handleFileChange}
-                                            disabled={formData.status === "Settled" || user?.id !== respondent.respondentName}
+                                  */}
+
+                                  {initialRespondent.respondentName !== "" && (
+                                    <div className="online-report-box-container">
+                                      <div className="box-container-outer-image">
+                                        <div className="title-image">Investigation Report</div>
+                                        <div className={`box-container-investigation-report-action ${invalidFields.includes("investigationReport") ? "input-error" : ""}`}>
+                                          <span className="required-asterisk">*</span>
+                                          <textarea
+                                         
+                                            className ="investigation-report-input-field "  
+                                            placeholder="Enter Investigation Details"
+                                            name="investigationReport"
+                                            value={respondent.investigationReport}
+                                            onChange={handleChange}
+                                            disabled={
+                                              formData.status === "Settled" ||
+                                              user?.id !== respondent.respondentName
+                                            }
                                           />
-                                        </>
-                                      )}
-  
-                                      <div className="uploadedFiles-container">
-                                        {(files.length > 0 || respondent.file.length > 0) ? (
-                                          <div className="file-name-image-display">
-                                            <ul>
-                                              {/* Existing files */}
-                                              {respondent.file.map((url: string, index: number) => (
-                                                <div className="file-name-image-display-indiv" key={`existing-${index}`}>
-                                                  <li>
-                                                    <div className="filename&image-container">
-                                                      <img src={url} alt={`Investigation Photo ${index + 1}`} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
-                                                    </div>
-                                                    <a href={url} target="_blank" rel="noopener noreferrer">View</a>
-                                                  </li>
-                                                </div>
-                                              ))}
-  
-                                              {/* New files */}
-                                              {files.map((file, index) => (
-                                                <div className="file-name-image-display-indiv" key={`new-${index}`}>
-                                                  <li>
-                                                    {file.preview && (
-                                                      <div className="filename&image-container">
-                                                        <img src={file.preview} alt={file.name} style={{ width: '50px', height: '50px', marginRight: '5px' }} />
-                                                      </div>
-                                                    )}
-                                                    {file.name}
-                                                    <button type="button" onClick={() => handleFileDelete(file.name)} className="delete-button">
-                                                      <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                                                    </button>
-                                                  </li>
-                                                </div>
-                                              ))}
-                                            </ul>
-                                          </div>
-                                        ) : (
-                                          <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>
-                                            No image available
-                                          </p>
-                                        )}
+                                        </div>
                                       </div>
-                                      
+                                    </div>
+                                  )}
+                                </div>
+
+                                {initialRespondent.respondentName !== "" && (
+                                  <div className="online-report-section-right-side">
+                                    <div className="online-report-box-container">
+                                      <div className="box-container-outer-image">
+                                        <div className="title-image">Investigation Photo</div>
+                                        <div className="box-container-investigation">
+                                          <div className="file-upload-container-investigation">
+                                            {formData.status !== "Settled" &&
+                                              respondent.file.length === 0 && (
+                                                <>
+                                                  <label htmlFor="file-upload2" className="upload-link">
+                                                    Click to Upload File
+                                                  </label>
+                                                  <input
+                                                    id="file-upload2"
+                                                    type="file"
+                                                    name="file"
+                                                    className={`file-upload-input ${invalidFields.includes("file") ? "input-error" : ""}`}
+                                                    multiple
+                                                    accept=".jpg,.jpeg,.png"
+                                                    onChange={handleFileChange}
+                                                    disabled={
+                                                      formData.status === "Settled" ||
+                                                      user?.id !== respondent.respondentName
+                                                    }
+                                                  />
+                                                </>
+                                              )}
+
+                                            <div className="uploadedFiles-container">
+                                              {(files.length > 0 || respondent.file.length > 0) ? (
+                                                <div className="file-name-image-display">
+                                                  <ul>
+                                                    {respondent.file.map((url: string, index: number) => (
+                                                      <div
+                                                        className="file-name-image-display-indiv"
+                                                        key={`existing-${index}`}
+                                                      >
+                                                        <li>
+                                                          <div className="filename&image-container">
+                                                            <img
+                                                              src={url}
+                                                              alt={`Investigation Photo ${index + 1}`}
+                                                              style={{ width: "50px", height: "50px", marginRight: "5px" }}
+                                                            />
+                                                          </div>
+                                                          <a href={url} target="_blank" rel="noopener noreferrer">
+                                                            View
+                                                          </a>
+                                                        </li>
+                                                      </div>
+                                                    ))}
+
+                                                    {files.map((file, index) => (
+                                                      <div
+                                                        className="file-name-image-display-indiv"
+                                                        key={`new-${index}`}
+                                                      >
+                                                        <li>
+                                                          {file.preview && (
+                                                            <div className="filename&image-container">
+                                                              <img
+                                                                src={file.preview}
+                                                                alt={file.name}
+                                                                style={{ width: "50px", height: "50px", marginRight: "5px" }}
+                                                              />
+                                                            </div>
+                                                          )}
+                                                          {file.name}
+                                                          <button
+                                                            type="button"
+                                                            onClick={() => handleFileDelete(file.name)}
+                                                            className="delete-button"
+                                                          >
+                                                            <img
+                                                              src="/images/trash.png"
+                                                              alt="Delete"
+                                                              className="delete-icon"
+                                                            />
+                                                          </button>
+                                                        </li>
+                                                      </div>
+                                                    ))}
+                                                  </ul>
+                                                </div>
+                                              ) : (
+                                                <p
+                                                  style={{
+                                                    color: "red",
+                                                    fontStyle: "italic",
+                                                    textAlign: "center",
+                                                    marginTop: "30%",
+                                                  }}
+                                                >
+                                                  No image available
+                                                </p>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
-  
-  
-                                </div>
-  
-  
+                                )}
                               </div>
-  
-                            
-                          </div>
+                            </>
+                          )}
+                        </form>
+                      )}
 
-                        )}
-                    
-
-                      </div>
-
-
-                      </>
-                    )}
-                    </form>
 
 
                       
