@@ -250,9 +250,32 @@ const getViewedRequests = (): string[] => {
       return pageNumbersToShow;
     };
 
+    const [activeSection, setActiveSection] = useState("main");
+
   return (
     <main className="main-container-online-reports">
-    
+
+
+      <div className="section-1-online-reports">
+            <div className="edit-incident-info-toggle-wrapper">
+                  {["main", "tasks" ].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "main" && "Online Records"}
+                      {section === "tasks" && "Assigned Tasks"}
+                    </button>
+                  ))}
+          </div> 
+
+      </div>
+
+      {activeSection === "main" && (
+        <>
+
       <div className="section-2-online-reports">
         <input
           type="text"
@@ -357,11 +380,22 @@ const getViewedRequests = (): string[] => {
       </div>
 
 
+
+                        </>
+                      )}
+
+
+
+
+
         {/* this table shows all assigned task of the current user. 
         for now it will be for LF staff but will be change to barangay officer
         i will not include the pagination for now
          */}
-        <p className="text-2xl">Assigned Tasks</p>
+
+
+     {activeSection === "tasks" && (
+        <>
         <div className="main-section-online-reports">
         {taskAssignedData.length === 0 ? (
           <div className="no-result-card">
@@ -428,7 +462,8 @@ const getViewedRequests = (): string[] => {
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
 
-
+                        </>
+                      )}
     </main>
   );
 }

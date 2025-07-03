@@ -179,6 +179,80 @@ width: 100px;
 }
 
 
+
+
+
+.section-1-online-reports {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.edit-incident-info-toggle-wrapper {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.info-toggle-btn {
+  padding: 10px 20px;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  background-color: transparent;
+  color: #214666;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  text-transform: capitalize;
+}
+
+.info-toggle-btn:hover {
+  background-color: rgba(33, 70, 102, 0.1);
+}
+
+.info-toggle-btn.active {
+  background-color: #214666;
+  color: #ffffff;
+  border: 1px solid #214666;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 
 FOR ONLINE INCIDENT REPORTING CSS
