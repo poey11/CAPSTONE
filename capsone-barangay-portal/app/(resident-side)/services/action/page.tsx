@@ -3,7 +3,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 import {useAuth} from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 import {useSearchParams } from "next/navigation";
-import { addDoc, collection, doc, getDoc, getDocs} from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, DocumentData} from "firebase/firestore";
 import { db, storage, auth } from "@/app/db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/navigation";
@@ -57,7 +57,7 @@ interface ClearanceInput {
   citizenship: string;
   educationalAttainment: string;
   course: string;
-  isBeneficiary: string;
+  isBeneficiary: boolean;
   birthplace: string;
   religion: string;
   nationality: string;
@@ -108,7 +108,7 @@ export default function Action() {
   const [errorMessage, setErrorMessage] = useState("");
   const user = useAuth().user; 
   const searchParam = useSearchParams();
-  const docType = searchParam.get("doc");
+  const docType = searchParam.get("doc") || "";
   const router = useRouter();
   const [nos, setNos] = useState(0);
 
@@ -117,6 +117,7 @@ export default function Action() {
   const [otherDocFieldsByType, setOtherDocFieldsByType] = useState<{ [type: string]: string[] }>({});
   const [otherDocImageFields, setOtherDocImageFields] = useState<{ [title: string]: string[] }>({});
   const [forResidentOnlyMap, setForResidentOnlyMap] = useState<{ [title: string]: boolean }>({});
+  const [otherDocuments, setOtherDocuments] = useState<DocumentData[]>([]);
 
   const [dynamicFileStates, setDynamicFileStates] = useState<{
     [key: string]: { name: string; preview: string | undefined }[];
@@ -163,7 +164,7 @@ export default function Action() {
     homeOrOfficeAddress: "",
     educationalAttainment: "",
     course: "",
-    isBeneficiary: "",
+    isBeneficiary: false,
     birthplace: "",
     religion: "",
     nationality: "",
@@ -358,17 +359,8 @@ export default function Action() {
           //  Only set requestor fields
           setClearanceInput((prev: any) => ({
             ...prev,
-            fullName: "",
-            contact: "",
-            address: "",
-            gender: "",
-            civilStatus: "",
             birthplace: "",
-            birthday: "",
-            age: "",
             precinctnumber: "",
-            requestorFname: fullName,
-            requestorMrMs: mrms,
           }));
         } else {
           //  Fill all fields for self
@@ -454,6 +446,16 @@ export default function Action() {
     fetchOtherDocumentPurposes();
   }, []);
   
+
+  useEffect(() => {
+    const fetchOtherDocuments = async () => {
+      const snapshot = await getDocs(collection(db, "OtherDocuments"));
+      const docs = snapshot.docs.map((doc) => doc.data());
+      setOtherDocuments(docs);
+    };
+  
+    fetchOtherDocuments();
+  }, []);
   
   const handleDynamicImageUpload = (fieldName: string, file: File) => {
     const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
@@ -591,45 +593,57 @@ const handleFileChange = (
   }
 };
 
-    
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
 
-    // Handle birthday and compute age
-    if (name === "birthday") {
-      const birthDate = new Date(value);
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-
-      setClearanceInput((prev: any) => ({
-        ...prev,
-        birthday: value,
-        age: age.toString(), // Ensure it's string if your input expects string
-      }));
-      return;
-    }
   
-    setClearanceInput((prev: any) => {
-      const keys = name.split(".");
-      if (keys.length === 2) {
-        return {
-          ...prev,
-          [keys[0]]: {
-            ...prev[keys[0]],
-            [keys[1]]: value,
-          },
-        };
-      }
+  const handleChange = (
+  e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => {
+  const { name, value, type } = e.target;
+
+  // Safely get checked value only for checkboxes
+  const fieldValue =
+    type === "checkbox" && e.target instanceof HTMLInputElement
+      ? e.target.checked
+      : value;
+
+  // Handle birthday and compute age
+  if (name === "birthday") {
+    const birthDate = new Date(value);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    setClearanceInput((prev: any) => ({
+      ...prev,
+      birthday: value,
+      age: age.toString(),
+    }));
+    return;
+  }
+
+  setClearanceInput((prev: any) => {
+    const keys = name.split(".");
+    if (keys.length === 2) {
       return {
         ...prev,
-        [name]: value,
+        [keys[0]]: {
+          ...(prev[keys[0]] || {}),
+          [keys[1]]: fieldValue,
+        },
       };
-    });
-  };
+    }
+
+    return {
+      ...prev,
+      [name]: fieldValue,
+    };
+  });
+};
+  
+  
   
     // Handle form submission
     const handleSubmit = (event: React.FormEvent) => {
@@ -652,17 +666,12 @@ const handleFileChange = (
       console.log(clearanceInput);
     
       // List all file-related keys in an array for easier maintenance
+
       const fileKeys = [
-        "barangayIDjpg",
-        "validIDjpg",
-        "letterjpg",
-        "signaturejpg",
-        "copyOfPropertyTitle",
-        "dtiRegistration",
-        "isCCTV",
-        "taxDeclaration",
-        "approvedBldgPlan",
-        "deathCertificate"
+        ...Object.keys(dynamicFileStates), // Add dynamic image fields
+        "barangayIDjpg", "validIDjpg", "letterjpg", "signaturejpg",
+        "copyOfPropertyTitle", "dtiRegistration", "isCCTV",
+        "taxDeclaration", "approvedBldgPlan", "deathCertificate"
       ];
     
       const filenames: Record<string, string> = {};
@@ -686,8 +695,8 @@ const handleFileChange = (
         docType === "Barangay Certificate" ||
         docType === "Barangay Clearance" ||
         docType === "Barangay Indigency" ||
-        docType === "Barangay ID" ||
-        docType === "First Time Jobseeker"
+        clearanceInput.purpose === "Barangay ID" ||
+        clearanceInput.purpose === "First Time Jobseeker"
       ) {
         if (
           !clearanceInput.barangayIDjpg &&
@@ -732,19 +741,19 @@ const handleFileChange = (
           ...(clearanceInput.purpose === "Garage/TRU" && {
             businessName: clearanceInput.businessName,
             businessLocation: clearanceInput.businessLocation,
-            noOfTRU: clearanceInput.noOfVechicles,
+            noOfVechicles: clearanceInput.noOfVechicles,
             businessNature: clearanceInput.businessNature,
-            tricycleMake: clearanceInput.vehicleMake,
-            tricycleType: clearanceInput.vehicleType,
-            tricyclePlateNo: clearanceInput.vehiclePlateNo,
-            tricycleSerialNo: clearanceInput.vehicleSerialNo,
-            tricycleChassisNo: clearanceInput.vehicleChassisNo,
-            tricycleEngineNo: clearanceInput.vehicleEngineNo,
-            tricycleFileNo: clearanceInput.vehicleFileNo,
+            vehicleMake: clearanceInput.vehicleMake,
+            vehicleType: clearanceInput.vehicleType,
+            vehiclePlateNo: clearanceInput.vehiclePlateNo,
+            vehicleSerialNo: clearanceInput.vehicleSerialNo,
+            vehicleChassisNo: clearanceInput.vehicleChassisNo,
+            vehicleEngineNo: clearanceInput.vehicleEngineNo,
+            vehicleFileNo: clearanceInput.vehicleFileNo,
           }),
           ...(clearanceInput.purpose === "Garage/PUV" && {
             vehicleType: clearanceInput.vehicleType,
-            nosOfPUV: clearanceInput.noOfVechicles,
+            noOfVechicles: clearanceInput.noOfVechicles,
             puvPurpose: clearanceInput.goodMoralOtherPurpose,
           }),
           birthday: clearanceInput.birthday,
@@ -763,6 +772,7 @@ const handleFileChange = (
             fullName: clearanceInput.fullName,
             dateofdeath: clearanceInput.dateofdeath,
             estateSince: clearanceInput.estateSince,
+            deathCertificate: filenames.deathCertificate,
           }),
           ...( clearanceInput.purpose === "Death Residency"  && {
             fullName: clearanceInput.fullName,
@@ -780,7 +790,7 @@ const handleFileChange = (
           }),
           ...(clearanceInput.barangayIDjpg && { barangayIDjpg: filenames.barangayIDjpg }),
           ...(clearanceInput.validIDjpg && { validIDjpg: filenames.validIDjpg }),
-          ...(clearanceInput.letterjpg && { endorsementLetter: filenames.letterjpg }),
+          ...(clearanceInput.letterjpg && { letterjpg: filenames.letterjpg }),
           ...(((clearanceInput.purpose === "Residency" && docType === "Barangay Certificate") || docType === "Barangay Indigency") && {
             appointmentDate: clearanceInput.appointmentDate,
             purpose: clearanceInput.purpose,
@@ -792,15 +802,15 @@ const handleFileChange = (
 
           ...(clearanceInput.purpose === "Fire Victims" && {
             dateOfFireIncident: clearanceInput.dateOfFireIncident,
-            dateOfTyphoon: clearanceInput.dateOfTyphoon,
           }),
 
           ...(clearanceInput.purpose === "Flood Victims" && {
             nameOfTyphoon: clearanceInput.nameOfTyphoon,
+            dateOfTyphoon: clearanceInput.dateOfTyphoon,
 
           }),
 
-          ...(docType === "Barangay ID" && {
+          ...(clearanceInput.purpose === "Barangay ID" && {
             birthplace: clearanceInput.birthplace,
             religion: clearanceInput.religion,
             nationality: clearanceInput.nationality,
@@ -809,9 +819,14 @@ const handleFileChange = (
             bloodtype: clearanceInput.bloodtype,
             occupation: clearanceInput.occupation,
             precinctnumber: clearanceInput.precinctnumber,
-            emergencyDetails: clearanceInput.emergencyDetails
+            emergencyDetails: {
+              fullName: clearanceInput.emergencyDetails?.fullName || "",
+              address: clearanceInput.emergencyDetails?.address || "",
+              contactNumber: clearanceInput.emergencyDetails?.contactNumber || "",
+              relationship: clearanceInput.emergencyDetails?.relationship || "",
+            }
           }),
-          ...(docType === "First Time Jobseeker" && {
+          ...(clearanceInput.purpose === "First Time Jobseeker" && {
             educationalAttainment: clearanceInput.educationalAttainment,
             course: clearanceInput.course,
             isBeneficiary: clearanceInput.isBeneficiary,
@@ -826,6 +841,13 @@ const handleFileChange = (
             clearanceVars[fieldName] = clearanceInput[fieldName];
           }
         });
+
+        Object.keys(dynamicFileStates).forEach((key) => {
+          if (clearanceInput[key] instanceof File && filenames[key]) {
+            clearanceVars[key] = filenames[key];
+          }
+        });
+        
         
         console.log(clearanceVars, storageRefs);
         handleReportUpload(clearanceVars, storageRefs);
@@ -841,20 +863,25 @@ const handleFileChange = (
           statusPriority: 1,
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
           accID: clearanceInput.accountId,
+          dateOfResidency: clearanceInput.dateOfResidency,
+          address: clearanceInput.address,
+          birthday: clearanceInput.birthday,
+          age: clearanceInput.age,
+          gender: clearanceInput.gender,
+          civilStatus: clearanceInput.civilStatus,
+          contact: clearanceInput.contact,
+          citizenship: clearanceInput.citizenship,
           docType: docType,
           purpose: clearanceInput.purpose,
           businessName: clearanceInput.businessName,
           businessLocation: clearanceInput.businessLocation,
           businessNature: clearanceInput.businessNature,
           estimatedCapital: clearanceInput.estimatedCapital,
-          fullName: clearanceInput.fullName,
-          contact: clearanceInput.contact,
-          homeAddress: clearanceInput.address,
           copyOfPropertyTitle: filenames.copyOfPropertyTitle,
           dtiRegistration: filenames.dtiRegistration,
           isCCTV: filenames.isCCTV,
           signaturejpg: filenames.signaturejpg,
-          endorsementLetter: filenames.letterjpg,
+          letterjpg: filenames.letterjpg,
         };
         console.log(clearanceVars, storageRefs);
         handleReportUpload(clearanceVars, storageRefs);
@@ -862,7 +889,7 @@ const handleFileChange = (
       }
     
       // 📌 Handling for Construction Permit
-      if (docType === "Construction Permit") {
+      if (docType === "Construction") {
         const clearanceVars = {
           createdAt: clearanceInput.dateRequested,
           requestId: clearanceInput.requestId,
@@ -873,22 +900,87 @@ const handleFileChange = (
           docType: docType,
           typeofconstruction: clearanceInput.typeofconstruction,
           homeOrOfficeAddress: clearanceInput.homeOrOfficeAddress,
+          dateOfResidency: clearanceInput.dateOfResidency,
+          address: clearanceInput.address,
+          birthday: clearanceInput.birthday,
+          age: clearanceInput.age,
+          gender: clearanceInput.gender,
+          civilStatus: clearanceInput.civilStatus,
+          contact: clearanceInput.contact,
+          citizenship: clearanceInput.citizenship,
           typeofbldg: clearanceInput.typeofbldg,
           projectName: clearanceInput.projectName,
-          projectLocation: clearanceInput.businessLocation,
+          projectLocation: clearanceInput.projectLocation,
           taxDeclaration: filenames.taxDeclaration,
           approvedBldgPlan: filenames.approvedBldgPlan,
-          fullName: clearanceInput.fullName,
-          contact: clearanceInput.contact,
-          homeAddress: clearanceInput.address,
           copyOfPropertyTitle: filenames.copyOfPropertyTitle,
           signaturejpg: filenames.signaturejpg,
-          endorsementLetter: filenames.letterjpg,
+          letterjpg: filenames.letterjpg,
           ...(clearanceInput.typeofbldg === "Others" && {othersTypeofbldg: clearanceInput.othersTypeofbldg}),
         };
         console.log(clearanceVars, storageRefs);
         handleReportUpload(clearanceVars, storageRefs);
       }
+
+
+      if (
+        docType &&
+          ![
+            "Barangay Certificate",
+            "Barangay Clearance",
+            "Barangay Indigency",
+            "Temporary Business Permit",
+            "Business Permit",
+            "Construction"
+          ].includes(docType) &&
+          !["Barangay ID", "First Time Jobseeker"].includes(clearanceInput.purpose)
+        ) {
+        const clearanceVars: Record<string, any> = {
+          createdAt: clearanceInput.dateRequested,
+          requestId: clearanceInput.requestId,
+          reqType: "Online",
+          status: "Pending",
+          statusPriority: 1,
+          requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
+          accID: clearanceInput.accountId,
+          docType: docType,
+          purpose: clearanceInput.purpose,
+          dateOfResidency: clearanceInput.dateOfResidency,
+          address: clearanceInput.address,
+          birthday: clearanceInput.birthday,
+          age: clearanceInput.age,
+          gender: clearanceInput.gender,
+          civilStatus: clearanceInput.civilStatus,
+          contact: clearanceInput.contact,
+          citizenship: clearanceInput.citizenship,
+          signaturejpg: filenames.signaturejpg,
+          ...(clearanceInput.barangayIDjpg && { barangayIDjpg: filenames.barangayIDjpg }),
+          ...(clearanceInput.validIDjpg && { validIDjpg: filenames.validIDjpg }),
+          ...(clearanceInput.letterjpg && { letterjpg: filenames.letterjpg }),
+        };
+      
+        // Add dynamic text fields (non-image fields)
+        filteredDynamicFields.forEach((fieldName) => {
+          if (
+            !["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg"].includes(fieldName) &&
+            clearanceInput[fieldName] !== undefined
+          ) {
+            clearanceVars[fieldName] = clearanceInput[fieldName];
+          }
+        });
+      
+        // Add dynamic image fields
+        Object.keys(dynamicFileStates).forEach((key) => {
+          if (clearanceInput[key] instanceof File && filenames[key]) {
+            clearanceVars[key] = filenames[key];
+          }
+        });
+      
+        console.log("✅ Saving dynamic document:", clearanceVars);
+        handleReportUpload(clearanceVars, storageRefs);
+      }
+
+
      // alert("Document request submitted successfully!");
       router.push('/services/notification'); 
     //  router.push("/services");
@@ -1224,16 +1316,16 @@ const handleFileChange = (
                           required
                         >
                           <option value="" disabled>Select Year</option>
-                          {[...Array(100)].map((_, i) => {
-                            const year = new Date().getFullYear() - i;
-                            const cyTo = parseInt(clearanceInput.CYTo);
-                            const isDisabled = !isNaN(cyTo) && year >= cyTo;
-                            return (
-                              <option key={year} value={year} disabled={isDisabled}>
-                                {year}
-                              </option>
-                            );
-                          })}
+                                  {[...Array(100)].map((_, i) => {
+                                    const year = new Date().getFullYear() - i;
+                                    const cyTo = parseInt(clearanceInput.CYTo || "");
+                                    const isDisabled = !isNaN(cyTo) && year >= cyTo;
+                                    return (
+                                    <option key={year} value={year} disabled={isDisabled}>
+                                      {year}
+                                    </option>
+                                    );
+                                  })}
                         </select>
                       </div>
 
@@ -1247,17 +1339,31 @@ const handleFileChange = (
                           className="form-input-document-req"
                           required
                         >
-                          <option value="" disabled>Select Year</option>
-                          {[...Array(100)].map((_, i) => {
-                            const year = new Date().getFullYear() - i;
-                            const cyFrom = parseInt(clearanceInput.CYFrom);
-                            const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
-                            return (
-                              <option key={year} value={year} disabled={isDisabled}>
-                                {year}
-                              </option>
-                            );
-                          })}
+                         <option value="" disabled>Select Year</option>
+                                  {(() => {
+                                    const currentYear = new Date().getFullYear();
+                                    const cyFrom = parseInt(clearanceInput.CYFrom || "");
+
+                                    if (cyFrom === currentYear) {
+                                      // Only show current year
+                                      return (
+                                        <option key={currentYear} value={currentYear}>
+                                          {currentYear}
+                                        </option>
+                                      );
+                                    }
+
+                                    // Default behavior if Year From is not current year
+                                    return [...Array(100)].map((_, i) => {
+                                      const year = currentYear - i;
+                                      const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
+                                      return (
+                                        <option key={year} value={year} disabled={isDisabled}>
+                                          {year}
+                                        </option>
+                                      );
+                                    });
+                                  })()}
                         </select>
                       </div>
 
@@ -1277,16 +1383,16 @@ const handleFileChange = (
                           required
                         >
                           <option value="" disabled>Select Year</option>
-                          {[...Array(100)].map((_, i) => {
-                            const year = new Date().getFullYear() - i;
-                            const cyTo = parseInt(clearanceInput.CYTo);
-                            const isDisabled = !isNaN(cyTo) && year >= cyTo;
-                            return (
-                              <option key={year} value={year} disabled={isDisabled}>
-                                {year}
-                              </option>
-                            );
-                          })}
+                                  {[...Array(100)].map((_, i) => {
+                                    const year = new Date().getFullYear() - i;
+                                    const cyTo = parseInt(clearanceInput.CYTo || "");
+                                    const isDisabled = !isNaN(cyTo) && year >= cyTo;
+                                    return (
+                                    <option key={year} value={year} disabled={isDisabled}>
+                                      {year}
+                                    </option>
+                                    );
+                                  })}
                         </select>
                       </div>
 
@@ -1313,7 +1419,8 @@ const handleFileChange = (
                       </div>
                     </>
                   )}
-                  {(clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Certificate") || clearanceInput.purpose === "Financial Subsidy of Solo Parent" && (
+
+                  {((clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Certificate") || (clearanceInput.purpose === "Financial Subsidy of Solo Parent" && clearanceInput.docType === "Barangay Indigency")) && (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="noIncomeChildFName" className="form-label-document-req">Son/Daughter's Name<span className="required">*</span></label>
@@ -1527,7 +1634,7 @@ const handleFileChange = (
                     </div>
                   ))}
 
-                  { clearanceInput.docType === "Business Permit" || clearanceInput.docType === "Temporary Business Permit" && (
+                  { (clearanceInput.docType === "Business Permit" || clearanceInput.docType === "Temporary Business Permit") && (
                     <>  
                       <div className="form-group-document-req">
                         <label htmlFor="businessname" className="form-label-document-req">Business Name<span className="required">*</span></label>
@@ -1735,7 +1842,7 @@ const handleFileChange = (
                       <div className="form-group-document-req">
                         <label htmlFor="precinctno" className="form-label-document-req">Precinct Number<span className="required">*</span></label>
                         <input 
-                          type="number" 
+                          type="text" 
                           id="precinctno" 
                           name="precinctnumber" 
                           className="form-input-document-req" 
@@ -1877,7 +1984,7 @@ const handleFileChange = (
                   {(docType === "Barangay Indigency" || (clearanceInput.purpose === "Residency" && docType === "Barangay Certificate")) && (
                     <>
                       <div className="form-group-document-req">
-                        <label htmlFor="appointmentDate" className="form-label-document-req">Set An Appointment<span className="required">*</span></label>
+                        <label htmlFor="appointmentDate" className="form-label-document-req">Set Interview Appointment<span className="required">*</span></label>
                         <input 
                           type="date" 
                           id="appointmentDate" 
@@ -2068,8 +2175,7 @@ const handleFileChange = (
                     </>
                   )}
 
-
-                  {(clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Indigency")&& (
+                  {(clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Indigency") && (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="noIncomeChildFName" className="form-label-document-req">Son/Daughter's Name<span className="required">*</span></label>
@@ -2086,6 +2192,7 @@ const handleFileChange = (
                       </div>
                     </>
                   )}
+                  
 
                   {clearanceInput.purpose === "Occupancy /  Moving Out" && (
                     <>
@@ -2109,7 +2216,7 @@ const handleFileChange = (
                           type="text"  
                           id="fromAddress"  
                           name="fromAddress"  
-                          value={clearanceInput.toAddress}
+                          value={clearanceInput.fromAddress}
                           onChange={handleChange}
                           className="form-input-document-req"  
                           required 
@@ -2176,16 +2283,30 @@ const handleFileChange = (
                           required
                         >
                           <option value="" disabled>Select Year</option>
-                          {[...Array(100)].map((_, i) => {
-                            const year = new Date().getFullYear() - i;
-                            const cyFrom = parseInt(clearanceInput.CYFrom);
-                            const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
-                            return (
-                              <option key={year} value={year} disabled={isDisabled}>
-                                {year}
-                              </option>
-                            );
-                          })}
+                                  {(() => {
+                                    const currentYear = new Date().getFullYear();
+                                    const cyFrom = parseInt(clearanceInput.CYFrom || "");
+
+                                    if (cyFrom === currentYear) {
+                                      // Only show current year
+                                      return (
+                                        <option key={currentYear} value={currentYear}>
+                                          {currentYear}
+                                        </option>
+                                      );
+                                    }
+
+                                    // Default behavior if Year From is not current year
+                                    return [...Array(100)].map((_, i) => {
+                                      const year = currentYear - i;
+                                      const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
+                                      return (
+                                        <option key={year} value={year} disabled={isDisabled}>
+                                          {year}
+                                        </option>
+                                      );
+                                    });
+                                  })()}
                         </select>
                       </div>
 
@@ -2412,7 +2533,7 @@ const handleFileChange = (
                     </div>
                   ))}
 
-                  {clearanceInput.docType === "Business Permit" || clearanceInput.docType === "Temporary Business Permit"&& (
+                  {(clearanceInput.docType === "Business Permit" || clearanceInput.docType === "Temporary Business Permit") && (
                     <>  
                       <div className="form-group-document-req">
                         <label htmlFor="businessNature" className="form-label-document-req">Business Nature<span className="required">*</span></label>
@@ -2542,7 +2663,7 @@ const handleFileChange = (
                       <div className="form-group-document-req">
                         <label htmlFor="height" className="form-label-document-req">Height<span className="required">*</span></label>
                         <input 
-                          type="number" 
+                          type="text" 
                           id="height" 
                           name="height" 
                           className="form-input-document-req" 
@@ -2556,7 +2677,7 @@ const handleFileChange = (
                       <div className="form-group-document-req">
                         <label htmlFor="weight" className="form-label-document-req">Weight<span className="required">*</span></label>
                         <input 
-                          type="number" 
+                          type="text" 
                           id="weight" 
                           name="weight" 
                           value={clearanceInput.weight}
@@ -2569,7 +2690,6 @@ const handleFileChange = (
                     </>
                   )}
 
-{/* hereee*/}
                   {clearanceInput.purpose === "First Time Jobseeker" && (
                     <>
                       <div className="form-group-document-req">
@@ -2585,6 +2705,19 @@ const handleFileChange = (
                           placeholder="Enter Course"  
                         />
                       </div>
+
+                      <div className="form-group-document-req-checkbox">
+                        <input 
+                          type="checkbox"  
+                          id="isBeneficiary"  
+                          name="isBeneficiary"  
+                          checked={clearanceInput.isBeneficiary || false}
+                          onChange={handleChange}
+                          required 
+                        />
+                        <label htmlFor="isBeneficiary" className="form-label-document-req">Is beneficiary of a JobStart Program under RA No. 10869?<span className="required">*</span></label>
+                      </div>
+
                     </>
                   )}
                 </div>
@@ -2831,7 +2964,7 @@ const handleFileChange = (
                           <input
                             id="file-upload7"
                             type="file"
-                            required={(docType === "Temporary Business Permit" || docType === "Business Permit" || docType === "Construction Permit")}
+                            required={(docType === "Temporary Business Permit" || docType === "Business Permit" || docType === "Construction")}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                               handleFileChange(e, setFiles7, 'isCCTV');
                             }} 
@@ -3006,6 +3139,68 @@ const handleFileChange = (
                   </>
                 )}
 
+                {(clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax")&& (
+                  <>
+                    <div className="required-documents-container">
+                    <label className="form-label-required-documents"> Death Certificate<span className="required">*</span></label>
+                      <div className="file-upload-container-required-documents">
+                        <label htmlFor="file-upload8"  className="upload-link">Click to Upload File</label>
+                          <input
+                            id="file-upload8"
+                            type="file"
+                            required
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              handleFileChange(e, setFiles10, 'deathCertificate');
+                            }}
+                            accept=".jpg,.jpeg,.png"
+                            style={{ display: "none" }}
+                          />
+                        <div className="uploadedFiles-container">
+                          {/* Display the file names with image previews */}
+                          {files10.length > 0 && (
+                            <div className="file-name-image-display">
+                              <ul>
+                                {files10.map((file, index) => (
+                                  <div className="file-name-image-display-indiv" key={index}>
+                                    <li> 
+                                        {/* Display the image preview */}
+                                        {file.preview && (
+                                          <div className="filename&image-container">
+                                            <img
+                                              src={file.preview}
+                                              alt={file.name}
+                                              style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                            />
+                                          </div>
+                                          )}
+                                        {file.name}  
+                                      <div className="delete-container">
+                                        {/* Delete button with image */}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleFileDelete('file-upload10',setFiles10)}
+                                            className="delete-button"
+                                          >
+                                            <img
+                                              src="/images/trash.png"  
+                                              alt="Delete"
+                                              className="delete-icon"
+                                            />
+                                          </button>
+                                        
+                                      </div>
+                                        
+                                    </li>
+                                  </div>
+                                ))}  
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
                 <div className="required-documents-container">
                   <label className="form-label-required-documents"> Upload Signature Over Printed Name<span className="required">*</span></label>
 
@@ -3281,7 +3476,7 @@ const handleFileChange = (
                         id="file-upload4"
                         type="file"
                         accept=".jpg,.jpeg,.png"
-                        required={(docType === "Temporary Business Permit" || docType === "Business Permit"|| docType === "Construction Permit")}
+                        required={(docType === "Temporary Business Permit" || docType === "Business Permit"|| docType === "Construction")}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           handleFileChange(e,setFiles4, 'letterjpg');
                         

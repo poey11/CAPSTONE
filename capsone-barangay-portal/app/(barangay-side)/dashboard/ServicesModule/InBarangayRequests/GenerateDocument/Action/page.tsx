@@ -232,11 +232,17 @@ export default function action() {
       }, []);
 
 
-      const removeNullFields = (obj: Record<string, any>) => {
+      const removeNullFields = (obj: Record<string, any>): Record<string, any> => {
         const cleaned: Record<string, any> = {};
         for (const key in obj) {
           const value = obj[key];
-          if (value !== null && value !== undefined && value !== "") {
+      
+          if (
+            value !== null &&
+            value !== undefined &&
+            value !== "" &&
+            !(typeof value === "object" && !Array.isArray(value) && Object.values(value).every(v => v === ""))
+          ) {
             cleaned[key] = value;
           }
         }

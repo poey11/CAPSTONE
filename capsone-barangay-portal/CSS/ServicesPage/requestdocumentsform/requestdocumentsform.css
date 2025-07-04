@@ -555,6 +555,23 @@ flex-direction: column;
 margin-bottom: 10px;
 }
 
+.form-group-document-req-checkbox {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  margin-top: 15px;
+  gap: 20px;
+}
+
+input[type="checkbox"] {
+  accent-color: #ED7014;
+  width: 23px;
+  height: 23px;
+  cursor: pointer;
+}
+
 .form-group-document-req input,
 .form-group-document-req select {
 padding: 8px;
