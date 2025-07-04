@@ -6,11 +6,11 @@ import { doc, collection, getDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import Form from "@/app/(barangay-side)/components/accSetupForm";
 
+// @ts-ignore
 interface AccountSetupPageProps {
   searchParams: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-// @ts-ignore
 export default async function AccountSetupPage({searchParams}: AccountSetupPageProps) {
   const params = await searchParams;
   const returnUrl = (params.returnUrl as string) || "/dashboard";

@@ -23,10 +23,8 @@ const eslintConfig = [
       
     },
 
-    
-    eslint:{
 
-      
+    eslint:{
       // Disable the no-undef rule globally
       ignoreDuringBuilds: true,
 
