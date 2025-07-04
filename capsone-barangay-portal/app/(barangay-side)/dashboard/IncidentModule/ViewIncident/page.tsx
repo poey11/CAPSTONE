@@ -100,6 +100,8 @@ export default  function ViewLupon() {
 
   const status = reportData?.status; 
   const departId = reportData?.department;
+   const typeOfIncident = reportData?.typeOfIncident;
+
   const complainantsData  ={
     fname: reportData?.complainant.fname,
     lname: reportData?.complainant.lname,
@@ -383,6 +385,10 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
           </div>
 
           <div className="view-incident-header-body-bottom-section">
+
+
+
+
             <div className="incident-main-details-container">
               <div className="incident-main-details-section">
                 <div className="incident-main-details-topsection">
@@ -406,6 +412,18 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                       </div>
                     </div>
                     <p>{`${reportData?.dateFiled}${reportData?.isReportLate ? " (Late Filing)" : ""} `  || ""}</p>
+                  </div>
+
+                    <div className="incident-date-section">
+                    <div className="incident-date-topsection">
+                      <div className="incident-main-details-icons-section">
+                        <img src="/Images/calendar.png" alt="calendar icon" className="view-incident-description-icon-calendar" />
+                      </div>
+                      <div className="incident-main-details-title-section">
+                        <h1>Type of ncident</h1>
+                      </div>
+                    </div>
+                            <p>{reportData?.typeOfIncident || "N/A"}</p>
                   </div>
 
                   <div className="incident-location-section">
@@ -435,6 +453,11 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
               </div>
               
             </div>
+
+
+
+
+
 
             <div className="view-incident-info-main-container">
               <div className="view-incident-info-container-scrollable">
@@ -570,7 +593,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
 
                             {reportData?.typeOfIncident === "Minor" && (
                               <div className="view-incident-fields-section">
-                                <p>Recommended Event To Join By Desk Officer</p>
+                                <p>Recommended Event</p>
                                 <input type="text" className="view-incident-input-field" name="recommendedEvent" value={reportData?.recommendedEvent || "N/A"} readOnly />
                               </div>
                             )}
@@ -606,8 +629,13 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                             <div className="bottom-middle-incidentfields">
                               <p>Date & Time Filed</p>
                               <input type="text" className="view-incident-input-field" name="deskOfficerDateTimeReceived" value={otherinformation.date || "N/A"} readOnly />
-                            </div>
+                            </div>       
                           )}
+
+                           <div className="bottom-middle-incidentfields">
+                              <p>Type of Incident</p>
+                              <input type="text" className="view-incident-input-field" name="typeOfIncident" value={reportData?.typeOfIncident  || "N/A"} readOnly />
+                            </div>
                         </div>
 
                         <div className="view-incident-content-bottomsection">
