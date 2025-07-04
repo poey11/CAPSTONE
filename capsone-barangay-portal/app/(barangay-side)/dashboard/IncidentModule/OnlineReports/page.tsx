@@ -262,7 +262,7 @@ const getViewedRequests = (): string[] => {
 
 
       <div className="section-1-online-reports">
-            <div className="edit-incident-info-toggle-wrapper">
+            <div className="assigned-incident-info-toggle-wrapper">
 
               {/*
 
@@ -285,7 +285,7 @@ const getViewedRequests = (): string[] => {
             <button
               key={section}
               type="button"
-              className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+              className={`info-toggle-btn-assigned ${activeSection === section ? "active" : ""}`}
               onClick={() => setActiveSection(section)}
               style={{ position: "relative" }}
             >

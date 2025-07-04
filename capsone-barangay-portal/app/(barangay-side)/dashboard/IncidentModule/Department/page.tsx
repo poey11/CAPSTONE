@@ -302,7 +302,7 @@ useEffect(() => {
     <table>
       <thead>
         <tr>
-          <th>Case #</th>
+          <th>Case Number</th>
           <th>Date & Time of the Incident</th>
           <th>Area Of Incident</th>
           <th>Nature of Complaint</th>

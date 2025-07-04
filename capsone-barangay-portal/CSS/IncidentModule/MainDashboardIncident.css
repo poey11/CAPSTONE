@@ -23,7 +23,7 @@
     height: 100%; /* Full height */
     margin-top: 2rem;
     max-height: 70%;
-    border: 2px solid rgba(36, 53, 76, 0.7);
+    border: 1px solid rgba(36, 53, 76, 0.7);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
    background-color: #ffffff;
    border-radius: 6px;
@@ -47,7 +47,7 @@
 .main-section-departments td {
   padding: 1rem; 
   text-align: center; 
-  border-bottom: 2px solid #ddd;
+  border-bottom: 1px solid #ddd;
 color: rgb(44, 42, 42);
   font-weight: normal;
 }
@@ -60,6 +60,30 @@ color: rgb(44, 42, 42);
   text-align: center;
     
 }
+
+
+
+/*
+Newly added for tables
+*/
+
+.main-section-departments tbody tr:nth-child(even) {
+  background-color: #f0f4f8; /* Softer modern gray-blue tone */
+}
+
+.main-section-departments tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* Crisp white */
+}
+
+.main-section-departments tbody tr:hover {
+  background-color: #d0e4f5 !important; /* Light pastel blue hover */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+
+
+
 
 .main-section-departments .official-info-departments {
     display: flex;
@@ -162,50 +186,43 @@ color: rgb(44, 42, 42);
     color: rgba(0, 0, 0, 0.4); 
   }
 
-  .status-dropdown-departments {
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    text-align: center;
-  }
-  
-  .pending {
-    background-color: #d4d64f;
-    color: white;
-    font-size: 15px;
-    
-  }
-  
-  .resolved {
-    background-color: #66c47a;
-    color: white;
-    
-  }
-  
-  .settled {
-    background-color: #1e5128;
-    color: white;
-    font-size: 15px;
-  }
-  
-  .archived {
-    background-color: #7f7f7f;
-    color: white;
-    font-size: 15px;
-  }
 
-  .status-badge-departments {
+  
+
+
+    .status-badge-departments {
     padding: 8px 12px;            
-    border-radius: 5px;          
-    font-size: 13px;              
+    border-radius: 5px;                     
     color: white;                
     display: inline-block;        
     text-transform: capitalize;   
     text-align: center;    
     width: 100px;       
 }
+
+
+
+  .pending {
+    background-color: #d4d64f;
+    font-size: 15px;
+  }
+  
+  .settled {
+    background-color: #1e5128;
+    font-size: 15px;
+  }
+  
+  .archived {
+    background-color: #7f7f7f;
+    font-size: 15px;
+  }
+
+  .cfa {
+    background-color: rgb(116, 16, 21);
+    font-size: 15px;
+  }
+
+
 
 
 
