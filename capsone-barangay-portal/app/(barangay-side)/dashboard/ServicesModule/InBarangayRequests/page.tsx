@@ -25,16 +25,58 @@ import { report } from "process";
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
   
+    if(user?.position === "Admin Staff" || user?.position === "Secretary" || user?.position === "Assistant Secretary"){
+      useEffect(() => {
+        let position = "";
+        if(user?.position === "Admin Staff"){
+          position = "Admin Staff";
+        }else if(user?.position === "Secretary" || user?.position === "Assistant Secretary"){
+          position = "SAS";
+        }
+        console.log("User Position:", position);
+        try {
+          const Collection = query(
+            collection(db,"ServiceRequests"),
+            where("accID", "==", "INBRGY-REQ"), // Filter for In Barangay requests
+            orderBy("createdAt", "desc") // First, sort by latest
+          );      
+          const unsubscribe = onSnapshot(Collection, (snapshot) => {
+            let reports: any[] = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
 
-    useEffect(() => {
-      let position = "";
-      if(user?.position === "Admin Staff"){
-        position = "Admin Staff";
-      }else if(user?.position === "Secretary" || user?.position === "Assistant Secretary"){
-        position = "SAS";
-      }
-      console.log("User Position:", position);
-      try {
+             // Filter based on sendTo field
+            const filterReports = reports.filter(
+              (report) => report.sendTo === position
+            );
+
+            filterReports.sort((a, b) => {
+              if (a.statusPriority !== b.statusPriority) {
+                return a.statusPriority - b.statusPriority;
+              }
+            
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+          
+            setRequestData(filterReports);
+            setFilteredInBarangayRequests(filterReports); // add
+
+            setLoading(false);
+            setError(null);
+            console.log(requestData);
+
+          });
+        
+          return unsubscribe;
+        } catch (error: any) {
+          console.log(error.message);
+          }
+        }, [user]);
+    }
+    else{
+      useEffect(() => {
+        try {
         const Collection = query(
           collection(db,"ServiceRequests"),
           where("accID", "==", "INBRGY-REQ"), // Filter for In Barangay requests
@@ -46,12 +88,7 @@ import { report } from "process";
             ...doc.data(),
           }));
           
-           // Filter based on sendTo field
-          const filterReports = reports.filter(
-            (report) => report.sendTo === position
-          );
-
-          filterReports.sort((a, b) => {
+          reports.sort((a, b) => {
             if (a.statusPriority !== b.statusPriority) {
               return a.statusPriority - b.statusPriority;
             }
@@ -59,21 +96,19 @@ import { report } from "process";
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
           });
         
-          setRequestData(filterReports);
-          setFilteredInBarangayRequests(filterReports); // add
-
+          setRequestData(reports);
+          setFilteredInBarangayRequests(reports); // add
           setLoading(false);
           setError(null);
           console.log(requestData);
-
         });
       
         return unsubscribe;
       } catch (error: any) {
         console.log(error.message);
-      }
-    }, [user]);
-
+        }
+      }, []);
+    }
 
     /*
       FILTER LOGIC
