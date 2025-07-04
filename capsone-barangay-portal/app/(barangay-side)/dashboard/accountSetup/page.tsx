@@ -7,7 +7,8 @@ import { db } from "@/app/db/firebase";
 import Form from "@/app/(barangay-side)/components/accSetupForm";
 
 interface AccountSetupPageProps {
-  searchParams: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
+  // searchParams: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
+    searchParams: { [key: string]: string | string[] | undefined };
 }
 
 
