@@ -1,12 +1,4 @@
 
-.main-container-edit{
- width: 100%;
- height: 100%;
- background-color: #F0F2F8; 
- margin-left: 3rem; 
- padding-top: 11.2%;
- padding-bottom:30px;
-}
 
 .letters-content-edit {
   display: flex;
@@ -1076,7 +1068,37 @@ padding: 1rem;
   height: 27px;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* NEW CSS */
+
+.main-container-edit{
+ width: 100%;
+ height: 100%;
+ background-color: #F0F2F8; 
+ margin-left: 3rem; 
+ padding-top: 11.2%;
+ padding-bottom:30px;
+}
+
+
 .edit-incident-main-content {
   display: flex;
   flex-direction: column;

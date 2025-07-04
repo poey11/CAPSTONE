@@ -715,21 +715,7 @@ const handleSubmit = (event: React.FormEvent) => {
                 
               </div>
                     
-              <div className="section-1-add-title flex-col">
-                Type of Incident
-                <div>
-                  <input type="radio" id="minor" name="typeOfIncident" 
-                  onChange={handleFormChange}
-                  className="mr-2" value="Minor" required/>
-                  <label htmlFor="minor">Minor Incident</label>
-                </div>
-                <div>
-                  <input type="radio" id="major"  name="typeOfIncident"  
-                  onChange={handleFormChange}
-                  className="mr-2" value="Major" required/>  
-                  <label htmlFor="major">Major Incident</label>
-                </div>
-              </div>
+
             
             <div className="add-incident-bottom-section">
 
@@ -1228,7 +1214,69 @@ const handleSubmit = (event: React.FormEvent) => {
                         </select>
                   </div>
 
-                  {reportInfo.typeOfIncident === "Minor" && (
+
+
+              <div className="fields-section-add">
+                  <p>Date Filed<span className="required">*</span></p>
+                  <input type="date" className="add-incident-input-field" max={currentDate} id="dateFiled" name="dateFiled" 
+                    value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
+              </div>
+
+              <div className="fields-section-add">
+                   <p>Time Filed<span className="required">*</span></p>
+                   <input type="time" className="add-incident-input-field" id="timeFiled" name="timeFiled" 
+                   value = {reportInfo.timeFiled} onChange={handleFormChange} required />
+              </div>
+
+              <div className="fields-section-add">
+                  <p>Location<span className="required">*</span></p>
+                  <input type="text" className="add-incident-input-field" placeholder="Enter Location" id="location" name="location" 
+                  value = {reportInfo.location} onChange={handleFormChange} required />
+
+              </div>
+              
+
+          
+          </div>
+
+
+          <div className="add-incident-section-right-side">
+            
+            {/*}
+            <div className="section-1-add-title flex-col">
+                Type of Incident
+                <div>
+                  <input type="radio" id="minor" name="typeOfIncident" 
+                  onChange={handleFormChange}
+                  className="mr-2" value="Minor" required/>
+                  <label htmlFor="minor">Minor Incident</label>
+                </div>
+                <div>
+                  <input type="radio" id="major"  name="typeOfIncident"  
+                  onChange={handleFormChange}
+                  className="mr-2" value="Major" required/>  
+                  <label htmlFor="major">Major Incident</label>
+                </div>
+            </div>
+              */}
+
+              <div className="fields-section-add">
+                <p>Type of Incident<span className="required">*</span></p>
+                <select 
+                  className="add-incident-input-field" 
+                  required
+                  id="typeOfIncident" 
+                  name="typeOfIncident"
+                  value={reportInfo.typeOfIncident}
+                  onChange={handleFormChange}
+                >
+                  <option value="" disabled>Choose Type of Incident</option>
+                  <option value="Minor">Minor Incident</option>
+                  <option value="Major">Major Incident</option>
+                </select>
+              </div>
+
+                                {reportInfo.typeOfIncident === "Minor" && (
                     <>
                       <div className="fields-section-add">
                         <p>Recommended To Join:<span className="required">*</span></p>
@@ -1258,32 +1306,6 @@ const handleSubmit = (event: React.FormEvent) => {
                       </div>
                     </>
                   )}
-
-              <div className="fields-section-add">
-                  <p>Date Filed<span className="required">*</span></p>
-                  <input type="date" className="add-incident-input-field" max={currentDate} id="dateFiled" name="dateFiled" 
-                    value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
-              </div>
-
-              <div className="fields-section-add">
-                   <p>Time Filed<span className="required">*</span></p>
-                   <input type="time" className="add-incident-input-field" id="timeFiled" name="timeFiled" 
-                   value = {reportInfo.timeFiled} onChange={handleFormChange} required />
-              </div>
-
-              <div className="fields-section-add">
-                  <p>Location<span className="required">*</span></p>
-                  <input type="text" className="add-incident-input-field" placeholder="Enter Location" id="location" name="location" 
-                  value = {reportInfo.location} onChange={handleFormChange} required />
-
-              </div>
-              
-
-          
-          </div>
-
-
-          <div className="add-incident-section-right-side">
 
 
           <div className="box-container-outer-proof">
@@ -1345,9 +1367,14 @@ const handleSubmit = (event: React.FormEvent) => {
                         </div>
 
                     </div>
+
+
                    
 
           </div>
+
+
+  
 
           </div>
 
