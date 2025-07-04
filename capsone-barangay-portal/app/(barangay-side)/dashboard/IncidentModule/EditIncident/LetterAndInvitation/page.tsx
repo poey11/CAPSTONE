@@ -876,10 +876,12 @@ export default function GenerateDialogueLetter() {
                         <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> 
              </div>
             */}
-                  
+                
+                <div className="section-2-letter-upper">
 
-            
-                <div className="section-2-information-section">
+                    <div className="section-2-letter-left-side">
+
+                                        <div className="section-2-information-section">
 
                     <div className="section-2-information-top">
 
@@ -888,9 +890,11 @@ export default function GenerateDialogueLetter() {
                         </div>
                     </div>
 
-                 <div className="section-2-information-bottom">
+                 <div className="section-2-information-bottom-upper">
 
-                          <div className="fields-section-letter">
+                    <div className="information-bottom-first-section ">
+
+                    <div className="fields-section-letter">
                           <p>Name</p>
                              <input 
                             type="text" 
@@ -903,20 +907,7 @@ export default function GenerateDialogueLetter() {
                         />
                         </div>
 
-                        <div className="fields-section-letter">
-                            <p>Address</p>
-                                <input 
-                                type="text" 
-                                className="generate-letter-input-field" 
-                                placeholder= {otherInfo.complainant.address}
-                                value={otherInfo.complainant.address}
-                                id="complainant.address"
-                                name="complainant.address"
-                                disabled
-                                />
-                        </div>
-
-                        <div className="fields-section-letter">
+                                <div className="fields-section-letter">
                             <p>Contact Nos</p>
                             <input 
                             type="text" 
@@ -929,14 +920,46 @@ export default function GenerateDialogueLetter() {
                             />
 
                         </div>
+
+  
+
+                    </div>
+
+
+                    <div className="information-bottom-second-section">
+
+                
+
+                        <div className="fields-section-letter-address">
+                            <p>Address</p>
+                                <input 
+                                type="text" 
+                                className="generate-letter-input-field-address" 
+                                placeholder= {otherInfo.complainant.address}
+                                value={otherInfo.complainant.address}
+                                id="complainant.address"
+                                name="complainant.address"
+                                disabled
+                                />
+                        </div>
+                        
+                    </div>
+
+                      
+
+
                  
                  </div>       
             
 
               
                 </div>
-                
-                  <div className="section-2-information-section">
+
+                    </div>
+
+      <div className="section-2-letter-right-side">
+
+              <div className="section-2-information-section">
 
                     <div className="section-2-information-top">
 
@@ -945,9 +968,12 @@ export default function GenerateDialogueLetter() {
                         </div>
                     </div>
 
-                 <div className="section-2-information-bottom">
+                 <div className="section-2-information-bottom-upper">
 
-                          <div className="fields-section-letter">
+
+                    <div className="information-bottom-first-section ">
+                       
+                        <div className="fields-section-letter">
                           <p>Name</p>
                             
                             <input 
@@ -962,20 +988,9 @@ export default function GenerateDialogueLetter() {
 
                         </div>
 
-                        <div className="fields-section-letter">
-                            <p>Address</p>
-                                   <input 
-                                type="text" 
-                                className="generate-letter-input-field" 
-                                placeholder= {otherInfo.respondent.address}
-                                value={otherInfo.respondent.address}
-                                id="respondent.address"
-                                name="respondent.address"
-                                disabled
-                                />
-                
-                        </div>
 
+
+                        
                         <div className="fields-section-letter">
                             <p>Contact Nos</p>
                             <input 
@@ -989,6 +1004,29 @@ export default function GenerateDialogueLetter() {
                             />
 
                         </div>
+
+                    </div>
+
+                    <div className="information-bottom-second-section ">
+
+                    <div className="fields-section-letter-address">
+                            <p>Address</p>
+                                   <input 
+                                type="text" 
+                                className="generate-letter-input-field-address" 
+                                placeholder= {otherInfo.respondent.address}
+                                value={otherInfo.respondent.address}
+                                id="respondent.address"
+                                name="respondent.address"
+                                disabled
+                                />
+                
+                        </div>
+                        
+                    </div>
+
+
+
                  
                  </div>       
             
@@ -996,8 +1034,16 @@ export default function GenerateDialogueLetter() {
               
                 </div>
 
+                    </div>
 
-                   <div className="section-2-information-section">
+
+                </div>
+
+
+
+                <div className="section-2-letter-lower">
+
+                                     <div className="section-2-information-section">
                         <div className="section-2-information-top">
                             <div className="section-title-letter">
                             <h1>Other Information</h1>
@@ -1131,6 +1177,16 @@ export default function GenerateDialogueLetter() {
                             )}
                         </div>
                         </div>
+
+                </div>
+
+            
+
+                
+
+
+
+  
 
 
 
