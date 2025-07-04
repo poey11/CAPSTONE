@@ -264,7 +264,7 @@ padding-bottom:30px;
 
 .title-proof {
   position: absolute;
-  left: 18%; 
+  left: 22%; 
   top: 0; 
   transform: translate(25%, 25%);
   background-color: #1f3b57;
@@ -298,12 +298,15 @@ padding-bottom:30px;
   .title-proof {
     font-size: 14px;
     padding: 6px 12px;
+    max-width: 160px;
   }
 
   .box-container-proof {
     padding: 20px;
   }
 }
+
+
 .add-incident-section-bottom-side {
   display: flex;
   flex-direction: column;
