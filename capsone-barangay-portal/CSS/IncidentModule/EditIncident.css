@@ -2148,3 +2148,131 @@ border-left: 10px solid #8a0f0f;
 .input-error:hover {
   background-color: #ffd6d6 !important;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.confirmation-popup-overlay-continue{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+}
+
+.confirmation-popup-continue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 250px;
+  width: 450px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 30px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+  gap: 10px;
+}
+
+.confirmation-popup-continue p{
+  color: rgb(97, 97, 97);
+}
+
+.yesno-container-continue{
+  display: flex;
+  gap: 20px;
+}
+
+.yes-button-continue,
+.no-button-continue{
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 150px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+}
+
+.yes-button-continue {
+  background-color: #4caf50; 
+}
+
+.yes-button-continue:hover {
+  background-color: #3d8c40; 
+} 
+
+.no-button-continue {
+  background-color: #f44336;
+}
+
+.no-button-continue:hover {
+  background-color:  #c2352b; 
+} 
+
+.icon-alert-continue {
+  width: 27px;
+  height: 27px;
+}
+
+
+.popup-title {
+  font-size: 18px;
+  color: #333;
+  margin: 0;
+}
+
+.settlement-options {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 10px 0 0;
+}
+
+.settlement-option {
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.settlement-option input[type="radio"] {
+  accent-color: #214666;
+  cursor: pointer;
+  transform: scale(1.2);
+}
+
+.settlement-option:hover {
+  color: #111;
+  font-weight: 500;
+}
