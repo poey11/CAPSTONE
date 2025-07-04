@@ -53,6 +53,7 @@ interface ClearanceInput {
   typeofbldg: string;
   othersTypeofbldg: string;
   projectName: string;
+  projectLocation: string;
   citizenship: string;
   educationalAttainment: string;
   course: string;
@@ -78,6 +79,7 @@ interface ClearanceInput {
   dateOfFireIncident: string;
   dateOfTyphoon: string;
   nameOfTyphoon: string;
+  homeOrOfficeAddress: string;
   CYFrom: string;
   CYTo: string;
   attestedBy: string;
@@ -156,7 +158,9 @@ export default function Action() {
     typeofbldg:"",
     othersTypeofbldg:"",
     projectName:"",
+    projectLocation: "",
     citizenship: "",
+    homeOrOfficeAddress: "",
     educationalAttainment: "",
     course: "",
     isBeneficiary: "",
@@ -867,7 +871,8 @@ const handleFileChange = (
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
           accID: clearanceInput.accountId,
           docType: docType,
-          purpose: clearanceInput.typeofconstruction,
+          typeofconstruction: clearanceInput.typeofconstruction,
+          homeOrOfficeAddress: clearanceInput.homeOrOfficeAddress,
           typeofbldg: clearanceInput.typeofbldg,
           projectName: clearanceInput.projectName,
           projectLocation: clearanceInput.businessLocation,
@@ -940,14 +945,18 @@ const handleFileChange = (
       (fieldName) => !fixedPredefinedFields.includes(fieldName)
     );
 
+    const matchedPermitFields = otherDocFieldsByType[clearanceInput.docType] || [];
+    const matchedPermitImageFields = otherDocImageFields[clearanceInput.docType] || [];
+    const purposeFields = otherDocFieldsByType[clearanceInput.purpose] || [];
+    const purposeImageFields = otherDocImageFields[clearanceInput.purpose] || [];
     
     const excludedDynamicFields = ["requestorFname", "requestorMrMs", "dateOfResidency", "address"];
 
 
-    const filteredDynamicFields =
-    otherDocFieldsByType[clearanceInput.purpose]?.filter(
-      (fieldName) => !excludedDynamicFields.includes(fieldName)
-    ) || [];
+    const filteredDynamicFields = [...new Set([
+      ...purposeFields,
+      ...(clearanceInput.docType && matchedPermitFields)
+    ])].filter((fieldName) => !excludedDynamicFields.includes(fieldName));
 
     const matchedImageFieldsRaw = [
       ...(otherDocImageFields[clearanceInput.purpose] || []),
@@ -961,8 +970,14 @@ const handleFileChange = (
       typeof field === "string" ? field : field?.name
     );
 
-    const dynamicImageFields = matchedImageFields.filter(
-      (name) => !existingImageFields.includes(name)
+    const dynamicImageFields = [...new Set([
+      ...matchedImageFields,
+      ...purposeImageFields,
+    ])].filter(
+      (field): field is string =>
+        typeof field === "string" &&
+        !!field &&
+        !existingImageFields.includes(field)
     );
 
    
@@ -1509,6 +1524,109 @@ const handleFileChange = (
                       />
                     </div>
                   ))}
+
+                  { clearanceInput.docType === "Business Permit" || clearanceInput.docType === "Temporary Business Permit" && (
+                    <>  
+                      <div className="form-group-document-req">
+                        <label htmlFor="businessname" className="form-label-document-req">Business Name<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="businessname"  
+                          name="businessName"  
+                          className="form-input-document-req"  
+                          required 
+                          placeholder="Enter Business Name"  
+                          value={clearanceInput.businessName}
+                          onChange={handleChange}
+                        />
+                      </div>            
+                      <div className="form-group-document-req">
+                        <label htmlFor="businessloc" className="form-label-document-req">Business Location<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="businessloc"  
+                          name="businessLocation"  
+                          className="form-input-document-req"  
+                          value={clearanceInput.businessLocation}
+                          onChange={handleChange}
+                          required 
+                          placeholder="Enter Business Location"  
+                        />
+                      </div>
+                    </>
+                  )}
+
+{/*testhere*/}
+                  {docType === "Construction" && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label className="form-label-document-req">Type of Construction Activity<span className="required">*</span></label>
+                          <select 
+                            id="typeofconstruction" 
+                            name="typeofconstruction" 
+                            className="form-input-document-req" 
+                            required
+                            value ={clearanceInput?.typeofconstruction}
+                            onChange={handleChange} // Handle change to update state
+                          >
+                                  <option value="" disabled>Select Construction Activity</option>
+                                  <option value="Structure">Structure</option>
+                                  <option value="Renovation">Renovation</option>
+                                  <option value="Excavation">Excavation</option>
+                                  <option value="Demolition">Demolition</option>
+                          </select> 
+                      </div>
+
+                      <div className="form-group-document-req">
+                        <label htmlFor="buildingtype" className="form-label-document-req">
+                          Type of Building<span className="required">*</span>
+                        </label>
+                        <select
+                          id="buildingtype"
+                          name="typeofbldg"
+                          className="form-input-document-req"
+                          value={clearanceInput.typeofbldg}
+                          onChange={handleChange}
+                          required
+                        >
+                          <option value="" disabled>Select Type of Building</option>
+                          <option value="Residential">Residential</option>
+                          <option value="Commercial">Commercial</option>
+                          <option value="Institutional">Institutional</option>
+                          <option value="Industrial">Industrial</option>
+                          <option value="Mixed-Use">Mixed-Use</option>
+                          <option value="Others">Others</option>
+                        </select>
+
+                        {clearanceInput.typeofbldg === "Others" && (
+                          <input
+                            type="text"
+                            id="othersTypeofbldg"
+                            name="othersTypeofbldg"
+                            className="fform-input-document-req"
+                            placeholder="Enter Type of Building"
+                            value={clearanceInput.othersTypeofbldg}
+                            onChange={handleChange}
+                            required
+                          />
+                        )}
+                      </div>
+
+                      <div className="form-group-document-req">
+                        <label htmlFor="homeOrOfficeAddress" className="form-label-document-req">Home / Office Address<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="homeOrOfficeAddress"  
+                          name="homeOrOfficeAddress"  
+                          className="form-input-document-req"  
+                          required 
+                          placeholder="Enter Business Name"  
+                          value={clearanceInput.homeOrOfficeAddress}
+                          onChange={handleChange}
+                        />
+                      </div>       
+                    </>
+                  )}
                 </div>
 
                 
@@ -2144,19 +2262,387 @@ const handleFileChange = (
                       />
                     </div>
                   ))}
+
+                  {clearanceInput.docType === "Business Permit" || clearanceInput.docType === "Temporary Business Permit"&& (
+                    <>  
+                      <div className="form-group-document-req">
+                        <label htmlFor="businessNature" className="form-label-document-req">Business Nature<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="businessNature"  
+                          name="businessNature"  
+                          className="form-input-document-req"  
+                          required 
+                          placeholder="Enter Business Nature"  
+                          value={clearanceInput.businessNature}
+                          onChange={handleChange}
+                        />
+                      </div>            
+                      <div className="form-group-document-req">
+                        <label htmlFor="estimatedCapital" className="form-label-document-req">Estimated Capital<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="estimatedCapital"  
+                          name="estimatedCapital"  
+                          className="form-input-document-req"  
+                          value={clearanceInput.estimatedCapital}
+                          onChange={handleChange}
+                          required 
+                          placeholder="Enter Estimated Capital"  
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {docType === "Construction"  && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="projectName" className="form-label-document-req">Project Name<span className="required">*</span></label>
+                        <input 
+                          value ={clearanceInput?.projectName || ""}
+                          onChange={handleChange} 
+                          required
+                          type="text" 
+                          id="projectName"
+                          name="projectName"
+                          className="form-input-document-req" 
+                          placeholder="Enter Project Name" 
+                        />
+                      </div>
+
+                      <div className="form-group-document-req">
+                        <label htmlFor="projectLocation" className="form-label-document-req">Project Location<span className="required">*</span></label>
+                        <input 
+                          value ={clearanceInput?.projectLocation || ""}
+                          onChange={handleChange} 
+                          required
+                          type="text" 
+                          id="projectLocation"
+                          name="projectLocation"
+                          className="form-input-document-req" 
+                          placeholder="Enter Project Location" 
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
 
               </div>
-
-              
-              
             </>
           )}
 
-          {/* hereothers*/}
           {activeSection === "others" && (
             <>
               <div className="document-req-form-container-requirements">
+                {(docType ==="Temporary Business Permit" || docType ==="Business Permit" || docType === "Construction") &&(
+                  <>
+                    <div className="required-documents-container">
+                        <label className="form-label-required-documents">Certified True Copy of Title of the Property/Contract of Lease<span className="required">*</span></label>
+
+                        <div className="file-upload-container-required-documents">
+                          <label htmlFor="file-upload5"  className="upload-link">Click to Upload File</label>
+                            <input
+                              id="file-upload5"
+                              type="file"
+                              required
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                handleFileChange(e, setFiles5, 'copyOfPropertyTitle');
+                              }} 
+                              accept=".jpg,.jpeg,.png"
+                              style={{ display: "none" }}
+                            />
+
+                          <div className="uploadedFiles-container">
+                            {/* Display the file names with image previews */}
+                            {files5.length > 0 && (
+                              <div className="file-name-image-display">
+                                <ul>
+                                  {files5.map((file, index) => (
+                                    <div className="file-name-image-display-indiv" key={index}>
+                                      <li> 
+                                          {/* Display the image preview */}
+                                          {file.preview && (
+                                            <div className="filename&image-container">
+                                              <img
+                                                src={file.preview}
+                                                alt={file.name}
+                                                style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                              />
+                                            </div>
+                                            )}
+                                          {file.name}  
+                                        <div className="delete-container">
+                                          {/* Delete button with image */}
+                                          <button
+                                              type="button"
+                                              onClick={() => handleFileDelete('file-upload5', setFiles5)}
+                                              className="delete-button"
+                                            >
+                                              <img
+                                                src="/images/trash.png"  
+                                                alt="Delete"
+                                                className="delete-icon"
+                                              />
+                                            </button>
+
+                                        </div>             
+                                      </li>
+                                    </div>
+                                  ))}  
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                    </div>
+                  </>
+                )}
+
+                {(docType ==="Temporary Business Permit"||docType ==="Business Permit") &&(
+                  <>
+                    <div className="required-documents-container">
+                      <label className="form-label-required-documents">Certified True Copy of DTI Registration<span className="required">*</span></label>
+
+                      <div className="file-upload-container-required-documents">
+                        <label htmlFor="file-upload6"  className="upload-link">Click to Upload File</label>
+                          <input
+                            id="file-upload6"
+                            type="file"
+                            required={(docType === "Temporary Business Permit" || docType === "Business Permit")}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              handleFileChange(e, setFiles6, 'dtiRegistration');
+                            }} 
+                            accept=".jpg,.jpeg,.png"
+                            style={{ display: "none" }}
+                          />
+
+                        <div className="uploadedFiles-container">
+                          {/* Display the file names with image previews */}
+                          {files6.length > 0 && (
+                            <div className="file-name-image-display">
+                              <ul>
+                                {files6.map((file, index) => (
+                                  <div className="file-name-image-display-indiv" key={index}>
+                                    <li> 
+                                        {/* Display the image preview */}
+                                        {file.preview && (
+                                          <div className="filename&image-container">
+                                            <img
+                                              src={file.preview}
+                                              alt={file.name}
+                                              style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                            />
+                                          </div>
+                                          )}
+                                        {file.name}  
+                                      <div className="delete-container">
+                                        {/* Delete button with image */}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleFileDelete('file-upload6', setFiles6)}
+                                            className="delete-button"
+                                          >
+                                            <img
+                                              src="/images/trash.png"  
+                                              alt="Delete"
+                                              className="delete-icon"
+                                            />
+                                          </button>
+                                      </div>
+                                    </li>
+                                  </div>
+                                ))}  
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="required-documents-container">
+                      <label className="form-label-required-documents">Picture of CCTV installed in the establishment<span className="required">*</span></label>
+                      <label className="form-sub-label-required-documents">(for verification by Barangay Inspector)</label>
+
+                      <div className="file-upload-container-required-documents">
+                        <label htmlFor="file-upload7"  className="upload-link">Click to Upload File</label>
+                          <input
+                            id="file-upload7"
+                            type="file"
+                            required={(docType === "Temporary Business Permit" || docType === "Business Permit" || docType === "Construction Permit")}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              handleFileChange(e, setFiles7, 'isCCTV');
+                            }} 
+                            accept=".jpg,.jpeg,.png"
+                            style={{ display: "none" }}
+                          />
+
+                        <div className="uploadedFiles-container">
+                          {/* Display the file names with image previews */}
+                          {files7.length > 0 && (
+                            <div className="file-name-image-display">
+                              <ul>
+                                {files7.map((file, index) => (
+                                  <div className="file-name-image-display-indiv" key={index}>
+                                    <li> 
+                                        {/* Display the image preview */}
+                                        {file.preview && (
+                                          <div className="filename&image-container">
+                                            <img
+                                              src={file.preview}
+                                              alt={file.name}
+                                              style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                            />
+                                          </div>
+                                          )}
+                                        {file.name}  
+                                      <div className="delete-container">
+                                        {/* Delete button with image */}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleFileDelete('file-upload7', setFiles7)}
+                                            className="delete-button"
+                                          >
+                                            <img
+                                              src="/images/trash.png"  
+                                              alt="Delete"
+                                              className="delete-icon"
+                                            />
+                                          </button>
+                                      </div>     
+                                    </li>
+                                  </div>
+                                ))}  
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {docType === "Construction" && (
+                  <>
+                    <div className="required-documents-container">
+                      <label className="form-label-required-documents"> Certified True Copy of Tax Declaration<span className="required">*</span></label>
+
+                      <div className="file-upload-container-required-documents">
+                        <label htmlFor="file-upload8"  className="upload-link">Click to Upload File</label>
+                          <input
+                            id="file-upload8"
+                            type="file"
+                            required
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              handleFileChange(e, setFiles8, 'taxDeclaration');
+                            }}
+                            accept=".jpg,.jpeg,.png"
+                            style={{ display: "none" }}
+                          />
+
+                        <div className="uploadedFiles-container">
+                          {/* Display the file names with image previews */}
+                          {files8.length > 0 && (
+                            <div className="file-name-image-display">
+                              <ul>
+                                {files8.map((file, index) => (
+                                  <div className="file-name-image-display-indiv" key={index}>
+                                    <li> 
+                                        {/* Display the image preview */}
+                                        {file.preview && (
+                                          <div className="filename&image-container">
+                                            <img
+                                              src={file.preview}
+                                              alt={file.name}
+                                              style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                            />
+                                          </div>
+                                          )}
+                                        {file.name}  
+                                      <div className="delete-container">
+                                        {/* Delete button with image */}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleFileDelete('file-upload8',setFiles8)}
+                                            className="delete-button"
+                                          >
+                                            <img
+                                              src="/images/trash.png"  
+                                              alt="Delete"
+                                              className="delete-icon"
+                                            />
+                                          </button>
+                                      </div>
+                                    </li>
+                                  </div>
+                                ))}  
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="required-documents-container">
+                      <label className="form-label-required-documents"> Approved Building/Construction Plan<span className="required">*</span></label>
+              
+                      <div className="file-upload-container-required-documents">
+                        <label htmlFor="file-upload10"  className="upload-link">Click to Upload File</label>
+                          <input
+                            id="file-upload10"
+                            type="file"
+                            required
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              handleFileChange(e, setFiles9, 'approvedBldgPlan');
+                            }}
+                            accept=".jpg,.jpeg,.png"
+                            style={{ display: "none" }}
+                          />
+
+                        <div className="uploadedFiles-container">
+                          {/* Display the file names with image previews */}
+                          {files9.length > 0 && (
+                            <div className="file-name-image-display">
+                              <ul>
+                                {files9.map((file, index) => (
+                                  <div className="file-name-image-display-indiv" key={index}>
+                                    <li> 
+                                        {/* Display the image preview */}
+                                        {file.preview && (
+                                          <div className="filename&image-container">
+                                            <img
+                                              src={file.preview}
+                                              alt={file.name}
+                                              style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                            />
+                                          </div>
+                                          )}
+                                        {file.name}  
+                                      <div className="delete-container">
+                                        {/* Delete button with image */}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleFileDelete('file-upload9',setFiles9)}
+                                            className="delete-button"
+                                          >
+                                            <img
+                                              src="/images/trash.png"  
+                                              alt="Delete"
+                                              className="delete-icon"
+                                            />
+                                          </button>
+                                      </div>  
+                                    </li>
+                                  </div>
+                                ))}  
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
                 <div className="required-documents-container">
                   <label className="form-label-required-documents"> Upload Signature Over Printed Name<span className="required">*</span></label>
 
@@ -2217,13 +2703,80 @@ const handleFileChange = (
                   </div>
                 </div>
 
-                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction Permit" ) && (
+                {/* Dynamically Render Extra Image Upload Fields */}
+                {dynamicImageFields.map((fieldName) => (
+                  <div className="required-documents-container" key={fieldName}>
+                    <label className="form-label-required-documents">
+                      {typeof fieldName === "string"
+                        ? formatFieldName(fieldName.replace(/jpg$/, "").trim())
+                        : ""}
+                      <span className="required">*</span>
+                    </label>
+
+                    <div className="file-upload-container-required-documents">
+                      <label htmlFor={`file-upload-${fieldName}`} className="upload-link">Click to Upload File</label>
+
+                      <input
+                        id={`file-upload-${fieldName}`}
+                        type="file"
+                        accept=".jpg,.jpeg,.png"
+                        style={{ display: "none" }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleDynamicImageUpload(fieldName, file);
+                          e.target.value = ""; // reset input
+                        }}
+                      />
+
+                      {/* Show Preview if Files Exist */}
+                      {dynamicFileStates[fieldName] && dynamicFileStates[fieldName].length > 0 && (
+                        <div className="file-name-image-display">
+                          <ul>
+                            {dynamicFileStates[fieldName].map((file, index) => (
+                              <div className="file-name-image-display-indiv" key={index}>
+                                <li className="file-item">
+                                  {file.preview && (
+                                    <div className="filename-image-container">
+                                      <img
+                                        src={file.preview}
+                                        alt={file.name}
+                                        className="file-preview"
+                                        style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                      />
+                                    </div>
+                                  )}
+                                  <div className="file-name-truncated">{file.name}</div>
+
+                                  <div className="delete-container">
+                                    <button
+                                      type="button"
+                                      className="delete-button"
+                                      onClick={() => handleDynamicImageDelete(fieldName, file.name)}
+                                    >
+                                      <img
+                                        src="/images/trash.png"
+                                        alt="Delete"
+                                        className="delete-icon"
+                                      />
+                                    </button>
+                                  </div>
+                                </li>
+                              </div>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction" ) && (
                   <>
                     <label className="form-label-required-documents-uploadany"> Upload any of the following requirements<span className="required">*</span></label>
                   </>
                 )}
 
-                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction Permit") &&(
+                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction") &&(
                   <>
                     <div className="required-documents-container">
                       <label className="form-label-required-documents"> Barangay ID</label>
@@ -2416,70 +2969,7 @@ const handleFileChange = (
                 </div>
 
 
-                {/* Dynamically Render Extra Image Upload Fields */}
-{dynamicImageFields.map((fieldName) => (
-  <div className="required-documents-container" key={fieldName}>
-    <label className="form-label-required-documents">
-      {formatFieldName(fieldName.replace(/jpg$/, "").trim())}
-      <span className="required">*</span>
-    </label>
-
-    <div className="file-upload-container-required-documents">
-      <label htmlFor={`file-upload-${fieldName}`} className="upload-link">Click to Upload File</label>
-
-      <input
-        id={`file-upload-${fieldName}`}
-        type="file"
-        accept=".jpg,.jpeg,.png"
-        style={{ display: "none" }}
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) handleDynamicImageUpload(fieldName, file);
-          e.target.value = ""; // reset input
-        }}
-      />
-
-      {/* Show Preview if Files Exist */}
-      {dynamicFileStates[fieldName] && dynamicFileStates[fieldName].length > 0 && (
-        <div className="file-name-image-display">
-          <ul>
-            {dynamicFileStates[fieldName].map((file, index) => (
-              <div className="file-name-image-display-indiv" key={index}>
-                <li className="file-item">
-                  {file.preview && (
-                    <div className="filename-image-container">
-                      <img
-                        src={file.preview}
-                        alt={file.name}
-                        className="file-preview"
-                        style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                      />
-                    </div>
-                  )}
-                  <div className="file-name-truncated">{file.name}</div>
-
-                  <div className="delete-container">
-                    <button
-                      type="button"
-                      className="delete-button"
-                      onClick={() => handleDynamicImageDelete(fieldName, file.name)}
-                    >
-                      <img
-                        src="/images/trash.png"
-                        alt="Delete"
-                        className="delete-icon"
-                      />
-                    </button>
-                  </div>
-                </li>
-              </div>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  </div>
-))}
+                
               </div>
             </>
           )}
@@ -2580,7 +3070,7 @@ const handleFileChange = (
         )}
         
          
-          {docType === "Construction Permit" && (
+          {docType === "Construction" && (
             <>
               <div className="form-group">
                 <label className="form-label">Type of Construction Activity<span className="required">*</span></label>
