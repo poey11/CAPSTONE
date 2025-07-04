@@ -251,15 +251,14 @@ padding-bottom:30px;
  padding: 2rem;
 }
 
-
-
 .box-container-outer-proof {
-  position: relative; 
-  margin-bottom: 20px;
+  position: relative;
+  margin: 20px auto;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  margin-top: 20px;
-  align-self: center;
+  width: 90%;
+  max-width: 600px;
 }
 
 
@@ -279,24 +278,32 @@ padding-bottom:30px;
   text-align: center;
 }
 
+
 .box-container-proof {
-  position: relative;
-  width: 500px;
-  height: 280px;
+  width: 100%;
+  height: auto;
+  min-height: 280px;
   border: 1px solid #5a6b7c;
   border-radius: 10px;
   background-color: #ffffff;
-  padding-top: 30px;
- padding-right: 20px;
- padding-bottom: 50px;
- padding-left: 20px;
- padding-top: 40px;
-  margin-top: 20px;
+  padding: 40px 20px 50px 20px;
+  margin-top: 40px;
   display: flex;
- justify-content: center;
- align-items: center;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
+@media (max-width: 600px) {
+  .title-proof {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+
+  .box-container-proof {
+    padding: 20px;
+  }
+}
 .add-incident-section-bottom-side {
   display: flex;
   flex-direction: column;
