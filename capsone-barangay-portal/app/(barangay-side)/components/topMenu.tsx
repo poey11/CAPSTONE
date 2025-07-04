@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { db } from "../../db/firebase";
-import { collection, query, where, onSnapshot, updateDoc, doc, orderBy } from "firebase/firestore";
+import { collection, query, where, onSnapshot, updateDoc, doc, orderBy, getDoc } from "firebase/firestore";
 import { usePathname } from "next/navigation";
 
 
@@ -20,6 +20,7 @@ type BarangayNotification = {
   transactionType: string;
   incidentID: string;
   isRead?: boolean;
+  requestID: string;
 };
 
 interface User {
@@ -56,26 +57,84 @@ export default function TopMenu() {
     console.log("Session Data:", session);
   }, [session]);
 
-  useEffect(() => {
-    if (session) {
-      console.log("Fetching notifications for user:", userPosition);
 
-      const q = query(
-        collection(db, "BarangayNotifications"),
-        where("recipientRole", "==", userPosition)
-      );
 
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const fetchedNotifications: BarangayNotification[] = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as BarangayNotification[]; // Explicitly cast to Notification[]
-        setNotifications(fetchedNotifications);
+  const filterValidNotifications = async (notifications: BarangayNotification[]) => {
+    return Promise.all(notifications.map(async notif => {
+      try {
+        if (notif.incidentID) {
+          const incidentSnap = await getDoc(doc(db, "IncidentReports", notif.incidentID));
+          if (!incidentSnap.exists()) return null;
+        }
+        if (notif.requestID) {
+          const requestSnap = await getDoc(doc(db, "ServiceRequests", notif.requestID));
+          if (!requestSnap.exists()) return null;
+        }
+        return notif;
+      } catch (err) {
+        console.error("Error checking related doc:", err);
+        return null;
+      }
+    }))
+    .then(results => results.filter((notif): notif is BarangayNotification => notif !== null));
+  };
+  
+  
+
+useEffect(() => {
+  if (session && session?.user?.id && userPosition) {
+    console.log("Fetching notifications for user:", userPosition, "and id:", session?.user?.id);
+
+    // Listen for both: by role
+    const qRole = query(
+      collection(db, "BarangayNotifications"),
+      where("recipientRole", "==", userPosition),
+      orderBy("timestamp", "desc")
+    );
+
+    // and by respondentID
+    const qRespondent = query(
+      collection(db, "BarangayNotifications"),
+      where("respondentID", "==", session?.user?.id),
+      orderBy("timestamp", "desc")
+    );
+
+    // Set up both listeners
+    const unsubRole = onSnapshot(qRole, async (snapshot) => {
+      const notifications = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as BarangayNotification[];
+    
+      // Check existence of linked documents
+      const filtered = await filterValidNotifications(notifications);
+      setNotifications(prev => {
+        const merged = [...prev, ...filtered];
+        const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
+        return unique.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
       });
+    });
+    
+    const unsubRespondent = onSnapshot(qRespondent, async (snapshot) => {
+      const notifications = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as BarangayNotification[];
+    
+      const filtered = await filterValidNotifications(notifications);
+      setNotifications(prev => {
+        const merged = [...prev, ...filtered];
+        const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
+        return unique.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
+      });
+    });
 
-      return () => unsubscribe();
-    }
-  }, [session]);
+    return () => {
+      unsubRole();
+      unsubRespondent();
+    };
+  }
+}, [session]);
 
   const handleNotificationClick = async (notification: BarangayNotification) => {
     if (!notification.isRead) {
@@ -94,7 +153,7 @@ export default function TopMenu() {
       }
     }
 
-    if (notification.transactionType === "Online Incident") {
+    if (notification.transactionType === "Online Incident" || notification.transactionType === "Assigned Incident") {
       router.push(`/dashboard/IncidentModule/OnlineReports/ViewOnlineReport?id=${notification.incidentID}`);
     }
   };
