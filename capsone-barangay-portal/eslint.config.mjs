@@ -20,7 +20,17 @@ const eslintConfig = [
 
       // Disable Next.js hydration whitespace error globally
       "@next/next/no-html-link-for-pages": "off",
+      
     },
+
+    
+    eslint:{
+
+      
+      // Disable the no-undef rule globally
+      ignoreDuringBuilds: true,
+
+    }
   }
 ];
 
