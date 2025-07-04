@@ -75,6 +75,7 @@ const getViewedRequests = (): string[] => {
 
   console.log("Incident Data:", incidentData);
   useEffect(() => {
+    if (!user?.id) return; 
     
     try {
       const Collection = query(
