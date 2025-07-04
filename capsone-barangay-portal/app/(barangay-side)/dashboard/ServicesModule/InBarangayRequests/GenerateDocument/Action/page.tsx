@@ -914,7 +914,7 @@ export default function action() {
       }
     
       const isBarangayDocumentAndNewPermit =
-        isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "");
+        isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "First Time Jobseeker";
     
       //  If it's a Barangay Permit type, require at least one of the three
       if (isBarangayDocumentAndNewPermit) {
@@ -3023,7 +3023,7 @@ const handleChange = (
 
                         
 
-                        {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "")) && (
+                        {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "First Time Jobseeker") && (
                           <>
                             <div className="box-container-outer-inbrgy">
                               <div className="title-verificationdocs-barangayID">

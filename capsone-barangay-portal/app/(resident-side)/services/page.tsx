@@ -147,7 +147,7 @@ export default function Services() {
 
                 <div className="documents-container-column-other">
                
-                    <div className="documents-card" onClick={gotoOtherDocuments}>
+                    <div className="documents-card" onClick={goToServices} id="Other Documents">
                       <img src="/images/document.png" alt="Document Icon" className="document-icon" />
                       <h1>Other Documents</h1>
                     </div>  
