@@ -345,6 +345,19 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): 
       });
     }
 
+    if (respondent.respondentName) {
+      const barangayNotificationRef = doc(collection(db, "BarangayNotifications"));
+      await setDoc(barangayNotificationRef, {
+        recipientRole: "LF Staff",
+        respondentID: respondent.respondentName,
+        message: `You have been assigned an incident (${formData.caseNumber}).`,
+        timestamp: new Date(),
+        isRead: false,
+        incidentID: formData.id,
+        transactionType: "Assigned Incident"
+      });
+    }
+
   //  alert("Incident status and respondent info updated!");
    // router.push("/dashboard/IncidentModule/OnlineReports");
 
