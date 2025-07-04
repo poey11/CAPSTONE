@@ -136,7 +136,6 @@ export default function action() {
     const [otherDocFields, setOtherDocFields] = useState<{ [title: string]: string[] }>({});
     const [otherDocImageFields, setOtherDocImageFields] = useState<{ [title: string]: string[] }>({});
 
-
     // State for all file containers
     const [files1, setFiles1] = useState<{ name: string, preview: string | undefined }[]>([]);
     const [files2, setFiles2] = useState<{ name: string, preview: string | undefined }[]>([]);
@@ -329,7 +328,6 @@ export default function action() {
       dateOfTyphoon: "",
       dateOfFireIncident: "",  
       fromAddress: "",
-
       emergencyDetails: {
         fullName: "",
         address: "",
@@ -388,7 +386,6 @@ export default function action() {
     });
 
     
-    
 
     // Close popup when clicking outside
     useEffect(() => {
@@ -411,20 +408,7 @@ export default function action() {
       router.back();
     };
 
-    // Handle file selection for any container
-    const handleFileChange = (container: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFiles = event.target.files;
-        if (selectedFiles) {
-          const fileArray = Array.from(selectedFiles).map((file) => {
-            const preview = URL.createObjectURL(file);
-            return { file, name: file.name, preview };
-          });
-          setFiles((prevFiles) => ({
-            ...prevFiles,
-            [container]: [...prevFiles[container], ...fileArray], // Append new files to the specified container
-          }));
-        }
-    };
+    
   
       // Handle file deletion for documents container
       const handleSignatureDelete = (fileName: string) => {
@@ -499,7 +483,7 @@ export default function action() {
         }));
       };
 
-      
+  
 
 
     const handleSignatureUpload = (
@@ -679,7 +663,7 @@ export default function action() {
       }));
 
       e.target.value = "";
-    
+
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
     };
@@ -859,10 +843,23 @@ export default function action() {
             }
           }
         }
-    
+        let sendTo ="";
+        if(clearanceInput.docType === "Barangay Certificate" || clearanceInput.docType === "Barangay Clearance" 
+          || clearanceInput.docType === "Barangay Indigency" || clearanceInput.docType === "Temporary Business Permit"
+          || clearanceInput.docType === "Construction Permit" 
+        ) {
+
+          sendTo = "SAS";
+        } 
+        else if(clearanceInput.docType === "Business Permit" || clearanceInput.purpose === "Barangay ID"){
+          sendTo = "Admin Staff";
+        }
+
         const docData = {
           ...removeNullFields(clearanceInput),
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
+          sendTo: sendTo,
+          docPrinted: false,
           ...uploadedFileUrls,
         };
     
@@ -1016,7 +1013,7 @@ export default function action() {
         console.log("Files:", files);
         console.log("Clearance Input:", clearanceInput);
         handleUploadClick().then(() => {
-            router.push(`/dashboard/ServicesModule/ViewRequest?id=${id}`);
+            router.push(`/dashboard/ServicesModule/InBarangayRequests`);
         });
         // Hide the popup after 3 seconds
         setTimeout(() => {

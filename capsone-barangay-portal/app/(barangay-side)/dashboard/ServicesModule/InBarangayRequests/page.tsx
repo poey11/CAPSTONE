@@ -1,32 +1,39 @@
 "use client"
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import "@/CSS/barangaySide/ServicesModule/InBarangayRequests.css";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
+import { useSession } from "next-auth/react";
+import { report } from "process";
 
 
   export default function InBarangayRequests() { 
     const router = useRouter();
+    const { data: session } = useSession();
+    const user = session?.user;
     const [requestData, setRequestData] = useState<any[]>([]);
-     const [searchType, setSearchType] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-      const [loading, setLoading] = useState(true);
+    const [searchType, setSearchType] = useState("");
+    const [dateFrom, setDateFrom] = useState("");
+    const [dateTo, setDateTo] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-  const [filteredInBarangayRequests, setFilteredInBarangayRequests] = useState<any[]>([]);
-
-
-
-  const [selectedDocumentType, setSelectedDocumentType] = useState<string | null>(null);
-
-  const [showDeletePopup, setShowDeletePopup] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupMessage, setPopupMessage] = useState("");
+    const [filteredInBarangayRequests, setFilteredInBarangayRequests] = useState<any[]>([]);
+    const [selectedDocumentType, setSelectedDocumentType] = useState<string | null>(null);
+    const [showDeletePopup, setShowDeletePopup] = useState(false);
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+  
 
     useEffect(() => {
+      let position = "";
+      if(user?.position === "Admin Staff"){
+        position = "Admin Staff";
+      }else if(user?.position === "Secretary" || user?.position === "Assistant Secretary"){
+        position = "SAS";
+      }
+      console.log("User Position:", position);
       try {
         const Collection = query(
           collection(db,"ServiceRequests"),
@@ -38,19 +45,22 @@ import { db } from "@/app/db/firebase";
             id: doc.id,
             ...doc.data(),
           }));
-        
-          // Now sort client-side: Pending (1) first, then Pickup (2), etc.
-          reports.sort((a, b) => {
+          
+           // Filter based on sendTo field
+          const filterReports = reports.filter(
+            (report) => report.sendTo === position
+          );
+
+          filterReports.sort((a, b) => {
             if (a.statusPriority !== b.statusPriority) {
-              return a.statusPriority - b.statusPriority; // status priority asc
+              return a.statusPriority - b.statusPriority;
             }
           
-            // Convert string dates to timestamps
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
           });
         
-          setRequestData(reports);
-          setFilteredInBarangayRequests(reports); // add
+          setRequestData(filterReports);
+          setFilteredInBarangayRequests(filterReports); // add
 
           setLoading(false);
           setError(null);
@@ -62,7 +72,7 @@ import { db } from "@/app/db/firebase";
       } catch (error: any) {
         console.log(error.message);
       }
-    }, []);
+    }, [user]);
 
 
     /*
@@ -300,15 +310,15 @@ const confirmDelete = () => {
         )}
 
         {showDeletePopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
-                                <p>Are you sure you want to delete this request?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
-                                </div> 
-                            </div>
-                        </div>
+          <div className="confirmation-popup-overlay">
+              <div className="confirmation-popup">
+                  <p>Are you sure you want to delete this request?</p>
+                  <div className="yesno-container">
+                      <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
+                      <button onClick={confirmDelete} className="yes-button">Yes</button>
+                  </div> 
+              </div>
+          </div>
           )}
                 
 

@@ -85,7 +85,7 @@ export default function reasonForRejection() {
             setShowPopup(true);
             setTimeout(() => {
                 setShowPopup(false);
-                if(data?.reqType === "InBarangay") {
+                if(data?.reqType === "In Barangay") {
                     router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${id}`);
                 }
                 else{
@@ -106,8 +106,10 @@ export default function reasonForRejection() {
                 status: "Rejected",
                 statusPriority: 4,
                 rejectionReason: rejectionReason.reason,
+                sendTo: "Admin Staff",
             };
             await updateDoc(docRef, updatedData);
+            router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${id}`);
         } catch (error) {
             console.error("Error updating status:", error);
         }

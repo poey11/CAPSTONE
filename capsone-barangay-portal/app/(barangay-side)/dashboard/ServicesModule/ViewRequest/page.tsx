@@ -7,13 +7,10 @@ import { useSession } from "next-auth/react";
 import { getDownloadURL, ref } from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
-import { collection, doc, setDoc, updateDoc, getDocs, query } from "firebase/firestore";
-import { getLocalDateString } from "@/app/helpers/helpers";
-import { toWords } from 'number-to-words';
+import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot } from "firebase/firestore";
+import { handlePrint } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
-import OnlineRequests from "../OnlineRequests/page";
-import OnlineReports from "../../IncidentModule/OnlineReports/page";
-
+import { stat } from "fs";
 
 interface EmergencyDetails {
     fullName: string;
@@ -23,8 +20,10 @@ interface EmergencyDetails {
   }
   
   interface OnlineRequest {
+    sendTo: string;
     accID: string;
     requestId: string;
+    docPrinted?: boolean; // Optional field to track if document is printed
     reqType?: string; // "Online" or "InBarangay"
     requestor: string;
     partnerWifeHusbandFullName: string;
@@ -34,7 +33,7 @@ interface EmergencyDetails {
     status: string;
     purpose: string;
     createdAt: string;
-    fullName: string;
+    requestorFname: string;
     nosOfPUV: string;
     puvPurpose: string;
     appointmentDate: string;
@@ -134,9 +133,18 @@ const ViewOnlineRequest = () => {
 
     useEffect(() => {
         if(!id) return
-        getSpecificDocument("ServiceRequests", id, setRequestData).then(() => setLoading(false));   
-        console.log(id);    
-    }, [id]);
+        const serviceRef = doc(db, "ServiceRequests", id);
+        const unsubscribe = onSnapshot(serviceRef, (doc) => {
+          if(doc.exists()) {
+            const data = doc.data() as OnlineRequest;
+            setRequestData(data);
+            setLoading(false);
+          }
+        })
+        return () => {
+          unsubscribe(); // Clean up the listener
+        };
+        }, [id]);
     const [status, setStatus] = useState("");    
     
    
@@ -1191,7 +1199,7 @@ const ViewOnlineRequest = () => {
               },
               body: JSON.stringify({
                   to: requestData?.contact,
-                  message: `Hello Mr/Ms. ${requestData?.fullName}, your 
+                  message: `Hello Mr/Ms. ${requestData?.requestorFname}, your 
                   document request with ID ${requestData?.requestId} 
                   is now ready for pick-up. Please visit the barangay hall 
                   to collect your document. Thank you!`,
@@ -1206,246 +1214,169 @@ const ViewOnlineRequest = () => {
           console.log(err);
         }  
     };
-    
-    
-    const getMonthName = (monthNumber:number) => {
-      const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-      ];
-    
-      if (monthNumber >= 1 && monthNumber <= 12) {
-        return monthNames[monthNumber - 1];
-      } else {
-        return "Invalid month number";
+  
+    const [showReceivalForm, setShowReceivalForm] = useState(false);
+    const [receival, setReceival] = useState({
+      receivalName: "",
+      receivalWhen: new Date(),
+      receivalNotes: "",
+      recievalOther: "",
+    })
+
+    const handleReceivalSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if(!id) return;
+
+      const docRef = doc(db, "ServiceRequests", id);
+      const updatedData = {
+        ...(receival.receivalName === "Others" ? {
+           receivalName: receival.recievalOther 
+        }:{
+
+          receivalName: receival.receivalName,
+        }),
+        receivalWhen: receival.receivalWhen,
+        receivalNotes: receival.receivalNotes,
+        status: "Completed",
+        statusPriority: 3,
+      };
+
+      await updateDoc(docRef, updatedData);
+      setShowReceivalForm(false);
+      handleRequestIsDone();
+
+    }
+
+    const docPrinted = requestData?.docPrinted;
+
+    const print = async() => {
+      handlePrint(requestData);
+      
+      if(!id) return;
+      const docRef = doc(db, "ServiceRequests", id);
+      let updatedData: any = {
+          docPrinted: true,
+      };
+
+      // if(requestData?.sendTo === "Admin Staff"){
+      //   updatedData = {
+      //     ...updatedData,
+      //     status: "Pick-up",
+      //     statusPriority: 2,
+      //   }
+      // }
+
+      await updateDoc(docRef, updatedData);
+    }
+
+    const handleNextStep = async() => {
+      //handleSMS(); dito mag sesend ng SMS to the resident
+      if(!id) return;
+      let updatedData = {}
+      const docRef = doc(db, "ServiceRequests", id);
+
+      if(requestData?.sendTo ==="SAS"){
+         updatedData = {
+          status: "Pick-up",
+          statusPriority: 2,
+          sendTo: "Admin Staff",
+        }
+      }else{
+        updatedData = {
+          status: "Pick-up",
+          statusPriority: 2,
+        }
       }
+      router.push("/dashboard/ServicesModule/InBarangayRequests");
+      
+      await updateDoc(docRef, updatedData);
     }
 
-    function getOrdinal(n: number): string {
-      const suffixes = ["th", "st", "nd", "rd"];
-      const v = n % 100;
-      return n + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
+    const handleRequestIsDone = async() => {
+      if(!id) return;
+      const docRef = doc(db, "ServiceRequests", id);
+      const updatedData = {
+          status: "Completed",
+          statusPriority: 3,
+      };
+      await updateDoc(docRef, updatedData);
     }
-    
-    
-    const handlePrint = async() => {
-        if(!requestData) return
-        const dateToday = getLocalDateString(new Date());
-        const dayToday = getOrdinal(parseInt(dateToday.split("-")[2]));
-        const monthToday = getMonthName(parseInt(dateToday.split("-")[1]));
-        const yearToday = dateToday.split("-")[0];
-        let locationPath = "";
-        let reqData = {};
-        if(requestData?.purpose === "Death Residency"){
-            locationPath = "DeathResidency.pdf";
-            reqData = {
-                    "Text1":`${requestData?.fullName.toUpperCase()} (Deceased),`,
-                    "Text2": requestData?.address,
-                    "Text3": `${getMonthName(parseInt(requestData?.dateofdeath.split("-")[1]))} ${requestData?.dateofdeath.split("-")[2]}, ${requestData?.dateofdeath.split("-")[0]}`,
-                    "Text4": requestData?.requestor.toUpperCase(),
-                    "Text5": dayToday,
-                    "Text6": `${monthToday} ${yearToday}`,  
-                };
-        }
-        else if(requestData?.purpose === "Cohabitation" ){
-            if(requestData?.cohabitationRelationship ==="Husband And Wife")locationPath = "Certificate of cohab_marriage.pdf";
-            else locationPath = "Certificate of cohab_partners.pdf";
-            reqData = {
-                "Text1":`${requestData?.fullName.toUpperCase()}`,
-                "Text2": `${requestData?.partnerWifeHusbandFullName.toUpperCase()}`,
-                "Text3": requestData?.address,
-                "Text4": `${getMonthName(parseInt(requestData?.cohabitationStartDate.split("-")[1]))} ${requestData?.cohabitationStartDate.split("-")[2]}, ${requestData?.cohabitationStartDate.split("-")[0]}`,
-                "Text5": requestData?.requestor.toUpperCase(),
-                "Text6": dayToday,
-                "Text7": `${monthToday} ${yearToday}`,
-            };
-        }
-        else if(requestData?.purpose === "Occupancy /  Moving Out"){
-            locationPath = "certficate of moving out.pdf";
-            reqData = {
-                "Text1":`${requestData?.fullName.toUpperCase()}`,
-                "Text2": requestData?.address,
-                "Text3": requestData?.toAddress,
-                "Text4": requestData?.requestor.toUpperCase(),
-                "Text5": dayToday,
-                "Text6": `${monthToday} ${yearToday}`,
-            };
-        }
-        else if(requestData?.purpose === "Guardianship"){
-            if(requestData?.guardianshipType === "Legal Purpose") locationPath = "certifiacte of guardianship_legal.pdf";
-            else locationPath = "certifiacte of guardianship_school.pdf";
-            reqData = {
-                "Text1":`${requestData?.fullName.toUpperCase()}`,
-                "Text2": requestData?.address,
-                "Text3": requestData?.wardRelationship,
-                "Text4": `${requestData?.wardFname.toUpperCase()}`,
-                "Text5": requestData?.requestor.toUpperCase(),
-                "Text6": dayToday,
-                "Text7": `${monthToday} ${yearToday}`,
-            };
-        }
-        else if(requestData?.purpose === "Residency"){
-            locationPath = "certificate of residency.pdf";
-            reqData = {
-                "Text1":`${requestData?.fullName.toUpperCase()}`,
-                "Text2": requestData?.CYFrom,
-                "Text3": requestData?.CYTo,
-                "Text4": requestData?.address,
-                "Text5": requestData?.attestedBy.toUpperCase(),
-                "Text6": dayToday,
-                "Text7": `${monthToday} ${yearToday}`,
-            };
-        }
-        else if(requestData?.purpose === "Good Moral and Probation"){
-            if(requestData?.goodMoralPurpose === "Other Legal Purpose and Intent") locationPath = "certificate of goodmoral_a.pdf";
-            else locationPath = "certificate of goodmoral_b.pdf";
-            reqData = {
-                "Text1":`${requestData?.fullName.toUpperCase()}`,
-                "Text2": requestData?.address,
-                ...(requestData?.goodMoralPurpose === "Other Legal Purpose and Intent" ? {
-                    "Text3": dayToday,
-                    "Text4": `${monthToday} ${yearToday}`,
-                }:{
-                    "Text3": requestData?.goodMoralPurpose.toUpperCase(),
-                    "Text4": dayToday,
-                    "Text5": `${monthToday} ${yearToday}`,
-                })
-            };
-        }
-        else if(requestData?.purpose === "No Income"){
-            if(requestData?.noIncomePurpose === "SPES Scholarship") locationPath = "certificate of no income (scholarship).pdf";
-            else locationPath = "certificate of no income (esc).pdf";
-            reqData = {
-                "Text1":`${requestData?.fullName.toUpperCase()}`,
-                "Text2": requestData?.address,
-                "Text3": requestData?.fullName.toUpperCase(),
-                "Text4": requestData?.requestor.toUpperCase(),
-                "Text5": requestData?.noIncomeChildFName.toUpperCase(),
-                "Text6": dayToday,
-                "Text7": `${monthToday} ${yearToday}`,
-            }
-        }
-        else if(requestData?.purpose === "Estate Tax"){
-            locationPath = "certificate of estate tax.pdf";
-            reqData = {
-                "Text1":`${requestData?.fullName.toUpperCase()}`,
-                "Text2": requestData?.address,
-                "Text3": requestData?.dateOfResidency.split("-")[0],
-                "Text4": requestData?.fullName.toUpperCase(),
-                "Text5": `${getMonthName(parseInt(requestData?.dateofdeath.split("-")[1]))} ${requestData?.dateofdeath.split("-")[2]}, ${requestData?.dateofdeath.split("-")[0]}`,
-                "Text6": requestData?.estateSince.toUpperCase(),
-                "Text7": requestData?.requestor.toUpperCase(),
-                "Text8": dayToday,
-                "Text9": `${monthToday} ${yearToday}`,
-            }
-        }
-        //Garage PUV/TRU,
-        else if(requestData?.purpose === "Garage/TRU"){
-            locationPath = "certificate of tru.pdf";
-            reqData = {
-                "Text1":`${requestData?.fullName.toUpperCase()}`,
-                "Text2": requestData?.businessName.toUpperCase(),
-                "Text3": requestData?.businessLocation,
-                "Text4": `${toWords(parseInt(requestData?.noOfTRU)).toUpperCase()} (${requestData?.noOfTRU})`,
-                "Text5": requestData?.businessNature,
-                "Text6": requestData?.vehicleMake.toUpperCase(),
-                "Text7": requestData?.vehicleType,
-                "Text8": requestData?.vehiclePlateNo,
-                "Text9": requestData?.vehicleSerialNo,
-                "Text10": requestData?.vehicleChassisNo,
-                "Text11": requestData?.vehicleEngineNo,
-                "Text12": requestData?.vehicleFileNo,
-                "Text13": requestData?.requestor.toUpperCase(),
-                "Text14": dayToday,
-                "Text15": `${monthToday} ${yearToday}`,
-            };
-        }
-        else if(requestData?.purpose === "Garage/PUV"){
-            locationPath = "certificate of puv.pdf";
-            reqData = {
-                "Text1":`${requestData?.vehicleType.toUpperCase()}`,
-                "Text2": requestData?.fullName.toUpperCase(),
-                "Text3": requestData?.address.toUpperCase(),
-                "Text4": `${toWords(parseInt(requestData?.nosOfPUV)).toUpperCase()} (${requestData?.nosOfPUV})`,
-                "Text5": requestData?.puvPurpose,
-                "Text6": dayToday,
-                "Text7": `${monthToday} ${yearToday}`,
-            }
-
-        }
-
-
-        const response = await fetch("/api/fillPDF", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                location: "/ServiceRequests/templates",
-                pdfTemplate: locationPath,
-                data: reqData,
-            })
-        });
-        if(!response.ok)throw new Error("Failed to generate PDF");
-        
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_certificate.pdf`;
-        link.click();
-        URL.revokeObjectURL(url);
-        link.remove();
-
-    }
-
-    
-
+  
     return (
         <main className="main-container-services-onlinereq">
 
             {/* NEW CODE */}
-            {(userPosition === "Assistant Secretary" || userPosition === "Admin Staff") && (
+            {(userPosition === "Assistant Secretary" || userPosition === "Secretary" ||userPosition === "Admin Staff") && (
                 <>
-                    {((status !== "Rejected" && status !== "Completed") || (status === "Rejected" && requestData?.appointmentDate)) && (
-                    <div className="services-onlinereq-redirectionpage-section">
-                        {(status !== "Completed" && status !== "Rejected") && (
-                        <>
+                  {(status !== "Completed" && status !== "Rejected") && (
+                    <>
+                      <div className="services-onlinereq-redirectionpage-section">
+                        
+                        {!docPrinted && (
+                          <>
                             <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
-                            <div className="services-onlinereq-redirection-icons-section">
-                                <img src="/images/rejected.png" alt="user info" className="redirection-icons-info" />
-                            </div>
-                            <h1>Reject Request</h1>
+                              <div className="services-onlinereq-redirection-icons-section">
+                                  <img src="/images/rejected.png" alt="user info" className="redirection-icons-info" />
+                              </div>
+                              <h1>Reject Request</h1>
                             </button>
-
-                            <button className="services-onlinereq-redirection-buttons" onClick={handlePrint}>
-                            <div className="services-onlinereq-redirection-icons-section">
-                                <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
-                            </div>
-                            <h1>Generate Document</h1>
+                            <button className="services-onlinereq-redirection-buttons" onClick={print}>
+                              <div className="services-onlinereq-redirection-icons-section">
+                                  <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                              </div>
+                              <h1>Generate Document</h1>
                             </button>
-                        </>
+                          </>
+                        )}
+                        {docPrinted && (userPosition !== "Admin Staff") ? (
+                          <>
+                            <button className="services-onlinereq-redirection-buttons" onClick={handleNextStep}>
+                              <div className="services-onlinereq-redirection-icons-section">
+                                  <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                              </div>
+                              <h1>Notify Admin Staff</h1>
+                            </button>
+                          </>
+                        ) : docPrinted && (userPosition !== "Assistant Secretary" && userPosition !== "Secretary" ) && status !== "Pick-up" &&(
+                          <>
+                            <button className="services-onlinereq-redirection-buttons" onClick={handleNextStep}>
+                              <div className="services-onlinereq-redirection-icons-section">
+                                  <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                              </div>
+                              <h1>Notify Resident</h1>
+                            </button>
+                          </>
+                        )}
+                         {docPrinted && status === "Pick-up" && (
+                          <>
+                            <button className="services-onlinereq-redirection-buttons" onClick={() => setShowReceivalForm(true)}>
+                              <div className="services-onlinereq-redirection-icons-section">
+                                  <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                              </div>
+                              <h1>Document Received</h1>
+                            </button>
+                          </>
                         )}
 
-                        {status === "Pick-up" && (
-                        <button  onClick={handleSMS} className="services-onlinereq-redirection-buttons">
-                            <div className="services-onlinereq-redirection-icons-section">
-                            <img src="/images/sendSMS.png" alt="user info" className="redirection-icons-info" />
-                            </div>
-                            <h1>Send SMS</h1>
-                        </button>
-                        )}
-
+                        {/* {status === "Pick-up" && docPrinted && (
+                          <button  onClick={handleSMS} className="services-onlinereq-redirection-buttons">
+                              <div className="services-onlinereq-redirection-icons-section">
+                              <img src="/images/sendSMS.png" alt="user info" className="redirection-icons-info" />
+                              </div>
+                              <h1>Send SMS</h1>
+                          </button>
+                        )} */}
                         {requestData?.appointmentDate && (
-                        <button className="services-onlinereq-redirection-buttons" onClick={handleviewappointmentdetails}>
-                            <div className="services-onlinereq-redirection-icons-section">
-                            <img src="/images/appointment.png" alt="user info" className="redirection-icons-info" />
-                            </div>
-                            <h1>Appointment Details</h1>
-                        </button>
+                          <button className="services-onlinereq-redirection-buttons" onClick={handleviewappointmentdetails}>
+                              <div className="services-onlinereq-redirection-icons-section">
+                              <img src="/images/appointment.png" alt="user info" className="redirection-icons-info" />
+                              </div>
+                              <h1>Appointment Details</h1>
+                          </button>
                         )}
-                    </div>
-                    )}
+                      </div>
+                    </>
+                  )}
                 </>
             )}
 
@@ -1496,7 +1427,7 @@ const ViewOnlineRequest = () => {
                                             name="status"
                                             value={status}
                                             onChange={handleStatusChange}
-                                            disabled={requestData?.status === "Completed" || requestData?.status === "Rejected"} // Disable if already completed or rejected 
+                                            disabled
                                         >
                                             <option value="Pending">Pending</option>
                                             <option value="Pick-up">Pick-up</option>
@@ -1652,6 +1583,60 @@ const ViewOnlineRequest = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+
+            {showReceivalForm && (
+              <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md relative">
+                    <h2 className="text-xl font-semibold mb-4">Document Receival Form</h2>
+                    <form onSubmit={handleReceivalSubmit} className="space-y-4">
+                        <label className="block">
+                          <span className="block mb-1">Name of Person Receiving:</span>
+                            <select
+                                value={receival.receivalName}
+                                onChange={(e) => setReceival({ ...receival, receivalName: e.target.value })}
+                                className="w-full border border-gray-300 rounded px-3 py-2 mb-2"
+                                required
+                            >
+                              <option value={requestData?.requestorFname}>{requestData?.requestorFname}</option>
+                              <option value="Others">Others</option>
+                            </select>
+
+                            {receival.receivalName === "Others" && (
+                              <>
+                                <span className="block mb-1">Please specify:</span>
+                                <input
+                                    type="text"
+                                    value={receival.recievalOther}
+                                    onChange={(e) => setReceival({ ...receival, recievalOther: e.target.value })}
+                                    required
+                                    className="w-full border border-gray-300 rounded px-3 py-2"
+                                />
+                              </>
+                            )}                        
+                          
+                        </label>
+                        <label className="block">
+                            <span className="block mb-1">Notes (if any):</span>
+                            <textarea
+                                value={receival.receivalNotes}
+                                onChange={(e) => setReceival({ ...receival, receivalNotes: e.target.value })}
+                                className="w-full border border-gray-300 rounded px-3 py-2"
+                                rows={3}
+                            />
+                        </label>
+                        <div className="flex justify-end gap-2">
+                          <button type="button" onClick={() => setShowReceivalForm(false)} className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400">
+                            Close
+                          </button>
+                          <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">
+                            Submit
+                          </button>
+                        </div>
+                    </form>
+                  </div>
+              </div>
             )}
 
             {showPopup && (
