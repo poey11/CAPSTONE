@@ -52,7 +52,8 @@
   display: none;
   position: absolute;
   top: 100%; 
-  left: 0;
+  right: 25px;
+  left: -180px;
  background: linear-gradient(to right, #294c6b, #356f86, #3a849e);
   padding: 10px;
   z-index: 2; 
@@ -213,7 +214,7 @@ WITH INFO
 .notification-section {
   position: absolute;
   top: 72px; 
-  right: -250px;
+  right: 0px;
   width: 380px;
   height: 600px;
   background-color: #f9fafb;
@@ -406,4 +407,10 @@ padding: 20px;
 
 .delete-btn:hover .delete-icon-image {
   transform: scale(1.2);
+}
+
+.right-icons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }

@@ -38,10 +38,9 @@ export default function Dashboard() {
   
   // for in barangay incidents
   const [pendingIncidentReportsCount, setPendingIncidentReportsCount] = useState(0);
-  const [inProgressIncidentReportsCount, setInProgressIncidentReportsCount] = useState(0);
+  const [CFAIncidentReportsCount, setCFAIncidentReportsCount] = useState(0);
   const [settledIncidentReportsCount, setSettledIncidentReportsCount] = useState(0);
   const [archivedIncidentReportsCount, setArchivedIncidentReportsCount] = useState(0);
-  const [resolvedIncidentReportsCount, setResolvedIncidentReportsCount] = useState(0);
 
   // for online incidents
   const [onlineIncidentReportsPendingCount, setOnlineIncidentReportsPendingCount] = useState(0);
@@ -317,9 +316,8 @@ useEffect(() => {
   
           let pending = 0,
           settled = 0,
-          inprogress = 0,
           archived = 0,
-          resolved = 0,
+          CFA = 0,
           onlineInProgress = 0,
           onlinePending = 0,
           onlineSettled = 0;
@@ -338,18 +336,20 @@ useEffect(() => {
         } else {
           // IN-BARANGAY INCIDENT REPORTS
           if (status === "pending") pending++;
-          else if (status === "In - Progress") inprogress++;
-          else if (status === "Settled") settled++;
+          else if (status === "settled") settled++;
           else if (status === "archived") archived++;
-          else if (status === "resolved") resolved++;
+          else if (status === "CFA") CFA++;
         }
       });
-      
+
+
+      // for in barangay
       setPendingIncidentReportsCount(pending);
-      setInProgressIncidentReportsCount(inprogress);
       setSettledIncidentReportsCount(settled);
       setArchivedIncidentReportsCount(archived);
-      setResolvedIncidentReportsCount(resolved);
+      setCFAIncidentReportsCount(CFA);
+
+      // for online
       setOnlineIncidentReportsInProgressCount(onlineInProgress);
       setOnlineIncidentReportsPendingCount(onlinePending);
       setOnlineIncidentReportsSettledCount(onlineSettled);
@@ -392,11 +392,10 @@ useEffect(() => {
   const incidentMonthlyCounts: Record<string, Record<string, number>> = {};
 
   incidentReportsData.forEach((report) => {
-    const reportDate = new Date(report.dateFiled);
-
-    // Create month key as 'MMM yyyy' format
-    const monthKey = reportDate.toLocaleDateString("en-US", { year: "numeric", month: "short" });
-
+    const [year, month] = report.dateFiled.split("-"); // "2025-07-04" => ["2025", "07", "04"]
+    const monthName = new Date(`${year}-${month}-01`).toLocaleString("en-US", { month: "short" });
+    const monthKey = `${monthName} ${year}`;
+  
     // Initialize the department counts for this month if they don't exist
     if (!incidentMonthlyCounts[monthKey]) {
       incidentMonthlyCounts[monthKey] = {
@@ -407,10 +406,11 @@ useEffect(() => {
         Online: 0,
       };
     }
-
+  
     // Increment the count for the department
     incidentMonthlyCounts[monthKey][report.department] += 1;
   });
+  
 
   const formattedMonthlyData = Object.keys(incidentMonthlyCounts).map((month) => ({
       month,
@@ -498,15 +498,14 @@ useEffect(() => {
   const totalIncidentReportsChart = selectedIncidentType === 'inBarangay'
   ? {
       title: "Statuses of In-Barangay Incident Reports",
-      count: pendingIncidentReportsCount + inProgressIncidentReportsCount+ settledIncidentReportsCount + resolvedIncidentReportsCount + archivedIncidentReportsCount,
+      count: pendingIncidentReportsCount + CFAIncidentReportsCount+ settledIncidentReportsCount + archivedIncidentReportsCount,
       data: [
         { name: "Pending", value: pendingIncidentReportsCount },
-        { name: "In-Progress", value: inProgressIncidentReportsCount },
         { name: "Settled", value: settledIncidentReportsCount },
-        { name: "Resolved", value: resolvedIncidentReportsCount },
         { name: "Archived", value: archivedIncidentReportsCount },
+        { name: "CFA", value: CFAIncidentReportsCount },
       ],
-      colors: ["#FF9800", "#03A9F4", "#4CAF50", "#9E9E9E"],
+      colors: ["#FF9800", "#4CAF50", "#03A9F4", "#9E9E9E"],
     }
   : {
       title: "Statuses of Online Incident Reports",
