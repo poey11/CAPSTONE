@@ -47,7 +47,7 @@
 .main-section-departments td {
   padding: 1rem; 
   text-align: center; 
-  border-bottom: 1px solid #ddd;
+  border-bottom: 2px solid #ddd;
 color: rgb(44, 42, 42);
   font-weight: normal;
 }
@@ -137,32 +137,39 @@ Newly added for tables
 
 }
 
-.section-1-departments h1{
-    font-size: 2rem;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.5);
-   
+.section-1-departments h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
 }
 
+/* Modern primary action button */
 .add-announcement-btn-departments {
-    background-color:#e56723;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .add-announcement-btn-departments:hover {
-    background-color:#cc591b;
-  }
+  background-color: #e56723;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.25s ease, transform 0.2s ease;
+}
+
+.add-announcement-btn-departments:hover {
+  background-color: #cc591b;
+  transform: translateY(-1px);
+}
+
 
   .section-2-departments{
     display: flex;
     gap: 20px;
     padding: 0;
-    margin-top: 5px;
+    margin-top: 15px;
   }
 
   .search-bar-departments, .featuredStatus-departments{
@@ -176,14 +183,14 @@ Newly added for tables
     text-align: left;
   }
 
-  .search-bar-departments, .featuredStatus-departments:focus {
+  .search-bar-departments:focus, .featuredStatus-departments:focus {
     border-color: #f49028;
     outline: none;
     box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
 
   .featuredStatus-departments option {
-    color: rgba(0, 0, 0, 0.4); 
+    color: #000000; 
   }
 
 
