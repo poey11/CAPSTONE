@@ -2,7 +2,7 @@
 
 import { getSpecificDocument } from "@/app/helpers/firestorehelper";
 import { useSearchParams,useRouter } from "next/navigation";
-import { useEffect,useState } from "react";
+import { use, useEffect,useState } from "react";
 import { useSession } from "next-auth/react";
 import { getDownloadURL, ref } from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
@@ -10,7 +10,6 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot } from "firebase/firestore";
 import { handlePrint } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
-import { stat } from "fs";
 
 interface EmergencyDetails {
     fullName: string;
@@ -114,7 +113,7 @@ interface File {
 
 const ViewOnlineRequest = () => {
     const user = useSession().data?.user;
-    const userPosition = user?.position;
+    const [userPosition, setUserPosition] = useState<string | null>(null);
     const router = useRouter();
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
@@ -129,6 +128,13 @@ const ViewOnlineRequest = () => {
     const [otherDocuments, setOtherDocuments] = useState<
       { type: string; title: string; fields: { name: string }[] }[]
     >([]);
+
+    useEffect(() => {
+        if (user) {
+            setUserPosition(user.position || null);
+        }
+
+    },[user])
 
 
     useEffect(() => {
@@ -1223,6 +1229,7 @@ const ViewOnlineRequest = () => {
       recievalOther: "",
     })
 
+    console.log(receival);
     const handleReceivalSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       if(!id) return;
@@ -1255,13 +1262,15 @@ const ViewOnlineRequest = () => {
       if(!id) return;
       const docRef = doc(db, "ServiceRequests", id);
       let updatedData: any = {
+          status: "In - Progress",
+          statusPriority: 2,
           docPrinted: true,
       };
 
       // if(requestData?.sendTo === "Admin Staff"){
       //   updatedData = {
       //     ...updatedData,
-      //     status: "Pick-up",
+      //     status: "In - Progress",
       //     statusPriority: 2,
       //   }
       // }
@@ -1275,16 +1284,16 @@ const ViewOnlineRequest = () => {
       let updatedData = {}
       const docRef = doc(db, "ServiceRequests", id);
 
-      if(requestData?.sendTo ==="SAS"){
+      if(requestData?.sendTo === "SAS"){
          updatedData = {
           status: "Pick-up",
-          statusPriority: 2,
+          statusPriority: 3,
           sendTo: "Admin Staff",
         }
       }else{
         updatedData = {
           status: "Pick-up",
-          statusPriority: 2,
+          statusPriority: 3,
         }
       }
       router.push("/dashboard/ServicesModule/InBarangayRequests");
@@ -1297,16 +1306,24 @@ const ViewOnlineRequest = () => {
       const docRef = doc(db, "ServiceRequests", id);
       const updatedData = {
           status: "Completed",
-          statusPriority: 3,
+          statusPriority: 4,
       };
       await updateDoc(docRef, updatedData);
     }
-  
-    return (
+    console.log(userPosition);
+    console.log(requestData?.sendTo);
+    console.log(docPrinted);
+
+    return (  
         <main className="main-container-services-onlinereq">
 
-            {/* NEW CODE */}
-            {(userPosition === "Assistant Secretary" || userPosition === "Secretary" ||userPosition === "Admin Staff") && (
+        
+            {
+              (
+                (userPosition === "Admin Staff" && requestData?.sendTo === "Admin Staff") ||
+                (["Assistant Secretary", "Secretary"].includes(userPosition || "") && requestData?.sendTo === "SAS")
+              )
+              && (
                 <>
                   {(status !== "Completed" && status !== "Rejected") && (
                     <>
@@ -1337,7 +1354,7 @@ const ViewOnlineRequest = () => {
                               <h1>Notify Admin Staff</h1>
                             </button>
                           </>
-                        ) : docPrinted && (userPosition !== "Assistant Secretary" && userPosition !== "Secretary" ) && status !== "Pick-up" &&(
+                        ) : (docPrinted && !["Assistant Secretary", "Secretary"].includes(userPosition as string) && status !== "Pick-up") &&(
                           <>
                             <button className="services-onlinereq-redirection-buttons" onClick={handleNextStep}>
                               <div className="services-onlinereq-redirection-icons-section">
@@ -1430,6 +1447,7 @@ const ViewOnlineRequest = () => {
                                             disabled
                                         >
                                             <option value="Pending">Pending</option>
+                                            <option value="In - Progress">In - Progress</option>
                                             <option value="Pick-up">Pick-up</option>
                                             <option value="Completed">Completed</option>
                                             <option value="Rejected" disabled>Rejected</option>
@@ -1599,6 +1617,7 @@ const ViewOnlineRequest = () => {
                                 className="w-full border border-gray-300 rounded px-3 py-2 mb-2"
                                 required
                             >
+                              <option value="" disabled>Select Name</option>
                               <option value={requestData?.requestorFname}>{requestData?.requestorFname}</option>
                               <option value="Others">Others</option>
                             </select>

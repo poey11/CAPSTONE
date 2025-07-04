@@ -25,7 +25,6 @@ import { report } from "process";
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
   
-    if(user?.position === "Admin Staff" || user?.position === "Secretary" || user?.position === "Assistant Secretary"){
       useEffect(() => {
         let position = "";
         if(user?.position === "Admin Staff"){
@@ -73,8 +72,9 @@ import { report } from "process";
           console.log(error.message);
           }
         }, [user]);
-    }
-    else{
+        
+        
+      const [allRequests, setAllRequests] = useState<any[]>([]);
       useEffect(() => {
         try {
         const Collection = query(
@@ -96,8 +96,7 @@ import { report } from "process";
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
           });
         
-          setRequestData(reports);
-          setFilteredInBarangayRequests(reports); // add
+          setAllRequests(reports);
           setLoading(false);
           setError(null);
           console.log(requestData);
@@ -108,7 +107,7 @@ import { report } from "process";
         console.log(error.message);
         }
       }, []);
-    }
+
 
     /*
       FILTER LOGIC
@@ -214,13 +213,14 @@ const confirmDelete = () => {
 
         <main className="inbarangayreq-main-container">
          <div className="inbarangayreq-section-1">
-         
+          {(user?.position === "Admin Staff" || user?.position === "Secretary" || user?.position === "Assistant Secretary") && (
               <button
                 className="add-announcement-btn"
                 onClick={handleGenerateDocument}
               >
                 Generate Document
               </button>
+          )}
          </div>
 
          <div className="inbarangayreq-section-2">
@@ -264,7 +264,7 @@ const confirmDelete = () => {
               <option value="inProgress">In Progress</option>
             </select>
       </div>
-
+        Assigned Requests
        <div className="inbarangayreq-main-section">
         {loading ? (
             <p>Loading Online Requests...</p>
@@ -334,7 +334,57 @@ const confirmDelete = () => {
             </button>
         </div>
 
+        All Requests: {allRequests.length}     
+       <div className="inbarangayreq-main-section">
+        {loading ? (
+            <p>Loading Online Requests...</p>
+          ) : error ? (
+            <p className="error">{error}</p>
+          ) : allRequests.length === 0 ? (
+            <div className="no-result-card-inbarangay">
+              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
+              <p className="no-results-inbarangay">No Results Found</p>
+            </div>
+          ) : (
 
+          <table>
+            <thead>
+              <tr>
+                <th>Document Type</th>
+                <th>Request ID</th>
+                <th>Request Date</th>
+                <th>Requestor</th>
+                <th>Purpose</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allRequests.map((request, index) => (
+                <tr key={index}>
+                  <td>{request.docType}</td>
+                  <td>{request.requestId}</td>
+                  <td>{request.createdAt}</td>
+                  <td>{request.requestor}</td>
+                  <td>{request.purpose}</td>
+                  <td>
+                    <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
+                      {request.status}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="actions-inbarangay">
+                      <button className="action-inbarangay-view" onClick={() => handleView(request.id, request.reqType)}>
+                          <img src="/Images/view.png" alt="View" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
 
         {showPopup && (
                 <div className={`popup-overlay show`}>

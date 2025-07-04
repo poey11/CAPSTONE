@@ -104,7 +104,7 @@ export default function reasonForRejection() {
             const docRef = doc(db, "ServiceRequests", id);
             const updatedData = {
                 status: "Rejected",
-                statusPriority: 4,
+                statusPriority: 5,
                 rejectionReason: rejectionReason.reason,
                 sendTo: "Admin Staff",
             };
