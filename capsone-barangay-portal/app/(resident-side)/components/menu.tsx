@@ -137,23 +137,49 @@ const Menu = () => {
 
 
   
+
+  const filterValidNotifications = async (notifications: Notification[]) => {
+    return Promise.all(notifications.map(async notif => {
+      try {
+        if (notif.incidentID) {
+          const incidentSnap = await getDoc(doc(db, "IncidentReports", notif.incidentID));
+          if (!incidentSnap.exists()) return null;
+        }
+        if (notif.requestID) {
+          const serviceSnap = await getDoc(doc(db, "ServiceRequests", notif.requestID));
+          if (!serviceSnap.exists()) return null;
+        }
+        return notif;
+      } catch (err) {
+        console.error("Error checking linked docs:", err);
+        return null;
+      }
+    }))
+    .then(results => results.filter((notif): notif is Notification => notif !== null));
+  };
+  
   
 
   // Fetch Notifications for the logged-in user in real time
   useEffect(() => {
     if (user) {
       console.log("Fetching notifications for user:", user.uid);
-
+  
       const q = query(
         collection(db, "Notifications"),
-        where("residentID", "==", user.uid), orderBy("timestamp", "desc")
-      );  
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const fetchedNotifications: Notification[] = snapshot.docs.map((doc) => ({
+        where("residentID", "==", user.uid),
+        orderBy("timestamp", "desc")
+      );
+  
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const notifications = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        })) as Notification[]; // Explicitly cast to Notification[]
-        setNotifications(fetchedNotifications);
+        })) as Notification[];
+  
+        // Filter out if linked records don't exist
+        const filtered = await filterValidNotifications(notifications);
+        setNotifications(filtered);
       });
   
       return () => unsubscribe();

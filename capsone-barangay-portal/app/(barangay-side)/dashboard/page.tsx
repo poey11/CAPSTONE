@@ -1,10 +1,22 @@
 "use client";
 import "@/CSS/DashboardModule/dashboard.css";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { db } from "@/app/db/firebase";
-import { doc, collection, getDoc, getDocs, query, where } from "firebase/firestore";
+import { doc, collection, getDoc, getDocs, query, where, orderBy, onSnapshot } from "firebase/firestore";
 import {Area, AreaChart, PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import Heatmap from "@/app/(barangay-side)/components/heatmap";
+import LegendColorBox from "../components/legendColorBox";
+
+
+interface incidentProps{
+  id: string;
+  typeOfIncident: string;
+  createdAt: string;
+  areaOfIncident: string;
+  status: string;
+  department: string;
+}
 
 export default function Dashboard() {
 // for number of siteVisits 
@@ -26,13 +38,15 @@ export default function Dashboard() {
   
   // for in barangay incidents
   const [pendingIncidentReportsCount, setPendingIncidentReportsCount] = useState(0);
+  const [inProgressIncidentReportsCount, setInProgressIncidentReportsCount] = useState(0);
   const [settledIncidentReportsCount, setSettledIncidentReportsCount] = useState(0);
   const [archivedIncidentReportsCount, setArchivedIncidentReportsCount] = useState(0);
   const [resolvedIncidentReportsCount, setResolvedIncidentReportsCount] = useState(0);
 
   // for online incidents
   const [onlineIncidentReportsPendingCount, setOnlineIncidentReportsPendingCount] = useState(0);
-  const [onlineIncidentReportsAcknowledgedCount, setOnlineIncidentReportsAcknowledgedCount] = useState(0);
+  const [onlineIncidentReportsInProgressCount, setOnlineIncidentReportsInProgressCount] = useState(0);
+  const [onlineIncidentReportsSettledCount, setOnlineIncidentReportsSettledCount] = useState(0);
   
   // generel incident count
   const [BCPCReportsCount, setBCPCReportsCount] = useState(0);
@@ -91,6 +105,9 @@ export default function Dashboard() {
   
 
 []>([]);
+
+const [incidentData, setIncidentData] = useState<any[]>([]);
+const [filteredIncidents, setFilteredIncidents] = useState<any[]>([]);
   
 
 // site visits
@@ -162,15 +179,15 @@ useEffect(() => {
         const documentStatus = data.status;
         const accID = data.accID;
       
-        if (accID) { // if accID exists then online request
+        if (accID && accID != "Guest") { // if accID exists then online request
           if (documentStatus === "Pending") documentOnlinePending++;
-          else if (documentStatus === "Pick-Up") documentOnlinePickUp++;
+          else if (documentStatus === "Pick-up") documentOnlinePickUp++;
           else if (documentStatus === "Completed") documentOnlineCompleted++;
           else if (documentStatus === "Rejected") documentOnlineRejected++;
         } else {
             // If accID does NOT exist then in-barangay
             if (documentStatus === "Pending") documentNew++;
-            else if (documentStatus === "Pick-Up") documentInProgress++;
+            else if (documentStatus === "Pick-up") documentInProgress++;
             else if (documentStatus === "Completed") documentCompleted++;
           }
         });
@@ -183,40 +200,62 @@ useEffect(() => {
       setdocumentRequestInProgressCount(documentInProgress);
       setdocumentRequestCompletedCount(documentCompleted);
 
-      // for document requests stacked bar chart
-
       const DocumentRequestsWeeklyCounts: Record<string, { [key: string]: number }> = {};
 
       documentRequestsSnapshots.docs.forEach((doc) => {
         const data = doc.data();
-        const requestDate = new Date(data.requestDate?.toDate?.() || data.requestDate);
-        const docType = data.docType;
-
-        const startOfWeek = new Date(requestDate);
-        startOfWeek.setDate(requestDate.getDate() - ((requestDate.getDay() + 6) % 7)); // Monday start
+        let createdAt;
+      
+        // Try Firestore Timestamp or fallback to string
+        if (data.createdAt?.toDate) {
+          createdAt = data.createdAt.toDate();
+        } else if (data.createdAt) {
+          createdAt = new Date(data.createdAt);
+        }
+      
+        // Skip if invalid date
+        if (!createdAt || isNaN(createdAt.getTime())) {
+          console.warn("Skipping invalid createdAt for doc:", doc.id, data.createdAt);
+          return;
+        }
+      
+        let docType = data.docType;
+        if (docType.includes("Permit")) {
+          docType = "Barangay Permits";
+        }      
+        // Calculate week start (Monday) and end (Sunday)
+        const startOfWeek = new Date(createdAt);
+        startOfWeek.setDate(createdAt.getDate() - ((createdAt.getDay() + 6) % 7));
         startOfWeek.setHours(0, 0, 0, 0);
-
+      
         const endOfWeek = new Date(startOfWeek);
         endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-        const documentRequestsWeekLabel = `${startOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${endOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
-
-        if (!DocumentRequestsWeeklyCounts[documentRequestsWeekLabel]) {
-            DocumentRequestsWeeklyCounts[documentRequestsWeekLabel] = {};
+      
+        const weekLabel = `${startOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${endOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+      
+        if (!DocumentRequestsWeeklyCounts[weekLabel]) {
+          DocumentRequestsWeeklyCounts[weekLabel] = {};
         }
-
-        DocumentRequestsWeeklyCounts[documentRequestsWeekLabel][docType] = (DocumentRequestsWeeklyCounts[documentRequestsWeekLabel][docType] || 0) + 1;
+      
+        DocumentRequestsWeeklyCounts[weekLabel][docType] =
+          (DocumentRequestsWeeklyCounts[weekLabel][docType] || 0) + 1;
       });
-
-      // Flatten into array for recharts
+      
+      // Prepare data for Recharts
       const documentRequestFormattedWeeklyData = Object.entries(DocumentRequestsWeeklyCounts).map(([week, types]) => ({
         monthWeek: week,
         ...types,
       }));
-
-      documentRequestFormattedWeeklyData.sort((a, b) => new Date(a.monthWeek.split(" - ")[0]).getTime() - new Date(b.monthWeek.split(" - ")[0]).getTime());
-
+      
+      // Sort by parsed start date
+      documentRequestFormattedWeeklyData.sort((a, b) => {
+        const dateA = new Date(a.monthWeek.split(" - ")[0]);
+        const dateB = new Date(b.monthWeek.split(" - ")[0]);
+        return dateA.getTime() - dateB.getTime();
+      });
+      
       setdocumentRequestsByWeek(documentRequestFormattedWeeklyData);
+      
      
         const barangayUsersSnapshot = await getDocs(collection(db, "BarangayUsers"));
         setBarangayUsersCount(barangayUsersSnapshot.size);
@@ -278,10 +317,12 @@ useEffect(() => {
   
           let pending = 0,
           settled = 0,
+          inprogress = 0,
           archived = 0,
           resolved = 0,
+          onlineInProgress = 0,
           onlinePending = 0,
-          onlineAcknowledged = 0;
+          onlineSettled = 0;
       
       incidentReportsSnapshot.docs.forEach((doc) => {
         const data = doc.data();
@@ -290,23 +331,28 @@ useEffect(() => {
       
         if (department === "Online") {
           // ONLINE INCIDENT REPORTS
-          if (status === "Pending") onlinePending++;
-          else if (status === "Acknowledged") onlineAcknowledged++;
+          if (status === "pending") onlinePending++;
+          else if (status === "Settled") onlineSettled++;
+          else if (status === "In - Progress") onlineInProgress++;
+
         } else {
           // IN-BARANGAY INCIDENT REPORTS
-          if (status === "Pending") pending++;
+          if (status === "pending") pending++;
+          else if (status === "In - Progress") inprogress++;
           else if (status === "Settled") settled++;
-          else if (status === "Archived") archived++;
-          else if (status === "Resolved") resolved++;
+          else if (status === "archived") archived++;
+          else if (status === "resolved") resolved++;
         }
       });
       
       setPendingIncidentReportsCount(pending);
+      setInProgressIncidentReportsCount(inprogress);
       setSettledIncidentReportsCount(settled);
       setArchivedIncidentReportsCount(archived);
       setResolvedIncidentReportsCount(resolved);
+      setOnlineIncidentReportsInProgressCount(onlineInProgress);
       setOnlineIncidentReportsPendingCount(onlinePending);
-      setOnlineIncidentReportsAcknowledgedCount(onlineAcknowledged);
+      setOnlineIncidentReportsSettledCount(onlineSettled);
   
           let online = 0,
           gad = 0,
@@ -452,9 +498,10 @@ useEffect(() => {
   const totalIncidentReportsChart = selectedIncidentType === 'inBarangay'
   ? {
       title: "Statuses of In-Barangay Incident Reports",
-      count: pendingIncidentReportsCount + settledIncidentReportsCount + resolvedIncidentReportsCount + archivedIncidentReportsCount,
+      count: pendingIncidentReportsCount + inProgressIncidentReportsCount+ settledIncidentReportsCount + resolvedIncidentReportsCount + archivedIncidentReportsCount,
       data: [
         { name: "Pending", value: pendingIncidentReportsCount },
+        { name: "In-Progress", value: inProgressIncidentReportsCount },
         { name: "Settled", value: settledIncidentReportsCount },
         { name: "Resolved", value: resolvedIncidentReportsCount },
         { name: "Archived", value: archivedIncidentReportsCount },
@@ -463,10 +510,11 @@ useEffect(() => {
     }
   : {
       title: "Statuses of Online Incident Reports",
-      count: onlineIncidentReportsPendingCount + onlineIncidentReportsAcknowledgedCount,
+      count: onlineIncidentReportsPendingCount + onlineIncidentReportsSettledCount + onlineIncidentReportsInProgressCount,
       data: [
         { name: "Pending", value: onlineIncidentReportsPendingCount },
-        { name: "ACK", value: onlineIncidentReportsAcknowledgedCount },
+        { name: "In-Progress", value: onlineIncidentReportsInProgressCount },
+        { name: "Settled", value: onlineIncidentReportsSettledCount },
       ],
       colors: ["#FF9800", "#03A9F4"],
     };
@@ -480,7 +528,73 @@ useEffect(() => {
 
   // colors for each dashboard
 
-  const DEMOGRAPHICS_COLORS = ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"];  
+  const DEMOGRAPHICS_COLORS = ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"]; 
+  
+  
+  // incident heatmap
+
+  useEffect(() => {
+    const Collection = query(
+      collection(db,"IncidentReports"),
+      where("department", "!=", "Online"), 
+      orderBy("createdAt", "desc") // Order by createdAt in descending order
+    );
+
+    const unsubscribe = onSnapshot(Collection, (snapshot) => {
+      const data:any[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+       data.sort((a, b) => {
+        if(a.statusPriority !== b.statusPriority) {
+          return a.statusPriority - b.statusPriority; // Sort by status priority first
+        }
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA; // Sort by createdAt in descending order
+      });
+      setIncidentData(data);
+      setFilteredIncidents(data); // Initialize filteredIncidents with the full data set
+    })
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, []);
+
+  const [data, setData] = useState<incidentProps[]>([]);
+
+  useEffect(() => {
+    const incidentCollection = collection(db, "IncidentReports");
+
+    const q = query(
+      incidentCollection,
+      where("status", "in", ["pending", "In - Progress"]),
+      orderBy("createdAt", "desc") // Order by createdAt in descending order
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const filtered = snapshot.docs
+        .map((doc) => ({
+          ...(doc.data() as incidentProps),
+          id: doc.id,
+        })).filter(
+    (incident) =>
+    (incident.status === "pending" && incident.department !== "Online") ||
+    (incident.status === "In - Progress" && incident.department === "Online")
+)
+
+
+      setData(filtered as incidentProps[]);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const reportData: incidentProps[] = useMemo(() => {
+    return [...data]
+  }, [data]);
 
   return (
     <main className="main-container">
@@ -491,7 +605,7 @@ useEffect(() => {
      
           <div className="counts-metric-card">
             <div className="counts-card-left-side">
-              <Link href="/dashboard/admin">
+              <Link href="/dashboard/admin/ResidentUsers">
                 <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
                   Total Registered Users:
                 </p>
@@ -739,7 +853,7 @@ useEffect(() => {
 
             <div className="services-second-section">
                       
-                  <Link href="/dashboard/ServicesModule/InBarangayRequests">
+            <Link href="/dashboard/ServicesModule/InBarangayRequests">
               <p className="dashboard-title" style={{ cursor: "pointer", textDecoration: "underline" }}>
                 Weekly Barangay Requests Chart
               </p>
@@ -752,23 +866,13 @@ useEffect(() => {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="First Time Jobseeker" stackId="a" fill="#4CAF50" />
+                  <Bar dataKey="Barangay Jobseeker" stackId="a" fill="#4CAF50" />
                   <Bar dataKey="Barangay Clearance" stackId="a" fill="#2196F3" />
                   <Bar dataKey="Barangay Indigency" stackId="a" fill="#FF9800" />
                   <Bar dataKey="Barangay ID" stackId="a" fill="#9C27B0" />
                   <Bar dataKey="Barangay Certificate" stackId="a" fill="#00BCD4" />
+                  <Bar dataKey="Barangay Permits" stackId="a" fill="#F44336" />
 
-                  {/* Dynamically render all "Permit" related bars */}
-                  {Object.keys(documentRequestsByWeek[0] || {})
-                    .filter((key) => key.includes("Permit"))
-                    .map((key, index) => (
-                      <Bar
-                        key={key}
-                        dataKey={key}
-                        stackId="a"
-                        fill="#F44336"
-                      />
-                    ))}
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -830,7 +934,7 @@ useEffect(() => {
 
                       <div className="metric-card">
                           <div className="card-left-side">
-                        <Link href={selectedIncidentType === 'inBarangay' ? "/dashboard/IncidentModule/InBarangayReports" : "/dashboard/IncidentModule/OnlineReports"}>
+                        <Link href={selectedIncidentType === 'inBarangay' ? "/dashboard/IncidentModule" : "/dashboard/IncidentModule/OnlineReports"}>
                           <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
                             {totalIncidentReportsChart.title}
                           </p>
@@ -903,12 +1007,28 @@ useEffect(() => {
               </div>
                       
 
-                    </div>
+            </div>
 
-          </div>
-        
+            <div className="dashboard-heatmap-section">
+              <div className="title">
+                <p>Incident Heat Map</p>
+                <div className="ml-2 mt-2 p-2 bg-white shadow rounded w-fit text-sm border border-gray-300">
+                <div className="font-semibold mb-1">Incident Intensity</div>
+                <div className="flex gap-2 items-center">
+                  <LegendColorBox color="#00ff00" label="Low" />
+                  <LegendColorBox color="#ffff00" label="Medium" />
+                  <LegendColorBox color="#ff0000" label="High" />
+                </div>
+              </div>
 
-      
+              </div>
+
+              <div className="heatmap-container">
+                <Heatmap incidents={reportData}/>
+              </div>
+              
+            </div>
+        </div>
     </main>
   );
 }

@@ -146,7 +146,7 @@
 
 .dropdown-Container p {
   cursor: pointer;
-  color: #fffcfc;
+  color: #000000;
   transition: color 0.3s ease-in-out;
 }
 
@@ -258,21 +258,6 @@ box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
 }
 
 
-/*
-
-OLD
-.notification-item {
-  cursor: pointer;
-  border-bottom: 1px solid #d4cdc8;
-  height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: background-color 0.3s ease-in-out;
-}
-
-*/
-
 .notification-item {
     cursor: pointer;
   display: flex;
@@ -281,6 +266,8 @@ OLD
   border-bottom: 1px solid #e5e7eb;
   padding: 12px 0;
   transition: background 0.2s ease;
+  color: #000000;
+
 }
 .notification-item:hover {
  background-color: #f1f5f9;
@@ -303,8 +290,7 @@ OLD
    max-height: 7em;
   text-overflow: ellipsis;
   white-space: normal;
-  word-break: break-word; /* Ensures words wrap properly */
-  
+  word-break: break-word; /* Ensures words wrap properly */;
 }
 
 .notification-badge {
