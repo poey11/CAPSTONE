@@ -8,11 +8,13 @@ import Form from "@/app/(barangay-side)/components/accSetupForm";
 
 // @ts-ignore
 interface AccountSetupPageProps {
-  searchParams: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
+  // searchParams: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
 export default async function AccountSetupPage({searchParams}: AccountSetupPageProps) {
   const params = await searchParams;
+  
   const returnUrl = (params.returnUrl as string) || "/dashboard";
   const session = await getServerSession(authOptions);
   if (!session) {
