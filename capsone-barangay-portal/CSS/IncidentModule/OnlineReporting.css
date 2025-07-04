@@ -226,14 +226,14 @@ width: 100px;
   box-shadow: none;
 }
 
-.edit-incident-info-toggle-wrapper {
+.assigned-incident-info-toggle-wrapper {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-.info-toggle-btn {
+.info-toggle-btn-assigned {
   padding: 10px 20px;
  /* border: 1px solid transparent;*/
   border: 1px solid #214666;
@@ -247,11 +247,11 @@ width: 100px;
   text-transform: capitalize;
 }
 
-.info-toggle-btn:hover {
+.info-toggle-btn-assigned:hover {
   background-color: rgba(33, 70, 102, 0.1);
 }
 
-.info-toggle-btn.active {
+.info-toggle-btn-assigned.active {
   background-color: #214666;
   color: #ffffff;
   border: 1px solid #214666;
@@ -1060,28 +1060,6 @@ FILE UPLOAD SECTION DAMI KASI TANGINA!
   align-items: center;
   align-self: center;
 }
-
-
-.status-badge-view {
-  padding: 8px 12px;            
-  border-radius: 5px;          
-  font-size: 13px;              
-  color: white;                
-  display: inline-block;        
-  text-transform: capitalize;   
-  text-align: center;    
-  width: 200px; 
-  height: 40px;
-  }
-  
-  .status-badge-view.acknowledged {
-      background-color: #4caf50;   
-  }
-  
-  .status-badge-view.pending {
-      background-color: #325bd4;  
-  }
-
 
 
 
