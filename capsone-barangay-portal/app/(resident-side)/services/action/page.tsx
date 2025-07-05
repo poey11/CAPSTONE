@@ -376,7 +376,6 @@ export default function Action() {
             age: age.toString(),
             dateOfResidency: residentData.dateOfResidency || "",
             precinctnumber: residentData.precinctNumber || "",
-            citizenship: residentData.citizenship || "",
             requestorFname: fullName,
             requestorMrMs: mrms,
             residentId: residentData.id,
@@ -649,7 +648,7 @@ const handleFileChange = (
   
   
     // Handle form submission
-    const handleSubmit = (event: React.FormEvent) => {
+    const handleSubmit = async (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
 
       const contactPattern = /^09\d{9}$/; // Regex for Philippine mobile numbers
@@ -984,6 +983,19 @@ const handleFileChange = (
         handleReportUpload(clearanceVars, storageRefs);
       }
 
+      const notificationRef = collection(db, "BarangayNotifications");
+      await addDoc(notificationRef, {
+        message: `New ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
+        timestamp: new Date(),
+        requestorId: userData?.residentId,
+        isRead: false,
+        transactionType: "Online Service Request",
+        recipientRole: clearanceInput.purpose === "First Time Jobseeker"
+          ? "Assistant Secretary"
+          : "Admin Staff",
+        requestId: clearanceInput.requestId,
+      });
+      
 
      // alert("Document request submitted successfully!");
       router.push('/services/notification'); 
@@ -1193,7 +1205,7 @@ const handleFileChange = (
                               {!isGuest && (
                                 <>
                                   <option value="Barangay ID">Barangay ID</option>
-                                  <option value="First Time Jobseeker">First Time Jobseeker</option>
+                                  <option value="First Time Jobseeker">Jobseeker Certificate</option>
                                 </>
                               )}
 
