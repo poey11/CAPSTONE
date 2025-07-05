@@ -42,6 +42,11 @@ export default function KasambahayListModule() {
   const highlightResidentId = searchParams.get("highlight");
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
+
+const [filterNatureOfWork, setFilterNatureOfWork] = useState("");
+const [filterEmploymentArrangement, setFilterEmploymentArrangement] = useState("");
+
+
   useEffect(() => {
     if (highlightResidentId && filteredResidents.length > 0) {
       const targetIndex = filteredResidents.findIndex(resident => resident.id === highlightResidentId);
@@ -106,11 +111,19 @@ export default function KasambahayListModule() {
       });
     }
 
-    if (searchAddress) {
-      filtered = filtered.filter((resident) =>
-        resident.homeAddress.toLowerCase().includes(searchAddress.toLowerCase())
-      );
-    }
+        if (filterNatureOfWork) {
+          filtered = filtered.filter(
+            (resident) => String(resident.natureOfWork) === filterNatureOfWork
+          );
+        }
+
+        if (filterEmploymentArrangement) {
+          filtered = filtered.filter(
+            (resident) => String(resident.employmentArrangement) === filterEmploymentArrangement
+          );
+        }
+
+
 
     // Sorting by Registration Control Number
     filtered.sort((a, b) => {
@@ -126,7 +139,7 @@ export default function KasambahayListModule() {
     setCurrentPage(1);
 
     setFilteredResidents(filtered);
-  }, [searchName, searchAddress, showCount, residents, sortOrder]);
+  }, [searchName, filterNatureOfWork, filterEmploymentArrangement ,showCount, residents, sortOrder]);
 
 
   const handleAddResidentClick = () => {
@@ -250,13 +263,33 @@ export default function KasambahayListModule() {
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
-        <input
-          type="text"
-          className="resident-module-filter"
-          placeholder="Search by Address"
-          value={searchAddress}
-          onChange={(e) => setSearchAddress(e.target.value)}
-        />
+
+          <select
+            className="resident-module-filter"
+            value={filterNatureOfWork}
+            onChange={(e) => setFilterNatureOfWork(e.target.value)}
+          >
+            <option value="">Filter by Nature of Work</option>
+            <option value="1">Gen. House Help (All Around)</option>
+            <option value="2">YAYA</option>
+            <option value="3">COOK</option>
+            <option value="4">Gardener</option>
+            <option value="5">Laundry Person</option>
+            <option value="6">Others</option>
+          </select>
+
+          <select
+            className="resident-module-filter"
+            value={filterEmploymentArrangement}
+            onChange={(e) => setFilterEmploymentArrangement(e.target.value)}
+          >
+            <option value="">Filter by Employment Arrangement</option>
+            <option value="1">Live - IN</option>
+            <option value="2">Live - OUT</option>
+          </select>
+
+
+
       <select
           className="resident-module-filter"
           value={showCount}
@@ -279,67 +312,84 @@ export default function KasambahayListModule() {
       <p className="no-results-department">No Results Found</p>
     </div>
   ) : (
-    <table>
-    <thead>
-      <tr>
-        <th>
-          Registration Control Number
-          <button
-            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className="sort-button"
-          >
-            {sortOrder === "asc" ? "▲" : "▼"}
-          </button>
-        </th>
-        <th>Full Name</th>
-        <th>Home Address</th>
-        <th>Date of Birth</th>
-        <th>Place of Birth</th>
-        <th>Sex</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {currentResidents.map((resident) => {
-        const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
-        return (
-          <tr
-            key={resident.id}
-            data-id={resident.id}
-            className={highlightedId === resident.id ? "highlighted-row" : ""}
-          >
-            <td>{resident.registrationControlNumber}</td>
-            <td>{fullName}</td>
-            <td>{resident.homeAddress}</td>
-            <td>{resident.dateOfBirth}</td>
-            <td>{resident.placeOfBirth}</td>
-            <td>{resident.sex}</td>
+<table>
+  <thead>
+    <tr>
+      <th>
+        Registration Control Number
+        <button
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+          className="sort-button"
+        >
+          {sortOrder === "asc" ? "▲" : "▼"}
+        </button>
+      </th>
+      <th>Full Name</th>
+      <th>Home Address</th>
+      <th>Nature of Work</th>
+      <th>Employment Arrangement</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {currentResidents.map((resident) => {
+      const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
 
+      const natureOfWorkMap = {
+        1: "Gen. House Help (All Around)",
+        2: "YAYA",
+        3: "COOK",
+        4: "Gardener",
+        5: "Laundry Person",
+        6: "Others",
+      };
+
+      const employmentArrangementMap = {
+        1: "Live - IN",
+        2: "Live - OUT",
+      };
+
+      return (
+        <tr
+          key={resident.id}
+          data-id={resident.id}
+          className={highlightedId === resident.id ? "highlighted-row" : ""}
+        >
+          <td>{resident.registrationControlNumber}</td>
+          <td>{fullName}</td>
+          <td>{resident.homeAddress}</td>
+          <td>
+              {natureOfWorkMap[resident.natureOfWork as keyof typeof natureOfWorkMap] || "N/A"}
+            </td>
             <td>
-              <div className="residentmodule-actions">
-                <button
-                  className="residentmodule-action-view"
-                  onClick={() =>
-                    router.push(
-                      `/dashboard/ResidentModule/kasambahayList/ViewKasambahay?id=${resident.id}`
-                    )
-                  }
-                >
-                  <img src="/Images/view.png" alt="View" />
-                </button>
-                {!isAuthorized ? (
+              {employmentArrangementMap[resident.employmentArrangement as keyof typeof employmentArrangementMap] || "N/A"}
+            </td>
+
+          <td>
+            <div className="residentmodule-actions">
+              <button
+                className="residentmodule-action-view"
+                onClick={() =>
+                  router.push(
+                    `/dashboard/ResidentModule/kasambahayList/ViewKasambahay?id=${resident.id}`
+                  )
+                }
+              >
+                <img src="/Images/view.png" alt="View" />
+              </button>
+              {!isAuthorized ? (
                 <>
                   <button
                     className="residentmodule-action-edit hidden"
                     aria-hidden="true"
                   >
-                    <img src="/Images/edit.png" alt="View" />
+                    <img src="/Images/edit.png" alt="Edit" />
                   </button>
                   <button
                     className="residentmodule-action-delete hidden"
                     aria-hidden="true"
                   >
-                     <img src="/Images/delete.png" alt="View" />
+                    <img src="/Images/delete.png" alt="Delete" />
                   </button>
                 </>
               ) : (
@@ -348,7 +398,7 @@ export default function KasambahayListModule() {
                     className="residentmodule-action-edit"
                     onClick={() => handleEditClick(resident.id)}
                   >
-                    <img src="/Images/edit.png" alt="View" />
+                    <img src="/Images/edit.png" alt="Edit" />
                   </button>
                   <button
                     className="residentmodule-action-delete"
@@ -359,18 +409,18 @@ export default function KasambahayListModule() {
                       )
                     }
                   >
-                   <img src="/Images/delete.png" alt="View" />
+                    <img src="/Images/delete.png" alt="Delete" />
                   </button>
                 </>
               )}
+            </div>
+          </td>
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
 
-              </div>
-            </td>
-          </tr>
-        );
-      })}
-    </tbody>
-  </table>
   
   )}
 </div>
