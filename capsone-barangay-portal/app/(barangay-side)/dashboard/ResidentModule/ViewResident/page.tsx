@@ -30,6 +30,7 @@ export default function ViewResident() {
     address: "",
     dateOfBirth: "",
     placeOfBirth: "",
+    dateOfResidency: "",
     age: 0,
     sex: "",
     civilStatus: "",
@@ -69,6 +70,7 @@ export default function ViewResident() {
             address: docSnap.data().address || "",
             dateOfBirth: docSnap.data().dateOfBirth || "",
             placeOfBirth: docSnap.data().placeOfBirth || "",
+            dateOfResidency: docSnap.data().dateOfResidency || "",
             age: docSnap.data().age || 0,
             sex: docSnap.data().sex || "",
             civilStatus: docSnap.data().civilStatus || "",
@@ -328,6 +330,11 @@ useEffect(() => {
                 {activeSection === "full" && (
                   <>
                     <div className="view-main-resident-content-left-side">
+                      
+                      <div className="view-resident-fields-section">
+                        <p>Date of Residency</p>
+                        <input type="date" className="view-resident-input-field" name="dateOfResidency" value={formData.dateOfResidency || "N/A"}  max={new Date().toISOString().split("T")[0]} readOnly />
+                      </div>                    
                       <div className="view-resident-fields-section">
                         <p>Address</p><input type="text" className="view-resident-input-field" name="address" value={formData.address || "N/A"} readOnly />
                       </div>
@@ -352,10 +359,6 @@ useEffect(() => {
                         <input type="text" className="view-resident-input-field"  name="precinctNumber" value={formData.precinctNumber || "N/A"} readOnly />
                       </div> 
 
-                      <div className="view-resident-fields-section">
-                        <p>Citizenship</p>
-                        <input type="text" className="view-resident-input-field"  name="citizenship" value={formData.citizenship || "N/A"} readOnly />
-                      </div> 
                     </div>
 
                     <div className="view-main-resident-content-right-side">
@@ -383,6 +386,11 @@ useEffect(() => {
                         <p>Email Address</p>
                         <input type="email" className="view-resident-input-field" name="emailAddress" value={formData.emailAddress || "N/A"} readOnly />
                       </div>
+
+                      <div className="view-resident-fields-section">
+                        <p>Citizenship</p>
+                        <input type="text" className="view-resident-input-field"  name="citizenship" value={formData.citizenship || "N/A"} readOnly />
+                      </div> 
                     </div>
 
                   </>

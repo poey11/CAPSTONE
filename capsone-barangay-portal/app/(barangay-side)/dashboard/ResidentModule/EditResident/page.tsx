@@ -24,6 +24,7 @@ export default function EditResident() {
     address: "",
     dateOfBirth: "",
     placeOfBirth: "",
+    dateOfResidency: "",
     age: 0,
     sex: "",
     civilStatus: "",
@@ -81,6 +82,7 @@ export default function EditResident() {
     dateOfBirth: "basic",
     age: "full",
     placeOfBirth: "full",
+    dateOfResidency: "full",
     civilStatus: "full",
     generalLocation: "full",
     cluster: "full",
@@ -153,6 +155,7 @@ export default function EditResident() {
             address: docSnap.data().address || "",
             dateOfBirth: docSnap.data().dateOfBirth || "",
             placeOfBirth: docSnap.data().placeOfBirth || "",
+            dateOfResidency: docSnap.data().placeOfBirth || "",
             age: docSnap.data().age || 0,
             sex: docSnap.data().sex || "",
             civilStatus: docSnap.data().civilStatus || "",
@@ -646,6 +649,19 @@ export default function EditResident() {
                                   onChange={handleChange}
                                 />
                               </div>
+
+
+                              <div className="fields-section">
+                                  <p>Date of Residency<span className="required">*</span></p>
+                                    <input 
+                                      type="date"
+                                      className={`add-resident-input-field ${invalidFields.includes("dateOfResidency") ? "input-error" : ""}`}
+                                      name="dateOfResidency"
+                                      value={formData.dateOfResidency}
+                                      onChange={handleChange}
+                                      max={new Date().toISOString().split("T")[0]}
+                                      required />
+                                </div>
                        
                           </div>
 
@@ -688,23 +704,25 @@ export default function EditResident() {
                                       onChange={handleChange}
                                       required />
                               </div>
+
+                              <div className="add-main-resident-section-2-cluster">
+                                <div className="fields-section">
+                                  <p>Date of Birth<span className="required">*</span></p>
+                                    <input 
+                                      type="date"
+                                      className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
+                                      name="dateOfBirth"
+                                      value={formData.dateOfBirth}
+                                      onChange={handleChange}
+                                      max={new Date().toISOString().split("T")[0]}
+                                      required />
+                                </div>
+                              </div>
                           </div>
                         </div>
 
                         <div className="add-main-resident-section-2-full-bottom">
-                          <div className="add-main-resident-section-2-cluster">
-                            <div className="fields-section">
-                              <p>Date of Birth<span className="required">*</span></p>
-                                <input 
-                                  type="date"
-                                  className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
-                                  name="dateOfBirth"
-                                  value={formData.dateOfBirth}
-                                  onChange={handleChange}
-                                  max={new Date().toISOString().split("T")[0]}
-                                  required />
-                            </div>
-                          </div>
+
                         </div>
                         </>
                       )}
@@ -712,7 +730,6 @@ export default function EditResident() {
                       {activeSection === "full" && (
                         <>
                         <div className="add-main-resident-section-2-full-top">
-
                           <div className="add-main-resident-section-2-left-side">
                                 <div className="fields-section">
                                   <p>Age<span className="required">*</span></p>
