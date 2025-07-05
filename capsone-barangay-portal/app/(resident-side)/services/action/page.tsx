@@ -376,6 +376,7 @@ export default function Action() {
             age: age.toString(),
             dateOfResidency: residentData.dateOfResidency || "",
             precinctnumber: residentData.precinctNumber || "",
+            citizenship: residentData.citizenship || "",
             requestorFname: fullName,
             requestorMrMs: mrms,
             residentId: residentData.id
