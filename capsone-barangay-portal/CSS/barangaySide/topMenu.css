@@ -116,51 +116,60 @@ body {
     margin-top: 5px;
   }
 
-  .notification-section-brgyside {
-    position: absolute;
-    top: 89px; 
-    right: -210px;
-    width: 380px;
-    height: 600px;
-    /*background-color: #ed7014;*/
-    background-color: #f7e5d5;
-    border-radius: 8px;
-    /*padding: 20px;*/
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+
+
+
+
+
+
+
+
+
+  /*
+
+
+  */
+
+  .dropdown-Container {
+      display: block; 
+   position: relative;
+  }
+
+  
+  .dropdown-Container p {
+  display: block; 
+   position: relative;
+  }
+
+  .dropdown-Container-no-hover-notifications-brgy {
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.5s ease-in-out;
+  font-weight: normal;
+  font-size: 16px;
+  border-radius: 10px;
+  width: 60px;
+  }
+
+  .inbox-container-brgy{
+  position: relative;
+  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+}
+
+  .header-inboxicon-brgyside{
+    width: 100%; 
+    margin-top: 5px;
+    filter: invert(0%);
+    transition: filter 0.2s ease-in-out;
   }
   
-  .notification-title-brgyside {
-    font-size: 25px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    text-align: left;
-    color: #cbd5e1;
-  }
-  
-  .notification-content-brgyside {
-    /*max-height: 350px; /* Keep it scrollable */
-    max-height: 450px;
-    overflow-y: auto; /* Enable vertical scrolling */
-    padding-right: 5px; /* Avoid cutting off scrollbar */
-  }
-  
-  .notification-item-brgyside {
-    padding-left: 8px;
-    cursor: pointer;
-    /*border-bottom: 1px solid #f0eeee;*/
-    border-bottom: 1px solid #d4cdc8;
-    height: 90px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .notification-item-brgyside:hover {
-    background-color: #f5f5f58b;
+  .header-inboxicon-brgyside:hover{
+    filter: invert(24%) sepia(19%) saturate(924%) hue-rotate(174deg) brightness(93%) contrast(89%);
   }
   
   .notification-badge-brgyside {
@@ -180,23 +189,184 @@ body {
     transform: translate(50%, -50%);
   }
 
+  
+  .notification-section-brgyside {
+    position: absolute;
+    top: 65px; 
+    right: -150px;
+    width: 380px;
+    height: 600px;
+   background-color: #f9fafb;
+    border-radius: 12px;
+    /*padding: 20px;*/
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+      overflow: hidden;
+  }
 
-  .header-inboxicon-brgyside{
-    width: 100%; 
-    margin-top: 5px;
-    filter: invert(0%);
-    transition: filter 0.2s ease-in-out;
+    .top-section-brgyside{
+background: linear-gradient(to right, #1b3840, #214666, #2c5e73);
+/*background: linear-gradient(to right, #1f2e49, #284a66);*/
+padding: 20px;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+
+    
+  .notification-title-brgyside {
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 12px;
+  }
+
+.filter-container-brgy {
+    display: flex;
+  gap: 20px;
+  color: #FFFFFF
+}
+
+.filter-option-brgy{
+   background: transparent;
+  border: none;
+  color: #e0e0e0;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.3s, color 0.3s;
+  cursor: pointer;
+}
+
+.filter-option-brgy:hover,
+.filter-option-brgy.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.bottom-section-brgy {
+    padding: 20px;
+  background-color: #FFFFFF;
+    flex-grow: 1;
+  overflow: hidden;
+}
+
+  
+  .notification-content-brgyside {
+  max-height: 470px;
+  overflow-y: auto; 
+  padding-right: 5px; 
+    scrollbar-width: medium;
+  scrollbar-color: #cbd5e1 transparent;
   }
   
-  .header-inboxicon-brgyside:hover{
-    filter: invert(24%) sepia(19%) saturate(924%) hue-rotate(174deg) brightness(93%) contrast(89%);
+  .notification-content-brgyside p{
+  color: #000000;
+}
+
+.notification-content-brgyside::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-content-brgyside::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+
+
+  .notification-item-brgyside {
+    cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 0;
+  transition: background 0.2s ease;
+  color: #000000;
   }
   
-
-  .top-section-brgyside{
-    background-color: rgb(149, 150, 151);
-    padding-top: 20px;
-    padding-left: 20px;
-    padding-right: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+  .notification-item-brgyside:hover {
+    background-color: #f1f5f9;
+  box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
   }
+  
+  .message-section-brgy {
+      width: 100%;
+  text-align: left;
+  padding: 10px;
+  box-sizing: border-box;
+  height: 100px;
+  line-height: 1.5em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; /* Limit to two lines */
+  line-clamp: 3; /* Non-standard, but future-proof */
+  overflow: hidden;
+  /*max-height: 90px; /* Approximate height for two lines */
+   max-height: 7em;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word; /* Ensures words wrap properly */;
+  }
+
+  .unread-icon-section-brgy{
+  width: 15%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.unread-icon{
+  width: 10px;
+  filter: brightness(0) saturate(100%) invert(49%) sepia(85%) saturate(500%) hue-rotate(-10deg);
+}
+
+
+.delete-icon-section-brgy {
+  width: 10%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2px;
+}
+
+.delete-btn-brgy {
+  background: transparent;
+  border: none;
+  color: #d11a2a;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.delete-btn-brgy:hover {
+  transform: scale(1.2);
+}
+
+
+.delete-icon-image-brgy {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%) invert(18%) sepia(96%) saturate(7491%) hue-rotate(-8deg) brightness(94%) contrast(107%);
+  transition: transform 0.2s ease;
+}
+
+.delete-btn-brgy:hover .delete-icon-image-brgy {
+  transform: scale(1.2);
+}
+
+
+.no-messages-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.no-messages-container p {
+  color: red;
+  font-weight: bold;
+  padding-top: 200px;
+}

@@ -263,35 +263,37 @@ export default function Header() {
   }, [pathname, searchParams.toString()]);
 
   return (
-    <div className="header-main-container">
-      <div className="add-resident-main-header">
-      <div className="path-section">
-          {routeInfo.breadcrumb.map((crumb, index) => {
-            const isLast = index === routeInfo.breadcrumb.length - 1;
-            const Tag = isLast ? "h2" : "h1";
+<div className="header-main-container">
+  <div className="add-resident-main-header">
+    <div className="path-section">
+      {routeInfo.breadcrumb.map((crumb, index) => {
+        const isLast = index === routeInfo.breadcrumb.length - 1;
+        const Tag = isLast ? "h2" : "h1";
 
-            // Build the dynamic href from the pathname
-            const pathSegments = pathname.split("/").filter(Boolean);
-            const href = "/" + pathSegments.slice(0, index + 1).join("/");
+        const pathSegments = pathname.split("/").filter(Boolean);
+        const href = "/" + pathSegments.slice(0, index + 1).join("/");
 
-            return (
-              <Tag className="breadcrumb" key={index}>
-                {!isLast && index !== 0 ? (
-                  <Link href={href}>{crumb}</Link>
-                ) : (
-                  crumb
-                )}
-                {!isLast && <span className="chevron">/</span>}
-              </Tag>
-            );
-          })}
-        </div>
-
-        <div className="addresident-page-title-section-1">
-          <h1>{routeInfo.title}</h1>
-        </div>
-      </div>
+        return (
+          <Tag className="breadcrumb" key={index}>
+            {!isLast && index !== 0 ? (
+              <Link href={href} className="breadcrumb-link">
+                {crumb}
+              </Link>
+            ) : (
+              crumb
+            )}
+            {!isLast && <span className="chevron">/</span>}
+          </Tag>
+        );
+      })}
     </div>
+
+    <div className="addresident-page-title-section-1">
+      <h1>{routeInfo.title}</h1>
+    </div>
+  </div>
+</div>
+
   );
 }
 

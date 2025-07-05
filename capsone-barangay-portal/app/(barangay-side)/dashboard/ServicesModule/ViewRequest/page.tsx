@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { getDownloadURL, ref } from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
-import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot } from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot, getDoc } from "firebase/firestore";
 import { handlePrint } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
 
@@ -1074,7 +1074,8 @@ const ViewOnlineRequest = () => {
       
     const currentPurpose = requestData?.purpose as keyof typeof predefinedFieldSections;
     const currentSections = predefinedFieldSections[currentPurpose] || {};
-
+    const [resolvedImageUrls, setResolvedImageUrls] = useState<Record<string, string>>({});
+    
     useEffect(() => {
       const resolveFilenamesToUrls = async () => {
         if (!requestData) return;
@@ -1315,34 +1316,28 @@ const ViewOnlineRequest = () => {
     const [receival, setReceival] = useState({
       receivalName: "",
       receivalWhen: new Date(),
-      receivalNotes: "",
-      recievalOther: "",
     })
 
     console.log(receival);
+
     const handleReceivalSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      if(!id) return;
-
+      if (!id) return;
+    
       const docRef = doc(db, "ServiceRequests", id);
+      const currentDateTime = new Date(); 
+    
       const updatedData = {
-        ...(receival.receivalName === "Others" ? {
-           receivalName: receival.recievalOther 
-        }:{
-
-          receivalName: receival.receivalName,
-        }),
-        receivalWhen: receival.receivalWhen,
-        receivalNotes: receival.receivalNotes,
+        receivalName: receival.receivalName,
+        receivalWhen: currentDateTime,
         status: "Completed",
         statusPriority: 3,
       };
-
+    
       await updateDoc(docRef, updatedData);
       setShowReceivalForm(false);
       handleRequestIsDone();
-
-    }
+    };
 
     const docPrinted = requestData?.docPrinted;
 
@@ -1367,6 +1362,27 @@ const ViewOnlineRequest = () => {
 
       await updateDoc(docRef, updatedData);
     }
+
+    useEffect(() => {
+      const fetchReceivalData = async () => {
+        if (!id) return;
+    
+        const docRef = doc(db, "ServiceRequests", id);
+        const docSnap = await getDoc(docRef);
+    
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setReceival({
+            receivalName: data.receivalName || "",
+            receivalWhen: data.receivalWhen?.seconds
+              ? new Date(data.receivalWhen.seconds * 1000) // Convert Firestore Timestamp to JS Date
+              : data.receivalWhen || "", // fallback
+          });
+        }
+      };
+    
+      fetchReceivalData();
+    }, [id]);
 
     const handleNextStep = async() => {
       //handleSMS(); dito mag sesend ng SMS to the resident
@@ -1502,19 +1518,26 @@ const ViewOnlineRequest = () => {
 
                     <div className="services-onlinereq-header-body-top-section">
                         <div className="services-onlinereq-info-toggle-wrapper">
-                            {["basic", "full", ...(requestData?.purpose === "Barangay ID" ? ["emergency"] : []), "others"].map((section) => (
-                                <button
-                                key={section}
-                                type="button"
-                                className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                                onClick={() => setActiveSection(section)}
-                                >
-                                {section === "basic" && "Basic Info"}
-                                {section === "full" && "Full Info"}
-                                {section === "emergency" && "Emergency Info"}
-                                {section === "others" && "Others"}
-                                </button>
-                            ))}
+                        {[
+                            "basic",
+                            "full",
+                            ...(requestData?.purpose === "Barangay ID" ? ["emergency"] : []),
+                            "others",
+                            ...(requestData?.status === "Completed" ? ["received"] : [])
+                          ].map((section) => (
+                            <button
+                              key={section}
+                              type="button"
+                              className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                              onClick={() => setActiveSection(section)}
+                            >
+                              {section === "basic" && "Basic Info"}
+                              {section === "full" && "Full Info"}
+                              {section === "emergency" && "Emergency Info"}
+                              {section === "others" && "Others"}
+                              {section === "received" && "Received"}
+                            </button>
+                          ))}
                         </div> 
                     </div>
 
@@ -1530,7 +1553,8 @@ const ViewOnlineRequest = () => {
                                     <div className="services-onlinereq-status-section-view">
                                         <select
                                             id="status"
-                                            className={`services-onlinereq-status-dropdown ${status ? status[0].toLowerCase() + status.slice(1):""}`}
+                                            className={`services-onlinereq-status-dropdown ${status?.toLowerCase().replace(/\s*-\s*/g, "-") || ""}`}
+
                                             name="status"
                                             value={status}
                                             onChange={handleStatusChange}
@@ -1616,58 +1640,107 @@ const ViewOnlineRequest = () => {
 
 
                                 {activeSection === "emergency" && (
-                                <div className="services-onlinereq-content" style={{ display: 'flex', gap: '2rem' }}>
-                                  <div className="services-onlinereq-content-left-side" style={{ flex: 1 }}>
-                                    <div className="services-onlinereq-fields-section">
-                                      <p>Emergency Contact Full Name</p>
-                                      <input
-                                        type="text"
-                                        className="services-onlinereq-input-field"
-                                        value={requestData?.emergencyDetails?.fullName || ""}
-                                        readOnly
-                                      />
-                                    </div>
-                                    <div className="services-onlinereq-fields-section">
-                                      <p>Emergency Contact Address</p>
-                                      <input
-                                        type="text"
-                                        className="services-onlinereq-input-field"
-                                        value={requestData?.emergencyDetails?.address || ""}
-                                        readOnly
-                                      />
-                                    </div>
-                                    
-                                  </div>
+                                  <>
+                                    <div className="services-onlinereq-content" style={{ display: 'flex', gap: '2rem' }}>
+                                      <div className="services-onlinereq-content-left-side" style={{ flex: 1 }}>
+                                        <div className="services-onlinereq-fields-section">
+                                          <p>Emergency Contact Full Name</p>
+                                          <input
+                                            type="text"
+                                            className="services-onlinereq-input-field"
+                                            value={requestData?.emergencyDetails?.fullName || ""}
+                                            readOnly
+                                          />
+                                        </div>
+                                        <div className="services-onlinereq-fields-section">
+                                          <p>Emergency Contact Address</p>
+                                          <input
+                                            type="text"
+                                            className="services-onlinereq-input-field"
+                                            value={requestData?.emergencyDetails?.address || ""}
+                                            readOnly
+                                          />
+                                        </div>
+                                        
+                                      </div>
 
-                                  <div className="services-onlinereq-content-right-side" style={{ flex: 1 }}>
-                                    <div className="services-onlinereq-fields-section">
-                                      <p>Emergency Contact Number</p>
-                                      <input
-                                        type="text"
-                                        className="services-onlinereq-input-field"
-                                        value={requestData?.emergencyDetails?.contactNumber || ""}
-                                        readOnly
-                                      />
-                                    </div>
+                                      <div className="services-onlinereq-content-right-side" style={{ flex: 1 }}>
+                                        <div className="services-onlinereq-fields-section">
+                                          <p>Emergency Contact Number</p>
+                                          <input
+                                            type="text"
+                                            className="services-onlinereq-input-field"
+                                            value={requestData?.emergencyDetails?.contactNumber || ""}
+                                            readOnly
+                                          />
+                                        </div>
 
-                                    <div className="services-onlinereq-fields-section">
-                                      <p>Relationship</p>
-                                      <input
-                                        type="text"
-                                        className="services-onlinereq-input-field"
-                                        value={requestData?.emergencyDetails?.relationship || ""}
-                                        readOnly
-                                      />
+                                        <div className="services-onlinereq-fields-section">
+                                          <p>Relationship</p>
+                                          <input
+                                            type="text"
+                                            className="services-onlinereq-input-field"
+                                            value={requestData?.emergencyDetails?.relationship || ""}
+                                            readOnly
+                                          />
+                                        </div>
+                                        
+                                      </div>
                                     </div>
-                                    
-                                  </div>
-                                </div>
-                              )}
-                                
+                                  </>
+                                )}
+
 
                                 {activeSection === "others" && <> {renderSection("others")} </>}
 
+
+                                {activeSection === "received" && (
+                                  <>
+                                    <div className="services-onlinereq-content" style={{ display: 'flex', gap: '2rem' }}>
+                                      <div className="services-onlinereq-content-left-side" style={{ flex: 1 }}>
+                                        <div className="services-onlinereq-fields-section">
+                                          <p>Receival Name</p>
+                                          <input
+                                            type="text"
+                                            className="services-onlinereq-input-field"
+                                            value={receival?.receivalName}
+                                            readOnly
+                                          />
+                                        </div>
+                                      </div>
+
+                                      <div className="services-onlinereq-content-right-side" style={{ flex: 1 }}>
+
+                                      <div className="services-onlinereq-fields-section">
+                                        <p>Receival Date and Time</p>
+                                        <input
+                                          type="text"
+                                          className="services-onlinereq-input-field"
+                                          value={
+                                            receival?.receivalWhen
+                                              ? new Date(receival.receivalWhen).toLocaleString("en-US", {
+                                                  year: "numeric",
+                                                  month: "long",
+                                                  day: "numeric",
+                                                  hour: "2-digit",
+                                                  minute: "2-digit",
+                                                  hour12: true,
+                                                })
+                                              : ""
+                                          }
+                                          
+                                          readOnly
+                                        />
+                                      </div>
+
+
+                                       
                                         
+                                      </div>
+                                    </div>
+                                  
+                                  </>
+                                )}  
 
                                 </div>
                             </div>
@@ -1695,56 +1768,61 @@ const ViewOnlineRequest = () => {
 
 
             {showReceivalForm && (
-              <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-                <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md relative">
-                    <h2 className="text-xl font-semibold mb-4">Document Receival Form</h2>
-                    <form onSubmit={handleReceivalSubmit} className="space-y-4">
-                        <label className="block">
-                          <span className="block mb-1">Name of Person Receiving:</span>
-                            <select
-                                value={receival.receivalName}
-                                onChange={(e) => setReceival({ ...receival, receivalName: e.target.value })}
-                                className="w-full border border-gray-300 rounded px-3 py-2 mb-2"
-                                required
-                            >
-                              <option value="" disabled>Select Name</option>
-                              <option value={requestData?.requestorFname}>{requestData?.requestorFname}</option>
-                              <option value="Others">Others</option>
-                            </select>
+              <div className="view-doc-receival-form-popup-overlay">
+                <div className="doc-receival-popup">
+                  <h2>Document Receival Form</h2>
+                  <form onSubmit={handleReceivalSubmit} className="doc-receival-form">
+                    
 
-                            {receival.receivalName === "Others" && (
-                              <>
-                                <span className="block mb-1">Please specify:</span>
-                                <input
-                                    type="text"
-                                    value={receival.recievalOther}
-                                    onChange={(e) => setReceival({ ...receival, recievalOther: e.target.value })}
-                                    required
-                                    className="w-full border border-gray-300 rounded px-3 py-2"
-                                />
-                              </>
-                            )}                        
-                          
-                        </label>
-                        <label className="block">
-                            <span className="block mb-1">Notes (if any):</span>
-                            <textarea
-                                value={receival.receivalNotes}
-                                onChange={(e) => setReceival({ ...receival, receivalNotes: e.target.value })}
-                                className="w-full border border-gray-300 rounded px-3 py-2"
-                                rows={3}
-                            />
-                        </label>
-                        <div className="flex justify-end gap-2">
-                          <button type="button" onClick={() => setShowReceivalForm(false)} className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400">
-                            Close
-                          </button>
-                          <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">
-                            Submit
-                          </button>
-                        </div>
-                    </form>
-                  </div>
+                    <div className="services-onlinereq-doc-receival-form-section">
+                      <p>Name of Person Receiving</p>
+                      <select
+                        value={receival.receivalName}
+                        onChange={(e) => setReceival({ ...receival, receivalName: e.target.value })}
+                        className="services-onlinereq-input-field"
+                        required
+                      >
+                        <option value="" disabled>Select Name</option>
+                        <option value={requestData?.requestorFname}>{requestData?.requestorFname}</option>
+                      </select>
+                    </div>
+
+                    <div className="services-onlinereq-doc-receival-form-section">
+                      <p>Current Date and Time</p>
+                      <input
+                        type="text"
+                        className="services-onlinereq-input-field"
+                        value={new Date().toLocaleString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: true,
+                        })}
+                        readOnly
+                      />
+                    </div>
+
+                    <div className="doc-receivalform-buttons-section">
+                      <div className="doc-receivalform-action-buttons">
+                        <button 
+                          className="doc-receivalform-action-close" 
+                          onClick={() => setShowReceivalForm(false)}
+                        >
+                          Close
+                        </button>
+                        
+                        <button 
+                          className="doc-receivalform-action-submit" 
+                        >
+                          Submit
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
               </div>
             )}
 
