@@ -30,7 +30,7 @@ export default function EditResident() {
     occupation: "",
     contactNumber: "",
     emailAddress: "",
-    precinctNumber: "",
+    citizenship: "",
     generalLocation: "",
     cluster: "",
     isStudent: false,
@@ -159,7 +159,7 @@ export default function EditResident() {
             occupation: docSnap.data().occupation || "",
             contactNumber: docSnap.data().contactNumber || "",
             emailAddress: docSnap.data().emailAddress || "",
-            precinctNumber: docSnap.data().precinctNumber || "",
+            citizenship: docSnap.data().citizenship || "",
             generalLocation: docSnap.data().generalLocation || "",
             cluster: docSnap.data().cluster || "",
             isStudent: docSnap.data().isStudent || false,
@@ -798,9 +798,82 @@ export default function EditResident() {
                                     </div>
 
                                     <div className="fields-section">
-                                      <p>Precinct Number</p>
-                                      <input type="text" className="add-resident-input-field" placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} />
-                                    </div> 
+                                <p>Citizenship<span className="required">*</span></p>
+                                <select
+                                  name="citizenship"
+                                  className={`add-resident-input-field ${invalidFields.includes("citizenship") ? "input-error" : ""}`}
+                                  value={
+                                    ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(
+                                      formData.citizenship.split("(")[0]
+                                    ) ? formData.citizenship.split("(")[0] : ""
+                                  }
+                                  onChange={(e) => {
+                                    const selected = e.target.value;
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      citizenship: selected
+                                    }));
+                                  }}
+                                  required
+                                >
+                                  <option value="" disabled>Select Citizenship</option>
+                                  <option value="Filipino">Filipino</option>
+                                  <option value="Dual Citizen">Dual Citizen</option>
+                                  <option value="Naturalized">Naturalized</option>
+                                  <option value="Others">Others</option>
+                                </select>
+
+                                {/* Input for Dual Citizen */}
+                                {formData.citizenship.startsWith("Dual Citizen") && (
+                                  <input
+                                    type="text"
+                                    className={`add-resident-input-field ${invalidFields.includes("citizenship") ? "input-error" : ""}`}
+                                    placeholder="Specify other citizenship (e.g., American)"
+                                    value={
+                                      formData.citizenship.includes("(")
+                                        ? formData.citizenship.slice(
+                                            formData.citizenship.indexOf("(") + 1,
+                                            formData.citizenship.indexOf(")")
+                                          )
+                                        : ""
+                                    }
+                                    onChange={(e) => {
+                                      const val = e.target.value.trim();
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        citizenship: val ? `Dual Citizen(${val})` : "Dual Citizen"
+                                      }));
+                                    }}
+                                    required
+                                  />
+                                )}
+
+                                {/* Input for Others */}
+                                {formData.citizenship.startsWith("Others") && (
+                                  <input
+                                    type="text"
+                                    className={`add-resident-input-field ${invalidFields.includes("citizenship") ? "input-error" : ""}`}
+                                    placeholder="Please specify your citizenship"
+                                    value={
+                                      formData.citizenship.includes("(")
+                                        ? formData.citizenship.slice(
+                                            formData.citizenship.indexOf("(") + 1,
+                                            formData.citizenship.indexOf(")")
+                                          )
+                                        : ""
+                                    }
+                                    onChange={(e) => {
+                                      const val = e.target.value.trim();
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        citizenship: val ? `Others(${val})` : "Others"
+                                      }));
+                                    }}
+                                    required
+                                  />
+                                )}
+                              </div>
+
                                     
                             </div>
 
