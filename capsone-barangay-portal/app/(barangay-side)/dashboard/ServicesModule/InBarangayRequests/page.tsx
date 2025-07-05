@@ -47,9 +47,13 @@ import { report } from "process";
             }));
 
              // Filter based on sendTo field
-            const filterReports = reports.filter(
+            let filterReports = reports.filter(
               (report) => report.sendTo === position
             );
+
+            if (user?.position === "Admin Staff") {
+              filterReports = filterReports.filter((report) => report.status === "Pick-up");
+            }
 
             filterReports.sort((a, b) => {
               if (a.statusPriority !== b.statusPriority) {
@@ -228,7 +232,7 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
             onClick={() => setActiveSection(section)}
             style={{ position: "relative" }}
             >
-            {section === "main" && "Online Records"}
+            {section === "main" && "All Requests"}
             {section === "tasks" && (
               <>
                 Assigned Tasks
@@ -242,12 +246,12 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
           </div> 
          </div>
          <div className="section-generate-doc">
-          {(user?.position === "Admin Staff" || user?.position === "Secretary" || user?.position === "Assistant Secretary") && (
+          {(user?.position === "Admin Staff") && (
                 <button
                   className="add-announcement-btn"
                   onClick={handleGenerateDocument}
                 >
-                  Generate Document
+                  New Document Request
                 </button>
             )}
          </div>
