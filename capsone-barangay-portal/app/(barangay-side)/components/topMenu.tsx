@@ -21,6 +21,7 @@ type BarangayNotification = {
   incidentID: string;
   isRead?: boolean;
   requestID: string;
+  department: string;
 };
 
 interface User {
@@ -33,6 +34,7 @@ interface User {
 
 export default function TopMenu() {
   const [notifications, setNotifications] = useState<BarangayNotification[]>([]);
+  const [tasks, setTasks] = useState<BarangayNotification[]>([]);
   const [filter, setFilter] = useState("all");
   const [isNotificationOpen, setNotificationOpen] = useState(false);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
@@ -81,60 +83,61 @@ export default function TopMenu() {
   
   
 
-useEffect(() => {
-  if (session && session?.user?.id && userPosition) {
-    console.log("Fetching notifications for user:", userPosition, "and id:", session?.user?.id);
-
-    // Listen for both: by role
-    const qRole = query(
-      collection(db, "BarangayNotifications"),
-      where("recipientRole", "==", userPosition),
-      orderBy("timestamp", "desc")
-    );
-
-    // and by respondentID
-    const qRespondent = query(
-      collection(db, "BarangayNotifications"),
-      where("respondentID", "==", session?.user?.id),
-      orderBy("timestamp", "desc")
-    );
-
-    // Set up both listeners
-    const unsubRole = onSnapshot(qRole, async (snapshot) => {
-      const notifications = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as BarangayNotification[];
-    
-      // Check existence of linked documents
-      const filtered = await filterValidNotifications(notifications);
-      setNotifications(prev => {
-        const merged = [...prev, ...filtered];
-        const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
-        return unique.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
+  useEffect(() => {
+    if (session && session?.user?.id && userPosition) {
+      console.log("Fetching notifications for user:", userPosition, "and id:", session?.user?.id);
+  
+      const qRole = query(
+        collection(db, "BarangayNotifications"),
+        where("recipientRole", "==", userPosition),
+        orderBy("timestamp", "desc")
+      );
+  
+      const qRespondent = query(
+        collection(db, "BarangayNotifications"),
+        where("respondentID", "==", session?.user?.id),
+        orderBy("timestamp", "desc")
+      );
+  
+      const unsubRole = onSnapshot(qRole, async (snapshot) => {
+        const notifications = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as BarangayNotification[];
+  
+        const filtered = await filterValidNotifications(notifications);
+        setNotifications(prev => {
+          const merged = [...prev, ...filtered];
+          const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
+          return unique.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
+        });
       });
-    });
-    
-    const unsubRespondent = onSnapshot(qRespondent, async (snapshot) => {
-      const notifications = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as BarangayNotification[];
-    
-      const filtered = await filterValidNotifications(notifications);
-      setNotifications(prev => {
-        const merged = [...prev, ...filtered];
-        const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
-        return unique.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
+  
+      const unsubRespondent = onSnapshot(qRespondent, async (snapshot) => {
+        const notifications = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as BarangayNotification[];
+  
+        const filtered = await filterValidNotifications(notifications);
+  
+        // Set specifically to tasks
+        setTasks(filtered.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds));
+  
+        // Still also merge into global notifications
+        setNotifications(prev => {
+          const merged = [...prev, ...filtered];
+          const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
+          return unique.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
+        });
       });
-    });
-
-    return () => {
-      unsubRole();
-      unsubRespondent();
-    };
-  }
-}, [session]);
+  
+      return () => {
+        unsubRole();
+        unsubRespondent();
+      };
+    }
+  }, [session]);
 
   const handleNotificationClick = async (notification: BarangayNotification) => {
     if (!notification.isRead) {
@@ -159,10 +162,16 @@ useEffect(() => {
   };
 
   const unreadCount = notifications.filter((msg) => msg.isRead === false).length;
-  const filteredMessages = filter === "all"
-  ? notifications
-  : notifications.filter((msg) => !msg.isRead);
-
+  const filteredMessages =
+  filter === "all"
+    ? notifications
+    : filter === "false"
+    ? notifications.filter((msg) => !msg.isRead)
+    : filter === "tasks"
+    ? tasks
+    : filter === "department"
+    ? notifications.filter((msg) => msg.department === session?.user?.department)
+    : notifications;
     const pathname = usePathname();
 
   const toggleNotificationSection = () => {
@@ -238,6 +247,18 @@ const handleDeleteNotification = async (id: string) => {
                     onClick={() => setFilter("false")}
                   >
                     Unread
+                  </button>
+                  <button
+                    className={`filter-option ${filter === "tasks" ? "active" : ""}`}
+                    onClick={() => setFilter("tasks")}
+                  >
+                    Tasks
+                  </button>
+                  <button
+                    className={`filter-option ${filter === "department" ? "active" : ""}`}
+                    onClick={() => setFilter("department")}
+                  >
+                    Department
                   </button>
                 </div>
               </div>
