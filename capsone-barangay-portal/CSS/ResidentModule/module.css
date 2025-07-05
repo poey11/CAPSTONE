@@ -1,5 +1,6 @@
 
 
+
 .resident-module-main-container{
     width: 100%;
     height: 100vh;
@@ -24,7 +25,7 @@
     height: 100%; 
     max-height: 70%;
     margin-top: 2rem;
-     border: 2px solid rgba(36, 53, 76, 0.7);
+     border: 1px solid rgba(36, 53, 76, 0.7);
      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     background-color: #ffffff;
     border-radius: 6px;
@@ -37,16 +38,16 @@
     border-collapse: collapse; /* Removes unnecessary spacing between table cells */
 }
 
-.resident-module-main-section tbody tr:hover {
-  background-color: #e0e0e0; 
-  cursor: pointer; 
-  transition: background-color 0.2s ease; 
+.resident-module-main-section tbody tr:hover { 
+   background-color: #d0e4f5 !important; /* Light pastel blue hover */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .resident-module-main-section td {
     padding: 1rem; 
     text-align: center; 
-    border-bottom: 2px solid #ddd;
+    border-bottom:1px solid #ddd;
  color: rgb(44, 42, 42);
     font-weight: normal;
 }
@@ -68,6 +69,17 @@
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
   height: 80px;
 }
+
+
+
+.resident-module-main-section tbody tr:nth-child(even) {
+  background-color: #f0f4f8; /* Softer modern gray-blue tone */
+}
+
+.resident-module-main-section tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* Crisp white */
+}
+
 
 
 .resident-module-main-section .official-info {
@@ -124,9 +136,11 @@
 }
 
 .resident-module-section-1 h1 {
-    font-size: 2rem;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.5);
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
 }
 
 .redirection-section {
@@ -167,17 +181,21 @@
   
 
 .add-announcement-btn {
-    background-color:#e56723;
-    color: white;
-    border: none;
-    padding: 13px 22px;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 5px;
+  background-color: #e56723;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.25s ease, transform 0.2s ease;
   }
   
   .add-announcement-btn:hover {
-    background-color:#cc591b;
+     background-color: #cc591b;
+  transform: translateY(-1px);
   }
 
   .resident-module-section-2{
@@ -207,7 +225,7 @@
   }
 
   .resident-module-filter option {
-    color: rgba(0, 0, 0, 0.4); 
+    color: #000000; 
   }
 
   
