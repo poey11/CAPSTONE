@@ -597,7 +597,7 @@ useEffect(() => {
 
   return (
     <main className="main-container">
-      <p className="dashboard">Summaries</p>
+      
       
       <div className="counts-section">
 
@@ -1008,25 +1008,28 @@ useEffect(() => {
 
             </div>
 
-            <div className="dashboard-heatmap-section">
-              <div className="title">
-                <p>Incident Heat Map</p>
-                <div className="ml-2 mt-2 p-2 bg-white shadow rounded w-fit text-sm border border-gray-300">
-                <div className="font-semibold mb-1">Incident Intensity</div>
-                <div className="flex gap-2 items-center">
-                  <LegendColorBox color="#00ff00" label="Low" />
-                  <LegendColorBox color="#ffff00" label="Medium" />
-                  <LegendColorBox color="#ff0000" label="High" />
+
+              <div className="dashboard-heatmap-section">
+                <div className="heatmap-header">
+                  <h2 className="title">📍 Incident Heat Map</h2>
+
+                  <div className="heatmap-legend">
+                    <div className="legend-title">Incident Intensity</div>
+                    <div className="legend-items">
+                      <LegendColorBox color="#00ff00" label="Low" />
+                      <LegendColorBox color="#ffff00" label="Medium" />
+                      <LegendColorBox color="#ff0000" label="High" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="heatmap-container">
+                  <Heatmap incidents={reportData} />
                 </div>
               </div>
 
-              </div>
 
-              <div className="heatmap-container">
-                <Heatmap incidents={reportData}/>
-              </div>
-              
-            </div>
+
         </div>
     </main>
   );
