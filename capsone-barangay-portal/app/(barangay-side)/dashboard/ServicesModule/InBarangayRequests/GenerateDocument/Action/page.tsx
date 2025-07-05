@@ -1965,16 +1965,47 @@ const handleChange = (
 
                               <div className="fields-section">
                                 <h1>Religion<span className="required">*</span></h1>
-                                <input 
-                                  type="text"  
-                                  id="religion"  
-                                  name="religion"  
-                                  value={clearanceInput.religion || ""}
+
+                                <select
+                                  id="religion"
+                                  name="religion"
+                                  className="createRequest-input-field"
+                                  value={
+                                    ["Roman Catholic", "Iglesia ni Cristo", "Muslim", "Christian", "Others"].includes(clearanceInput.religion || "")
+                                      ? clearanceInput.religion
+                                      : ""
+                                  }
                                   onChange={handleChange}
-                                  className="createRequest-input-field"  
-                                  required 
-                                  placeholder="Enter Religion"  
-                                />
+                                  required
+                                >
+                                  <option value="" disabled>Select Religion</option>
+                                  <option value="Roman Catholic">Roman Catholic</option>
+                                  <option value="Iglesia ni Cristo">Iglesia ni Cristo</option>
+                                  <option value="Muslim">Muslim</option>
+                                  <option value="Christian">Christian</option>
+                                  <option value="Others">Others</option>
+                                </select>
+
+                                {/* Show custom input if "Others" is selected */}
+                                {clearanceInput.religion === "Others" && (
+                                  <input
+                                    type="text"
+                                    className="createRequest-input-field"
+                                    placeholder="Please specify your religion"
+                                    value={
+                                      ["Roman Catholic", "Iglesia ni Cristo", "Muslim", "Christian", "Others"].includes(clearanceInput.religion)
+                                        ? ""
+                                        : clearanceInput.religion
+                                    }
+                                    onChange={(e) =>
+                                      setClearanceInput((prev: any) => ({
+                                        ...prev,
+                                        religion: e.target.value,
+                                      }))
+                                    }
+                                    required
+                                  />
+                                )}
                               </div>
 
                               <div className="fields-section">
