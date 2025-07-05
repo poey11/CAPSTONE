@@ -275,8 +275,7 @@ export default function JobSeekerListModule() {
       </th>
       <th>Full Name</th>
       <th>Date of Birth</th>
-      <th>Age</th>
-      <th>Sex</th>
+
       <th>Remarks</th>
       <th>Actions</th>
     </tr>
@@ -293,8 +292,6 @@ export default function JobSeekerListModule() {
           <td>{formatDateToMMDDYYYY(seeker.dateApplied)}</td>
           <td>{fullName}</td>
           <td>{seeker.dateOfBirth}</td>
-          <td>{seeker.age}</td>
-          <td>{seeker.sex}</td>
           <td>{seeker.remarks}</td>
           <td>
             <div className="residentmodule-actions">

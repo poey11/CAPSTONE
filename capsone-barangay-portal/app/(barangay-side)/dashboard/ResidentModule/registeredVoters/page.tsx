@@ -45,6 +45,10 @@ export default function RegisteredVotersModule() {
   const highlightResidentId = searchParams.get("highlight");
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
+
+  const [searchPrecinct, setSearchPrecinct] = useState<string>("");
+
+
   useEffect(() => {
     if (highlightResidentId && filteredResidents.length > 0) {
       const targetIndex = filteredResidents.findIndex(resident => resident.id === highlightResidentId);
@@ -103,11 +107,21 @@ export default function RegisteredVotersModule() {
       });
     }
 
+
+    /*
     if (searchAddress) {
       filtered = filtered.filter((resident) =>
         resident.homeAddress?.toLowerCase().includes(searchAddress.toLowerCase())
       );
     }
+      */
+
+
+    if (searchPrecinct) {
+        filtered = filtered.filter((resident) =>
+          resident.precinctNumber?.toLowerCase().includes(searchPrecinct.toLowerCase())
+        );
+      }
 
     filtered.sort((a, b) => {
       const numA = parseInt(a.voterNumber, 10) || 0;
@@ -121,7 +135,7 @@ export default function RegisteredVotersModule() {
 
     setCurrentPage(1);
     setFilteredResidents(filtered);
-  }, [searchName, searchAddress, showCount, residents, sortOrder]);
+  }, [searchName, searchPrecinct, showCount, residents, sortOrder]);
 
 
 
@@ -440,13 +454,27 @@ export default function RegisteredVotersModule() {
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
-        <input
+
+     {/*
+             <input
           type="text"
           className="resident-module-filter"
           placeholder="Search by Address"
           value={searchAddress}
           onChange={(e) => setSearchAddress(e.target.value)}
         />
+
+     */}
+
+         <input
+          type="text"
+          className="resident-module-filter"
+          placeholder="Search by Precinct Number (e.g. 2014A)"
+          value={searchPrecinct}
+          onChange={(e) => setSearchPrecinct(e.target.value)}
+        />
+
+
       <select
           className="resident-module-filter"
           value={showCount}
