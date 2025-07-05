@@ -646,13 +646,13 @@ export default function RegisteredVotersModule() {
        )}  
 
       {showMissingPopup && (
-        <div className="confirmation-popup-overlay-module-voters">
-          <div className="confirmation-popup-module-voters">
-            <h3>{missingVoters.length} voter{missingVoters.length !== 1 ? "s" : ""} not found in Resident{missingVoters.length !== 1 ? "s" : ""}</h3>
+        <div className="confirmation-popup-overlay-voter-confirmation">
+          <div className="confirmation-popup-module-voter-confirmation">
+            <h3 className="missing-title">{missingVoters.length} voter{missingVoters.length !== 1 ? "s" : ""} not found in Resident{missingVoters.length !== 1 ? "s" : ""}</h3>
             <p>Select which voters to add as new residents:</p>
             <div className="missing-voter-list">
               {missingVoters.map((voter) => (
-                <label key={voter.voterId} style={{ display: "block", margin: "5px 0" }}>
+                <label key={voter.voterId} >
                   <input
                     type="checkbox"
                     checked={selectedToAdd.has(voter.voterId)}
@@ -666,13 +666,13 @@ export default function RegisteredVotersModule() {
                 </label>
               ))}
             </div>
-            <div className="yesno-container-module">
-              <button onClick={handleAddSelectedResidents} className="yes-button-module">Add Selected</button>
+            <div className="yesno-container-module-confirmation">
+              <button onClick={handleAddSelectedResidents} className="add-all-button-module-confirmation">Add Selected</button>
               <button onClick={() => {
                 setSelectedToAdd(new Set(missingVoters.map(v => v.voterId)));
                 handleAddSelectedResidents();
-              }} className="yes-button-module">Add All</button>
-              <button onClick={() => setShowMissingPopup(false)} className="no-button-module">Cancel</button>
+              }} className="yes-button-module-confirmation">Add All</button>
+              <button onClick={() => setShowMissingPopup(false)} className="no-button-module-confirmation">Cancel</button>
             </div>
           </div>
         </div>
