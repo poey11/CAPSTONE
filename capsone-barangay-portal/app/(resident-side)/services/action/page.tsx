@@ -104,9 +104,10 @@ interface ClearanceInput {
 
 
 export default function Action() {
+  const user = useAuth().user;
+  const isGuest = !user;
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const user = useAuth().user; 
   const searchParam = useSearchParams();
   const docType = searchParam.get("doc") || "";
   const router = useRouter();
@@ -1186,12 +1187,18 @@ const handleFileChange = (
                             </>
                           ) : docType === "Other Documents" ? (
                             <>
-                              <option value="Barangay ID">Barangay ID</option>
-                              <option value="First Time Jobseeker">First Time Jobseeker</option>
+                              {!isGuest && (
+                                <>
+                                  <option value="Barangay ID">Barangay ID</option>
+                                  <option value="First Time Jobseeker">First Time Jobseeker</option>
+                                </>
+                              )}
 
                               {/* Dynamically added */}
-                              {otherDocPurposes["Other"]?.map((title, index) => (
-                                <option key={index} value={title}>{title}</option>
+                              {otherDocPurposes["Other"]
+                                ?.filter(title => !isGuest || (isGuest && forResidentOnlyMap[title] === false))
+                                .map((title, index) => (
+                                  <option key={index} value={title}>{title}</option>
                               ))}
                             </>
                           ) : null}

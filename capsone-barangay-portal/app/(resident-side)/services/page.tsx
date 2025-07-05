@@ -18,7 +18,8 @@ export default function Services() {
     return (
       docType === "Temporary Business Permit" ||
       docType === "Business Permit" ||
-      docType === "Construction Permit"
+      docType === "Construction Permit" ||
+      docType === "Other Documents"
     );
   };
 
@@ -38,17 +39,27 @@ export default function Services() {
       try {
         const querySnapshot = await getDocs(collection(db, "OtherDocuments"));
         const permits = querySnapshot.docs
-          .filter(doc => doc.data().type === "Barangay Permit")
+          .filter(doc => {
+            const data = doc.data();
+            if (data.type !== "Barangay Permit") return false;
+  
+            const forResidentOnly = data.forResidentOnly ?? false;
+                  
+            // Show if:
+            // - user is logged in (show all)
+            // - OR user is guest and it's not for residents only
+            return !isGuest || (isGuest && forResidentOnly === false);
+          })
           .map(doc => doc.data().title);
-
+  
         setPermitOptions(permits);
       } catch (error) {
         console.error("Error fetching Barangay Permit documents:", error);
       }
     };
-
+  
     fetchPermitOptions();
-  }, []);
+  }, [isGuest]);
 
 
   return (
