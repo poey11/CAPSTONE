@@ -219,8 +219,10 @@ export default function RegisteredVotersModule() {
         const createdAt = today.toISOString().split("T")[0];
   
         //  Add voter to VotersList
+        const nextVoterNumber = await getNextVoterNumber();
+        
         const voterDocRef = await addDoc(collection(db, "VotersList"), {
-          voterNumber: no?.toString() || "",
+          voterNumber: nextVoterNumber,
           lastName,
           firstName,
           middleName,
@@ -296,6 +298,21 @@ export default function RegisteredVotersModule() {
     return highest + 1;
   };
 
+  const getNextVoterNumber = async () => {
+    const querySnapshot = await getDocs(collection(db, "VotersList"));
+    let highest = 0;
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.voterNumber) {
+        const num = parseInt(data.voterNumber, 10);
+        if (!isNaN(num) && num > highest) {
+          highest = num;
+        }
+      }
+    });
+    return highest + 1;
+  };
+
   function excelDateToISO(excelDate: number): string {
     const jsDate = new Date((excelDate - 25569) * 86400 * 1000);
     return jsDate.toISOString().split("T")[0]; // "YYYY-MM-DD"
@@ -331,7 +348,7 @@ export default function RegisteredVotersModule() {
   
         // Add resident
         const residentDocRef = await addDoc(collection(db, "Residents"), {
-          residentNumber: newNumber.toString(),
+          residentNumber: newNumber,
           firstName: voter.firstName,
           middleName: voter.middleName,
           lastName: voter.lastName,
@@ -339,7 +356,7 @@ export default function RegisteredVotersModule() {
           precinctNumber: voter.precinctNumber,
           voterId: voter.voterId,
           dateOfBirth: birthDate,
-          age: age
+          age: Number(age)
         });
   
         // Update Voter with new residentId
