@@ -2009,18 +2009,45 @@ const handleChange = (
                               </div>
 
                               <div className="fields-section">
-                                <h1>Nationality<span className="required">*</span></h1>
-                                <input 
-                                  type="text"  
-                                  id="nationality"  
-                                  name="nationality"  
-                                  value={clearanceInput.nationality || ""}
-                                  onChange={handleChange}
-                                  className="createRequest-input-field"  
-                                  required 
-                                  placeholder="Enter Nationality"  
-                                />
-                              </div>
+  <h1>Nationality<span className="required">*</span></h1>
+  <select
+    id="nationality"
+    name="nationality"
+    className="createRequest-input-field"
+    value={
+      ["Filipino", "Others"].includes(clearanceInput.nationality || "")
+        ? clearanceInput.nationality
+        : ""
+    }
+    onChange={handleChange}
+    required
+  >
+    <option value="" disabled>Select Nationality</option>
+    <option value="Filipino">Filipino</option>
+    <option value="Others">Others</option>
+  </select>
+
+  {clearanceInput.nationality === "Others" && (
+    <input
+      type="text"
+      name="nationality"
+      placeholder="Please specify your nationality"
+      className="createRequest-input-field"
+      value={
+        ["Filipino", "Others"].includes(clearanceInput.nationality || "")
+          ? ""
+          : clearanceInput.nationality
+      }
+      onChange={(e) =>
+        setClearanceInput((prev: any) => ({
+          ...prev,
+          nationality: e.target.value,
+        }))
+      }
+      required
+    />
+  )}
+</div>
                               
                               <div className="fields-section">
                                 <h1>Precinct Number<span className="required">*</span></h1>
@@ -2661,16 +2688,50 @@ const handleChange = (
 
                               <div className="fields-section">
                                 <h1>Blood Type<span className="required">*</span></h1>
-                                <input 
-                                  type="text"  
-                                  id="bloodtype"  
-                                  name="bloodtype"  
-                                  value={clearanceInput.bloodtype || ""}
+                                <select
+                                  id="bloodtype"
+                                  name="bloodtype"
+                                  className="createRequest-input-field"
+                                  value={
+                                    ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Others"].includes(clearanceInput.bloodtype || "")
+                                      ? clearanceInput.bloodtype
+                                      : ""
+                                  }
                                   onChange={handleChange}
-                                  className="createRequest-input-field"  
-                                  required 
-                                  placeholder="Enter Occupation"  
-                                />
+                                  required
+                                >
+                                  <option value="" disabled>Select Blood Type</option>
+                                  <option value="A+">A+</option>
+                                  <option value="A-">A-</option>
+                                  <option value="B+">B+</option>
+                                  <option value="B-">B-</option>
+                                  <option value="AB+">AB+</option>
+                                  <option value="AB-">AB-</option>
+                                  <option value="O+">O+</option>
+                                  <option value="O-">O-</option>
+                                  <option value="Others">Others</option>
+                                </select>
+
+                                {clearanceInput.bloodtype === "Others" && (
+                                  <input
+                                    type="text"
+                                    name="bloodtype"
+                                    placeholder="Please specify your blood type"
+                                    className="createRequest-input-field"
+                                    value={
+                                      ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Others"].includes(clearanceInput.bloodtype || "")
+                                        ? ""
+                                        : clearanceInput.bloodtype
+                                    }
+                                    onChange={(e) =>
+                                      setClearanceInput((prev: any) => ({
+                                        ...prev,
+                                        bloodtype: e.target.value,
+                                      }))
+                                    }
+                                    required
+                                  />
+                                )}
                               </div>
                               
                               <div className="fields-section">
