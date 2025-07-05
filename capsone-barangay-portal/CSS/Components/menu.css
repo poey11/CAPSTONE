@@ -52,9 +52,8 @@
   display: none;
   position: absolute;
   top: 100%; 
-  right: 25px;
-  left: -180px;
- background: linear-gradient(to right, #294c6b, #356f86, #3a849e);
+  left: 0;
+  background: linear-gradient(to right, #294c6b, #356f86, #3a849e);
   padding: 10px;
   z-index: 2; 
   width: 250px;
@@ -68,13 +67,55 @@
   cursor: pointer;
   font-weight: normal;
   border-radius: 10px;
- 
 }
 
 .Dropdown p:hover {
   color: #FFFFFF;
-  background: linear-gradient(to right, #3a7ca5, #529dc2, #7bbfe4); /* lighter blend of gradient */
+  background: linear-gradient(to right, #3a7ca5, #529dc2, #7bbfe4);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.Dropdown-services, .Dropdown-profile {
+  display: none;
+  position: absolute;
+  top: 100%; 
+  left: 0;
+  background: linear-gradient(to right, #294c6b, #356f86, #3a849e);
+  padding: 10px;
+  z-index: 2; 
+  width: 250px;
+}
+
+.Dropdown-services p,
+.Dropdown-profile p {
+  margin: 0;
+  padding: 10px 20px;
+  color: black;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: normal;
+  border-radius: 10px;
+}
+
+.Dropdown-services p:hover,
+.Dropdown-profile p:hover {
+  color: #FFFFFF;
+  background: linear-gradient(to right, #3a7ca5, #529dc2, #7bbfe4);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-Container:hover .Dropdown-services,
+.dropdown-Container .Dropdown-services:hover,
+.dropdown-item-no-hover:hover .Dropdown-profile,
+.dropdown-item-no-hover .Dropdown-profile:hover {
+  display: block;
+}
+
+.navbar-icons-wrapper {
+  margin-left: auto; /* pushes them to right */
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .navbar-container{
@@ -92,8 +133,15 @@
   align-items: center; 
   height: 120px; 
   padding: 0 20px; 
-  
+
 }
+
+.right-icons {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* CHANGE HERE */
+}
+
 
 .header-brgylogo {
   max-width: 100%; 
@@ -147,7 +195,7 @@
 
 .dropdown-Container p {
   cursor: pointer;
-  color: #000000;
+  color: #FFFFFF;
   transition: color 0.3s ease-in-out;
 }
 
@@ -160,9 +208,6 @@
 /*
 FOR NOTIFICATIONS
 */
-
-
-
 .logged-in-container{
   display: flex;
   flex-direction: row;
@@ -225,7 +270,6 @@ box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
   overflow: hidden;
- 
 }
 
 .notification-title {
@@ -409,8 +453,15 @@ padding: 20px;
   transform: scale(1.2);
 }
 
-.right-icons {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+
+.Dropdown-profile {
+  left: auto; 
+  right: 0px;   
+}
+.notification-section {
+  right: 0;   
+}
+.Dropdown-services {
+  left: 0;
+  right: auto;
 }

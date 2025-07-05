@@ -284,143 +284,163 @@ const handleDeleteNotification = async (notificationId: string) => {
   
 
   return (
-    <>
-      {/* Add new links as we go */}
-      
-        <div className="navbar-container">
-          <div className="navbar-card">
-            <img src="/images/brgylogo.png" alt="Barangay Logo" className="header-brgylogo" />
+<>
+  {/* Add new links as we go */}
+  <div className="navbar-container">
+    <div className="navbar-card">
+      <img src="/images/brgylogo.png" alt="Barangay Logo" className="header-brgylogo" />
 
-            <div className="navbar-links">
-              <div className="navbar-indiv-container">
-                <div className="dropdown-Container">
-                  <Link href="/">
-                    <p className="dropdown-item-resident" onClick={toggleLoginOptionsOff}>Home</p>
-                  </Link>
-                </div>
-              </div>
+      <div className="navbar-links">
+        <div className="navbar-indiv-container">
+          <div className="dropdown-Container">
+            <Link href="/">
+              <p className="dropdown-item-resident" onClick={toggleLoginOptionsOff}>Home</p>
+            </Link>
+          </div>
+        </div>
 
-              <div className="navbar-indiv-container">
-                <div className="dropdown-Container">
-                  <Link href="/aboutus">
-                    <p className="dropdown-item-resident" onClick={toggleLoginOptionsOff}>About Us</p>
-                  </Link>
-                </div>
-              </div>
+        <div className="navbar-indiv-container">
+          <div className="dropdown-Container">
+            <Link href="/aboutus">
+              <p className="dropdown-item-resident" onClick={toggleLoginOptionsOff}>About Us</p>
+            </Link>
+          </div>
+        </div>
 
-              <div className="dropdown-Container">
-                <div className="menu-section-container">
-                  <p className="dropdown-item-resident">Services</p>
-                  <img src="/images/down-arrow.png" className="dropdown-icon"/>
-                </div>
-                <div className="Dropdown">
-                  <Link href="/services"><p>Request Documents</p></Link>
-                  <Link href="/IncidentReport"><p>File an Incident</p></Link>
-                </div>
-              </div>
+        <div className="dropdown-Container">
+          <div className="menu-section-container">
+            <p className="dropdown-item-resident">Services</p>
+            <img src="/images/down-arrow.png" className="dropdown-icon" />
+          </div>
+          <div className="Dropdown-services"> {/* CHANGE HERE */}
+            <Link href="/services"><p>Request Documents</p></Link>
+            <Link href="/IncidentReport"><p>File an Incident</p></Link>
+          </div>
+        </div>
+
+        {/*}
+          <div className="navbar-indiv-container">
+            <div className="dropdown-Container">
+              <Link href="/Announcements">
+                <p className="dropdown-item-resident" onClick={toggleLoginOptionsOff}>News</p>
+              </Link>
             </div>
+          </div>
+        */}
 
-            <div className="right-icons">
-              {!loading && user ? (
-                <>
-                  <div className="dropdown-Container-notifications">
-                    <div className="dropdown-item-no-hover-notifications">
-                      <p id="inbox-link" onClick={toggleNotificationSection} className="inbox-container">
-                        <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
-                        {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
-                      </p>
-                    </div>
+        {/*}
+          <div className="dropdown-Container">
+            <div className="menu-section-container">
+              <p className="dropdown-item-resident">Officials</p>
+              <img src="/images/down-arrow.png" className="dropdown-icon" />
+            </div>
+            <div className="Dropdown">
+              <Link href="/OfficialsPage">
+                <p className="dropdown-item-resident">Barangay Officials</p>
+              </Link>
+              <Link href="/OfficialsPage/HOAOfficersPage">
+                <p className="dropdown-item-resident">HOA Officers</p>
+              </Link>
+              <Link href="/OfficialsPage/SitioOfficersPage">
+                <p className="dropdown-item-resident">Sitio Officers</p>
+              </Link>
+            </div>
+          </div>
+        */}
+      </div>
 
-                    {isOpen && (
-                      <div className="notification-section" ref={dropdownRef}>
-                        <div className="top-section">
-                          <p className="notification-title">Notification Inbox</p>
-                          <div className="filter-container">
-                            <button className={`filter-option ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
-                            <button className={`filter-option ${filter === "unread" ? "active" : ""}`} onClick={() => setFilter("unread")}>Unread</button>
-                            <button className={`filter-option ${filter === "incident" ? "active" : ""}`} onClick={() => setFilter("incident")}>Incident</button>
-                            <button className={`filter-option ${filter === "document" ? "active" : ""}`} onClick={() => setFilter("document")}>Documents</button>
-                          </div>
-                        </div>
-                        <div className="bottom-section">
-                          <div className="notification-content">
-                            {filteredMessages.length > 0 ? (
-                              filteredMessages.map((message) => (
-                                <div
-                                  className="notification-item"
-                                  key={message.id}
-                                  onClick={() => handleNotificationClick(message)}
-                                >
-                                  <div className="message-section">
-                                    <p>{message.message}</p>
-                                  </div>
-                                  <div className="unread-icon-section">
-                                    {message.isRead === false && (
-                                      <img src="/images/unread-icon.png" alt="Unread Icon" className="unread-icon" />
-                                    )}
-                                  </div>
-                                  <div className="delete-icon-section">
-                                    <button
-                                      className="delete-btn"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeleteNotification(message.id);
-                                      }}
-                                    >
-                                      <img src="/images/Delete.png" alt="Delete" className="delete-icon-image" />
-                                    </button>
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <p style={{ color: "red" }}>No messages found</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+      {/* CHANGE HERE */}
+      <div className="navbar-icons-wrapper" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '20px' }}>
+        {/* FOR NOTIFICATIONS */}
+        {!loading && user ? (
+          <>
+            <div className="dropdown-Container-notifications">
+              <div className="dropdown-item-no-hover-notifications">
+                <p id="inbox-link" onClick={toggleNotificationSection} className="inbox-container">
+                  <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
+                  {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+                </p>
+              </div>
 
-                  <div className="dropdown-Container">
-                    <div className="dropdown-item-no-hover" ref={loginMenuRef} onMouseEnter={() => setIsOpen(false)}>
-                      <p id="profile-link" onClick={toggleLoginOptions}>
-                        {resident?.userIcon ? (
-                          <img src={resident.userIcon} alt="User Icon" className="header-usericon" />
-                        ) : (
-                          <img src="/images/user.png" alt="Default User" className="header-usericon" />
-                        )}
-                      </p>
-                      <div className="Dropdown">
-                        <Link href={`/ResidentAccount/Profile?id=${user?.uid}`}>
-                          <p className="dropdown-item-resident">Profile</p>
-                        </Link>
-                        <Link href={"/ResidentAccount/Transactions"}>
-                          <p className="dropdown-item-resident">Transactions</p>
-                        </Link>
-                        <Link href={"/"} onClick={handleLogout}>
-                          <p className="dropdown-item-resident">Logout</p>
-                        </Link>
-                      </div>
+              {isOpen && (
+                <div className="notification-section" ref={dropdownRef}>
+                  <div className="top-section">
+                    <p className="notification-title">Notification Inbox</p>
+                    <div className="filter-container">
+                      <button className={`filter-option ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
+                      <button className={`filter-option ${filter === "unread" ? "active" : ""}`} onClick={() => setFilter("unread")}>Unread</button>
+                      <button className={`filter-option ${filter === "incident" ? "active" : ""}`} onClick={() => setFilter("incident")}>Incident</button>
+                      <button className={`filter-option ${filter === "document" ? "active" : ""}`} onClick={() => setFilter("document")}>Documents</button>
                     </div>
                   </div>
-                </>
-              ) : (
-                <div className="dropdown-Container">
-                  <div className="menu-section-container" ref={loginMenuRef}>
-                    <p id="login-link" className="dropdown-item">Login</p>
-                    <div className="Dropdown">
-                      <Link href="/resident/login"><p className="dropdown-item">Log In</p></Link>
-                      <Link href="/register"><p className="dropdown-item">Register</p></Link>
+                  <div className="bottom-section">
+                    <div className="notification-content">
+                      {filteredMessages.length > 0 ? (
+                        filteredMessages.map((message) => (
+                          <div className="notification-item" key={message.id} onClick={() => handleNotificationClick(message)}>
+                            <div className="message-section">
+                              <p>{message.message}</p>
+                            </div>
+                            <div className="unread-icon-section">
+                              {message.isRead === false && (
+                                <img src="/images/unread-icon.png" alt="Unread Icon" className="unread-icon" />
+                              )}
+                            </div>
+                            <div className="delete-icon-section">
+                              <button className="delete-btn" onClick={(e) => { e.stopPropagation(); handleDeleteNotification(message.id); }}>
+                                <img src="/images/Delete.png" alt="Delete" className="delete-icon-image" />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p style={{ color: "red" }}>No messages found</p>
+                      )}
                     </div>
                   </div>
                 </div>
               )}
             </div>
-          </div>
-        </div>
 
-            </>
-          );
-        };
+            <div className="dropdown-Container">
+              <div className="dropdown-item-no-hover" ref={loginMenuRef} onMouseEnter={() => setIsOpen(false)}>
+                <p id="profile-link" onClick={toggleLoginOptions}>
+                  {resident?.userIcon ? (
+                    <img src={resident.userIcon} alt="User Icon" className="header-usericon" />
+                  ) : (
+                    <img src="/images/user.png" alt="Default User" className="header-usericon" />
+                  )}
+                </p>
+                <div className="Dropdown-profile"> {/* CHANGE HERE */}
+                  <Link href={`/ResidentAccount/Profile?id=${user?.uid}`}>
+                    <p className="dropdown-item-resident">Profile</p>
+                  </Link>
+                  <Link href={"/ResidentAccount/Transactions"}>
+                    <p className="dropdown-item-resident">Transactions</p>
+                  </Link>
+                  <Link href={"/"} onClick={handleLogout}>
+                    <p className="dropdown-item-resident">Logout</p>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="dropdown-Container">
+            <div className="menu-section-container" ref={loginMenuRef}>
+              <p id="login-link" className="dropdown-item">Login</p>
+              <div className="Dropdown">
+                <Link href="/resident/login"><p className="dropdown-item">Log In</p></Link>
+                <Link href="/register"><p className="dropdown-item">Register</p></Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</>
+);
+};
 
 export default Menu;
