@@ -425,6 +425,7 @@ export default function RegisteredVotersModule() {
   return (
     <main className="resident-module-main-container">
       <div className="resident-module-section-1">
+        
         <button
           className="add-announcement-btn"
           onClick={() => {

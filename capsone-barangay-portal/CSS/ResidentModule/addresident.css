@@ -5,9 +5,7 @@
     background-color: #F0F2F8; 
     margin-left: 3rem; 
     /*padding-top: 150px;*/
-    padding-top: 11.2%;
-    padding-left:30px;
-  padding-right:30px;
+  padding-top: 11.2%;
   padding-bottom:30px;
 }
 
@@ -15,13 +13,13 @@
 .add-resident-main-content {
     display: flex;
     flex-direction: column;
-    width: 70%;
+    width: 90%;
     border-radius: 1rem;
     border: 2px solid rgba(36, 53, 76, 0.7);
     margin:  auto; 
     background-color: #ffffff;
     overflow: hidden; 
-    height: 580px;
+    height: 600px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
@@ -1017,6 +1015,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 .add-main-resident-section-2-full-bottom{
   width: 50%;
+  margin-top: 20px;
 }
 
 .add-voter-section-2-full-bottom{
@@ -1101,14 +1100,17 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
   margin-top: 20px;
+  width: 100%;
+
 }
+
 
 .add-main-resident-section-2-bottom-side{
   display:flex;
   flex-direction: row;
-  gap: 30px;
+  gap:100px;
 }
 
 .box-container-remarks {
