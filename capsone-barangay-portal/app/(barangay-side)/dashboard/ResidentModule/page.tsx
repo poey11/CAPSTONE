@@ -308,6 +308,8 @@ export default function ResidentModule() {
         value={searchAddress}
         onChange={(e) => setSearchAddress(e.target.value)}
       />
+
+      {/*}
       <input
         type="text"
         className="resident-module-filter"
@@ -315,7 +317,8 @@ export default function ResidentModule() {
         value={searchOccupation}
         onChange={(e) => setSearchOccupation(e.target.value)}
       />
-  
+     */}
+
       <select className="resident-module-filter" value={residentType} onChange={handleResidentTypeChange}>
         <option value="">Resident Type</option>
         <option value="senior-citizen">Senior Citizen</option>
