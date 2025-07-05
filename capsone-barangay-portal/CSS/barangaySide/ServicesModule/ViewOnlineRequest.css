@@ -747,7 +747,12 @@
   margin-top: 60px;
 }
 
-.services-onlinereq-fields-section{
+.doc-receival-form {
+  margin-top: 5%;
+}
+
+.services-onlinereq-fields-section,
+.services-onlinereq-doc-receival-form-section{
   display: flex;
   flex-direction: column;
   margin-top: 10px;
@@ -763,6 +768,14 @@
   font-weight: bold;
   align-self: flex-start; /* Left-aligns the label */
   margin-left: 20px;
+}
+
+.services-onlinereq-doc-receival-form-section p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 7%;
 }
 
 .services-onlinereq-input-field {
@@ -974,4 +987,88 @@
   align-items: center;
   justify-content: center;
   gap: 20px;
+}
+
+
+.view-doc-receival-form-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; 
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.4);
+  padding-right: 25%; 
+
+}
+
+.doc-receival-popup {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  max-width: 1000px;
+  width: 60%;
+  overflow: hidden;
+  max-height: 90vh; /* Allow it to be scrollable within a certain height */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Heading */
+.doc-receival-popup h2 {
+  margin-top: 1rem;
+  font-size: 1.50rem;
+  font-weight: bolder;
+  text-align: center;
+  font-weight: bold;
+  color: #214666;
+}
+
+.doc-receivalform-buttons-section{
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.doc-receivalform-action-buttons{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 30px;
+}
+
+
+
+.doc-receivalform-action-submit,
+.doc-receivalform-action-close {   
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+  width: 100px;
+}
+
+.doc-receivalform-action-submit{
+background-color: #19b035; 
+color: white;
+}
+
+.doc-receivalform-action-submitt:hover{
+  background-color: #179f30;
+}
+
+.doc-receivalform-action-close{
+  background-color: #f44336; 
+  color: white;
+}
+.doc-receivalform-action-close:hover{
+  background-color: #d73c31; 
 }
