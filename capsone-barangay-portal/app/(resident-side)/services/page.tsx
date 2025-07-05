@@ -2,10 +2,15 @@
 import { useAuth } from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsmain/requestdocumentsmain.css";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { db } from "@/app/db/firebase";
+import { collection, getDocs} from "firebase/firestore";
 
 export default function Services() {
   const user = useAuth().user;
   const router = useRouter();
+  const [permitOptions, setPermitOptions] = useState<string[]>([]);
+
 
   const isGuest = !user;
 
@@ -26,6 +31,25 @@ export default function Services() {
   const gotoOtherDocuments = () => {
     router.push("/services/other-documents");
   }
+
+
+  useEffect(() => {
+    const fetchPermitOptions = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "OtherDocuments"));
+        const permits = querySnapshot.docs
+          .filter(doc => doc.data().type === "Barangay Permit")
+          .map(doc => doc.data().title);
+
+        setPermitOptions(permits);
+      } catch (error) {
+        console.error("Error fetching Barangay Permit documents:", error);
+      }
+    };
+
+    fetchPermitOptions();
+  }, []);
+
 
   return (
     <main className="services-container-document">
@@ -74,13 +98,21 @@ export default function Services() {
 
                <div className="documents-container-column">
 
-                     <div className="documents-card dropdown-container">
+                    <div className="documents-card dropdown-container">
                       <img src="/images/document.png" alt="Document Icon" className="document-icon" />
                       <h1>Barangay Permits</h1>
                       <div className="dropdown">
-                        <p id="Temporary Business Permit" onClick={goToServices}>Temporary Business Permit</p>
+                        {/* Static ones */}
                         <p id="Business Permit" onClick={goToServices}>Business Permit</p>
-                        <p id="Construction Permit" onClick={goToServices}>Construction Permit</p>
+                        <p id="Temporary Business Permit" onClick={goToServices}>Temporary Business Permit</p>
+                        <p id="Construction" onClick={goToServices}>Construction Permit</p>
+
+                        {/* Dynamic permits */}
+                        {permitOptions.map((title, index) => (
+                          <p key={index} id={title} onClick={goToServices}>
+                            {title}
+                          </p>
+                        ))}
                       </div>
                     </div>
 
@@ -115,7 +147,7 @@ export default function Services() {
 
                 <div className="documents-container-column-other">
                
-                    <div className="documents-card" onClick={gotoOtherDocuments}>
+                    <div className="documents-card" onClick={goToServices} id="Other Documents">
                       <img src="/images/document.png" alt="Document Icon" className="document-icon" />
                       <h1>Other Documents</h1>
                     </div>  

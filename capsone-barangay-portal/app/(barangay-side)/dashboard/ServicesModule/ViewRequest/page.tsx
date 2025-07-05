@@ -131,6 +131,7 @@ const ViewOnlineRequest = () => {
       { type: string; title: string; fields: { name: string }[] }[]
     >([]);
 
+    const [resolvedImageUrls, setResolvedImageUrls] = useState<Record<string, string>>({});
 
     useEffect(() => {
         if(!id) return
@@ -776,7 +777,36 @@ const ViewOnlineRequest = () => {
                 "nationality",
                 "height",
                 "precinctnumber",
+                "weight"
 
+              ],
+              others: [
+                "signaturejpg",
+                "barangayIDjpg",
+                "validIDjpg",
+                "letterjpg",
+            ],
+          },
+          "First Time Jobseeker": {
+              basic: [
+               "createdAt", 
+               "requestor",
+                "docType", 
+                "dateOfResidency", 
+                "purpose", 
+                "address",
+                "rejectionReason",
+              ],
+              full: [
+                "birthday",
+                "contact",
+                "age", 
+                "civilStatus", 
+                "gender", 
+                "citizenship", 
+                "educationalAttainment",
+                "course",
+                "isBeneficiary",
               ],
               others: [
                 "signaturejpg",
@@ -918,6 +948,9 @@ const ViewOnlineRequest = () => {
           "validIDjpg",
           "letterjpg",
         ];
+
+
+        
         
         const fieldSections = useMemo(() => {
           if (requestData?.docType === "Construction") {
@@ -948,11 +981,15 @@ const ViewOnlineRequest = () => {
           );
         
           // ✅ Combine all matched fields
-          const combinedFields = [
-            ...(matchedByPurpose?.fields || []),
-            ...(matchedByDocType?.fields || []),
-            ...(matchedByTitleOnly?.fields || []),
-          ];
+          const combinedFields = Array.from(
+            new Map(
+              [
+                ...(matchedByPurpose?.fields || []),
+                ...(matchedByDocType?.fields || []),
+                ...(matchedByTitleOnly?.fields || []),
+              ].map((field) => [field.name, field]) // key by field name
+            ).values()
+          );
         
           const excludedDynamicFields = [
             "requestorFname",
@@ -1025,11 +1062,46 @@ const ViewOnlineRequest = () => {
     const currentPurpose = requestData?.purpose as keyof typeof predefinedFieldSections;
     const currentSections = predefinedFieldSections[currentPurpose] || {};
 
+    useEffect(() => {
+      const resolveFilenamesToUrls = async () => {
+        if (!requestData) return;
+    
+        const allFieldKeys = [
+          ...fieldSections.basic,
+          ...fieldSections.full,
+          ...fieldSections.others,
+        ];
+    
+        const keys = Object.keys(requestData).filter((key) => {
+          const value = String(requestData[key as keyof typeof requestData]);
+          return (
+            !allFieldKeys.includes(key) &&
+            typeof value === "string" &&
+            value.startsWith("service_request_")
+          );
+        });
+    
+        const resolved: Record<string, string> = {};
+        for (const key of keys) {
+          try {
+            const filename = requestData[key as keyof typeof requestData];
+            const fileRef = ref(storage, `ServiceRequests/${filename}`);
+            const url = await getDownloadURL(fileRef);
+            resolved[key] = url;
+          } catch (error) {
+            console.error("Failed to get download URL for", key, error);
+          }
+        }
+    
+        setResolvedImageUrls(resolved);
+      };
+    
+      resolveFilenamesToUrls();
+    }, [requestData, fieldSections]);
       
     const renderSection = (sectionName: "basic" | "full" | "others") => {
       let fieldKeys = fieldSections[sectionName] || [];
-  
-    
+
       if (sectionName === "others") {
         return (
           <div className="others-image-section" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
@@ -1056,20 +1128,30 @@ const ViewOnlineRequest = () => {
                {requestData &&
                 [
                   ...fieldKeys,
-                  ...Object.keys(requestData).filter(
-                    (key) =>
+                  ...Object.keys(requestData).filter((key) => {
+                    const value = String(requestData[key as keyof typeof requestData]);
+                    return (
                       !fieldKeys.includes(key) &&
-                      typeof requestData[key as keyof OnlineRequest] === "string" &&
-                      String(requestData[key as keyof OnlineRequest]).startsWith("https://firebasestorage")
-                  ),
+                      typeof value === "string" &&
+                      (value.startsWith("https://firebasestorage") || value.startsWith("service_request_"))
+                    );
+                  }),
                 ].map((key) => {
-                  const fileUrl = (requestData as any)?.[key];
-                  if (!fileUrl) return null;
+                  const value = requestData[key as keyof typeof requestData];
+                  if (!value) return null;
+
+                  let fileUrl: string | undefined;
+                    if (typeof value === "string") {
+                      fileUrl = value.startsWith("service_request_") ? resolvedImageUrls[key] : value;
+                    }
+
+                  if (!fileUrl) return null; // still loading or failed to resolve
 
                   return (
                     <div key={key} className="services-onlinereq-verification-requirements-section">
                       <span className="verification-requirements-label">{getLabel(key)}</span>
                       <div className="services-onlinereq-verification-requirements-container">
+                      {fileUrl && (
                         <a href={fileUrl} target="_blank" rel="noopener noreferrer">
                           <img
                             src={fileUrl}
@@ -1078,6 +1160,7 @@ const ViewOnlineRequest = () => {
                             style={{ cursor: 'pointer' }}
                           />
                         </a>
+                      )}
                       </div>
                     </div>
                   );
@@ -1095,12 +1178,20 @@ const ViewOnlineRequest = () => {
       const rightFields = fieldKeys.filter((_, i) => i % 2 !== 0);
     
       const renderField = (key: string) => {
-        const value = key.includes(".")
-          ? key.split(".").reduce((obj, k) => (obj as any)?.[k], requestData)
-          : (requestData as any)?.[key];
-    
+        let value;
+      
+        if (key.includes(".")) {
+          value = key.split(".").reduce((obj, k) => (obj as any)?.[k], requestData);
+        } else {
+          value = (requestData as any)?.[key];
+        }
+      
+        if (key === "isBeneficiary") {
+          value = value === true ? "Yes" : value === false ? "No" : "";
+        }
+      
         if (!value) return null;
-    
+      
         return (
           <div key={key} className="services-onlinereq-fields-section">
             <p>{getLabel(key)}</p>

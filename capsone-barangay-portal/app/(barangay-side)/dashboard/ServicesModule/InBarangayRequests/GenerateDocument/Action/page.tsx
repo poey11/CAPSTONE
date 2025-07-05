@@ -232,11 +232,17 @@ export default function action() {
       }, []);
 
 
-      const removeNullFields = (obj: Record<string, any>) => {
+      const removeNullFields = (obj: Record<string, any>): Record<string, any> => {
         const cleaned: Record<string, any> = {};
         for (const key in obj) {
           const value = obj[key];
-          if (value !== null && value !== undefined && value !== "") {
+      
+          if (
+            value !== null &&
+            value !== undefined &&
+            value !== "" &&
+            !(typeof value === "object" && !Array.isArray(value) && Object.values(value).every(v => v === ""))
+          ) {
             cleaned[key] = value;
           }
         }
@@ -914,7 +920,7 @@ export default function action() {
       }
     
       const isBarangayDocumentAndNewPermit =
-        isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "");
+        isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "First Time Jobseeker";
     
       //  If it's a Barangay Permit type, require at least one of the three
       if (isBarangayDocumentAndNewPermit) {
@@ -2896,65 +2902,70 @@ const handleChange = (
                   {activeSection === "others" && (
                     <>
                       <div className="others-main-container">
-                      <div className="box-container-outer-inbrgy">
-                          <div className="title-verificationdocs-signature">
-                            Identification Picture
-                          </div>
+                        {(clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") && (
+                          <>
+                            <div className="box-container-outer-inbrgy">
+                              <div className="title-verificationdocs-signature">
+                                Identification Picture
+                              </div>
 
-                          <div className="box-container-inbrgy">
-                            <span className="required-asterisk">*</span>
+                              <div className="box-container-inbrgy">
+                                <span className="required-asterisk">*</span>
 
-                            {/* File Upload Section */}
-                            <div className="file-upload-container-inbrgy">
-                              <label htmlFor="file-upload11"  className="upload-link">Click to Upload File</label>
-                                <input
-                                  id="file-upload11"
-                                  type="file"
-                                  className="file-upload-input" 
-                                  multiple
-                                  accept=".jpg,.jpeg,.png"
-                                  onChange={handleIdentificationPicUpload}
-                                />
+                                {/* File Upload Section */}
+                                <div className="file-upload-container-inbrgy">
+                                  <label htmlFor="file-upload11"  className="upload-link">Click to Upload File</label>
+                                    <input
+                                      id="file-upload11"
+                                      type="file"
+                                      className="file-upload-input" 
+                                      multiple
+                                      accept=".jpg,.jpeg,.png"
+                                      onChange={handleIdentificationPicUpload}
+                                    />
 
-                                {/* Display the file names with image previews */}
-                                {files11.length > 0 && (
-                                  <div className="file-name-image-display">
-                                    {files11.map((file, index) => (
-                                      <div className="file-name-image-display-indiv" key={index}>
-                                        <li className="file-item"> 
-                                          {/* Display the image preview */}
-                                          {file.preview && (
-                                            <div className="filename-image-container">
-                                              <img
-                                                src={file.preview}
-                                                alt={file.name}
-                                                className="file-preview"
-                                              />
-                                            </div>
-                                          )}
-                                          <span className="file-name">{file.name}</span>  
-                                          <div className="delete-container">
-                                            {/* Delete button with image */}
-                                            <button
-                                              type="button"
-                                              onClick={() => handleIdentificationPicDelete(file.name)}
-                                              className="delete-button"
-                                            >
-                                            <img
-                                              src="/images/trash.png"  
-                                              alt="Delete"
-                                              className="delete-icon"
-                                            />
-                                            </button>
+                                    {/* Display the file names with image previews */}
+                                    {files11.length > 0 && (
+                                      <div className="file-name-image-display">
+                                        {files11.map((file, index) => (
+                                          <div className="file-name-image-display-indiv" key={index}>
+                                            <li className="file-item"> 
+                                              {/* Display the image preview */}
+                                              {file.preview && (
+                                                <div className="filename-image-container">
+                                                  <img
+                                                    src={file.preview}
+                                                    alt={file.name}
+                                                    className="file-preview"
+                                                  />
+                                                </div>
+                                              )}
+                                              <span className="file-name">{file.name}</span>  
+                                              <div className="delete-container">
+                                                {/* Delete button with image */}
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleIdentificationPicDelete(file.name)}
+                                                  className="delete-button"
+                                                >
+                                                <img
+                                                  src="/images/trash.png"  
+                                                  alt="Delete"
+                                                  className="delete-icon"
+                                                />
+                                                </button>
+                                              </div>
+                                            </li>
                                           </div>
-                                        </li>
+                                        ))}           
                                       </div>
-                                    ))}           
-                                  </div>
-                                )}
+                                    )}
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
+                          </>
+                        )}
+                          
 
                         <div className="box-container-outer-inbrgy">
                           <div className="title-verificationdocs-signature">
@@ -3018,7 +3029,7 @@ const handleChange = (
 
                         
 
-                        {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "")) && (
+                        {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "First Time Jobseeker") && (
                           <>
                             <div className="box-container-outer-inbrgy">
                               <div className="title-verificationdocs-barangayID">

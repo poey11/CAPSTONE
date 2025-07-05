@@ -608,8 +608,22 @@ export default function EditLuponIncident() {
             </div>
 
             <div className="edit-incident-header-body">
-              <div className="edit-incident-header-body-top-section">
-
+             <div className="edit-incident-header-body-top-section">
+                <div className="edit-incident-info-toggle-wrapper">
+                  {["complainant", "respondent", "incident" , "barangay desk" ].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "complainant" && "Complainant"}
+                      {section === "respondent" && "Respondent"}
+                      {section === "incident" && "Incident"}
+                      {section === "barangay desk" && "Desk Officer"}
+                    </button>
+                  ))}
+                </div> 
               </div>
 
               <div className="edit-incident-header-body-bottom-section">
@@ -1141,46 +1155,50 @@ export default function EditLuponIncident() {
 
 
         {showContinuePopup && (
-          <div className="confirmation-popup-overlay-add">
-            <div className="confirmation-popup-add">
-              <p>Who requested to reopen the incident case?</p>
-              <div className="settlement-options">
-                <label className="mr-4">
-                  <input
-                    type="radio"
-                    className="mr-2"
-                    name="reopenRequester"
-                    checked={toUpdate.reopenRequester === "complainant"}
-                    onChange={() => setToUpdate((prev: any) => ({
-                      ...prev,
-                      reopenRequester: "complainant",
-                    }))}
-                  />
-                  Complainant
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="reopenRequester"
-                    className="mr-2"
-                    checked={toUpdate.reopenRequester === "respondent"}
-                    onChange={() => setToUpdate((prev: any) => ({
-                      ...prev,
-                      reopenRequester: "respondent",
-                    }))}
-                  />
-                  Respondent
-                </label>
-              </div>
+          <div className="confirmation-popup-overlay-continue">
+            <div className="confirmation-popup-continue">
+               <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                    <p className="popup-title">Who requested to reopen the incident case?</p>
 
-              <div className="yesno-container-add">
+                          <div className="settlement-options">
+                            <label className="settlement-option">
+                              <input
+                                type="radio"
+                                name="reopenRequester"
+                                checked={toUpdate.reopenRequester === "complainant"}
+                                onChange={() =>
+                                  setToUpdate((prev: any) => ({
+                                    ...prev,
+                                    reopenRequester: "complainant",
+                                  }))
+                                }
+                              />
+                              Complainant
+                            </label>
+                            <label className="settlement-option">
+                              <input
+                                type="radio"
+                                name="reopenRequester"
+                                checked={toUpdate.reopenRequester === "respondent"}
+                                onChange={() =>
+                                  setToUpdate((prev: any) => ({
+                                    ...prev,
+                                    reopenRequester: "respondent",
+                                  }))
+                                }
+                              />
+                              Respondent
+                            </label>
+                          </div>
+
+              <div className="yesno-container-continue">
                 <button
                   onClick={() => setShowContinuePopup(false)}
-                  className="no-button-add"
+                  className="no-button-continue"
                 >
                   Cancel
                 </button>
-                <button onClick={handleReopen} className="yes-button-add">
+                <button onClick={handleReopen} className="yes-button-continue">
                   Reopen
                 </button>
               </div>

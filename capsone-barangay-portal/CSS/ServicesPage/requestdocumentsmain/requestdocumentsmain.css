@@ -153,6 +153,8 @@ padding-top: 30px;
     padding: 10px;
     z-index: 100;
     width: 332px;
+    height: 160px;
+    overflow-y: auto;
 }
 
 .dropdown p {
