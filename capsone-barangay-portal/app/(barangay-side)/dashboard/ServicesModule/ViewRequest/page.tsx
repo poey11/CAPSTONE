@@ -1531,7 +1531,8 @@ const ViewOnlineRequest = () => {
                                     <div className="services-onlinereq-status-section-view">
                                         <select
                                             id="status"
-                                            className={`services-onlinereq-status-dropdown ${status ? status[0].toLowerCase() + status.slice(1):""}`}
+                                            className={`services-onlinereq-status-dropdown ${status?.toLowerCase().replace(/\s*-\s*/g, "-") || ""}`}
+
                                             name="status"
                                             value={status}
                                             onChange={handleStatusChange}

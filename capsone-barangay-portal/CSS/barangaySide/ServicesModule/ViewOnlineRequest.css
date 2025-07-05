@@ -282,7 +282,7 @@
 }
 
 .status-dropdown-viewonlinereq.in-progress {
-  background-color: #ffd700;    
+  background-color: #dd5312;    
 }
 
 
@@ -624,45 +624,34 @@
 .services-onlinereq-status-dropdown.rejected { 
   background-color: #e22929;   
   color: white;
-  font-size: 15px; 
+  font-size: 12px;
 }
 
 .services-onlinereq-status-dropdown.completed {
   background-color: #4caf50;   
   color: white;
-  font-size: 15px; 
+  font-size: 12px;
 }
 
-.services-onlinereq-status-dropdown.claiming {
-  background-color: #3196e8;    
-  color: white;
-  font-size: 15px;
-}
 
 .services-onlinereq-status-dropdown.pick-up {
   background-color: #be5cb6;    
   color: white;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .services-onlinereq-status-dropdown.pending {
-  background-color: #325bd4;   
+  background-color: #d4d64f;   
   color: white;
-  font-size: 15px; 
+  font-size: 12px;
 }
 
 .services-onlinereq-status-dropdown.in-progress {
-  background-color: #ffd700;    
+  background-color: #dd5312;    
   color: white;
-  font-size: 15px;
+  font-size: 12px;
 }
 
-
-.services-onlinereq-status-dropdown.new {
-  background-color: #f79233;    
-  color: white;
-  font-size: 15px;
-}
 
 .services-onlinereq-main-details-description {
   display: flex;

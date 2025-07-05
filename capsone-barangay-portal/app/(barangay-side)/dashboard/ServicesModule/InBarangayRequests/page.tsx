@@ -330,7 +330,7 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
                         <td>{request.requestor}</td>
                         <td>{request.purpose}</td>
                         <td>
-                          <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
+                        <span className={`status-badge ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
                             {request.status}
                           </span>
                         </td>
@@ -406,7 +406,7 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
                         <td>{request.requestor}</td>
                         <td>{request.purpose}</td>
                         <td>
-                          <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
+                          <span className={`status-badge ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
                             {request.status}
                           </span>
                         </td>
