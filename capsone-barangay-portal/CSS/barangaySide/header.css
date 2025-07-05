@@ -1,63 +1,78 @@
-.header-main-container{
-    width: auto;
-      height: 90px;
-      background-color: #FFFFFF;
-      border-bottom: 2px solid rgb(202, 202, 202);
-      position: fixed;  /* Keeps it at the top */
-      top: 90px;
-      left: 100px;
-      right: 0;
-      z-index: 10;
-  }
+.header-main-container {
+  width: auto;
+  height: 80px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  position: fixed;
+  top: 90px;
+  left: 100px;
+  right: 0;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
 
-  .add-resident-main-header{
-    background-color: #ffffff;
-    border-bottom: 2px solid #ddd;
-    padding-left: 140px;
-    padding-right: 30px;
-    padding-top: 15px;
-    padding-bottom: 15px;
-  }
+.add-resident-main-header {
+  background-color: #ffffff;
+  padding: 12px 24px 12px 130px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
-  .path-section {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-  }
-  
-  .path-section h1 {
-    font-size: 1rem;
-    font-weight: bold;
-    color: #214666;
-  }
-  
-  .path-section h2 {
-    font-size: 1rem;
-    font-weight: bold;
-    color: rgba(33, 70, 102, 0.6);
-  }
-  
-  .breadcrumb {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  .chevron {
-    color: #2C3E50;
-    margin-left: 10px;
-  }
+.path-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
 
-  .addresident-page-title-section-1{
-    width: fit-content;
-    background-color: #214666;
-    border-radius: 6px;
-    padding: 5px 20px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-  }
-  
-  .addresident-page-title-section-1 h1{
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #ffffff;
-  }
+.path-section h1,
+.path-section h2 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4a6a8c;
+  margin: 0;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.breadcrumb-link {
+  color: #2d6cdf;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.breadcrumb-link:hover {
+  color: #174ea6;
+  text-decoration: underline;
+}
+
+.chevron {
+  margin: 0 6px;
+  color: #a0a0a0;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.addresident-page-title-section-1 {
+  width: fit-content;
+  background: linear-gradient(to right, #214666, #2e5f84);
+  border-radius: 7px;
+  padding: 5px 18px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(33, 70, 102, 0.25);
+}
+
+.addresident-page-title-section-1 h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.4px;
+}
