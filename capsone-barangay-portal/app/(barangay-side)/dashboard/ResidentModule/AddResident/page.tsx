@@ -565,23 +565,22 @@ const [activeSection, setActiveSection] = useState("basic");
                                       </select>
                                     </div>
 
-                                                              <div className="fields-section">
+                                    <div className="fields-section">
                                       <p>Citizenship<span className="required">*</span></p>
                                       <select
                                         name="citizenship"
                                         className={`add-resident-input-field ${invalidFields.includes("citizenship") ? "input-error" : ""}`}
                                         value={
-                                          ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(formData.citizenship.split("(")[0])
-                                            ? formData.citizenship.split("(")[0]
-                                            : ""
+                                          ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(
+                                            formData.citizenship.split("(")[0]
+                                          ) ? formData.citizenship.split("(")[0] : ""
                                         }
                                         onChange={(e) => {
                                           const selected = e.target.value;
-                                          if (selected === "Dual Citizen" || selected === "Others") {
-                                            setFormData((prev) => ({ ...prev, citizenship: selected }));
-                                          } else {
-                                            setFormData((prev) => ({ ...prev, citizenship: selected }));
-                                          }
+                                          setFormData((prev) => ({
+                                            ...prev,
+                                            citizenship: selected
+                                          }));
                                         }}
                                         required
                                       >
@@ -592,50 +591,56 @@ const [activeSection, setActiveSection] = useState("basic");
                                         <option value="Others">Others</option>
                                       </select>
 
-                                      {/* Input field for Dual Citizen */}
-                                      {formData.citizenship === "Dual Citizen" && (
+                                      {/* Input for Dual Citizen */}
+                                      {formData.citizenship.startsWith("Dual Citizen") && (
                                         <input
                                           type="text"
-                                          className={`add-resident-input-field ${invalidFields.includes("citizenshipDetails") ? "input-error" : ""}`}
+                                          className={`add-resident-input-field ${invalidFields.includes("citizenship") ? "input-error" : ""}`}
                                           placeholder="Specify other citizenship (e.g., American)"
                                           value={
                                             formData.citizenship.includes("(")
-                                              ? formData.citizenship.split("(")[1].replace(")", "")
+                                              ? formData.citizenship.slice(
+                                                  formData.citizenship.indexOf("(") + 1,
+                                                  formData.citizenship.indexOf(")")
+                                                )
                                               : ""
                                           }
                                           onChange={(e) => {
-                                            const second = e.target.value.trim();
+                                            const val = e.target.value.trim();
                                             setFormData((prev) => ({
                                               ...prev,
-                                              citizenship: second ? `Dual Citizen(${second})` : "Dual Citizen",
+                                              citizenship: val ? `Dual Citizen (${val})` : "Dual Citizen"
                                             }));
                                           }}
                                           required
                                         />
                                       )}
 
-                                      {/* Input field for Others */}
-                                      {formData.citizenship === "Others" && (
+                                      {/* Input for Others */}
+                                      {formData.citizenship.startsWith("Others") && (
                                         <input
                                           type="text"
-                                          className={`add-resident-input-field ${invalidFields.includes("citizenshipDetails") ? "input-error" : ""}`}
+                                          className={`add-resident-input-field ${invalidFields.includes("citizenship") ? "input-error" : ""}`}
                                           placeholder="Please specify your citizenship"
                                           value={
-                                            ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(formData.citizenship)
-                                              ? ""
-                                              : formData.citizenship
+                                            formData.citizenship.includes("(")
+                                              ? formData.citizenship.slice(
+                                                  formData.citizenship.indexOf("(") + 1,
+                                                  formData.citizenship.indexOf(")")
+                                                )
+                                              : ""
                                           }
-                                          onChange={(e) =>
+                                          onChange={(e) => {
+                                            const val = e.target.value.trim();
                                             setFormData((prev) => ({
                                               ...prev,
-                                              citizenship: e.target.value,
-                                            }))
-                                          }
+                                              citizenship: val ? `Others(${val})` : "Others"
+                                            }));
+                                          }}
                                           required
                                         />
                                       )}
-                                    </div>
-
+                                  </div>
                             </div>
 
 

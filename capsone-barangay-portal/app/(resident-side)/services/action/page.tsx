@@ -2099,17 +2099,10 @@ const handleFileChange = (
                       }
                       onChange={(e) => {
                         const selected = e.target.value;
-                        if (selected === "Dual Citizen" || selected === "Others") {
-                          setClearanceInput((prev: any) => ({
-                            ...prev,
-                            citizenship: selected,
-                          }));
-                        } else {
-                          setClearanceInput((prev: any) => ({
-                            ...prev,
-                            citizenship: selected,
-                          }));
-                        }
+                        setClearanceInput((prev: any) => ({
+                          ...prev,
+                          citizenship: selected
+                        }));
                       }}
                       required
                     >
@@ -2121,21 +2114,24 @@ const handleFileChange = (
                     </select>
 
                     {/* Input field for Dual Citizen */}
-                    {clearanceInput.citizenship === "Dual Citizen" && (
+                    {clearanceInput.citizenship.startsWith("Dual Citizen") && (
                       <input
                         type="text"
                         className="form-input-document-req"
                         placeholder="Specify other citizenship (e.g., American)"
                         value={
                           clearanceInput.citizenship.includes("(")
-                            ? clearanceInput.citizenship.split("(")[1].replace(")", "")
+                            ? clearanceInput.citizenship.slice(
+                                clearanceInput.citizenship.indexOf("(") + 1,
+                                clearanceInput.citizenship.indexOf(")")
+                              )
                             : ""
                         }
                         onChange={(e) => {
-                          const second = e.target.value.trim();
+                          const val = e.target.value.trim();
                           setClearanceInput((prev: any) => ({
                             ...prev,
-                            citizenship: second ? `Dual Citizen(${second})` : "Dual Citizen",
+                            citizenship: val ? `Dual Citizen(${val})` : "Dual Citizen"
                           }));
                         }}
                         required
@@ -2143,26 +2139,31 @@ const handleFileChange = (
                     )}
 
                     {/* Input field for Others */}
-                    {clearanceInput.citizenship === "Others" && (
+                    {clearanceInput.citizenship.startsWith("Others") && (
                       <input
                         type="text"
                         className="form-input-document-req"
                         placeholder="Please specify your citizenship"
                         value={
-                          ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(clearanceInput.citizenship)
-                            ? ""
-                            : clearanceInput.citizenship
+                          clearanceInput.citizenship.includes("(")
+                            ? clearanceInput.citizenship.slice(
+                                clearanceInput.citizenship.indexOf("(") + 1,
+                                clearanceInput.citizenship.indexOf(")")
+                              )
+                            : ""
                         }
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const val = e.target.value.trim();
                           setClearanceInput((prev: any) => ({
                             ...prev,
-                            citizenship: e.target.value,
-                          }))
-                        }
+                            citizenship: val ? `Others(${val})` : "Others"
+                          }));
+                        }}
                         required
                       />
                     )}
                   </div>
+
 
                   {clearanceInput.purpose === "Residency" && (
                     <>
