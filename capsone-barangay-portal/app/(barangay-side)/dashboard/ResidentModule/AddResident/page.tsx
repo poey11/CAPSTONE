@@ -34,6 +34,7 @@ export default function AddResident() {
     isPWD: false,
     isSeniorCitizen: false,
     isSoloParent: false,
+    residentNumber: 0,
   });
 
   const clusterOptions: Record<string, string[]> = {
@@ -306,6 +307,22 @@ export default function AddResident() {
     }
   };
 
+  const fillEmptyFieldsWithNA = (
+    data: Record<string, any>, 
+    requiredFields: string[] = []
+  ): Record<string, any> => {
+    const newData = { ...data };
+    for (const key in newData) {
+      if (!requiredFields.includes(key)) {
+        if (newData[key] === "" || newData[key] === null) {
+          newData[key] = "N/A";
+        }
+      }
+    }
+    return newData;
+  };
+  
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -333,19 +350,23 @@ export default function AddResident() {
       const residentsRef = collection(db, "Residents");
       const q = query(residentsRef, orderBy("residentNumber", "desc"), limit(1));
       const querySnapshot = await getDocs(q);
-  
-      let newResidentNumber = 1; // Default to 1 if no residents exist
-  
+      
+      let newResidentNumber = 1; // Default to 1
+      
       if (!querySnapshot.empty) {
         const lastResident = querySnapshot.docs[0].data();
-        newResidentNumber = lastResident.residentNumber + 1;
+        const lastNumber = Number(lastResident.residentNumber);
+        newResidentNumber = isNaN(lastNumber) ? 1 : lastNumber + 1;
       }
 
       const currentDate = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
 
+      const requiredFields = ["lastName", "firstName", "address", "generalLocation", "cluster", "dateOfBirth", "age", "sex", "civilStatus", "contactNumber", "citizenship"];
+      const finalFormData = fillEmptyFieldsWithNA(formData, requiredFields);
+
 
       const docRef = await addDoc(residentsRef, {
-        ...formData,
+        ...finalFormData,
         residentNumber: newResidentNumber,
         createdAt: currentDate,
         verificationFilesURLs,
