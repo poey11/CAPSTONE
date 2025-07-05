@@ -65,22 +65,48 @@ export default function SettingsPageResident() {
                 middle_name: docSnap.data().middle_name || "N/A",
                 phone: docSnap.data().phone || "N/A",
                 email: docSnap.data().email || "N/A",
-                sex: docSnap.data().sex  || "N/A",
+                sex: docSnap.data().sex || "N/A",
                 status: docSnap.data().status || "N/A",
-                userIcon: docSnap.data().userIcon ||  "N/A",
+                userIcon: docSnap.data().userIcon || "N/A",
                 upload: docSnap.data().upload || "N/A",
-                reupload: docSnap.data().reupload || "N/A",                
+                reupload: docSnap.data().reupload || "N/A",
                 address: docSnap.data().address || "N/A",
               };
-              setResident(data);
-              setFormData(data);    
-              setPreview(data.userIcon);
+      
+              if (data.status === "Verified") {
+                const residentDocRef = doc(db, "Residents", docSnap.data()?.residentId);
+                const residentSnap = await getDoc(residentDocRef);
+                if (residentSnap.exists()) {
+                  const verifiedData = residentSnap.data();
+                  const mappedData = {
+                    first_name: verifiedData.firstName || "N/A",
+                    last_name: verifiedData.lastName || "N/A",
+                    middle_name: verifiedData.middleName || "N/A",
+                    phone: verifiedData.contactNumber || "N/A",
+                    email: verifiedData.emailAddress || "N/A",
+                    sex: verifiedData.sex || "N/A", // since Residents table may not have sex
+                    status: "Verified",
+                    userIcon: data.userIcon || "N/A", 
+                    upload: verifiedData.verificationFilesURLs?.[0] || "N/A",
+                    reupload: data.reupload || "N/A",
+                    address: verifiedData.address || "N/A",
+                  };
+                  setResident(mappedData);
+                  setFormData(mappedData);
+                  setPreview(data.userIcon);
+                }
+              } else {
+                setResident(data);
+                setFormData(data);
+                setPreview(data.userIcon);
+              }
             }
           };
       
           fetchResidentData();
         }
       }, [residentId]);
+      
       
 
     const handleBack = () => {
@@ -316,6 +342,16 @@ export default function SettingsPageResident() {
                         View Transactions
                     </a>
                     </div>
+
+                    <div className="name-section">
+                    <p>
+                        <span className="required">*</span> THE DATA IS UNEDITABLE AS IT IS TAKEN FROM THE BARANGAY'S DATABASE.<br/>
+                        <span className="required">*</span> IF YOU HAVE ANY CONCERNS. PLEASE VISIT THE BARANGAY.
+                    </p>
+                    </div>
+
+
+
                 </div>
 
 
@@ -332,7 +368,7 @@ export default function SettingsPageResident() {
                             onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                             className="form-input-profile-section" 
                             required
-                        />
+                            disabled={formData.status === "Verified"}                        />
                     </div>
 
                     <div className="form-group-profile-section">
@@ -344,7 +380,7 @@ export default function SettingsPageResident() {
                             onChange={(e) => setFormData({ ...formData, middle_name: e.target.value })}
                             className="form-input-profile-section" 
                             required
-                        />
+                            disabled={formData.status === "Verified"}                        />
                     </div>
 
                     <div className="form-sgroup-profile-section">
@@ -355,7 +391,7 @@ export default function SettingsPageResident() {
                             value={formData.last_name} 
                             onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                             className="form-input-profile-section"
-                        />
+                            disabled={formData.status === "Verified"}                        />
                     </div>
 
                     <div className="form-group-profile-section">
@@ -367,6 +403,7 @@ export default function SettingsPageResident() {
                             onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
                             className="form-input-profile-section"
                             required
+                            disabled={formData.status === "Verified"}
                         >
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
@@ -382,7 +419,7 @@ export default function SettingsPageResident() {
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             className="form-input-profile-section" 
                             required 
-                            disabled
+                            disabled={formData.status === "Verified"}
                         />
                     </div>
 
@@ -430,6 +467,7 @@ export default function SettingsPageResident() {
                             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                             className="form-input-profile-section" 
                             required 
+                            disabled={formData.status === "Verified"}
                         />
                     </div>
 
