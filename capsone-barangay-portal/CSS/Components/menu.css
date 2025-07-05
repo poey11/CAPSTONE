@@ -86,6 +86,7 @@
   width: 250px;
 }
 
+.Dropdown p,
 .Dropdown-services p,
 .Dropdown-profile p {
   margin: 0;
@@ -95,6 +96,7 @@
   cursor: pointer;
   font-weight: normal;
   border-radius: 10px;
+  text-align: center; /* CENTER TEXT */
 }
 
 .Dropdown-services p:hover,
@@ -464,4 +466,12 @@ padding: 20px;
 .Dropdown-services {
   left: 0;
   right: auto;
+}
+
+/* Align the Login dropdown away from edge */
+.menu-section-container .Dropdown {
+  left: auto;
+  right: 0px; /* adjust to move left from right edge */
+  align-items: center;
+
 }

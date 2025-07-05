@@ -411,7 +411,7 @@ const handleDeleteNotification = async (notificationId: string) => {
                     <img src="/images/user.png" alt="Default User" className="header-usericon" />
                   )}
                 </p>
-                <div className="Dropdown-profile"> {/* CHANGE HERE */}
+                <div className="Dropdown-profile">
                   <Link href={`/ResidentAccount/Profile?id=${user?.uid}`}>
                     <p className="dropdown-item-resident">Profile</p>
                   </Link>
