@@ -37,6 +37,7 @@ export default function ViewResident() {
     contactNumber: "",
     emailAddress: "",
     precinctNumber: "",
+    citizenship: "",
     generalLocation: "",
     cluster: "",
     isStudent: false,
@@ -86,6 +87,7 @@ export default function ViewResident() {
             createdBy: docSnap.data().createdBy || "",
             updatedBy: docSnap.data().updatedBy || "",
             createdAt: docSnap.data().createdAt || "",
+            citizenship: docSnap.data().citizenship || "",
           };
 
           setFormData(data);
@@ -348,6 +350,11 @@ useEffect(() => {
                       <div className="view-resident-fields-section">
                         <p>Precinct Number</p>
                         <input type="text" className="view-resident-input-field"  name="precinctNumber" value={formData.precinctNumber || "N/A"} readOnly />
+                      </div> 
+
+                      <div className="view-resident-fields-section">
+                        <p>Citizenship</p>
+                        <input type="text" className="view-resident-input-field"  name="citizenship" value={formData.citizenship || "N/A"} readOnly />
                       </div> 
                     </div>
 
