@@ -8,7 +8,7 @@ import { db,storage } from "@/app/db/firebase";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 
 
-const statusOptions = ["Pending", "Resolved", "Settled", "Archived"];
+const statusOptions = ["Pending", "CFA", "Settled", "Archived"];
 
 export default function Department() {
   const user = useSession().data?.user;
@@ -38,6 +38,7 @@ export default function Department() {
   const router = useRouter();
   const searchParam = useSearchParams();
   const departmentId = searchParam.get("id");
+
 
   const isAuthorized = userDepartment === departmentId;
 
@@ -177,6 +178,8 @@ const [showCount, setShowCount] = useState<number>(0);
 const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 const [selectedStatus, setSelectedStatus] = useState<string>("");
 const [caseNumberSearch, setCaseNumberSearch] = useState("");
+const [incidentType, setIncidentType] = useState<string>("");
+
 
 
 useEffect(() => {
@@ -189,6 +192,15 @@ useEffect(() => {
         incident.status?.toLowerCase().trim() === selectedStatus.toLowerCase()
     );
   }
+
+
+if (incidentType) {
+  filtered = filtered.filter(
+    (incident) =>
+      incident.typeOfIncident?.toLowerCase().trim() === incidentType.toLowerCase()
+  );
+}
+
 
   // Filter by case number segment
   if (caseNumberSearch) {
@@ -214,7 +226,7 @@ useEffect(() => {
   setCurrentPage(1);
 
   setFilteredIncidents(filtered);
-}, [incidentData, selectedStatus, showCount, sortOrder, caseNumberSearch]);
+}, [incidentData, selectedStatus, showCount, sortOrder, caseNumberSearch, incidentType]);
 
 
   // Pagination logic
@@ -277,6 +289,17 @@ useEffect(() => {
           ))}
         </select>
 
+        <select
+          className="featuredStatus-departments"
+          value={incidentType}
+          onChange={(e) => setIncidentType(e.target.value)}
+        >
+          <option value="">All Types</option>
+          <option value="Minor">Minor</option>
+          <option value="Major">Major</option>
+        </select>
+
+
 
         <select
           className="featuredStatus-departments"
@@ -286,7 +309,6 @@ useEffect(() => {
           <option value="0">Show All</option>
           <option value="5">Show 5</option>
           <option value="10">Show 10</option>
-          <option value="15">Show 15</option>
         </select>
 
 
@@ -302,7 +324,7 @@ useEffect(() => {
     <table>
       <thead>
         <tr>
-          <th>Case #</th>
+          <th>Case Number</th>
           <th>Date & Time of the Incident</th>
           <th>Area Of Incident</th>
           <th>Nature of Complaint</th>

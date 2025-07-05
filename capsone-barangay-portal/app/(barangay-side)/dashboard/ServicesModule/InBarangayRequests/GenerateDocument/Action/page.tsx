@@ -136,7 +136,6 @@ export default function action() {
     const [otherDocFields, setOtherDocFields] = useState<{ [title: string]: string[] }>({});
     const [otherDocImageFields, setOtherDocImageFields] = useState<{ [title: string]: string[] }>({});
 
-
     // State for all file containers
     const [files1, setFiles1] = useState<{ name: string, preview: string | undefined }[]>([]);
     const [files2, setFiles2] = useState<{ name: string, preview: string | undefined }[]>([]);
@@ -232,11 +231,17 @@ export default function action() {
       }, []);
 
 
-      const removeNullFields = (obj: Record<string, any>) => {
+      const removeNullFields = (obj: Record<string, any>): Record<string, any> => {
         const cleaned: Record<string, any> = {};
         for (const key in obj) {
           const value = obj[key];
-          if (value !== null && value !== undefined && value !== "") {
+      
+          if (
+            value !== null &&
+            value !== undefined &&
+            value !== "" &&
+            !(typeof value === "object" && !Array.isArray(value) && Object.values(value).every(v => v === ""))
+          ) {
             cleaned[key] = value;
           }
         }
@@ -329,7 +334,6 @@ export default function action() {
       dateOfTyphoon: "",
       dateOfFireIncident: "",  
       fromAddress: "",
-
       emergencyDetails: {
         fullName: "",
         address: "",
@@ -388,7 +392,6 @@ export default function action() {
     });
 
     
-    
 
     // Close popup when clicking outside
     useEffect(() => {
@@ -411,20 +414,7 @@ export default function action() {
       router.back();
     };
 
-    // Handle file selection for any container
-    const handleFileChange = (container: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFiles = event.target.files;
-        if (selectedFiles) {
-          const fileArray = Array.from(selectedFiles).map((file) => {
-            const preview = URL.createObjectURL(file);
-            return { file, name: file.name, preview };
-          });
-          setFiles((prevFiles) => ({
-            ...prevFiles,
-            [container]: [...prevFiles[container], ...fileArray], // Append new files to the specified container
-          }));
-        }
-    };
+    
   
       // Handle file deletion for documents container
       const handleSignatureDelete = (fileName: string) => {
@@ -499,7 +489,7 @@ export default function action() {
         }));
       };
 
-      
+  
 
 
     const handleSignatureUpload = (
@@ -679,7 +669,7 @@ export default function action() {
       }));
 
       e.target.value = "";
-    
+
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
     };
@@ -859,10 +849,23 @@ export default function action() {
             }
           }
         }
-    
+        let sendTo ="";
+        if(clearanceInput.docType === "Barangay Certificate" || clearanceInput.docType === "Barangay Clearance" 
+          || clearanceInput.docType === "Barangay Indigency" || clearanceInput.docType === "Temporary Business Permit"
+          || clearanceInput.docType === "Construction Permit" 
+        ) {
+
+          sendTo = "SAS";
+        } 
+        else if(clearanceInput.docType === "Business Permit" || clearanceInput.purpose === "Barangay ID"){
+          sendTo = "Admin Staff";
+        }
+
         const docData = {
           ...removeNullFields(clearanceInput),
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
+          sendTo: sendTo,
+          docPrinted: false,
           ...uploadedFileUrls,
         };
     
@@ -914,7 +917,7 @@ export default function action() {
       }
     
       const isBarangayDocumentAndNewPermit =
-        isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "");
+        isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "First Time Jobseeker";
     
       //  If it's a Barangay Permit type, require at least one of the three
       if (isBarangayDocumentAndNewPermit) {
@@ -1016,7 +1019,7 @@ export default function action() {
         console.log("Files:", files);
         console.log("Clearance Input:", clearanceInput);
         handleUploadClick().then(() => {
-            router.push(`/dashboard/ServicesModule/ViewRequest?id=${id}`);
+            router.push(`/dashboard/ServicesModule/InBarangayRequests`);
         });
         // Hide the popup after 3 seconds
         setTimeout(() => {
@@ -2896,65 +2899,70 @@ const handleChange = (
                   {activeSection === "others" && (
                     <>
                       <div className="others-main-container">
-                      <div className="box-container-outer-inbrgy">
-                          <div className="title-verificationdocs-signature">
-                            Identification Picture
-                          </div>
+                        {(clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") && (
+                          <>
+                            <div className="box-container-outer-inbrgy">
+                              <div className="title-verificationdocs-signature">
+                                Identification Picture
+                              </div>
 
-                          <div className="box-container-inbrgy">
-                            <span className="required-asterisk">*</span>
+                              <div className="box-container-inbrgy">
+                                <span className="required-asterisk">*</span>
 
-                            {/* File Upload Section */}
-                            <div className="file-upload-container-inbrgy">
-                              <label htmlFor="file-upload11"  className="upload-link">Click to Upload File</label>
-                                <input
-                                  id="file-upload11"
-                                  type="file"
-                                  className="file-upload-input" 
-                                  multiple
-                                  accept=".jpg,.jpeg,.png"
-                                  onChange={handleIdentificationPicUpload}
-                                />
+                                {/* File Upload Section */}
+                                <div className="file-upload-container-inbrgy">
+                                  <label htmlFor="file-upload11"  className="upload-link">Click to Upload File</label>
+                                    <input
+                                      id="file-upload11"
+                                      type="file"
+                                      className="file-upload-input" 
+                                      multiple
+                                      accept=".jpg,.jpeg,.png"
+                                      onChange={handleIdentificationPicUpload}
+                                    />
 
-                                {/* Display the file names with image previews */}
-                                {files11.length > 0 && (
-                                  <div className="file-name-image-display">
-                                    {files11.map((file, index) => (
-                                      <div className="file-name-image-display-indiv" key={index}>
-                                        <li className="file-item"> 
-                                          {/* Display the image preview */}
-                                          {file.preview && (
-                                            <div className="filename-image-container">
-                                              <img
-                                                src={file.preview}
-                                                alt={file.name}
-                                                className="file-preview"
-                                              />
-                                            </div>
-                                          )}
-                                          <span className="file-name">{file.name}</span>  
-                                          <div className="delete-container">
-                                            {/* Delete button with image */}
-                                            <button
-                                              type="button"
-                                              onClick={() => handleIdentificationPicDelete(file.name)}
-                                              className="delete-button"
-                                            >
-                                            <img
-                                              src="/images/trash.png"  
-                                              alt="Delete"
-                                              className="delete-icon"
-                                            />
-                                            </button>
+                                    {/* Display the file names with image previews */}
+                                    {files11.length > 0 && (
+                                      <div className="file-name-image-display">
+                                        {files11.map((file, index) => (
+                                          <div className="file-name-image-display-indiv" key={index}>
+                                            <li className="file-item"> 
+                                              {/* Display the image preview */}
+                                              {file.preview && (
+                                                <div className="filename-image-container">
+                                                  <img
+                                                    src={file.preview}
+                                                    alt={file.name}
+                                                    className="file-preview"
+                                                  />
+                                                </div>
+                                              )}
+                                              <span className="file-name">{file.name}</span>  
+                                              <div className="delete-container">
+                                                {/* Delete button with image */}
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleIdentificationPicDelete(file.name)}
+                                                  className="delete-button"
+                                                >
+                                                <img
+                                                  src="/images/trash.png"  
+                                                  alt="Delete"
+                                                  className="delete-icon"
+                                                />
+                                                </button>
+                                              </div>
+                                            </li>
                                           </div>
-                                        </li>
+                                        ))}           
                                       </div>
-                                    ))}           
-                                  </div>
-                                )}
+                                    )}
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
+                          </>
+                        )}
+                          
 
                         <div className="box-container-outer-inbrgy">
                           <div className="title-verificationdocs-signature">
@@ -3018,7 +3026,7 @@ const handleChange = (
 
                         
 
-                        {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "")) && (
+                        {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "First Time Jobseeker") && (
                           <>
                             <div className="box-container-outer-inbrgy">
                               <div className="title-verificationdocs-barangayID">

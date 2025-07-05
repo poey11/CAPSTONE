@@ -23,7 +23,7 @@
     height: 100%; /* Full height */
     margin-top: 2rem;
     max-height: 70%;
-    border: 2px solid rgba(36, 53, 76, 0.7);
+    border: 1px solid rgba(36, 53, 76, 0.7);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
    background-color: #ffffff;
    border-radius: 6px;
@@ -60,6 +60,30 @@ color: rgb(44, 42, 42);
   text-align: center;
     
 }
+
+
+
+/*
+Newly added for tables
+*/
+
+.main-section-departments tbody tr:nth-child(even) {
+  background-color: #f0f4f8; /* Softer modern gray-blue tone */
+}
+
+.main-section-departments tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* Crisp white */
+}
+
+.main-section-departments tbody tr:hover {
+  background-color: #d0e4f5 !important; /* Light pastel blue hover */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+
+
+
 
 .main-section-departments .official-info-departments {
     display: flex;
@@ -113,32 +137,39 @@ color: rgb(44, 42, 42);
 
 }
 
-.section-1-departments h1{
-    font-size: 2rem;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.5);
-   
+.section-1-departments h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
 }
 
+/* Modern primary action button */
 .add-announcement-btn-departments {
-    background-color:#e56723;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .add-announcement-btn-departments:hover {
-    background-color:#cc591b;
-  }
+  background-color: #e56723;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.25s ease, transform 0.2s ease;
+}
+
+.add-announcement-btn-departments:hover {
+  background-color: #cc591b;
+  transform: translateY(-1px);
+}
+
 
   .section-2-departments{
     display: flex;
     gap: 20px;
     padding: 0;
-    margin-top: 5px;
+    margin-top: 15px;
   }
 
   .search-bar-departments, .featuredStatus-departments{
@@ -152,60 +183,53 @@ color: rgb(44, 42, 42);
     text-align: left;
   }
 
-  .search-bar-departments, .featuredStatus-departments:focus {
+  .search-bar-departments:focus, .featuredStatus-departments:focus {
     border-color: #f49028;
     outline: none;
     box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
   }
 
   .featuredStatus-departments option {
-    color: rgba(0, 0, 0, 0.4); 
+    color: #000000; 
   }
 
-  .status-dropdown-departments {
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    text-align: center;
-  }
-  
-  .pending {
-    background-color: #d4d64f;
-    color: white;
-    font-size: 15px;
-    
-  }
-  
-  .resolved {
-    background-color: #66c47a;
-    color: white;
-    
-  }
-  
-  .settled {
-    background-color: #1e5128;
-    color: white;
-    font-size: 15px;
-  }
-  
-  .archived {
-    background-color: #7f7f7f;
-    color: white;
-    font-size: 15px;
-  }
 
-  .status-badge-departments {
+  
+
+
+    .status-badge-departments {
     padding: 8px 12px;            
-    border-radius: 5px;          
-    font-size: 13px;              
+    border-radius: 5px;                     
     color: white;                
     display: inline-block;        
     text-transform: capitalize;   
     text-align: center;    
     width: 100px;       
 }
+
+
+
+  .pending {
+    background-color: #d4d64f;
+    font-size: 15px;
+  }
+  
+  .settled {
+    background-color: #1e5128;
+    font-size: 15px;
+  }
+  
+  .archived {
+    background-color: #7f7f7f;
+    font-size: 15px;
+  }
+
+  .cfa {
+    background-color: rgb(116, 16, 21);
+    font-size: 15px;
+  }
+
+
 
 
 

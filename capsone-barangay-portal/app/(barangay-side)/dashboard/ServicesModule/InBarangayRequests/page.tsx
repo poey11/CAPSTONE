@@ -1,33 +1,82 @@
 "use client"
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import "@/CSS/barangaySide/ServicesModule/InBarangayRequests.css";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
+import { useSession } from "next-auth/react";
+import { report } from "process";
 
 
   export default function InBarangayRequests() { 
     const router = useRouter();
+    const { data: session } = useSession();
+    const user = session?.user;
     const [requestData, setRequestData] = useState<any[]>([]);
-     const [searchType, setSearchType] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-      const [loading, setLoading] = useState(true);
+    const [searchType, setSearchType] = useState("");
+    const [dateFrom, setDateFrom] = useState("");
+    const [dateTo, setDateTo] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [filteredInBarangayRequests, setFilteredInBarangayRequests] = useState<any[]>([]);
+    const [selectedDocumentType, setSelectedDocumentType] = useState<string | null>(null);
+    const [showDeletePopup, setShowDeletePopup] = useState(false);
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+  
+      useEffect(() => {
+        let position = "";
+        if(user?.position === "Admin Staff"){
+          position = "Admin Staff";
+        }else if(user?.position === "Secretary" || user?.position === "Assistant Secretary"){
+          position = "SAS";
+        }
+        console.log("User Position:", position);
+        try {
+          const Collection = query(
+            collection(db,"ServiceRequests"),
+            where("accID", "==", "INBRGY-REQ"), // Filter for In Barangay requests
+            orderBy("createdAt", "desc") // First, sort by latest
+          );      
+          const unsubscribe = onSnapshot(Collection, (snapshot) => {
+            let reports: any[] = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
 
-  const [filteredInBarangayRequests, setFilteredInBarangayRequests] = useState<any[]>([]);
+             // Filter based on sendTo field
+            const filterReports = reports.filter(
+              (report) => report.sendTo === position
+            );
 
+            filterReports.sort((a, b) => {
+              if (a.statusPriority !== b.statusPriority) {
+                return a.statusPriority - b.statusPriority;
+              }
+            
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+          
+            setRequestData(filterReports);
+            setFilteredInBarangayRequests(filterReports); // add
 
+            setLoading(false);
+            setError(null);
+            console.log(requestData);
 
-  const [selectedDocumentType, setSelectedDocumentType] = useState<string | null>(null);
-
-  const [showDeletePopup, setShowDeletePopup] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupMessage, setPopupMessage] = useState("");
-
-    useEffect(() => {
-      try {
+          });
+        
+          return unsubscribe;
+        } catch (error: any) {
+          console.log(error.message);
+          }
+        }, [user]);
+        
+        
+      const [allRequests, setAllRequests] = useState<any[]>([]);
+      useEffect(() => {
+        try {
         const Collection = query(
           collection(db,"ServiceRequests"),
           where("accID", "==", "INBRGY-REQ"), // Filter for In Barangay requests
@@ -38,31 +87,26 @@ import { db } from "@/app/db/firebase";
             id: doc.id,
             ...doc.data(),
           }));
-        
-          // Now sort client-side: Pending (1) first, then Pickup (2), etc.
+          
           reports.sort((a, b) => {
             if (a.statusPriority !== b.statusPriority) {
-              return a.statusPriority - b.statusPriority; // status priority asc
+              return a.statusPriority - b.statusPriority;
             }
           
-            // Convert string dates to timestamps
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
           });
         
-          setRequestData(reports);
-          setFilteredInBarangayRequests(reports); // add
-
+          setAllRequests(reports);
           setLoading(false);
           setError(null);
           console.log(requestData);
-
         });
       
         return unsubscribe;
       } catch (error: any) {
         console.log(error.message);
-      }
-    }, []);
+        }
+      }, []);
 
 
     /*
@@ -169,13 +213,14 @@ const confirmDelete = () => {
 
         <main className="inbarangayreq-main-container">
          <div className="inbarangayreq-section-1">
-         
+          {(user?.position === "Admin Staff" || user?.position === "Secretary" || user?.position === "Assistant Secretary") && (
               <button
                 className="add-announcement-btn"
                 onClick={handleGenerateDocument}
               >
                 Generate Document
               </button>
+          )}
          </div>
 
          <div className="inbarangayreq-section-2">
@@ -219,7 +264,7 @@ const confirmDelete = () => {
               <option value="inProgress">In Progress</option>
             </select>
       </div>
-
+        Assigned Requests
        <div className="inbarangayreq-main-section">
         {loading ? (
             <p>Loading Online Requests...</p>
@@ -289,7 +334,57 @@ const confirmDelete = () => {
             </button>
         </div>
 
+        All Requests: {allRequests.length}     
+       <div className="inbarangayreq-main-section">
+        {loading ? (
+            <p>Loading Online Requests...</p>
+          ) : error ? (
+            <p className="error">{error}</p>
+          ) : allRequests.length === 0 ? (
+            <div className="no-result-card-inbarangay">
+              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
+              <p className="no-results-inbarangay">No Results Found</p>
+            </div>
+          ) : (
 
+          <table>
+            <thead>
+              <tr>
+                <th>Document Type</th>
+                <th>Request ID</th>
+                <th>Request Date</th>
+                <th>Requestor</th>
+                <th>Purpose</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allRequests.map((request, index) => (
+                <tr key={index}>
+                  <td>{request.docType}</td>
+                  <td>{request.requestId}</td>
+                  <td>{request.createdAt}</td>
+                  <td>{request.requestor}</td>
+                  <td>{request.purpose}</td>
+                  <td>
+                    <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
+                      {request.status}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="actions-inbarangay">
+                      <button className="action-inbarangay-view" onClick={() => handleView(request.id, request.reqType)}>
+                          <img src="/Images/view.png" alt="View" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
 
         {showPopup && (
                 <div className={`popup-overlay show`}>
@@ -300,15 +395,15 @@ const confirmDelete = () => {
         )}
 
         {showDeletePopup && (
-                        <div className="confirmation-popup-overlay">
-                            <div className="confirmation-popup">
-                                <p>Are you sure you want to delete this request?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
-                                    <button onClick={confirmDelete} className="yes-button">Yes</button>
-                                </div> 
-                            </div>
-                        </div>
+          <div className="confirmation-popup-overlay">
+              <div className="confirmation-popup">
+                  <p>Are you sure you want to delete this request?</p>
+                  <div className="yesno-container">
+                      <button onClick={() => setShowDeletePopup(false)} className="no-button">No</button>
+                      <button onClick={confirmDelete} className="yes-button">Yes</button>
+                  </div> 
+              </div>
+          </div>
           )}
                 
 

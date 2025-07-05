@@ -317,15 +317,19 @@
     
   }
 
-  .acknowledged {
-    background-color: #4caf50;   
+  .settled {
+   background-color: #1e5128;
     color: white;
     font-size: 15px;
   }
 
-  .In-Progress {
-    background-color: #325bd4;
-  }
+  .in-progress {
+  background-color: #dd5312;
+      color: white;
+    font-size: 15px;
+}
+
+
 
 
 
