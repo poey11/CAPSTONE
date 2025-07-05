@@ -1074,7 +1074,8 @@ const ViewOnlineRequest = () => {
       
     const currentPurpose = requestData?.purpose as keyof typeof predefinedFieldSections;
     const currentSections = predefinedFieldSections[currentPurpose] || {};
-
+    const [resolvedImageUrls, setResolvedImageUrls] = useState<Record<string, string>>({});
+    
     useEffect(() => {
       const resolveFilenamesToUrls = async () => {
         if (!requestData) return;
