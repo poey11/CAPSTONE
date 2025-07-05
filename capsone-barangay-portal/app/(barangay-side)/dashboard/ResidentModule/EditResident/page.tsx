@@ -734,7 +734,7 @@ export default function EditResident() {
                                 <div className="fields-section">
                                   <p>Age<span className="required">*</span></p>
                                   <input 
-                                    type="number"
+                                    type="string"
                                     className={`add-resident-input-field ${invalidFields.includes("age") ? "input-error" : ""}`}
                                     placeholder="Enter Age"
                                     name="age"
@@ -786,10 +786,6 @@ export default function EditResident() {
 
 
                               <div className="add-main-resident-section-2-right-side">
-                                    <div className="fields-section">
-                                      <p>Occupation</p>
-                                      <input type="text" className="add-resident-input-field" placeholder="Enter Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
-                                    </div>
                                     
                                     <div className="fields-section">
                                       <p>Contact Number<span className="required">*</span></p>
@@ -813,6 +809,28 @@ export default function EditResident() {
                                       <p>Email Address</p>
                                       <input type="email" className="add-resident-input-field" placeholder="Enter Email Address" name="emailAddress" value={formData.emailAddress} onChange={handleChange} />
                                     </div>
+
+                                    <div className="fields-section">
+                                    <p>Cluster/Section<span className="required">*</span></p>
+                                    <select
+                                      name="cluster"
+                                      className="add-resident-input-field"
+                                      value={formData.cluster || ""}
+                                      onChange={handleChange}
+                                      required
+                                      disabled={!formData.generalLocation} // Optional: disables until a location is picked
+                                    >
+                                      <option value="" disabled>
+                                        {formData.generalLocation ? "Choose HOA/Sitio" : "Select Location First"}
+                                      </option>
+                                      {formData.generalLocation &&
+                                        clusterOptions[formData.generalLocation].map((option, index) => (
+                                          <option key={index} value={option}>
+                                            {option}
+                                          </option>
+                                        ))}
+                                    </select>
+                                  </div>
 
                                     <div className="fields-section">
                                 <p>Citizenship<span className="required">*</span></p>
@@ -900,26 +918,9 @@ export default function EditResident() {
                           
                           <div className="add-main-resident-section-2-cluster">
                             <div className="fields-section">
-                              <p>Cluster/Section<span className="required">*</span></p>
-                              <select
-                                name="cluster"
-                                className="add-resident-input-field"
-                                value={formData.cluster || ""}
-                                onChange={handleChange}
-                                required
-                                disabled={!formData.generalLocation} // Optional: disables until a location is picked
-                              >
-                                <option value="" disabled>
-                                  {formData.generalLocation ? "Choose HOA/Sitio" : "Select Location First"}
-                                </option>
-                                {formData.generalLocation &&
-                                  clusterOptions[formData.generalLocation].map((option, index) => (
-                                    <option key={index} value={option}>
-                                      {option}
-                                    </option>
-                                  ))}
-                              </select>
-                            </div>
+                                      <p>Occupation</p>
+                                      <input type="text" className="add-resident-input-field" placeholder="Enter Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
+                                    </div>
                           </div>
                           </div>
                         </>

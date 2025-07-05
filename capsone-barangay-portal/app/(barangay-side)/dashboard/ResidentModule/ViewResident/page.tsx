@@ -345,8 +345,8 @@ useEffect(() => {
                       </div>
 
                       <div className="view-resident-fields-section">
-                        <p>Date of Birth</p>
-                        <input type="date" className="view-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth || "N/A"}  max={new Date().toISOString().split("T")[0]} readOnly />
+                        <p>Civil Status</p>
+                        <input type="text" name="civilStatus" className="view-resident-input-field" value={formData.civilStatus || "N/A"} readOnly/>
                       </div>
 
                       <div className="view-resident-fields-section">
@@ -362,6 +362,13 @@ useEffect(() => {
                     </div>
 
                     <div className="view-main-resident-content-right-side">
+
+                      
+
+                    <div className="view-resident-fields-section">
+                        <p>Date of Birth</p>
+                        <input type="date" className="view-resident-input-field" name="dateOfBirth" value={formData.dateOfBirth || "N/A"}  max={new Date().toISOString().split("T")[0]} readOnly />
+                      </div>
                       <div className="view-resident-fields-section">
                         <p>Location</p>
                         <input type="text" name="generalLocation" className="view-resident-input-field" value={formData.generalLocation || "N/A"} readOnly/>
@@ -372,10 +379,6 @@ useEffect(() => {
                         <input type="text" className="view-resident-input-field" name="placeOfBirth" value={formData.placeOfBirth || "N/A"}  readOnly />
                       </div>
 
-                      <div className="view-resident-fields-section">
-                        <p>Civil Status</p>
-                        <input type="text" name="civilStatus" className="view-resident-input-field" value={formData.civilStatus || "N/A"} readOnly/>
-                      </div>
 
                       <div className="view-resident-fields-section">
                         <p>Contact Number</p>
