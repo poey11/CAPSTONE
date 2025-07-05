@@ -18,6 +18,8 @@ const incidentForm:React.FC = () => {
   const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
   const minDate = getLocalDateString(new Date());
   const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
+  const [isVerified, setIsVerified] = useState(false);
+
 
 
 const formRef = useRef<HTMLFormElement>(null);
@@ -55,29 +57,60 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
     status: "pending",
     addInfo:"",
     reasonForLateFiling: "",
+    residentid:"",
   });
 
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (currentUser && currentUser !== "Guest") {
-        const docRef = doc(db, "ResidentUsers", currentUser);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setIncidentReport((prev: any) => ({
-            ...prev,
-            firstname: data.first_name || "",
-            middlename: data.middle_name || "",
-            lastname: data.last_name || "",
-            contactNos: data.phone || "",
-          }));
+        const userRef = doc(db, "ResidentUsers", currentUser);
+        const userSnap = await getDoc(userRef);
+  
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+  
+          if (userData.status === "Verified" && userData.residentId) {
+            // Set verified flag
+            setIsVerified(true);
+  
+            // Fetch from Residents table
+            const residentRef = doc(db, "Residents", userData.residentId);
+            const residentSnap = await getDoc(residentRef);
+  
+            if (residentSnap.exists()) {
+              const verifiedData = residentSnap.data();
+              setIncidentReport((prev: any) => ({
+                ...prev,
+                firstname: verifiedData.firstName || "",
+                middlename: verifiedData.middleName || "",
+                lastname: verifiedData.lastName || "",
+                contactNos: verifiedData.contactNumber || "",
+                email: verifiedData.emailAddress || "",
+                address: verifiedData.address || "",
+                residentId: userData.residentId || "",
+              }));
+            }
+          } else {
+            // fallback to ResidentUsers
+            setIsVerified(false); // <--- not verified
+            setIncidentReport((prev: any) => ({
+              ...prev,
+              firstname: userData.first_name || "",
+              middlename: userData.middle_name || "",
+              lastname: userData.last_name || "",
+              contactNos: userData.phone || "",
+              email: userData.email || "",
+              address: userData.address || "",
+            }));
+          }
         }
       }
     };
-
+  
     fetchUserData();
   }, [currentUser]);
+  
     
     const [nos, setNos] = useState<number>(0); // Initialize with a default value
   
@@ -295,6 +328,7 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
           file: filename,
           department: "Online",
           status: incidentReport.status,
+          residentId: incidentReport.residentId,
           statusPriority: 1,
           isViewed: false,
           ...(incidentReport.isReportLate && { 
@@ -466,6 +500,7 @@ const confirmSubmit = async () => {
                           placeholder="Enter First Name"
                           value={incidentReport.firstname}
                           onChange={handleFormChange}
+                          disabled={isVerified}
                         />
                       </div>
 
@@ -485,6 +520,7 @@ const confirmSubmit = async () => {
                           placeholder="Enter Last Name"
                           value={incidentReport.lastname}
                           onChange={handleFormChange}
+                          disabled={isVerified}
                         />
                       </div>
 
@@ -508,6 +544,7 @@ const confirmSubmit = async () => {
                           placeholder="Enter Middle Name"
                           value={incidentReport.middlename}
                           onChange={handleFormChange}
+                          disabled={isVerified}
                         />
                     </div>
 
