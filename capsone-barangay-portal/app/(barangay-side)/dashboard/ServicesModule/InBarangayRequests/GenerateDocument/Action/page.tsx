@@ -2380,18 +2380,77 @@ const handleChange = (
 
                           <div className="fields-section">
                             <h1>Requestor's Citizenship<span className="required">*</span></h1>
-                            <input 
-                              value ={clearanceInput?.citizenship || ""}
-                              onChange={handleChange} 
-                              required
-                              type="text" 
+
+                            <select
                               id="citizenship"
                               name="citizenship"
-                              className="createRequest-input-field" 
-                              placeholder="Enter Citizenship" 
-                            />
+                              className="createRequest-input-field"
+                              value={
+                                clearanceInput.citizenship &&
+                                ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(clearanceInput.citizenship.split("(")[0])
+                                  ? clearanceInput.citizenship.split("(")[0]
+                                  : ""
+                              }
+                              onChange={(e) => {
+                                const selected = e.target.value;
+                                setClearanceInput((prev: any) => ({
+                                  ...prev,
+                                  citizenship: selected,
+                                }));
+                              }}
+                              required
+                            >
+                              <option value="" disabled>Select Citizenship</option>
+                              <option value="Filipino">Filipino</option>
+                              <option value="Dual Citizen">Dual Citizen</option>
+                              <option value="Naturalized">Naturalized</option>
+                              <option value="Others">Others</option>
+                            </select>
+
+                            {/* Additional input for Dual Citizen */}
+                            {clearanceInput.citizenship?.startsWith("Dual Citizen") && (
+                              <input
+                                type="text"
+                                className="createRequest-input-field"
+                                placeholder="Specify other citizenship (e.g., American)"
+                                value={
+                                  clearanceInput.citizenship.includes("(")
+                                    ? clearanceInput.citizenship.split("(")[1].replace(")", "")
+                                    : ""
+                                }
+                                onChange={(e) => {
+                                  const second = e.target.value.trim();
+                                  setClearanceInput((prev: any) => ({
+                                    ...prev,
+                                    citizenship: second ? `Dual Citizen(${second})` : "Dual Citizen",
+                                  }));
+                                }}
+                                required
+                              />
+                            )}
+
+                            {/* Additional input for Others */}
+                            {clearanceInput.citizenship === "Others" && (
+                              <input
+                                type="text"
+                                className="createRequest-input-field"
+                                placeholder="Please specify your citizenship"
+                                value={
+                                  ["Filipino", "Dual Citizen", "Naturalized", "Others"].includes(clearanceInput.citizenship)
+                                    ? ""
+                                    : clearanceInput.citizenship
+                                }
+                                onChange={(e) =>
+                                  setClearanceInput((prev: any) => ({
+                                    ...prev,
+                                    citizenship: e.target.value,
+                                  }))
+                                }
+                                required
+                              />
+                            )}
                           </div>
-                          
+  
                           {clearanceInput.purpose === "Residency" && (
                             <>
                               <div className="fields-section">
@@ -3833,6 +3892,7 @@ const handleChange = (
                                               occupation: resident.occupation || '',
                                               precinctnumber: resident.precinctNumber || '',
                                               dateOfResidency: resident.dateOfResidency || '',
+                                              citizenship: resident.citizenship || '',
                                             };
                                       
                                             // Only clear fromAddress if purpose is NOT Occupancy
