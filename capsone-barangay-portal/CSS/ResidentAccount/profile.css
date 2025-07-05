@@ -374,3 +374,9 @@
         opacity: 0.7;
     }
 
+    .required {
+        color: red;
+        margin-left: 5px;
+      }
+      
+

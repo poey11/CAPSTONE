@@ -378,7 +378,8 @@ export default function Action() {
             precinctnumber: residentData.precinctNumber || "",
             requestorFname: fullName,
             requestorMrMs: mrms,
-            residentId: residentData.id
+            residentId: residentData.id,
+            citizenship: residentData.citizenship || "",
           }));
         }
   
@@ -722,6 +723,7 @@ const handleFileChange = (
           purpose: clearanceInput.purpose,
           dateOfResidency: clearanceInput.dateOfResidency,
           address: clearanceInput.address,
+          residentId: userData?.status === "Verified" ? userData.residentId : "Guest",
           ...(clearanceInput.purpose === "Residency" && {
             CYFrom: clearanceInput.CYFrom,
             CYTo: clearanceInput.CYTo,

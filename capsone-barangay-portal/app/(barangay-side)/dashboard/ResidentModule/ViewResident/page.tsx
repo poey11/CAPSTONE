@@ -37,6 +37,7 @@ export default function ViewResident() {
     contactNumber: "",
     emailAddress: "",
     precinctNumber: "",
+    citizenship: "",
     generalLocation: "",
     cluster: "",
     isStudent: false,
@@ -86,6 +87,7 @@ export default function ViewResident() {
             createdBy: docSnap.data().createdBy || "",
             updatedBy: docSnap.data().updatedBy || "",
             createdAt: docSnap.data().createdAt || "",
+            citizenship: docSnap.data().citizenship || "",
           };
 
           setFormData(data);
@@ -105,47 +107,60 @@ export default function ViewResident() {
 
   const [incidentReports, setIncidentReports] = useState<any[]>([]);
 
-useEffect(() => {
-  const fetchIncidentReports = async () => {
-    if (!residentId) return;
-
-    const incidentRef = collection(db, "IncidentReports");
-
-    // Query where the resident is the complainant
-    const complainantQuery = query(
-      incidentRef,
-      where("complainant.residentId", "==", residentId)
-    );
-
-    // Query where the resident is the respondent
-    const respondentQuery = query(
-      incidentRef,
-      where("respondent.residentId", "==", residentId)
-    );
-
-    const [complainantSnap, respondentSnap] = await Promise.all([
-      getDocs(complainantQuery),
-      getDocs(respondentQuery),
-    ]);
-
-    const reports: any[] = [];
-
-    complainantSnap.forEach((doc) => {
-      reports.push({ id: doc.id, role: "Complainant", ...doc.data() });
-    });
-
-    respondentSnap.forEach((doc) => {
-      // Avoid duplication if the same doc appears in both roles
-      if (!reports.find((r) => r.id === doc.id)) {
-        reports.push({ id: doc.id, role: "Respondent", ...doc.data() });
-      }
-    });
-
-    setIncidentReports(reports);
-  };
-
-  fetchIncidentReports();
-}, [residentId]);
+  useEffect(() => {
+    const fetchIncidentReports = async () => {
+      if (!residentId) return;
+  
+      const incidentRef = collection(db, "IncidentReports");
+  
+      // Query where the resident is the complainant
+      const complainantQuery = query(
+        incidentRef,
+        where("complainant.residentId", "==", residentId)
+      );
+  
+      // Query where the resident is the respondent
+      const respondentQuery = query(
+        incidentRef,
+        where("respondent.residentId", "==", residentId)
+      );
+  
+      // Query where the general residentId matches
+      const generalQuery = query(
+        incidentRef,
+        where("residentId", "==", residentId)
+      );
+  
+      const [complainantSnap, respondentSnap, generalSnap] = await Promise.all([
+        getDocs(complainantQuery),
+        getDocs(respondentQuery),
+        getDocs(generalQuery),
+      ]);
+  
+      const reports: any[] = [];
+  
+      complainantSnap.forEach((doc) => {
+        reports.push({ id: doc.id, role: "Complainant", ...doc.data() });
+      });
+  
+      respondentSnap.forEach((doc) => {
+        if (!reports.find((r) => r.id === doc.id)) {
+          reports.push({ id: doc.id, role: "Respondent", ...doc.data() });
+        }
+      });
+  
+      generalSnap.forEach((doc) => {
+        if (!reports.find((r) => r.id === doc.id)) {
+          reports.push({ id: doc.id, role: "Complainant", ...doc.data() });
+        }
+      });
+  
+      setIncidentReports(reports);
+    };
+  
+    fetchIncidentReports();
+  }, [residentId]);
+  
 
 const [serviceRequests, setServiceRequests] = useState<any[]>([]);
 
@@ -336,6 +351,11 @@ useEffect(() => {
                         <p>Precinct Number</p>
                         <input type="text" className="view-resident-input-field"  name="precinctNumber" value={formData.precinctNumber || "N/A"} readOnly />
                       </div> 
+
+                      <div className="view-resident-fields-section">
+                        <p>Citizenship</p>
+                        <input type="text" className="view-resident-input-field"  name="citizenship" value={formData.citizenship || "N/A"} readOnly />
+                      </div> 
                     </div>
 
                     <div className="view-main-resident-content-right-side">
@@ -490,66 +510,76 @@ useEffect(() => {
                   )}
                   {activeSection === "incidents" && (
                     <>
-                      <div className="view-resident-incident-table-container">
-                        {incidentReports.length === 0 ? (
-                          <div className="no-incident-message">
-                            <p>No incident reports found for this resident.</p>
-                          </div>
-                        ) : (
-                          // different widths for each column to make it center and easier to read
-                          <table className="incident-table-section">
-                            <thead>
-                              <tr>
-                                <th className="w-[250px] text-center">Case No.</th>
-                                <th className="w-[150px] text-center">Date & Time Filed</th>
-                                <th className="w-[180px] text-center">Nature</th>
-                                <th className="w-[150px] text-center">Status</th>
-                                <th className="w-[120px] text-center">Role</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-
-                              {/* clickable rows that leads to view incident*/}
-                              {incidentReports.map((incident) => (
-                                <tr key={incident.id} className="clickable-row">
-                                  <td>
-                                    <Link href={`/dashboard/IncidentModule/ViewIncident?id=${incident.id}`}>
-                                      {incident.caseNumber}
-                                    </Link>
-                                  </td>
-                                  <td>
-                                    <Link href={`/dashboard/IncidentModule/ViewIncident?id=${incident.id}`}>
-                                      {`${incident.dateFiled} ${incident.timeFiled}`}
-                                    </Link>
-                                  </td>
-                                  <td>
-                                    <Link href={`/dashboard/IncidentModule/ViewIncident?id=${incident.id}`}>
-                                      {incident.nature === "Others" ? incident.specifyNature : incident.nature}
-                                    </Link>
-                                  </td>
-                                  <td>
-                                    <Link href={`/dashboard/IncidentModule/ViewIncident?id=${incident.id}`}>
-                                      <span
-                                        className={`status-badge-departments ${incident.status
-                                          .toLowerCase()
-                                          .replace(/\s+/g, "-")}`}
-                                      >
-                                        {incident.status.charAt(0).toUpperCase() + incident.status.slice(1).toLowerCase()}
-                                      </span>
-                                    </Link>
-                                  </td>
-                                  <td>
-                                    <Link href={`/dashboard/IncidentModule/ViewIncident?id=${incident.id}`}>
-                                      {incident.role}
-                                    </Link>
-                                  </td>
+                        <div className="view-resident-incident-table-container">
+                          {incidentReports.length === 0 ? (
+                            <div className="no-incident-message">
+                              <p>No incident reports found for this resident.</p>
+                            </div>
+                          ) : (
+                            <table className="incident-table-section">
+                              <thead>
+                                <tr>
+                                  <th className="w-[250px] text-center">Case No.</th>
+                                  <th className="w-[200px] text-center">
+                                    {incidentReports.some((i) => i.department === "Online") ? "Date Filed" : "Date & Time Filed"}
+                                  </th>
+                                  <th className="w-[200px] text-center">
+                                    {incidentReports.some((i) => i.department === "Online") ? "Concerns" : "Nature"}
+                                  </th>
+                                  <th className="w-[150px] text-center">Status</th>
+                                  <th className="w-[120px] text-center">Role</th>
                                 </tr>
-                              ))}
-                            </tbody>
+                              </thead>
+                              <tbody>
+                                {incidentReports.map((incident) => {
+                                  const isOnline = incident.department === "Online";
+                                  const targetUrl = isOnline
+                                    ? `/dashboard/IncidentModule/OnlineReports/ViewOnlineReport?id=${incident.id}`
+                                    : `/dashboard/IncidentModule/ViewIncident?id=${incident.id}`;
 
-                          </table>
-                        )}
-                      </div>
+                                  return (
+                                    <tr key={incident.id} className="clickable-row">
+                                      <td>
+                                        <Link href={targetUrl}>
+                                          {incident.caseNumber}
+                                        </Link>
+                                      </td>
+                                      <td>
+                                        <Link href={targetUrl}>
+                                          {isOnline ? incident.dateFiled : `${incident.dateFiled} ${incident.timeFiled}`}
+                                        </Link>
+                                      </td>
+                                      <td>
+                                        <Link href={targetUrl}>
+                                          {isOnline 
+                                            ? (incident.concerns || "N/A")
+                                            : (incident.nature === "Others" ? incident.specifyNature : incident.nature)}
+                                        </Link>
+                                      </td>
+                                      <td>
+                                        <Link href={targetUrl}>
+                                          <span
+                                            className={`status-badge-departments ${incident.status
+                                              .toLowerCase()
+                                              .replace(/\s+/g, "-")}`}
+                                          >
+                                            {incident.status.charAt(0).toUpperCase() + incident.status.slice(1).toLowerCase()}
+                                          </span>
+                                        </Link>
+                                      </td>
+                                      <td>
+                                        <Link href={targetUrl}>
+                                          {incident.role}
+                                        </Link>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          )}
+                        </div>
+
                     </>
                   )}
 {activeSection === "services" && (
