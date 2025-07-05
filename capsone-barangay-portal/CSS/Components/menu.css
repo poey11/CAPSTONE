@@ -475,3 +475,16 @@ padding: 20px;
   align-items: center;
 
 }
+
+.no-messages-container-res {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.no-messages-container-res p {
+  color: red;
+  font-weight: bold;
+  padding-top: 200px;
+}

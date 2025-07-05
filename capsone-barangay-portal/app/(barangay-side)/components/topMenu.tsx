@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { db } from "../../db/firebase";
-import { collection, query, where, onSnapshot, updateDoc, doc, orderBy, getDoc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, updateDoc, doc, orderBy, getDoc, deleteDoc } from "firebase/firestore";
 import { usePathname } from "next/navigation";
 
 
@@ -192,40 +192,56 @@ useEffect(() => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+
+const handleDeleteNotification = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, "BarangayNotifications", id));
+    setNotifications(prev => prev.filter(notif => notif.id !== id));
+    console.log("Notification deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting notification:", error);
+  }
+};
+
+
   return (
     <div className="main-containerB">
       <div className="user-container">
+
+
         <div className="dropdown-Container">
-          <div className="dropdown-item">
+
+          <div className="dropdown-Container-no-hover-notifications-brgy">
             <p
               id="inbox-link"
               onClick={toggleNotificationSection}
-              className="inbox-container"
+              className="inbox-container-brgy"
             >
               <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon-brgyside" />
               {unreadCount > 0 && <span className="notification-badge-brgyside">{unreadCount}</span>}
             </p>
           </div>
+
           {isNotificationOpen && (
             <div className="notification-section-brgyside" ref={notificationRef}>
               <div className="top-section-brgyside">
                 <p className="notification-title-brgyside">Notification Inbox</p>
-                <div className="filter-container">
+                <div className="filter-container-brgy">
                   <button
-                    className={`filter-option ${filter === "all" ? "active" : ""}`}
+                    className={`filter-option-brgy ${filter === "all" ? "active" : ""}`}
                     onClick={() => setFilter("all")}
                   >
                     All
                   </button>
                   <button
-                    className={`filter-option ${filter === "false" ? "active" : ""}`}
+                    className={`filter-option-brgy ${filter === "false" ? "active" : ""}`}
                     onClick={() => setFilter("false")}
                   >
                     Unread
                   </button>
                 </div>
               </div>
-              <div className="bottom-section">
+              <div className="bottom-section-brg">
                 <div className="notification-content-brgyside">
                   {filteredMessages.length > 0 ? (
                     filteredMessages.map((message) => (
@@ -234,10 +250,10 @@ useEffect(() => {
                         key={message.id}
                         onClick={() => handleNotificationClick(message)}
                       >
-                        <div className="message-section">
+                        <div className="message-section-brgy">
                           <p>{message.message}</p>
                         </div>
-                        <div className="unread-icon-section">
+                        <div className="unread-icon-section-brgy">
                           {message.isRead === false && (
                             <img
                               src="/images/unread-icon.png"
@@ -246,10 +262,21 @@ useEffect(() => {
                             />
                           )}
                         </div>
+
+                          
+                        <div className="delete-icon-section-brgy">
+                              <button className="delete-btn-brgy" onClick={(e) => { e.stopPropagation(); handleDeleteNotification(message.id); }}>
+                                <img src="/images/Delete.png" alt="Delete" className="delete-icon-image-brgy" />
+                              </button>
+                        </div>
+                          
                       </div>
                     ))
                   ) : (
-                    <p>No messages found</p>
+                     <div className="no-messages-container">
+                      <p>No messages found</p>
+                    </div>
+
                   )}
                 </div>
               </div>

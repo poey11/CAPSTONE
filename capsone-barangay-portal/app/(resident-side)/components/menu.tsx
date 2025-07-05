@@ -348,6 +348,7 @@ const handleDeleteNotification = async (notificationId: string) => {
           </div>
         */}
       </div>
+      
 
       {/* CHANGE HERE */}
       <div className="navbar-icons-wrapper" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -394,7 +395,9 @@ const handleDeleteNotification = async (notificationId: string) => {
                           </div>
                         ))
                       ) : (
-                        <p style={{ color: "red" }}>No messages found</p>
+                        <div className="no-messages-container-res">
+                            <p>No messages found</p>
+                          </div>
                       )}
                     </div>
                   </div>
