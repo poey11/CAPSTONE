@@ -19,11 +19,12 @@ import { report } from "process";
     const [statusFilter, setStatusFilter] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [filteredInBarangayRequests, setFilteredInBarangayRequests] = useState<any[]>([]);
     const [selectedDocumentType, setSelectedDocumentType] = useState<string | null>(null);
     const [showDeletePopup, setShowDeletePopup] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+    const [taskAssignedData, setTaskAssignedData] = useState<any[]>([]);
+    const [filteredMainRequests, setFilteredMainRequests] = useState<any[]>([]);
   
       useEffect(() => {
         let position = "";
@@ -46,9 +47,13 @@ import { report } from "process";
             }));
 
              // Filter based on sendTo field
-            const filterReports = reports.filter(
+            let filterReports = reports.filter(
               (report) => report.sendTo === position
             );
+
+            if (user?.position === "Admin Staff") {
+              filterReports = filterReports.filter((report) => report.status === "Pick-up");
+            }
 
             filterReports.sort((a, b) => {
               if (a.statusPriority !== b.statusPriority) {
@@ -59,7 +64,8 @@ import { report } from "process";
             });
           
             setRequestData(filterReports);
-            setFilteredInBarangayRequests(filterReports); // add
+            setTaskAssignedData(filterReports); // add
+            
 
             setLoading(false);
             setError(null);
@@ -114,31 +120,31 @@ import { report } from "process";
     */
 
 
-    useEffect(() => {
-    let filtered = requestData;
-
-   if (searchType !== "" && searchType !== "All") {
-    filtered = filtered.filter((req) =>
-      req.docType.toLowerCase().includes(searchType.toLowerCase())
-    );
-  }
-
-    if (dateFrom && dateTo) {
-      filtered = filtered.filter((req) => {
-        const requestDate = new Date(req.createdAt);
-        return requestDate >= new Date(dateFrom) && requestDate <= new Date(dateTo);
-      });
-    }
-
-    if (statusFilter !== "") {
-      filtered = filtered.filter(
-        (req) => req.status.toLowerCase() === statusFilter.toLowerCase()
-      );
-    }
-
-    setFilteredInBarangayRequests(filtered);
-    setCurrentPage(1);
-  }, [searchType, dateFrom, dateTo, statusFilter, requestData]);
+      useEffect(() => {
+        let filtered = allRequests;
+      
+        if (searchType !== "" && searchType !== "All") {
+          filtered = filtered.filter((req) =>
+            req.docType.toLowerCase().includes(searchType.toLowerCase())
+          );
+        }
+      
+        if (dateFrom && dateTo) {
+          filtered = filtered.filter((req) => {
+            const requestDate = new Date(req.createdAt);
+            return requestDate >= new Date(dateFrom) && requestDate <= new Date(dateTo);
+          });
+        }
+      
+        if (statusFilter !== "") {
+          filtered = filtered.filter(
+            (req) => req.status.toLowerCase() === statusFilter.toLowerCase()
+          );
+        }
+      
+        setFilteredMainRequests(filtered);
+        setMainCurrentPage(1);            
+      }, [searchType, dateFrom, dateTo, statusFilter, allRequests]);
 
 
 
@@ -177,22 +183,25 @@ const confirmDelete = () => {
 };
 
 
- const [currentPage, setCurrentPage] = useState(1);
+  const [mainCurrentPage, setMainCurrentPage] = useState(1);
+  const [taskCurrentPage, setTaskCurrentPage] = useState(1);
+ 
   const requestsPerPage = 10;
 
-  const indexOfLastRequest = currentPage * requestsPerPage;
-  const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
-  const currentInBarangayRequests = filteredInBarangayRequests.slice(indexOfFirstRequest, indexOfLastRequest);
+  // MAIN pagination
+  const mainIndexOfLast = mainCurrentPage * requestsPerPage;
+  const mainIndexOfFirst = mainIndexOfLast - requestsPerPage;
+  const currentMainRequests = filteredMainRequests.slice(mainIndexOfFirst, mainIndexOfLast);
+const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
 
-  const totalPages = Math.ceil(filteredInBarangayRequests.length / requestsPerPage);
+  // TASK pagination
+  const taskIndexOfLast = taskCurrentPage * requestsPerPage;
+  const taskIndexOfFirst = taskIndexOfLast - requestsPerPage;
+  const currentInBarangayRequests = taskAssignedData.slice(taskIndexOfFirst, taskIndexOfLast);
+  const taskTotalPages = Math.ceil(taskAssignedData.length / requestsPerPage);
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-  const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
-  const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
-
-  const getPageNumbers = () => {
+  const getPageNumbers = (currentPage: number, totalPages: number) => {
     const pageNumbersToShow = [];
-
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
         pageNumbersToShow.push(i);
@@ -203,189 +212,247 @@ const confirmDelete = () => {
         pageNumbersToShow.push("...");
       }
     }
-
     return pageNumbersToShow;
   };
 
-
+  
+  const [activeSection, setActiveSection] = useState("main");
 
     return (
 
         <main className="inbarangayreq-main-container">
          <div className="inbarangayreq-section-1">
-          {(user?.position === "Admin Staff" || user?.position === "Secretary" || user?.position === "Assistant Secretary") && (
-              <button
-                className="add-announcement-btn"
-                onClick={handleGenerateDocument}
-              >
-                Generate Document
-              </button>
-          )}
+          
+          <div className="assigned-incident-info-toggle-wrapper">
+            {["main", "tasks"].map((section) => (
+            <button
+            key={section}
+            type="button"
+            className={`info-toggle-btn-assigned ${activeSection === section ? "active" : ""}`}
+            onClick={() => setActiveSection(section)}
+            style={{ position: "relative" }}
+            >
+            {section === "main" && "All Requests"}
+            {section === "tasks" && (
+              <>
+                Assigned Tasks
+                {taskAssignedData.length > 0 && (
+                  <span className="task-badge">{taskAssignedData.length}</span>
+                )}
+              </>
+            )}
+            </button>
+            ))}
+          </div> 
+         </div>
+         <div className="section-generate-doc">
+          {(user?.position === "Admin Staff") && (
+                <button
+                  className="add-announcement-btn"
+                  onClick={handleGenerateDocument}
+                >
+                  New Document Request
+                </button>
+            )}
          </div>
 
-         <div className="inbarangayreq-section-2">
-           
-           <select
-            className="inbarangay-services-module-filter"
-            value={searchType}
-            onChange={(e) => setSearchType(e.target.value)}
-          >
-            <option value="All">All Document Types</option>
-            <option value="Barangay Certificate">Barangay Certificate</option>
-            <option value="Barangay Indigency">Barangay Indigency</option>
-            <option value="Barangay ID">Barangay ID</option>
-            <option value="Barangay Permits">Barangay Permits</option>
-            <option value="Barangay Clearance">Barangay Clearance</option>
-            <option value="First Time Jobseeker">First Time Jobseeker</option>
-            <option value="Other">Other Documents</option>
-          </select>
 
-            <input
-              type="date"
-              className="inbarangay-services-module-filter"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-            />
-            <input
-              type="date"
-              className="inbarangay-services-module-filter"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-            />
-            <select
-              className="inbarangay-services-module-filter"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">Select Status</option>
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
-              <option value="rejected">Rejected</option>
-              <option value="inProgress">In Progress</option>
-            </select>
-      </div>
-        Assigned Requests
-       <div className="inbarangayreq-main-section">
-        {loading ? (
-            <p>Loading Online Requests...</p>
-          ) : error ? (
-            <p className="error">{error}</p>
-          ) : currentInBarangayRequests.length === 0 ? (
-            <div className="no-result-card-inbarangay">
-              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
-              <p className="no-results-inbarangay">No Results Found</p>
-            </div>
-          ) : (
-
-          <table>
-            <thead>
-              <tr>
-                <th>Document Type</th>
-                <th>Request ID</th>
-                <th>Request Date</th>
-                <th>Requestor</th>
-                <th>Purpose</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentInBarangayRequests.map((request, index) => (
-                <tr key={index}>
-                  <td>{request.docType}</td>
-                  <td>{request.requestId}</td>
-                  <td>{request.createdAt}</td>
-                  <td>{request.requestor}</td>
-                  <td>{request.purpose}</td>
-                  <td>
-                    <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
-                      {request.status}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="actions-inbarangay">
-                      <button className="action-inbarangay-view" onClick={() => handleView(request.id, request.reqType)}>
-                          <img src="/Images/view.png" alt="View" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-        <div className="redirection-section-inbarangay">
-            <button onClick={prevPage} disabled={currentPage === 1}>
-              &laquo;
-            </button>
-            {getPageNumbers().map((number, index) => (
-              <button
-                key={index}
-                onClick={() => typeof number === "number" && paginate(number)}
-                className={currentPage === number ? "active" : ""}
+        {activeSection === "main" && (
+          <>
+            <div className="inbarangayreq-section-2">
+              
+              <select
+                className="inbarangay-services-module-filter"
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value)}
               >
-                {number}
-              </button>
-            ))}
-            <button onClick={nextPage} disabled={currentPage === totalPages}>
-              &raquo;
-            </button>
-        </div>
+                <option value="All">All Document Types</option>
+                <option value="Barangay Certificate">Barangay Certificate</option>
+                <option value="Barangay Indigency">Barangay Indigency</option>
+                <option value="Barangay ID">Barangay ID</option>
+                <option value="Barangay Permits">Barangay Permits</option>
+                <option value="Barangay Clearance">Barangay Clearance</option>
+                <option value="First Time Jobseeker">First Time Jobseeker</option>
+                <option value="Other">Other Documents</option>
+              </select>
 
-        All Requests: {allRequests.length}     
-       <div className="inbarangayreq-main-section">
-        {loading ? (
-            <p>Loading Online Requests...</p>
-          ) : error ? (
-            <p className="error">{error}</p>
-          ) : allRequests.length === 0 ? (
-            <div className="no-result-card-inbarangay">
-              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
-              <p className="no-results-inbarangay">No Results Found</p>
+                <input
+                  type="date"
+                  className="inbarangay-services-module-filter"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                />
+                <input
+                  type="date"
+                  className="inbarangay-services-module-filter"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                />
+                <select
+                  className="inbarangay-services-module-filter"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">Select Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="completed">Completed</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="inProgress">In Progress</option>
+                </select>
             </div>
-          ) : (
 
-          <table>
-            <thead>
-              <tr>
-                <th>Document Type</th>
-                <th>Request ID</th>
-                <th>Request Date</th>
-                <th>Requestor</th>
-                <th>Purpose</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allRequests.map((request, index) => (
-                <tr key={index}>
-                  <td>{request.docType}</td>
-                  <td>{request.requestId}</td>
-                  <td>{request.createdAt}</td>
-                  <td>{request.requestor}</td>
-                  <td>{request.purpose}</td>
-                  <td>
-                    <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
-                      {request.status}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="actions-inbarangay">
-                      <button className="action-inbarangay-view" onClick={() => handleView(request.id, request.reqType)}>
-                          <img src="/Images/view.png" alt="View" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+            <div className="inbarangayreq-main-section">
+              {loading ? (
+                  <p>Loading Online Requests...</p>
+                ) : error ? (
+                  <p className="error">{error}</p>
+                ) : allRequests.length === 0 ? (
+                  <div className="no-result-card-inbarangay">
+                    <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
+                    <p className="no-results-inbarangay">No Results Found</p>
+                  </div>
+                ) : (
+
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Document Type</th>
+                      <th>Request ID</th>
+                      <th>Request Date</th>
+                      <th>Requestor</th>
+                      <th>Purpose</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  {currentMainRequests.map((request, index) => (
+                      <tr key={index}>
+                        <td>{request.docType}</td>
+                        <td>{request.requestId}</td>
+                        <td>{request.createdAt}</td>
+                        <td>{request.requestor}</td>
+                        <td>{request.purpose}</td>
+                        <td>
+                        <span className={`status-badge ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
+                            {request.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="actions-inbarangay">
+                            <button className="action-inbarangay-view" onClick={() => handleView(request.id, request.reqType)}>
+                                <img src="/Images/view.png" alt="View" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="redirection-section-inbarangay">
+              <button onClick={() => setMainCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={mainCurrentPage === 1}>
+                &laquo;
+              </button>
+              {getPageNumbers(mainCurrentPage, mainTotalPages).map((number, index) => (
+                <button
+                  key={index}
+                  onClick={() => typeof number === "number" && setMainCurrentPage(number)}
+                  className={mainCurrentPage === number ? "active" : ""}
+                >
+                  {number}
+                </button>
               ))}
-            </tbody>
-          </table>
+              <button
+                onClick={() => setMainCurrentPage((prev) => Math.min(prev + 1, mainTotalPages))}
+                disabled={mainCurrentPage === mainTotalPages}
+              >
+                &raquo;
+              </button>
+            </div>
+          </>
         )}
-      </div>
 
+        {activeSection === "tasks" && (
+          <>
+            <div className="inbarangayreq-main-section">
+              {loading ? (
+                  <p>Loading Online Requests...</p>
+                ) : error ? (
+                  <p className="error">{error}</p>
+                ) : currentInBarangayRequests.length === 0 ? (
+                  <div className="no-result-card-inbarangay">
+                    <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
+                    <p className="no-results-inbarangay">No Results Found</p>
+                  </div>
+                ) : (
+
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Document Type</th>
+                      <th>Request ID</th>
+                      <th>Request Date</th>
+                      <th>Requestor</th>
+                      <th>Purpose</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentInBarangayRequests.map((request, index) => (
+                      <tr key={index}>
+                        <td>{request.docType}</td>
+                        <td>{request.requestId}</td>
+                        <td>{request.createdAt}</td>
+                        <td>{request.requestor}</td>
+                        <td>{request.purpose}</td>
+                        <td>
+                          <span className={`status-badge ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
+                            {request.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="actions-inbarangay">
+                            <button className="action-inbarangay-view" onClick={() => handleView(request.id, request.reqType)}>
+                                <img src="/Images/view.png" alt="View" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="redirection-section-inbarangay">
+              <button onClick={() => setTaskCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={taskCurrentPage === 1}>
+                &laquo;
+              </button>
+              {getPageNumbers(taskCurrentPage, taskTotalPages).map((number, index) => (
+                <button
+                  key={index}
+                  onClick={() => typeof number === "number" && setTaskCurrentPage(number)}
+                  className={taskCurrentPage === number ? "active" : ""}
+                >
+                  {number}
+                </button>
+              ))}
+              <button
+                onClick={() => setTaskCurrentPage((prev) => Math.min(prev + 1, taskTotalPages))}
+                disabled={taskCurrentPage === taskTotalPages}
+              >
+                &raquo;
+              </button>
+            </div>
+
+          </>
+        )}
+
+      
         {showPopup && (
                 <div className={`popup-overlay show`}>
                     <div className="popup">
