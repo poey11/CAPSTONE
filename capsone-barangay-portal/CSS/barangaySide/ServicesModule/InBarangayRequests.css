@@ -9,21 +9,28 @@
     margin-left: 3rem; 
 }
 
-.inbarangayreq-section-1{
-    display: flex;
-  justify-content: center;
+.inbarangayreq-section-1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1.5rem;
   padding: 0.5rem 0;
   background: transparent;
   border: none;
   box-shadow: none;
+  padding-left: 120px;
 }
 
-.section-generate-doc{
-display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    width: 100%;
+.center-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.section-generate-doc {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .inbarangayreq-section-1 h1{
@@ -33,6 +40,8 @@ display: flex;
   letter-spacing: 0.5px;
   margin-bottom: 0.5rem;
 }
+
+
 
 .add-requests-btn {
   background-color: #e56723;

@@ -226,41 +226,41 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
     return (
 
         <main className="inbarangayreq-main-container">
-         <div className="inbarangayreq-section-1">
-          
-          <div className="assigned-incident-info-toggle-wrapper">
-            {["main", "tasks"].map((section) => (
-            <button
-            key={section}
-            type="button"
-            className={`info-toggle-btn-assigned ${activeSection === section ? "active" : ""}`}
-            onClick={() => setActiveSection(section)}
-            style={{ position: "relative" }}
-            >
-            {section === "main" && "All Requests"}
-            {section === "tasks" && (
-              <>
-                Assigned Tasks
-                {taskAssignedData.length > 0 && (
-                  <span className="task-badge">{taskAssignedData.length}</span>
-                )}
-              </>
-            )}
-            </button>
-            ))}
-          </div> 
-         </div>
-         
-         <div className="section-generate-doc">
-          {(user?.position === "Admin Staff") && (
-                <button
-                  className="add-requests-btn"
-                  onClick={handleGenerateDocument}
-                >
-                  New Document Request
-                </button>
-            )}
-         </div>
+
+
+<div className="inbarangayreq-section-1">
+  <div className="center-wrapper">
+    <div className="assigned-incident-info-toggle-wrapper">
+      {["main", "tasks"].map((section) => (
+        <button
+          key={section}
+          type="button"
+          className={`info-toggle-btn-assigned ${activeSection === section ? "active" : ""}`}
+          onClick={() => setActiveSection(section)}
+        >
+          {section === "main" && "All Requests"}
+          {section === "tasks" && (
+            <>
+              Assigned Tasks
+              {taskAssignedData.length > 0 && (
+                <span className="task-badge">{taskAssignedData.length}</span>
+              )}
+            </>
+          )}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <div className="section-generate-doc">
+    {(user?.position === "Admin Staff") && (
+      <button className="add-requests-btn" onClick={handleGenerateDocument}>
+        New Document Request
+      </button>
+    )}
+  </div>
+</div>
+
 
 
         {activeSection === "main" && (
