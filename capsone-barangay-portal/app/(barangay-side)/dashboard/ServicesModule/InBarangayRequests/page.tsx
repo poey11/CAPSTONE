@@ -25,6 +25,10 @@ import { report } from "process";
     const [popupMessage, setPopupMessage] = useState("");
     const [taskAssignedData, setTaskAssignedData] = useState<any[]>([]);
     const [filteredMainRequests, setFilteredMainRequests] = useState<any[]>([]);
+
+
+
+    
   
       useEffect(() => {
         let position = "";
@@ -81,6 +85,7 @@ import { report } from "process";
         
         
       const [allRequests, setAllRequests] = useState<any[]>([]);
+
       useEffect(() => {
         try {
         const Collection = query(
@@ -259,54 +264,80 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
 
         {activeSection === "main" && (
           <>
-            <div className="inbarangayreq-section-2">
-              
-              <select
-                className="inbarangay-services-module-filter-dropdown"
-                value={searchType}
-                onChange={(e) => setSearchType(e.target.value)}
-              >
-                <option value="All">All Document Types</option>
-                <option value="Barangay Certificate">Barangay Certificate</option>
-                <option value="Barangay Indigency">Barangay Indigency</option>
-                <option value="Barangay ID">Barangay ID</option>
-                <option value="Business Permit">Barangay Business Permits</option>
-                <option value="Barangay Clearance">Barangay Clearance</option>
-                <option value="First Time Jobseeker">First Time Jobseeker</option>
-                <option value="Other">Other Documents</option>
-              </select>
+              <div className="inbarangayreq-section-2">
+                <div className="inbarangayreq-section-2-left">
+                  <div className="date-input-group">
+                    <label htmlFor="dateFrom">From Date :</label>
+                    <input
+                      id="dateFrom"
+                      type="date"
+                     className={`inbarangay-services-module-filter ${dateFrom ? 'has-value' : ''}`}
+                      value={dateFrom}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                    />
+                  </div>
 
-                <input
-                  type="date"
-                  className="inbarangay-services-module-filter"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                />
-                <input
-                  type="date"
-                  className="inbarangay-services-module-filter"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                />
-                <select
-                  className="inbarangay-services-module-filter-dropdown"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="">Select Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="completed">Completed</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="inProgress">In Progress</option>
-                </select>
-            </div>
+                  <div className="date-input-group">
+                    <label htmlFor="dateTo">To Date :</label>
+                    <input
+                      id="dateTo"
+                      type="date"
+                     className={`inbarangay-services-module-filter ${dateFrom ? 'has-value' : ''}`}
+                      value={dateTo}
+                      onChange={(e) => setDateTo(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="inbarangayreq-section-2-right">
+
+                   <div className="dropdown-group">
+
+                     <select
+                     className={`inbarangay-services-module-filter-dropdown ${searchType ? "has-value" : ""}`}
+                        value={searchType}
+                        onChange={(e) => setSearchType(e.target.value)}
+                      >
+                        <option value="All">All Document Types</option>
+                        <option value="Barangay Certificate">Barangay Certificate</option>
+                        <option value="Barangay Indigency">Barangay Indigency</option>
+                        <option value="Business Permit">Barangay Business Permits</option>
+                        <option value="Barangay Clearance">Barangay Clearance</option>
+                        <option value="Other">Other Documents</option>
+                      </select>
+
+                   </div>
+                   
+                    <div className="dropdown-group">
+
+                      <select
+                        className={`inbarangay-services-module-filter-dropdown ${searchType ? "has-value" : ""}`}
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                      >
+                        <option value="">Select Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="inProgress">In Progress</option>
+                      </select>
+
+                    </div>
+
+
+                </div>
+
+
+
+              </div>
+
 
             <div className="inbarangayreq-main-section">
               {loading ? (
                   <p>Loading Online Requests...</p>
                 ) : error ? (
                   <p className="error">{error}</p>
-                    ) :filteredMainRequests.length === 0 ? (
+                    ) : filteredMainRequests.length === 0 ? (
                   <div className="no-result-card-inbarangay">
                     <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
                     <p className="no-results-inbarangay">No Results Found</p>

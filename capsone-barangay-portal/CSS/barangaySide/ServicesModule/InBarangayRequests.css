@@ -48,10 +48,60 @@ display: flex;
 
   .inbarangayreq-section-2{
     display: flex;
+    width: 100%;
+    gap: 2rem;
+ 
+  }
+
+  .inbarangayreq-section-2-left {
+    display: flex;
     gap: 20px;
     padding: 0;
     margin-top: 5px;
+    width: 50%;
+    height: 90%;
+
+    
   }
+
+    .inbarangayreq-section-2-right {
+    display: flex;
+    gap: 20px;
+    padding: 0;
+    margin-top: 28px;
+     width: 50%;
+     height: 90%;
+
+     
+  }
+
+  .dropdown-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+  
+  .date-input-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.date-input-group label {
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #214666;
+}
+
+
+
+
+
+
+
+
   
 
   /*
@@ -79,6 +129,7 @@ display: flex;
   }
 
 
+
 /*
 For Dropdowns (SELECT)
 */
@@ -93,6 +144,7 @@ For Dropdowns (SELECT)
     text-align: left;
   }
 
+
   .inbarangay-services-module-filter-dropdown :focus {
     border-color: #f49028;
     outline: none;
@@ -102,6 +154,26 @@ For Dropdowns (SELECT)
    .inbarangay-services-module-filter-dropdown  option {
    color: #000000;
   }
+
+  
+
+
+
+  /*
+Values
+  */
+
+ 
+
+.inbarangay-services-module-filter-dropdown.has-value {
+  color: #000000;
+}
+
+.inbarangay-services-module-filter.has-value {
+  color: #000000;
+}
+
+
 
 
 
@@ -201,6 +273,26 @@ SCROLL FOR CHROME ETC
 }
 
 
+
+
+.date-input-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.date-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #aaa;
+  pointer-events: none;
+  font-size: 0.9rem;
+}
+
+.inbarangay-services-module-filter.empty::-webkit-datetime-edit {
+  color: transparent;
+}
 
 
 
