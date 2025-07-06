@@ -1481,7 +1481,9 @@ const handleChange = (
                           </>
                         )}
 
-                      {(
+                    <div className="isresident-section">
+
+                    {(
                         allExistingPermits.includes(docType || "") ||
                         (
                           (
@@ -1498,16 +1500,17 @@ const handleChange = (
                       ) && (
                           <>
                             <div className="beneficiary-checkbox-container">
-                              <input 
-                                type="checkbox" 
-                                name="isResident"  
-                                checked={clearanceInput?.isResident || false}
-                                onChange={handleChange}
-                              />   
                               <label className="beneficiary-checkbox-label" htmlFor="forResidentOnly" >
                                 <p>Is requestor a resident?<span className="required">*</span></p> 
                               </label>
-                                   
+                              <div className="checkbox-container-isresident">
+                                <input 
+                                  type="checkbox" 
+                                  name="isResident"  
+                                  checked={clearanceInput?.isResident || false}
+                                  onChange={handleChange}
+                                />    
+                              </div>
                             </div>
                           </>
                         )}
@@ -1595,6 +1598,9 @@ const handleChange = (
                                 </div>
                               </div>
                             </div>
+
+                    </div>
+                     
                         
                       </div>
 
