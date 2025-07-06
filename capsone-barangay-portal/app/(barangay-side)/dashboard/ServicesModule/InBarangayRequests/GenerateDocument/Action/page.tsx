@@ -872,6 +872,9 @@ export default function action() {
         console.log("Document Data:", docData);
         const doc = await addDoc(docRef, docData);
         console.log("Document written with ID: ", doc.id);
+
+        router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${doc.id}`); // changed by dirick note para if may maging bug haha
+
         id = doc.id;
       } catch (error) {
         console.error("Error:", error);
@@ -1011,6 +1014,7 @@ export default function action() {
       handleConfirmClick();
     };
 
+    
 
     const confirmCreate = async () => {
         setShowCreatePopup(false);
@@ -1018,9 +1022,9 @@ export default function action() {
         setShowPopup(true);
         console.log("Files:", files);
         console.log("Clearance Input:", clearanceInput);
-        handleUploadClick().then(() => {
-            router.push(`/dashboard/ServicesModule/InBarangayRequests`);
-        });
+
+        await handleUploadClick(); // changed by dirick note para if may maging bug haha
+
         // Hide the popup after 3 seconds
         setTimeout(() => {
             setShowPopup(false);

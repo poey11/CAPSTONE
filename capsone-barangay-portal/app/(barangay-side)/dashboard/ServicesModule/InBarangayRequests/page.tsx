@@ -1,5 +1,5 @@
 "use client"
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import "@/CSS/barangaySide/ServicesModule/InBarangayRequests.css";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
@@ -25,6 +25,10 @@ import { report } from "process";
     const [popupMessage, setPopupMessage] = useState("");
     const [taskAssignedData, setTaskAssignedData] = useState<any[]>([]);
     const [filteredMainRequests, setFilteredMainRequests] = useState<any[]>([]);
+
+
+
+    
   
       useEffect(() => {
         let position = "";
@@ -81,6 +85,7 @@ import { report } from "process";
         
         
       const [allRequests, setAllRequests] = useState<any[]>([]);
+
       useEffect(() => {
         try {
         const Collection = query(
@@ -217,96 +222,171 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
 
   
   const [activeSection, setActiveSection] = useState("main");
+  const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
+
+
+
+
+const searchParams = useSearchParams();
+const highlightRequestId = searchParams.get("highlight");
+const [highlightedRequestId, setHighlightedRequestId] = useState<string | null>(null);
+
+
+useEffect(() => {
+  if (highlightRequestId && filteredMainRequests.length > 0) {
+    const targetIndex = filteredMainRequests.findIndex(
+      (req) => req.id === highlightRequestId
+    );
+
+    if (targetIndex !== -1) {
+      const targetPage = Math.floor(targetIndex / requestsPerPage) + 1;
+      setMainCurrentPage(targetPage);
+      setHighlightedRequestId(highlightRequestId);
+
+      setTimeout(() => {
+        const targetElement = document.querySelector(`tr[data-id="${highlightRequestId}"]`);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 500);
+
+
+        // Remove highlight and update URL after 3 seconds
+        const timeoutId = setTimeout(() => {
+          setHighlightedRequestId(null);
+
+          const params = new URLSearchParams(window.location.search);
+          params.delete("highlight");
+          const newUrl = `${window.location.pathname}?${params.toString()}`;
+          router.replace(newUrl, { scroll: false });
+        }, 3000);
+
+        return () => clearTimeout(timeoutId);
+
+    }
+  }
+}, [highlightRequestId, filteredMainRequests]);
+
+
 
     return (
 
         <main className="inbarangayreq-main-container">
-         <div className="inbarangayreq-section-1">
-          
-          <div className="assigned-incident-info-toggle-wrapper">
-            {["main", "tasks"].map((section) => (
-            <button
-            key={section}
-            type="button"
-            className={`info-toggle-btn-assigned ${activeSection === section ? "active" : ""}`}
-            onClick={() => setActiveSection(section)}
-            style={{ position: "relative" }}
-            >
-            {section === "main" && "All Requests"}
-            {section === "tasks" && (
-              <>
-                Assigned Tasks
-                {taskAssignedData.length > 0 && (
-                  <span className="task-badge">{taskAssignedData.length}</span>
-                )}
-              </>
-            )}
-            </button>
-            ))}
-          </div> 
-         </div>
-         <div className="section-generate-doc">
-          {(user?.position === "Admin Staff") && (
-                <button
-                  className="add-announcement-btn"
-                  onClick={handleGenerateDocument}
-                >
-                  New Document Request
-                </button>
-            )}
-         </div>
+
+
+<div className="inbarangayreq-section-1">
+  <div className="center-wrapper">
+    <div className="assigned-incident-info-toggle-wrapper">
+      {["main", "tasks"].map((section) => (
+        <button
+          key={section}
+          type="button"
+          className={`info-toggle-btn-assigned ${activeSection === section ? "active" : ""}`}
+          onClick={() => setActiveSection(section)}
+        >
+          {section === "main" && "All Requests"}
+          {section === "tasks" && (
+            <>
+              Assigned Tasks
+              {taskAssignedData.length > 0 && (
+                <span className="task-badge">{taskAssignedData.length}</span>
+              )}
+            </>
+          )}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <div className="section-generate-doc">
+    {(user?.position === "Admin Staff") && (
+      <button className="add-requests-btn" onClick={handleGenerateDocument}>
+        New Document Request
+      </button>
+    )}
+  </div>
+</div>
+
 
 
         {activeSection === "main" && (
           <>
-            <div className="inbarangayreq-section-2">
-              
-              <select
-                className="inbarangay-services-module-filter"
-                value={searchType}
-                onChange={(e) => setSearchType(e.target.value)}
-              >
-                <option value="All">All Document Types</option>
-                <option value="Barangay Certificate">Barangay Certificate</option>
-                <option value="Barangay Indigency">Barangay Indigency</option>
-                <option value="Barangay ID">Barangay ID</option>
-                <option value="Barangay Permits">Barangay Permits</option>
-                <option value="Barangay Clearance">Barangay Clearance</option>
-                <option value="First Time Jobseeker">First Time Jobseeker</option>
-                <option value="Other">Other Documents</option>
-              </select>
+              <div className="inbarangayreq-section-2">
+                <div className="inbarangayreq-section-2-left">
+                  <div className="date-input-group">
+                    <label htmlFor="dateFrom">From Date :</label>
+                    <input
+                      id="dateFrom"
+                      type="date"
+                     className={`inbarangay-services-module-filter ${dateFrom ? 'has-value' : ''}`}
+                      value={dateFrom}
+                       max={today}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                    />
+                  </div>
 
-                <input
-                  type="date"
-                  className="inbarangay-services-module-filter"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                />
-                <input
-                  type="date"
-                  className="inbarangay-services-module-filter"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                />
-                <select
-                  className="inbarangay-services-module-filter"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="">Select Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="completed">Completed</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="inProgress">In Progress</option>
-                </select>
-            </div>
+                  <div className="date-input-group">
+                    <label htmlFor="dateTo">To Date :</label>
+                    <input
+                      id="dateTo"
+                      type="date"
+                     className={`inbarangay-services-module-filter ${dateFrom ? 'has-value' : ''}`}
+                      value={dateTo}
+                       max={today}
+                      onChange={(e) => setDateTo(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="inbarangayreq-section-2-right">
+
+                   <div className="dropdown-group">
+
+                     <select
+                     className={`inbarangay-services-module-filter-dropdown ${searchType ? "has-value" : ""}`}
+                        value={searchType}
+                        onChange={(e) => setSearchType(e.target.value)}
+                      >
+                        <option value="All">All Document Types</option>
+                        <option value="Barangay Certificate">Barangay Certificate</option>
+                        <option value="Barangay Indigency">Barangay Indigency</option>
+                        <option value="Business Permit">Barangay Business Permits</option>
+                        <option value="Barangay Clearance">Barangay Clearance</option>
+                        <option value="Other">Other Documents</option>
+                      </select>
+
+                   </div>
+                   
+                    <div className="dropdown-group">
+
+                      <select
+                        className={`inbarangay-services-module-filter-dropdown ${searchType ? "has-value" : ""}`}
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                      >
+                        <option value="">Select Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="inProgress">In Progress</option>
+                      </select>
+
+                    </div>
+
+
+                </div>
+
+
+
+              </div>
+
 
             <div className="inbarangayreq-main-section">
               {loading ? (
                   <p>Loading Online Requests...</p>
                 ) : error ? (
                   <p className="error">{error}</p>
-                ) : allRequests.length === 0 ? (
+                    ) : filteredMainRequests.length === 0 ? (
                   <div className="no-result-card-inbarangay">
                     <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
                     <p className="no-results-inbarangay">No Results Found</p>
@@ -327,7 +407,12 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
                   </thead>
                   <tbody>
                   {currentMainRequests.map((request, index) => (
-                      <tr key={index}>
+                      <tr
+                          key={index}
+                          data-id={request.id}
+                          className={highlightedRequestId === request.id ? "highlighted-row" : ""}
+                        >
+
                         <td>{request.docType}</td>
                         <td>{request.requestId}</td>
                         <td>{request.createdAt}</td>
@@ -383,10 +468,10 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
                 ) : error ? (
                   <p className="error">{error}</p>
                 ) : currentInBarangayRequests.length === 0 ? (
-                  <div className="no-result-card-inbarangay">
-                    <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
-                    <p className="no-results-inbarangay">No Results Found</p>
-                  </div>
+                    <div className="no-task-card-inbrgy">
+                      <img src="/images/customer-service.png" alt="No results icon" className="no-task-icon-inbrgy" />
+                      <p className="no-task-department-inbrgy">You have No Tasks For Today!</p>
+                    </div>
                 ) : (
 
                 <table>
