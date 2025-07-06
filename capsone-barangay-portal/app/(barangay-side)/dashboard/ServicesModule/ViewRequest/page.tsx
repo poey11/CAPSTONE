@@ -4,7 +4,7 @@ import { getSpecificDocument } from "@/app/helpers/firestorehelper";
 import { useSearchParams,useRouter } from "next/navigation";
 import { use, useEffect,useState } from "react";
 import { useSession } from "next-auth/react";
-import { getDownloadURL, ref } from "firebase/storage";
+import { getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot, getDoc } from "firebase/firestore";
@@ -106,6 +106,8 @@ interface EmergencyDetails {
     projectLocation: string;
     homeOrOfficeAddress: string;
     rejectionReason: string;
+    orNumber: string;
+    orImageUpload: string;
 }
 
 interface File {
@@ -122,14 +124,17 @@ const ViewOnlineRequest = () => {
     const  [loading, setLoading] = useState(true);
     const [requestData, setRequestData] = useState<OnlineRequest>();
     const [activeSection, setActiveSection] = useState("basic");
+    const [popupSection, setPopupSection] = useState("receival");
     const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
     const [pendingStatus, setPendingStatus] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
     const [matchedOtherDocFields, setMatchedOtherDocFields] = useState<string[]>([]);
+    const [orNumber, setOrNumber] = useState("");
     const [otherDocuments, setOtherDocuments] = useState<
       { type: string; title: string; fields: { name: string }[] }[]
     >([]);
+    const [files1, setFiles1] = useState<{ name: string; preview: string }[]>([]);
 
     useEffect(() => {
         if (user) {
@@ -175,6 +180,7 @@ const ViewOnlineRequest = () => {
         "approvedBldgPlan",
         "deathCertificate",
         "identificationPic",
+        "orImageUpload",
       ] as const;
 
       const updatedData = { ...data };
@@ -201,6 +207,31 @@ const ViewOnlineRequest = () => {
       return updatedData;
     };
 
+    const handleORUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles1([{ name: file.name, preview }]);
+    
+      // Optionally store in requestData.orImageUpload here (if needed)
+      // Example: setRequestData(prev => ({ ...prev, orImageUpload: file.name }));
+    
+      e.target.value = "";
+    
+      // Optional cleanup
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
+    };
+
+    const handleORDelete = (fileName: string) => {
+      setFiles1((prev) => prev.filter((file) => file.name !== fileName));
+    };
     
     useEffect(() => {
       const fetchMatchedOtherDocFields = async () => {
@@ -387,6 +418,10 @@ const ViewOnlineRequest = () => {
         { key: "approvedBldgPlan", label: "Approved Building Plan" },
         { key: "deathCertificate", label: "Death Certificate" },
         { key: "identificationPic", label: "Identification Picture" },
+
+        // OR
+        { key: "orNumber", label: "OR Number" },
+        { key: "orImageUpload", label: "OR Image" },
         ];
 
 
@@ -1303,6 +1338,7 @@ const ViewOnlineRequest = () => {
 
     console.log(receival);
 
+
     const handleReceivalSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!id) return;
@@ -1310,14 +1346,29 @@ const ViewOnlineRequest = () => {
       const docRef = doc(db, "ServiceRequests", id);
       const currentDateTime = new Date(); 
     
-      const updatedData = {
+      const updatedData: any = {
         receivalName: receival.receivalName,
         receivalWhen: currentDateTime,
         status: "Completed",
         statusPriority: 3,
+        orNumber: orNumber,
       };
     
+      
+      if (files1.length > 0) {
+        const file = files1[0];
+        const response = await fetch(file.preview);
+        const blob = await response.blob();
+    
+        const storageRef = ref(storage, `ServiceRequests/${file.name}`);
+        await uploadBytes(storageRef, blob);
+        const downloadURL = await getDownloadURL(storageRef);
+    
+        updatedData.orImageUpload = downloadURL;
+      }
+    
       await updateDoc(docRef, updatedData);
+    
       setShowReceivalForm(false);
       handleRequestIsDone();
     };
@@ -1507,7 +1558,11 @@ const ViewOnlineRequest = () => {
                             ...(requestData?.purpose === "Barangay ID" ? ["emergency"] : []),
                             "others",
                             ...(requestData?.status === "Rejected" ? ["rejected"] : []),
-                            ...(requestData?.status === "Completed" ? ["received"] : [])
+                            ...(requestData?.status === "Completed" ? ["received"] : []),
+                            ...(requestData?.status === "Completed" &&
+                              !["Barangay Clearance", "Barangay Certificate", "Barangay Indigency", "Other Documents"].includes(requestData?.docType || "")
+                              ? ["or"]
+                              : [])
                           ].map((section) => (
                             <button
                               key={section}
@@ -1521,6 +1576,7 @@ const ViewOnlineRequest = () => {
                               {section === "others" && "Others"}
                               {section === "rejected" && "Rejected"}
                               {section === "received" && "Received"}
+                              {section === "or" && "OR Section"}
                             </button>
                           ))}
                         </div> 
@@ -1696,10 +1752,10 @@ const ViewOnlineRequest = () => {
 
                                 {activeSection === "received" && (
                                   <>
-                                    <div className="services-onlinereq-content" style={{ display: 'flex', gap: '2rem' }}>
-                                      <div className="services-onlinereq-content-left-side" style={{ flex: 1 }}>
+                                    <div className="services-onlinereq-content">
+                                      
                                         <div className="services-onlinereq-fields-section">
-                                          <p>Receival Name</p>
+                                          <h1>Receival Name</h1>
                                           <input
                                             type="text"
                                             className="services-onlinereq-input-field"
@@ -1707,12 +1763,9 @@ const ViewOnlineRequest = () => {
                                             readOnly
                                           />
                                         </div>
-                                      </div>
-
-                                      <div className="services-onlinereq-content-right-side" style={{ flex: 1 }}>
 
                                       <div className="services-onlinereq-fields-section">
-                                        <p>Receival Date and Time</p>
+                                        <h1>Receival Date and Time</h1>
                                         <input
                                           type="text"
                                           className="services-onlinereq-input-field"
@@ -1732,15 +1785,59 @@ const ViewOnlineRequest = () => {
                                           readOnly
                                         />
                                       </div>
-
-
-                                       
-                                        
-                                      </div>
                                     </div>
                                   
                                   </>
                                 )}  
+
+{/* gohere*/}
+                                {activeSection === "or" && (
+                                  <>
+                                    <div className="services-onlinereq-content">
+                                      
+                                        <div className="services-onlinereq-fields-section">
+                                          <h1>OR Number</h1>
+                                          <input
+                                            type="number"
+                                            className="services-onlinereq-input-field"
+                                            value={requestData?.orNumber}
+                                            readOnly
+                                          />
+                                        </div>
+
+                                        <div className="services-onlinereq-fields-section">
+                                          <div className="services-onlinereq-verification-requirements-section">
+                                            <span className="verification-requirements-label">OR Image</span>
+                                            <div className="services-onlinereq-verification-requirements-container">
+                                              {requestData?.orImageUpload && (
+                                                <a
+                                                  href={
+                                                    requestData.orImageUpload.startsWith("https://")
+                                                      ? requestData.orImageUpload
+                                                      : resolvedImageUrls["orImageUpload"]
+                                                  }
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                >
+                                                  <img
+                                                    src={
+                                                      requestData.orImageUpload.startsWith("https://")
+                                                        ? requestData.orImageUpload
+                                                        : resolvedImageUrls["orImageUpload"]
+                                                    }
+                                                    alt="OR Image"
+                                                    className="verification-reqs-pic uploaded-picture"
+                                                    style={{ cursor: "pointer" }}
+                                                  />
+                                                </a>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      
+                                    </div>
+                                  </>
+                                )}
 
                                 </div>
                             </div>
@@ -1767,13 +1864,45 @@ const ViewOnlineRequest = () => {
             )}
 
 
-            {showReceivalForm && (
-              <div className="view-doc-receival-form-popup-overlay">
-                <div className="doc-receival-popup">
-                  <h2>Document Receival Form</h2>
-                  <form onSubmit={handleReceivalSubmit} className="doc-receival-form">
-                    
+            
 
+        {showReceivalForm && (
+          <div className="view-doc-receival-form-popup-overlay">
+            <div className="doc-receival-popup">
+              <div className="services-onlinereq-info-toggle-wrapper">
+              {["receival", "payment"].map((section) => {
+                const excludedDocTypes = [
+                  "Barangay Clearance",
+                  "Barangay Certificate",
+                  "Barangay Indigency",
+                  "Other Documents",
+                ];
+
+                // Hide "OR Section" if docType is in the excluded list
+                const isPayment = section === "payment";
+                const shouldHidePayment = isPayment && excludedDocTypes.includes(requestData?.docType || "");
+
+                if (shouldHidePayment) return null;
+
+                return (
+                  <button
+                    key={section}
+                    type="button"
+                    className={`info-toggle-btn ${popupSection === section ? "active" : ""}`}
+                    onClick={() => setPopupSection(section)}
+                  >
+                    {section === "receival" && "Receival Section"}
+                    {section === "payment" && "OR Section"}
+                  </button>
+                );
+              })}
+              </div>
+
+              <form onSubmit={handleReceivalSubmit} className="doc-receival-form">
+
+                {popupSection === "receival" && (
+                  <>
+                  <div className="doc-receival-content">
                     <div className="services-onlinereq-doc-receival-form-section">
                       <p>Name of Person Receiving</p>
                       <select
@@ -1786,7 +1915,6 @@ const ViewOnlineRequest = () => {
                         <option value={requestData?.requestorFname}>{requestData?.requestorFname}</option>
                       </select>
                     </div>
-
                     <div className="services-onlinereq-doc-receival-form-section">
                       <p>Current Date and Time</p>
                       <input
@@ -1804,27 +1932,93 @@ const ViewOnlineRequest = () => {
                         readOnly
                       />
                     </div>
+                  </div>
+                </>
+               )}
 
-                    <div className="doc-receivalform-buttons-section">
-                      <div className="doc-receivalform-action-buttons">
-                        <button 
-                          className="doc-receivalform-action-close" 
-                          onClick={() => setShowReceivalForm(false)}
-                        >
-                          Close
-                        </button>
-                        
-                        <button 
-                          className="doc-receivalform-action-submit" 
-                        >
-                          Submit
-                        </button>
+                {popupSection === "payment" && (
+                  <>
+                    <div className="doc-receival-content">
+                      <div className="services-onlinereq-doc-receival-form-section">
+                        <p>OR Number</p>
+                        <input
+                          type="number"
+                          className="services-onlinereq-input-field"
+                          value={orNumber}
+                          onChange={(e) => setOrNumber(e.target.value)}
+                        />
+                      </div>
+                      <div className="services-onlinereq-doc-receival-form-section">
+                        <p>Upload OR</p>
+                        <div className="box-container-OR">
+                          <div className="file-upload-container-OR">
+                            <label htmlFor="file-upload-OR" className="upload-link">Click to Upload File</label>
+                            <input
+                              id="file-upload-OR"
+                              type="file"
+                              className="file-upload-input"
+                              accept=".jpg,.jpeg,.png"
+                              onChange={handleORUpload}
+                            />
+                            {files1.length > 0 && (
+                              <div className="file-name-image-display">
+                                {files1.map((file, index) => (
+                                  <div className="file-name-image-display-indiv" key={index}>
+                                    <li className="file-item">
+                                      {file.preview && (
+                                        <div className="filename-image-container">
+                                          <img
+                                            src={file.preview}
+                                            alt={file.name}
+                                            className="file-preview"
+                                          />
+                                        </div>
+                                      )}
+                                      <span className="file-name">{file.name}</span>
+                                      <div className="delete-container">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleORDelete(file.name)}
+                                          className="delete-button"
+                                        >
+                                          <img
+                                            src="/images/trash.png"
+                                            alt="Delete"
+                                            className="delete-icon"
+                                          />
+                                        </button>
+                                      </div>
+                                    </li>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </form>
-                </div>
-              </div>
-            )}
+                    
+                  </>
+                )}
+
+                  <div className="doc-receivalform-buttons-section">
+                    <div className="doc-receivalform-action-buttons">
+                      <button
+                        className="doc-receivalform-action-close"
+                        type="button"
+                        onClick={() => setShowReceivalForm(false)}
+                      >
+                        Close
+                      </button>
+                      <button className="doc-receivalform-action-submit" type="submit">
+                        Submit
+                      </button>
+                    </div>
+                  </div>
+              </form>
+            </div>
+          </div>
+        )}
 
             {showPopup && (
                 <div className={`popup-overlay-services-onlinereq show`}>

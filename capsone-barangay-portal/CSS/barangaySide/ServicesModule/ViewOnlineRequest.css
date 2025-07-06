@@ -748,7 +748,16 @@
 }
 
 .doc-receival-form {
-  margin-top: 5%;
+  width: 100%;
+}
+
+.doc-receival-content {
+  width: 100%;
+  height: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
 }
 
 .services-onlinereq-fields-section,
@@ -768,6 +777,15 @@
   font-weight: bold;
   align-self: flex-start; /* Left-aligns the label */
   margin-left: 20px;
+}
+
+.services-onlinereq-fields-section h1{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 50px;
+  margin-top: 20px;
 }
 
 .services-onlinereq-doc-receival-form-section p{
@@ -1012,10 +1030,11 @@
   padding: 1.5rem;
   max-width: 1000px;
   width: 60%;
-  overflow: hidden;
-  max-height: 90vh; /* Allow it to be scrollable within a certain height */
+  height: 400px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Heading */
@@ -1126,4 +1145,116 @@ color: white;
   outline: none;
   border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
   box-shadow: none;
+}
+
+.box-container-OR {
+  position: relative;
+  width: 85%;
+  height: 200px;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding-top: 30px;
+ padding-right: 20px;
+ padding-bottom: 50px;
+ padding-left: 20px;
+ padding-top: 40px;
+  margin-top: 10px;
+  display: flex;
+ justify-content: center;
+ align-items: center;
+}
+
+.box-container-OR:hover {
+ background-color: rgba(245, 143, 88, 0.2);
+}
+
+.file-upload-container-OR {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  display: block;
+  align-items: center; 
+  justify-content: center; 
+  text-align: center;
+  width: 100%;
+  height: 140px;
+  overflow-y: auto;
+  margin-top: 10px;
+  align-self: center;
+}
+
+.upload-link {
+  color: rgb(245, 143, 88);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.file-upload-input {
+  display: none;
+  }
+
+  .file-name-image-display {
+    margin-top: 10px;
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.6);
+    text-align: center;
+    }
+
+    .file-name-image-display-indiv {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      background-color: #F0F2F8;
+      border-radius: 5px;
+      gap: 10px;
+      margin-bottom: 10px; 
+    }
+
+    .file-name-image-display-indiv li {
+      display: flex;
+      flex-grow: 1;
+      overflow: hidden; 
+      white-space: nowrap; 
+      text-overflow: ellipsis; 
+    }
+
+
+        
+    .file-preview {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 4px;
+      flex-shrink: 0; /* Prevents the image from shrinking */
+  }
+
+
+  .file-name {
+    max-width: 150px; /* Adjust this value based on your layout */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    flex-grow: 1; /* Takes up remaining space */
+}
+
+.delete-container {
+  margin-left: auto;
+    flex-shrink: 0; /* Prevents the delete button from shrinking */
+}
+
+   
+.delete-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.delete-icon {
+  width: 20px;
+  height: 20px;
 }

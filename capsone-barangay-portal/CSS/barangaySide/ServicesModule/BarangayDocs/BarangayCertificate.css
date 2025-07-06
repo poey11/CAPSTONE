@@ -1090,7 +1090,7 @@ gap: 20px;
     font-weight: bold;
     font-size: 16px;
     z-index: 10;
-    width: fit-content;
+    width: 250px;
     text-align: center;
   }
 
