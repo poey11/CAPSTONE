@@ -973,7 +973,7 @@ gap: 20px;
 
 
 .box-container-outer-inbrgy {
-  flex: 0 1 45%;
+  flex: 0 1 400px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -987,6 +987,9 @@ gap: 20px;
     flex: 0 1 100%;
   }
 }
+
+
+
 
 .box-container-inbrgy {
   position: relative;
@@ -1186,13 +1189,14 @@ gap: 20px;
     text-align: center;
     }
 
+    
   .others-main-container {
     width: 100%;
     display: flex;
-    flex-wrap: wrap; /* allow items to wrap to the next row */
+    flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
-    align-items: center; /* align items to top if height differs */
+    align-items: center;
     margin-top: 20px;
   }
   
