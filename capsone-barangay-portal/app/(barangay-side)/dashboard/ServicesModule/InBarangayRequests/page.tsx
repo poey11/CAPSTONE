@@ -1,5 +1,5 @@
 "use client"
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import "@/CSS/barangaySide/ServicesModule/InBarangayRequests.css";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
@@ -224,6 +224,51 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
   const [activeSection, setActiveSection] = useState("main");
   const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
+
+
+
+const searchParams = useSearchParams();
+const highlightRequestId = searchParams.get("highlight");
+const [highlightedRequestId, setHighlightedRequestId] = useState<string | null>(null);
+
+
+useEffect(() => {
+  if (highlightRequestId && filteredMainRequests.length > 0) {
+    const targetIndex = filteredMainRequests.findIndex(
+      (req) => req.id === highlightRequestId
+    );
+
+    if (targetIndex !== -1) {
+      const targetPage = Math.floor(targetIndex / requestsPerPage) + 1;
+      setMainCurrentPage(targetPage);
+      setHighlightedRequestId(highlightRequestId);
+
+      setTimeout(() => {
+        const targetElement = document.querySelector(`tr[data-id="${highlightRequestId}"]`);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 500);
+
+
+        // Remove highlight and update URL after 3 seconds
+        const timeoutId = setTimeout(() => {
+          setHighlightedRequestId(null);
+
+          const params = new URLSearchParams(window.location.search);
+          params.delete("highlight");
+          const newUrl = `${window.location.pathname}?${params.toString()}`;
+          router.replace(newUrl, { scroll: false });
+        }, 3000);
+
+        return () => clearTimeout(timeoutId);
+
+    }
+  }
+}, [highlightRequestId, filteredMainRequests]);
+
+
+
     return (
 
         <main className="inbarangayreq-main-container">
@@ -362,7 +407,12 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
                   </thead>
                   <tbody>
                   {currentMainRequests.map((request, index) => (
-                      <tr key={index}>
+                      <tr
+                          key={index}
+                          data-id={request.id}
+                          className={highlightedRequestId === request.id ? "highlighted-row" : ""}
+                        >
+
                         <td>{request.docType}</td>
                         <td>{request.requestId}</td>
                         <td>{request.createdAt}</td>
