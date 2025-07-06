@@ -119,6 +119,11 @@ import { report } from "process";
       FILTER LOGIC
     */
 
+      const canSeeTasks =
+      user?.position === "Admin Staff" ||
+      user?.position === "Secretary" ||
+      user?.position === "Assistant Secretary";
+
 
       useEffect(() => {
         let filtered = allRequests;
@@ -224,7 +229,8 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
          <div className="inbarangayreq-section-1">
           
           <div className="assigned-incident-info-toggle-wrapper">
-            {["main", "tasks"].map((section) => (
+            {/*{["main", "tasks"].map((section) => (*/}
+            {["main", ...(canSeeTasks ? ["tasks"] : [])].map((section) => (
             <button
             key={section}
             type="button"
@@ -375,7 +381,7 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
           </>
         )}
 
-        {activeSection === "tasks" && (
+        {canSeeTasks && activeSection === "tasks" && (
           <>
             <div className="inbarangayreq-main-section">
               {loading ? (
