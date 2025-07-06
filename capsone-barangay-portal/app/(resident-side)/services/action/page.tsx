@@ -99,6 +99,8 @@ interface ClearanceInput {
   taxDeclaration: File | null;
   approvedBldgPlan: File | null;
   deathCertificate: File | null;
+
+  isViewed: boolean;
 }
 
 
@@ -129,6 +131,7 @@ export default function Action() {
     accountId: user?.uid || "Guest",
     residentId: userData?.residentId || "Guest",
     docType: docType || "" ,
+    isViewed: false,
     requestId: "",
     purpose: "",
     dateRequested: new Date().toLocaleString(),
@@ -713,6 +716,7 @@ const handleFileChange = (
     
         const clearanceVars: Record<string, any> = {
           createdAt: clearanceInput.dateRequested,
+          isViewed: clearanceInput.isViewed,
           requestId: clearanceInput.requestId,
           reqType: "Online",
           status: "Pending",
