@@ -212,6 +212,17 @@ export default function Action() {
     deathCertificate: null,
   })
 
+  useEffect(() => {
+    const restrictedDocs = ["Barangay Certificate", "Barangay Indigency", "Barangay Clearance"];
+  
+    const tryingToAccessRestrictedDoc = restrictedDocs.includes(docType);
+    const isUnverifiedOrGuest = !user || userData?.status !== "Verified";
+  
+    if (tryingToAccessRestrictedDoc && isUnverifiedOrGuest) {
+      alert("You must be a verified resident to request this document.");
+      router.push("/services");
+    }
+  }, [user, userData, docType]);
 
 
   useEffect(() => {
