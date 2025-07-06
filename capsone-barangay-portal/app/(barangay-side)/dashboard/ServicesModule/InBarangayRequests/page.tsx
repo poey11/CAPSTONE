@@ -250,10 +250,11 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
             ))}
           </div> 
          </div>
+         
          <div className="section-generate-doc">
           {(user?.position === "Admin Staff") && (
                 <button
-                  className="add-announcement-btn"
+                  className="add-requests-btn"
                   onClick={handleGenerateDocument}
                 >
                   New Document Request

@@ -27,23 +27,29 @@ display: flex;
 }
 
 .inbarangayreq-section-1 h1{
-  font-size: 2rem;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.5);
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
 }
 
-.add-announcement-btn {
-    background-color:#e56723;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    font-size: 13px;
-    cursor: pointer;
-    border-radius: 5px;
+.add-requests-btn {
+  background-color: #e56723;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.25s ease, transform 0.2s ease;
   }
   
   .add-announcement-btn:hover {
-    background-color:#cc591b;
+  background-color: #cc591b;
+  transform: translateY(-1px);
   }
 
   .inbarangayreq-section-2{
