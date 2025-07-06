@@ -52,7 +52,11 @@ display: flex;
     padding: 0;
     margin-top: 5px;
   }
+  
 
+  /*
+  For Inputs 
+  */
   .inbarangay-services-module-filter {
     padding: 8px;
     width: 100%;
@@ -60,7 +64,7 @@ display: flex;
     margin-top: 10px;
     border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
-    color: #000000;
+    color: rgba(0, 0, 0, 0.4);
     text-align: left;
   }
 
@@ -71,7 +75,32 @@ display: flex;
   }
 
    .inbarangay-services-module-filter option {
+   color: #000000;
+  }
+
+
+/*
+For Dropdowns (SELECT)
+*/
+    .inbarangay-services-module-filter-dropdown {
+    padding: 11px;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
     color: rgba(0, 0, 0, 0.4);
+    text-align: left;
+  }
+
+  .inbarangay-services-module-filter-dropdown :focus {
+    border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+
+   .inbarangay-services-module-filter-dropdown  option {
+   color: #000000;
   }
 
 
@@ -87,10 +116,15 @@ display: flex;
     height: 100%; 
     max-height: 70%;
     margin-top: 2rem;
-     border: 2px solid rgba(36, 53, 76, 0.7);
+     border: 1px solid rgba(36, 53, 76, 0.7);
      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     background-color: #ffffff;
     border-radius: 6px;
+
+
+
+  scrollbar-width: thin;
+  scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 }
 
 .inbarangayreq-main-section thead {
@@ -124,6 +158,53 @@ display: flex;
     color: #FFFFFF;
     text-align: center;
 }
+
+
+
+.inbarangayreq-main-section tbody tr:nth-child(even) {
+  background-color: #f0f4f8; /* Softer modern gray-blue tone */
+}
+
+.inbarangayreq-main-sectiontbody tr:nth-child(odd) {
+  background-color: #ffffff; /* Crisp white */
+}
+
+.inbarangayreq-main-section tbody tr:hover { 
+   background-color: #d0e4f5 !important; /* Light pastel blue hover */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+
+
+/*
+SCROLL FOR CHROME ETC
+*/
+
+.inbarangayreq-main-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.inbarangayreq-main-section::-webkit-scrollbar-track {
+  background: transparent; 
+}
+
+.inbarangayreq-main-section::-webkit-scrollbar-thumb {
+  background-color: rgba(96, 165, 250, 0.5); 
+  border-radius: 8px;
+  border: 2px solid transparent; 
+  background-clip: content-box;  
+}
+
+.inbarangayreq-main-section::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(59, 130, 246, 0.7);
+}
+
+
+
+
+
+
 
 
 .redirection-section-inbarangay {
@@ -163,39 +244,142 @@ display: flex;
   }
   
 
-  .no-result-card-inbarangay {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 200px;
-    border: 2px solid #f3c3bf;
-    width: 500px;
-    border-radius: 1rem;
-    background-color: #fff;
-    margin-top: 5rem;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.03);
-    align-self: center;
-  }
-  
-  .no-result-icon-inbarangay {
-    width: 46px;
-    height: 46px;
-    margin-bottom: 0.5rem;
-    opacity: 0.75;
-  }
-
-  .no-results-inbarangay {
-    font-weight: bold;
-    font-size: 1.25rem;
-    color: #e7594e;
-  }
-
   .actions-inbarangay {
    display: flex;
     gap: 1rem; /* Space between action buttons */
     justify-content: center;
 }
+
+
+
+
+
+/*
+NO RESULTS POPUP IN TABLE
+*/
+
+.no-result-card-inbarangay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  width: 500px;
+  margin-top: 5rem;
+  padding: 1.5rem;
+  gap: 10px;
+  align-self: center;
+
+  border: 2px solid #f3c3bf;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #fff, #fff5f5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+
+  /* Entrance animation */
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease-out forwards;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.no-result-card-inbarangay:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.no-result-icon-inbarangay {
+  width: 46px;
+  height: 46px;
+  margin-bottom: 0.5rem;
+  opacity: 0.75;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.no-result-card-inbarangay:hover .no-result-icon-inbarangay {
+  transform: scale(1.05);
+  opacity: 0.85;
+}
+
+.no-results-inbarangay {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #e7594e;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+
+
+/*
+  NO TASKS POPUP IN TABLE
+*/
+
+.no-task-card-inbrgy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  width: 500px;
+  margin-top: 5rem;
+  padding: 1.5rem;
+  gap: 10px;
+  align-self: center;
+
+  border: 2px solid #dbeafe;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+
+ 
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease-out forwards;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.no-task-card-inbrgy:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.no-task-icon-inbrgy {
+  width: 46px;
+  height: 46px;
+  margin-bottom: 0.5rem;
+  opacity: 0.65;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.no-task-card-inbrgy:hover .no-task-icon-inbrgy {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+.no-task-department-inbrgy {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #2563eb;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+
+
 
 
 

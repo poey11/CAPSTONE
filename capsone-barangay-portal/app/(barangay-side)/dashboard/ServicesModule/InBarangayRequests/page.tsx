@@ -262,7 +262,7 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
             <div className="inbarangayreq-section-2">
               
               <select
-                className="inbarangay-services-module-filter"
+                className="inbarangay-services-module-filter-dropdown"
                 value={searchType}
                 onChange={(e) => setSearchType(e.target.value)}
               >
@@ -270,7 +270,7 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
                 <option value="Barangay Certificate">Barangay Certificate</option>
                 <option value="Barangay Indigency">Barangay Indigency</option>
                 <option value="Barangay ID">Barangay ID</option>
-                <option value="Barangay Permits">Barangay Permits</option>
+                <option value="Business Permit">Barangay Business Permits</option>
                 <option value="Barangay Clearance">Barangay Clearance</option>
                 <option value="First Time Jobseeker">First Time Jobseeker</option>
                 <option value="Other">Other Documents</option>
@@ -289,7 +289,7 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
                   onChange={(e) => setDateTo(e.target.value)}
                 />
                 <select
-                  className="inbarangay-services-module-filter"
+                  className="inbarangay-services-module-filter-dropdown"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
@@ -306,7 +306,7 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
                   <p>Loading Online Requests...</p>
                 ) : error ? (
                   <p className="error">{error}</p>
-                ) : allRequests.length === 0 ? (
+                    ) :filteredMainRequests.length === 0 ? (
                   <div className="no-result-card-inbarangay">
                     <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
                     <p className="no-results-inbarangay">No Results Found</p>
@@ -383,10 +383,10 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
                 ) : error ? (
                   <p className="error">{error}</p>
                 ) : currentInBarangayRequests.length === 0 ? (
-                  <div className="no-result-card-inbarangay">
-                    <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
-                    <p className="no-results-inbarangay">No Results Found</p>
-                  </div>
+                    <div className="no-task-card-inbrgy">
+                      <img src="/images/customer-service.png" alt="No results icon" className="no-task-icon-inbrgy" />
+                      <p className="no-task-department-inbrgy">You have No Tasks For Today!</p>
+                    </div>
                 ) : (
 
                 <table>
