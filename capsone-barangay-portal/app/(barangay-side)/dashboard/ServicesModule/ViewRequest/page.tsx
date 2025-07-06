@@ -10,6 +10,7 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot, getDoc } from "firebase/firestore";
 import { handlePrint } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
+import OnlineRequests from "../OnlineRequests/page";
 
 interface EmergencyDetails {
     fullName: string;
@@ -104,6 +105,7 @@ interface EmergencyDetails {
     dateOfTyphoon: string;
     projectLocation: string;
     homeOrOfficeAddress: string;
+    rejectionReason: string;
 }
 
 interface File {
@@ -402,7 +404,6 @@ const ViewOnlineRequest = () => {
                 "dateOfResidency", 
                 "purpose", 
                 "address", 
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -431,7 +432,6 @@ const ViewOnlineRequest = () => {
                 "dateOfResidency", 
                 "purpose", 
                 "address", 
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -460,7 +460,6 @@ const ViewOnlineRequest = () => {
                 "dateOfResidency",
                 "purpose",
                 "address",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -489,7 +488,6 @@ const ViewOnlineRequest = () => {
                 "purpose", 
                 "address", 
                 "guardianshipType",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -518,7 +516,6 @@ const ViewOnlineRequest = () => {
                 "purpose", 
                 "address", 
                 "appointmentDate",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -548,7 +545,6 @@ const ViewOnlineRequest = () => {
                 "purpose", 
                 "address", 
                 "goodMoralPurpose",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -574,7 +570,6 @@ const ViewOnlineRequest = () => {
                 "purpose", 
                 "address", 
                 "noIncomePurpose",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -600,7 +595,6 @@ const ViewOnlineRequest = () => {
                 "dateOfResidency", 
                 "purpose", 
                 "address", 
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -629,7 +623,6 @@ const ViewOnlineRequest = () => {
                 "dateOfResidency", 
                 "purpose", 
                 "address",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -666,7 +659,6 @@ const ViewOnlineRequest = () => {
                 "purpose", 
                 "address",
                 "goodMoralOtherPurpose",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -695,7 +687,6 @@ const ViewOnlineRequest = () => {
                 "purpose", 
                 "address",
                 "goodMoralOtherPurpose",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -721,7 +712,6 @@ const ViewOnlineRequest = () => {
                 "dateOfResidency", 
                 "purpose", 
                 "address",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -747,7 +737,6 @@ const ViewOnlineRequest = () => {
                 "dateOfResidency", 
                 "purpose", 
                 "address",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -774,7 +763,6 @@ const ViewOnlineRequest = () => {
                 "dateOfResidency", 
                 "purpose", 
                 "address",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -808,7 +796,6 @@ const ViewOnlineRequest = () => {
                 "dateOfResidency", 
                 "purpose", 
                 "address",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -837,7 +824,6 @@ const ViewOnlineRequest = () => {
                 "dateOfResidency", 
                 "purpose", 
                 "address",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -866,7 +852,6 @@ const ViewOnlineRequest = () => {
                 "dateOfResidency", 
                 "purpose", 
                 "address",
-                "rejectionReason",
               ],
               full: [
                 "birthday",
@@ -898,7 +883,6 @@ const ViewOnlineRequest = () => {
               "dateOfResidency", 
               "purpose", 
               "address",
-              "rejectionReason",
             ],
             full: [
               "birthday",
@@ -930,7 +914,6 @@ const ViewOnlineRequest = () => {
             "dateOfResidency", 
             "purpose", 
             "address", 
-            "rejectionReason",
           ],
           full: [
             "birthday",
@@ -950,7 +933,7 @@ const ViewOnlineRequest = () => {
         
 
         const defaultFieldSections = {
-          basic: ["createdAt", "requestor", "docType", "dateOfResidency", "purpose", "address", "rejectionReason",],
+          basic: ["createdAt", "requestor", "docType", "dateOfResidency", "purpose", "address"],
           full: ["birthday", "contact", "age", "civilStatus", "gender", "citizenship"],
           others: ["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg"],
         };
@@ -1523,6 +1506,7 @@ const ViewOnlineRequest = () => {
                             "full",
                             ...(requestData?.purpose === "Barangay ID" ? ["emergency"] : []),
                             "others",
+                            ...(requestData?.status === "Rejected" ? ["rejected"] : []),
                             ...(requestData?.status === "Completed" ? ["received"] : [])
                           ].map((section) => (
                             <button
@@ -1535,6 +1519,7 @@ const ViewOnlineRequest = () => {
                               {section === "full" && "Full Info"}
                               {section === "emergency" && "Emergency Info"}
                               {section === "others" && "Others"}
+                              {section === "rejected" && "Rejected"}
                               {section === "received" && "Received"}
                             </button>
                           ))}
@@ -1693,6 +1678,21 @@ const ViewOnlineRequest = () => {
 
                                 {activeSection === "others" && <> {renderSection("others")} </>}
 
+                                {activeSection === "rejected" && (
+                                  <>
+                                    <div className="rejectedion-main-container">
+                                    <div className="box-container-outer-rejection">
+                                        <div className="title-remarks-rejected">
+                                          Reason for Rejection
+                                        </div>
+                                        <div className="box-container-rejected">
+                                        <textarea className="rejected-input-field" placeholder="Enter Remarks" name="remarks" value={requestData?.rejectionReason} readOnly/>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                  </>
+                                )}
 
                                 {activeSection === "received" && (
                                   <>

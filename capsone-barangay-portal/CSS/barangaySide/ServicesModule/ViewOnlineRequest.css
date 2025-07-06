@@ -1072,3 +1072,58 @@ color: white;
 .doc-receivalform-action-close:hover{
   background-color: #d73c31; 
 }
+
+.rejectedion-main-container {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+.box-container-outer-rejection {
+  position: relative; 
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 85%;
+}
+
+.title-remarks-rejected {
+  position: absolute;
+  left: 50%; 
+  top: 30px; 
+  transform: translate(-50%, -50%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 210px;
+  text-align: center;
+}
+
+.box-container-rejected {
+  position: relative;
+  width: 100%;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  margin-top: 30px;
+  height: 340px;
+}
+
+.rejected-input-field {
+  padding: 8px;
+  width: 100%;
+  border-radius: 5px;
+  color: #000000;
+  text-align: left;
+  height: 310px;
+  margin-top: 20px;
+  resize: none;
+}
+
+.rejected-input-field:focus {
+  outline: none;
+  border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
+  box-shadow: none;
+}
