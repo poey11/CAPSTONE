@@ -1481,126 +1481,180 @@ const handleChange = (
                           </>
                         )}
 
-                    <div className="isresident-section">
+{(
+  allExistingPermits.includes(docType || "") ||
+  (
+    (
+      otherDocPurposes["Barangay Permit"]?.includes(docType || "") &&
+      forResidentOnlyMap[docType || ""] === false
+    ) || 
+    (
+      docType === "Other Documents" &&
+      clearanceInput.purpose !== "Barangay ID" &&
+      clearanceInput.purpose !== "First Time Jobseeker" &&
+      forResidentOnlyMap[clearanceInput.purpose || ""] === false
+    )
+  )
+) ? (
+  <div className="isresident-section">
+    {/* ✅ Show 'Is Resident' Checkbox */}
+    <div className="beneficiary-checkbox-container">
+      <label className="beneficiary-checkbox-label" htmlFor="forResidentOnly">
+        <p>Is requestor a resident?<span className="required">*</span></p> 
+      </label>
+      <div className="checkbox-container-isresident">
+        <input 
+          type="checkbox" 
+          name="isResident"  
+          checked={clearanceInput?.isResident || false}
+          onChange={handleChange}
+        />    
+      </div>
+    </div>
 
-                    {(
-                        allExistingPermits.includes(docType || "") ||
-                        (
-                          (
-                            otherDocPurposes["Barangay Permit"]?.includes(docType || "") &&
-                            forResidentOnlyMap[docType || ""] === false
-                          ) || 
-                          (
-                            docType === "Other Documents" &&
-                            clearanceInput.purpose !== "Barangay ID" &&
-                            clearanceInput.purpose !== "First Time Jobseeker" &&
-                            forResidentOnlyMap[clearanceInput.purpose || ""] === false
-                          )
-                        )
-                      ) && (
-                          <>
-                            <div className="beneficiary-checkbox-container">
-                              <label className="beneficiary-checkbox-label" htmlFor="forResidentOnly" >
-                                <p>Is requestor a resident?<span className="required">*</span></p> 
-                              </label>
-                              <div className="checkbox-container-isresident">
-                                <input 
-                                  type="checkbox" 
-                                  name="isResident"  
-                                  checked={clearanceInput?.isResident || false}
-                                  onChange={handleChange}
-                                />    
-                              </div>
-                            </div>
-                          </>
-                        )}
-                        
+    {/* ✅ Requestor Full Name inside */}
+    <div className="fields-section">
+      <h1>Requestor's Full Name<span className="required">*</span></h1>
+      <div className="createRequest-input-wrapper">
+        <div className="createRequest-input-with-clear">
+          <input 
+            type="text" 
+            className="createRequest-select-resident-input-field" 
+            placeholder="Enter Requestor's Name"
+            value={clearanceInput.requestorFname ?? ""}
+            onChange={handleChange}
+            required
+            id="requestorFname"
+            name="requestorFname"
+            readOnly={
+              forResidentOnlyMap[docType || ""] === true ||
+              (docType === "Other Documents" && clearanceInput?.isResident) ||
+              clearanceInput?.isResident
+            }
+            onClick={() => {
+              const isExplicitResidentOnly = forResidentOnlyMap[docType || ""] === true;
+              const isOtherDocs = docType === "Other Documents";
 
-          
-                            <div className="fields-section">
-                              <h1>Requestor's Full Name<span className="required">*</span></h1>
+              const allowPopup =
+                isExplicitResidentOnly ||
+                (!isPermitLike && !isOtherDocs) ||
+                (isOtherDocs && clearanceInput?.isResident) ||
+                clearanceInput?.isResident ||
+                (clearanceInput.purpose === "Barangay ID" || clearanceInput.purpose === "First Time Jobseeker");
 
-                              <div className="createRequest-input-wrapper">
-                                <div className="createRequest-input-with-clear">
-                                <input 
-                                  type="text" 
-                                  className="createRequest-select-resident-input-field" 
-                                  placeholder="Enter Requestor's Name"
-                                  value={clearanceInput.requestorFname ?? ""}
-                                  onChange={handleChange}
-                                  required
-                                  id="requestorFname"
-                                  name="requestorFname"
-                                  readOnly={
-                                    forResidentOnlyMap[docType || ""] === true ||
-                                    (docType === "Other Documents" && clearanceInput?.isResident) ||
-                                    clearanceInput?.isResident
-                                  }
-                                  onClick={() => {
-                                    const isExplicitResidentOnly = forResidentOnlyMap[docType || ""] === true;
-                                  
-                                    const isOtherDocs = docType === "Other Documents";
-                                  
-                                    const allowPopup =
-                                      // Always allow for system-defined resident-only types
-                                      isExplicitResidentOnly ||
-                                  
-                                      // Allow for all non-permit types EXCEPT Other Documents
-                                      (!isPermitLike && !isOtherDocs) ||
-                                  
-                                      // Allow for Other Documents ONLY IF user manually selects resident
-                                      (isOtherDocs && clearanceInput?.isResident) ||
-                                  
-                                      // User manually selected resident
-                                      clearanceInput?.isResident ||
+              if (allowPopup) {
+                setSelectingFor("requestor");
+                setShowResidentsPopup(true);
+              }
+            }}
+          />
 
-                                      (clearanceInput.purpose === "Barangay ID" || clearanceInput.purpose === "First Time Jobseeker");
-                                  
-                                    if (allowPopup) {
-                                      setSelectingFor("requestor");
-                                      setShowResidentsPopup(true);
-                                    }
-                                  }}
-                                />
+          {((
+            !allExistingPermits.includes(docType || "") ||
+            clearanceInput?.isResident
+          ) && isRequestorSelected) && (
+            <span
+              className="clear-icon"
+              title="Click to clear selected resident"
+              onClick={() => {
+                const purpose = clearanceInput.purpose ?? "";
 
+                const updatedInput: any = {
+                  ...clearanceInput,
+                  requestorFname: "",
+                  requestorMrMs: "",
+                  gender: "",
+                  civilStatus: "",
+                  birthday: "",
+                  contact: "",
+                  dateOfResidency: "",
+                  address: ""
+                };
 
-                                  {((
-                                    !allExistingPermits.includes(docType || "") ||
-                                    clearanceInput?.isResident
-                                  ) && isRequestorSelected) && (
-                                    <span
-                                      className="clear-icon"
-                                      title="Click to clear selected resident"
-                                      onClick={() => {
-                                        const purpose = clearanceInput.purpose ?? "";
-                                    
-                                        const updatedInput: any = {
-                                          ...clearanceInput,
-                                          requestorFname: "",
-                                          requestorMrMs: "",
-                                          gender: "",
-                                          civilStatus: "",
-                                          birthday: "",
-                                          contact: "",
-                                          dateOfResidency: "",
-                                          address: ""
-                                        };
-                                    
-                                        
-                                    
-                                        setClearanceInput(updatedInput);
-                                        setIsRequestorSelected(false);
-                                      }}
-                                    >
-                                      ×
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
+                setClearanceInput(updatedInput);
+                setIsRequestorSelected(false);
+              }}
+            >
+              ×
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+) : (
+  // condition not met, show Requestor Full Name outside isresident-section
+  <div className="fields-section">
+    <h1>Requestor's Full Name<span className="required">*</span></h1>
+    <div className="createRequest-input-wrapper">
+      <div className="createRequest-input-with-clear">
+        <input 
+          type="text" 
+          className="createRequest-select-resident-input-field" 
+          placeholder="Enter Requestor's Name"
+          value={clearanceInput.requestorFname ?? ""}
+          onChange={handleChange}
+          required
+          id="requestorFname"
+          name="requestorFname"
+          readOnly={
+            forResidentOnlyMap[docType || ""] === true ||
+            (docType === "Other Documents" && clearanceInput?.isResident) ||
+            clearanceInput?.isResident
+          }
+          onClick={() => {
+            const isExplicitResidentOnly = forResidentOnlyMap[docType || ""] === true;
+            const isOtherDocs = docType === "Other Documents";
 
-                    </div>
+            const allowPopup =
+              isExplicitResidentOnly ||
+              (!isPermitLike && !isOtherDocs) ||
+              (isOtherDocs && clearanceInput?.isResident) ||
+              clearanceInput?.isResident ||
+              (clearanceInput.purpose === "Barangay ID" || clearanceInput.purpose === "First Time Jobseeker");
+
+            if (allowPopup) {
+              setSelectingFor("requestor");
+              setShowResidentsPopup(true);
+            }
+          }}
+        />
+
+        {((
+          !allExistingPermits.includes(docType || "") ||
+          clearanceInput?.isResident
+        ) && isRequestorSelected) && (
+          <span
+            className="clear-icon"
+            title="Click to clear selected resident"
+            onClick={() => {
+              const purpose = clearanceInput.purpose ?? "";
+
+              const updatedInput: any = {
+                ...clearanceInput,
+                requestorFname: "",
+                requestorMrMs: "",
+                gender: "",
+                civilStatus: "",
+                birthday: "",
+                contact: "",
+                dateOfResidency: "",
+                address: ""
+              };
+
+              setClearanceInput(updatedInput);
+              setIsRequestorSelected(false);
+            }}
+          >
+            ×
+          </span>
+        )}
+      </div>
+    </div>
+  </div>
+)}
                      
+                        
                         
                       </div>
 
@@ -3894,7 +3948,7 @@ const handleChange = (
                         <div className="confirmation-popup-overlay">
                             <div className="confirmation-popup">
                             <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
-                                <p>Are you sure you want to create the document?</p>
+                                <p>Are you sure you want to submit the request?</p>
                                 <div className="yesno-container">
                                     <button onClick={() => setShowCreatePopup(false)} className="no-button">No</button> 
                                     <button onClick={confirmCreate} className="yes-button">Yes</button> 
