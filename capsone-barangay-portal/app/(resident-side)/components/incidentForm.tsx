@@ -249,12 +249,14 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
         await addDoc(notificationRef, {
           message: `New incident report filed by ${key[0].firstname} ${key[0].lastname}.`,
           timestamp: new Date(),
-          reportID: currentUser,
           isRead: false,
           transactionType: "Online Incident",
           recipientRole: "LF Staff",
           incidentID: incidentID,
+          ...(currentUser !== "Guest" && { reportID: currentUser }), 
+          reporterType: currentUser !== "Guest" ? "Resident" : "Guest",
         });
+        
     
     
       } catch (e: any) {
@@ -328,7 +330,7 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
           file: filename,
           department: "Online",
           status: incidentReport.status,
-          residentId: incidentReport.residentId,
+          residentId: incidentReport.residentId || null,
           statusPriority: 1,
           isViewed: false,
           ...(incidentReport.isReportLate && { 
