@@ -82,6 +82,7 @@ import { db } from "@/app/db/firebase";
 
     useEffect(() => {
       let filtered = requestData;
+      
 
       // Filter by Document Type
       if (searchType !== "" && searchType !== "All") {
@@ -198,6 +199,11 @@ import { db } from "@/app/db/firebase";
   }, [highlightResidentId, filteredOnlineRequests]);
 
 
+const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
+
+
+
+
     return (
 
         <main className="onlinereq-main-container">
@@ -213,47 +219,84 @@ import { db } from "@/app/db/firebase";
 
 
          <div className="onlinereq-section-2">
+
+
+          <div className="onlinereq-section-2-left">
+
+            <div className="data-input-group-onlinereq">
+              <label htmlFor="dateFrom">From Date :</label>
+              <input
+                type="date"
+                 className={`online-services-module-filter ${dateFrom ? 'has-value' : ''}`}
+                value={dateFrom}
+                 max={today}
+                onChange={(e) => setDateFrom(e.target.value)}
+              />
+
+
+            </div>
+
+            <div className="data-input-group-onlinereq">
+                <label htmlFor="dateTo">To Date :</label>
+                
+                <input
+                  type="date"
+                   className={`online-services-module-filter ${dateFrom ? 'has-value' : ''}`}
+                  value={dateTo}
+                   max={today}
+                  onChange={(e) => setDateTo(e.target.value)}
+                />
+
+            </div>
+
+
+          </div>
+
+
+          <div className="onlinereq-section-2-right">
+
+            <div className="dropdown-group-onlinereq">
+
+                <select
+                    className={`online-services-module-filter-dropdown ${searchType ? "has-value" : ""}`}
+                  value={searchType}
+                  onChange={(e) => setSearchType(e.target.value)}
+                >
+                  <option value="All">All Document Types</option>
+                  <option value="Barangay Certificate">Barangay Certificate</option>
+                  <option value="Barangay Indigency">Barangay Indigency</option>
+                  <option value="Barangay ID">Barangay ID</option>
+                  <option value="Barangay Permits">Barangay Permits</option>
+                  <option value="Barangay Clearance">Barangay Clearance</option>
+                  <option value="First Time Jobseeker">First Time Jobseeker</option>
+                  <option value="Other">Other Documents</option>
+                </select>
+
+            </div>
+
+              <div className="dropdown-group-onlinereq">
+
+                 <select
+                  className="online-services-module-filter-dropdown"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">Select Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="completed">Completed</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="forpickup">For Pick Up</option>
+                </select>
+
+            </div>
+
+
+          </div>
               
-            <select
-            className="online-services-module-filter"
-            value={searchType}
-            onChange={(e) => setSearchType(e.target.value)}
-          >
-            <option value="All">All Document Types</option>
-            <option value="Barangay Certificate">Barangay Certificate</option>
-            <option value="Barangay Indigency">Barangay Indigency</option>
-            <option value="Barangay ID">Barangay ID</option>
-            <option value="Barangay Permits">Barangay Permits</option>
-            <option value="Barangay Clearance">Barangay Clearance</option>
-            <option value="First Time Jobseeker">First Time Jobseeker</option>
-            <option value="Other">Other Documents</option>
-          </select>
 
-            <input
-              type="date"
-              className="online-services-module-filter"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-            />
 
-            <input
-              type="date"
-              className="online-services-module-filter"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-            />
 
-            <select
-              className="online-services-module-filter"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">Select Status</option>
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
-              <option value="rejected">Rejected</option>
-              <option value="forpickup">For Pick Up</option>
-            </select>
+
 
          </div>
 

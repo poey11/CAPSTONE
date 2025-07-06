@@ -222,6 +222,7 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
 
   
   const [activeSection, setActiveSection] = useState("main");
+  const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
     return (
 
@@ -274,6 +275,7 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
                       type="date"
                      className={`inbarangay-services-module-filter ${dateFrom ? 'has-value' : ''}`}
                       value={dateFrom}
+                       max={today}
                       onChange={(e) => setDateFrom(e.target.value)}
                     />
                   </div>
@@ -285,6 +287,7 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
                       type="date"
                      className={`inbarangay-services-module-filter ${dateFrom ? 'has-value' : ''}`}
                       value={dateTo}
+                       max={today}
                       onChange={(e) => setDateTo(e.target.value)}
                     />
                   </div>
