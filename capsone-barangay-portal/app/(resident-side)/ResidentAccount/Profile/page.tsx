@@ -287,6 +287,58 @@ export default function SettingsPageResident() {
     
     return (
         <main className="main-container-resident-profile">
+
+            <div className="account-section-incident-report">
+                <h1>Account Profile</h1>
+                <hr />
+
+                <div className="account-profile-section-modern">
+
+                  
+                    <div className="profile-left">
+                    {preview ? (
+                        <img src={preview} alt="User Icon" className="profile-image" />
+                    ) : resident.userIcon ? (
+                        <img src={resident.userIcon} alt="User Icon" className="profile-image" />
+                    ) : (
+                        <img src="/images/user.png" alt="User Icon" className="profile-image" />
+                    )}
+                    <input
+                        type="file"
+                        accept="image/*"
+                        id="fileUpload"
+                        style={{ display: "none" }}
+                        onChange={handleImageChange}
+                    />
+                    <button
+                        className="upload-btn"
+                        onClick={() => document.getElementById("fileUpload")?.click()}
+                    >
+                        Update Profile Image
+                    </button>
+                    </div>
+
+                  
+                    <div className="profile-right">
+                    <h2>{resident.first_name} {resident.last_name}</h2>
+
+                    <a href="/ResidentAccount/Transactions" className="transactions-link-modern">
+                        View Transactions →
+                    </a>
+
+                    <div className="note-box">
+                        <p>
+                        <span className="required">*</span> This data is uneditable as it is synced with the Barangay's database.<br />
+                        <span className="required">*</span> For any concerns, please visit the Barangay.
+                        </p>
+                    </div>
+                    </div>
+                </div>
+                </div>
+
+
+
+
             <div className="first-section-resident-profile">
 
                 <div className="account-details-section">
@@ -296,63 +348,6 @@ export default function SettingsPageResident() {
                 </div>
 
 
-                <div className="account-profile-section">
-                    <div className="icon-container-profile-section">
-                    {preview ? (
-                                <img
-                                    src={preview}
-                                    alt="User Icon"
-                                    className="user-icon-profile-section"
-                                />
-                            ) : resident.userIcon ? (
-                                <img
-                                    src={resident.userIcon}
-                                    alt="User Icon"
-                                    className="user-icon-profile-section"
-                                />
-                            ) : (
-                                <img
-                                    src="/images/user.png"
-                                    alt="User Icon"
-                                    className="user-icon-profile-section"
-                                />
-                            )}
-                    <input
-                        type="file"
-                        accept="image/*"
-                        id="fileUpload"
-                        style={{ display: "none" }}
-                        onChange={handleImageChange}
-                    />
-                    <button
-                        className="upload-btn-profile-section"
-                        onClick={() => document.getElementById("fileUpload")?.click()}
-                    >
-                        Update Profile Image
-                    </button>
-                    </div>
-
-                    <div className="name-section">
-                    <p className="name">{resident.first_name}</p>
-                    <p className="name">{resident.last_name}</p>
-                    </div>
-
-                    <div className="transactions-link">
-                    <a href="/ResidentAccount/Transactions" className="transactions-text">
-                        View Transactions
-                    </a>
-                    </div>
-
-                    <div className="name-section">
-                    <p>
-                        <span className="required">*</span> THE DATA IS UNEDITABLE AS IT IS TAKEN FROM THE BARANGAY'S DATABASE.<br/>
-                        <span className="required">*</span> IF YOU HAVE ANY CONCERNS. PLEASE VISIT THE BARANGAY.
-                    </p>
-                    </div>
-
-
-
-                </div>
 
 
                     

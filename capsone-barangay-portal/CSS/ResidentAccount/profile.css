@@ -1,10 +1,9 @@
     .main-container-resident-profile {
-        background-color: #D8DFE5; 
-        display: flex; 
-        flex-direction: column;
-        height: auto; 
-        width: 100%;
-
+     background-image: url('/Images/bghome.jpg');
+    display: flex;
+    flex-direction: column;  
+    height: 100%;
+    width: 100%;
     }
 
     .first-section-resident-profile {
@@ -17,21 +16,6 @@
     margin-top: 30px;
     }
 
-    .account-profile-section {
-        width: 70%;
-        display: flex;
-        flex-direction: column;
-        /*background-color: rgba(255, 255, 255, 0.7);*/
-        padding: 3rem;
-        border-radius: 16px;
-        /*box-shadow: 0 10px 20px rgba(95, 94, 94, 0.1);*/
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        height: 50%;
-        align-self: center;
-    
-    }
 
     .acc-details-content-section-1{
         display: flex;
@@ -47,46 +31,23 @@
     }
 
 
+  
 
 
-    .icon-container-profile-section {
-        display: flex;
-        flex-direction: column;
-        margin-top: 2rem;
-    }
 
-    .user-icon-profile-section {
-        width: 250px;
-        height: 250px;
-        border-radius: 50%;
-        object-fit: cover; 
-        border: 4px solid #DF7426;
-        margin-bottom: 1rem;
-    }
 
-    .submit-section-resident-account {
-        padding: 2rem;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
 
-    .upload-btn-profile-section {
-        background-color: #DF7426;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 10px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background 0.3s ease;
-        width: 100%;
 
-    }
 
-    .upload-btn-profile-section:hover {
-        background-color: #bc5f1c;
-    }
+
+
+
+
+
+
+
+
+
 
     .account-details-section {
         width: 80%;
@@ -161,56 +122,6 @@
         font-size: 1.5rem;
         font-weight: bold;
         align-self: center;
-    }
-
-    .name-section {
-        display: flex;
-        gap: 10px;
-        margin-top: 1rem;
-        padding: 1rem;
-    }
-
-
-    .name {
-    display: flex;
-    color: #333;;
-    font-size: 1.5rem;
-    font-weight: bold;
-    align-self: center;
-    }
-
-    .transactions-history {
-        width: 50%;
-        display: flex;
-        flex-direction: column;
-        padding: 3rem;
-        background-color: rgba(255, 255, 255, 0.7);
-        border-radius: 16px;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        justify-content: center;
-        align-items: center;
-        margin-top: 1rem;
-
-    }
-
-
-    .transactions-link {
-    text-align: center;
-    margin-top: 10px;
-    }
-
-    .transactions-text {
-    color: #0C508F;
-    font-weight: bold;
-    text-decoration: none;
-    font-size: 16px;
-    transition: color 0.3s ease-in-out;
-    cursor: pointer;
-    }
-
-    .transactions-text:hover {
-    color: #6773cd;
-    text-decoration: underline;
     }
 
 
@@ -379,4 +290,146 @@
         margin-left: 5px;
       }
       
+
+
+
+
+
+
+
+
+
+
+/*
+UPDATED CSS
+*/
+
+
+.account-section-incident-report {
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  padding: 2rem;
+  margin: auto;
+  width: 60%;
+  margin-top: 5rem;
+  margin-bottom: 5rem;
+}
+
+ .account-section-incident-report hr {
+    border: none; 
+    border-top: 2px solid rgba(0, 0, 0, 0.20);
+    margin-top: 30px;
+    margin-bottom: 40px;
+    }
+
+  .account-section-incident-report h1 {
+    font-size: 30px; 
+    color: #2C3E50;
+    text-align: center;
+    font-weight: 750;  
+    margin-top: 20px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+
+  
+
+.account-profile-section-modern {
+  display: flex;
+  flex-direction: row;
+  gap: 3rem;
+  align-items: flex-start;
+  justify-content: center;
+  background-color: #f9f9f9;
+  padding: 3rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  flex-wrap: wrap;
+}
+
+.profile-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-image {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #DF7426;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.upload-btn {
+  background-color: #DF7426;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-weight: 500;
+}
+
+.upload-btn:hover {
+  background-color: #bc5f1c;
+}
+
+.profile-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  max-width: 400px;
+  padding-left: 50px;
+}
+
+.profile-right h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2C3E50;
+}
+
+.transactions-link-modern {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0C508F;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.transactions-link-modern:hover {
+  color: #6773cd;
+  text-decoration: underline;
+}
+
+.note-box {
+  background-color: #fff8f6;
+  border: 1px solid #f3c3bf;
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+.required {
+  color: #d63031;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .account-profile-section-modern {
+    flex-direction: column;
+    align-items: center;
+  }
+}
 
