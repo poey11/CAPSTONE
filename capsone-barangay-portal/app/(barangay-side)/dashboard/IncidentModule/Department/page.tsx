@@ -71,7 +71,7 @@ export default function Department() {
           setHighlightedId(null);
   
           const params = new URLSearchParams(window.location.search);
-          params.delete("incidentId");
+          params.delete("highlight");
           const newUrl = `${window.location.pathname}?${params.toString()}`;
           router.replace(newUrl, { scroll: false });
         }, 3000);

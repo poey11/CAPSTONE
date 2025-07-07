@@ -262,7 +262,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
       
           setTimeout(() => {
             setShowPopup(false);
-            //router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
+            router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
+            
           }, 3000);
         } catch (error) {
           console.error("Error during confirmation submit:", error);
