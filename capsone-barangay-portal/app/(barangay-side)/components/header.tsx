@@ -3,13 +3,33 @@
 import "@/CSS/barangaySide/header.css";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from '@/app/db/firebase';
 
 export default function Header() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  
+  // State to hold loaded resident status
+  const [viewedResidentStatus, setViewedResidentStatus] = useState<string | null>(null);
+
+  // Fetch the resident status from Firestore if on /viewResidentUser
+  useEffect(() => {
+    const fetchResidentStatus = async () => {
+      if (pathname === "/dashboard/admin/viewResidentUser") {
+        const id = searchParams.get("id");
+        if (id) {
+          const docRef = doc(db, "ResidentUsers", id);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setViewedResidentStatus(docSnap.data().status || null);
+          }
+        }
+      }
+    };
+    fetchResidentStatus();
+  }, [pathname, searchParams]);
 
   const routeInfo = useMemo(() => {
     const departmentId = searchParams.get("id");
@@ -20,8 +40,6 @@ export default function Header() {
       BCPC: "BCPC",
       VAWC: "VAWC",
     };
-
-    
 
     // Dynamic mapping for departments
     const dynamicIncidentModuleMap: Record<string, { title: string; breadcrumb: string[] }> = {
@@ -42,7 +60,6 @@ export default function Header() {
         breadcrumb: ["Incident Management", "VAWC"],
       },
     };
-
 
     /* NOTE: Will add the other links pa */
     const staticMap: Record<string, { title: string; breadcrumb: string[] }> = {
@@ -72,28 +89,26 @@ export default function Header() {
         title: "Barangay Users",
         breadcrumb: ["User and Roles", "Barangay Users", "Add Barangay User"],
       },
-         "/dashboard/admin/viewBarangayUser": {
+      "/dashboard/admin/viewBarangayUser": {
         title: "Barangay Users",
-          breadcrumb: ["User and Roles", "Barangay Users", "View Barangay User"],
+        breadcrumb: ["User and Roles", "Barangay Users", "View Barangay User"],
       },
-
-         "/dashboard/admin/modifyBarangayAcc": {
+      "/dashboard/admin/modifyBarangayAcc": {
         title: "Barangay Users",
-          breadcrumb: ["User and Roles", "Barangay Users", "Edit Barangay User"],
+        breadcrumb: ["User and Roles", "Barangay Users", "Edit Barangay User"],
       },
-      //ResidentUsers
+      // ResidentUsers
       "/dashboard/admin/ResidentUsers": {
         title: "Resident Users",
         breadcrumb: ["User and Roles", "Resident Users"],
       },
 
-      //NEED PA AYUSIN VIEEWS FOR PENDING AND RESIDENT USEERS KASI SAME CSS SILA 
-      //MAY BUG PA
+      // NEED PA AYUSIN VIEEWS FOR PENDING AND RESIDENT USEERS KASI SAME CSS SILA 
+      // MAY BUG PA
 
-
-       "/dashboard/admin/viewResidentUser": {
+      "/dashboard/admin/viewResidentUser": {
         title: "Pending Resident Users",
-        breadcrumb: ["User and Roles", "Pending Resident Users", "View Pending Resident Users"],
+        breadcrumb: ["User and Roles", "Pending Resident Users", "View Pending Resident User"],
       },
 
     /*
@@ -163,34 +178,27 @@ export default function Header() {
         title: "First-Time Job Seeker List",
         breadcrumb: ["Residents Management", "First-Time Job Seeker List", "Edit First-Time Job Seeker"],
       },
-
       "/dashboard/ResidentModule/FirstTimeJobSeeker/ViewFirstTimeJobSeeker": {
         title: "First-Time Job Seeker List",
         breadcrumb: ["Residents Management", "First-Time Job Seeker List", "View Job Seeker"],
       },
 
-
-      //For Online Reports
-
+      // For Online Reports
       "/dashboard/IncidentModule/OnlineReports": {
         title: "Incident Online Reports",
         breadcrumb: ["Incident Management", "Online Reports"],
       },
-
-        "/dashboard/IncidentModule/OnlineReports/ViewOnlineReport": {
+      "/dashboard/IncidentModule/OnlineReports/ViewOnlineReport": {
         title: "View Online Reports",
         breadcrumb: ["Incident Management", "Online Reports", "View Online Report"],
       },
 
-
-         "/dashboard/IncidentModule": {
+      "/dashboard/IncidentModule": {
         title: "Main Dashboard Incident Management",
         breadcrumb: ["Incident Management", "Main Dashboard"],
       },
 
-
-      // For In Brangay Requests
-
+      // For In Barangay Requests
       "/dashboard/ServicesModule/InBarangayRequests": {
         title: "In Barangay Documents Requests",
         breadcrumb: ["Services Management", "In Barangay Requests"],
@@ -208,28 +216,18 @@ export default function Header() {
         breadcrumb: ["Services Management", "In Barangay Requests", "New Document Request"],
       },
 
-
       // For Online Requests
-
       "/dashboard/ServicesModule/OnlineRequests": {
         title: "Online Documents Requests",
         breadcrumb: ["Services Management", "Online Requests"],
       },
 
       // Appointments
-
       "/dashboard/ServicesModule/Appointments": {
         title: "Scheduled Appointments",
         breadcrumb: ["Services Management", "Appointments"],
       },
-
-
-      
-
-
     };
-
-
 
     // Check for dynamic IncidentModule main page route
     if (pathname === "/dashboard/IncidentModule/Department" && departmentId) {
@@ -247,48 +245,58 @@ export default function Header() {
       };
     }
 
+    // Override dynamically for viewResidentUser if Firestore status loaded
+    if (pathname === "/dashboard/admin/viewResidentUser" && viewedResidentStatus) {
+      if (viewedResidentStatus === "Verified") {
+        return {
+          title: "View Verified User",
+          breadcrumb: ["User and Roles", "Resident Users", "View Verified User"],
+        };
+      } else {
+        return {
+          title: "View Pending Resident User",
+          breadcrumb: ["User and Roles", "Pending Resident Users", "View Pending Resident User"],
+        };
+      }
+    }
 
     // Fallback to static routes
     return staticMap[pathname] || {
       title: "Undefined",
       breadcrumb: ["Undefined"],
     };
-
-
-  }, [pathname, searchParams.toString()]);
+  }, [pathname, searchParams.toString(), viewedResidentStatus]);
 
   return (
-<div className="header-main-container">
-  <div className="add-resident-main-header">
-    <div className="path-section">
-      {routeInfo.breadcrumb.map((crumb, index) => {
-        const isLast = index === routeInfo.breadcrumb.length - 1;
-        const Tag = isLast ? "h2" : "h1";
+    <div className="header-main-container">
+      <div className="add-resident-main-header">
+        <div className="path-section">
+          {routeInfo.breadcrumb.map((crumb, index) => {
+            const isLast = index === routeInfo.breadcrumb.length - 1;
+            const Tag = isLast ? "h2" : "h1";
 
-        const pathSegments = pathname.split("/").filter(Boolean);
-        const href = "/" + pathSegments.slice(0, index + 1).join("/");
+            const pathSegments = pathname.split("/").filter(Boolean);
+            const href = "/" + pathSegments.slice(0, index + 1).join("/");
 
-        return (
-          <Tag className="breadcrumb" key={index}>
-            {!isLast && index !== 0 ? (
-              <Link href={href} className="breadcrumb-link">
-                {crumb}
-              </Link>
-            ) : (
-              crumb
-            )}
-            {!isLast && <span className="chevron">/</span>}
-          </Tag>
-        );
-      })}
+            return (
+              <Tag className="breadcrumb" key={index}>
+                {!isLast && index !== 0 ? (
+                  <Link href={href} className="breadcrumb-link">
+                    {crumb}
+                  </Link>
+                ) : (
+                  crumb
+                )}
+                {!isLast && <span className="chevron">/</span>}
+              </Tag>
+            );
+          })}
+        </div>
+
+        <div className="addresident-page-title-section-1">
+          <h1>{routeInfo.title}</h1>
+        </div>
+      </div>
     </div>
-
-    <div className="addresident-page-title-section-1">
-      <h1>{routeInfo.title}</h1>
-    </div>
-  </div>
-</div>
-
   );
 }
-
