@@ -4,12 +4,12 @@ import "@/CSS/ServicesPage/requestdocumentsmain/requestdocumentsmain.css";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { db } from "@/app/db/firebase";
-import { collection, getDocs} from "firebase/firestore";
+import { collection, getDocs, onSnapshot} from "firebase/firestore";
 
 export default function Services() {
   const user = useAuth().user;
   const router = useRouter();
-  const [permitOptions, setPermitOptions] = useState<string[]>([]);
+    const [permitOptions, setPermitOptions] = useState<any[]>([]);
 
 
   const isGuest = !user;
@@ -29,36 +29,44 @@ export default function Services() {
     router.push(`/services/action?doc=${action}`);
   };
 
+  const handleSubmitOther = (e: any) => {
+        console.log("Selected Document:", e);
+        router.push(`/services/action?doc=${e.type}&purpose=${e.title}`);
+    }
+
   const gotoOtherDocuments = () => {
     router.push("/services/other-documents");
   }
 
 
+
   useEffect(() => {
-    const fetchPermitOptions = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "OtherDocuments"));
-        const permits = querySnapshot.docs
-          .filter(doc => {
-            const data = doc.data();
-            if (data.type !== "Barangay Permit") return false;
+    const collectionRef = collection(db, "OtherDocuments");
+    
+    const unsubscribe = onSnapshot(collectionRef, (snapshot) => {
+      const permits = snapshot.docs
+        .filter(doc => {
+          const data = doc.data();
+        
+          if (data.type !== "Barangay Permit") return false;
+        
+          const forResidentOnly = data.forResidentOnly ?? false;
+        
+          // Show if:
+          // - user is logged in (show all)
+          // - OR user is guest and it's not for residents only
+          return !isGuest || (isGuest && forResidentOnly === false);
+        })
+        .map(doc => ({
+          id: doc.id,
+          title: doc.data().title,
+          type: doc.data().type,
+        }));
+      
+      setPermitOptions(permits);
+    });
   
-            const forResidentOnly = data.forResidentOnly ?? false;
-                  
-            // Show if:
-            // - user is logged in (show all)
-            // - OR user is guest and it's not for residents only
-            return !isGuest || (isGuest && forResidentOnly === false);
-          })
-          .map(doc => doc.data().title);
-  
-        setPermitOptions(permits);
-      } catch (error) {
-        console.error("Error fetching Barangay Permit documents:", error);
-      }
-    };
-  
-    fetchPermitOptions();
+    return () => unsubscribe(); // Cleanup listener
   }, [isGuest]);
 
 
@@ -119,10 +127,10 @@ export default function Services() {
                         <p id="Construction" onClick={goToServices}>Construction Permit</p>
 
                         {/* Dynamic permits */}
-                        {permitOptions.map((title, index) => (
-                          <p key={index} id={title} onClick={goToServices}>
-                            {title}
-                          </p>
+                        {permitOptions.map((permit, index) => (
+                            <p key={permit.id||index} className="dropdown-item" onClick={() => handleSubmitOther(permit)}>
+                                {permit.title}
+                            </p>
                         ))}
                       </div>
                     </div>

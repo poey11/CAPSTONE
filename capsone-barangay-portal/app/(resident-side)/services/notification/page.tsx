@@ -1,13 +1,8 @@
 "use client"
-import type { Metadata } from "next";
 import Link from 'next/link';
 import "@/CSS/ServicesPage/notification/notifcationservices.css";
 
 
-const metadata:Metadata = { 
-  title: "Notification",
-  description: "Notification page for the barangay website",
-};
 export default function ServicesNotification() {
   return (
 
