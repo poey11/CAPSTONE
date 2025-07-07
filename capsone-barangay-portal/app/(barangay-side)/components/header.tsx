@@ -90,11 +90,6 @@ export default function Header() {
       //NEED PA AYUSIN VIEEWS FOR PENDING AND RESIDENT USEERS KASI SAME CSS SILA 
       //MAY BUG PA
 
-      //Pending Resident Useers
-      "/dashboard/admin/PendingResidentUsers": {
-        title: "Pending Resident Users",
-        breadcrumb: ["User and Roles", "Pending Resident Users"],
-      },
 
        "/dashboard/admin/viewResidentUser": {
         title: "Pending Resident Users",
