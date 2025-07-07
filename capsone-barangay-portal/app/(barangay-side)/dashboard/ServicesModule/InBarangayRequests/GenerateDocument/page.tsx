@@ -2,19 +2,25 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { collection, getDocs} from "firebase/firestore";
+import { collection, getDocs, onSnapshot} from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/GenerateDocument.css";
+import { title } from "process";
 
 
 export default function GenerateDocument() {
     const router = useRouter();
-    const [permitOptions, setPermitOptions] = useState<string[]>([]);
+    const [permitOptions, setPermitOptions] = useState<any[]>([]);
 
 
     const handleSubmit = (e: any) => {
         const action = e.currentTarget.id;
         router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=${action}`);
+    }
+
+    const handleSubmitOther = (e: any) => {
+        console.log("Selected Document:", e);
+        router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=${e.type}&purpose=${e.title}`);
     }
 
     const [isDropdownVisible, setDropdownVisible] = useState(false);
@@ -33,22 +39,22 @@ export default function GenerateDocument() {
     };
 
     useEffect(() => {
-        const fetchPermitOptions = async () => {
-          try {
-            const querySnapshot = await getDocs(collection(db, "OtherDocuments"));
-            const permits = querySnapshot.docs
-              .filter(doc => doc.data().type === "Barangay Permit")
-              .map(doc => doc.data().title);
-      
+        const collectionRef = collection(db, "OtherDocuments");
+        const unsubscribe = onSnapshot(collectionRef, (snapshot) => {
+            const permits = snapshot.docs
+                .filter(doc => doc.data().type === "Barangay Permit")
+                .map(doc => ({
+                    id: doc.id,
+                    title: doc.data().title,
+                    type: doc.data().type,
+                }));
             setPermitOptions(permits);
-          } catch (error) {
-            console.error("Error fetching Barangay Permit documents:", error);
-          }
-        };
-      
-        fetchPermitOptions();
-      }, []);
+        });
 
+        return () => unsubscribe(); // Cleanup the listener on unmount
+
+      }, []);
+      console.log("Permit Options:", permitOptions);
     return (
         <main className="generatedocument-main-container">
             {/* NEW */}
@@ -111,9 +117,9 @@ export default function GenerateDocument() {
                                         
                                         {/* Add dynamic permit titles */}
                                         
-                                        {permitOptions.map((title, index) => (
-                                            <p key={index} className="dropdown-item" onClick={handleSubmit} id={title}>
-                                            {title}
+                                        {permitOptions.map((permit, index) => (
+                                            <p key={permit.id||index} className="dropdown-item" onClick={() => handleSubmitOther(permit)}>
+                                                {permit.title}
                                             </p>
                                         ))}
                                     </div>

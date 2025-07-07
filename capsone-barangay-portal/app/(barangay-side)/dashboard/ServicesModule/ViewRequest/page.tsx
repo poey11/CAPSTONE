@@ -128,6 +128,7 @@ const ViewOnlineRequest = () => {
     const [otherDocuments, setOtherDocuments] = useState<
       { type: string; title: string; fields: { name: string }[] }[]
     >([]);
+    const [resolvedImageUrls, setResolvedImageUrls] = useState<Record<string, string>>({});
 
     useEffect(() => {
         if (user) {
@@ -1346,9 +1347,10 @@ const ViewOnlineRequest = () => {
 
     const docPrinted = requestData?.docPrinted;
 
+    
     const print = async() => {
+      /* This part will handle ung pag generate ng pdf and also updates the request's status to In - Progress */
       handlePrint(requestData);
-      
       if(!id) return;
       const docRef = doc(db, "ServiceRequests", id);
       let updatedData: any = {
@@ -1357,30 +1359,22 @@ const ViewOnlineRequest = () => {
           docPrinted: true,
       };
 
-      // if(requestData?.sendTo === "Admin Staff"){
-      //   updatedData = {
-      //     ...updatedData,
-      //     status: "In - Progress",
-      //     statusPriority: 2,
-      //   }
-      // }
-
       await updateDoc(docRef, updatedData);
     }
 
     const handleNextStep = async() => {
-      //handleSMS(); dito mag sesend ng SMS to the resident
       if(!id) return;
       let updatedData = {}
       const docRef = doc(db, "ServiceRequests", id);
 
       if(requestData?.sendTo === "SAS"){
+          /* This part will handle ung pag notify kay admin staff regarding the doc  */
          updatedData = {
-          status: "Pick-up",
-          statusPriority: 3,
           sendTo: "Admin Staff",
         }
       }else{
+        /* This part will handle ung pag notify kay resident na to pickup na ung  doc */
+        //handleSMS(); Admin Staff will handle the sending of SMS to the resident
         updatedData = {
           status: "Pick-up",
           statusPriority: 3,
@@ -1392,6 +1386,7 @@ const ViewOnlineRequest = () => {
     }
 
     const handleRequestIsDone = async() => {
+      /* This part will handle ung pag update ng status to Completed and nareceive n ni resident yung document */
       if(!id) return;
       const docRef = doc(db, "ServiceRequests", id);
       const updatedData = {

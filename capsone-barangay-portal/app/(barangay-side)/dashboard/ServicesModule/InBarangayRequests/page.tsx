@@ -213,7 +213,7 @@ const confirmDelete = () => {
 
         <main className="inbarangayreq-main-container">
          <div className="inbarangayreq-section-1">
-          {(user?.position === "Admin Staff" || user?.position === "Secretary" || user?.position === "Assistant Secretary") && (
+          {(user?.position === "Admin Staff") && (
               <button
                 className="add-announcement-btn"
                 onClick={handleGenerateDocument}
@@ -264,7 +264,7 @@ const confirmDelete = () => {
               <option value="inProgress">In Progress</option>
             </select>
       </div>
-        Assigned Requests
+        Assigned Requests: {requestData.length}
        <div className="inbarangayreq-main-section">
         {loading ? (
             <p>Loading Online Requests...</p>
@@ -276,7 +276,7 @@ const confirmDelete = () => {
               <p className="no-results-inbarangay">No Results Found</p>
             </div>
           ) : (
-
+          
           <table>
             <thead>
               <tr>

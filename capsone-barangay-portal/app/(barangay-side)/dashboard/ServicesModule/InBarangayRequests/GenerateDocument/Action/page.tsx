@@ -120,6 +120,7 @@ export default function action() {
     const router = useRouter();
     const searchParam = useSearchParams();
     const docType = searchParam.get("docType");
+    const docPurpose = searchParam.get("purpose");
     const [showDiscardPopup, setShowDiscardPopup] = useState(false);
     const [showCreatePopup, setShowCreatePopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
@@ -273,7 +274,7 @@ export default function action() {
       residentId: "",
       requestType: "",
       requestId: "",
-      purpose: "",
+      purpose: docPurpose|| "",
       fullName: "",
       dateOfResidency: "",
       dateofdeath: "",
@@ -852,7 +853,7 @@ export default function action() {
         let sendTo ="";
         if(clearanceInput.docType === "Barangay Certificate" || clearanceInput.docType === "Barangay Clearance" 
           || clearanceInput.docType === "Barangay Indigency" || clearanceInput.docType === "Temporary Business Permit"
-          || clearanceInput.docType === "Construction Permit" 
+          || clearanceInput.docType === "Construction" || (docType === "Barangay Permit" && docPurpose)
         ) {
 
           sendTo = "SAS";
@@ -1255,7 +1256,6 @@ const handleChange = (
     const today = new Date();
     const minDateTyphoon = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0]; // 1st of this month
     const maxDateTyphoon = today.toISOString().split("T")[0];
-
     return (
         <main className="createRequest-main-container">
           {/* NEW */}
@@ -1317,7 +1317,7 @@ const handleChange = (
                           />
                         </div>
 
-                        {docType !== "Construction" && !otherDocPurposes["Barangay Permit"]?.includes(docType || "") && (
+                        {docType !== "Construction" && !docPurpose && !otherDocPurposes["Barangay Permit"]?.includes(docType || "") && (
                         <>
                         <div className="fields-section">
                           <h1>Purpose<span className="required">*</span></h1>
