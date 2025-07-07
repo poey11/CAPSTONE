@@ -171,6 +171,8 @@ export default function TopMenu() {
     ? tasks
     : filter === "department"
     ? notifications.filter((msg) => msg.department === session?.user?.department)
+    : filter === "users"
+    ? notifications.filter((msg) => msg.transactionType === "Resident Registration")
     : notifications;
     const pathname = usePathname();
 
@@ -254,12 +256,22 @@ const handleDeleteNotification = async (id: string) => {
                   >
                     Tasks
                   </button>
+                  {userPosition === "Admin Staff" || userPosition === "LF Staff" && (
                   <button
                     className={`filter-option ${filter === "department" ? "active" : ""}`}
                     onClick={() => setFilter("department")}
                   >
                     Department
                   </button>
+                  )}                  
+                  {userPosition === "Assistant Secretary" && (
+                    <button
+                      className={`filter-option-brgy ${filter === "users" ? "active" : ""}`}
+                      onClick={() => setFilter("users")}
+                    >
+                      Users
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="bottom-section-brg">
