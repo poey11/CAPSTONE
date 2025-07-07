@@ -1,6 +1,6 @@
 
 
-.side-bar {
+.side-bar-brgyside {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -17,7 +17,7 @@
   overflow-y: auto;
 }
 
-.contents-side-bar {
+.contents-side-bar-brgyside {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -26,14 +26,14 @@
   
 }
 
-.logo-side-bar {
+.logo-side-bar-brgyside {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   border-bottom:  2px solid #24354C;
   padding-bottom: 30px;
 }
 
-.logo-image-side-bar{
+.logo-image-side-bar-brgyside{
   width: 350px;
   height: 120px;
 }
@@ -41,22 +41,22 @@
 
 
 
-.module-title:hover {
+.module-title-brgyside:hover {
   background-color: #24354C;
 }
 
-.module-title:not(:last-child) {
+.module-title-brgyside:not(:last-child) {
   margin-bottom: 0.50rem;
 }
 
 
-.dropdown-wrapper {
+.dropdown-wrapper-brgyside {
   position: relative;
   width: 100%;
   text-align: center;
 }
 
-.dropdown-button {
+.dropdown-button-brgyside {
   display: flex;
   justify-content: space-between; 
   align-items: center; 
@@ -69,13 +69,13 @@
   cursor: pointer;
 }
 
-.dropdown-button:hover {
+.dropdown-button-brgyside:hover {
   background-color: #24354C;
 }
 
 
 
-.module-title {
+.module-title-brgyside {
   font-size: 17px;
   padding: 1rem;
   color: #FFFFFF;
@@ -86,12 +86,12 @@
   position: relative;
 }
 
-.dropdown-button a {
+.dropdown-button-brgyside a {
   flex-grow: 1;
   text-align: center;
 }
 
-.arrow {
+.arrow-brgyside {
   width: 13px; 
   height: 13px;
   margin-left: auto;
@@ -100,7 +100,7 @@
 
 
 
-.dropdown-container {
+.dropdown-container-brgyside {
   display: none;
   flex-direction: column;
   background-color: white;
@@ -116,12 +116,12 @@
 }
 
 
-.dropdown-wrapper:hover .dropdown-container {
+.dropdown-wrapper-brgyside:hover .dropdown-container-brgyside {
   display: flex;
 }
 
 
-.dropdown-item-brgy {
+.dropdown-item-brgy-brgyside {
   padding: 0.75rem 1rem;
   text-align: center;
   color: #2C3E50;
@@ -132,7 +132,7 @@
  
 }
 
-.dropdown-item-brgy:hover {
+.dropdown-item-brgy-brgyside:hover {
   background-color: #24354C;
   color: rgb(255, 255, 255);
 }
