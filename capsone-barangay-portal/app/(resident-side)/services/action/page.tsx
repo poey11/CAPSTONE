@@ -681,8 +681,8 @@ const handleFileChange = (
   });
 };
     
+    /* just add here to enable more warnings*/
     const getRequiredFields = (docType: string, purpose: string): string[] => {
-      /* just add here to enable more warnings  */
       const required: string[] = [
         "requestorFname", 
         "contact", 
