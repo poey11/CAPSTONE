@@ -1,110 +1,96 @@
 .footer-container {
-  background-color: #618fb9;
+  background: linear-gradient(to right, #1b3840, #214666, #2c5e73);
   color: white;
   padding: 10px 40px;
   font-size:16px;
+  height: 18vh;
 }
+
 
 .footer-content {
-  margin-top: 30px;
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 300px;
+  flex-direction: column;
+  height: 100%;
 }
 
+.footer-top {
+  height: 90%;
+  display: flex; 
+  flex-direction: row;
+}
+
+.footer-bottom {
+  height: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-bottom p{
+  font-size: 12px;
+}
+
+
+
 .footer-section1{
-    margin-top:20px;
     margin-left: 50px;
-    width: 430px;
+    width: 50%;
     display: flex;
-    flex-direction: column; 
+    flex-direction: row; 
     align-items: center;
-    
+    justify-content: center;
+    padding-right: 10%;
+}
+
+.footer-section1 p{
+  margin-left: 20px;
+  font-size: 13px;
 }
 
 .footer-logo{
-    margin-bottom:30px;
-    height: 150px;
-    margin-right:20px;
-    width: 150px;
+    width: 13%;
 }
 
 .footer-section2{
-    margin-top: 20px;
+  padding-top: 15px;
+  padding-left: 10%;
   display: block; 
   justify-content: space-between; 
   gap: 20px; 
-  width: 400;
-
+  width: 50%;
 }
 
 .footer-section2 h1{
     color: white;
-    font-size:30px;
+    font-size: 15px;
     font-weight: bold;
+    margin-bottom: 10px;
 }
 
 .contacticon {
-  width: 25px; 
-  margin: 20px;
-  height: auto; 
+  width: 15px; 
+  height: 15px;
   filter: invert(100%);
 }
 
-.contactinfo-email{
-  display: flex; 
-  align-items: center; 
-}
-
-.contactinfo-phone{
-  display: flex; 
-  align-items: center; 
-}
-
+.contactinfo-email,
+.contactinfo-phone,
 .contactinfo-loc{
   display: flex; 
-  align-items: center; 
+  flex-direction: row;
+  gap: 20px;
+  padding-left: 20px;
 }
 
-/*
-.footer-bottom{
-    margin-top: 40px;
-   text-align:center;
-   display: flex;
-   align-items: center;
-    justify-content: center;
-}*/
-
-
-  .footer-bottom {
-  margin-top: 40px;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
+.contactinfo-email p,
+.contactinfo-phone p,
+.contactinfo-loc p {
+  margin-bottom: 5px;
+  font-size: 12px;
 }
 
-.scroll-to-top {
-  position: absolute;
-  right: 20px;
-  bottom: 10px;
-  background-color: #4e779e; /* Darker orange */
-  border: none;
-  padding: 10px;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
 
-.scroll-to-top:hover {
-  background-color: #436a8f
 
-}
 
-.scroll-icon {
-  width: 30px;
-  height: auto;
-  filter: invert(100%);
-}
+
+

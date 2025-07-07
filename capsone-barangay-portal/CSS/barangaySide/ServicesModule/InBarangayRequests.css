@@ -11,15 +11,15 @@
 
 .inbarangayreq-section-1 {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: 1.5rem;
   padding: 0.5rem 0;
   background: transparent;
   border: none;
   box-shadow: none;
-  padding-left: 120px;
 }
+
 
 .center-wrapper {
   flex: 1;
@@ -791,8 +791,8 @@ NO RESULTS POPUP IN TABLE
 
 .task-badge {
   position: absolute;
-  top: -5px;
-  right: -10px;
+  top: -15px;
+  right: -20px;
   background-color: #e53935; /* red badge */
   color: white;
   font-size: 11px;
@@ -805,4 +805,9 @@ NO RESULTS POPUP IN TABLE
   box-shadow: 0 0 0 2px white;
   pointer-events: none;
   animation: popIn 0.3s ease;
+}
+
+.badge-container {
+  position: relative;
+  display: inline-block;
 }
