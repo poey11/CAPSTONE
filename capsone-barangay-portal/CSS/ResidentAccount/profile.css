@@ -522,6 +522,14 @@ For the popup if reupload
   font-weight: 700;
 }
 
+.popup-message {
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+
 .valid-id-content {
   display: flex;
   flex-direction: column;
