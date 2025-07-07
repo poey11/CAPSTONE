@@ -180,18 +180,38 @@ const ResidentUsers = () => {
             return pageNumbersToShow;
           };
 
+
+          const [activeSection, setActiveSection] = useState("main");
+
     return(
         <main className="residentusers-page-main-container">
+
+            <div className="user-roles-module-section-1-resident-users">
+
+                <div className="assigned-tasks-info-toggle-wrapper">
+
+                    
+                            {["main", "tasks"].map((section) => (
+                            <button
+                            key={section}
+                            type="button"
+                            className={`info-toggle-btn-assigned-resident ${activeSection === section ? "active" : ""}`}
+                            onClick={() => setActiveSection(section)}
+                            style={{ position: "relative" }}
+                            >
+                            {section === "main" && "Resident Users Records"}
+                            {section === "tasks" && "Assigned Tasks"}
+                            </button>
+                        ))}
+
+                </div>
+
+            </div>
            
-             {/*
-            <div className="path-section">
-                <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
-                <h2 className="breadcrumb">Resident Users<span className="chevron"></span></h2>
-            </div>
-            <div className="user-roles-module-section-1">
-                <h1>Resident Users</h1>
-            </div>
-                        */}
+
+        {activeSection === "main" && (
+        <>
+
             
             <div className="residentusers-page-section-2">
                 <input
@@ -306,6 +326,38 @@ const ResidentUsers = () => {
             ))}
             <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
         </div>
+
+                 </>
+                      )}
+
+
+        {activeSection === "tasks" && (
+        <>
+
+            <div className="residentusers-page-main-section">
+
+
+                
+            </div>
+
+        <div className="redirection-section-users">
+            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+            {getPageNumbers().map((number, index) => (
+            <button
+                key={index}
+                onClick={() => typeof number === 'number' && paginate(number)}
+                className={currentPage === number ? "active" : ""}
+            >
+                {number}
+            </button>
+            ))}
+            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+        </div>
+
+        </>
+        )}
+          
+
 
 
         </main>
