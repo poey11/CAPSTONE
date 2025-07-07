@@ -1,7 +1,7 @@
 "use client"
 import { auth, db, storage } from "../../db/firebase";
 import { deleteObject, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { deleteDoc, doc, setDoc } from "firebase/firestore";
+import { deleteDoc, doc, setDoc, addDoc, collection } from "firebase/firestore";
 import { createUserWithEmailAndPassword, sendEmailVerification, signOut } from "firebase/auth";
 import { useState, ChangeEvent } from "react";
 import { useRouter } from 'next/navigation';
@@ -22,6 +22,9 @@ interface Resident {
     password: string;
     upload: File | null;
 }
+
+
+// need to add notif for Assistant Sec
 
 type residentUser = Resident & {
     role: "Resident";
@@ -172,6 +175,17 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
           upload: fileDownloadURL, // Save the file URL instead of the file object
           createdAt: today,
         });
+
+        // Add notification for Assistant Secretary to review
+        const notificationRef = collection(db, "BarangayNotifications");
+        await addDoc(notificationRef, {
+        message: `New resident registration pending approval by ${resident.first_name} ${resident.last_name}.`,
+        timestamp: new Date(),
+        isRead: false,
+        transactionType: "Resident Registration",
+        recipientRole: "Assistant Secretary",
+        });
+        
     
         await sendEmailVerification(user);
     
