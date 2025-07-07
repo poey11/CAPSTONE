@@ -8,6 +8,8 @@ import "@/CSS/ReportsModule/reports.css";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { MonthYearModal } from "@/app/(barangay-side)/components/MonthYearModal"; 
+import { NatureOfWorkModal } from "@/app/(barangay-side)/components/NatureOfWorkModal"; 
+
 
 
 
@@ -29,6 +31,8 @@ const ReportsPage = () => {
   // for residents
   const [loadingKasambahay, setLoadingKasambahay] = useState(false); 
   const [loadingJobSeeker, setLoadingJobSeeker] = useState(false);
+  const [showKasambahayModal, setShowKasambahayModal] = useState(false);
+
 
   // inhabitant record
   const [loadingMasterResident, setLoadingMasterResident] = useState(false);    
@@ -356,48 +360,53 @@ const uploadForms = async (url: string): Promise<void> => {
 
   // kasambahay report
 
-  const generateKasambahayReport = async () => {
+  const natureOfWorkMap: Record<number, string> = {
+    1: "Gen. House Help (All Around)",
+    2: "YAYA",
+    3: "COOK",
+    4: "Gardener",
+    5: "Laundry Person",
+    6: "Others"
+  };
+  
+
+  const generateKasambahayReport = async (natureOfWork: string) => {
     setLoadingKasambahay(true);
     setIsGenerating(true);
+  
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
       const month = String(currentDate.getMonth() + 1).padStart(2, "0");
-      const currentMonthYear = currentDate
-        .toLocaleString("en-US", { month: "long", year: "numeric" })
-        .toUpperCase();
-  
-      // for the previous month
-      const previousMonth = currentDate.getMonth();
-      const previousYear = previousMonth === 0 ? currentDate.getFullYear() - 1 : currentDate.getFullYear();
-      const previousMonthName = String(previousMonth === 0 ? 12 : previousMonth).padStart(2, "0");
-      const previousMonthYear = new Date(previousYear, previousMonth, 1)
-        .toLocaleString("en-US", { month: "long", year: "numeric" })
-        .toUpperCase();
+      const currentMonthYear = currentDate.toLocaleString("en-US", { month: "long", year: "numeric" }).toUpperCase();
   
       const kasambahayRef = collection(db, "KasambahayList");
+      const q = query(kasambahayRef);
+      const snapshot = await getDocs(q);
   
-      // Fetch all records before current month
-      const qOldRecords = query(
-        kasambahayRef,
-        where("createdAt", "<", `${year}-${month}-01`)
-      );
-      const oldRecordsSnapshot = await getDocs(qOldRecords);
-      let oldMembers = oldRecordsSnapshot.docs.map((doc) => doc.data());
+      let allMembers = snapshot.docs.map(doc => doc.data());
   
-      // Fetch records for the current month
-      const qCurrentMonthRecords = query(
-        kasambahayRef,
-        where("createdAt", ">=", `${year}-${month}-01`),
-        where("createdAt", "<=", `${year}-${month}-31`)
-      );
-      const currentMonthSnapshot = await getDocs(qCurrentMonthRecords);
-      let currentMonthMembers = currentMonthSnapshot.docs.map((doc) => doc.data());
+      // Filter by natureOfWork if not "All"
+      if (natureOfWork !== "All") {
+        allMembers = allMembers.filter(member => member.natureOfWork === Number(natureOfWork));
+      }
+  
+      // Split into old & current month
+      const oldMembers = allMembers.filter(member => {
+        const createdDate = new Date(member.createdAt);
+        return createdDate.getFullYear() < currentDate.getFullYear() ||
+              (createdDate.getFullYear() === currentDate.getFullYear() && createdDate.getMonth() < currentDate.getMonth());
+      });
+  
+      const currentMonthMembers = allMembers.filter(member => {
+        const createdDate = new Date(member.createdAt);
+        return createdDate.getFullYear() === currentDate.getFullYear() &&
+               createdDate.getMonth() === currentDate.getMonth();
+      });
   
       if (oldMembers.length === 0 && currentMonthMembers.length === 0) {
-        alert("No new members found.");
-        setLoadingKasambahay(false);
-        return;
+        alert(`No Kasambahay records${natureOfWork !== "All" ? ` for ${natureOfWork}` : ""}.`);
+        return null;
       }
   
       oldMembers.sort((a, b) => Number(a.registrationControlNumber) - Number(b.registrationControlNumber));
@@ -411,58 +420,53 @@ const uploadForms = async (url: string): Promise<void> => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
-
+  
       const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow === 0);
       const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= 5);
   
-      const footerStartRow = 6; 
+      const footerStartRow = 6;
       worksheet.spliceRows(footerStartRow, 0, ...new Array(oldMembers.length + currentMonthMembers.length + 2).fill([]));
   
       headerDrawings.forEach((drawing) => {
         if (drawing.range?.tl) drawing.range.tl.nativeRow = 0;
-  
-        if (drawing.range?.br) {
-          drawing.range.br.nativeRow = 0;
-        }
+        if (drawing.range?.br) drawing.range.br.nativeRow = 0;
       });
   
-      // Use separate insertionRows for old and new members
-      let oldInsertionRow = footerStartRow + 1; 
-      let newInsertionRow = footerStartRow + oldMembers.length + 2; 
+      let oldInsertionRow = footerStartRow + 1;
+      let newInsertionRow = footerStartRow + oldMembers.length + 2;
   
-      // Insert records from previous months first
+      // Insert old records
       oldMembers.forEach((member) => {
         const row = worksheet.getRow(oldInsertionRow);
         row.height = 100;
   
         const cells = [
-          member.registrationControlNumber, 
-          member.lastName.toUpperCase(), 
-          member.firstName.toUpperCase(), 
-          member.middleName.toUpperCase(), 
-          member.homeAddress.toUpperCase(), 
-          member.placeOfBirth.toUpperCase(), 
-          `${String(new Date(member.dateOfBirth).getMonth() + 1).padStart(2, "0")}/${String(new Date(member.dateOfBirth).getDate()).padStart(2, "0")}/${new Date(member.dateOfBirth).getFullYear()}`, 
-          member.sex === "Female" ? "F" : member.sex === "Male" ? "M" : "", 
-          member.age, 
-          member.civilStatus.toUpperCase(), 
-          member.educationalAttainment, 
-          member.natureOfWork, 
-          member.employmentArrangement, 
-          member.salary, 
-          member.sssMember ? "YES" : "NO", 
-          member.pagibigMember ? "YES" : "NO", 
-          member.philhealthMember ? "YES" : "NO", 
-          member.employerName.toUpperCase(), 
-          member.employerAddress.toUpperCase()
+          member.registrationControlNumber,
+          member.lastName?.toUpperCase(),
+          member.firstName?.toUpperCase(),
+          member.middleName?.toUpperCase(),
+          member.homeAddress?.toUpperCase(),
+          member.placeOfBirth?.toUpperCase(),
+          `${String(new Date(member.dateOfBirth).getMonth() + 1).padStart(2, "0")}/${String(new Date(member.dateOfBirth).getDate()).padStart(2, "0")}/${new Date(member.dateOfBirth).getFullYear()}`,
+          member.sex === "Female" ? "F" : member.sex === "Male" ? "M" : "",
+          member.age,
+          member.civilStatus?.toUpperCase(),
+          member.educationalAttainment,
+          member.natureOfWork,
+          member.employmentArrangement,
+          member.salary,
+          member.sssMember ? "YES" : "NO",
+          member.pagibigMember ? "YES" : "NO",
+          member.philhealthMember ? "YES" : "NO",
+          member.employerName?.toUpperCase(),
+          member.employerAddress?.toUpperCase()
         ];
   
         cells.forEach((value, index) => {
           const cell = row.getCell(index + 1);
           cell.value = value;
-          cell.font = { name: "Calibri", size: 21 }; // Increased font size
-          cell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" }; // Enable text wrapping
-  
+          cell.font = { name: "Calibri", size: 21 };
+          cell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
           cell.border = {
             top: { style: "medium", color: { argb: "000000" } },
             bottom: { style: "medium", color: { argb: "000000" } },
@@ -475,53 +479,48 @@ const uploadForms = async (url: string): Promise<void> => {
         oldInsertionRow++;
       });
   
+      // Header row for new members
       const headerRow = worksheet.getRow(footerStartRow + oldMembers.length + 1);
-  
-      worksheet.unMergeCells(footerStartRow, 1, footerStartRow, 18);
-      
-      // Set the value and styles for the header
+      worksheet.unMergeCells(footerStartRow + oldMembers.length + 1, 1, footerStartRow + oldMembers.length + 1, 18);
       headerRow.getCell(1).value = `(NEW MEMBERS ${currentMonthYear})`;
-      headerRow.getCell(1).font = { bold: true, italic: true, size: 21, color: { argb: "FF0000" } }; // Increased font size
+      headerRow.getCell(1).font = { bold: true, italic: true, size: 21, color: { argb: "FF0000" } };
       headerRow.height = 25;
       headerRow.alignment = { horizontal: "left", vertical: "middle" };
-      
       worksheet.mergeCells(footerStartRow + oldMembers.length + 1, 1, footerStartRow + oldMembers.length + 1, 18);
       headerRow.commit();
   
-      // Insert records from the current month
+      // Insert current month records
       currentMonthMembers.forEach((member) => {
         const row = worksheet.getRow(newInsertionRow);
         row.height = 100;
   
         const cells = [
-          member.registrationControlNumber, 
-          member.lastName.toUpperCase(), 
-          member.firstName.toUpperCase(), 
-          member.middleName.toUpperCase(), 
-          member.homeAddress.toUpperCase(), 
-          member.placeOfBirth.toUpperCase(), 
-          `${String(new Date(member.dateOfBirth).getMonth() + 1).padStart(2, "0")}/${String(new Date(member.dateOfBirth).getDate()).padStart(2, "0")}/${new Date(member.dateOfBirth).getFullYear()}`, 
-          member.sex === "Female" ? "F" : member.sex === "Male" ? "M" : "", 
-          member.age, 
-          member.civilStatus.toUpperCase(), 
-          member.educationalAttainment, 
-          member.natureOfWork, 
-          member.employmentArrangement, 
-          member.salary, 
-          member.sssMember ? "YES" : "NO", 
-          member.pagibigMember ? "YES" : "NO", 
-          member.philhealthMember ? "YES" : "NO", 
-          member.employerName.toUpperCase(), 
-          member.employerAddress.toUpperCase()
+          member.registrationControlNumber,
+          member.lastName?.toUpperCase(),
+          member.firstName?.toUpperCase(),
+          member.middleName?.toUpperCase(),
+          member.homeAddress?.toUpperCase(),
+          member.placeOfBirth?.toUpperCase(),
+          `${String(new Date(member.dateOfBirth).getMonth() + 1).padStart(2, "0")}/${String(new Date(member.dateOfBirth).getDate()).padStart(2, "0")}/${new Date(member.dateOfBirth).getFullYear()}`,
+          member.sex === "Female" ? "F" : member.sex === "Male" ? "M" : "",
+          member.age,
+          member.civilStatus?.toUpperCase(),
+          member.educationalAttainment,
+          member.natureOfWork,
+          member.employmentArrangement,
+          member.salary,
+          member.sssMember ? "YES" : "NO",
+          member.pagibigMember ? "YES" : "NO",
+          member.philhealthMember ? "YES" : "NO",
+          member.employerName?.toUpperCase(),
+          member.employerAddress?.toUpperCase()
         ];
   
         cells.forEach((value, index) => {
           const cell = row.getCell(index + 1);
           cell.value = value;
-          cell.font = { name: "Calibri", size: 21 }; // Increased font size
-          cell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" }; // Enable text wrapping
-  
-          // Apply medium black border to each cell
+          cell.font = { name: "Calibri", size: 21 };
+          cell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
           cell.border = {
             top: { style: "medium", color: { argb: "000000" } },
             bottom: { style: "medium", color: { argb: "000000" } },
@@ -536,74 +535,56 @@ const uploadForms = async (url: string): Promise<void> => {
   
       footerDrawings.forEach((drawing) => {
         const newRow = (drawing.range?.tl?.nativeRow || 5) + oldMembers.length + currentMonthMembers.length + 2;
-  
         if (drawing.range?.tl) drawing.range.tl.nativeRow = newRow;
-  
-        if (drawing.range?.br) {
-          drawing.range.br.nativeRow = newRow + 1;
-        }
+        if (drawing.range?.br) drawing.range.br.nativeRow = newRow + 1;
       });
   
-      // Create a buffer and upload to Firebase Storage
       worksheet.pageSetup = {
         horizontalCentered: true,
         verticalCentered: false,
         orientation: "landscape",
-        paperSize: 9, 
+        paperSize: 9,
         fitToPage: true,
         fitToWidth: 1,
-        fitToHeight: 0, 
+        fitToHeight: 0,
       };
-
+  
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   
-      const fileName = `Kasambahay_Masterlist_${currentMonthYear}.xlsx`;
+      const fileName = `Kasambahay_Masterlist_${natureOfWork}_${currentMonthYear.replace(" ", "_")}.xlsx`;
       const storageRef = ref(storage, `GeneratedReports/${fileName}`);
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-  
-      /*alert("Kasambahay Masterlist Report generated successfully. Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating Kasambahay Masterlist Report...");
-
-      // Return file URL for conversion
       return fileUrl;
     } catch (error) {
-      setIsGenerating(false);
-
-      console.error("Unexpected error:", error);
-
+      console.error("Error generating Kasambahay Masterlist:", error);
       setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate Kasambahay Masterlist Report");  
-      
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
-      /*alert("Failed to generate Kasambahay Masterlist Report.");*/
+      setPopupErrorGenerateReportMessage("Failed to generate Kasambahay Masterlist");
+      setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
+      return null;
     } finally {
       setLoadingKasambahay(false);
+      setShowKasambahayModal(false);
+
     }
   };
   
   
   
-  const handleGenerateKasambahayPDF = async () => {
+  
+  const handleGenerateKasambahayPDF = async (natureOfWork: string) => {
     setLoadingKasambahay(true);
-  
     try {
-      const fileUrl = await generateKasambahayReport();
-      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
-
-      if (!fileUrl) {
-        setIsGenerating(false); 
+      const fileUrl = await generateKasambahayReport(natureOfWork);
   
+      if (!fileUrl) {
+        setIsGenerating(false);
         setPopupErrorGenerateReportMessage("Failed to generate Excel report");
         setShowErrorGenerateReportPopup(true);
-  
-        setTimeout(() => {
-          setShowErrorGenerateReportPopup(false);
-        }, 5000);
+        setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
         return;
       }
   
@@ -616,34 +597,33 @@ const uploadForms = async (url: string): Promise<void> => {
       if (!response.ok) throw new Error("Failed to convert to PDF");
   
       const blob = await response.blob();
-  
       const currentDate = new Date();
       const currentMonthYear = currentDate.toLocaleString("en-US", { month: "long", year: "numeric" }).toUpperCase();
-      saveAs(blob, `Kasambahay_Masterlist_${currentMonthYear}.pdf`);
   
-      /*alert("Kasambahay Report successfully converted to PDF!");*/
-
-      setIsGenerating(false); 
+      // Use the label instead of number
+      let fileLabel = "All";
+      if (natureOfWork !== "All") {
+        fileLabel = natureOfWorkMap[Number(natureOfWork)] || `Type${natureOfWork}`;
+      }
+  
+      saveAs(blob, `Kasambahay_Masterlist_${fileLabel}_${currentMonthYear}.pdf`);
+      setIsGenerating(false);
       setGeneratingMessage("");
       setPopupSuccessGenerateReportMessage("Kasambahay Report generated successfully");
       setShowSuccessGenerateReportPopup(true);
-
-      setTimeout(() => {
-        setShowSuccessGenerateReportPopup(false);
-      }, 5000);
+      setTimeout(() => setShowSuccessGenerateReportPopup(false), 5000);
     } catch (error) {
       console.error("Error:", error);
       setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate Kasambahay Report PDF");    
-
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
-      alert("Failed to generate PDF.");
+      setPopupErrorGenerateReportMessage("Failed to generate Kasambahay Report PDF");
+      setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
+      setShowKasambahayModal(false);
     } finally {
       setLoadingKasambahay(false);
     }
   };
+  
+
 
   // jobseekers
   
@@ -5289,12 +5269,42 @@ const handleGenerateIncidentSummaryPDF = async (
                         </p>
                       </button>
 
-                      <button onClick={handleGenerateKasambahayPDF} disabled={loadingKasambahay} className="report-tile">
-                        <img src="/images/form.png" alt="user info" className="report-icon"/> 
-                        <p className="report-title">
-                          {loadingKasambahay ? "Generating..." : "Kasambahay Masterlist"}
-                        </p>
-                      </button>
+                      <>
+  <button
+    type="button"
+    onClick={() => setShowKasambahayModal(true)}
+    disabled={loadingKasambahay}
+    className={`report-tile ${loadingKasambahay ? "disabled" : ""}`}
+    aria-busy={loadingKasambahay}
+    aria-label="Generate Kasambahay Masterlist Report"
+  >
+    <img
+      src="/images/form.png"
+      alt="Kasambahay icon"
+      className="report-icon"
+      aria-hidden="true"
+    />
+    <p className="report-title">
+      {loadingKasambahay ? "Generating..." : "Kasambahay Masterlist"}
+    </p>
+  </button>
+
+  <NatureOfWorkModal
+    show={showKasambahayModal}
+    onClose={() => setShowKasambahayModal(false)}
+    onGenerate={handleGenerateKasambahayPDF}
+    loading={loadingKasambahay}
+    title="Generate Kasambahay Masterlist"
+    options={[
+      { key: "All", value: "All" },
+      ...Object.entries(natureOfWorkMap).map(([key, value]) => ({
+        key,
+        value
+      }))
+    ]}    
+  />
+</>
+
 
                       <button onClick={handleGenerateJobSeekerPDF} disabled={loadingJobSeeker} className="report-tile">
                         <img src="/images/jobseeker.png" alt="user info" className="report-icon-bigger"/> 
