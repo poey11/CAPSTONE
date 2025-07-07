@@ -219,10 +219,10 @@ margin-top: 20px;
   height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: flex-end; 
+  justify-content: center; 
   z-index: 9999;
   background: rgba(0, 0, 0, 0.4);
-  padding-right: 200px; 
+
 
 }
 
@@ -321,12 +321,12 @@ margin-top: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   padding: 1.5rem;
-  max-width: 1000px;
-  width: 100%;
+  width: 60%;
   overflow: hidden;
   max-height: 90vh; /* Allow it to be scrollable within a certain height */
   display: flex;
   flex-direction: column;
+  position: fixed;
 }
 
 /* Heading */

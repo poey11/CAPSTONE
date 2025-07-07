@@ -28,7 +28,7 @@ import { report } from "process";
 
 
 
-    
+  
   
       useEffect(() => {
         let position = "";
@@ -83,7 +83,12 @@ import { report } from "process";
           }
         }, [user]);
         
-        
+
+    
+
+
+
+    
       const [allRequests, setAllRequests] = useState<any[]>([]);
 
       useEffect(() => {
@@ -273,45 +278,50 @@ useEffect(() => {
 }, [highlightRequestId, filteredMainRequests]);
 
 
+{console.log("Assigned Tasks:", taskAssignedData)}
 
     return (
 
         <main className="inbarangayreq-main-container">
 
 
-<div className="inbarangayreq-section-1">
-  <div className="center-wrapper">
-    <div className="assigned-incident-info-toggle-wrapper">
-      {/*{["main", "tasks"].map((section) => (*/}
-            {["main", ...(canSeeTasks ? ["tasks"] : [])].map((section) => (
-        <button
-          key={section}
-          type="button"
-          className={`info-toggle-btn-assigned ${activeSection === section ? "active" : ""}`}
-          onClick={() => setActiveSection(section)}
-        >
-          {section === "main" && "All Requests"}
-          {section === "tasks" && (
-            <>
-              Assigned Tasks
-              {taskAssignedData.length > 0 && (
-                <span className="task-badge">{taskAssignedData.length}</span>
-              )}
-            </>
-          )}
-        </button>
-      ))}
-    </div>
-  </div>
+          <div className="inbarangayreq-section-1">
+            <div className="center-wrapper">
+              <div className="assigned-incident-info-toggle-wrapper">
+               
+                      {["main", ...(canSeeTasks ? ["tasks"] : [])].map((section) => (
+                  <button
+                    key={section}
+                    type="button"
+                    className={`info-toggle-btn-assigned ${activeSection === section ? "active" : ""}`}
+                    onClick={() => setActiveSection(section)}
+                  >
+                    {section === "main" && "All Requests"}
+                    {section === "tasks" && (
+                      <>
+                        <span className="badge-container">
+                          Assigned Tasks
+                          {taskAssignedData.length > 0 && (
+                            <span className="task-badge">{taskAssignedData.length}</span>
+                          )}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-  <div className="section-generate-doc">
-    {(user?.position === "Admin Staff") && (
-      <button className="add-requests-btn" onClick={handleGenerateDocument}>
-        New Document Request
-      </button>
-    )}
-  </div>
-</div>
+            
+            {(user?.position === "Admin Staff") && (
+              <div className="section-generate-doc">
+                <button className="add-requests-btn" onClick={handleGenerateDocument}>
+                  New Document Request
+                </button>
+                </div>
+            )}
+            
+          </div>
 
 
 
