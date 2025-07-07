@@ -388,7 +388,7 @@ export default function ResidentModule() {
               </thead>
               <tbody>
                 {currentResidents.map((resident) => {
-                  const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || ""}`.trim();
+                  const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || "N/A"}`.trim();
                   return (
                     <tr
                     key={resident.id}
@@ -400,7 +400,7 @@ export default function ResidentModule() {
                       <td>{resident.address}</td>
                       <td>{resident.generalLocation}</td>
                       <td>{resident.dateOfBirth}</td>
-                      <td>{resident.occupation}</td>
+                      <td>{resident.occupation || "N/A"}</td>
                 
                      
                       <td>

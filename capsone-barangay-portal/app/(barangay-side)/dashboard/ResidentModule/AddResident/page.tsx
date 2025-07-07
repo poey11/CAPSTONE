@@ -307,20 +307,7 @@ export default function AddResident() {
     }
   };
 
-  const fillEmptyFieldsWithNA = (
-    data: Record<string, any>, 
-    requiredFields: string[] = []
-  ): Record<string, any> => {
-    const newData = { ...data };
-    for (const key in newData) {
-      if (!requiredFields.includes(key)) {
-        if (newData[key] === "" || newData[key] === null) {
-          newData[key] = "N/A";
-        }
-      }
-    }
-    return newData;
-  };
+
   
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -362,11 +349,10 @@ export default function AddResident() {
       const currentDate = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
 
       const requiredFields = ["lastName", "firstName", "address", "generalLocation", "cluster", "dateOfBirth", "age", "sex", "civilStatus", "contactNumber", "citizenship"];
-      const finalFormData = fillEmptyFieldsWithNA(formData, requiredFields);
 
 
       const docRef = await addDoc(residentsRef, {
-        ...finalFormData,
+        ...formData,
         residentNumber: newResidentNumber,
         createdAt: currentDate,
         verificationFilesURLs,
