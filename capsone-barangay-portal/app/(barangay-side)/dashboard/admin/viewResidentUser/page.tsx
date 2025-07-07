@@ -158,6 +158,7 @@ export default function ViewUser() {
                     firstName: string;
                     middleName: string;
                     lastName: string;
+                    dateOfBirth: string;
                 };
     
                 return {
@@ -170,9 +171,10 @@ export default function ViewUser() {
     
             const matchingResident = residentsList.find(resident =>
                 resident.firstName?.toLowerCase().trim() === ResidentUserData.first_name?.toLowerCase().trim() &&
-                resident.middleName?.toLowerCase().trim() === ResidentUserData.middle_name?.toLowerCase().trim() &&
-                resident.lastName?.toLowerCase().trim() === ResidentUserData.last_name?.toLowerCase().trim()
-            );
+                resident.lastName?.toLowerCase().trim() === ResidentUserData.last_name?.toLowerCase().trim() &&
+                resident.dateOfBirth?.trim() === ResidentUserData.dateOfBirth?.trim()
+              );
+              
     
             if (matchingResident) {
                 // Open popup and prefill search term with matched name
@@ -528,58 +530,60 @@ export default function ViewUser() {
 
             {/* Popup for No match Residents */}
             {showNoMatchResidentsPopup && (
-  <div className="view-residentuser-confirmation-popup-overlay">
-    <div className="resident-table-popup">
-      <h2>Resident Database Verification</h2>
+                    <div className="view-residentuser-confirmation-popup-overlay">
+                        <div className="resident-table-popup">
+                        <h2>Resident Database Verification</h2>
 
-      {(() => {
-        const selectedName = `${ResidentUserData.first_name} ${ResidentUserData.middle_name} ${ResidentUserData.last_name}`.toLowerCase().trim();
+                    {(() => {
+                        const selectedName = `${ResidentUserData.first_name} ${ResidentUserData.middle_name} ${ResidentUserData.last_name}`.toLowerCase().trim();
 
-        const matchingResidents = residents.filter(resident => {
-          const residentName = `${resident.firstName} ${resident.middleName} ${resident.lastName}`.toLowerCase().trim();
-          return residentName === selectedName;
-        });
+                        const matchingResidents = residents.filter(resident => {
+                        const residentName = `${resident.firstName} ${resident.middleName} ${resident.lastName}`.toLowerCase().trim();
+                        return residentName === selectedName;
+                        });
 
-        return (
-          <>
-            <h1>{matchingResidents.length === 0 ? "* 0 Matches *" : `* ${matchingResidents.length} Match(es) *`}</h1>
-            
-            {/* Table will always render, even with no matches */}
-            <div className="matched-table-container">
-              <table className="resident-table">
-                <thead>
-                  <tr>
-                    <th className="verification-table-firsttitle">First Name</th>
-                    <th className="verification-table-firsttitle">Middle Name</th>
-                    <th className="verification-table-firsttitle">Last Name</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {matchingResidents.length === 0 ? (
-                    <tr>
-                      <td colSpan={3} className="no-matches">No matches found</td>
-                    </tr>
-                  ) : (
-                    matchingResidents.map(resident => (
-                      <tr
-                        key={resident.id}
-                        className="resident-table-row"
-                        onClick={() =>
-                          router.push(`/dashboard/ResidentModule/ViewResident?id=${resident.id}`)
-                        }
-                      >
-                        <td>{resident.firstName}</td>
-                        <td>{resident.middleName}</td>
-                        <td>{resident.lastName}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </>
-        );
-      })()}
+                        return (
+                        <>
+                            <h1>{matchingResidents.length === 0 ? "* 0 Matches *" : `* ${matchingResidents.length} Match(es) *`}</h1>
+                            
+                            {/* Table will always render, even with no matches */}
+                            <div className="matched-table-container">
+                            <table className="resident-table">
+                                <thead>
+                                <tr>
+                                    <th className="verification-table-firsttitle">First Name</th>
+                                    <th className="verification-table-firsttitle">Middle Name</th>
+                                    <th className="verification-table-firsttitle">Last Name</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {matchingResidents.length === 0 ? (
+                                    <tr>
+                                    <td colSpan={3} className="no-matches">No matches found</td>
+                                    </tr>
+                                ) : (
+                                    matchingResidents.map(resident => (
+                                    <tr
+                                        key={resident.id}
+                                        className="resident-table-row"
+                                        onClick={() =>
+                                        router.push(`/dashboard/ResidentModule/ViewResident?id=${resident.id}`)
+                                        }
+                                    >
+                                        <td>{resident.firstName}</td>
+                                        <td>{resident.middleName}</td>
+                                        <td>{resident.lastName}</td>
+                                        <td>{resident.dateOfBirth}</td>
+                                    </tr>
+                                    ))
+                                )}
+                                </tbody>
+                            </table>
+                            </div>
+                        </>
+                        );
+                })
+                ()}
 
       <div className="verification-buttons-section">
         <div className="verification-action-buttons">
@@ -636,6 +640,7 @@ export default function ViewUser() {
                                 <th className="verification-table-firsttitle">First Name</th>
                                 <th className="verification-table-firsttitle">Middle Name</th>
                                 <th className="verification-table-firsttitle">Last Name</th>
+                                <th className="verification-table-firsttitle">Date Of Birth</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -659,6 +664,7 @@ export default function ViewUser() {
                                     <td>{resident.firstName}</td>
                                     <td>{resident.middleName}</td>
                                     <td>{resident.lastName}</td>
+                                    <td>{resident.dateOfBirth}</td>
                                     </tr>
                                 ))}
                             </tbody>
