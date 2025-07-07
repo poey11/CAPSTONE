@@ -1320,7 +1320,6 @@ const ViewOnlineRequest = () => {
       recievalOther: "",
     })
 
-    console.log(receival);
     const handleReceivalSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       if(!id) return;
@@ -1395,9 +1394,6 @@ const ViewOnlineRequest = () => {
       };
       await updateDoc(docRef, updatedData);
     }
-    console.log(userPosition);
-    console.log(requestData?.sendTo);
-    console.log(docPrinted);
 
     return (  
         <main className="main-container-services-onlinereq">

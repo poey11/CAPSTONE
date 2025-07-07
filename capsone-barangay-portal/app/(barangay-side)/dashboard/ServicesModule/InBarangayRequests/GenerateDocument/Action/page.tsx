@@ -39,7 +39,8 @@ interface ClearanceInput {
     toAddress?: string;
     businessLocation?: string;
     businessNature?: string;
-    noOfVechicles?: string;
+    noOfVehicles?: string;
+    noOfTricycles?: string;
     vehicleMake?: string;
     vehicleType?: string;
     vehiclePlateNo?: string;
@@ -283,7 +284,8 @@ export default function action() {
       toAddress: "",
       businessLocation: "",
       businessNature: "",
-      noOfVechicles: "",
+      noOfVehicles: "",
+      noOfTricycles: "",
       vehicleMake: "",
       vehicleType: "",
       vehiclePlateNo: "",
@@ -878,10 +880,13 @@ export default function action() {
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
           sendTo: sendTo,
           docPrinted: false,
+          ...(clearanceInput.purpose ==="Garage/PUV" && {
+            noOfVehicles: clearanceInput.noOfVehicles,
+          }),
           ...uploadedFileUrls,
         };
-    
-        console.log("Document Data:", docData);
+        console.log("Uploaded", docData);
+
         const doc = await addDoc(docRef, docData);
         console.log("Document written with ID: ", doc.id);
         id = doc.id;
@@ -1031,7 +1036,7 @@ export default function action() {
         console.log("Files:", files);
         console.log("Clearance Input:", clearanceInput);
         handleUploadClick().then(() => {
-            router.push(`/dashboard/ServicesModule/InBarangayRequests`);
+          router.push(`/dashboard/ServicesModule/InBarangayRequests`);
         });
         // Hide the popup after 3 seconds
         setTimeout(() => {
@@ -1274,7 +1279,7 @@ const handleChange = (
             <div className="createRequest-inbrgy-main-content">
               <div className="createRequest-inbrgy-main-section1">
                 <div className="createRequest-inbrgy-main-section1-left">
-                  <button onClick={handleBack}>
+                  <button type="button"onClick={handleBack}>
                     <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
                   </button>
 
@@ -1282,7 +1287,7 @@ const handleChange = (
                 </div>
 
                 <div className="action-btn-section">
-                  <button type="button" className="discard-btn" onClick={handleDiscardClick}>
+                  <button type="reset" className="discard-btn" onClick={handleDiscardClick}>
                     Discard
                   </button>
                   <button type="submit" className="save-btn">
@@ -1915,11 +1920,11 @@ const handleChange = (
                                 <h1>Nos of Tricycle<span className="required">*</span></h1>
                                 <input 
                                   type="number"  
-                                  id="noOfVechicles"  
-                                  name="noOfVechicles"  
+                                  id="noOfVehicles"  
+                                  name="noOfVehicles"  
                                   className="createRequest-input-field"  
                                   required 
-                                  value={clearanceInput.noOfVechicles||1}
+                                  value={clearanceInput.noOfVehicles||1}
                                   onChange={handleChange}
                                   min={1}
                                   onKeyDown={(e)=> {
@@ -2475,14 +2480,14 @@ const handleChange = (
                           {clearanceInput.purpose === "Garage/PUV" && (
                             <>
                               <div className="fields-section">
-                                <h1>Nos of Vehicle/s<span className="required">*</span></h1>
+                                {/* <h1>Nos of Vehicle/s<span className="required">*</span></h1>
                                 <input 
                                   type="number"  
-                                  id="noOfVechicles"  
-                                  name="noOfVechicles"  
+                                  id="noOfVehicles"  
+                                  name="noOfVehicles"  
                                   className="createRequest-input-field"  
                                   required 
-                                  value={clearanceInput.noOfVechicles || 1}
+                                  value={clearanceInput.noOfVehicles || 1}
                                   onChange={handleChange}
                                   min={1}
                                   onKeyDown={(e)=> {
@@ -2491,7 +2496,24 @@ const handleChange = (
                                   }
                                   }
                                   } // Prevent manual input
-                                  />
+                                  /> */}
+                                  <h1>Nos of Vehicle/s<span className="required">*</span></h1>
+                                  <input 
+                                  type="number"  
+                                  id="noOfVehicles"  
+                                  name="noOfVehicles"  
+                                  className="createRequest-input-field"  
+                                  required 
+                                  value={clearanceInput.noOfVehicles || 1}
+                                  onChange={handleChange}
+                                  min={1}
+                                  onKeyDown={(e)=> {
+                                    if (e.key === 'e' || e.key === '-' || e.key === '+') {
+                                      e.preventDefault(); // Prevent scientific notation and negative/positive signs
+                                    }
+                                  }
+                                  } // Prevent manual input
+                                />
                               </div>
                             </>
                           )}
