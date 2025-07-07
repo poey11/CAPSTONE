@@ -264,7 +264,7 @@ export default function Header() {
 
   return (
 <div className="header-main-container">
-  <div className="add-resident-main-header">
+  <div className="main-header">
     <div className="path-section">
       {routeInfo.breadcrumb.map((crumb, index) => {
         const isLast = index === routeInfo.breadcrumb.length - 1;
