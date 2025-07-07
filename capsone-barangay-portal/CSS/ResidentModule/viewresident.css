@@ -823,6 +823,7 @@ background-color: #214666;
   display: flex;
   justify-content: center; 
   padding: 1rem; 
+  width: 100%;
 }
 
 .incident-table-section {
@@ -899,13 +900,13 @@ background-color: #214666;
 
 .no-incident-message {
   height: 250px; 
-  width: 550px;
+  width:100%;
+  
   font-weight: bold;
   font-size: 1rem; 
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
   color: red;
 }
 
