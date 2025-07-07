@@ -284,11 +284,13 @@ export default function SettingsPageResident() {
       
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [showIDPopup, setShowIDPopup] = useState(false);
+
     
     return (
         <main className="main-container-resident-profile">
 
-            <div className="account-section-incident-report">
+        <div className="account-section-incident-report">
                 <h1>Account Profile</h1>
                 <hr />
 
@@ -332,248 +334,283 @@ export default function SettingsPageResident() {
                         <span className="required">*</span> For any concerns, please visit the Barangay.
                         </p>
                     </div>
+
+                     {formData.status === "Resubmission" && (!resident.reupload || resident.reupload === "N/A") && (
+                        <button
+                            type="button"
+                            className="reupload-button"
+                            onClick={() => setShowIDPopup(true)}
+                        >
+                             ⚠ Reupload Valid ID
+                        </button>
+                        )}
+
                     </div>
+
+
                 </div>
-                </div>
-
-
-
-
-            <div className="first-section-resident-profile">
 
                 <div className="account-details-section">
 
-                <div className="acc-details-content-section-1">
-                    <p>Account Details</p>
-                </div>
+                    <form onSubmit={handleSubmit} className="account-details-content">
 
+                        <div className="account-details-upper">
 
+                            <div className="account-details-section-left">
 
-
-                    
-
-                    <div className="edit-section-profile">
-                      <form onSubmit={handleSubmit}>
-                      <div className="form-group-profile-section">
-                        <label htmlFor="first_name" className="form-label-profile-section">First Name:</label>
-                        <input 
-                            id="first_name" 
-                            name="first_name"
-                            value={formData.first_name} 
-                            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                            className="form-input-profile-section" 
-                            required
-                            disabled={formData.status === "Verified"}                        />
-                    </div>
-
-                    <div className="form-group-profile-section">
-                        <label htmlFor="middle_name" className="form-label-profile-section">Middle Name:</label>
-                        <input 
-                            id="middle_name" 
-                            name="middle_name"
-                            value={formData.middle_name} 
-                            onChange={(e) => setFormData({ ...formData, middle_name: e.target.value })}
-                            className="form-input-profile-section" 
-                            required
-                            disabled={formData.status === "Verified"}                        />
-                    </div>
-
-                    <div className="form-sgroup-profile-section">
-                        <label htmlFor="last_name" className="form-label-profile-section">Last Name:</label>
-                        <input 
-                            id="last_name" 
-                            name="last_name"
-                            value={formData.last_name} 
-                            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                            className="form-input-profile-section"
-                            disabled={formData.status === "Verified"}                        />
-                    </div>
-
-                    <div className="form-group-profile-section">
-                        <label htmlFor="sex" className="form-label-profile-section">Sex:</label>
-                        <select
-                            id="sex"
-                            name="sex"
-                            value={formData.sex}
-                            onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
-                            className="form-input-profile-section"
-                            required
-                            disabled={formData.status === "Verified"}
-                        >
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-
-                    <div className="form-group-profile-section">
-                        <label htmlFor="email" className="form-label-profile-section">Email:</label>
-                        <input 
-                            id="email" 
-                            name="email"
-                            value={formData.email} 
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className="form-input-profile-section" 
-                            required 
-                            disabled={formData.status === "Verified"}
-                        />
-                    </div>
-
-                    <div className="form-group-profile-section">
-                        <label htmlFor="phone" className="form-label-profile-section">Phone:</label>
-                        <input 
-                            id="phone" 
-                            name="phone"
-                            value={formData.phone} 
-                            onChange={(e) => {
-                                const input = e.target.value;
-                                // Only allow digits and limit to 11 characters
-                                if (/^\d{0,11}$/.test(input)) {
-                                  setFormData({ ...formData, phone: input });
-                                }
-                              }}
-                            className="form-input-profile-section" 
-                            maxLength={11}  
-                            pattern="^[0-9]{11}$" 
-                            title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX "
-                        />
-                    </div>
-
-                    <div className="form-group-profile-section">
-                        <label htmlFor="status" className="form-label-profile-section">Status:</label>
-                        <input 
-                            id="status" 
-                            name="status"
-                            value={
-                                formData.status === "Rejected" || formData.status === "Resubmission"
-                                    ? "Unverified"
-                                    : formData.status
-                            }
-                            className="form-input-profile-section" 
-                            disabled 
-                        />
-                    </div>
-
-                    <div className="form-group-profile-section">
-                        <label htmlFor="address" className="form-label-profile-section">Address:</label>
-                        <input 
-                            id="address" 
-                            name="address"
-                            value={formData.address}  
-                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                            className="form-input-profile-section" 
-                            required 
-                            disabled={formData.status === "Verified"}
-                        />
-                    </div>
-
-
-
-                        
-                        <div className="form-group-profile-section">
-                            <label htmlFor="password" className="form-label-profile-section">New Password:</label>
-                            <div className="relative">
-                                <input 
-                                        id="password" 
-                                        name="password"
+                             <div className="form-group-profile-section">
+                                    <label htmlFor="first_name" className="form-label-profile-section">First Name:</label>
+                                    <input 
+                                        id="first_name" 
+                                        name="first_name"
+                                        value={formData.first_name} 
+                                        onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                                         className="form-input-profile-section" 
-                                        type={showNewPassword ? "text" : "password"}
-                                        title="Please enter a password with a minimum of 6 characters"
-                                        onChange={handleChange}
-                                    />
-                                    <button
-                                                                    type="button"
-                                                                    className="toggle-password-btn"
-                                                                    onClick={() => setShowNewPassword(!showNewPassword)}
-                                                                >
-                                                                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                                                </button>
-
-                            </div>
-                        </div>
-
-                        <div className="form-group-profile-section">
-                            <label htmlFor="confirmPassword" className="form-label-profile-section">Confirm Password:</label>
-                            <div className="relative">
-                                <input 
-                                        id="confirmPassword" 
-                                        name="confirmPassword"
-                                        className="form-input-profile-section" 
-                                        type={showConfirmPassword ? "text" : "password"}
-                                        title="Please enter a password with a minimum of 6 characters"
-                                        onChange={handleChange}
-                                    />
-                                    <button
-                                                                    type="button"
-                                                                    className="toggle-password-btn"
-                                                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                                >
-                                                                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                        </button>
-                            </div>
-                        </div>
-                        {formData.status === "Resubmission" && (!resident.reupload || resident.reupload === "N/A") && (
-                            <div id="resubmit-section" className="valid-id-section-profile">
-                                <h3 className="valid-id-header">ID Rejected — Please Resubmit</h3>
-                                <p className="valid-id-subtext">
-                                    Your previously submitted valid ID did not meet the requirements. Kindly upload a new, clear image for review.
-                                </p>
-
-                                <div className="valid-id-content">
-                                {preview2 ? (
-                                    <img
-                                    src={preview2}
-                                    alt="User Valid ID"
-                                    className="valid-id-preview"
-                                    />
-                                ) : resident.upload ? (
-                                    <img
-                                    src={resident.upload}
-                                    alt="User Valid ID"
-                                    className="valid-id-preview"
-                                    />
-                                ) : (
-                                    <p className="no-valid-id-text">No Valid ID uploaded</p>
-                                )}
-
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        id="validIdUpload"
-                                        style={{ display: "none" }}
-                                        onChange={handleValidIDChange}
-                                    />
-
-                                    <button
-                                        type="button"
-                                        className="upload-btn-profile-section"
-                                        onClick={() => document.getElementById("validIdUpload")?.click()}
-                                    >
-                                        Upload New Valid ID
-                                    </button>
+                                        required
+                                        disabled={formData.status === "Verified"}                        />
                                 </div>
+
+                                
+                                    <div className="form-group-profile-section">
+                                        <label htmlFor="last_name" className="form-label-profile-section">Last Name:</label>
+                                        <input 
+                                            id="last_name" 
+                                            name="last_name"
+                                            value={formData.last_name} 
+                                            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                                            className="form-input-profile-section"
+                                            disabled={formData.status === "Verified"}                        />
+                                    </div>
+
+                                 <div className="form-group-profile-section">
+                                        <label htmlFor="email" className="form-label-profile-section">Email:</label>
+                                        <input 
+                                            id="email" 
+                                            name="email"
+                                            value={formData.email} 
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            className="form-input-profile-section" 
+                                            required 
+                                            disabled={formData.status === "Verified"}
+                                        />
+                                    </div>
+
+                                    <div className="form-group-profile-section">
+                                            <label htmlFor="status" className="form-label-profile-section">Status:</label>
+                                            <input 
+                                                id="status" 
+                                                name="status"
+                                                value={
+                                                    formData.status === "Rejected" || formData.status === "Resubmission"
+                                                        ? "Unverified"
+                                                        : formData.status
+                                                }
+                                                className="form-input-profile-section" 
+                                                disabled 
+                                            />
+                                        </div>
+
+                                <div className="form-group-profile-section">
+                                    <label htmlFor="password" className="form-label-profile-section">New Password:</label>
+                                    <div className="relative">
+                                        <input 
+                                                id="password" 
+                                                name="password"
+                                                className="form-input-profile-section" 
+                                                type={showNewPassword ? "text" : "password"}
+                                                title="Please enter a password with a minimum of 6 characters"
+                                                onChange={handleChange}
+                                            />
+                                            <button
+                                                    type="button"
+                                                    className="toggle-password-btn"
+                                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                                            >
+                                                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                            </button>
+
+                                    </div>
+                                </div>
+                                        
                             </div>
-                        )}
 
-                      
+                            <div className="account-details-section-right">
 
-                        
-                        <div className="submit-section-resident-account">
+                                    <div className="form-group-profile-section">
+                                        <label htmlFor="middle_name" className="form-label-profile-section">Middle Name:</label>
+                                        <input 
+                                            id="middle_name" 
+                                            name="middle_name"
+                                            value={formData.middle_name} 
+                                            onChange={(e) => setFormData({ ...formData, middle_name: e.target.value })}
+                                            className="form-input-profile-section" 
+                                            required
+                                            disabled={formData.status === "Verified"}                        />
+                                    </div>
 
-                            <button type="submit" className="submit-btn-profile-section" disabled={loading}>
-                                {loading ? "Updating..." : "Update Profile"}
-                            </button>
+                                      <div className="form-group-profile-section-dropdown">
+                                            <label htmlFor="sex" className="form-label-profile-section">Sex:</label>
+                                            <select
+                                                id="sex"
+                                                name="sex"
+                                                value={formData.sex}
+                                                onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
+                                                className="form-input-profile-section"
+                                                required
+                                                disabled={formData.status === "Verified"}
+                                            >
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                            </select>
+                                        </div>
+
+                                  <div className="form-group-profile-section">
+                                        <label htmlFor="phone" className="form-label-profile-section">Phone:</label>
+                                        <input 
+                                            id="phone" 
+                                            name="phone"
+                                            value={formData.phone} 
+                                            onChange={(e) => {
+                                                const input = e.target.value;
+                                                // Only allow digits and limit to 11 characters
+                                                if (/^\d{0,11}$/.test(input)) {
+                                                setFormData({ ...formData, phone: input });
+                                                }
+                                            }}
+                                            className="form-input-profile-section" 
+                                            maxLength={11}  
+                                            pattern="^[0-9]{11}$" 
+                                            title="Please enter a valid 11-digit contact number. Format: 0917XXXXXXX "
+                                        />
+                                    </div>
+
+                                    <div className="form-group-profile-section">
+                                        <label htmlFor="address" className="form-label-profile-section">Address:</label>
+                                        <input 
+                                            id="address" 
+                                            name="address"
+                                            value={formData.address}  
+                                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                            className="form-input-profile-section" 
+                                            required 
+                                            disabled={formData.status === "Verified"}
+                                        />
+                                    </div>
+
+                                    <div className="form-group-profile-section">
+                                        <label htmlFor="confirmPassword" className="form-label-profile-section">Confirm Password:</label>
+                                        <div className="relative">
+                                            <input 
+                                             id="confirmPassword" 
+                                              name="confirmPassword"
+                                             className="form-input-profile-section" 
+                                              type={showConfirmPassword ? "text" : "password"}
+                                             title="Please enter a password with a minimum of 6 characters"
+                                              onChange={handleChange}
+                                         />
+                                               <button
+                                               type="button"
+                                                className="toggle-password-btn"
+                                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                             >
+                                             {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                        </button>
+                                        </div>
+                                    </div>
+
+                            </div>
 
                         </div>
 
-                       
+                        <div className="account-details-lower">
+
+                            
+                             <div className="submit-section-resident-account">
+
+                                <button type="submit" className="submit-btn-profile-section" disabled={loading}>
+                                {loading ? "Updating..." : "Update Profile"}
+                                </button>
+
+                            </div>
+
+
+                        </div>
+
+            
+ 
 
                         </form>
 
+                        
 
-                    </div>
                 </div>
 
+
+
+
+         </div>
+
+         {showIDPopup && (
+            <div className="popup-overlay">
+                <div className="popup-modal">
+                <h3>ID Rejected — Please Resubmit</h3>
+                    <p className="popup-message">
+                    Your previous valid ID submission didn’t meet our verification standards.  
+                    Please upload a new, clear image of your valid ID for review.<br /><br />
+                    <strong>Note:</strong> After selecting your new file, make sure to click the  
+                    <em>“Update Profile”</em> button below the form to save your changes.
+                    </p>
+
+                
+
+                <div className="valid-id-content">
+                    {preview2 ? (
+                    <img
+                        src={preview2}
+                        alt="User Valid ID"
+                        className="valid-id-preview"
+                    />
+                    ) : resident.upload ? (
+                    <img
+                        src={resident.upload}
+                        alt="User Valid ID"
+                        className="valid-id-preview"
+                    />
+                    ) : (
+                    <p className="no-valid-id-text">No Valid ID uploaded</p>
+                    )}
+
+                    <input
+                    type="file"
+                    accept="image/*"
+                    id="validIdUpload"
+                    style={{ display: "none" }}
+                    onChange={handleValidIDChange}
+                    />
+
+                    <button
+                    type="button"
+                    className="upload-btn-popup"
+                    onClick={() => document.getElementById("validIdUpload")?.click()}
+                    >
+                    Choose File
+                    </button>
+                    <button
+                    type="button"
+                    className="close-btn"
+                    onClick={() => setShowIDPopup(false)}
+                    >
+                    Close
+                    </button>
+                </div>
+                </div>
             </div>
+            )}
+
+
+
+
+
 
 
             {showPopup && (

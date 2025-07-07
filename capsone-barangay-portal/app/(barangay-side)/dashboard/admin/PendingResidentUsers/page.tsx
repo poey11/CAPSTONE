@@ -184,16 +184,7 @@ const PendingResidentUsers = () => {
     return(
         <main className="pendingresidentusers-page-main-container">
 
-             {/*
-            <div className="path-section">
-                <h1 className="breadcrumb">User and Roles<span className="chevron">/</span></h1>
-                <h2 className="breadcrumb">Pending Resident Users<span className="chevron"></span></h2>
-            </div>
-          
-            <div className="user-roles-module-section-1">
-                <h1>Pending Resident Users</h1>
-            </div>
-              */}
+
 
             
                <div className="residentusers-page-section-2">

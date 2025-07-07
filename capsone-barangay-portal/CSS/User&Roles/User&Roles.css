@@ -60,9 +60,13 @@
   height: 100%; 
   max-height: 70%;
   margin-top: 2rem;
-  border: 2px solid rgba(36, 53, 76, 0.7);
+  border: 1px solid rgba(36, 53, 76, 0.7);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   background-color: #ffffff;
+  border-radius: 6px;
+
+    scrollbar-width: thin;
+  scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 }
 
 
@@ -86,7 +90,7 @@
 .pendingresidentusers-page-main-section td {
   padding: 1rem; 
   text-align: center; 
-  border-bottom: 2px solid #ddd;
+  border-bottom: 1px solid #ddd;
     color: rgb(44, 42, 42); /*new text color sa td*/
      font-weight: normal;
 }
@@ -112,6 +116,90 @@
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); 
   height: 80px;
 }
+
+
+
+
+/*
+Newly added for tables
+*/
+
+.barangayusers-page-main-section tbody tr:nth-child(even),
+.residentusers-page-main-section tbody tr:nth-child(even){
+  background-color: #f0f4f8; /* Softer modern gray-blue tone */
+}
+
+.barangayusers-page-main-section tbody tr:nth-child(odd),
+.residentusers-page-main-section tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* Crisp white */
+}
+
+
+.barangayusers-page-main-section tbody tr:hover,
+.residentusers-page-main-section tbody tr:hover { 
+   background-color: #d0e4f5 !important; 
+  transition: background-color 0.2s ease;
+}
+
+
+
+
+
+/****
+
+
+.highlight-new-request {
+  background-color: #d6f8c0 !important; 
+  transition: background-color 0.3s ease;
+}
+
+
+.highlight-new-request:hover {
+  background-color: #b4eba1 !important; 
+}
+
+
+.main-section-online-reports tbody tr:not(.highlight-new-request):hover {
+  background-color: #d0e4f5 !important;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+****/
+
+
+
+/*
+SCROLL FOR CHROME ETC
+*/
+
+.barangayusers-page-main-section::-webkit-scrollbar,
+.residentusers-page-main-section::-webkit-scrollbar{
+  width: 8px;
+}
+
+.barangayusers-page-main-section::-webkit-scrollbar-track,
+.residentusers-page-main-section::-webkit-scrollbar-track {
+  background: transparent; 
+}
+
+.barangayusers-page-main-section::-webkit-scrollbar-thumb,
+.residentusers-page-main-section::-webkit-scrollbar-thumb {
+  background-color: rgba(96, 165, 250, 0.5); 
+  border-radius: 8px;
+  border: 2px solid transparent; 
+  background-clip: content-box;  
+}
+
+.barangayusers-page-main-section::-webkit-scrollbar-thumb:hover,
+.residentusers-page-main-section::-webkit-scrollbar-thumb {
+  background-color: rgba(59, 130, 246, 0.7);
+}
+
+
+
+
+
 
 
 .user-roles-module-main-container{
@@ -718,4 +806,68 @@ background-color: #214666;
   font-weight: bold;
   font-size: 1.25rem;
   color: #e7594e;
+}
+
+
+
+
+
+
+/*
+UPDATE
+*/
+
+
+.user-roles-module-section-1-resident-users {
+    display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.assigned-tasks-info-toggle-wrapper {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.info-toggle-btn-assigned-resident {
+   padding: 10px 20px;
+ /* border: 1px solid transparent;*/
+  border: 1px solid #214666;
+  border-radius: 20px;
+  background-color: transparent;
+  color: #214666;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  text-transform: capitalize; 
+}
+
+.info-toggle-btn-assigned-resident:hover {
+  background-color: rgba(33, 70, 102, 0.1);
+}
+
+.info-toggle-btn-assigned-resident.active {
+  background-color: #214666;
+  color: #ffffff;
+  border: 1px solid #214666;
+}
+
+
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }

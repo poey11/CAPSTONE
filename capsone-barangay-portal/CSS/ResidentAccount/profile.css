@@ -49,17 +49,6 @@
 
 
 
-    .account-details-section {
-        width: 80%;
-        display: flex;
-        flex-direction: column;
-        background-color: rgba(255, 255, 255, 0.7);
-        border-radius: 16px;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        gap: 2rem;
-        overflow: hidden; 
-    }
-
     .edit-section-profile {
         display: flex;
         flex-direction: column;
@@ -69,35 +58,8 @@
         padding-right: 4rem;
     }
 
-    .form-group-profile-section {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-bottom: 10px;
-    }
+ 
 
-    .form-label-profile-section {
-        font-size: 16px;
-        font-weight: bold;
-        color: gray;
-        margin-top: 1rem;
-    }
-
-    .form-input-profile-section {
-        width: 100%;
-        padding: 10px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        color: #555;
-        background-color: #FFFFFF;
-    }
-
-    .form-input-profile-section:focus {
-        border-color: #DF7426;
-        outline: none;
-        box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
-    }
 
     .submit-btn-profile-section {
         background-color: #DF7426;
@@ -242,20 +204,7 @@
         object-fit: contain;
       }
       
-      .valid-id-upload-btn {
-        background-color: #DF7426;
-        color: #fff;
-        font-weight: 600;
-        padding: 0.6rem 1.5rem;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-      
-      .valid-id-upload-btn:hover {
-        background-color: #c2611f;
-      }
+
       
       .no-valid-id-text {
         font-style: italic;
@@ -265,7 +214,7 @@
       .toggle-password-btn {
         position: absolute;
         right: 12px;
-        top: 50%;
+        top: 60%;
         transform: translateY(-50%);
         background: none;
         border: none;
@@ -432,4 +381,279 @@ UPDATED CSS
     align-items: center;
   }
 }
+
+.account-details-section {
+  display: flex;
+  width: 100%;
+}
+
+.account-details-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 3rem;
+
+}
+
+.account-details-upper {
+    display: flex;
+      gap: 50px;
+    margin-top: 40px;
+    width: 100%;
+}
+
+.account-details-lower {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.account-details-section-left {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  gap: 1rem;
+}
+
+.account-details-section-right {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+   gap: 1rem;
+}
+
+   .form-group-profile-section {
+   display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+    }
+
+    
+   .form-group-profile-section input {
+   padding: 8px;
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left; 
+    }
+
+    
+   .form-group-profile-section-dropdown {
+   display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+    }
+
+    
+   .form-group-profile-section-dropdown select {
+   padding: 10px;
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left; 
+    }
+    
+
+    .form-label-profile-section { 
+      font-size: 16px;
+      font-weight: bold;
+      color: #2C3E50;
+    }
+
+    .form-input-profile-section {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #555;
+    }
+
+    .form-input-profile-section:focus {
+       border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+    }
+
+  
+
+
+
+
+
+/*
+For the popup if reupload
+*/
+
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(30, 30, 30, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.popup-modal {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.35s ease;
+}
+
+.popup-modal h3 {
+  margin-bottom: 1rem;
+  color: #b72f2f; 
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.popup-message {
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+
+.valid-id-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.valid-id-preview {
+  max-width: 280px;
+  border: 3px dashed #214666;
+  border-radius: 12px;
+  padding: 0.5rem;
+  background-color: #fffaf5;
+  transition: transform 0.2s ease;
+}
+
+.valid-id-preview:hover {
+  transform: scale(1.03);
+}
+
+
+.upload-btn-popup {
+  background-color: #214666;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-weight: 500;
+}
+
+.upload-btn-popup:hover {
+  background-color: #103b61;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(16, 59, 97, 0.4);
+}
+
+.close-btn {
+  margin-top: 1rem;
+  background-color: #555;
+  color: white;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.close-btn:hover {
+  background-color: #333;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(51, 51, 51, 0.4);
+}
+
+
+@keyframes fadeIn {
+  from {
+    background-color: rgba(30, 30, 30, 0);
+  }
+  to {
+    background-color: rgba(30, 30, 30, 0.75);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+
+
+
+
+    
+
+
+/*
+For the conditional Reupload Button
+*/
+
+.reupload-button {
+  background-color: #D93636; 
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.45rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(217, 54, 54, 0.5); 
+  animation: pulse 1.5s infinite;
+  transition: all 0.3s ease;
+}
+
+.reupload-button:hover {
+  background-color: #b72f2f;
+  box-shadow: 0 0 12px rgba(217, 54, 54, 0.7);
+}
+
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(217, 54, 54, 0.5);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(217, 54, 54, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(217, 54, 54, 0.5);
+  }
+}
+
+
 
