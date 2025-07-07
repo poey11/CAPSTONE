@@ -260,7 +260,7 @@ export default function Header() {
     };
 
 
-  }, [pathname, searchParams.toString()]);
+  }, [pathname, Array.from(searchParams.entries()).toString()]);
 
   return (
 <div className="header-main-container">
