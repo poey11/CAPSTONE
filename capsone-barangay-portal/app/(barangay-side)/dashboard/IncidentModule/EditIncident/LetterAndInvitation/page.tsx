@@ -1082,14 +1082,14 @@ export default function GenerateDialogueLetter() {
                                 </div>
                                 <div className="fields-section-letter">
                                       <p>Delivered By</p>      
-                                    <select className="generate-letter-input-field" value={safeData[0]?.LuponStaff||otherInfo.LuponStaff}
+                                    <select className="generate-letter-input-field-dropdown" value={safeData[0]?.LuponStaff||otherInfo.LuponStaff}
                                     id="LuponStaff"
                                     name="LuponStaff"
                                     onChange={handleChange}
                                     required
                                     disabled = {safeData[0]?.LuponStaff ? true : false}
                                     >
-                                        <option value="">Select Official/Kagawad</option>
+                                        <option value="">Select Kagawad</option>
                                         {listOfStaffs.map((staff, index) => (
                                             <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
                                                 {staff.firstName} {staff.lastName}
@@ -1144,7 +1144,7 @@ export default function GenerateDialogueLetter() {
 
                                  <div className="fields-section-letter">
                                     <p>Delivered By</p>
-                                     <select className="generate-letter-input-field" value={otherInfo.LuponStaff}
+                                     <select className="generate-letter-input-field-dropdown" value={otherInfo.LuponStaff}
                                 id="LuponStaff"
                                 name="LuponStaff"
                                 onChange={handleChange}

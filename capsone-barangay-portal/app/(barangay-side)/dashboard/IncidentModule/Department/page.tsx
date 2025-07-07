@@ -30,7 +30,7 @@ export default function Department() {
   const [showAlertPopup, setshowAlertPopup] = useState(false); 
 
  const searchParams = useSearchParams();
-  const highlightUserId = searchParams.get("incidentId");
+  const highlightUserId = searchParams.get("highlight");
  const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
 
@@ -71,7 +71,7 @@ export default function Department() {
           setHighlightedId(null);
   
           const params = new URLSearchParams(window.location.search);
-          params.delete("incidentId");
+          params.delete("highlight");
           const newUrl = `${window.location.pathname}?${params.toString()}`;
           router.replace(newUrl, { scroll: false });
         }, 3000);
@@ -172,6 +172,45 @@ export default function Department() {
 
 
 
+
+/*
+For Nature Filters
+*/
+const natureOptionsByDepartment: { [key: string]: string[] } = {
+  Lupon: ["Civil", "Criminal", "Others"],
+  GAD: [
+    "Physical Abuse",
+    "Sexual Abuse",
+    "Psychological, Enviromental, Verbal Abuse",
+    "Economic, Financial Abuse",
+    "Public Space Sexual Harassment",
+    "Others: (Trafficking, Prostitution, Violaiton of RA9208)",
+  ],
+  BCPC: [
+    "Child Abuse",
+    "Child Exploitation",
+    "Child Trafficking",
+    "Child Labor",
+    "Child Neglect",
+    "Child Abandonment",
+    "Child Sexual Abuse",
+    "Child Physical Abuse",
+    "Child Psychological Abuse",
+    "Child Bullying",
+    "Child Prostitution",
+    "Others",
+  ],
+  VAWC: [
+    "Physical Abuse",
+    "Sexual Abuse",
+    "Psychological, Enviromental, Verbal Abuse",
+    "Economic, Financial Abuse",
+    "Public Space Sexual Harassment",
+    "Others: (Trafficking, Prostitution, Violaiton of RA9208)",
+  ],
+};
+
+
 //FILTERS LOGIC
 
 const [showCount, setShowCount] = useState<number>(0);
@@ -179,6 +218,7 @@ const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 const [selectedStatus, setSelectedStatus] = useState<string>("");
 const [caseNumberSearch, setCaseNumberSearch] = useState("");
 const [incidentType, setIncidentType] = useState<string>("");
+const [selectedNature, setSelectedNature] = useState<string>("");
 
 
 
@@ -222,11 +262,20 @@ if (incidentType) {
   if (showCount) {
     filtered = filtered.slice(0, showCount);
   }
+
+
+  if (selectedNature) {
+  filtered = filtered.filter(
+    (incident) =>
+      incident.nature?.toLowerCase().trim() === selectedNature.toLowerCase()
+  );
+}
+
   
   setCurrentPage(1);
 
   setFilteredIncidents(filtered);
-}, [incidentData, selectedStatus, showCount, sortOrder, caseNumberSearch, incidentType]);
+}, [incidentData, selectedStatus, showCount, sortOrder, caseNumberSearch, incidentType, selectedNature]);
 
 
   // Pagination logic
@@ -300,25 +349,44 @@ if (incidentType) {
         </select>
 
 
+      {/*
+                <select
+              className="featuredStatus-departments"
+              value={showCount}
+              onChange={(e) => setShowCount(Number(e.target.value))}
+            >
+              <option value="0">Show All</option>
+              <option value="5">Show 5</option>
+              <option value="10">Show 10</option>
+            </select>
 
-        <select
-          className="featuredStatus-departments"
-          value={showCount}
-          onChange={(e) => setShowCount(Number(e.target.value))}
-        >
-          <option value="0">Show All</option>
-          <option value="5">Show 5</option>
-          <option value="10">Show 10</option>
-        </select>
+      */}
+
+
+        {departmentId && (
+            <select
+              className="featuredStatus-departments"
+              value={selectedNature}
+              onChange={(e) => setSelectedNature(e.target.value)}
+            >
+              <option value="">All Natures</option>
+              {natureOptionsByDepartment[departmentId]?.map((nature) => (
+                <option key={nature} value={nature}>
+                  {nature}
+                </option>
+              ))}
+            </select>
+          )}
+
 
 
       </div>
 
       <div className="main-section-departments">
   {currentIncidents.length === 0 ? (
-    <div className="no-result-card">
-       <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
-      <p className="no-results-department">No Results Found</p>
+    <div className="no-result-card-departments">
+       <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-departments" />
+      <p className="no-results-departments">No Results Found</p>
     </div>
   ) : (
     <table>
