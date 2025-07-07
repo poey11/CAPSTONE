@@ -96,7 +96,7 @@ export default function reasonForRejection() {
     
                 setTimeout(() => {
                     setShowPopup(false);
-                    router.push(`/dashboard/admin/PendingResidentUsers?highlight=${userId}`);
+                    router.push(`/dashboard/admin/ResidentUsers?highlight=${userId}`);
                 }, 3000);
             } else {
                 console.error("User document does not exist.");
