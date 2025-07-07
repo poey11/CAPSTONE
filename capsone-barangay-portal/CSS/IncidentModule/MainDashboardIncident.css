@@ -27,6 +27,10 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
    background-color: #ffffff;
    border-radius: 6px;
+
+
+     scrollbar-width: thin;
+  scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 }
 
 .main-section-departments thead {
@@ -79,6 +83,32 @@ Newly added for tables
   background-color: #d0e4f5 !important; /* Light pastel blue hover */
   cursor: pointer;
   transition: background-color 0.2s ease;
+}
+
+
+
+
+/*
+SCROLL FOR CHROME ETC
+*/
+
+.main-section-departments::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-section-departments::-webkit-scrollbar-track {
+  background: transparent; 
+}
+
+.main-section-departments::-webkit-scrollbar-thumb {
+  background-color: rgba(96, 165, 250, 0.5); 
+  border-radius: 8px;
+  border: 2px solid transparent; 
+  background-clip: content-box;  
+}
+
+.main-section-departments::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(59, 130, 246, 0.7);
 }
 
 
@@ -271,35 +301,62 @@ Newly added for tables
   }
 
   
-  .no-result-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 200px;
-    border: 2px solid #f3c3bf;
-    width: 500px;
-    border-radius: 1rem;
-    background-color: #fff;
-    margin-top: 5rem;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.03);
-    align-self: center;
+  .no-result-card-departments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  width: 500px;
+  margin-top: 5rem;
+  padding: 1.5rem;
+  gap: 10px;
+  align-self: center;
+
+  border: 2px solid #f3c3bf;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #fff, #fff5f5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+
+  /* Entrance animation */
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease-out forwards;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   
+.no-result-card-departments:hover {
+    transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
 
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
   
 
-  .no-result-icon {
-    width: 46px;
-    height: 46px;
-    margin-bottom: 0.5rem;
-    opacity: 0.75;
+  .no-result-icon-departments {
+  width: 46px;
+  height: 46px;
+  margin-bottom: 0.5rem;
+  opacity: 0.75;
+  transition: transform 0.3s ease, opacity 0.3s ease;
   }
 
-  .no-results-department {
-    font-weight: bold;
-    font-size: 1.25rem;
-    color: #e7594e;
+  .no-result-card-departments:hover .no-result-icon-departments {
+    transform: scale(1.05);
+    opacity: 0.85;  
+  }
+
+  .no-results-departments {
+   font-weight: 600;
+  font-size: 1.25rem;
+  color: #e7594e;
+  text-align: center;
+  transition: color 0.3s ease;
   }
   
 
