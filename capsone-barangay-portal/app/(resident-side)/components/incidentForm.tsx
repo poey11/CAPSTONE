@@ -667,6 +667,26 @@ const confirmSubmit = async () => {
                     </select>
                   </div>
 
+                  { isIncidentLate && (
+                    <>
+                      <div className="form-group-incident-report">
+                        <label htmlFor="reasonForLateFiling" className="form-label-incident-report">
+                          Reason for Late Filing<span className="required">*</span>
+                        </label>
+                        <textarea
+                          id="reasonForLateFiling"
+                          name="reasonForLateFiling"
+                          className={`form-input-incident-report ${invalidFields.includes("reasonForLateFiling") ? "input-error" : ""}`}
+                          required
+                          placeholder="Enter Reason for Late Filing"
+                          value={incidentReport.reasonForLateFiling}
+                          onChange={handleFormChange}
+                          rows={4} cols={50}
+                        />
+                      </div>
+                    </>    
+                  )}
+
                   </div>
 
 
@@ -706,25 +726,6 @@ const confirmSubmit = async () => {
                         />
                       </div>
                     
-                  { isIncidentLate && (
-                    <>
-                      <div className="form-group-incident-report">
-                        <label htmlFor="reasonForLateFiling" className="form-label-incident-report">
-                          Reason for Late Filing<span className="required">*</span>
-                        </label>
-                        <textarea
-                          id="reasonForLateFiling"
-                          name="reasonForLateFiling"
-                          className={`form-input-incident-report ${invalidFields.includes("reasonForLateFiling") ? "input-error" : ""}`}
-                          required
-                          placeholder="Enter Reason for Late Filing"
-                          value={incidentReport.reasonForLateFiling}
-                          onChange={handleFormChange}
-                          rows={4} cols={50}
-                        />
-                      </div>
-                    </>    
-                  )}
                   <div className="form-group-incident-report">
                     <label htmlFor="addInfo" className="form-label-incident-report">
                     Additional Info Regarding the Concern<span className="required">*</span>

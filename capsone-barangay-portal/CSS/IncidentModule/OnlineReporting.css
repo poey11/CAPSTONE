@@ -544,15 +544,30 @@ FOR ONLINE INCIDENT REPORTING CSS
 
 .online-report-section-bottom-side-2 {
    display: flex;
-
+    flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
+
 }
 
+.online-report-top {
+  width: 100%;
+  display: flex;
+  align-items: center;
+ justify-content: center;
+}
+
+.online-report-bottom {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+ justify-content: center;
+}
 
 .online-report-box-container{
-width: 100%;
+width: 50%;
 margin-top: 2rem;
 }
 
@@ -630,7 +645,6 @@ margin-top: 2rem;
     width: 100%;
     border: 1px solid #5a6b7c;
     border-radius: 10px;
-    background-color: #ffffff;
     margin-top: 30px;
     height: 250px;
 }

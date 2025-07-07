@@ -264,9 +264,9 @@ padding-bottom:30px;
 
 .title-proof {
   position: absolute;
-  left: 22%; 
-  top: 0; 
-  transform: translate(25%, 25%);
+  top: 15px; /* stays above the box */
+    left: 50%; /* center horizontally */
+    transform: translateX(-50%); /* offset by 50% of its own width */
   background-color: #1f3b57;
   color: white;
   padding: 8px 16px;

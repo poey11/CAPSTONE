@@ -1705,13 +1705,15 @@ padding: 1rem;
 
 
   .box-container-incidentimage {
-    position: relative;
-    width: 60%;
-    border: 1px solid #5a6b7c;
-    border-radius: 10px;
-    background-color: #ffffff;
-    margin-top: 30px;
-    height: 260px;
+    border: 1px solid rgba(44, 62, 80, 0.7);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 100%;
+    text-align: center;
+    margin-top: 30px; 
+    height: 300px;
   }
   
 
@@ -2275,4 +2277,17 @@ border-left: 10px solid #8a0f0f;
 .settlement-option:hover {
   color: #111;
   font-weight: 500;
+}
+
+.incident-img-view{
+  margin-right: 8px;
+  margin-bottom: 8px;
+  width: 100px;
+  height: auto;
+  object-fit: cover;
+}
+
+.uploaded-pic {
+  width: 100%;
+  height: 300px;
 }

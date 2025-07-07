@@ -977,7 +977,7 @@ export default function EditLuponIncident() {
                                       <img
                                         src={concernImageUrl}
                                         alt="Incident Image"
-                                        style={{ maxWidth: "100%", maxHeight: "260px", borderRadius: "10px" }}
+                                        className="incident-img-view uploaded-pic"
                                       />
                                     ) : (
                                       <p style={{ color: "red", fontStyle: "italic", textAlign: "center", marginTop: "30%" }}>No image available</p>
