@@ -30,7 +30,7 @@ export default function Department() {
   const [showAlertPopup, setshowAlertPopup] = useState(false); 
 
  const searchParams = useSearchParams();
-  const highlightUserId = searchParams.get("incidentId");
+  const highlightUserId = searchParams.get("highlight");
  const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
 
