@@ -199,7 +199,7 @@ const ResidentUsers = () => {
                             onClick={() => setActiveSection(section)}
                             style={{ position: "relative" }}
                             >
-                            {section === "main" && "Online Records"}
+                            {section === "main" && "Resident Users Records"}
                             {section === "tasks" && "Assigned Tasks"}
                             </button>
                         ))}
@@ -331,8 +331,28 @@ const ResidentUsers = () => {
                       )}
 
 
-        {activeSection === "main" && (
+        {activeSection === "tasks" && (
         <>
+
+            <div className="residentusers-page-main-section">
+
+
+                
+            </div>
+
+        <div className="redirection-section-users">
+            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+            {getPageNumbers().map((number, index) => (
+            <button
+                key={index}
+                onClick={() => typeof number === 'number' && paginate(number)}
+                className={currentPage === number ? "active" : ""}
+            >
+                {number}
+            </button>
+            ))}
+            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+        </div>
 
         </>
         )}
