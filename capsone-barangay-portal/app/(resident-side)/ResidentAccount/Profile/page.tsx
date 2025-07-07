@@ -284,6 +284,8 @@ export default function SettingsPageResident() {
       
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [showIDPopup, setShowIDPopup] = useState(false);
+
     
     return (
         <main className="main-container-resident-profile">
@@ -332,7 +334,20 @@ export default function SettingsPageResident() {
                         <span className="required">*</span> For any concerns, please visit the Barangay.
                         </p>
                     </div>
+
+                     {formData.status === "Resubmission" && (!resident.reupload || resident.reupload === "N/A") && (
+                        <button
+                            type="button"
+                            className="reupload-button"
+                            onClick={() => setShowIDPopup(true)}
+                        >
+                             ⚠ Reupload Valid ID
+                        </button>
+                        )}
+
                     </div>
+
+
                 </div>
 
                 <div className="account-details-section">
@@ -534,6 +549,60 @@ export default function SettingsPageResident() {
 
 
          </div>
+
+         {showIDPopup && (
+            <div className="popup-overlay">
+                <div className="popup-modal">
+                <h3>ID Rejected — Please Resubmit</h3>
+                <p>
+                    Your previously submitted valid ID did not meet the requirements.
+                    Kindly upload a new, clear image for review.
+                </p>
+
+                <div className="valid-id-content">
+                    {preview2 ? (
+                    <img
+                        src={preview2}
+                        alt="User Valid ID"
+                        className="valid-id-preview"
+                    />
+                    ) : resident.upload ? (
+                    <img
+                        src={resident.upload}
+                        alt="User Valid ID"
+                        className="valid-id-preview"
+                    />
+                    ) : (
+                    <p className="no-valid-id-text">No Valid ID uploaded</p>
+                    )}
+
+                    <input
+                    type="file"
+                    accept="image/*"
+                    id="validIdUpload"
+                    style={{ display: "none" }}
+                    onChange={handleValidIDChange}
+                    />
+
+                    <button
+                    type="button"
+                    className="upload-btn-popup"
+                    onClick={() => document.getElementById("validIdUpload")?.click()}
+                    >
+                    Choose File
+                    </button>
+                    <button
+                    type="button"
+                    className="close-btn"
+                    onClick={() => setShowIDPopup(false)}
+                    >
+                    Close
+                    </button>
+                </div>
+                </div>
+            </div>
+            )}
+
 
 
 
