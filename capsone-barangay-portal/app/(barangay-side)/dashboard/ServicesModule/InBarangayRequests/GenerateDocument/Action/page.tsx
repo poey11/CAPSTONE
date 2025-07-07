@@ -546,8 +546,19 @@ export default function action() {
     };
 
     const handleValidIDUpload = (
-      e: React.ChangeEvent<HTMLInputElement>
+      e: React.ChangeEvent<HTMLInputElement> |string
     ) => {
+      // If a string is passed (URL from resident DB)
+      if (typeof e === "string") {
+        setFiles3([{ name: "Uploaded ID from Resident List", preview: e }]);
+
+        setClearanceInput((prev: any) => ({
+          ...prev,
+          validIDjpg: e, // URL string
+        }));
+
+        return;
+      }
       const file = e.target.files?.[0];
       if (!file) return;
     
@@ -1580,11 +1591,17 @@ const handleChange = (
                                           birthday: "",
                                           contact: "",
                                           dateOfResidency: "",
-                                          address: ""
+                                          address: "",
+                                          age: "",
+                                          occupation: "",
+                                          precinctnumber: "",
+                                          validIDjpg: "",  
                                         };
                                     
-                                        
-                                    
+                                        if(files3 && files3.length > 0) {
+                                          
+                                          handleValidIDDelete(files3[0].name);
+                                        }
                                         setClearanceInput(updatedInput);
                                         setIsRequestorSelected(false);
                                       }}
@@ -3833,8 +3850,12 @@ const handleChange = (
                                               occupation: resident.occupation || '',
                                               precinctnumber: resident.precinctNumber || '',
                                               dateOfResidency: resident.dateOfResidency || '',
+                                              validIDjpg: resident.verificationFilesURLs[0] || '',  
+
                                             };
-                                      
+                                            
+                                            handleValidIDUpload(resident.verificationFilesURLs[0] || '');
+                                            
                                             // Only clear fromAddress if purpose is NOT Occupancy
                                             if (purpose !== "Occupancy /  Moving Out") {
                                               update.fromAddress = "";
