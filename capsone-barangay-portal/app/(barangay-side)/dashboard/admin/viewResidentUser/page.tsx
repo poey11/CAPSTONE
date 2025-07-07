@@ -142,7 +142,7 @@ export default function ViewUser() {
         if (ResidentUserData?.status === "Verified") {
             window.location.href = "/dashboard/admin/ResidentUsers";
         } else {
-            window.location.href = "/dashboard/admin/PendingResidentUsers";
+            window.location.href = "/dashboard/admin/ResidentUsers";
         }
     };
 
