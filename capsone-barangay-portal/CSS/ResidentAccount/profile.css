@@ -49,17 +49,6 @@
 
 
 
-    .account-details-section {
-        width: 80%;
-        display: flex;
-        flex-direction: column;
-        background-color: rgba(255, 255, 255, 0.7);
-        border-radius: 16px;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        gap: 2rem;
-        overflow: hidden; 
-    }
-
     .edit-section-profile {
         display: flex;
         flex-direction: column;
@@ -69,35 +58,8 @@
         padding-right: 4rem;
     }
 
-    .form-group-profile-section {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-bottom: 10px;
-    }
+ 
 
-    .form-label-profile-section {
-        font-size: 16px;
-        font-weight: bold;
-        color: gray;
-        margin-top: 1rem;
-    }
-
-    .form-input-profile-section {
-        width: 100%;
-        padding: 10px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        color: #555;
-        background-color: #FFFFFF;
-    }
-
-    .form-input-profile-section:focus {
-        border-color: #DF7426;
-        outline: none;
-        box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
-    }
 
     .submit-btn-profile-section {
         background-color: #DF7426;
@@ -265,7 +227,7 @@
       .toggle-password-btn {
         position: absolute;
         right: 12px;
-        top: 50%;
+        top: 60%;
         transform: translateY(-50%);
         background: none;
         border: none;
@@ -433,3 +395,101 @@ UPDATED CSS
   }
 }
 
+.account-details-section {
+  display: flex;
+  width: 100%;
+}
+
+.account-details-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 3rem;
+
+}
+
+.account-details-upper {
+    display: flex;
+      gap: 50px;
+    margin-top: 40px;
+    width: 100%;
+}
+
+.account-details-lower {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.account-details-section-left {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  gap: 1rem;
+}
+
+.account-details-section-right {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+   gap: 1rem;
+}
+
+   .form-group-profile-section {
+   display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+    }
+
+    
+   .form-group-profile-section input {
+   padding: 8px;
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left; 
+    }
+
+    
+   .form-group-profile-section-dropdown {
+   display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+    }
+
+    
+   .form-group-profile-section-dropdown select {
+   padding: 10px;
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left; 
+    }
+    
+
+    .form-label-profile-section { 
+      font-size: 16px;
+      font-weight: bold;
+      color: #2C3E50;
+    }
+
+    .form-input-profile-section {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #555;
+    }
+
+    .form-input-profile-section:focus {
+       border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+    }
+
+  
