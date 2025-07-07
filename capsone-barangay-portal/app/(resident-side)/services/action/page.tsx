@@ -689,8 +689,6 @@ const handleFileChange = (
         "age", 
         "birthday"
       ];
-    
-    
       if (purpose === "Residency") {
         required.push("CYFrom", "CYTo", "attestedBy", "appointmentDate");
       }
@@ -752,6 +750,13 @@ const handleFileChange = (
       if(docType === "Business Permit" || docType === "Temporary Business Permit") {
         required.push(
           "businessName", "businessLocation", "businessNature", "estimatedCapital",
+        );
+      }
+
+      if( docType === "Construction") {
+        required.push(
+          "typeofconstruction", "typeofbldg", "othersTypeofbldg", "projectName",
+          "projectLocation", "homeOrOfficeAddress",
         );
 
       }
