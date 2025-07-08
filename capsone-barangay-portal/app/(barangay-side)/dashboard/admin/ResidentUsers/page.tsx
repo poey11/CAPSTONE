@@ -99,6 +99,10 @@ const ResidentUsers = () => {
     }
   }, [highlightUserId, residentUsers, filteredUser, currentPage]);
 
+
+
+
+  
   // Main table filtering
   useEffect(() => {
     const filterUsers = () => {
@@ -241,6 +245,7 @@ const ResidentUsers = () => {
 
       {/* Main verified users */}
       {activeSection === "main" && (
+        <>
         <div className="residentusers-page-main-section">
           {currentUser.length === 0 ? (
             <div className="no-result-card">
@@ -280,10 +285,27 @@ const ResidentUsers = () => {
             </table>
           )}
         </div>
+
+              <div className="redirection-section-users">
+            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+            {getPageNumbers().map((number, index) => (
+            <button
+                key={index}
+                onClick={() => typeof number === 'number' && paginate(number)}
+                className={currentPage === number ? "active" : ""}
+            >
+                {number}
+            </button>
+            ))}
+            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+        </div>
+        </>
       )}
 
       {/* Pending users */}
       {activeSection === "pending" && (
+
+         <>
         <div className="residentusers-page-main-section">
           {currentPendingUsers.length === 0 ? (
             <div className="no-result-card">
@@ -321,6 +343,24 @@ const ResidentUsers = () => {
             </table>
           )}
         </div>
+
+          
+      <div className="redirection-section-users">
+            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+            {getPageNumbers().map((number, index) => (
+            <button
+                key={index}
+                onClick={() => typeof number === 'number' && paginate(number)}
+                className={currentPage === number ? "active" : ""}
+            >
+                {number}
+            </button>
+            ))}
+            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+        </div>
+
+          </>
+
       )}
     </main>
   );
