@@ -163,12 +163,16 @@ const Menu = () => {
 
   // Fetch Notifications for the logged-in user in real time
   useEffect(() => {
-    if (user && resident) {  // wait until resident data is loaded
+    if (user && resident) {
       console.log("Fetching notifications for user:", user.uid, "and resident:", resident.residentId);
+  
+      const validIds = [user.uid, resident.residentId].filter(Boolean);
+  
+      if (validIds.length === 0) return;
   
       const q = query(
         collection(db, "Notifications"),
-        where("residentID", "in", [user.uid, resident.residentId]),
+        where("residentID", "in", validIds),
         orderBy("timestamp", "desc")
       );
   
@@ -184,7 +188,7 @@ const Menu = () => {
   
       return () => unsubscribe();
     }
-  }, [user, resident]); // <-- key: wait for resident to load
+  }, [user, resident]);
   
   
 
