@@ -4,7 +4,7 @@ body {
 
 .main-containerB{
     width: auto;
-    height: 90px;
+    height: 65px;
     background-color: #FFFFFF;
     border-bottom: 2px solid rgb(202, 202, 202);
 
@@ -22,7 +22,7 @@ body {
 
 .user-container{
     display: flex;
-    gap: 20px;
+    gap: 10px;
     align-items: center;
     justify-content: center;
 }
@@ -33,13 +33,13 @@ body {
 }
 
 .user-section h1{
-    font-size: 18px;
+    font-size: 16px;
     color: #e56723; 
     font-weight: bold;
 }
 
 .user-section p{
-    font-size: 14px;
+    font-size: 13px;
     color: #a29f9e; 
     font-weight: bold;
 }
@@ -53,19 +53,20 @@ body {
     width: 15px;
     height: 15px;
     cursor: pointer;
-    filter: grayscale(100%);
+    filter: brightness(0) saturate(100%) invert(18%) sepia(22%) saturate(1010%) hue-rotate(152deg) brightness(93%) contrast(94%);
 }
 
 .dropdown {
     position: absolute;
-    top: 40px; /* Adjust as needed */
-    left: -180px; /* Moves it to the leftmost part of the screen */
+    top: 39px; /* Adjust as needed */
+    left: -160px; /* Moves it to the leftmost part of the screen */
     background-color: #f9f9f9;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     min-width: 200px;
     z-index: 1000;
     padding: 5px 0;
     display: none; /* Hide dropdown by default */
+    height: 100px
 }
 
 .dropdown.show {
@@ -74,6 +75,7 @@ body {
 
 .menu-section{
     position: relative;
+    padding-left: 20px;
 }
 
 .dropdown ul {
@@ -85,10 +87,11 @@ body {
 .dropdown li {
     padding: 8px 16px;
     cursor: pointer;
+    font-size: 15px;
 }
 
 .dropdown li:hover {
-  background-color: #c3c2c2;
+  background-color: #24354C;
   color: rgb(255, 255, 255);
 }
 
@@ -112,6 +115,11 @@ body {
     margin-bottom: 0.50rem;
   }
 
+  .header-usericon {
+    height: 40px;
+    width: 40px;
+  }
+
   .icon-section{
     margin-top: 5px;
   }
@@ -131,8 +139,9 @@ body {
   */
 
   .dropdown-Container {
-      display: block; 
+    display: block; 
    position: relative;
+
   }
 
   
@@ -164,18 +173,20 @@ body {
   .header-inboxicon-brgyside{
     width: 100%; 
     margin-top: 5px;
-    filter: invert(0%);
+    
+    filter: invert(24%) sepia(19%) saturate(924%) hue-rotate(174deg) brightness(93%) contrast(89%);
     transition: filter 0.2s ease-in-out;
   }
   
   .header-inboxicon-brgyside:hover{
-    filter: invert(24%) sepia(19%) saturate(924%) hue-rotate(174deg) brightness(93%) contrast(89%);
+    filter: invert(0%);
+  
   }
   
   .notification-badge-brgyside {
     position: absolute;
     top: 5px;
-    right: 15px;
+    right: -5px;
     background-color: rgb(219, 7, 7);
     color: white;
     font-size: 12px;
@@ -192,10 +203,10 @@ body {
   
   .notification-section-brgyside {
     position: absolute;
-    top: 65px; 
-    right: -150px;
-    width: 380px;
-    height: 600px;
+    top: 48px; 
+    right: -220px;
+    width: 350px;
+    height: 500px;
    background-color: #f9fafb;
     border-radius: 12px;
     /*padding: 20px;*/
@@ -203,7 +214,7 @@ body {
     z-index: 100;
     display: flex;
     flex-direction: column;
-      overflow: hidden;
+    overflow: hidden;
   }
 
     .top-section-brgyside{
@@ -211,12 +222,13 @@ background: linear-gradient(to right, #1b3840, #214666, #2c5e73);
 /*background: linear-gradient(to right, #1f2e49, #284a66);*/
 padding: 20px;
   box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+height: 100px
   }
 
 
     
   .notification-title-brgyside {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 600;
   color: #ffffff;
   margin-bottom: 12px;
@@ -224,7 +236,7 @@ padding: 20px;
 
 .filter-container-brgy {
     display: flex;
-  gap: 20px;
+  gap: 10px;
   color: #FFFFFF
 }
 
@@ -232,7 +244,7 @@ padding: 20px;
    background: transparent;
   border: none;
   color: #e0e0e0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   padding: 4px 8px;
   border-radius: 6px;
@@ -285,6 +297,7 @@ padding: 20px;
   padding: 12px 0;
   transition: background 0.2s ease;
   color: #000000;
+  height: 100px;
   }
   
   .notification-item-brgyside:hover {

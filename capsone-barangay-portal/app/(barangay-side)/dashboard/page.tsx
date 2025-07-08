@@ -433,7 +433,7 @@ useEffect(() => {
 
   
   const barangayPopulationChart = {
-    title: "Barangay Population:",
+    title: "Barangay Population",
     count: residentsCount,
     data: [
       { name: "E. Fairview", value: eastResidentsCount },
@@ -444,7 +444,7 @@ useEffect(() => {
   };
   
   const barangayDemographicsChart = {
-    title: "Barangay Demographics:",
+    title: "Barangay Demographics",
     count: residentsCount,
     data: [
       { name: "Senior Citizens", value: seniorCitizensCount },
@@ -479,7 +479,7 @@ useEffect(() => {
           { name: "Completed", value: documentRequestCompletedCount },
         ],
     
-    colors: ["#4CAF50", "#2196F3", "#FF9800"],
+    colors: ["#4CAF50", "#2196F3", "#FF9800", "#D32F2F"],
   };
   
   const incidentReportsByDepartmentChart = {
@@ -595,59 +595,129 @@ useEffect(() => {
     return [...data]
   }, [data]);
 
+  const [visibleCards, setVisibleCards] = useState(0);
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setVisibleCards((prev) => {
+      if (prev >= 3) { // Number of cards
+        clearInterval(interval);
+        return prev;
+      }
+      return prev + 1;
+    });
+  }, 300); // Delay between each card (ms)
+
+  return () => clearInterval(interval);
+}, []);
+
+// Compute total value per department for dynamic ordering
+const departmentTotals: Record<string, number> = {};
+
+incidentReportsByMonth.forEach((item) => {
+  for (const key in item) {
+    if (key !== "month") {
+      departmentTotals[key] = (departmentTotals[key] || 0) + (item[key as keyof typeof item] as number);
+    }
+  }
+});
+
+// Sort departments by total descending
+const sortedDepartments = Object.entries(departmentTotals)
+  .sort((a, b) => b[1] - a[1])
+  .map(([key]) => key); // Only keep department names
+
+
+  const getColor = (dept: string): string => {
+    const colorMap: Record<string, string> = {
+      VAWC: "#8884d8",
+      GAD: "#82ca9d",
+      Lupon: "#ffc658",
+      BCPC: "#ff7300",
+      Online: "#ff0000",
+    };
+    return colorMap[dept] || "#ccc"; // default gray if dept not found
+  };
+
+  const [visibleSummaries, setVisibleSummaries] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisibleSummaries((prev) => {
+        if (prev >= 3) { // Adjust if you have more summary cards
+          clearInterval(interval);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 300); // Adjust delay per card
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <main className="main-container">
       
       
       <div className="counts-section">
+        {[...Array(3)].map((_, index) => (
+          <div
+            key={index}
+            className={`counts-metric-card fade-in-count ${visibleCards > index ? 'visible' : ''}`}
+          >
+            {/* Card content here — render content based on index */}
+            {index === 0 && (
+              <>
+                <div className="counts-card-left-side">
+                  <img src="/images/register.png" alt="Visible Icon" className="counts-icon-register" />
+                </div>
+                <div className="counts-card-right-side">
+                  <Link href="/dashboard/admin/ResidentUsers">
+                    <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                      Total Registered Users
+                    </p>
+                  </Link>
+                  <p className="count">{residentUsersCount}</p>
+                </div>
+              </>
+            )}
 
-     
-          <div className="counts-metric-card">
-            <div className="counts-card-left-side">
-              <Link href="/dashboard/admin/ResidentUsers">
-                <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                  Total Registered Users:
-                </p>
-              </Link>
-              <p className="count">{residentUsersCount}</p>
-            </div>
+            {index === 1 && (
+              <>
+                <div className="counts-card-left-side">
+                  <img src="/images/visible.png" alt="Visible Icon" className="counts-icon-view" />
+                </div>
+                <div className="counts-card-right-side">
+                  <p className="title">Total Homepage Visits</p>
+                  <p className="count">{siteVisits}</p>
+                </div>
+              </>
+            )}
 
-            <div className="counts-card-right-side">
-                <img src="/images/register.png" alt="Visible Icon" className="counts-icon-register" />
-            </div>
+            {index === 2 && (
+              <>
+                <div className="counts-card-left-side">
+                  <img src="/images/avatar.png" alt="Visible Icon" className="counts-icon-officer" />
+                </div>
+                <div className="counts-card-right-side">
+                  <p className="title">Total Barangay Officials</p>
+                  <p className="count">{barangayUsersCount}</p>
+                </div>
+              </>
+            )}
           </div>
+        ))}
+      </div>
 
-          <div className="counts-metric-card">
-            <div className="counts-card-left-side">
-                <p className="title">
-                  Total Homepage Visits:
-                </p>
-              <p className="count">{siteVisits}</p>
-            </div>
 
-            <div className="counts-card-right-side">
-                <img src="/images/visible.png" alt="Visible Icon" className="counts-icon-view" />
-            </div>
-          </div>
+   <div className="summaries-section">
+      {[barangayPopulationChart, barangayDemographicsChart, null].map((chart, index) => (
+        <div
+          key={index}
+          className={`metric-card fade-in-metric ${visibleSummaries > index ? 'visible' : ''}`}
+        >
 
-          <div className="counts-metric-card">
-            <div className="counts-card-left-side">
-                <p className="title">
-                  Total Barangay Officials
-                </p>
-              <p className="count">{barangayUsersCount}</p>
-            </div>
-
-            <div className="counts-card-right-side">
-                <img src="/images/avatar.png" alt="Visible Icon" className="counts-icon-officer" />
-            </div>
-          </div>
-        </div>
-
-       
-        <div className="summaries-section">
-
-          <div className="metric-card">
+        {index === 0 && (
+          <>
             <div className="card-left-side">
               <Link href="/dashboard/ResidentModule">
                 <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
@@ -658,7 +728,7 @@ useEffect(() => {
             </div>
 
             <div className="card-right-side">
-              <ResponsiveContainer width={300} height={300}>
+              <ResponsiveContainer width={350} height={250}>
                 <BarChart
                   data={barangayPopulationChart.data}
                   layout="vertical"
@@ -668,7 +738,9 @@ useEffect(() => {
                   <XAxis type="number" />
                   <YAxis type="category" dataKey="name" />
                   <Tooltip />
-                  <Legend />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '14px' }}
+                  />
                   <Bar dataKey="value" name="Number of Residents">
                     {barangayPopulationChart.data.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={barangayPopulationChart.colors[index % barangayPopulationChart.colors.length]} />
@@ -677,9 +749,11 @@ useEffect(() => {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </>
+        )}
 
-          <div className="metric-card">
+        {index === 1 && (
+          <>
             <div className="card-left-side">
               <Link href="/dashboard/ResidentModule">
                 <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
@@ -690,7 +764,7 @@ useEffect(() => {
             </div>
 
             <div className="card-right-side">
-              <ResponsiveContainer width={300} height={350}>
+              <ResponsiveContainer width={300} height={300}>
                 <PieChart>
                   <Pie
                     data={barangayDemographicsChart.data}
@@ -698,8 +772,8 @@ useEffect(() => {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={100}
-                    innerRadius={50}
+                    outerRadius={80}
+                    innerRadius={40}
                     label
                   >
                     {barangayDemographicsChart.data.map((entry, index) => (
@@ -707,22 +781,24 @@ useEffect(() => {
                     ))}
                   </Pie>
                   <Tooltip />
-                  <Legend />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '13px' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </>
+        )}
 
-          <div className="metric-card">
-
-
+        {index === 2 && (
+          <>
             <div className="card-left-side">
               <Link href="/dashboard/ServicesModule/Appointments">
                 <p
                   className="title"
                   style={{ cursor: "pointer", textDecoration: "underline" }}
                 >
-                    Pending or Completed Appointments(to be implemented):
+                    Pending or Completed Appointments {/*(to be implemented)*/}
                 </p>
               </Link>
               <p className="count">
@@ -731,7 +807,7 @@ useEffect(() => {
             </div>
 
             <div className="card-right-side">
-              <ResponsiveContainer width={300} height={350}>
+              <ResponsiveContainer width={300} height={300}>
                 <PieChart>
                   <Pie
                     data={barangayDemographics}
@@ -739,28 +815,199 @@ useEffect(() => {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={100}
+                    outerRadius={80}
                   >
                     {barangayDemographics.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={DEMOGRAPHICS_COLORS[index % DEMOGRAPHICS_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
-                  <Legend />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '13px' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </>
+        )}
+        </div>
+        ))}
+
+    </div>
+ 
+
+     <hr/>
 
 
+          <div className="services-section">
+
+          <div className="services-second-section">
+                      
+                      <Link href="/dashboard/IncidentModule">
+                         <p className="dashboard-title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                           Monthly Incident Reports Chart
+                         </p>
+                       </Link>
+                       <div className="heatmap-container">
+                         <ResponsiveContainer width={1000} height={300}>
+                         <AreaChart data={incidentReportsByMonth} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                           <CartesianGrid strokeDasharray="3 3" />
+                           <XAxis dataKey="month" />
+                           <YAxis />
+                           <Tooltip />
+                           <Legend />
+         
+                           {sortedDepartments.map((dept) => (
+                             <Area
+                             type="monotone"
+                             dataKey={dept}
+                             stroke={getColor(dept)}
+                             fill={getColor(dept)}
+                           />
+                           ))}
+                         </AreaChart>
+         
+                           
+                         </ResponsiveContainer>
+                       </div>
+                               
+         
+                     </div>
+
+          <div className="services-first-section">
 
 
-          </div> 
+                <div className="services-section-left-side">
 
-          <hr/>
+                        <div className="metric-card">
+                  <div className="card-left-side">
+                    <Link href="/dashboard/IncidentModule">
+                      <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                        {incidentReportsByDepartmentChart.title}
+                      </p>
+                    </Link>
+                    <p className="count">{incidentReportsByDepartmentChart.count}</p>
+                  </div>
+
+                  <div className="card-right-side">
+                    <ResponsiveContainer width={300} height={300}>
+                      <PieChart>
+                        <Pie
+                          data={incidentReportsByDepartmentChart.data}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={40}
+                                outerRadius={80}
+                          label
+                        >
+                          {incidentReportsByDepartmentChart.data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={incidentReportsByDepartmentChart.colors[index % incidentReportsByDepartmentChart.colors.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend 
+                          wrapperStyle={{ fontSize: '13px' }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+
+            </div>
+
+                    <div className="services-section-right-side">
+
+                      <div className="metric-card">
+                          <div className="card-left-side">
+                        <Link href={selectedIncidentType === 'inBarangay' ? "/dashboard/IncidentModule" : "/dashboard/IncidentModule/OnlineReports"}>
+                          <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                            {totalIncidentReportsChart.title}
+                          </p>
+                        </Link>
+                            <p className="count">{totalIncidentReportsChart.count}</p>
+
+                              <button 
+                                onClick={() => setSelectedIncidentType(prev => prev === 'inBarangay' ? 'online' : 'inBarangay')}
+                                className="action-next"
+                              >
+                                Switch
+                              </button>
+                          </div>
+
+                          <div className="card-right-side">
+                            <ResponsiveContainer width={700} height={280}>
+                              <BarChart
+                                data={totalIncidentReportsChart.data}
+                                layout="vertical"
+                                margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis type="number" />
+                                <YAxis type="category" dataKey="name" />
+                                <Tooltip />
+                                <Legend 
+                                  wrapperStyle={{ fontSize: '13px' }}
+                                />
+                                <Bar dataKey="value" name="Number of Incidents">
+                                  {totalIncidentReportsChart.data.map((entry, index) => (
+                                    <Cell 
+                                      key={`cell-${index}`} 
+                                      fill={totalIncidentReportsChart.colors[index % totalIncidentReportsChart.colors.length]} 
+                                    />
+                                  ))}
+
+                                  posi
+                                </Bar>
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+
+                          </div>          
+
+
+                  
+                </div>
+            </div>
+
+  
+        </div>
+
+        <hr/>
 
    
         <div className="services-section">
+            <div className="services-second-section">
+                      
+            <Link href="/dashboard/ServicesModule/InBarangayRequests">
+              <p className="dashboard-title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                Weekly Barangay Requests Chart
+              </p>
+            </Link>
+            <div className="heatmap-container">
+              <ResponsiveContainer width={1000} height={250}>
+                <BarChart data={documentRequestsByWeek}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="monthWeek" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '13px' }}
+                  />
+                  <Bar dataKey="Barangay Jobseeker" stackId="a" fill="#4CAF50" />
+                  <Bar dataKey="Barangay Clearance" stackId="a" fill="#2196F3" />
+                  <Bar dataKey="Barangay Indigency" stackId="a" fill="#FF9800" />
+                  <Bar dataKey="Barangay ID" stackId="a" fill="#9C27B0" />
+                  <Bar dataKey="Barangay Certificate" stackId="a" fill="#00BCD4" />
+                  <Bar dataKey="Barangay Permits" stackId="a" fill="#F44336" />
+
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            
+          </div>
 
           <div className="services-first-section">
 
@@ -775,7 +1022,7 @@ useEffect(() => {
                           </Link>
                         </div>
                         <div className="card-right-side">
-                          <ResponsiveContainer width={300} height={450}>
+                          <ResponsiveContainer width={300} height={300}>
                             <PieChart>
                               <Pie
                                 data={documentRequestsTypeData}
@@ -783,8 +1030,8 @@ useEffect(() => {
                                 nameKey="name"
                                 cx="50%"
                                 cy="50%"
-                                innerRadius={60}
-                                outerRadius={100}
+                                innerRadius={40}
+                                outerRadius={80}
                                 fill="#8884d8"
                                 label
                               >
@@ -793,7 +1040,9 @@ useEffect(() => {
                                 ))}
                               </Pie>
                               <Tooltip />
-                              <Legend />
+                              <Legend 
+                                wrapperStyle={{ fontSize: '13px' }}
+                              />
                             </PieChart>
                           </ResponsiveContainer>
                         </div>
@@ -822,7 +1071,7 @@ useEffect(() => {
                     </div>
 
                     <div className="card-right-side">
-                      <ResponsiveContainer width={700} height={300}>
+                      <ResponsiveContainer width={800} height={270}>
                         <BarChart
                           data={documentRequestsStatusChart.data}
                           layout="vertical"
@@ -832,7 +1081,9 @@ useEffect(() => {
                           <XAxis type="number" />
                           <YAxis type="category" dataKey="name" />
                           <Tooltip />
-                          <Legend />
+                          <Legend 
+                            wrapperStyle={{ fontSize: '13px' }}
+                          />
                           <Bar dataKey="value" name="Number of Documents">
                             {documentRequestsStatusChart.data.map((entry, index) => (
                               <Cell 
@@ -850,168 +1101,20 @@ useEffect(() => {
                 </div>
             </div>
 
-            <div className="services-second-section">
-                      
-            <Link href="/dashboard/ServicesModule/InBarangayRequests">
-              <p className="dashboard-title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                Weekly Barangay Requests Chart
-              </p>
-            </Link>
-            <div className="heatmap-container">
-              <ResponsiveContainer width={1000} height={300}>
-                <BarChart data={documentRequestsByWeek}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="monthWeek" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="Barangay Jobseeker" stackId="a" fill="#4CAF50" />
-                  <Bar dataKey="Barangay Clearance" stackId="a" fill="#2196F3" />
-                  <Bar dataKey="Barangay Indigency" stackId="a" fill="#FF9800" />
-                  <Bar dataKey="Barangay ID" stackId="a" fill="#9C27B0" />
-                  <Bar dataKey="Barangay Certificate" stackId="a" fill="#00BCD4" />
-                  <Bar dataKey="Barangay Permits" stackId="a" fill="#F44336" />
-
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-              
-
-            </div>
-
         </div>
 
 
         <hr/>
 
 
-      <div className="services-section">
+        <div className="services-section">
 
-          <div className="services-first-section">
-
-
-                <div className="services-section-left-side">
-
-                        <div className="metric-card">
-                  <div className="card-left-side">
-                    <Link href="/dashboard/IncidentModule">
-                      <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                        {incidentReportsByDepartmentChart.title}
-                      </p>
-                    </Link>
-                    <p className="count">{incidentReportsByDepartmentChart.count}</p>
-                  </div>
-
-                  <div className="card-right-side">
-                    <ResponsiveContainer width={300} height={300}>
-                      <PieChart>
-                        <Pie
-                          data={incidentReportsByDepartmentChart.data}
-                          dataKey="value"
-                          nameKey="name"
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={100}
-                          innerRadius={50} // doughnut style
-                          label
-                        >
-                          {incidentReportsByDepartmentChart.data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={incidentReportsByDepartmentChart.colors[index % incidentReportsByDepartmentChart.colors.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-
-                    </div>
-
-                    <div className="services-section-right-side">
-
-                      <div className="metric-card">
-                          <div className="card-left-side">
-                        <Link href={selectedIncidentType === 'inBarangay' ? "/dashboard/IncidentModule" : "/dashboard/IncidentModule/OnlineReports"}>
-                          <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                            {totalIncidentReportsChart.title}
-                          </p>
-                        </Link>
-                            <p className="count">{totalIncidentReportsChart.count}</p>
-
-                              <button 
-                                onClick={() => setSelectedIncidentType(prev => prev === 'inBarangay' ? 'online' : 'inBarangay')}
-                                className="action-next"
-                              >
-                                Switch
-                              </button>
-                          </div>
-
-                          <div className="card-right-side">
-                            <ResponsiveContainer width={700} height={300}>
-                              <BarChart
-                                data={totalIncidentReportsChart.data}
-                                layout="vertical"
-                                margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
-                              >
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis type="number" />
-                                <YAxis type="category" dataKey="name" />
-                                <Tooltip />
-                                <Legend />
-                                <Bar dataKey="value" name="Number of Incidents">
-                                  {totalIncidentReportsChart.data.map((entry, index) => (
-                                    <Cell 
-                                      key={`cell-${index}`} 
-                                      fill={totalIncidentReportsChart.colors[index % totalIncidentReportsChart.colors.length]} 
-                                    />
-                                  ))}
-
-                                  posi
-                                </Bar>
-                              </BarChart>
-                            </ResponsiveContainer>
-                          </div>
-
-                          </div>          
-
-
-                  
-                </div>
-            </div>
-
-            <div className="services-second-section">
-                      
-             <Link href="/dashboard/IncidentModule">
-                <p className="dashboard-title" style={{ cursor: "pointer", textDecoration: "underline" }}>
-                  Monthly Incident Reports Chart
-                </p>
-              </Link>
-              <div className="heatmap-container">
-                <ResponsiveContainer width={1000} height={300}>
-                  <AreaChart data={incidentReportsByMonth} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Area type="monotone" dataKey="VAWC" stroke="#8884d8" fill="#8884d8" />
-                    <Area type="monotone" dataKey="GAD" stroke="#82ca9d" fill="#82ca9d" />
-                    <Area type="monotone" dataKey="Lupon" stroke="#ffc658" fill="#ffc658" />
-                    <Area type="monotone" dataKey="BCPC" stroke="#ff7300" fill="#ff7300" />
-                    <Area type="monotone" dataKey="Online" stroke="#ff0000" fill="#ff0000" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-                      
-
-            </div>
-
-
-              <div className="dashboard-heatmap-section">
+        <div className="dashboard-heatmap-section">
                 <div className="heatmap-header">
-                  <h2 className="title">📍 Incident Heat Map</h2>
+                
+                  <p className="dashboard-title-heading">
+                    📍 Incident Heat Map
+                  </p>
 
                   <div className="heatmap-legend">
                     <div className="legend-title">Incident Intensity</div>
@@ -1027,10 +1130,9 @@ useEffect(() => {
                   <Heatmap incidents={reportData} />
                 </div>
               </div>
-
-
-
         </div>
+
+       
     </main>
   );
 }

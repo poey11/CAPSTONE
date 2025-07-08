@@ -265,15 +265,15 @@ export default function Header() {
       title: "Undefined",
       breadcrumb: ["Undefined"],
     };
-  }, [pathname, searchParams.toString(), viewedResidentStatus]);
+  }, [pathname, Array.from(searchParams.entries()).toString(), viewedResidentStatus]);
 
   return (
-    <div className="header-main-container">
-      <div className="add-resident-main-header">
-        <div className="path-section">
-          {routeInfo.breadcrumb.map((crumb, index) => {
-            const isLast = index === routeInfo.breadcrumb.length - 1;
-            const Tag = isLast ? "h2" : "h1";
+<div className="header-main-container">
+  <div className="main-header">
+    <div className="path-section">
+      {routeInfo.breadcrumb.map((crumb, index) => {
+        const isLast = index === routeInfo.breadcrumb.length - 1;
+        const Tag = isLast ? "h2" : "h1";
 
             const pathSegments = pathname.split("/").filter(Boolean);
             const href = "/" + pathSegments.slice(0, index + 1).join("/");
