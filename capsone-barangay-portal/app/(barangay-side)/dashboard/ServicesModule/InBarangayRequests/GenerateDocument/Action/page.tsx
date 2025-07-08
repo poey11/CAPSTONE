@@ -864,15 +864,26 @@ export default function action() {
           }
         }
         let sendTo ="";
-        if(clearanceInput.docType === "Barangay Certificate" || clearanceInput.docType === "Barangay Clearance" 
-          || clearanceInput.docType === "Barangay Indigency" || clearanceInput.docType === "Temporary Business Permit"
-          || clearanceInput.docType === "Construction" || (docType === "Barangay Permit" && docPurpose)
+        if (
+          clearanceInput.docType === "Barangay Certificate" ||
+          clearanceInput.docType === "Barangay Clearance" ||
+          clearanceInput.docType === "Barangay Indigency" ||
+          clearanceInput.docType === "Temporary Business Permit" ||
+          clearanceInput.docType === "Construction" ||
+          (docType === "Barangay Permit" && docPurpose) ||
+          (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
         ) {
-
           sendTo = "SAS";
-        } 
-        else if(clearanceInput.docType === "Business Permit" || clearanceInput.purpose === "Barangay ID"){
+        } else if (
+          clearanceInput.docType === "Business Permit" ||
+          (clearanceInput.docType === "Other Documents" && clearanceInput.purpose === "Barangay ID")
+        ) {
           sendTo = "Admin Staff";
+        }
+
+        let documentTypeIs = "";
+        if(otherDocPurposes[clearanceInput.docType || '']?.includes(clearanceInput.purpose || "")) {
+          documentTypeIs = "OtherDocuments";
         }
 
         const docData = {
@@ -882,6 +893,9 @@ export default function action() {
           docPrinted: false,
           ...(clearanceInput.purpose ==="Garage/PUV" && {
             noOfVehicles: clearanceInput.noOfVehicles,
+          }),
+          ...(documentTypeIs !== "" && {
+            documentTypeIs: documentTypeIs,
           }),
           ...uploadedFileUrls,
         };
@@ -1409,7 +1423,7 @@ const handleChange = (
                                 <option value="Barangay ID">Barangay ID</option>
                                 <option value="First Time Jobseeker">First Time Jobseeker</option>
 
-                                {otherDocPurposes["Other"]?.map((title, index) => (
+                                {otherDocPurposes["Other Documents"]?.map((title, index) => (
                                   <option key={index} value={title}>{title}</option>
                                 ))}
                               </>

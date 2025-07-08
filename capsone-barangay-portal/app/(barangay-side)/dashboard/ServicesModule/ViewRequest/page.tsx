@@ -8,7 +8,7 @@ import { getDownloadURL, ref } from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot } from "firebase/firestore";
-import { handlePrint } from "@/app/helpers/pdfhelper";
+import { handlePrint,handleGenerateDocument } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
 
 interface EmergencyDetails {
@@ -22,6 +22,7 @@ interface EmergencyDetails {
     sendTo: string;
     accID: string;
     requestId: string;
+    documentTypeIs?: string; 
     docPrinted?: boolean; // Optional field to track if document is printed
     reqType?: string; // "Online" or "InBarangay"
     requestor: string;
@@ -1350,7 +1351,14 @@ const ViewOnlineRequest = () => {
     
     const print = async() => {
       /* This part will handle ung pag generate ng pdf and also updates the request's status to In - Progress */
-      handlePrint(requestData);
+      if(!requestData?.documentTypeIs){
+        handlePrint(requestData);
+      }
+      else{//if existing ung documentTypeIs, it will use the other generate document function
+        handleGenerateDocument(requestData);
+        console.log("Existing documentTypeIs, using other generate document function");
+      }
+      
       if(!id) return;
       const docRef = doc(db, "ServiceRequests", id);
       let updatedData: any = {
@@ -1359,7 +1367,7 @@ const ViewOnlineRequest = () => {
           docPrinted: true,
       };
 
-      await updateDoc(docRef, updatedData);
+     await updateDoc(docRef, updatedData);
     }
 
     const handleNextStep = async() => {

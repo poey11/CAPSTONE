@@ -239,7 +239,7 @@ export default function AddNewDoc() {
                                         <option value="Barangay Clearance">Clearance</option>
                                         <option value="Barangay Indigency">Indigency</option>                     
                                         <option value="Barangay Permit">Permit</option>
-                                        <option value="Other">Other</option>
+                                        <option value="Other Documents">Other</option>
                                     </select>
                                 </div>
                                 <div className="addNewDoc-checkbox-container">

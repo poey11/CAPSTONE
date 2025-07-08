@@ -1,5 +1,12 @@
 import { getLocalDateString } from "./helpers";
 import { toWords } from 'number-to-words';
+import {db} from "@/app/db/firebase";
+import { collection,doc,getDocs, query, where } from "firebase/firestore";
+
+interface fieldsProps {
+  name?: string;
+  value?: string; // or `file?: File` if used before uploading
+}
 
 
 const getMonthName = (monthNumber:number) => {
@@ -213,4 +220,100 @@ const handlePrint = async(requestData:any) => {
     link.remove();
 }
 
-export {handlePrint};
+
+const today = new Date();
+
+
+const extraData = {
+    day: "",
+    month: "",
+    year:   "",
+}
+
+const handleGenerateDocument = async(documentB:any) => {
+    function replacePlaceholders(body: string, values: Record<string, string>) {
+        return body.replace(/\{(\w+)\}/g, (_, key) => values[key] || `{${key}}`);
+    }
+
+
+
+    const docRef = query(
+      collection(db, "OtherDocuments"),
+      where("type", "==", documentB?.docType),
+    );
+
+    const docSnapshot = await getDocs(docRef);
+    if (docSnapshot.empty) return;
+
+    let documentData: any[] = [];
+    docSnapshot.forEach((doc) => {
+      const data = doc.data();
+      documentData.push({
+        id: doc.id,
+        ...data,
+      });
+    });
+
+    
+    const day = getOrdinal(today.getDate());
+    const month = getMonthName(today.getMonth() + 1);
+    const year = today.getFullYear();
+    extraData.day = day;
+    extraData.month = month;
+    extraData.year = year.toString();
+
+    // ✅ Actually store the result of filtering
+    const matchedDoc = documentData.find((doc) => doc.title === documentB?.purpose);
+
+    console.log("Matched Document:", matchedDoc);
+    console.log("Document Data:", documentB);
+    console.log("Extra Data:", extraData);
+
+    const documentFields =  [];
+
+    const dynamicFields = matchedDoc.fields.reduce((acc: any, field: any) => {
+      acc[field.name] = documentB[field.name];
+      return acc;
+    }, {});
+    
+    documentFields.push(dynamicFields);
+    console.log("Document Fields:", documentFields);
+
+    const mergedData = {
+      ...dynamicFields,
+      ...extraData,
+    };
+    
+    const newBody = replacePlaceholders(matchedDoc?.body, mergedData);
+
+    console.log("Replaced Body:", newBody);
+    
+    
+    console.log("Generating document with body:", newBody);
+    const response = await fetch('/api/dynamicPDF', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            title: matchedDoc?.title,
+            body: newBody,
+        }),
+    });
+    if (!response.ok) {
+        console.error("Failed to generate PDF");
+        return;
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download=`${documentB.docType}${`_${documentB.purpose}` || ""}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+    link.remove();        
+}
+
+
+    
+export {handlePrint, handleGenerateDocument};
