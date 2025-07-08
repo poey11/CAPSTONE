@@ -7,7 +7,7 @@
   background-color: #F0F2F8; 
   margin-left: 1rem;
 
-  padding-top: 80px; /* edited this line */
+  padding-top: 80px; /* edited this line */ 
   padding-left: 20px; /* edited */
   padding-right: 20px; /* edited */
   padding-bottom: 20px; /* edited */
@@ -22,7 +22,7 @@
   gap: 20px;
   padding: 0;
   
-  margin-top: 20px; /* edited this line */
+  margin-top: 10px; /* edited this line */ /* 10px kapag may redirection section buttons sa taas ng filters*/
 }
 
 /* NEW UPDATED */
@@ -739,15 +739,21 @@ filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-
     background-color:#cc591b;
   }
 
+
+  /* NEW UPDATED */
   .status-badge {
-    padding: 8px 12px;            
-    border-radius: 5px;          
-    font-size: 13px;              
+    border-radius: 5px;                     
     color: white;                
     display: inline-block;        
     text-transform: capitalize;   
     text-align: center;    
-    width: 105px;       
+    
+    width: 80px; /* edited this line */
+    padding: 5px 10px;   /* edited this line */    
+}
+
+.status-badge p{
+  font-size: 13px;
 }
 
 .status-badge.unverified {
@@ -902,7 +908,6 @@ UPDATE
 .user-roles-module-section-1-resident-users {
     display: flex;
   justify-content: center;
-  margin-bottom: 1.5rem;
   padding: 0.5rem 0;
   background: transparent;
   border: none;
@@ -916,8 +921,9 @@ UPDATE
   justify-content: center;
 }
 
+/* NEW UPDATED*/
 .info-toggle-btn-assigned-resident {
-   padding: 10px 20px;
+   padding: 8px 18px;
  /* border: 1px solid transparent;*/
   border: 1px solid #214666;
   border-radius: 20px;
@@ -928,6 +934,9 @@ UPDATE
   transition: all 0.3s ease;
   font-size: 14px;
   text-transform: capitalize; 
+
+
+  padding: 8px 18px; /* edited this line */
 }
 
 .info-toggle-btn-assigned-resident:hover {
@@ -989,7 +998,8 @@ UPDATE
 }
 
 /* NEW UPDATED ADDED */
-.add-incident-animated {
+.add-incident-animated,
+.verified-pending-users{
   opacity: 0;
   animation: dropDownFromTop 0.6s ease-out forwards;
   animation-delay: 0.3s;

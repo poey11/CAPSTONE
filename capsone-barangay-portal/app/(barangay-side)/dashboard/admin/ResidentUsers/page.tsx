@@ -168,28 +168,40 @@ const ResidentUsers = () => {
     return pageNumbersToShow;
   };
 
+    /* NEW UPDATED ADDED */
+    const [filtersLoaded, setFiltersLoaded] = useState(false);
+  
+    /* NEW UPDATED ADDED */
+    useEffect(() => {
+      setFiltersLoaded(false); // reset animation
+      const timeout = setTimeout(() => {
+        setFiltersLoaded(true); // retrigger
+      }, 50); // adjust delay as needed
+      return () => clearTimeout(timeout);
+    }, [searchParams.toString()]);
+    
   return (
     <main className="residentusers-page-main-container">
       <div className="user-roles-module-section-1-resident-users">
-        <div className="assigned-tasks-info-toggle-wrapper">
-          {["main", "pending"].map(section => (
-            <button
-              key={section}
-              type="button"
-              className={`info-toggle-btn-assigned-resident ${activeSection === section ? "active" : ""}`}
-              onClick={() => { setActiveSection(section); setCurrentPage(1); }}
-              style={{ position: "relative" }}
-            >
-              {section === "main" && "Verified Users"}
-              {section === "pending" && "Pending Users"}
-            </button>
-          ))}
-        </div>
+      <div className={`assigned-tasks-info-toggle-wrapper ${filtersLoaded ? "filters-animated" : ""}`}>
+        {["main", "pending"].map(section => (
+          <button
+            key={section}
+            className={`info-toggle-btn-assigned-resident verified-pending-users ${activeSection === section ? "active" : ""}`}
+            onClick={() => { setActiveSection(section); setCurrentPage(1); }}
+          >
+            {section === "main" && "Verified Users"}
+            {section === "pending" && "Pending Users"}
+          </button>
+        ))}
+      </div>
       </div>
 
       {/* Filters for main */}
+
+    
       {activeSection === "main" && (
-        <div className="residentusers-page-section-2">
+        <div className={`residentusers-page-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
           <input type="text" className="residentusers-page-filter" placeholder="Search by Name"
             value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           {/* <select className="residentusers-page-filter" value={sexFilter}
@@ -215,7 +227,7 @@ const ResidentUsers = () => {
 
       {/* Filters for pending */}
       {activeSection === "pending" && (
-        <div className="residentusers-page-section-2">
+        <div className={`residentusers-page-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
           <input type="text" className="residentusers-page-filter" placeholder="Search by Name"
             value={pendingSearchTerm} onChange={(e) => setPendingSearchTerm(e.target.value)} />
           {/* <select className="residentusers-page-filter" value={pendingSexFilter}
@@ -266,7 +278,9 @@ const ResidentUsers = () => {
                   <tr key={user.id} className={highlightedId === user.id ? "highlighted-row" : ""}>
                     <td>{user.last_name}, {user.first_name} {user.middle_name}</td>
                     <td>{user.address}</td><td>{user.phone}</td><td>{user.sex}</td><td>{user.role}</td><td>{user.email}</td>
-                    <td><span className={`status-badge ${user.status.toLowerCase().replace(" ", "-")}`}>{user.status}</span></td>
+                    <td><span className={`status-badge ${user.status.toLowerCase().replace(" ", "-")}`}>
+                      <p>{user.status}</p>
+                      </span></td>
                     <td>
                       <div className="admin-actions">
                         <button className="admin-action-view" onClick={() => router.push(`/dashboard/admin/viewResidentUser?id=${user.id}`)}>
