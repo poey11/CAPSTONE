@@ -2,7 +2,7 @@
 import "@/CSS/IncidentModule/Letters.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import {  useEffect,useState } from "react";
-import { addDoc,collection,doc, getDocs, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { addDoc,collection,doc, getDocs, onSnapshot, orderBy, query, updateDoc, where, setDoc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
 import { getLocalDateString, getLocalDateTimeString } from "@/app/helpers/helpers";
@@ -40,6 +40,7 @@ export default function GenerateDialogueLetter() {
         DateOfDelivery: "",
         DateTimeOfMeeting: "",
         LuponStaff: "",
+        LuponStaffId: "",
         DateFiled:today ,
         complainant:{
             fname:"",
@@ -71,8 +72,8 @@ export default function GenerateDialogueLetter() {
                 const querySnapshot = await getDocs(staffquery);
                 
                 querySnapshot.forEach((doc) => {
-                    setListOfStaffs((prev) => [...prev, doc.data()]);
-                });
+                    setListOfStaffs((prev) => [...prev, { ...doc.data(), id: doc.id }]);
+                  });
       
             } catch (error: any) {
               console.error("Error fetching LT List:", error.message);
@@ -491,38 +492,80 @@ export default function GenerateDialogueLetter() {
         fetchSummonLetterStatus();
       }, [docId]);
 
-    const handleIsDialogue = async () => {
+      const handleIsDialogue = async () => {
         try {
-            if(!docId) throw new Error("Document ID is undefined");
-
+            if (!docId) throw new Error("Document ID is undefined");
+    
+            // Update the parent IncidentReport to mark isDialogue
             const docRef = doc(db, "IncidentReports", docId);
             const updates = {
                 isDialogue: true,
             };
             await updateDoc(docRef, updates);
-            const docRefB = (collection(db, "IncidentReports", docId, "GeneratedLetters"))
-            
+    
+            // Add GeneratedLetter subdocument
+            const docRefB = collection(db, "IncidentReports", docId, "GeneratedLetters");
             await addDoc(docRefB, {
                 createdAt: new Date(),
                 createdBy: user?.fullName,
                 letterType: actionId,
                 DateOfDelivery: otherInfo.DateOfDelivery,
                 DateTimeOfMeeting: otherInfo.DateTimeOfMeeting,
-                LuponStaff: otherInfo.LuponStaff,
-                DateFiled: otherInfo.DateFiled,          
-                dialougeSMS: otherInfo.sendDialogueSms,    
+                LuponStaff: otherInfo.LuponStaff, // display name
+                LuponStaffId: otherInfo.LuponStaffId, // keep staffId here silently
+                DateFiled: otherInfo.DateFiled,
+                dialougeSMS: otherInfo.sendDialogueSms,
             });
-        }
-        catch (error: string|any) {
+    
+            //  Add the barangay notification for assigned staff
+            if (otherInfo.LuponStaffId) {
+                const barangayNotificationRef = doc(collection(db, "BarangayNotifications"));
+                await setDoc(barangayNotificationRef, {
+                    recipientRole: "LF Staff",
+                    respondentID: otherInfo.LuponStaffId, // store hidden staffId
+                    message: `You have been assigned to deliver a Dialogue letter for Case #${userInfo.caseNumber || docId}.`,
+                    timestamp: new Date(),
+                    isRead: false,
+                    incidentID: docId,
+                    transactionType: "Assigned Incident"
+                });
+            }
+
+            // complainant notification
+
+            if (userInfo.complainant?.residentID) {
+                const complainantNotifRef = doc(collection(db, "Notifications"));
+                await setDoc(complainantNotifRef, {
+                    residentID: userInfo.complainant.residentID,
+                    message: `You have a scheduled Dialogue meeting on ${otherInfo.DateTimeOfMeeting} for Case #${userInfo.caseNumber || docId}.`,
+                    transactionType: "Incident",
+                    timestamp: new Date(),
+                    isRead: false,
+                });
+            }
+    
+            //  Respondent notification
+            if (userInfo.respondent?.residentID) {
+                const respondentNotifRef = doc(collection(db, "Notifications"));
+                await setDoc(respondentNotifRef, {
+                    residentID: userInfo.respondent.residentID,
+                    message: `You have a scheduled Dialogue meeting on ${otherInfo.DateTimeOfMeeting} for Case #${userInfo.caseNumber || docId}.`,
+                    transactionType: "Incident",
+                    timestamp: new Date(),
+                    isRead: false,
+                });
+            }
+    
+        } catch (error: string | any) {
             console.error(error);
         }
     }
+    
     const handleIsHearing = async () => {
         try {
-            if(!docId) throw new Error("Document ID is undefined");
-
-            const docRefB = (collection(db, "IncidentReports", docId, "GeneratedLetters"))
-            console.log(hearing);
+            if (!docId) throw new Error("Document ID is undefined");
+    
+            const docRefB = collection(db, "IncidentReports", docId, "GeneratedLetters");
             await addDoc(docRefB, {
                 createdAt: new Date(),
                 createdBy: user?.fullName,
@@ -530,23 +573,64 @@ export default function GenerateDialogueLetter() {
                 DateOfDelivery: otherInfo.DateOfDelivery,
                 DateTimeOfMeeting: otherInfo.DateTimeOfMeeting,
                 LuponStaff: otherInfo.LuponStaff,
-                DateFiled: otherInfo.DateFiled,                
+                LuponStaffId: otherInfo.LuponStaffId,
+                DateFiled: otherInfo.DateFiled,
                 hearingNumber: hearing,
                 hearingSms: otherInfo.sendHearingSms,
             });
-
+    
+            // Update parent doc hearing info
             const docRef = doc(db, "IncidentReports", docId);
             const updates = {
-                    ...(hearing !== 3 && { hearing: hearing + 1 }),
+                ...(hearing !== 3 && { hearing: hearing + 1 }),
                 generatedHearingSummons: generatedHearingSummons + 1,
             };
             await updateDoc(docRef, updates);
+    
+            // 🔥 Add notification for hearing
+            if (otherInfo.LuponStaffId) {
+                const barangayNotificationRef = doc(collection(db, "BarangayNotifications"));
+                await setDoc(barangayNotificationRef, {
+                    recipientRole: "LF Staff",
+                    respondentID: otherInfo.LuponStaffId,
+                    message: `You have been assigned to deliver a Summons letter for Case #${userInfo.caseNumber || docId}.`,
+                    timestamp: new Date(),
+                    isRead: false,
+                    incidentID: docId,
+                    transactionType: "Assigned Incident"
+                });
+            }
 
-        }
-        catch (error: string|any) {
+            // complainant notification
+            if (userInfo.complainant?.residentID) {
+                const complainantNotifRef = doc(collection(db, "Notifications"));
+                await setDoc(complainantNotifRef, {
+                    residentID: userInfo.complainant.residentID,
+                    message: `You have a scheduled ${hearingB} Hearing on ${otherInfo.DateTimeOfMeeting} for Case #${userInfo.caseNumber || docId}.`,
+                    transactionType: "Incident",
+                    timestamp: new Date(),
+                    isRead: false,
+                });
+            }
+    
+            // Respondent notification
+            if (userInfo.respondent?.residentID) {
+                const respondentNotifRef = doc(collection(db, "Notifications"));
+                await setDoc(respondentNotifRef, {
+                    residentID: userInfo.respondent.residentID,
+                    message: `You have a scheduled ${hearingB} Hearing on ${otherInfo.DateTimeOfMeeting} for Case #${userInfo.caseNumber || docId}.`,
+                    transactionType: "Incident",
+                    timestamp: new Date(),
+                    isRead: false,
+                });
+            }
+    
+    
+        } catch (error: string | any) {
             console.error(error);
         }
     }
+    
 
     const meeting = getLocalDateString(new Date(otherInfo.DateTimeOfMeeting.split("T")[0]));
     const delivery = getLocalDateString(new Date(otherInfo.DateOfDelivery));
@@ -604,6 +688,7 @@ export default function GenerateDialogueLetter() {
             DateOfDelivery: "",
             DateTimeOfMeeting: "",
             LuponStaff: "",
+            LuponStaffId: "",
             DateFiled: "",
             complainant:{
                 fname: `${userInfo.complainant?.fname || ""} ${userInfo.complainant?.lname || ""}`.trim(),
@@ -1082,20 +1167,37 @@ export default function GenerateDialogueLetter() {
                                 </div>
                                 <div className="fields-section-letter">
                                       <p>Delivered By</p>      
-                                    <select className="generate-letter-input-field-dropdown" value={safeData[0]?.LuponStaff||otherInfo.LuponStaff}
-                                    id="LuponStaff"
-                                    name="LuponStaff"
-                                    onChange={handleChange}
-                                    required
-                                    disabled = {safeData[0]?.LuponStaff ? true : false}
-                                    >
-                                        <option value="">Select Kagawad</option>
-                                        {listOfStaffs.map((staff, index) => (
-                                            <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
-                                                {staff.firstName} {staff.lastName}
-                                            </option>
-                                        ))}
-                                    </select>
+                                      <select
+                                            className="generate-letter-input-field-dropdown"
+                                            value={safeData[0]?.LuponStaff || otherInfo.LuponStaff}
+                                            onChange={(e) => {
+                                                const select = e.target;
+                                                const selectedOption = select.options[select.selectedIndex];
+                                                const selectedName = selectedOption.value;
+                                                const selectedId = selectedOption.getAttribute("data-staffid") || "";
+                                                console.log("DEBUG SELECT:", selectedName, selectedId);
+
+                                                setOtherInfo(prev => ({
+                                                    ...prev,
+                                                    LuponStaff: selectedName,
+                                                    LuponStaffId: selectedId
+                                                }));
+                                            }}
+                                            required
+                                            disabled={!!safeData[0]?.LuponStaff}
+                                        >
+                                            <option value="">Select Official/Kagawad</option>
+                                            {listOfStaffs.map((staff, index) => (
+                                                <option
+                                                    key={index}
+                                                    value={`${staff.firstName} ${staff.lastName}`}
+                                                    data-staffid={staff.id}
+                                                >
+                                                    {staff.firstName} {staff.lastName}
+                                                </option>
+                                            ))}
+                                        </select>
+
 
                                 </div>
 
@@ -1144,19 +1246,37 @@ export default function GenerateDialogueLetter() {
 
                                  <div className="fields-section-letter">
                                     <p>Delivered By</p>
-                                     <select className="generate-letter-input-field-dropdown" value={otherInfo.LuponStaff}
-                                id="LuponStaff"
-                                name="LuponStaff"
-                                onChange={handleChange}
-                                required
-                                >
-                                    <option value="">Select Official/Kagawad</option>
-                                    {listOfStaffs.map((staff, index) => (
-                                        <option key={index} value={`${staff.firstName} ${staff.lastName}`}>
+                                    <select
+                                        className="generate-letter-input-field-dropdown"
+                                        value={otherInfo.LuponStaff}
+                                        onChange={(e) => {
+                                            const select = e.target;
+                                            const selectedOption = select.options[select.selectedIndex];
+                                            const selectedName = selectedOption.value;
+                                            const selectedId = selectedOption.getAttribute("data-staffid") || "";
+
+                                            console.log("DEBUG SELECT HEARING:", selectedName, selectedId);
+
+                                            setOtherInfo(prev => ({
+                                            ...prev,
+                                            LuponStaff: selectedName,
+                                            LuponStaffId: selectedId
+                                            }));
+                                        }}
+                                        required
+                                        >
+                                        <option value="">Select Official/Kagawad</option>
+                                        {listOfStaffs.map((staff, index) => (
+                                            <option
+                                            key={index}
+                                            value={`${staff.firstName} ${staff.lastName}`}
+                                            data-staffid={staff.id}
+                                            >
                                             {staff.firstName} {staff.lastName}
-                                        </option>
-                                    ))}
-                                </select>
+                                            </option>
+                                        ))}
+                                        </select>
+
 
                                 </div>
 
