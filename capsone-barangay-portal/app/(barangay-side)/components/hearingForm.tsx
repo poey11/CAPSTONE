@@ -356,21 +356,34 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
             
    <form onSubmit={handleSaveClick} className="hearing-main-section">
 
-       <div className="dialogue-header-body-top-section">
-                        <div className="hearing-incident-info-toggle-wrapper">
-                            {["meeting", "minutes" ].map((section) => (
-                                <button
-                                key={section}
-                                type="button"
-                                className={`info-toggle-btn-hearing ${activeSection === section ? "active" : ""}`}
-                                onClick={() => setActiveSection(section)}
-                                >
-                                {section === "meeting" && "Meeting Information"}
-                                {section === "minutes" && "Minutes Information"}
-                                </button>
-                            ))}
-                        </div>
+       <div className="hearing-edit-header-body-top-section">
+            
+            <div className="hearing-edit-first-section">
+                 <div className="hearing-incident-info-toggle-wrapper">
+                     {["meeting", "minutes" ].map((section) => (
+                     <button
+                     key={section}
+                     type="button"
+                     className={`info-toggle-btn-hearing ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                          >
+                     {section === "meeting" && "Meeting Information"}
+                         {section === "minutes" && "Minutes Information"}
+                         </button>
+                        ))}
+                </div>
+
+            </div>
+
+
+                  <div className="hearing-edit-section-2">
+                        {!hearingDetails[index]?.filled && (<button type="submit" className="action-save-edit">Save</button>)}
+                  </div>
         </div>
+
+
+
+
  
         {activeSection === "meeting" && (
         <>
@@ -507,15 +520,15 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
 
                 </div>
 
-                <div className="edit-incident-content-dialogue-rightsection">
-                    <div className="view-incident-dialogue-remarks-container">
-                        <div className="box-container-outer-remarks-dialogue">
-                            <div className="title-remarks-dialogue">
+                <div className="edit-incident-content-dialogue-rightsection-update">
+                    <div className="view-incident-dialogue-remarks-container-update">
+                        <div className="box-container-outer-remarks-dialogue-update">
+                            <div className="title-remarks-dialogue-update">
                                 Remarks
                             </div>
-                             <div className={`box-container-remarks-dialogue ${invalidFields.includes("remarks") ? "input-error" : ""}`}>
-                                <span className="required-asterisk-incident">*</span>
-                                 <textarea className="remarks-input-field-dialogue" 
+                             <div className={`box-container-remarks-dialogue-update ${invalidFields.includes("remarks") ? "input-error" : ""}`}>
+                                <span className="required-asterisk-incident-update">*</span>
+                                 <textarea className="remarks-input-field-dialogue-update" 
                                     name="remarks"
                                     id="remarks"
                                     value={details.remarks||hearingDetails[index]?.remarks||""}
@@ -635,9 +648,6 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
             )}
 
             
-                  <div className="flex justify-center items-center mt-10">
-                        {!hearingDetails[index]?.filled && (<button type="submit" className="action-view-edit">Save</button>)}
-                  </div>
 
                
             </form>

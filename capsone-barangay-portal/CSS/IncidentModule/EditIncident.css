@@ -2342,3 +2342,142 @@ For hearing main
   color: #ff6600;
   border-bottom: 3px solid #ff6600;
 }
+
+
+
+
+
+
+
+/*
+
+*/
+
+.hearing-edit-header-body-top-section{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding-top: 20px;
+  width: 100%;
+}
+
+
+.hearing-edit-first-section {
+  width: 100%;
+  display:flex;
+  justify-content: center;
+}
+
+.hearing-edit-section-2 {
+   width: 15%;
+
+}
+
+
+
+
+
+
+.action-save-edit {
+  border: none;
+  cursor: pointer;
+  padding: 10px 30px;
+  font-size: 13px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.action-save-edit {
+  background-color: #4caf50; 
+  color: white;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.edit-incident-content-dialogue-rightsection-update{
+  width: 45%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.view-incident-dialogue-remarks-container-update {
+  width: 100%;
+}
+
+
+.box-container-outer-remarks-dialogue-update {
+  position: relative; 
+  margin-bottom: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  display: flex;
+  justify-content: center;
+  height: 360px;
+}
+
+
+.title-remarks-dialogue-update {
+  position: absolute;
+  left: 50%; 
+  top: 30px; 
+  transform: translate(-50%, -50%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 5;
+  width: 210px;
+  text-align: center;
+}
+
+.box-container-remarks-dialogue-update {
+  position: relative;
+  width: 100%;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  margin-top: 30px;
+  height: 310px;
+}
+
+
+
+  .required-asterisk-incident-update {
+    color: red;
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 20px;
+  }
+
+  
+.remarks-input-field-dialogue-update {
+  padding: 8px;
+  width: 100%;
+  border-radius: 5px;
+  color: #000000;
+  text-align: left;
+  height: 280px;
+  margin-top: 20px;
+  resize: none;
+}
+
+.remarks-input-field-dialogue-update:focus {
+  outline: none;
+  border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
+  box-shadow: none;
+}

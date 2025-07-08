@@ -886,7 +886,7 @@ export default function EditLuponIncident() {
                                   <>
                                     <div className="edit-incident-content-middle-section">
                                       <div className="edit-incident-fields-section">
-                                        <p>Recommended Event To Join By Desk Officer</p>
+                                        <p>Recommended Event </p>
                                         <input type="text" className="edit-incident-input-field" 
                                         value={`${reportData.recommendedEvent}`} name="recommendedEvent" id="recommendedEvent" disabled/>
                                       </div>
