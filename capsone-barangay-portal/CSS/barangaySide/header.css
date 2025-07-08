@@ -1,18 +1,18 @@
 .header-main-container {
   width: auto;
-  height: 80px;
-  background-color: #ffffff;
+  height: 75px;
   border-bottom: 1px solid #e0e0e0;
   position: fixed;
-  top: 90px;
-  left: 100px;
+  top: 65px;
+  left: 60px;
   right: 0;
   z-index: 10;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-.add-resident-main-header {
+.main-header {
   background-color: #ffffff;
+  height: 75px;
   padding: 12px 24px 12px 130px;
   display: flex;
   flex-direction: column;
@@ -23,13 +23,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   flex-wrap: wrap;
 }
 
 .path-section h1,
 .path-section h2 {
-  font-size: 0.95rem;
+  font-size: 0.90rem;
   font-weight: 600;
   color: #4a6a8c;
   margin: 0;
@@ -70,7 +70,7 @@
 }
 
 .addresident-page-title-section-1 h1 {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #ffffff;
   margin: 0;
