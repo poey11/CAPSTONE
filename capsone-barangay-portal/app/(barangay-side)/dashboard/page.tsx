@@ -654,6 +654,15 @@ const sortedDepartments = Object.entries(departmentTotals)
     return () => clearInterval(interval);
   }, []);
 
+  const [visibleMonthlyIncidentChart, setVisibleMonthlyIncidentChart] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVisibleMonthlyIncidentChart(true);
+    }, 600); // Adjust delay to match other animations
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <main className="main-container">
       
@@ -841,7 +850,7 @@ const sortedDepartments = Object.entries(departmentTotals)
 
           <div className="services-section">
 
-          <div className="services-second-section">
+          <div className={`services-second-section fade-in-monthly ${visibleMonthlyIncidentChart ? 'visible' : ''}`}>
                       
                       <Link href="/dashboard/IncidentModule">
                          <p className="dashboard-title" style={{ cursor: "pointer", textDecoration: "underline" }}>
@@ -872,7 +881,7 @@ const sortedDepartments = Object.entries(departmentTotals)
                        </div>
                                
          
-                     </div>
+           </div>
 
           <div className="services-first-section">
 

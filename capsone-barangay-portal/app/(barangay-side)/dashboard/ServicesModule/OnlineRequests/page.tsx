@@ -202,26 +202,25 @@ import { db } from "@/app/db/firebase";
 const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
 
+  /* NEW UPDATED ADDED */
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
 
+  /* NEW UPDATED ADDED */
+  useEffect(() => {
+    setFiltersLoaded(false); // reset animation
+    const timeout = setTimeout(() => {
+      setFiltersLoaded(true); // retrigger
+    }, 50); // adjust delay as needed
+    return () => clearTimeout(timeout);
+  }, [searchParams.toString()]);
 
     return (
 
-        <main className="onlinereq-main-container">
+        <main className="onlinereq-main-container" /* edited this class*/>
 
+         <div className={`onlinereq-section-2 ${filtersLoaded ? "filters-animated" : ""}`}  /* edited this class*/>
 
-              {/*}
-      <div className="path-section">
-          <h1 className="breadcrumb">Serivices Managemnt<span className="chevron">/</span></h1>
-          <h2 className="breadcrumb">Online Requests<span className="chevron"></span></h2>
-      </div>*/}
-
-
-
-
-         <div className="onlinereq-section-2">
-
-
-          <div className="onlinereq-section-2-left">
+     
 
             <div className="data-input-group-onlinereq">
               <label htmlFor="dateFrom">From Date :</label>
@@ -250,10 +249,9 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
             </div>
 
 
-          </div>
 
 
-          <div className="onlinereq-section-2-right">
+
 
             <div className="dropdown-group-onlinereq">
 
@@ -290,8 +288,6 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
             </div>
 
-
-          </div>
               
 
 
@@ -300,23 +296,23 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
          </div>
 
-         <div className="onlinereq-main-section">
+         <div className="onlinereq-main-section" /* edited this class*/>
           
               {loading ? (
             <p>Loading Online Requests...</p>
           ) : error ? (
             <p className="error">{error}</p>
           ) : currentOnlineRequests.length === 0 ? (
-            <div className="no-result-card-services">
-              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-services" />
-              <p className="no-results-services">No Results Found</p>
+            <div className="no-result-card-services" /* edited this class */>
+              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-services" /* edited this class *//>
+              <p className="no-results-services" /* edited this class */>No Results Found</p>
             </div>
           ) : (
 
           <table>
-            <thead>
+            <thead /* edited this class */>
               <tr>
-                <th>Document Type</th>
+                <th /* edited this class */>Document Type</th>
                 <th>Request ID</th>
                 <th>Request Date</th>
                 <th>Requestor</th>
@@ -327,16 +323,17 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
             </thead>
             <tbody>
           {currentOnlineRequests.map((request, index) => (
-              <tr key={index} className={`${request.isNew ? "highlight-new-request" : ""} ${highlightedId && request.id === highlightedId ? "highlighted-row" : ""}`}>
+              <tr /* edited this class*/
+              key={index} className={`${request.isNew ? "highlight-new-request" : ""} ${highlightedId && request.id === highlightedId ? "highlighted-row" : ""}`}>
 
-                <td>{request.docType}</td>
+                <td /* edited this class */>{request.docType}</td>
                 <td>{request.requestId}</td>
                 <td>{request.createdAt}</td>
                 <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
                 <td>
                     <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
-                        {request.status}
+                        <p>{request.status}</p>
                     </span>
                 </td>
                 <td>

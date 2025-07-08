@@ -268,7 +268,7 @@ export default function HearingSection() {
                 </div>
 
                 <div className="edit-incident-header-body">
-                    <div className="hearing-header-body-top-section">
+                    <div className="hearing-header-body-top-section-main-hearing">
 
                     {/*
                         {["firsthearing", "secondhearing", "thirdhearing" ].map((section) => (
@@ -313,7 +313,7 @@ export default function HearingSection() {
                                 <button
                                     key={section}
                                     type="button"
-                                    className={`info-toggle-btn ${activeSection === section ? "active" : ""} ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    className={`info-toggle-btn-main-hearing ${activeSection === section ? "active" : ""} ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
                                     onClick={handleClick}
                                 >
                                     {section === "firsthearing" && "First Hearing"}
