@@ -438,16 +438,9 @@ export default function ViewUser() {
                                                 />
                                             </div>
 
-                                            <div className="view-pendinguser-fields-section">
-                                                <p>Reason For Reject</p>
-                                                <input
-                                                    type="text"
-                                                    className="view-user-input-field"
-                                                    name="reasonForReject"
-                                                    value={ResidentUserData?.rejectionReason || "N/A"}
-                                                    readOnly
-                                                />
-                                            </div>
+
+
+                      
                                         </div>
 
                                         <div className="view-main-user-content-right-side">
@@ -462,16 +455,49 @@ export default function ViewUser() {
                                                 />
                                             </div>
 
+
+                                         {ResidentUserData?.status === "Resubmission" && (
                                             <div className="view-pendinguser-fields-section">
-                                                <p>Linked Resident</p>
+                                                <p>Reason For Reject</p>
                                                 <input
                                                     type="text"
                                                     className="view-user-input-field"
-                                                    name="residentId"
-                                                    value={ResidentUserData?.residentId || "N/A"}
+                                                    name="reasonForReject"
+                                                    value={ResidentUserData?.rejectionReason || "N/A"}
                                                     readOnly
                                                 />
                                             </div>
+                                        )}
+
+                                        {ResidentUserData?.status === "Verified" && (
+                                            <div className="view-pendinguser-fields-section">
+                                                <p>Linked Resident</p>
+                                                {residentUserId ? (
+                                                <a
+                                                    href={`/dashboard/ResidentModule/ViewResident?id=${residentUserId}`}
+                                                    className="view-user-input-field"
+                                                    style={{
+                                                    display: 'inline-block',
+                                                    padding: '8px 12px',
+                                                    borderRadius: '4px',
+                                                    backgroundColor: '#f5f5f5',
+                                                    textDecoration: 'none',
+                                                    color: '#007bff',
+                                                    }}
+                                                >
+                                                    {residentUserId}
+                                                </a>
+                                                ) : (
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    value="N/A"
+                                                    readOnly
+                                                />
+                                                )}
+                                            </div>
+                                            )}
+
                                         </div>
 
                                           
@@ -479,8 +505,35 @@ export default function ViewUser() {
                                 )}
 
                                 {activeSection === "others" && (
-                                    <>
-                                        insert valid ID
+                                    <><div className="view-user-requirement-section">
+                                            <label className="view-user-requirements-label">Uploaded ID</label>
+                                            <div className="view-user-container">
+                                                {ResidentUserData?.upload ? (
+                                                <div className="file-name-image-display">
+                                                    <a
+                                                    href={ResidentUserData.upload}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    >
+                                                    <img
+                                                        alt="Verification Requirement"
+                                                        className="view-reqs-pic view-uploaded-pic"
+                                                        style={{ cursor: 'pointer' }}
+                                                        src={ResidentUserData.upload}
+                                                    />
+                                                    </a>
+                                                </div>
+                                                ) : (
+
+                                                
+                                            
+                                                <div className="no-verification-files-text">
+                                                    <p>No verification requirements uploaded.</p>
+                                                </div>
+                                                )}
+                                            </div>
+                                            </div>
+
                                     </>
                                 )}
                                 </div>
@@ -662,7 +715,7 @@ export default function ViewUser() {
                                     }}
                                     >
                                     <td>{resident.firstName}</td>
-                                    <td>{resident.middleName}</td>
+                                    <td>{resident.middleName}</td> 
                                     <td>{resident.lastName}</td>
                                     <td>{resident.dateOfBirth}</td>
                                     </tr>
@@ -715,15 +768,15 @@ export default function ViewUser() {
                                     <tr>
                                         <th>Valid ID</th>
                                         <td>
-                                            {resident.fileURL ? (
+                                            {resident.verificationFilesURLs ? (
                                                 <div className="resident-id-container">
                                                     <img
-                                                        src={resident.fileURL}
+                                                        src={resident.verificationFilesURLs}
                                                         alt="Resident's Valid ID"
                                                         className="resident-id-image"
                                                     />
                                                     <a
-                                                        href={resident.fileURL}
+                                                        href={resident.verificationFilesURLs}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="view-image-link"
