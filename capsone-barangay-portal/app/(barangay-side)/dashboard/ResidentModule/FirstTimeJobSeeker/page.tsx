@@ -211,25 +211,29 @@ export default function JobSeekerListModule() {
     return pageNumbersToShow;
   };
 
+   /* NEW UPDATED ADDED */
+   const [filtersLoaded, setFiltersLoaded] = useState(false);
+  
+   /* NEW UPDATED ADDED */
+   useEffect(() => {
+     setFiltersLoaded(false); // reset animation
+     const timeout = setTimeout(() => {
+       setFiltersLoaded(true); // retrigger
+     }, 50); // adjust delay as needed
+     return () => clearTimeout(timeout);
+   }, [searchParams.toString()]);
+
   return (
     <main className="resident-module-main-container">
-      {/*}
-      <div className="path-section">
-          <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
-          <h2 className="breadcrumb">First-Time Job Seeker List<span className="chevron"></span></h2>
-      </div>*/}
+   
       <div className="resident-module-section-1">
 
-    
-
-
-        {/*<h1>First-Time Job Seeker List</h1>*/}
         <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker/AddFirstTimeJobSeeker">
-          <button className="add-announcement-btn">Add New Job Seeker</button>
+          <button className="add-announcement-btn add-incident-animated">Add New Job Seeker</button>
         </Link>
       </div>
 
-      <div className="resident-module-section-2">
+      <div className={`resident-module-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
         <input
           type="text"
           className="resident-module-filter"
