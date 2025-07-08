@@ -216,8 +216,10 @@ export default function Action() {
   })
 
   useEffect(() => {
-    const restrictedDocs = ["Barangay Certificate", "Barangay Indigency", "Barangay Clearance"];
+    if (userData === null) return; // still loading Firestore
+    if (!docType) return; // no docType provided yet
   
+    const restrictedDocs = ["Barangay Certificate", "Barangay Indigency", "Barangay Clearance"];
     const tryingToAccessRestrictedDoc = restrictedDocs.includes(docType);
     const isUnverifiedOrGuest = !user || userData?.status !== "Verified";
   
@@ -226,6 +228,7 @@ export default function Action() {
       router.push("/services");
     }
   }, [user, userData, docType]);
+  
 
 
   useEffect(() => {
