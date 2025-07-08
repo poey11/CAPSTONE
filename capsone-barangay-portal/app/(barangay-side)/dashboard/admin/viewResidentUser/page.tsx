@@ -662,7 +662,7 @@ export default function ViewUser() {
                                     }}
                                     >
                                     <td>{resident.firstName}</td>
-                                    <td>{resident.middleName}</td>
+                                    <td>{resident.middleName}</td> 
                                     <td>{resident.lastName}</td>
                                     <td>{resident.dateOfBirth}</td>
                                     </tr>
@@ -715,15 +715,15 @@ export default function ViewUser() {
                                     <tr>
                                         <th>Valid ID</th>
                                         <td>
-                                            {resident.fileURL ? (
+                                            {resident.verificationFilesURLs ? (
                                                 <div className="resident-id-container">
                                                     <img
-                                                        src={resident.fileURL}
+                                                        src={resident.verificationFilesURLs}
                                                         alt="Resident's Valid ID"
                                                         className="resident-id-image"
                                                     />
                                                     <a
-                                                        href={resident.fileURL}
+                                                        href={resident.verificationFilesURLs}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="view-image-link"

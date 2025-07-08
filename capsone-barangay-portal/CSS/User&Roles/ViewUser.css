@@ -1,3 +1,4 @@
+
 .viewresident-main-container {
 
     width: 100%;
@@ -213,18 +214,17 @@ margin-top: 20px;
 
 .view-residentuser-confirmation-popup-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0; /* shorthand for top: 0; right: 0; bottom: 0; left: 0 */
   display: flex;
   align-items: center;
-  justify-content: center; 
+  justify-content: center;
   z-index: 9999;
-  background: rgba(0, 0, 0, 0.4);
-
-
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background 0.3s ease-in-out;
 }
+
 
 .view-residentuser-confirmation-popup-overlay-yesno {
   position: fixed;
@@ -327,7 +327,23 @@ margin-top: 20px;
   display: flex;
   flex-direction: column;
   position: fixed;
+   border-radius: 1rem;
+   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+     animation: fadeInUp 0.3s ease-in-out;
 }
+
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 /* Heading */
 .resident-table-popup h2 {
@@ -362,9 +378,15 @@ margin-top: 20px;
 }
 
 
+/* Container for matched resident table */
 .matched-table-container {
-  flex-grow: 1; 
+  flex-grow: 1;
   max-height: 60vh;
+  overflow-y: auto;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+  padding: 1rem;
 }
 
 
@@ -374,44 +396,52 @@ margin-top: 20px;
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 0.95rem;
+  color: #333;
 }
 
 .resident-table th,
 .resident-table td {
-  padding: 1.1rem;
+  padding: 1rem;
   text-align: center;
-  border-top: 1px solid #e2e2e2;
-  border-bottom: 1px solid#e2e2e2;
-  border-right: 1px solid #e2e2e2;
-  border-left: 1px solid #e2e2e2;
+  border: 1px solid #e0e0e0;
 }
 
-/*
-.resident-table th {
-
-  background-color: #214666;
-  font-weight: 600;
-  color: #ffffff;
-}*/
-
-.resident-table th:not(.verification-table-title, .verification-table-firsttitle) {
-  background-color: #f0f2f8;
-  color: #333;
-  font-weight: 600;
-  text-align: center;
-}
 
 /* Row hover effect */
 .resident-table-row {
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .resident-table-row:hover {
-  background-color: #f1f1f1;
+  background-color: #f9fafb;
+  transform: translateY(-1px);
+}
+
+/* First title row with distinct styling */
+.verification-table-firsttitle {
+  background-color: #214666;
+  color: #ffffff;
+  font-size: 1rem;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 
+
+
+/* Modern header styling excluding specific classes */
+.resident-table th:not(.verification-table-title):not(.verification-table-firsttitle) {
+  background-color: #f5f7fa;
+  color: #1f2937;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
 
 
 .resident-detail-container {
@@ -456,7 +486,14 @@ margin-top: 20px;
   gap: 30px;
   margin-top: 15px;
   overflow-y: auto;
-  max-height: 40vh; /* Limit the max height of the scrollable area */
+  max-height: 35vh; 
+    border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  margin-top: 1.5rem;
+
+    scrollbar-width: thin;
+  scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 }
 
 .verification-buttons-section{
@@ -538,13 +575,6 @@ color: white;
   background-color: #214666;
   color: #ffffff;
   font-size: 1.2rem;
-  text-align: center;
-}
-
-.verification-table-firsttitle {
-  background-color: #214666;
-  color: #ffffff;
-  font-size: 1rem;
   text-align: center;
 }
 
