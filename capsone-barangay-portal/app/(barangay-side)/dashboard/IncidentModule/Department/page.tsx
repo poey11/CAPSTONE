@@ -412,7 +412,7 @@ if (incidentType) {
             {incident.nature === "Others" ? (<td>{incident.specifyNature}</td>):(<td>{incident.nature}</td>)}
             <td>
               <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
-                {incident.status}
+                <p>{incident.status}</p>
               </span>
             </td>
             <td>

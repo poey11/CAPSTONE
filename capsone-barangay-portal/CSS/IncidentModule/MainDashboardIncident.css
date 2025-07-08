@@ -1,17 +1,23 @@
 
 
+/* NEW UPDATED */
 .main-container-departments{
   width: 100%;
   height: 100vh;
- background-color: #F0F2F8; 
-  padding-left:30px;
-  padding-right:30px;
-  padding-bottom:30px;
-  padding-top: 150px;
+  background-color: #F0F2F8; 
+  
+  
+
   margin-left: 1rem; 
+
+  padding-top: 80px; /* edited this line */
+  padding-left: 20px; /* edited */
+  padding-right: 20px; /* edited */
+  padding-bottom: 20px; /* edited */
 }
 
 
+/* NEW UPDATED */
  .main-section-departments {
     flex: 1; /* Makes it take up remaining space */
     display: flex; /* Ensures proper alignment */
@@ -20,26 +26,30 @@
     margin: 0; /* Remove default margin */
     overflow: auto; /* Allow scrolling if content overflows */
     width: 100%;
-    height: 100%; /* Full height */
-    margin-top: 2rem;
+    
     max-height: 70%;
     border: 1px solid rgba(36, 53, 76, 0.7);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
    background-color: #ffffff;
    border-radius: 6px;
-
-
   scrollbar-width: thin;
   scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+
+
+  margin-top: 1rem; /* edited this line */
+  height: 67%; /* edited this line */
 }
 
+/* NEW UPDATED */
 .main-section-departments thead {
   position: sticky;
   top: 0;
   background-color: #214666; /* Ensures it's visible when scrolled */
   z-index: 10; /* Ensures it stays above other content */
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
-  height: 80px;
+  
+  
+  height: 50px; /* edited this line */
 }
 
 .main-section-departments table {
@@ -48,14 +58,24 @@
   
 }
 
+/* NEW UPDATED */
 .main-section-departments td {
   padding: 1rem; 
   text-align: center; 
   border-bottom: 2px solid #ddd;
-color: rgb(44, 42, 42);
+  color: rgb(44, 42, 42);
   font-weight: normal;
+
+  font-size: 14px; /* added this line */
 }
 
+
+/* NEW UPDATED ADDED THIS */
+.main-section-departments tbody tr {
+  height: 50px; 
+}
+
+/* NEW UPDATED */
 .main-section-departments th {
   padding: 1rem; 
   text-align: left; 
@@ -63,6 +83,7 @@ color: rgb(44, 42, 42);
   color: #FFFFFF;
   text-align: center;
     
+  font-size: 14px; /* added this line */
 }
 
 
@@ -70,6 +91,7 @@ color: rgb(44, 42, 42);
 /*
 Newly added for tables
 */
+
 
 .main-section-departments tbody tr:nth-child(even) {
   background-color: #f0f4f8; /* Softer modern gray-blue tone */
@@ -79,10 +101,13 @@ Newly added for tables
   background-color: #ffffff; /* Crisp white */
 }
 
+
+/* NEW UPDATED */
 .main-section-departments tbody tr:hover {
   background-color: #d0e4f5 !important; /* Light pastel blue hover */
-  cursor: pointer;
   transition: background-color 0.2s ease;
+
+  /*cursor: pointer;*/ /* removed this line */
 }
 
 
@@ -134,16 +159,27 @@ SCROLL FOR CHROME ETC
     justify-content: center;
 }
 
+
+/* NEW UPDATED */
 .action-view-departments-main,
 .action-edit-departments-main,
 .action-delete-departments-main {
   border: none;
     cursor: pointer;
-    width: 24px;
-    height: 24px;
 
+
+    width: 20px;  /* edited this line */
+    height: 20px; /* edited this line */
+    transition: transform 0.2s ease, filter 0.2s ease;
 }
 
+
+.action-view-departments-main:hover,
+.action-edit-departments-main:hover,
+.action-delete-departments-main:hover {
+  transform: scale(1.2); /* Slight zoom-in */
+  filter: brightness(1.3); /* Make icon a bit brighter */
+}
 
 
 .action-view-departments-main img {
@@ -164,7 +200,6 @@ SCROLL FOR CHROME ETC
     align-items: center;
     justify-content: flex-end;
     width: 100%;
-
 }
 
 .section-1-departments h1 {
@@ -175,18 +210,21 @@ SCROLL FOR CHROME ETC
   margin-bottom: 0.5rem;
 }
 
+
+/* NEW UPDATED */
 /* Modern primary action button */
 .add-announcement-btn-departments {
   background-color: #e56723;
   color: #fff;
   border: none;
-  padding: 12px 24px;
-  font-size: 15px;
+  padding: 10px 22px;
   font-weight: 600;
   cursor: pointer;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: background-color 0.25s ease, transform 0.2s ease;
+
+  font-size: 13px; /* edited this line */
 }
 
 .add-announcement-btn-departments:hover {
@@ -195,22 +233,30 @@ SCROLL FOR CHROME ETC
 }
 
 
+
+/* NEW UPDATED */
   .section-2-departments{
     display: flex;
     gap: 20px;
     padding: 0;
-    margin-top: 15px;
+
+    margin-top: 20px; /* edited this line */
   }
 
+  /* NEW UPDATED */
   .search-bar-departments, .featuredStatus-departments{
     padding: 8px;
     width: 100%;
     max-width: 400px;
     margin-top: 10px;
-     border: 1px solid rgba(36, 53, 76, 0.7);
+    border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
     color: #000000;
     text-align: left;
+
+
+    font-size: 15px; /* added this line */
+    height: 35px; /* added this line */
   }
 
   .search-bar-departments:focus, .featuredStatus-departments:focus {
@@ -226,15 +272,23 @@ SCROLL FOR CHROME ETC
 
   
 
-
-    .status-badge-departments {
-    padding: 8px 12px;            
+/* NEW UPDATED */
+    .status-badge-departments {      
     border-radius: 5px;                     
     color: white;                
     display: inline-block;        
     text-transform: capitalize;   
     text-align: center;    
-    width: 100px;       
+    
+    width: 80px; /* edited this line */
+    padding: 5px 10px;   /* edited this line */
+    
+}
+
+/* NEW UPDATED ADDED THIS */
+/* also put status inside <p></p>*/
+.status-badge-departments p{
+  font-size: 13px;
 }
 
 
@@ -263,7 +317,7 @@ SCROLL FOR CHROME ETC
 
 
 
-
+/* NEW UPDATED */
 .redirection-section-departments {
   display: flex;
   justify-content: center;
@@ -271,19 +325,24 @@ SCROLL FOR CHROME ETC
   padding: 5px;
   border-radius: 6px;
   gap: 5px;
-    border: 2px solid rgba(36, 53, 76, 0.7);
    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   background-color: #ffffff;
+
+  border: 1px solid rgba(36, 53, 76, 0.7); /* edited this line */
   }
   
+
+  /* NEW UPDATED */
   .redirection-section-departments button {
-    padding: 4px 8px;
     border: none;
     background-color: #2C3E50;
     color: white;
     cursor: pointer;
     border-radius: 4px;
     transition: 0.3s;
+
+    padding: 2px 7px; /* edited this line */
+    font-size: 13px;
   }
   
   .redirection-section-departments button:hover {
@@ -301,14 +360,12 @@ SCROLL FOR CHROME ETC
   }
 
   
+  /* NEW UPDATED */
   .no-result-card-departments {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 200px;
-  width: 500px;
-  margin-top: 5rem;
   padding: 1.5rem;
   gap: 10px;
   align-self: center;
@@ -323,6 +380,10 @@ SCROLL FOR CHROME ETC
   transform: translateY(20px);
   animation: fadeInUp 0.6s ease-out forwards;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  height: 150px; /* edited this line */
+  width: 400px; /* edited this line */
+  margin-top: 11rem; /* edited this line */
   }
   
 .no-result-card-departments:hover {
