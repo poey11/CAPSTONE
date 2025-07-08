@@ -316,20 +316,20 @@ if (incidentType) {
   }, [searchParams.toString()]);
 
   return (
-    <main className="main-container-departments">
+    <main className="main-container-departments"  /* edited this class*/>
       <div className="section-1-departments">
         {isAuthorized && (
-          <button className="add-announcement-btn-departments add-incident-animated" onClick={() => router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`)}>
+          <button className="add-announcement-btn-departments add-incident-animated"  /* edited this class*/ onClick={() => router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`)}>
           Add New Incident
           </button>
         )}
         
       </div>
 
-      <div className={`section-2-departments ${filtersLoaded ? "filters-animated" : ""}`}>
+      <div className={`section-2-departments ${filtersLoaded ? "filters-animated" : ""}`}  /* edited this class*/>
       <input
           type="text"
-          className="search-bar-departments"
+          className="search-bar-departments"  /* edited this class*/
           placeholder="Enter Case Number (e.g. 0001)"
           value={caseNumberSearch}
           onChange={(e) => setCaseNumberSearch(e.target.value)}
@@ -395,11 +395,11 @@ if (incidentType) {
       </div>
 
 
-      <div className="main-section-departments">
+      <div className="main-section-departments"  /* edited this class*/>
         {currentIncidents.length === 0 ? (
-          <div className="no-result-card-departments">
-            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-departments" />
-            <p className="no-results-departments">No Results Found</p>
+          <div className="no-result-card-departments" /* edited this class */>
+            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-departments" /* edited this class *//>
+            <p className="no-results-departments" /* edited this class */>No Results Found</p>
           </div>
         ) : (
           <table>

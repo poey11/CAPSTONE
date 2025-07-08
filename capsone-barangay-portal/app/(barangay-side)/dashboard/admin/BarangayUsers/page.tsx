@@ -248,26 +248,38 @@ useEffect(() => {
     setFilteredUser(filtered);
   }, [nameSearch, userIdSearch, positionDropdown, showCount, barangayUsers]);
   
+
+  /* NEW UPDATED ADDED */
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
+
+  /* NEW UPDATED ADDED */
+  useEffect(() => {
+    setFiltersLoaded(false); // reset animation
+    const timeout = setTimeout(() => {
+      setFiltersLoaded(true); // retrigger
+    }, 50); // adjust delay as needed
+    return () => clearTimeout(timeout);
+  }, [searchParams.toString()]);
  
     return (
-        <main className="barangayusers-page-main-container">
+        <main className="barangayusers-page-main-container" /* edited this class*/>
             
             <div className="user-roles-module-section-1">
                 
                 {isAuthorized &&(
                     <Link href="/dashboard/admin/addBarangayUser">
-                    <button className="add-announcement-btn" onClick={handleAddBarangayUserClick}>Add New Barangay User</button>
+                    <button className="add-announcement-btn add-incident-animated" /* edited this class*/ onClick={handleAddBarangayUserClick}>Add New Barangay User</button>
                     </Link>
                 )}
 
             </div>
 
             
-          <div className="barangayusers-page-section-2">
+          <div className={`barangayusers-page-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
 
           <input
             type="text"
-            className="barangayusers-page-filter"
+            className="barangayusers-page-filter" /* edited this class*/
             placeholder="Search by User ID"
             value={userIdSearch}
             onChange={(e) => setUserIdSearch(e.target.value)}
@@ -309,13 +321,13 @@ useEffect(() => {
                 </div>
 
 
-<div className="barangayusers-page-main-section">
+<div className="barangayusers-page-main-section" /* edited this class*/>
   <>
    
     {currentUser.length === 0 ? (
-      <div className="no-result-card">
-        <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
-        <p className="no-results-department">No Results Found</p>
+      <div className="no-result-card" /* edited this class */>
+        <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" /* edited this class *//>
+        <p className="no-results-department" /* edited this class */>No Results Found</p>
       </div>
     ) : (
       <table>
