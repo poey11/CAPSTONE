@@ -35,6 +35,7 @@ interface Resident {
   sex: string;
   status: string;
   userIcon: string;
+  residentId: string;
 }
 
 const Menu = () => {
@@ -162,12 +163,12 @@ const Menu = () => {
 
   // Fetch Notifications for the logged-in user in real time
   useEffect(() => {
-    if (user) {
-      console.log("Fetching notifications for user:", user.uid);
+    if (user && resident) {  // wait until resident data is loaded
+      console.log("Fetching notifications for user:", user.uid, "and resident:", resident.residentId);
   
       const q = query(
         collection(db, "Notifications"),
-        where("residentID", "==", user.uid),
+        where("residentID", "in", [user.uid, resident.residentId]),
         orderBy("timestamp", "desc")
       );
   
@@ -177,14 +178,14 @@ const Menu = () => {
           ...doc.data(),
         })) as Notification[];
   
-        // Filter out if linked records don't exist
         const filtered = await filterValidNotifications(notifications);
         setNotifications(filtered);
       });
   
       return () => unsubscribe();
     }
-  }, [user]);
+  }, [user, resident]); // <-- key: wait for resident to load
+  
   
 
   
