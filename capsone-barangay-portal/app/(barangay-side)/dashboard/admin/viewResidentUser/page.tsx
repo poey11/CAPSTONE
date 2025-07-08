@@ -468,7 +468,7 @@ export default function ViewUser() {
                                                     type="text"
                                                     className="view-user-input-field"
                                                     name="residentId"
-                                                    value={ResidentUserData?.residentId || "N/A"}
+                                                    value={residentUserId || "N/A"}
                                                     readOnly
                                                 />
                                             </div>
@@ -479,8 +479,35 @@ export default function ViewUser() {
                                 )}
 
                                 {activeSection === "others" && (
-                                    <>
-                                        insert valid ID
+                                    <><div className="view-user-requirement-section">
+                                            <label className="view-user-requirements-label">Uploaded ID</label>
+                                            <div className="view-user-container">
+                                                {ResidentUserData?.upload ? (
+                                                <div className="file-name-image-display">
+                                                    <a
+                                                    href={ResidentUserData.upload}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    >
+                                                    <img
+                                                        alt="Verification Requirement"
+                                                        className="view-reqs-pic view-uploaded-pic"
+                                                        style={{ cursor: 'pointer' }}
+                                                        src={ResidentUserData.upload}
+                                                    />
+                                                    </a>
+                                                </div>
+                                                ) : (
+
+                                                
+                                            
+                                                <div className="no-verification-files-text">
+                                                    <p>No verification requirements uploaded.</p>
+                                                </div>
+                                                )}
+                                            </div>
+                                            </div>
+
                                     </>
                                 )}
                                 </div>
