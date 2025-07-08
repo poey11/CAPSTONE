@@ -26,8 +26,3 @@ body {
   @apply text-gray-400 bg-gray-100 cursor-not-allowed;
 }
 
-.react-datepicker__time-list-item--disabled {
-  color: #bbb !important;
-  background-color: #f9f9f9;
-  pointer-events: none;
-}
