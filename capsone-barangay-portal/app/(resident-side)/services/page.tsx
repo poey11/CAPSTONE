@@ -120,21 +120,6 @@ export default function Services() {
             </div>
 
             <div className="documents-container-column">
-              <div className="documents-card dropdown-container">
-                <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-                <h1>Barangay Permits</h1>
-                <div className="dropdown">
-                  <p id="Business Permit" onClick={goToServices}>Business Permit</p>
-                  <p id="Temporary Business Permit" onClick={goToServices}>Temporary Business Permit</p>
-                  <p id="Construction" onClick={goToServices}>Construction Permit</p>
-                  {permitOptions.map((title, index) => (
-                    <p key={index} id={title} onClick={goToServices}>
-                      {title}
-                    </p>
-                  ))}
-                </div>
-              </div>
-
               <div className="tooltip-wrapper">
                 <div
                   className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Clearance") ? "disabled-card" : ""}`}
@@ -148,6 +133,24 @@ export default function Services() {
                   <span className="tooltip-text">Login/Verification required to request this document</span>
                 )}
               </div>
+
+              <div className="documents-card dropdown-container">
+              <div className="card-content-up">
+                <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+                <h1>Barangay Permits</h1>
+                </div>
+                <div className="dropdown">
+                  <p id="Business Permit" onClick={goToServices}>Business Permit</p>
+                  <p id="Temporary Business Permit" onClick={goToServices}>Temporary Business Permit</p>
+                  <p id="Construction" onClick={goToServices}>Construction Permit</p>
+                  {permitOptions.map((title, index) => (
+                    <p key={index} id={title} onClick={goToServices}>
+                      {title}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
             </div>
 
           </div>
