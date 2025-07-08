@@ -278,3 +278,25 @@ to {
    display: flex;
    justify-content: center;
 }
+
+.documents-card.dropdown-container {
+  flex-direction: row;
+  gap: 55px;
+  align-items: center;
+}
+.documents-card.dropdown-container {
+  align-items: center;
+}
+
+.documents-card.dropdown-container .document-icon,
+.documents-card.dropdown-container h1 {
+  display: flex;
+  align-items: center;
+}
+
+.documents-card.dropdown-container .card-content-up {
+  display: flex;
+  align-items: center;
+  gap: 55px;
+  transform: translateY(-5px); /* move icon+text up inside the box */
+}
