@@ -449,7 +449,7 @@ if (incidentType) {
 
 
 
-    <div className="redirection-section-departments">
+    <div className="redirection-section-departments" /* edited this class */>
         <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
         {getPageNumbers().map((number, index) => (
           <button

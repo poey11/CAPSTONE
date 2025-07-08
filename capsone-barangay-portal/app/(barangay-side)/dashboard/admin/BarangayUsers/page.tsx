@@ -394,7 +394,7 @@ useEffect(() => {
   </>
 </div>
 
-   <div className="redirection-section-users">
+   <div className="redirection-section-users" /* edited this class */>
                     <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
                     {getPageNumbers().map((number, index) => (
                     <button
