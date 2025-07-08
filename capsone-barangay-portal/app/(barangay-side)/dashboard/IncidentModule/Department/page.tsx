@@ -303,18 +303,30 @@ if (incidentType) {
     return pageNumbersToShow;
   };
 
+  /* NEW UPDATED ADDED */
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
+
+  /* NEW UPDATED ADDED */
+  useEffect(() => {
+    setFiltersLoaded(false); // reset animation
+    const timeout = setTimeout(() => {
+      setFiltersLoaded(true); // retrigger
+    }, 50); // adjust delay as needed
+    return () => clearTimeout(timeout);
+  }, [searchParams.toString()]);
+
   return (
     <main className="main-container-departments">
       <div className="section-1-departments">
         {isAuthorized && (
-          <button className="add-announcement-btn-departments" onClick={() => router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`)}>
+          <button className="add-announcement-btn-departments add-incident-animated" onClick={() => router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`)}>
           Add New Incident
           </button>
         )}
         
       </div>
 
-      <div className="section-2-departments">
+      <div className={`section-2-departments ${filtersLoaded ? "filters-animated" : ""}`}>
       <input
           type="text"
           className="search-bar-departments"
@@ -382,62 +394,63 @@ if (incidentType) {
 
       </div>
 
+
       <div className="main-section-departments">
-  {currentIncidents.length === 0 ? (
-    <div className="no-result-card-departments">
-       <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-departments" />
-      <p className="no-results-departments">No Results Found</p>
-    </div>
-  ) : (
-    <table>
-      <thead>
-        <tr>
-          <th>Case Number</th>
-          <th>Date & Time of the Incident</th>
-          <th>Area Of Incident</th>
-          <th>Nature of Complaint</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {currentIncidents.map((incident, index) => (
-         <tr
-          key={incident.id}
-          className={highlightedId === incident.id ? "highlighted-row" : ""}
-        >
-            <td>{incident.caseNumber}</td>
-            <td>{incident.dateFiled} {incident.timeFiled}</td>
-            <td>{incident.areaOfIncident}</td>
-            {incident.nature === "Others" ? (<td>{incident.specifyNature}</td>):(<td>{incident.nature}</td>)}
-            <td>
-              <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
-                <p>{incident.status}</p>
-              </span>
-            </td>
-            <td>
-              <div className="actions-departments-main">
-                <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}><img src="/Images/view.png" alt="View" /></button>
-                {isAuthorized && (
-                  <>
-                   {incident.status !== "settled" && incident.status !== "CFA" && (
-                    <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}> <img src="/Images/edit.png" alt="Edit" /></button>
-                  )}
-                    <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}><img src="/Images/delete.png" alt="Delete" /></button>
-                  </>
-                )}
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  )}
-</div>
+        {currentIncidents.length === 0 ? (
+          <div className="no-result-card-departments">
+            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-departments" />
+            <p className="no-results-departments">No Results Found</p>
+          </div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Case Number</th>
+                <th>Date & Time of the Incident</th>
+                <th>Area Of Incident</th>
+                <th>Nature of Complaint</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentIncidents.map((incident, index) => (
+              <tr
+                key={incident.id}
+                className={highlightedId === incident.id ? "highlighted-row" : ""}
+              >
+                  <td>{incident.caseNumber}</td>
+                  <td>{incident.dateFiled} {incident.timeFiled}</td>
+                  <td>{incident.areaOfIncident}</td>
+                  {incident.nature === "Others" ? (<td>{incident.specifyNature}</td>):(<td>{incident.nature}</td>)}
+                  <td>
+                    <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
+                      <p>{incident.status}</p>
+                    </span>
+                  </td>
+                  <td>
+                    <div className="actions-departments-main">
+                      <button className="action-view-departments-main" onClick={(e) => { e.stopPropagation(); handleView(incident.id); }}><img src="/Images/view.png" alt="View" /></button>
+                      {isAuthorized && (
+                        <>
+                        {incident.status !== "settled" && incident.status !== "CFA" && (
+                          <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}> <img src="/Images/edit.png" alt="Edit" /></button>
+                        )}
+                          <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}><img src="/Images/delete.png" alt="Delete" /></button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
 
 
 
-<div className="redirection-section-departments">
+    <div className="redirection-section-departments">
         <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
         {getPageNumbers().map((number, index) => (
           <button
