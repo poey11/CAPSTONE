@@ -331,9 +331,9 @@ useEffect(() => {
       </div>
     ) : (
       <table>
-        <thead>
-          <tr>
-            <th>
+        <thead /* edited this class */>
+          <tr >
+            <th /* edited this class */>
               User ID
               <button
                 onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
@@ -350,11 +350,11 @@ useEffect(() => {
         </thead>
         <tbody>
         {currentUser.map((user) => (
-            <tr
+            <tr /* edited this class*/
             key={user.id}
             className={highlightedId === user.id ? "highlighted-row" : ""}
             >
-            <td>{user.userid}</td>
+            <td /* edited this class */>{user.userid}</td >
             <td>
                 {user.lastName ? `${user.lastName}, ` : ""}
                 {user.firstName} {user.middleName}
@@ -365,18 +365,18 @@ useEffect(() => {
                 <div className="admin-actions">
                 {/*<button className="admin-action-view" onClick={(e) => { e.stopPropagation(); }}>View</button>*/}
 
-                <button className="admin-action-view" onClick={() => handleViewBarangayUserClick(user.id)}><img src="/Images/view.png" alt="View" /></button>
+                <button className="admin-action-view" /* edited this class */ onClick={() => handleViewBarangayUserClick(user.id)}><img src="/Images/view.png" alt="View" /></button>
 
                 {isAuthorized && (
                     <>
                     <button
-                        className="admin-action-edit"
+                        className="admin-action-edit" /* edited this class */
                         onClick={() => handleEditBarangayUserClick(user.id)}
                     >
                          <img src="/Images/edit.png" alt="Edit" />
                     </button>
                     <button
-                        className="admin-action-delete"
+                        className="admin-action-delete" /* edited this class */
                         onClick={() => handleDeleteBarangayUserClick(user.id)}
                     >
                          <img src="/Images/delete.png" alt="Delete" />

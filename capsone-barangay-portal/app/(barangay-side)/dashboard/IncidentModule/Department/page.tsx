@@ -399,13 +399,12 @@ if (incidentType) {
         {currentIncidents.length === 0 ? (
           <div className="no-result-card-departments" /* edited this class */>
             <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-departments" /* edited this class *//>
-            <p className="no-results-departments" /* edited this class */>No Results Found</p>
           </div>
         ) : (
           <table>
-            <thead>
-              <tr>
-                <th>Case Number</th>
+            <thead /* edited this class */>
+              <tr >
+                <th /* edited this class */>Case Number</th> 
                 <th>Date & Time of the Incident</th>
                 <th>Area Of Incident</th>
                 <th>Nature of Complaint</th>
@@ -415,11 +414,11 @@ if (incidentType) {
             </thead>
             <tbody>
               {currentIncidents.map((incident, index) => (
-              <tr
+              <tr /* edited this class*/
                 key={incident.id}
                 className={highlightedId === incident.id ? "highlighted-row" : ""}
               >
-                  <td>{incident.caseNumber}</td>
+                  <td /* edited this class */>{incident.caseNumber}</td>
                   <td>{incident.dateFiled} {incident.timeFiled}</td>
                   <td>{incident.areaOfIncident}</td>
                   {incident.nature === "Others" ? (<td>{incident.specifyNature}</td>):(<td>{incident.nature}</td>)}
