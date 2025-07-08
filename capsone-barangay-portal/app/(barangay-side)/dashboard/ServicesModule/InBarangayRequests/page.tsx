@@ -99,7 +99,6 @@ import { report } from "process";
           setAllRequests(reports);
           setLoading(false);
           setError(null);
-          console.log(requestData);
         });
       
         return unsubscribe;

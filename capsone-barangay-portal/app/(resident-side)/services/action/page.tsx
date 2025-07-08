@@ -3,13 +3,15 @@ import { ChangeEvent, useEffect, useState } from "react";
 import {useAuth} from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 import {useSearchParams } from "next/navigation";
-import { addDoc, collection, doc, getDoc, getDocs, DocumentData} from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, DocumentData, onSnapshot, query, where} from "firebase/firestore";
 import { db, storage, auth } from "@/app/db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/navigation";
 import {getLocalDateString} from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface EmergencyDetails {
   fullName: string;
@@ -532,6 +534,87 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
 // const minDate = new Date().toISOString().split("T")[0]; 
 
 const [minDate, setMinDate] = useState<string>("");
+const [appointmentsMap, setAppointmentsMap] = useState<Record<string, number>>({});
+const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+useEffect(() => {
+  const collectionRef = query(
+    collection(db, "ServiceRequests"),
+    where("appointmentDate", "!=", null),
+    where("approvedBySAS", "==", true), // Only include appointments approved by SAS
+  );
+  const unsubscribe = onSnapshot(collectionRef, (snapshot) => {
+    const map: any = {};
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const time = toPHISOString(new Date(data.appointmentDate));
+      if(map[time]){
+        map[time]++;
+      }
+      else{
+        map[time] = 1;
+      }
+    });
+    setAppointmentsMap(map);
+  });
+
+  return () => unsubscribe();
+
+},[])
+
+console.log("Appointments Map:", appointmentsMap);
+
+function toPHISOString(date: Date): string {
+  // Shift time to UTC+8
+  const utc = date.getTime() + (8 * 60 * 60 * 1000);
+  const phDate = new Date(utc);
+
+  // Format manually: yyyy-MM-ddTHH:mm:ss+08:00
+  const yyyy = phDate.getUTCFullYear();
+  const mm = String(phDate.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(phDate.getUTCDate()).padStart(2, '0');
+  const hh = String(phDate.getUTCHours()).padStart(2, '0');
+  const min = String(phDate.getUTCMinutes()).padStart(2, '0');
+  const ss = String(phDate.getUTCSeconds()).padStart(2, '0');
+
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}+08:00`;
+}
+
+
+
+
+// Disable if the date has all time slots full
+const filterDate = (date: Date) => {
+  let fullCount = 0;
+  for (let hour = 8; hour <= 16; hour++) {
+    for (let min of [0, 30]) {
+      const slot = new Date(date);
+      slot.setHours(hour, min, 0, 0);
+      const key = toPHISOString(slot);
+
+      if ((appointmentsMap[key] || 0) >= 3) {
+        fullCount++;
+      }
+    }
+  }
+
+  // Total slots per day: 18 (9 hours * 2 slots per hour)
+  return fullCount  < 18; // Allow date if less than 18 slots are full
+};
+
+// Disable if that specific time slot already has 3 appointments
+const filterTime = (time: Date) => {
+  if(!selectedDate) return true; // If no date is selected, allow all times
+  
+  const slot = new Date(selectedDate);
+  slot.setHours(time.getHours(), time.getMinutes(), 0, 0);
+
+  const key = toPHISOString(slot);
+
+  return (appointmentsMap[key] || 0) < 3;
+};
+
+
 useEffect(() => {
   if (user) {
     setClearanceInput((prev: any) => ({
@@ -542,12 +625,18 @@ useEffect(() => {
 }, [user]); // Runs when `user` changes
 
 useEffect(() => {
- 
-  const tomorrow = getLocalDateString(new Date());
-  const tomorrowDate = new Date(tomorrow);
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1); // Add one day to the current date
-  setMinDate(getLocalDateString(tomorrowDate)); // Set the minimum date to tomorrow
-},[])
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(8, 0, 0, 0); // Tomorrow at 08:00
+
+  const yyyy = tomorrow.getFullYear();
+  const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+  const dd = String(tomorrow.getDate()).padStart(2, '0');
+  const min = `${yyyy}-${mm}-${dd}T08:00`;
+
+  setMinDate(min);
+}, []);
+
 
 
 const handleFileChange = (
@@ -621,6 +710,9 @@ const handleFileChange = (
     updates = {
       ...updates,
       sendTo: sendTo,
+      ...(clearanceInput.appointmentDate && { 
+        approvedBySAS: false,
+       }),
     }
     const newDoc = await addDoc(docRef, updates);
     console.log("Report uploaded with ID:", newDoc.id);
@@ -1770,8 +1862,8 @@ const handleFileChange = (
                           value={clearanceInput?.dateOfFireIncident || ""}
                           onChange={handleChange}
                           required
-                          min={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]} // 30 days before today
-                          max={new Date().toISOString().split("T")[0]} // today
+                          min={toPHISOString(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).split("T")[0]} // 30 days before today
+                          max={toPHISOString(new Date()).split("T")[0]} // today
                           onKeyDown={(e) => e.preventDefault()}  
                         />    
                       </div>            
@@ -2170,16 +2262,31 @@ const handleFileChange = (
                   {(docType === "Barangay Indigency" || (clearanceInput.purpose === "Residency" && docType === "Barangay Certificate")) && (
                     <>
                       <div className="form-group-document-req">
+                        
                         <label htmlFor="appointmentDate" className="form-label-document-req">Set Interview Appointment<span className="required">*</span></label>
-                        <input 
-                          type="date" 
-                          id="appointmentDate" 
-                          min={minDate} // Set minimum date to tomorrow
-                          onKeyDown={(e) => e.preventDefault()} // Prevent manual input
-                          name="appointmentDate" 
-                          value={clearanceInput.appointmentDate||""}
-                          onChange={handleChange}
-                          className="form-input-document-req" 
+                        <DatePicker
+                          selected={selectedDate}
+                          name="appointmentDate"
+                          id="appointmentDate"
+                          onChange={(date: Date | null) => {
+                            setSelectedDate(date);
+                            setClearanceInput((prev: any) => ({
+                              ...prev,
+                              appointmentDate: date ? toPHISOString(date) : ""
+                            }));
+                          }}
+                          showTimeSelect // 👈 this enables time selection
+                          timeIntervals={30}
+                          minDate={new Date(minDate)} // Set minimum date to today
+                          minTime={new Date(new Date().setHours(8, 0, 0, 0))}
+                          maxTime={new Date(new Date().setHours(17, 0, 0, 0))}
+                          placeholderText="Pick date and time"
+                          dateFormat="MMMM d, yyyy h:mm aa"
+                          className="form-input-document-req"
+                          popperClassName="z-50"
+                          filterDate={filterDate}
+                          filterTime={filterTime}
+                          onKeyDown={(e) => e.preventDefault()} 
                           required
                         />
                       </div>

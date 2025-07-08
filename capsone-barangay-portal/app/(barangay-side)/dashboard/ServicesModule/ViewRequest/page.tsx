@@ -47,6 +47,7 @@ interface EmergencyDetails {
     age: string;
     gender: string;
     civilStatus: string;
+    approvedBySAS: boolean;
     contact: string;
     typeofconstruction: string;
     typeofbldg: string;
@@ -1379,8 +1380,25 @@ const ViewOnlineRequest = () => {
           statusPriority: 3,
         }
       }
-      router.push("/dashboard/ServicesModule/InBarangayRequests");
+      if(requestData?.reqType === "Online"){
+        router.push("/dashboard/ServicesModule/OnlineRequests");
+        
+      }
+      else{
+        router.push("/dashboard/ServicesModule/InBarangayRequests");
+
+      }
       
+      await updateDoc(docRef, updatedData);
+    }
+
+    const handleApprovedBySAS = async() => {
+      /* This part will handle ung pag ka approve ni asst sec and sec sa appointment request */
+      if(!id) return;
+      const docRef = doc(db, "ServiceRequests", id);
+      const updatedData = {
+          approvedBySAS: true,
+      };
       await updateDoc(docRef, updatedData);
     }
 
@@ -1418,12 +1436,23 @@ const ViewOnlineRequest = () => {
                               </div>
                               <h1>Reject Request</h1>
                             </button>
-                            <button className="services-onlinereq-redirection-buttons" onClick={print}>
+                            {!requestData?.approvedBySAS && requestData?.appointmentDate ? (
+                              <button className="services-onlinereq-redirection-buttons" onClick={handleApprovedBySAS}>
                               <div className="services-onlinereq-redirection-icons-section">
                                   <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                               </div>
-                              <h1>Generate Document</h1>
+                              <h1>Approve Appointment</h1>
                             </button>
+                            ):(
+                              <button className="services-onlinereq-redirection-buttons" onClick={print}>
+                              <div className="services-onlinereq-redirection-icons-section">
+                                  <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                              </div>
+                                <h1>Generate Document</h1>
+                              </button>
+
+                            )}
+                            
                           </>
                         )}
                         {docPrinted && (userPosition !== "Admin Staff") ? (
@@ -1464,7 +1493,7 @@ const ViewOnlineRequest = () => {
                               <h1>Send SMS</h1>
                           </button>
                         )} */}
-                        {requestData?.appointmentDate && (
+                        {requestData?.appointmentDate && requestData?.approvedBySAS  && (
                           <button className="services-onlinereq-redirection-buttons" onClick={handleviewappointmentdetails}>
                               <div className="services-onlinereq-redirection-icons-section">
                               <img src="/images/appointment.png" alt="user info" className="redirection-icons-info" />
@@ -1699,7 +1728,7 @@ const ViewOnlineRequest = () => {
                                 required
                             >
                               <option value="" disabled>Select Name</option>
-                              <option value={requestData?.requestorFname}>{requestData?.requestorFname}</option>
+                              <option value={requestData?.requestorFname || requestData?.requestor}>{requestData?.requestorFname || requestData?.requestor}</option>
                               <option value="Others">Others</option>
                             </select>
 

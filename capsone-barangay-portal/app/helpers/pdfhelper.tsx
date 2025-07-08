@@ -81,7 +81,7 @@ const handlePrint = async(requestData:any) => {
     else if(requestData?.purpose === "Residency"){
         locationPath = "certificate of residency.pdf";
         reqData = {
-            "Text1":`${requestData?.requestorFname.toUpperCase()}`,
+            "Text1":`${requestData?.requestor.toUpperCase()}`,
             "Text2": requestData?.CYFrom,
             "Text3": requestData?.CYTo,
             "Text4": requestData?.address,
