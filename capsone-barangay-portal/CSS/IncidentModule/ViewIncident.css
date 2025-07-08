@@ -695,10 +695,7 @@ SHRINKING
     margin-top: 30px;
     height: 260px;
 
-      display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+
   }
 
   .box-container-incidentimage-2 {
@@ -711,6 +708,7 @@ SHRINKING
   text-align: center;
   margin-top: 30px; 
   height: 300px;
+
   }
 
   .title-remarks-partyA {
@@ -843,8 +841,11 @@ SHRINKING
 }
 
 .no-image-text-view {
+  display: flex;
+  justify-content: center;
+  padding-top: 120px;
   color: red;
-  font-style: italic;
+  font-weight: bold;
   text-align: center;
 }
 

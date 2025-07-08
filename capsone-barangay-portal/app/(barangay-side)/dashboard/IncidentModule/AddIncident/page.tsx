@@ -578,7 +578,8 @@ const handleSubmit = (event: React.FormEvent) => {
         setShowPopup(false);
         
         if (docId) {
-          router.push(`/dashboard/IncidentModule/ViewIncident?id=${docId.id}`);
+        /*  router.push(`/dashboard/IncidentModule/ViewIncident?id=${docId.id}`);*/
+         router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&highlight=${docId.id}`);
         } 
       }, 3000);
   
@@ -1214,26 +1215,28 @@ const handleSubmit = (event: React.FormEvent) => {
                         </select>
                   </div>
 
+                <div className="fields-section-add">
+                  <p>Location / Address of Incident<span className="required">*</span></p>
+                  <input type="text" className="add-incident-input-field" placeholder="Enter Location" id="location" name="location" 
+                  value = {reportInfo.location} onChange={handleFormChange} required />
+
+              </div>
+
 
 
               <div className="fields-section-add">
-                  <p>Date Filed<span className="required">*</span></p>
+                  <p>Date of Incident<span className="required">*</span></p>
                   <input type="date" className="add-incident-input-field" max={currentDate} id="dateFiled" name="dateFiled" 
                     value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
               </div>
 
               <div className="fields-section-add">
-                   <p>Time Filed<span className="required">*</span></p>
+                   <p>Time of Incident<span className="required">*</span></p>
                    <input type="time" className="add-incident-input-field" id="timeFiled" name="timeFiled" 
                    value = {reportInfo.timeFiled} onChange={handleFormChange} required />
               </div>
 
-              <div className="fields-section-add">
-                  <p>Location<span className="required">*</span></p>
-                  <input type="text" className="add-incident-input-field" placeholder="Enter Location" id="location" name="location" 
-                  value = {reportInfo.location} onChange={handleFormChange} required />
 
-              </div>
               
 
           
