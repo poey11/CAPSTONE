@@ -469,34 +469,35 @@ export default function ViewUser() {
                                             </div>
                                         )}
 
-                                        {ResidentUserData?.status === "Verified" && (
-                                            <div className="view-pendinguser-fields-section">
-                                                <p>Linked Resident</p>
-                                                {residentUserId ? (
-                                                <a
-                                                    href={`/dashboard/ResidentModule/ViewResident?id=${residentUserId}`}
-                                                    className="view-user-input-field"
-                                                    style={{
-                                                    display: 'inline-block',
-                                                    padding: '8px 12px',
-                                                    borderRadius: '4px',
-                                                    backgroundColor: '#f5f5f5',
-                                                    textDecoration: 'none',
-                                                    color: '#007bff',
-                                                    }}
-                                                >
-                                                    {residentUserId}
-                                                </a>
-                                                ) : (
-                                                <input
-                                                    type="text"
-                                                    className="view-user-input-field"
-                                                    value="N/A"
-                                                    readOnly
-                                                />
-                                                )}
-                                            </div>
-                                            )}
+{ResidentUserData?.status === "Verified" && (
+  <div className="view-pendinguser-fields-section">
+    <p>Linked Resident</p>
+    {ResidentUserData?.residentId ? (
+      <a
+        href={`/dashboard/ResidentModule/ViewResident?id=${ResidentUserData.residentId}`}
+        className="view-user-input-field"
+        style={{
+          display: 'inline-block',
+          padding: '8px 12px',
+          borderRadius: '4px',
+          backgroundColor: '#f5f5f5',
+          textDecoration: 'none',
+          color: '#007bff',
+        }}
+      >
+        Show Resident Info
+      </a>
+    ) : (
+      <input
+        type="text"
+        className="view-user-input-field"
+        value="N/A"
+        readOnly
+      />
+    )}
+  </div>
+)}
+
 
                                         </div>
 
