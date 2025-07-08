@@ -283,22 +283,22 @@ useEffect(() => {
     
   return (
     <main className="residentusers-page-main-container">
-      <div className="user-roles-module-section-1-resident-users">
-        <div className="assigned-tasks-info-toggle-wrapper">
-          {["main", "pending"].map(section => (
-            <button
-              key={section}
-              type="button"
-              className={`info-toggle-btn-assigned-resident ${activeSection === section ? "active" : ""}`}
-              onClick={() => { setActiveSection(section); setCurrentPage(1); }}
-              style={{ position: "relative" }}
-            >
-              {section === "main" && "Verified Users"}
-              {section === "pending" && "Pending Users"}
-            </button>
-          ))}
+      {["Assistant Secretary", "Secretary"].includes(userPosition || "") && (
+        <div className="user-roles-module-section-1-resident-users">
+          <div className={`assigned-tasks-info-toggle-wrapper ${filtersLoaded ? "filters-animated" : ""}`}>
+            {["main", "pending"].map(section => (
+              <button
+                key={section}
+                className={`info-toggle-btn-assigned-resident verified-pending-users ${activeSection === section ? "active" : ""}`}
+                onClick={() => { setActiveSection(section); setCurrentPage(1); }}
+              >
+                {section === "main" && "Verified Users"}
+                {section === "pending" && "Pending Users"}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Filters for main */}
 
