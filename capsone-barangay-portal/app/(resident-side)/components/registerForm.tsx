@@ -21,6 +21,7 @@ interface Resident {
     dateOfBirth: string;
     password: string;
     upload: File | null;
+    isViewed: boolean;
 }
 
 
@@ -67,7 +68,9 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
         dateOfBirth: "",
         role: "Resident",
         upload: null,
-        status: "Unverified"
+        status: "Unverified",
+        isViewed: false,
+        
     });
 
     const [filePreview, setFilePreview] = useState<string | null>(null);
@@ -172,8 +175,10 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
         docRef = doc(db, "ResidentUsers", user.uid);
         await setDoc(docRef, {
           ...resident,
+           isViewed: false,
           upload: fileDownloadURL, // Save the file URL instead of the file object
           createdAt: today,
+         
         });
 
         // Add notification for Assistant Secretary to review
