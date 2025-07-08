@@ -439,12 +439,24 @@ export default function RegisteredVotersModule() {
     return pageNumbersToShow;
   };
 
+   /* NEW UPDATED ADDED */
+   const [filtersLoaded, setFiltersLoaded] = useState(false);
+  
+   /* NEW UPDATED ADDED */
+   useEffect(() => {
+     setFiltersLoaded(false); // reset animation
+     const timeout = setTimeout(() => {
+       setFiltersLoaded(true); // retrigger
+     }, 50); // adjust delay as needed
+     return () => clearTimeout(timeout);
+   }, [searchParams.toString()]);
+
   return (
     <main className="resident-module-main-container">
       <div className="resident-module-section-1">
         
         <button
-          className="add-announcement-btn"
+          className="add-announcement-btn add-incident-animated"
           onClick={() => {
             if (isAuthorized) {
               fileInputRef.current?.click();
@@ -464,7 +476,7 @@ export default function RegisteredVotersModule() {
         />
       </div>
 
-      <div className="resident-module-section-2">
+      <div className={`resident-module-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
         <input
           type="text"
           className="resident-module-filter"

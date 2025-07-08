@@ -31,7 +31,7 @@
 .pendingresidentusers-page-filter{
   padding: 8px;
     width: 100%;
-    max-width: 400px;
+    max-width: 100%;
     margin-top: 10px;
     border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
@@ -343,6 +343,7 @@ SCROLL FOR CHROME ETC
 /* NEW UPDATED ADDED THIS */
 .barangayusers-page-main-section tbody tr {
   height: 50px; 
+  background-color: pink;
 }
 
 .resident-users-main-section tbody tr:hover {
