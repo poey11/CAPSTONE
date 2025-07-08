@@ -620,6 +620,8 @@ const uploadForms = async (url: string): Promise<void> => {
       setShowKasambahayModal(false);
     } finally {
       setLoadingKasambahay(false);
+      setIsGenerating(false); 
+
     }
   };
   
@@ -900,6 +902,8 @@ const uploadForms = async (url: string): Promise<void> => {
       /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingJobSeeker(false);
+      setIsGenerating(false); 
+
     }
   };
   
@@ -1162,6 +1166,8 @@ const uploadForms = async (url: string): Promise<void> => {
       /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingResidentSeniorDemographic(false);
+      setIsGenerating(false); 
+
     }
   };
   
@@ -1426,6 +1432,8 @@ const uploadForms = async (url: string): Promise<void> => {
       /*alert("Failed to generate Student PDF.");*/
     } finally {
       setLoadingResidentStudentDemographic(false);
+      setIsGenerating(false); 
+
     }
   };
   
@@ -1658,6 +1666,8 @@ const uploadForms = async (url: string): Promise<void> => {
       /*alert("Failed to generate PWD PDF.");*/
     } finally {
       setLoadingResidentPWDDemographic(false);
+      setIsGenerating(false); 
+
     }
   };
   
@@ -1907,6 +1917,8 @@ const uploadForms = async (url: string): Promise<void> => {
       /*alert("Failed to generate Solo Parent PDF.");*/
     } finally {
       setLoadingResidentSoloParentDemographic(false);
+      setIsGenerating(false); 
+
     }
   };
   
@@ -2396,6 +2408,8 @@ const uploadForms = async (url: string): Promise<void> => {
       /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingMasterResident(false);
+      setIsGenerating(false); 
+
     }
   };
   
@@ -2649,6 +2663,8 @@ const uploadForms = async (url: string): Promise<void> => {
       alert("Failed to generate PDF.");
     } finally {
       setLoadingEastResident(false);
+      setIsGenerating(false); 
+
     }
   };
 
@@ -2935,6 +2951,8 @@ const uploadForms = async (url: string): Promise<void> => {
       alert("Failed to generate PDF.");
     } finally {
       setLoadingWestResident(false);
+      setIsGenerating(false); 
+
     }
   };
 
@@ -3226,6 +3244,8 @@ const uploadForms = async (url: string): Promise<void> => {
       /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingSouthResident(false);
+      setIsGenerating(false); 
+
     }
   };
 
@@ -3509,6 +3529,8 @@ const handleGenerateIncidentSummaryPDF = async (
     }, 5000);
   } finally {
     setLoadingIncidentSummary(false);
+    setIsGenerating(false); 
+
   }
 };
 
@@ -3698,6 +3720,8 @@ const handleGenerateIncidentSummaryPDF = async (
     setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
   } finally {
     setLoadingVAWCReport(false);
+    setIsGenerating(false); 
+
   }
 };
 
@@ -3901,6 +3925,8 @@ const handleGenerateIncidentSummaryPDF = async (
       /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingLuponSettledReport(false);
+      setIsGenerating(false); 
+
     }
   };
   
@@ -4103,6 +4129,8 @@ const handleGenerateIncidentSummaryPDF = async (
       /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingLuponPendingReport(false);
+      setIsGenerating(false); 
+
     }
   };
   
@@ -4290,6 +4318,8 @@ const handleGenerateIncidentSummaryPDF = async (
       /*alert("Failed to generate Incident Summary PDF.");*/
     } finally {
       setLoadingIncidentSummary(false);
+      setIsGenerating(false); 
+
     }
   };
 
