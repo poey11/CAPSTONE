@@ -370,7 +370,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                                 </button>
                             ))}
                         </div>
-                    </div>
+        </div>
  
         {activeSection === "meeting" && (
         <>
