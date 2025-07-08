@@ -234,28 +234,32 @@ const [filterEmploymentArrangement, setFilterEmploymentArrangement] = useState("
     return pageNumbersToShow;
   };
 
+  /* NEW UPDATED ADDED */
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
+  
+  /* NEW UPDATED ADDED */
+  useEffect(() => {
+    setFiltersLoaded(false); // reset animation
+    const timeout = setTimeout(() => {
+      setFiltersLoaded(true); // retrigger
+    }, 50); // adjust delay as needed
+    return () => clearTimeout(timeout);
+  }, [searchParams.toString()]);
+
   return (
     <main className="resident-module-main-container">
-      {/*
-      <div className="path-section">
-          <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
-          <h2 className="breadcrumb">Kasambahay Masterlist<span className="chevron"></span></h2>
-      </div>*/}
       <div className="resident-module-section-1">
 
-
-
-        {/*<h1>Kasambahay Masterlist</h1>*/}
         {isAuthorized ? (
         <Link href="/dashboard/ResidentModule/kasambahayList/AddKasambahay">
-          <button className="add-announcement-btn">Add New Kasambahay</button>
+          <button className="add-announcement-btn add-incident-animated">Add New Kasambahay</button>
         </Link>
         ) : (
-          <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Kasambahay</button>
+          <button className="add-announcement-btn opacity-0 cursor-not-allowed add-incident-animated" disabled>Add New Kasambahay</button>
         )}
       </div>
 
-      <div className="resident-module-section-2">
+      <div className={`resident-module-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
         <input
           type="text"
           className="resident-module-filter"
@@ -304,8 +308,7 @@ const [filterEmploymentArrangement, setFilterEmploymentArrangement] = useState("
       <div className="resident-module-main-section">
   {loading ? (
     <p>Loading residents...</p>
-  ) : error ? (
-    <p className="error">{error}</p>
+
   ) : currentResidents.length === 0 ? (
     <div className="no-result-card">
       <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />

@@ -1,23 +1,27 @@
+  /* NEW UPDATED */
 .inbarangayreq-main-container{
- width: 100%;
-    height: 100vh;
-    background-color: #F0F2F8; 
-    padding-left:30px;
-    padding-right:30px;
-    padding-bottom:30px;
-    padding-top: 150px;
-    margin-left: 1rem; 
+  width: 100%;  
+  height: 100vh;
+  background-color: #F0F2F8; 
+  margin-left: 1rem;
+
+  padding-top: 80px; /* edited this line */ 
+  padding-left: 20px; /* edited */
+  padding-right: 20px; /* edited */
+  padding-bottom: 20px; /* edited */
 }
 
+  /* NEW UPDATED */
 .inbarangayreq-section-1 {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 1.5rem;
   padding: 0.5rem 0;
   background: transparent;
   border: none;
   box-shadow: none;
+
+  /*margin-bottom: 1rem;*/ /* removed for this page */
 }
 
 
@@ -42,18 +46,19 @@
 }
 
 
-
+  /* NEW UPDATED */
 .add-requests-btn {
   background-color: #e56723;
   color: #fff;
   border: none;
-  padding: 12px 24px;
-  font-size: 15px;
+  padding: 10px 22px;
   font-weight: 600;
   cursor: pointer;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: background-color 0.25s ease, transform 0.2s ease;
+
+  font-size: 13px; /* edited this line */
   }
   
   .add-requests-btn:hover {
@@ -61,11 +66,13 @@
   transform: translateY(-1px);
   }
 
+
+    /* NEW UPDATED */
   .inbarangayreq-section-2{
     display: flex;
-    width: 100%;
-    gap: 2rem;
- 
+    gap: 20px;
+    padding: 0;
+
   }
 
   .inbarangayreq-section-2-left {
@@ -75,7 +82,6 @@
     margin-top: 5px;
     width: 50%;
     height: 90%;
-
     
   }
 
@@ -94,6 +100,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  padding-top: 20px;
 }
 
   
@@ -106,7 +113,6 @@
 .date-input-group label {
   font-size: 0.85rem;
   font-weight: bold;
-  margin-bottom: 4px;
   color: #214666;
 }
 
@@ -128,15 +134,20 @@
   /*
   For Inputs 
   */
+
+  /* NEW UPDATED */
   .inbarangay-services-module-filter {
     padding: 8px;
     width: 100%;
-    max-width: 400px;
-    margin-top: 10px;
+    max-width: 100%;
     border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;
-    color: rgba(0, 0, 0, 0.4);
+    color: #000000;
     text-align: left;
+
+/*margin-top: 10px;*/ /*removed for this page*/
+    font-size: 15px; /* added this line */
+    height: 35px; /* added this line */
   }
 
   .inbarangay-services-module-filter:focus {
@@ -155,18 +166,22 @@
 For Dropdowns (SELECT)
 */
     .inbarangay-services-module-filter-dropdown {
-    padding: 11px;
-    width: 100%;
-    max-width: 400px;
-    margin-top: 10px;
-    border: 1px solid rgba(36, 53, 76, 0.7);
-    border-radius: 5px;
-    color: rgba(0, 0, 0, 0.4);
-    text-align: left;
+      padding: 8px;
+      width: 100%;
+      max-width: 100%;
+
+      border: 1px solid rgba(36, 53, 76, 0.7);
+      border-radius: 5px;
+      color: #000000;
+      text-align: left;
+  
+      /*margin-top: 10px;*/ /*removed for this page*/
+      font-size: 15px; /* added this line */
+      height: 35px; /* added this line */
   }
 
 
-  .inbarangay-services-module-filter-dropdown :focus {
+  .inbarangay-services-module-filter-dropdown:focus {
     border-color: #f49028;
     outline: none;
     box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
@@ -199,34 +214,36 @@ Values
 
 
 .inbarangayreq-main-section {
-    flex: 1; 
-    display: flex; 
-    flex-direction: column;
-    padding: 0;
-    margin: 0; /* Remove default margin */
-    overflow: auto; /* Allow scrolling if content overflows */
-    width: 100%;
-    height: 100%; 
-    max-height: 70%;
-    margin-top: 2rem;
-     border: 1px solid rgba(36, 53, 76, 0.7);
-     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    background-color: #ffffff;
-    border-radius: 6px;
-
-
-
+  flex: 1; /* Makes it take up remaining space */
+  display: flex; /* Ensures proper alignment */
+  flex-direction: column;
+  padding: 0;
+  margin: 0; /* Remove default margin */
+  overflow: auto; /* Allow scrolling if content overflows */
+  width: 100%;
+  
+  max-height: 70%;
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background-color: #ffffff;
+  border-radius: 6px;
   scrollbar-width: thin;
   scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+
+
+  margin-top: 2rem; /* edited this line */
+  height: 67%; /* edited this line */
 }
 
+/* NEW UPDATED */
 .inbarangayreq-main-section thead {
   position: sticky;
   top: 0;
-  background-color: #214666; 
-  z-index: 10; /* Ensures it stays above other content */
-  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
-  height: 80px;
+  background-color: #214666;
+  z-index: 10; 
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); 
+  
+  height: 50px; /* edited this line */
 }
 
 
@@ -235,23 +252,32 @@ Values
   border-collapse: collapse; /* Removes unnecessary spacing between table cells */
 }
 
-
+/* NEW UPDATED */
 .inbarangayreq-main-section td {
   padding: 1rem; 
-    text-align: center; 
-    border-bottom: 2px solid #ddd;
-    color: rgb(44, 42, 42);
-    font-weight: normal;
+  text-align: center; 
+  border-bottom: 2px solid #ddd;
+  color: rgb(44, 42, 42);
+  font-weight: normal;
+  
+  font-size: 14px; /* added this line */
 }
 
+/* NEW UPDATED */
 .inbarangayreq-main-section th {
-     padding: 1rem; 
-    text-align: left; 
-    border-bottom: 2px solid #ddd;
-    color: #FFFFFF;
-    text-align: center;
+  padding: 1rem; 
+  text-align: left; 
+  border-bottom: 2px solid #ddd;
+  color: #FFFFFF;
+  text-align: center;
+    
+  font-size: 14px; /* added this line */
 }
 
+/* NEW UPDATED ADDED THIS */
+.inbarangayreq-main-section tbody tr {
+  height: 50px; 
+}
 
 
 .inbarangayreq-main-section tbody tr:nth-child(even) {
@@ -319,27 +345,31 @@ SCROLL FOR CHROME ETC
 
 
 
-
+/* NEW UPDATED */
 .redirection-section-inbarangay {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 5px;
-    border-radius: 5px;
-    gap: 5px;
-      border: 2px solid rgba(36, 53, 76, 0.7);
-     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  border-radius: 6px;
+  gap: 5px;
+   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background-color: #ffffff;
+
+  border: 1px solid rgba(36, 53, 76, 0.7); /* edited this line */
   }
   
+  /* NEW UPDATED */
   .redirection-section-inbarangay button {
-    padding: 4px 8px;
     border: none;
-    background-color: #2C3E50;
-    color: white;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: 0.3s;
+  background-color: #2C3E50;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.3s;
+
+  padding: 2px 7px; /* edited this line */
+  font-size: 13px;
   }
   
   .redirection-section-inbarangay button:hover {
@@ -371,28 +401,29 @@ SCROLL FOR CHROME ETC
 NO RESULTS POPUP IN TABLE
 */
 
+ /* NEW UPDATED */
 .no-result-card-inbarangay {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 200px;
-  width: 500px;
-  margin-top: 5rem;
   padding: 1.5rem;
-  gap: 10px;
-  align-self: center;
-
   border: 2px solid #f3c3bf;
   border-radius: 1rem;
-  background: linear-gradient(135deg, #fff, #fff5f5);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  background-color: #fff;
+  margin-top: 5rem;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.03);
+  align-self: center;
 
-  /* Entrance animation */
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInUp 0.6s ease-out forwards;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Entrance animation */
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease-out forwards;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  height: 150px; /* edited this line */
+  margin-top: 11rem; /* edited this line */
+  width: 400px; /* edited this line */
 }
 
 .no-result-card-inbarangay:hover {
@@ -400,6 +431,13 @@ NO RESULTS POPUP IN TABLE
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 }
 
+ /* NEW UPDATED */
+ .no-result-card-inbarangay:hover .no-result-icon-inbarangay {
+  transform: scale(1.05);
+  opacity: 0.85;  
+}
+
+ /* NEW UPDATED */
 @keyframes fadeInUp {
   to {
     opacity: 1;
@@ -407,6 +445,7 @@ NO RESULTS POPUP IN TABLE
   }
 }
 
+ /* NEW UPDATED */
 .no-result-icon-inbarangay {
   width: 46px;
   height: 46px;
@@ -421,11 +460,9 @@ NO RESULTS POPUP IN TABLE
 }
 
 .no-results-inbarangay {
-  font-weight: 600;
+  font-weight: bold;
   font-size: 1.25rem;
   color: #e7594e;
-  text-align: center;
-  transition: color 0.3s ease;
 }
 
 
@@ -498,10 +535,18 @@ NO RESULTS POPUP IN TABLE
 
 
 .action-inbarangay-view {   
-     border: none;
-    cursor: pointer;
-    width: 24px;
-    height: 24px; 
+  border: none;
+  cursor: pointer;
+
+
+  width: 20px;  /* edited this line */
+  height: 20px; /* edited this line */
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.action-inbarangay-view:hover {
+  transform: scale(1.2); /* Slight zoom-in */
+  filter: brightness(1.3); /* Make icon a bit brighter */
 }
 
 .action-inbarangay-view img {
@@ -538,15 +583,22 @@ NO RESULTS POPUP IN TABLE
 }
 ***/
 
+/* NEW UPDATED */
 .status-badge {
-    padding: 8px 12px;            
-    border-radius: 5px;          
-    font-size: 13px;              
-    color: white;                
-    display: inline-block;        
-    text-transform: capitalize;   
-    text-align: center;    
-    width: 100px;       
+  border-radius: 5px;                     
+  color: white;                
+  display: inline-block;        
+  text-transform: capitalize;   
+  text-align: center;    
+  
+  width: 80px; /* edited this line */
+  padding: 5px 10px;   /* edited this line */
+}
+
+/* NEW UPDATED ADDED THIS */
+/* also put status inside <p></p>*/
+.status-badge p{
+  font-size: 13px;
 }
 
 /* Colors for different statuses */
@@ -765,18 +817,22 @@ NO RESULTS POPUP IN TABLE
   justify-content: center;
 }
 
+/* NEW UPDATED*/
 .info-toggle-btn-assigned {
-  padding: 10px 20px;
- /* border: 1px solid transparent;*/
-  border: 1px solid #214666;
-  border-radius: 20px;
-  background-color: transparent;
-  color: #214666;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 14px;
-  text-transform: capitalize;
+  padding: 8px 18px;
+  /* border: 1px solid transparent;*/
+   border: 1px solid #214666;
+   border-radius: 20px;
+   background-color: transparent;
+   color: #214666;
+   font-weight: 700;
+   cursor: pointer;
+   transition: all 0.3s ease;
+   font-size: 14px;
+   text-transform: capitalize; 
+ 
+ 
+   padding: 8px 18px; /* edited this line */
 }
 
 .info-toggle-btn-assigned:hover {
@@ -810,4 +866,52 @@ NO RESULTS POPUP IN TABLE
 .badge-container {
   position: relative;
   display: inline-block;
+}
+
+
+/* NEW UPDATED ADDED */
+.filters-animated > * {
+  opacity: 0;
+  transform: translateX(-20px);
+  animation: slideInFromLeft 0.5s forwards;
+}
+
+/* NEW UPDATED ADDED */
+.filters-animated > *:nth-child(1) { animation-delay: 0.2s; }
+.filters-animated > *:nth-child(2) { animation-delay: 0.5s; }
+.filters-animated > *:nth-child(3) { animation-delay: 0.8s; }
+.filters-animated > *:nth-child(4) { animation-delay: 1.1s; }
+
+/* NEW UPDATED ADDED */
+@keyframes slideInFromLeft {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* NEW UPDATED ADDED */
+@keyframes dropDownFromTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* NEW UPDATED ADDED */
+.assigned-tasks{
+  opacity: 0;
+  animation: dropDownFromTop 0.6s ease-out forwards;
+  animation-delay: 0.3s;
+}
+
+/* NEW UPDATED ADDED */
+.add-new-doc-req {
+  opacity: 0;
+  animation: dropDownFromTop 0.6s ease-out forwards;
+  animation-delay: 0.8s;
 }

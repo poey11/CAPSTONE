@@ -261,42 +261,48 @@ export default function ResidentModule() {
     return pageNumbersToShow;
   };
 
+   /* NEW UPDATED ADDED */
+    const [filtersLoaded, setFiltersLoaded] = useState(false);
+  
+    /* NEW UPDATED ADDED */
+    useEffect(() => {
+      setFiltersLoaded(false); // reset animation
+      const timeout = setTimeout(() => {
+        setFiltersLoaded(true); // retrigger
+      }, 50); // adjust delay as needed
+      return () => clearTimeout(timeout);
+    }, [searchParams.toString()]);
 
   return (
-    <main className="resident-module-main-container">
-      {/*}
-      <div className="path-section">
-          <h1 className="breadcrumb">Residents Management<span className="chevron">/</span></h1>
-          <h2 className="breadcrumb">Main Residents<span className="chevron"></span></h2>
-      </div>*/}
+    <main className="resident-module-main-container" /* edited this class*/>
+    
+    
 
-      <div className="resident-module-section-1">
-
-        {/*<h1>Main Residents</h1>*/}
+     <div className="resident-module-section-1">
         {isAuthorized ? (
           <Link href="/dashboard/ResidentModule/AddResident">
-            <button className="add-announcement-btn" onClick={handleAddResidentClick}>Import Residents from Excel</button>
+            <button className="add-announcement-btn add-incident-animated" /* edited this class*/ onClick={handleAddResidentClick}>Import Residents from Excel</button>
           </Link>
         ) : (
-          <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Import Residents from Excel</button>
+          <button className="add-announcement-btn opacity-0 cursor-not-allowed add-incident-animated" /* edited this class*/ disabled>Import Residents from Excel</button>
         )}
 
-        {/*<h1>Main Residents</h1>*/}
+        
         {isAuthorized ? (
           <Link href="/dashboard/ResidentModule/AddResident">
-            <button className="add-announcement-btn" onClick={handleAddResidentClick}>Add New Resident</button>
+            <button className="add-announcement-btn add-incident-animated" /* edited this class*/ onClick={handleAddResidentClick}>Add New Resident</button>
           </Link>
         ) : (
-          <button className="add-announcement-btn opacity-0 cursor-not-allowed" disabled>Add New Resident</button>
+          <button className="add-announcement-btn opacity-0 cursor-not-allowed add-incident-animated " /* edited this class*/ disabled>Add New Resident</button>
         )}
 
-       
-      </div>
+   
+    </div>
   
-    <div className="resident-module-section-2">
+    <div className={`resident-module-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
       <input
         type="text"
-        className="resident-module-filter"
+        className="resident-module-filter" /* edited this class*/
         placeholder="Search by Name"
         value={searchName}
         onChange={(e) => setSearchName(e.target.value)}
@@ -342,7 +348,7 @@ export default function ResidentModule() {
       className="resident-module-filter"
       value={selectedLocation}
       onChange={(e) => setSelectedLocation(e.target.value)}
-    >
+      >
       <option value="">Location</option>
       <option value="East Fairview">East Fairview</option>
       <option value="West Fairview">West Fairview</option>
@@ -352,7 +358,7 @@ export default function ResidentModule() {
 
     </div>
   
-    <div className="resident-module-main-section">
+    <div className="resident-module-main-section"  /* edited this class*/>
   
     {loading ? (
       <p>Loading residents...</p>
@@ -366,9 +372,9 @@ export default function ResidentModule() {
         <>
           {!loading && !error && (
             <table>
-              <thead>
+              <thead /* edited this class */>
                 <tr>
-                  <th>
+                  <th /* edited this class */>
                     Resident Number
                     <button
                       onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
@@ -390,12 +396,12 @@ export default function ResidentModule() {
                 {currentResidents.map((resident) => {
                   const fullName = `${resident.lastName || ""}, ${resident.firstName || ""} ${resident.middleName || "N/A"}`.trim();
                   return (
-                    <tr
+                    <tr /* edited this class*/
                     key={resident.id}
                     data-id={resident.id}
                     className={highlightedId === resident.id ? "highlighted-row" : ""}
                   >
-                      <td>{resident.residentNumber}</td>
+                      <td /* edited this class */>{resident.residentNumber}</td>
                       <td>{fullName}</td>
                       <td>{resident.address}</td>
                       <td>{resident.generalLocation}</td>
@@ -406,7 +412,7 @@ export default function ResidentModule() {
                       <td>
                         <div className="residentmodule-actions">
                          <button
-                          className="residentmodule-action-view"
+                          className="residentmodule-action-view" /* edited this class */
                           onClick={() =>
                             router.push(
                               `/dashboard/ResidentModule/ViewResident?id=${resident.id}`
@@ -419,13 +425,13 @@ export default function ResidentModule() {
                           {!isAuthorized ? (
                           <>
                             <button
-                              className="residentmodule-action-edit hidden"
+                              className="residentmodule-action-edit hidden" /* edited this class */
                               aria-hidden="true"
                             >
                               <img src="/Images/edit.png" alt="View" />
                             </button>
                             <button
-                              className="residentmodule-action-delete hidden"
+                              className="residentmodule-action-delete hidden" /* edited this class */
                               aria-hidden="true"
                             >
                                 <img src="/Images/delete.png" alt="View" />
@@ -434,13 +440,13 @@ export default function ResidentModule() {
                         ) : (
                           <>
                             <button
-                              className="residentmodule-action-edit"
+                              className="residentmodule-action-edit" /* edited this class */
                               onClick={() => handleEditClick(resident.id)}
                             >
                                 <img src="/Images/edit.png" alt="View" />
                             </button>
                             <button
-                              className="residentmodule-action-delete"
+                              className="residentmodule-action-delete" /* edited this class */
                               onClick={() =>
                                 handleDeleteClick(resident.id, resident.residentNumber)
                               }
@@ -462,7 +468,7 @@ export default function ResidentModule() {
       )}
     </div>
   
-       <div className="redirection-section">
+       <div className="redirection-section" /* edited this class */>
             <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
             {getPageNumbers().map((number, index) => (
               <button

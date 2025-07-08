@@ -280,20 +280,33 @@ useEffect(() => {
 
 {console.log("Assigned Tasks:", taskAssignedData)}
 
+    /* NEW UPDATED ADDED */
+    const [filtersLoaded, setFiltersLoaded] = useState(false);
+  
+    /* NEW UPDATED ADDED */
+    useEffect(() => {
+      setFiltersLoaded(false); // reset animation
+      const timeout = setTimeout(() => {
+        setFiltersLoaded(true); // retrigger
+      }, 50); // adjust delay as needed
+      return () => clearTimeout(timeout);
+    }, [searchParams.toString()]);
+
+
     return (
 
-        <main className="inbarangayreq-main-container">
+        <main className="inbarangayreq-main-container" >
 
 
           <div className="inbarangayreq-section-1">
             <div className="center-wrapper">
-              <div className="assigned-incident-info-toggle-wrapper">
+              <div className={`assigned-incident-info-toggle-wrapper ${filtersLoaded ? "filters-animated" : ""}`}>
                
                       {["main", ...(canSeeTasks ? ["tasks"] : [])].map((section) => (
                   <button
                     key={section}
                     type="button"
-                    className={`info-toggle-btn-assigned ${activeSection === section ? "active" : ""}`}
+                    className={`info-toggle-btn-assigned assigned-tasks ${activeSection === section ? "active" : ""}`}
                     onClick={() => setActiveSection(section)}
                   >
                     {section === "main" && "All Requests"}
@@ -313,9 +326,9 @@ useEffect(() => {
             </div>
 
             
-            {(user?.position === "Admin Staff") && (
+            {(user?.position === "Admin Staff") && filtersLoaded && (
               <div className="section-generate-doc">
-                <button className="add-requests-btn" onClick={handleGenerateDocument}>
+                <button className="add-requests-btn add-new-doc-req" onClick={handleGenerateDocument}>
                   New Document Request
                 </button>
                 </div>
@@ -327,8 +340,8 @@ useEffect(() => {
 
         {activeSection === "main" && (
           <>
-              <div className="inbarangayreq-section-2">
-                <div className="inbarangayreq-section-2-left">
+              <div className={`inbarangayreq-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
+                
                   <div className="date-input-group">
                     <label htmlFor="dateFrom">From Date :</label>
                     <input
@@ -352,9 +365,9 @@ useEffect(() => {
                       onChange={(e) => setDateTo(e.target.value)}
                     />
                   </div>
-                </div>
+              
 
-                <div className="inbarangayreq-section-2-right">
+         
 
                    <div className="dropdown-group">
 
@@ -390,29 +403,29 @@ useEffect(() => {
                     </div>
 
 
-                </div>
+            
 
 
 
               </div>
 
 
-            <div className="inbarangayreq-main-section">
+            <div className="inbarangayreq-main-section"  /* edited this class*/>
               {loading ? (
                   <p>Loading Online Requests...</p>
                 ) : error ? (
                   <p className="error">{error}</p>
                     ) : filteredMainRequests.length === 0 ? (
-                  <div className="no-result-card-inbarangay">
+                  <div className="no-result-card-inbarangay" /* edited this class */>
                     <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
                     <p className="no-results-inbarangay">No Results Found</p>
                   </div>
                 ) : (
 
                 <table>
-                  <thead>
+                  <thead /* edited this class */>
                     <tr>
-                      <th>Document Type</th>
+                      <th /* edited this class */>Document Type</th>
                       <th>Request ID</th>
                       <th>Request Date</th>
                       <th>Requestor</th>
@@ -423,25 +436,25 @@ useEffect(() => {
                   </thead>
                   <tbody>
                   {currentMainRequests.map((request, index) => (
-                      <tr
+                      <tr /* edited this class*/
                           key={index}
                           data-id={request.id}
                           className={highlightedRequestId === request.id ? "highlighted-row" : ""}
                         >
 
-                        <td>{request.docType}</td>
+                        <td /* edited this class */>{request.docType}</td>
                         <td>{request.requestId}</td>
                         <td>{request.createdAt}</td>
                         <td>{request.requestor}</td>
                         <td>{request.purpose}</td>
                         <td>
                         <span className={`status-badge ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
-                            {request.status}
+                            <p>{request.status}</p>
                           </span>
                         </td>
                         <td>
                           <div className="actions-inbarangay">
-                            <button className="action-inbarangay-view" onClick={() => handleView(request.id, request.reqType)}>
+                            <button className="action-inbarangay-view" /* edited this class */onClick={() => handleView(request.id, request.reqType)}>
                                 <img src="/Images/view.png" alt="View" />
                             </button>
                           </div>
@@ -453,7 +466,7 @@ useEffect(() => {
               )}
             </div>
 
-            <div className="redirection-section-inbarangay">
+            <div className="redirection-section-inbarangay" /* edited this class */>
               <button onClick={() => setMainCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={mainCurrentPage === 1}>
                 &laquo;
               </button>
