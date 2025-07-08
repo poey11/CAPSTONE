@@ -163,12 +163,15 @@ export default function GenerateDialogueLetter() {
                 complainant: {
                     fname: `${userInfo.complainant?.fname || ""} ${userInfo.complainant?.lname || ""}`.trim(),
                     address: userInfo.complainant?.address || "",
-                    contact: userInfo.complainant?.contact || ""
+                    contact: userInfo.complainant?.contact || "",
+                    residentId: userInfo.complainant?.residentId || "",
                 },
                 respondent: {
                     fname: `${userInfo.respondent?.fname || ""} ${userInfo.respondent?.lname || ""}`.trim(),
                     address: userInfo.respondent?.address || "",
-                    contact: userInfo.respondent?.contact || ""
+                    contact: userInfo.respondent?.contact || "",
+                    residentId: userInfo.respondent?.residentId || "",
+
                 }
             }));
         }
@@ -533,10 +536,10 @@ export default function GenerateDialogueLetter() {
 
             // complainant notification
 
-            if (userInfo.complainant?.residentID) {
+            if (userInfo.complainant?.residentId) {
                 const complainantNotifRef = doc(collection(db, "Notifications"));
                 await setDoc(complainantNotifRef, {
-                    residentID: userInfo.complainant.residentID,
+                    residentID: userInfo.complainant.residentId,
                     message: `You have a scheduled Dialogue meeting on ${otherInfo.DateTimeOfMeeting} for Case #${userInfo.caseNumber || docId}.`,
                     transactionType: "Incident",
                     timestamp: new Date(),
@@ -545,10 +548,10 @@ export default function GenerateDialogueLetter() {
             }
     
             //  Respondent notification
-            if (userInfo.respondent?.residentID) {
+            if (userInfo.respondent?.residentId) {
                 const respondentNotifRef = doc(collection(db, "Notifications"));
                 await setDoc(respondentNotifRef, {
-                    residentID: userInfo.respondent.residentID,
+                    residentID: userInfo.respondent.residentId,
                     message: `You have a scheduled Dialogue meeting on ${otherInfo.DateTimeOfMeeting} for Case #${userInfo.caseNumber || docId}.`,
                     transactionType: "Incident",
                     timestamp: new Date(),
@@ -605,7 +608,7 @@ export default function GenerateDialogueLetter() {
             if (userInfo.complainant?.residentID) {
                 const complainantNotifRef = doc(collection(db, "Notifications"));
                 await setDoc(complainantNotifRef, {
-                    residentID: userInfo.complainant.residentID,
+                    residentID: userInfo.complainant.residentId,
                     message: `You have a scheduled ${hearingB} Hearing on ${otherInfo.DateTimeOfMeeting} for Case #${userInfo.caseNumber || docId}.`,
                     transactionType: "Incident",
                     timestamp: new Date(),
@@ -617,7 +620,7 @@ export default function GenerateDialogueLetter() {
             if (userInfo.respondent?.residentID) {
                 const respondentNotifRef = doc(collection(db, "Notifications"));
                 await setDoc(respondentNotifRef, {
-                    residentID: userInfo.respondent.residentID,
+                    residentID: userInfo.respondent.residentId,
                     message: `You have a scheduled ${hearingB} Hearing on ${otherInfo.DateTimeOfMeeting} for Case #${userInfo.caseNumber || docId}.`,
                     transactionType: "Incident",
                     timestamp: new Date(),
