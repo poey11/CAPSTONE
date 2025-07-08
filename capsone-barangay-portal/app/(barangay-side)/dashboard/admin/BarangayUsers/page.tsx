@@ -248,26 +248,38 @@ useEffect(() => {
     setFilteredUser(filtered);
   }, [nameSearch, userIdSearch, positionDropdown, showCount, barangayUsers]);
   
+
+  /* NEW UPDATED ADDED */
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
+
+  /* NEW UPDATED ADDED */
+  useEffect(() => {
+    setFiltersLoaded(false); // reset animation
+    const timeout = setTimeout(() => {
+      setFiltersLoaded(true); // retrigger
+    }, 50); // adjust delay as needed
+    return () => clearTimeout(timeout);
+  }, [searchParams.toString()]);
  
     return (
-        <main className="barangayusers-page-main-container">
+        <main className="barangayusers-page-main-container" /* edited this class*/>
             
             <div className="user-roles-module-section-1">
                 
                 {isAuthorized &&(
                     <Link href="/dashboard/admin/addBarangayUser">
-                    <button className="add-announcement-btn" onClick={handleAddBarangayUserClick}>Add New Barangay User</button>
+                    <button className="add-announcement-btn add-incident-animated" /* edited this class*/ onClick={handleAddBarangayUserClick}>Add New Barangay User</button>
                     </Link>
                 )}
 
             </div>
 
             
-          <div className="barangayusers-page-section-2">
+          <div className={`barangayusers-page-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
 
           <input
             type="text"
-            className="barangayusers-page-filter"
+            className="barangayusers-page-filter" /* edited this class*/
             placeholder="Search by User ID"
             value={userIdSearch}
             onChange={(e) => setUserIdSearch(e.target.value)}
@@ -309,19 +321,19 @@ useEffect(() => {
                 </div>
 
 
-<div className="barangayusers-page-main-section">
+<div className="barangayusers-page-main-section" /* edited this class*/>
   <>
    
     {currentUser.length === 0 ? (
-      <div className="no-result-card">
-        <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
-        <p className="no-results-department">No Results Found</p>
+      <div className="no-result-card" /* edited this class */>
+        <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" /* edited this class *//>
+        <p className="no-results-department" /* edited this class */>No Results Found</p>
       </div>
     ) : (
       <table>
-        <thead>
-          <tr>
-            <th>
+        <thead /* edited this class */>
+          <tr >
+            <th /* edited this class */>
               User ID
               <button
                 onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
@@ -338,11 +350,11 @@ useEffect(() => {
         </thead>
         <tbody>
         {currentUser.map((user) => (
-            <tr
+            <tr /* edited this class*/
             key={user.id}
             className={highlightedId === user.id ? "highlighted-row" : ""}
             >
-            <td>{user.userid}</td>
+            <td /* edited this class */>{user.userid}</td >
             <td>
                 {user.lastName ? `${user.lastName}, ` : ""}
                 {user.firstName} {user.middleName}
@@ -353,18 +365,18 @@ useEffect(() => {
                 <div className="admin-actions">
                 {/*<button className="admin-action-view" onClick={(e) => { e.stopPropagation(); }}>View</button>*/}
 
-                <button className="admin-action-view" onClick={() => handleViewBarangayUserClick(user.id)}><img src="/Images/view.png" alt="View" /></button>
+                <button className="admin-action-view" /* edited this class */ onClick={() => handleViewBarangayUserClick(user.id)}><img src="/Images/view.png" alt="View" /></button>
 
                 {isAuthorized && (
                     <>
                     <button
-                        className="admin-action-edit"
+                        className="admin-action-edit" /* edited this class */
                         onClick={() => handleEditBarangayUserClick(user.id)}
                     >
                          <img src="/Images/edit.png" alt="Edit" />
                     </button>
                     <button
-                        className="admin-action-delete"
+                        className="admin-action-delete" /* edited this class */
                         onClick={() => handleDeleteBarangayUserClick(user.id)}
                     >
                          <img src="/Images/delete.png" alt="Delete" />
@@ -382,7 +394,7 @@ useEffect(() => {
   </>
 </div>
 
-   <div className="redirection-section-users">
+   <div className="redirection-section-users" /* edited this class */>
                     <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
                     {getPageNumbers().map((number, index) => (
                     <button

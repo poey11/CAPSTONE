@@ -6,6 +6,7 @@ import { useMemo, useEffect, useState } from "react";
 import Calendar from "@/app/(barangay-side)/components/calender";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
+import { useSearchParams } from 'next/navigation';
 import { request } from "http";
 
 
@@ -117,13 +118,25 @@ const getPageNumbers = () => {
 };
 
 
+const searchParams = useSearchParams();
+
+    /* NEW UPDATED ADDED */
+    const [filtersLoaded, setFiltersLoaded] = useState(false);
   
+    /* NEW UPDATED ADDED */
+    useEffect(() => {
+      setFiltersLoaded(false); // reset animation
+      const timeout = setTimeout(() => {
+        setFiltersLoaded(true); // retrigger
+      }, 50); // adjust delay as needed
+      return () => clearTimeout(timeout);
+    }, [searchParams.toString()]);
 
     return (
 
-        <main className="appointments-main-container">
+        <main className="appointments-main-container" /* edited this class*/>
         
-         <div className="appointments-section-2">
+         <div className={`appointments-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
           <input 
               type="text" 
               className="appointments-module-filter" 
@@ -153,10 +166,12 @@ const getPageNumbers = () => {
          </div>
 
          <div className="appointment-calendar-container">
+         <div className="custom-calendar-wrapper">
           <Calendar appointments={appointmentData} />
+          </div>
          </div>
           
-
+        
          
         
       </main>
