@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from "react";
 import { db } from "../../../../db/firebase";
-import { collection, onSnapshot, updateDoc, doc } from "firebase/firestore";
+import { collection, onSnapshot, query ,updateDoc, doc, orderBy} from "firebase/firestore";
 import "@/CSS/User&Roles/User&Roles.css";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -20,6 +20,7 @@ interface ResidentUser {
   email: string;
   status: string;
   isNew?: boolean;
+   createdAt?: string;
 }
 
 const ResidentUsers = () => {
@@ -58,7 +59,7 @@ const ResidentUsers = () => {
 
 
 
-  // 🔥 Mark as viewed
+// Mark as viewed
   const markAsViewed = async (id: string) => {
     try {
       const docRef = doc(db, "ResidentUsers", id);
@@ -69,8 +70,8 @@ const ResidentUsers = () => {
   };
 
 
-
-  // 🟡 Fetch users
+/*
+OLD
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -93,7 +94,7 @@ const ResidentUsers = () => {
     };
     fetchUsers();
   }, []);
-
+*/
 
   /*
 
@@ -123,7 +124,53 @@ const ResidentUsers = () => {
 */
 
 
-  // 🟢 Scroll + temporary highlight
+
+
+
+// Fetch users
+useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      const residentCollection = collection(db, "ResidentUsers");
+      const q = query(residentCollection, orderBy("createdAt", "desc")); // Firestore ordering
+
+        const unsubscribeResidents = onSnapshot(residentCollection, (snapshot) => {
+          const residentData: ResidentUser[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            isNew: doc.data().isViewed === false,
+          })) as ResidentUser[];
+
+          const sortedData = residentData.sort((a, b) => {
+            if (a.isNew === b.isNew) {
+              // Convert string dates to Date objects and compare
+              return new Date(b.createdAt || "").getTime() - new Date(a.createdAt || "").getTime();
+            }
+            return a.isNew ? -1 : 1; // New users on top
+          });
+
+          setResidentUsers(sortedData);
+        });
+
+
+      return () => unsubscribeResidents();
+    } catch (err: any) {
+      console.log(err.message);
+      setError("Failed to load residents");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchUsers();
+}, []);
+
+
+
+
+
+
+  // Scroll + temporary highlight
   useEffect(() => {
     if (highlightUserId && residentUsers.length > 0) {
       setHighlightedId(highlightUserId);
@@ -224,22 +271,26 @@ const ResidentUsers = () => {
 
   return (
     <main className="residentusers-page-main-container">
-      <div className="user-roles-module-section-1-resident-users">
-        <div className="assigned-tasks-info-toggle-wrapper">
-          {["main", "pending"].map(section => (
-            <button
-              key={section}
-              type="button"
-              className={`info-toggle-btn-assigned-resident ${activeSection === section ? "active" : ""}`}
-              onClick={() => { setActiveSection(section); setCurrentPage(1); }}
-              style={{ position: "relative" }}
-            >
-              {section === "main" && "Verified Users"}
-              {section === "pending" && "Pending Users"}
-            </button>
-          ))}
-        </div>
-      </div>
+
+        {["Assistant Secretary", "Secretary"].includes(userPosition || "") && (
+          <div className="user-roles-module-section-1-resident-users">
+            <div className="assigned-tasks-info-toggle-wrapper">
+              {["main", "pending"].map(section => (
+                <button
+                  key={section}
+                  type="button"
+                  className={`info-toggle-btn-assigned-resident ${activeSection === section ? "active" : ""}`}
+                  onClick={() => { setActiveSection(section); setCurrentPage(1); }}
+                  style={{ position: "relative" }}
+                >
+                  {section === "main" && "Verified Users"}
+                  {section === "pending" && "Pending Users"}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
 
       {/* Filters for main */}
       {activeSection === "main" && (
