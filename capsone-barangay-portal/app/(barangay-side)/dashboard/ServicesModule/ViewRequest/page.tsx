@@ -1367,7 +1367,7 @@ const ViewOnlineRequest = () => {
           docPrinted: true,
       };
 
-     await updateDoc(docRef, updatedData);
+     //await updateDoc(docRef, updatedData);
     }
 
     const handleNextStep = async() => {

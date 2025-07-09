@@ -706,13 +706,22 @@ const handleFileChange = (
       else if(clearanceInput.docType === "Business Permit" || clearanceInput.purpose === "Barangay ID"){
         sendTo = "Admin Staff";
       }
-
+      let documentTypeIs = "";
+        if(otherDocPurposes[clearanceInput.docType || '']?.includes(clearanceInput.purpose || "")) {
+          documentTypeIs = "OtherDocuments";
+      }
     updates = {
       ...updates,
       sendTo: sendTo,
       ...(clearanceInput.appointmentDate && { 
         approvedBySAS: false,
        }),
+      ...(documentTypeIs !== "" && {
+        documentTypeIs: documentTypeIs,
+      }),
+      requestorMrMs:clearanceInput.requestorMrMs,
+      requestorFname: clearanceInput.requestorFname
+
     }
     const newDoc = await addDoc(docRef, updates);
     console.log("Report uploaded with ID:", newDoc.id);
