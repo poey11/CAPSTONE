@@ -7,10 +7,9 @@ import { useSession } from "next-auth/react";
 import { getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
-import { collection, doc, setDoc, updateDoc, getDocs, query, ,getDoc } from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc } from "firebase/firestore";
 import { handlePrint,handleGenerateDocument } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
-import OnlineRequests from "../OnlineRequests/page";
 
 interface EmergencyDetails {
     fullName: string;
