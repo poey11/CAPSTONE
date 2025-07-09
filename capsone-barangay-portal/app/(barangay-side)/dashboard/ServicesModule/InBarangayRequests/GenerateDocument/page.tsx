@@ -2,19 +2,25 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { collection, getDocs} from "firebase/firestore";
+import { collection, getDocs, onSnapshot} from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/GenerateDocument.css";
+import { title } from "process";
 
 
 export default function GenerateDocument() {
     const router = useRouter();
-    const [permitOptions, setPermitOptions] = useState<string[]>([]);
+    const [permitOptions, setPermitOptions] = useState<any[]>([]);
 
 
     const handleSubmit = (e: any) => {
         const action = e.currentTarget.id;
         router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=${action}`);
+    }
+
+    const handleSubmitOther = (e: any) => {
+        console.log("Selected Document:", e);
+        router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=${e.type}&purpose=${e.title}`);
     }
 
     const [isDropdownVisible, setDropdownVisible] = useState(false);
@@ -32,23 +38,65 @@ export default function GenerateDocument() {
         router.push("/dashboard/ServicesModule/InBarangayRequests");
     };
 
-    useEffect(() => {
-        const fetchPermitOptions = async () => {
-          try {
-            const querySnapshot = await getDocs(collection(db, "OtherDocuments"));
-            const permits = querySnapshot.docs
-              .filter(doc => doc.data().type === "Barangay Permit")
-              .map(doc => doc.data().title);
-      
-            setPermitOptions(permits);
-          } catch (error) {
-            console.error("Error fetching Barangay Permit documents:", error);
-          }
-        };
-      
-        fetchPermitOptions();
-      }, []);
+    const  handleTestNewDocument = async() => {
+        let locationPath = "Barangay ID.pdf"; // Default path for Barangay Certificate
 
+        let reqData = {
+            "Text1": "John Doe",
+            "Text2": "1234",
+            "Text3": "1234 Street Name, Barangay, City",
+            "Text4": "1234567890",
+            "Text5": "1234567890",
+            "Text6": "1234567890",
+            "Text7": "1234567890",
+            "Text8": "1234567890",
+            "Text9": "1234567890",
+            "Text10": "1234567890",
+            "Text11": "1234567890",
+            "Text12": "1234567890",
+        }
+
+        
+        const response = await fetch("/api/fillPDF", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                location: "/ServiceRequests/templates",
+                pdfTemplate: locationPath,
+                data: reqData,
+            })
+        });
+        if(!response.ok)throw new Error("Failed to generate PDF");
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download=`test.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+        link.remove();
+    }
+
+    useEffect(() => {
+        const collectionRef = collection(db, "OtherDocuments");
+        const unsubscribe = onSnapshot(collectionRef, (snapshot) => {
+            const permits = snapshot.docs
+                .filter(doc => doc.data().type === "Barangay Permit")
+                .map(doc => ({
+                    id: doc.id,
+                    title: doc.data().title,
+                    type: doc.data().type,
+                }));
+            setPermitOptions(permits);
+        });
+
+        return () => unsubscribe(); // Cleanup the listener on unmount
+
+      }, []);
+      console.log("Permit Options:", permitOptions);
     return (
         <main className="generatedocument-main-container">
             {/* NEW */}
@@ -72,6 +120,10 @@ export default function GenerateDocument() {
                             Edit New Document
                         </button>
                         */}
+                        
+                        {/* <button className="action-edit-new-doc"  onClick={handleTestNewDocument}>
+                            Test Document
+                        </button> */}
                     </div>
                 </div>
 
@@ -111,9 +163,9 @@ export default function GenerateDocument() {
                                         
                                         {/* Add dynamic permit titles */}
                                         
-                                        {permitOptions.map((title, index) => (
-                                            <p key={index} className="dropdown-item" onClick={handleSubmit} id={title}>
-                                            {title}
+                                        {permitOptions.map((permit, index) => (
+                                            <p key={permit.id||index} className="dropdown-item" onClick={() => handleSubmitOther(permit)}>
+                                                {permit.title}
                                             </p>
                                         ))}
                                     </div>

@@ -7,10 +7,9 @@ import { useSession } from "next-auth/react";
 import { getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
-import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot, getDoc } from "firebase/firestore";
-import { handlePrint } from "@/app/helpers/pdfhelper";
+import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc } from "firebase/firestore";
+import { handlePrint,handleGenerateDocument } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
-import OnlineRequests from "../OnlineRequests/page";
 
 interface EmergencyDetails {
     fullName: string;
@@ -23,6 +22,7 @@ interface EmergencyDetails {
     sendTo: string;
     accID: string;
     requestId: string;
+    documentTypeIs?: string; 
     docPrinted?: boolean; // Optional field to track if document is printed
     reqType?: string; // "Online" or "InBarangay"
     requestor: string;
@@ -48,6 +48,7 @@ interface EmergencyDetails {
     age: string;
     gender: string;
     civilStatus: string;
+    approvedBySAS: boolean;
     contact: string;
     typeofconstruction: string;
     typeofbldg: string;
@@ -1337,9 +1338,6 @@ const ViewOnlineRequest = () => {
       receivalWhen: new Date(),
     })
 
-    console.log(receival);
-
-
     const handleReceivalSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!id) return;
@@ -1376,8 +1374,16 @@ const ViewOnlineRequest = () => {
 
     const docPrinted = requestData?.docPrinted;
 
+    
     const print = async() => {
-      handlePrint(requestData);
+      /* This part will handle ung pag generate ng pdf and also updates the request's status to In - Progress */
+      if(!requestData?.documentTypeIs){
+        handlePrint(requestData);
+      }
+      else{//if existing ung documentTypeIs, it will use the other generate document function
+        handleGenerateDocument(requestData);
+        console.log("Existing documentTypeIs, using other generate document function");
+      }
       
       if(!id) return;
       const docRef = doc(db, "ServiceRequests", id);
@@ -1387,15 +1393,7 @@ const ViewOnlineRequest = () => {
           docPrinted: true,
       };
 
-      // if(requestData?.sendTo === "Admin Staff"){
-      //   updatedData = {
-      //     ...updatedData,
-      //     status: "In - Progress",
-      //     statusPriority: 2,
-      //   }
-      // }
-
-      await updateDoc(docRef, updatedData);
+     await updateDoc(docRef, updatedData);
     }
 
     useEffect(() => {
@@ -1420,29 +1418,47 @@ const ViewOnlineRequest = () => {
     }, [id]);
 
     const handleNextStep = async() => {
-      //handleSMS(); dito mag sesend ng SMS to the resident
       if(!id) return;
       let updatedData = {}
       const docRef = doc(db, "ServiceRequests", id);
 
       if(requestData?.sendTo === "SAS"){
+          /* This part will handle ung pag notify kay admin staff regarding the doc  */
          updatedData = {
-          status: "Pick-up",
-          statusPriority: 3,
           sendTo: "Admin Staff",
         }
       }else{
+        /* This part will handle ung pag notify kay resident na to pickup na ung  doc */
+        //handleSMS(); Admin Staff will handle the sending of SMS to the resident
         updatedData = {
           status: "Pick-up",
           statusPriority: 3,
         }
       }
-      router.push("/dashboard/ServicesModule/InBarangayRequests");
+      if(requestData?.reqType === "Online"){
+        router.push("/dashboard/ServicesModule/OnlineRequests");
+        
+      }
+      else{
+        router.push("/dashboard/ServicesModule/InBarangayRequests");
+
+      }
       
       await updateDoc(docRef, updatedData);
     }
 
+    const handleApprovedBySAS = async() => {
+      /* This part will handle ung pag ka approve ni asst sec and sec sa appointment request */
+      if(!id) return;
+      const docRef = doc(db, "ServiceRequests", id);
+      const updatedData = {
+          approvedBySAS: true,
+      };
+      await updateDoc(docRef, updatedData);
+    }
+
     const handleRequestIsDone = async() => {
+      /* This part will handle ung pag update ng status to Completed and nareceive n ni resident yung document */
       if(!id) return;
       const docRef = doc(db, "ServiceRequests", id);
       const updatedData = {
@@ -1451,9 +1467,6 @@ const ViewOnlineRequest = () => {
       };
       await updateDoc(docRef, updatedData);
     }
-    console.log(userPosition);
-    console.log(requestData?.sendTo);
-    console.log(docPrinted);
 
     return (  
         <main className="main-container-services-onlinereq">
@@ -1478,12 +1491,23 @@ const ViewOnlineRequest = () => {
                               </div>
                               <h1>Reject Request</h1>
                             </button>
-                            <button className="services-onlinereq-redirection-buttons" onClick={print}>
+                            {!requestData?.approvedBySAS && requestData?.appointmentDate ? (
+                              <button className="services-onlinereq-redirection-buttons" onClick={handleApprovedBySAS}>
                               <div className="services-onlinereq-redirection-icons-section">
                                   <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                               </div>
-                              <h1>Generate Document</h1>
+                              <h1>Approve Appointment</h1>
                             </button>
+                            ):(
+                              <button className="services-onlinereq-redirection-buttons" onClick={print}>
+                              <div className="services-onlinereq-redirection-icons-section">
+                                  <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                              </div>
+                                <h1>Generate Document</h1>
+                              </button>
+
+                            )}
+                            
                           </>
                         )}
                         {docPrinted && (userPosition !== "Admin Staff") ? (
@@ -1524,7 +1548,7 @@ const ViewOnlineRequest = () => {
                               <h1>Send SMS</h1>
                           </button>
                         )} */}
-                        {requestData?.appointmentDate && (
+                        {requestData?.appointmentDate && requestData?.approvedBySAS  && (
                           <button className="services-onlinereq-redirection-buttons" onClick={handleviewappointmentdetails}>
                               <div className="services-onlinereq-redirection-icons-section">
                               <img src="/images/appointment.png" alt="user info" className="redirection-icons-info" />

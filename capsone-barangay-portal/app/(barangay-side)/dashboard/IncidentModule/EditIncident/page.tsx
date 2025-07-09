@@ -1,6 +1,6 @@
 "use client"
 import "@/CSS/IncidentModule/EditIncident.css";
-import { ChangeEvent,useEffect, useState } from "react";
+import { ChangeEvent,use,useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/firestorehelper";
 import { doc, updateDoc, collection, where, getDocs, query, onSnapshot, deleteDoc, orderBy} from "firebase/firestore";
@@ -81,14 +81,21 @@ export default function EditLuponIncident() {
     console.log("Summon Letter Data:", summonLetterData);
 
     useEffect(() => {
-      if(docId){
-        getSpecificDocument("IncidentReports", docId, setReportData).then(() => setLoading(false));
-      }
-      else{
-        console.log("No document ID provided.");
-        setReportData(null);
-       
-      }
+      if(!docId) return;
+        const docRef = doc(db, "IncidentReports", docId);
+        const unsubscribe = onSnapshot(docRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setReportData(data);
+          } else {
+            console.log("No such document!");
+          }
+        });
+      setLoading(false);
+      // Cleanup function to unsubscribe from the snapshot listener
+        return () => unsubscribe();
+      
+      
     }, [docId]);
 
     useEffect(() => {
@@ -399,7 +406,24 @@ export default function EditLuponIncident() {
 
 
     },[reportData])
+  const [generatedLetters, setGeneratedLetters] = useState<any[]>([]);
+  useEffect(() => {
+    if (!docId) return;
+    const lettersRef = collection(db, "IncidentReports", docId, "GeneratedLetters");
+    const unsubscribe = onSnapshot(lettersRef, (snapshot) => {
+      const fetchedData:any[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setGeneratedLetters(fetchedData); 
+    });
+    
 
+    return () => unsubscribe();
+
+  }, [docId]);
+
+  console.log("Generated Letter:", generatedLetters);
 
   const handleReopen = async(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.preventDefault();
@@ -414,8 +438,36 @@ export default function EditLuponIncident() {
         statusPriority: 1,
       });
 
-      if(dialogueReset) await deleteDoc(doc(db, "IncidentReports", docId, "DialogueMeeting", docId)); // Delete the summon letter if it exists
-      if(hearingReset) await deleteDoc(doc(db, "IncidentReports", docId, "SummonsMeeting", reportData.hearingId)); // Delete the hearing section if it exists
+      if(dialogueReset) {
+        await updateDoc(docRef, {
+          isDialogue: false, 
+        })
+        const dialogueLetter = generatedLetters.find(
+          (letter) => letter.letterType === "dialogue"
+        );
+        const generatedLetterId = dialogueLetter?.id;
+        if (generatedLetterId) {
+          await deleteDoc(doc(db, "IncidentReports", docId, "GeneratedLetters", generatedLetterId));
+        }
+        await deleteDoc(doc(db, "IncidentReports", docId, "DialogueMeeting", docId));
+
+      }
+      if(hearingReset){
+        await updateDoc(docRef, {
+          generatedHearingSummons: reportData?.generatedHearingSummons - 1, // Increment the hearing summons count
+          hearing: reportData?.hearing - 1, // Decrement the hearing count
+        })
+        const assortedLetter = generatedLetters
+          .filter(letter => letter.letterType === "summon")
+          .sort((a, b) => a.hearingNumber - b.hearingNumber);
+
+        
+
+        await deleteDoc(doc(db, "IncidentReports", docId, "GeneratedLetters", assortedLetter[assortedLetter.length-1]?.id)); // Delete the lastest summon letter
+
+
+        await deleteDoc(doc(db, "IncidentReports", docId, "SummonsMeeting", reportData.hearingId)); // Delete the hearing section if it exists\
+      } 
 
       setShowContinuePopup(false);
       setPopupMessage("Incident case has been reopened.");
@@ -423,10 +475,10 @@ export default function EditLuponIncident() {
 
       setTimeout(() => {
         setShowPopup(false);
-        router.refresh(); // Refresh the page to reflect changes
-        if (docId && departmentId) {
-          window.location.reload(); // Reload the page to ensure all data is fresh
-        }
+        // router.refresh(); // Refresh the page to reflect changes
+        // if (docId && departmentId) {
+        //   window.location.reload(); // Reload the page to ensure all data is fresh
+        // }
       }, 3000);
     } catch (error) {
       setPopupErrorMessage("Failed to reopen the case. Please try again.");
@@ -450,7 +502,7 @@ export default function EditLuponIncident() {
       setTimeout(() => {
         setShowPopup(false);
         //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
-        window.location.reload(); // Reload the page to ensure all data is fresh
+        //window.location.reload(); // Reload the page to ensure all data is fresh
       }, 3000);
     }
     else{
@@ -464,7 +516,7 @@ export default function EditLuponIncident() {
       setTimeout(() => {
         setShowPopup(false);
         //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
-        window.location.reload(); // Reload the page to ensure all data is fresh
+        //window.location.reload(); // Reload the page to ensure all data is fresh
       }, 3000);
     }
 
@@ -600,9 +652,9 @@ export default function EditLuponIncident() {
 
               <div className="action-btn-section">
                 
-              <button type="submit" className="action-view-edit" onClick={handleSubmit}>
+              {/* <button type="submit" className="action-view-edit" onClick={handleSubmit}>
                   {loading ? "Saving..." : "Save"}
-                </button>
+                </button> */}
               </div>
               
             </div>
@@ -638,9 +690,9 @@ export default function EditLuponIncident() {
                       <div className="status-section-view">
                         <select
                           id="status"
-                          className={`status-dropdown-edit ${toUpdate.status?.toLowerCase() || reportData.status?.toLowerCase() || "pending"}`}
+                          className={`status-dropdown-edit ${toUpdate.status?.toLowerCase() || reportData?.status.toLowerCase() || "pending"}`}
                           name="status"
-                          value={toUpdate.status ?? reportData.status ?? "pending"}  // changed to small
+                          value={toUpdate?.status ?? reportData?.status ?? "pending"}  // changed to small
                           onChange={handleFormChange}
                           onFocus ={(e) => e.target.blur()} // Prevents focus outline
                           disabled
@@ -665,7 +717,7 @@ export default function EditLuponIncident() {
                             <h1>Date Filed</h1>
                           </div>
                         </div>
-                        <p>{`${reportData?.dateFiled}${reportData.isReportLate ? " (Late Filing)" : ""} `  || "N/A"}</p>
+                        <p>{`${reportData?.dateFiled}${reportData?.isReportLate ? " (Late Filing)" : ""} `  || "N/A"}</p>
 
                       </div>
 
@@ -678,7 +730,7 @@ export default function EditLuponIncident() {
                             <h1>Location</h1>
                           </div>
                         </div>
-                        <p>{`${reportData?.location} - ${reportData.areaOfIncident}` || "N/A"}</p>
+                        <p>{`${reportData?.location} - ${reportData?.areaOfIncident}` || "N/A"}</p>
                       </div>
                         
                       <div className="incident-description-section">
@@ -707,19 +759,19 @@ export default function EditLuponIncident() {
                                 <div className="edit-incident-fields-section">
                                   <p>Last Name</p>
                                   <input type="text" className="edit-incident-input-field" 
-                                  placeholder= {reportData.complainant.lname} value={toUpdate.complainant.lname} 
+                                  placeholder= {reportData?.complainant.lname} value={toUpdate.complainant.lname} 
                                   name="complainant.lname" id="complainant.lname" onChange={handleFormChange} disabled/>
                                 </div>
 
                                 <div className="edit-incident-fields-section">
                                   <p>First Name</p>
-                                  <input type="text" className="edit-incident-input-field" disabled placeholder= {reportData.complainant.fname} value={toUpdate.complainant.fname} name="complainant.fname" id="complainant.fname" onChange={handleFormChange} />
+                                  <input type="text" className="edit-incident-input-field" disabled placeholder= {reportData?.complainant.fname} value={toUpdate.complainant.fname} name="complainant.fname" id="complainant.fname" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
                                   <p>Civil Status</p>
                                   <select   className="edit-incident-input-field"    
-                                    value={toUpdate.complainant.civilStatus || reportData.complainant.civilStatus || ""} // Show db value or user-updated value
+                                    value={toUpdate.complainant.civilStatus || reportData?.complainant.civilStatus || ""} // Show db value or user-updated value
                                     name="complainant.civilStatus"
                                     id="complainant.civilStatus" disabled
                                     onChange={handleFormChange}
@@ -737,7 +789,7 @@ export default function EditLuponIncident() {
                               <div className="edit-incident-content-right-side">
                                 <div className="edit-incident-fields-section">
                                   <p>Age</p>
-                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.complainant.age} value={toUpdate.complainant.age} name="complainant.age" id="complainant.age" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData?.complainant.age} value={toUpdate.complainant.age} name="complainant.age" id="complainant.age" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
@@ -746,7 +798,7 @@ export default function EditLuponIncident() {
                                     className="edit-incident-input-field"                     
                                     name="complainant.sex" 
                                     id="complainant.sex" disabled
-                                    value={toUpdate.complainant.sex || reportData.complainant.sex || ""} // Show db value or user-updated value
+                                    value={toUpdate.complainant.sex || reportData?.complainant.sex || ""} // Show db value or user-updated value
                                     onChange={handleFormChange}
                                     >
                                     <option value="" disabled>Choose A Sex</option>
@@ -757,7 +809,7 @@ export default function EditLuponIncident() {
 
                                 <div className="edit-incident-fields-section">
                                   <p>Address</p>
-                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.complainant.address} value={toUpdate.complainant.address} name="complainant.address" id="complainant.address" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData?.complainant.address} value={toUpdate.complainant.address} name="complainant.address" id="complainant.address" onChange={handleFormChange} />
                                 </div>
                               </div>
                             </div>
@@ -765,7 +817,7 @@ export default function EditLuponIncident() {
                             <div className="bottom-middle-section">
                               <div className="bottom-middle-incidentfields">
                                 <p>Contact Number</p>
-                                <input type="text" disabled className="edit-incident-input-field" placeholder={reportData.complainant.contact} value={toUpdate.complainant.contact} name="complainant.contact" id="complainant.contact" onChange={handleFormChange} />
+                                <input type="text" disabled className="edit-incident-input-field" placeholder={reportData?.complainant.contact} value={toUpdate.complainant.contact} name="complainant.contact" id="complainant.contact" onChange={handleFormChange} />
                               </div>
                             </div>
                           </div>
@@ -779,18 +831,18 @@ export default function EditLuponIncident() {
                               <div className="edit-incident-content-left-side">
                                 <div className="edit-incident-fields-section">
                                   <p>Last Name</p>
-                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.respondent.lname} value={toUpdate.respondent.lname} name="respondent.lname" id="respondent.lname" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData?.respondent.lname} value={toUpdate.respondent.lname} name="respondent.lname" id="respondent.lname" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
                                   <p>First Name</p>
-                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.respondent.fname} value={toUpdate.respondent.fname} name="respondent.fname" id="respondent.fname" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData?.respondent.fname} value={toUpdate.respondent.fname} name="respondent.fname" id="respondent.fname" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
                                   <p>Civil Status</p>
                                   <select   className="edit-incident-input-field"    
-                                    value={toUpdate.respondent.civilStatus || reportData.respondent.civilStatus || ""} // Show db value or user-updated value
+                                    value={toUpdate.respondent.civilStatus || reportData?.respondent.civilStatus || ""} // Show db value or user-updated value
                                     name="respondent.civilStatus" disabled
                                     id="respondent.civilStatus"
                                     onChange={handleFormChange}
@@ -808,7 +860,7 @@ export default function EditLuponIncident() {
                               <div className="edit-incident-content-right-side">
                                 <div className="edit-incident-fields-section">
                                   <p>Age</p>
-                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData.respondent.age} value={toUpdate.respondent.age} name="respondent.age" id="respondent.age" onChange={handleFormChange} />
+                                  <input type="text" disabled className="edit-incident-input-field" placeholder= {reportData?.respondent.age} value={toUpdate.respondent.age} name="respondent.age" id="respondent.age" onChange={handleFormChange} />
                                 </div>
 
                                 <div className="edit-incident-fields-section">
@@ -817,7 +869,7 @@ export default function EditLuponIncident() {
                                     className="edit-incident-input-field"                     
                                     name="respondent.sex" 
                                     id="respondent.sex" disabled
-                                    value={toUpdate.respondent.sex || reportData.respondent.sex || ""} // Show db value or user-updated value
+                                    value={toUpdate.respondent.sex || reportData?.respondent.sex || ""} // Show db value or user-updated value
                                     onChange={handleFormChange}
                                     >
                                     <option value="" disabled>Choose A Sex</option>
@@ -828,7 +880,7 @@ export default function EditLuponIncident() {
 
                                 <div className="edit-incident-fields-section">
                                   <p>Address</p>
-                                  <input type="text"  disabled className="edit-incident-input-field" placeholder= {reportData.respondent.address} value={toUpdate.respondent.address} name="respondent.address" id="respondent.address" onChange={handleFormChange} />
+                                  <input type="text"  disabled className="edit-incident-input-field" placeholder= {reportData?.respondent.address} value={toUpdate.respondent.address} name="respondent.address" id="respondent.address" onChange={handleFormChange} />
                                 </div>
                               </div>
                             </div>
@@ -836,7 +888,7 @@ export default function EditLuponIncident() {
                             <div className="bottom-middle-section">
                               <div className="bottom-middle-incidentfields">
                                 <p>Contact Number</p>
-                                <input type="text" disabled className="edit-incident-input-field" placeholder={reportData.respondent.contact} value={toUpdate.respondent.contact} name="respondent.contact" id="respondent.contact" onChange={handleFormChange} />
+                                <input type="text" disabled className="edit-incident-input-field" placeholder={reportData?.respondent.contact} value={toUpdate.respondent.contact} name="respondent.contact" id="respondent.contact" onChange={handleFormChange} />
                               </div>
                             </div>
                           </div>
@@ -859,7 +911,7 @@ export default function EditLuponIncident() {
                                     onChange={handleFormChange} disabled/>
                                   </>):(<>
                                     <input type="text" className="edit-incident-input-field" 
-                                    placeholder={reportData.nature}
+                                    placeholder={reportData?.nature}
                                     value={toUpdate.nature}
                                     name="nature"
                                     id="nature"
@@ -873,7 +925,7 @@ export default function EditLuponIncident() {
                                       <input 
                                         type="number" 
                                         className="edit-incident-input-field"
-                                        value={toUpdate.nosofMaleChildren || reportData.nosofMaleChildren}
+                                        value={toUpdate.nosofMaleChildren || reportData?.nosofMaleChildren}
                                         onChange={handleFormChange}
                                         name="nosofMaleChildren"
                                         disabled
@@ -888,7 +940,7 @@ export default function EditLuponIncident() {
                                       <div className="edit-incident-fields-section">
                                         <p>Recommended Event </p>
                                         <input type="text" className="edit-incident-input-field" 
-                                        value={`${reportData.recommendedEvent}`} name="recommendedEvent" id="recommendedEvent" disabled/>
+                                        value={`${reportData?.recommendedEvent}`} name="recommendedEvent" id="recommendedEvent" disabled/>
                                       </div>
                                     </div>
                                   </>
@@ -898,8 +950,8 @@ export default function EditLuponIncident() {
                                 <div className="edit-incident-fields-section">
                                   <p>Location</p>
                                   <input type="text" className="edit-incident-input-field" 
-                                    placeholder={reportData.location} 
-                                    value={`${toUpdate.location} - ${reportData.areaOfIncident}`}
+                                    placeholder={reportData?.location} 
+                                    value={`${toUpdate.location} - ${reportData?.areaOfIncident}`}
                                     name="location"
                                     id="location"
                                     onChange={handleFormChange} disabled
@@ -913,7 +965,7 @@ export default function EditLuponIncident() {
                                       <input 
                                         type="number" 
                                         className="edit-incident-input-field"
-                                        value={toUpdate.nosofFemaleChildren||reportData.nosofFemaleChildren}
+                                        value={toUpdate.nosofFemaleChildren||reportData?.nosofFemaleChildren}
                                         name="nosofFemaleChildren"
                                         onChange={handleFormChange}
                                         disabled
@@ -924,7 +976,7 @@ export default function EditLuponIncident() {
                                 { reportData?.typeOfIncident === "Minor" && (
                                     <div className="edit-incident-fields-section">
                                       <p>Date & Time Filed</p>
-                                      <input type="text" className="edit-incident-input-field" placeholder={`${reportData.dateFiled} ${reportData.timeFiled}`} disabled/>
+                                      <input type="text" className="edit-incident-input-field" placeholder={`${reportData?.dateFiled} ${reportData?.timeFiled}`} disabled/>
                                     </div>
                                 )}
                                
@@ -935,7 +987,7 @@ export default function EditLuponIncident() {
                               {reportData?.typeOfIncident === "Major" && (
                                  <div className="bottom-middle-incidentfields">
                                   <p>Date & Time Filed</p>
-                                  <input type="text" className="edit-incident-input-field" placeholder={`${reportData.dateFiled} ${reportData.timeFiled}`} disabled/>
+                                  <input type="text" className="edit-incident-input-field" placeholder={`${reportData?.dateFiled} ${reportData?.timeFiled}`} disabled/>
                                 </div>
                               )}
                             </div>
@@ -949,7 +1001,7 @@ export default function EditLuponIncident() {
                                   </div>
 
                                   <div className="box-container-partyA">
-                                    <textarea className="natureoffacts-input-field" name="reasonForLateFiling" id="reasonForLateFiling" value={reportData.reasonForLateFiling} onChange={handleFormChange} onFocusCapture={(e) => {e.target.blur();}} />
+                                    <textarea className="natureoffacts-input-field" name="reasonForLateFiling" id="reasonForLateFiling" value={reportData?.reasonForLateFiling} onChange={handleFormChange} onFocusCapture={(e) => {e.target.blur();}} />
                                   </div>
                                 </div>
                             )}
@@ -961,7 +1013,7 @@ export default function EditLuponIncident() {
                                   </div>
 
                                   <div className="box-container-partyA">
-                                    <textarea className="natureoffacts-input-field" name="concern" id="concern" value={reportData.concern} onChange={handleFormChange} onFocusCapture={(e) => {e.target.blur();}} />
+                                    <textarea className="natureoffacts-input-field" name="concern" id="concern" value={reportData?.concern} onChange={handleFormChange} onFocusCapture={(e) => {e.target.blur();}} />
                                   </div>
                                 </div>
                               </div>
@@ -998,8 +1050,8 @@ export default function EditLuponIncident() {
                               <input 
                                 type="text" 
                                 className="edit-incident-input-field" 
-                                placeholder={reportData.receivedBy} 
-                                value={reportData.receivedBy||""}
+                                placeholder={reportData?.receivedBy} 
+                                value={reportData?.receivedBy||""}
                                 name="receivedBy"
                                 id="receivedBy"
                                 disabled
@@ -1012,7 +1064,7 @@ export default function EditLuponIncident() {
                               <input 
                                 type="text" 
                                 className="edit-incident-input-field" 
-                                placeholder={reportData.dateReceived} 
+                                placeholder={reportData?.dateReceived} 
                                 value={toUpdate.dateReceived||""} 
                                 id="dateReceived" 
                                 name="dateReceived"
@@ -1026,7 +1078,7 @@ export default function EditLuponIncident() {
                               <input 
                                 type="text" 
                                 className="edit-incident-input-field" 
-                                placeholder={reportData.timeReceived} 
+                                placeholder={reportData?.timeReceived} 
                                 value={toUpdate.timeReceived||""} 
                                 id="timeReceived" 
                                 name="time  Received" 
@@ -1209,7 +1261,7 @@ export default function EditLuponIncident() {
           </div>
         )}
 
-        {showDoneIncidentPopup && (
+        {/* {showDoneIncidentPopup && (
           <div className="confirmation-popup-overlay-add">
             <div className="confirmation-popup-add">
               <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
@@ -1230,7 +1282,7 @@ export default function EditLuponIncident() {
               </div>
             </div>
           </div>    
-        )}
+        )} */}
 
      </main>
       )}

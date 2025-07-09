@@ -4,7 +4,7 @@ import "@/CSS/ServicesPage/requestdocumentsmain/requestdocumentsmain.css";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { db } from "@/app/db/firebase";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore"; // ✅ fix
+import { collection, getDocs, doc, getDoc,onSnapshot } from "firebase/firestore"; // ✅ fix
 
 export default function Services() {
   const user = useAuth().user;

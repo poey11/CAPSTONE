@@ -9,7 +9,8 @@ import { fill } from "pdf-lib";
 interface HearingFormProps {
     index: number;
     id: string;
-    generatedHearingSummons: number;
+    hearing: number;
+    status: string; 
 }
 
 interface HearingDetails {
@@ -30,7 +31,7 @@ interface HearingDetails {
 }
 
 
-const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSummons, }) => {
+const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status }) => {
     const user = useSession().data?.user;
     const [showHearingContent, setShowHearingContent] = useState(false); // Initially hidden
     const [hearingDetails, setHearingDetails] = useState<HearingDetails[]>([]);
@@ -169,7 +170,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
     const [popupErrorMessage, setPopupErrorMessage] = useState("");
     const [invalidFields, setInvalidFields] = useState<string[]>([]);
     const prevFilledHearing = hearingDetails[index - 1]?.filled || false;
-
+    const [toUpdate, setToUpdate] = useState<any>(null);
     {/*
     const handleToggleClick = () => {
         if(index === 0 && generatedHearingSummons === 0 || !dialogue) return;
@@ -251,9 +252,11 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
                     status: "archived",
                     statusPriority: 2,
                     hearingId:  success.id,
-                }
-            )
-        
+                })
+            else{
+                setShowDoneIncidentPopup(true);
+            }
+
             
         } catch (error:any) {
             console.error("Error saving data:", error.message);
@@ -272,11 +275,10 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
               setTimeout(() => {
                 setShowPopup(false);
                 if(index === 2) {
-                    window.location.reload(); // Reload the page to reflect changes
+                    //window.location.reload(); // Reload the page to reflect changes
                 }
             }, 3000);
-            router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
-              
+            //router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
             } catch (error) {
               console.error("Error during confirmation submit:", error);
               setPopupErrorMessage("Error saving summon. Please try again.");
@@ -342,12 +344,76 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
       });
     }, [details.Cstatus, details.Rstatus]);
 
+    const HandleEditDoc = async () => {
+
+        if (!docId) return;
+        const docRef = doc(db, "IncidentReports", docId);
+        const data = {
+            ...toUpdate
+        }
+        console.log("Data to update:", data);
+
+        await updateDoc(docRef, data);
+    }
+    
+    
+    const confirmSubmitB = async () => {
+    setShowSubmitPopupB(false);
+
+    try {
+      await HandleEditDoc(); // ✅ Only update when Yes is clicked
+
+      setPopupMessage("Incident Successfully Updated!");
+      setShowPopup(true);
+
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Error during confirmation submit:", error);
+      setPopupErrorMessage("Error updating incident. Please try again.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+    }
+};
 
     const router = useRouter();
-
-    const handleBack = () => {
-        router.back();
-    };
+    const [showSubmitPopupB, setShowSubmitPopupB] = useState(false);
+    const [showDoneIncidentPopup, setShowDoneIncidentPopup] = useState(false);
+    const handleClosingCase = async(status:boolean) => {
+        if (!docId) return;
+        setShowDoneIncidentPopup(false);
+        const docRef = doc(db, "IncidentReports", docId);
+        if(status) {
+          // If the case is closed, update the status to "Settled" and reset other fields
+          setPopupMessage("Incident case has been Settled.");
+          setShowPopup(true);
+          await updateDoc(docRef, {
+            status: "settled",
+            statusPriority: 3,
+          });
+          setTimeout(() => {
+            setShowPopup(false);
+            //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
+            //window.location.reload(); // Reload the page to ensure all data is fresh
+          }, 3000);
+        }
+        else{
+          // If the case is not closed, update the status to "cfa"
+          setPopupMessage("Incident case has been set to CFA.");
+          setShowPopup(true);
+          await updateDoc(docRef, {
+            status: "CFA",
+            statusPriority: 4,
+          });
+          setTimeout(() => {
+            setShowPopup(false);
+            //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
+            //window.location.reload(); // Reload the page to ensure all data is fresh
+          }, 3000);
+        }
+    
+      }
 
       const [activeSection, setActiveSection] = useState("meeting");
 
@@ -717,6 +783,109 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, generatedHearingSu
 
                   </div>
          */}
+
+        {showDoneIncidentPopup && (
+          <div className="confirmation-popup-overlay-add">
+            <div className="confirmation-popup-add">
+              <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
+              <p>Has the incident case been settled?</p>
+              <div className="yesno-container-add">
+                {hearing !==3 ? (
+                  <button
+                    onClick={() => setShowDoneIncidentPopup(false)}
+                    className="no-button-add"
+                  >
+                    No
+                  </button>
+                ): hearing === 3  && (
+                  <button
+                    onClick={() => handleClosingCase(false)}
+                    className="no-button-add bg-gray-600"
+                  >
+                    CFA
+                  </button>  
+                )}
+                <button  
+                  onClick={() => {handleClosingCase(true)
+                                  setShowSubmitPopupB(true);
+                  }}
+                  className="yes-button-add"
+                >
+                  Yes
+                </button>
+              </div>
+            </div>
+          </div>    
+        )}
+
+        {showSubmitPopupB && (
+          <div className="confirmation-popup-overlay-add">
+            <div className="confirmation-popup-add">
+
+                <>
+                  <p>How was the case settled?</p>
+                  <div className="settlement-options">
+                    <label>
+                      <input
+                        type="radio"
+                        name="settlementMethod"
+                        checked={toUpdate?.isMediation === true}
+                        onChange={() => setToUpdate((prev: any) => ({
+                          ...prev,
+                          isMediation: true,
+                          isConciliation: false,
+                          isArbitration: false,
+                        }))}
+                      />
+                      Mediation
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="settlementMethod"
+                        checked={toUpdate?.isConciliation === true}
+                        onChange={() => setToUpdate((prev: any) => ({
+                          ...prev,
+                          isMediation: false,
+                          isConciliation: true,
+                          isArbitration: false,
+                        }))}
+                      />
+                      Conciliation
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="settlementMethod"
+                        checked={toUpdate?.isArbitration === true}
+                        onChange={() => setToUpdate((prev: any) => ({
+                          ...prev,
+                          isMediation: false,
+                          isConciliation: false,
+                          isArbitration: true,
+                        }))}
+                      />
+                      Arbitration
+                    </label>
+                  </div>
+
+                  <div className="yesno-container-add">
+                    {/* <button
+                      onClick={() => setShowSubmitPopupB(false)}
+                      className="no-button-add"
+                    >
+                      Cancel
+                    </button> */}
+                    <button onClick={confirmSubmitB} className="yes-button-add">
+                      Submit
+                    </button>
+                  </div>
+                </>
+        
+
+            </div>
+          </div>
+        )}
 
 
         {showSubmitPopup && (

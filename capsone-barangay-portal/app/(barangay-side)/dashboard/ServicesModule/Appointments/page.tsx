@@ -32,7 +32,7 @@ type Appointment = {
             id: doc.id,
             ...doc.data(),
           }));
-        
+
           setData(reports); // don't sort here
         });
       
@@ -59,7 +59,9 @@ type Appointment = {
             item.appointmentDate,
           requestStatus: item.status,
           statusPriority: item.statusPriority,
-        }));
+          approvedBySAS: item.approvedBySAS,
+        })).filter((item) => item.approvedBySAS === true );
+        
     }, [data]);
 
     console.log(appointmentData);
