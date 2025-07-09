@@ -1,12 +1,13 @@
 "use client"
-import React,{useState, useEffect} from "react";
+import React,{useState, useEffect, ChangeEvent, useRef} from "react";
 import {db} from "../../../../db/firebase";
-import {collection, onSnapshot, deleteDoc, doc, updateDoc, setDoc, query, where} from "firebase/firestore";
+import {collection, onSnapshot, getDocs, deleteDoc, addDoc, doc, updateDoc, setDoc, query, where} from "firebase/firestore";
 import "@/CSS/User&Roles/User&Roles.css";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from 'next/navigation';
+import { hash } from "bcryptjs";
 
 interface dbBarangayUser{
     id: string;
@@ -24,6 +25,14 @@ interface dbBarangayUser{
     sex: string;
 }
 
+
+interface BarangayUser{
+    id?: string;
+    userId: string;
+    position:string;
+    password:string;
+    role: string;
+}
 
 
 const BarangayUsers = () => {
@@ -45,8 +54,10 @@ const BarangayUsers = () => {
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showAddUserPopup, setShowAddUserPopup] = useState(false);
   
 
+    
     const handleAddBarangayUserClick = () => {
         if (isAuthorized) {
             router.push("/dashboard/admin/addBarangayUser");
@@ -215,6 +226,34 @@ const [showCount, setShowCount] = useState(0);
 const [userIdSearch, setUserIdSearch] = useState("");
 
 
+useEffect(() => {
+    if (showAddUserPopup) {
+      const generateOnOpen = async () => {
+        const year = new Date().getFullYear().toString();
+        const generateNewID = async (): Promise<string> => {
+          const randomNum = Math.floor(100 + Math.random() * 900).toString();
+          const randomId = year + randomNum;
+          const barangayUsersCollection = collection(db, "BarangayUsers");
+          const querySnapshot = await getDocs(
+            query(barangayUsersCollection, where("userId", "==", randomId))
+          );
+          if (!querySnapshot.empty) {
+            return generateNewID();
+          }
+          return randomId;
+        };
+  
+        const uniqueId = await generateNewID();
+  
+        setUsers((prevUsers) => ({
+          ...prevUsers,
+          userId: uniqueId,
+        }));
+      };
+  
+      generateOnOpen();
+    }
+  }, [showAddUserPopup]);
 
 useEffect(() => {
     let filtered = [...barangayUsers];
@@ -249,17 +288,183 @@ useEffect(() => {
   }, [nameSearch, userIdSearch, positionDropdown, showCount, barangayUsers]);
   
 
+
+
   /* NEW UPDATED ADDED */
   const [filtersLoaded, setFiltersLoaded] = useState(false);
+  const hasAnimatedOnce = useRef(false);
 
   /* NEW UPDATED ADDED */
   useEffect(() => {
-    setFiltersLoaded(false); // reset animation
-    const timeout = setTimeout(() => {
-      setFiltersLoaded(true); // retrigger
-    }, 50); // adjust delay as needed
-    return () => clearTimeout(timeout);
-  }, [searchParams.toString()]);
+    if (!hasAnimatedOnce.current) {
+      hasAnimatedOnce.current = true;
+      setFiltersLoaded(false);
+      const timeout = setTimeout(() => {
+        setFiltersLoaded(true);
+      }, 50);
+      return () => clearTimeout(timeout);
+    } else {
+      setFiltersLoaded(true); // Always on after initial load
+    }
+  }, []);
+
+  /* ADDED for add brgy user */
+
+  const user = useSession().data?.user;
+      const userRole = user?.position;
+      const [users, setUsers] = useState<BarangayUser>({
+          userId:"",
+          position:"",
+          password:"",
+          role:"Barangay Official",
+      });
+     
+  
+      const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+      const [showErrorPopup, setShowErrorPopup] = useState(false);
+      const [popupErrorMessage, setPopupErrorMessage] = useState("");
+      const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
+
+
+    
+
+    useEffect(() => {
+        if(userRole !== "Admin" && userRole !== "Assistant Secretary") {
+            router.push("/dashboard/admin/BarangayUsers");
+            return;
+        }
+        setLoading(false);
+    }, []);
+
+    if (loading) return <p>Loading...</p>;
+   
+
+
+
+    const handleBack = () => {
+        window.location.href = "/dashboard/admin/BarangayUsers";
+    };
+
+    const GenerateID = async (e: any) => {
+        e.preventDefault();
+        
+        const generateNewID = async (): Promise<string> => {
+            const year = new Date().getFullYear().toString(); // First 4 digits
+            const randomNum = Math.floor(100 + Math.random() * 900).toString(); // Ensures 3-digit number (100-999)
+            const randomId = year + randomNum; // Concatenates to make 7 digits
+    
+            // ✅ Check Firestore if the ID already exists
+            const barangayUsersCollection = collection(db, "BarangayUsers");
+            const querySnapshot = await getDocs(query(barangayUsersCollection, where("userId", "==", randomId)));
+    
+            if (!querySnapshot.empty) {
+                console.log(`ID ${randomId} already exists, regenerating...`);
+                return generateNewID(); // 🔄 Recursively call the function if ID exists
+            }
+    
+            return randomId; // ✅ Unique ID found
+        };
+    
+        const uniqueId = await generateNewID(); // Wait for a unique ID to be generated
+    
+        setUsers((prevUsers) => ({
+            ...prevUsers,
+            userId: uniqueId,
+        }));
+    
+    };
+
+    const handleChange = (  e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>)=>{
+            e.preventDefault();
+          
+            const {name, value} = e.target;
+            setUsers((prevUsers) => ({
+                ...prevUsers,
+                [name]: value
+            }));
+    }
+
+    
+
+    const handleSubmitClick = async () => {
+        const { position, password, userId } = users;
+
+        const invalidFields : string[] = [];
+
+        if (!position) invalidFields.push("position");
+        if (!password) invalidFields.push("password");
+        if (!userId) invalidFields.push("userId");
+        
+        if (invalidFields.length > 0) {
+            
+         setInvalidFields(invalidFields);
+        setPopupErrorMessage("Please fill up all required fields.");
+        setShowErrorPopup(true);
+    
+        setTimeout(() => {
+          setShowErrorPopup(false);
+        }, 3000);
+        return;
+
+        }
+
+
+        if (password.length < 6) {
+            setInvalidFields(invalidFields);
+            setPopupErrorMessage("Password must be at least 6 characters.");
+            setShowErrorPopup(true);
+            setTimeout(() => setShowErrorPopup(false), 3000);
+            return;
+        }
+        
+        setInvalidFields([]);
+        setShowSubmitPopup(true);
+    };
+
+
+      const confirmSubmit = async () => {
+        setShowSubmitPopup(false);
+        setShowAddUserPopup(false);
+        
+        const passwordHash = await hash(users.password, 12);
+        const docRef = await addDoc(collection(db, "BarangayUsers"), {
+          userid: users.userId,
+          password: passwordHash,
+          role: users.role,
+          position: users.position,
+          createdAt: new Date().toISOString().split("T")[0],
+          firstTimelogin: true,
+          firstName: "User",
+          lastName: ""
+        });
+    
+        setPopupMessage("Barangay User created successfully!");
+        setShowPopup(true);
+    
+        setTimeout(() => {
+          setShowPopup(false);
+          
+          router.push(`/dashboard/admin/BarangayUsers?highlight=${docRef.id}`);
+        }, 3000);
+    
+        
+        setUsers({ userId: "", position: "", password: "", role: "Barangay Official" });
+      };
+
+
+      const handleSubmit = () => {
+        if (!users.userId || !users.password) {
+          setPopupErrorMessage("Please fill up all required fields.");
+          setShowErrorPopup(true);
+          return setTimeout(() => setShowErrorPopup(false), 3000);
+        }
+        setShowSubmitPopup(true);
+      };
+
+      
+      
+    
  
     return (
         <main className="barangayusers-page-main-container" /* edited this class*/>
@@ -267,9 +472,21 @@ useEffect(() => {
             <div className="user-roles-module-section-1">
                 
                 {isAuthorized &&(
-                    <Link href="/dashboard/admin/addBarangayUser">
-                    <button className="add-announcement-btn add-incident-animated" /* edited this class*/ onClick={handleAddBarangayUserClick}>Add New Barangay User</button>
-                    </Link>
+                    
+              //  <Link href="/dashboard/admin/addBarangayUser">
+            //    <button className="add-announcement-btn add-incident-animated" onClick={handleAddBarangayUserClick}>
+           //        Add New Barangay User
+         //        </button>
+         //       </Link>
+                
+                
+                <button 
+                    className="add-announcement-btn add-incident-animated" 
+                    onClick={() => setShowAddUserPopup(true)}
+               >
+                    Add New Barangay User
+                    </button>
+
                 )}
 
             </div>
@@ -422,6 +639,29 @@ useEffect(() => {
                 </div>
             )}
 
+        {showSubmitPopup && (
+                        <div className="addbrgyuser-confirmation-popup-overlay">
+                            <div className="addbrgyuser-confirmation-popup">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                                <p>Are you sure you want to submit?</p>
+                                <div className="user-roles-yesno-container">
+                                    <button onClick={() => setShowSubmitPopup(false)} className="addbrgyuser-no-button">No</button>
+                                    <button onClick={confirmSubmit} className="addbrgyuser-yes-button">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+        )}
+
+
+        {showErrorPopup && (
+                <div className={`addbrgyuser-error-popup-overlay show`}>
+                    <div className="addbrgyuser-popup">
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                        <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
+
             {showPopup && (
                 <div className={`user-roles-popup-overlay show`}>
                     <div className="user-roles-popup">
@@ -442,6 +682,68 @@ useEffect(() => {
                 </div>
             )}
 
+            {showAddUserPopup && (
+            <div className="user-roles-add-brgy-user-popup-overlay">
+                <div className="add-barangayusers-confirmation-popup" onSubmit={handleSubmit}>
+                    <h2>Add New Barangay User</h2>
+
+                    <div className="add-barangay-user-top">
+                        <div className="fields-section-add-brgy-user">
+                            <p>Position <span className="required">*</span> </p>
+                            <select  value={users.position}  onChange={handleChange} id="roles" name="position" className={`barangay-user-input-fields ${invalidFields.includes("position") ? "input-error" : ""}`} >
+                                <option value="" disabled>Select a Position</option>
+                                <option value="Punong Barangay">Punong Barangay</option>
+                                <option value="Secretary">Secretary</option>
+                                <option value="Assistant Secretary">Asst Secretary</option>
+                                <option value="Admin Staff">Admin Staff</option>
+                                <option value="LF Staff">LF Staff</option>
+                            </select>
+                        </div>
+                        <div className="fields-section-add-brgy-user">
+
+                            <p>User ID <span className="required">*</span> </p>
+                            <input 
+                                    type="text" 
+                                    id="username"
+                                    name="userId"
+                                    className={`barangay-user-input-fields ${invalidFields.includes("userId") ? "input-error" : ""}`}
+                                    value={users.userId} 
+                                    placeholder="User ID"
+                                    disabled  
+                                    required
+                                />
+                            
+                        </div>
+                        
+                    </div>
+
+                    <div className="add-barangay-user-bottom">
+                        <div className="fields-section-add-brgy-user">
+                        <p>Password <span className="required">*</span> </p>
+                            <input 
+                                value={users.password} 
+                                onChange={handleChange} 
+                                id="password" 
+                                type="password" 
+                                name="password" 
+                                className={`barangay-user-input-fields ${invalidFields.includes("password") ? "input-error" : ""}`}
+                                placeholder="Enter Password"
+                                required
+                            />
+                        </div>
+                                
+                    </div>
+                
+                    {/* Buttons */}
+                    <div className="user-roles-yesno-container">
+                        <button onClick={() => setShowAddUserPopup(false)} className="user-roles-no-button">Cancel</button>
+                        <button className="user-roles-yes-button" onClick={handleSubmitClick} disabled={loading}>
+                            {loading ? "Saving..." : "Save"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            )}
         
 
 
