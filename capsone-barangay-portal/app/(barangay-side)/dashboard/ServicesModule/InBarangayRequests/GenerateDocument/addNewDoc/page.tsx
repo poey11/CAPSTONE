@@ -193,7 +193,7 @@ export default function AddNewDoc() {
                 <div className="addNewDoc-inbrgy-main-content">
                     <div className="addNewDoc-inbrgy-main-section1">
                         <div className="addNewDoc-inbrgy-main-section1-left">
-                            <button onClick={handleBack}>
+                            <button type="button" onClick={handleBack}>
                                 <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
                             </button>
 

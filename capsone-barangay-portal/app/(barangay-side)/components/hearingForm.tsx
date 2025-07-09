@@ -780,20 +780,21 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
               <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
               <p>Has the incident case been settled?</p>
               <div className="yesno-container-add">
-                {hearing !==3 && (
+                {hearing !==3 ? (
                   <button
                     onClick={() => setShowDoneIncidentPopup(false)}
                     className="no-button-add"
                   >
                     No
                   </button>
+                ): hearing === 3  && (
+                  <button
+                    onClick={() => handleClosingCase(false)}
+                    className="no-button-add bg-gray-600"
+                  >
+                    CFA
+                  </button>  
                 )}
-                <button
-                  onClick={() => handleClosingCase(false)}
-                  className="no-button-add bg-gray-600"
-                >
-                  CFA
-                </button>
                 <button  
                   onClick={() => {handleClosingCase(true)
                                   setShowSubmitPopupB(true);

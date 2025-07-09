@@ -196,7 +196,16 @@ const handlePrint = async(requestData:any) => {
         };
     }
 
-    
+    if(requestData?.docType === "Barangay Permit"){
+        if(requestData?.purpose === "Residency") locationPath = "RESIDENCY.pdf";
+        else if(requestData?.purpose === "Loan") locationPath ="LOAN.pdf";
+        else if(requestData?.purpose === "Bank Transaction") locationPath ="BANK TRANSACTION.pdf";
+        else if(requestData?.purpose === "Local Employment") locationPath ="LOCAL EMPLOYEMENT.pdf";
+        else if(requestData?.purpose === "Maynilad") locationPath ="MAYNILAD.pdf";
+        else if(requestData?.purpose === "Meralco") locationPath ="MERALCO.pdf";
+        else if(requestData?.purpose === "Bail Bond") locationPath ="BAIL BOND_Clearance_OC.pdf";
+        
+    }
     const response = await fetch("/api/fillPDF", {
         method: "POST",
         headers: {

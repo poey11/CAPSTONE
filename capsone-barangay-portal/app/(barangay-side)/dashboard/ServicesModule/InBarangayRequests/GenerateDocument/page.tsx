@@ -38,6 +38,48 @@ export default function GenerateDocument() {
         router.push("/dashboard/ServicesModule/InBarangayRequests");
     };
 
+    const  handleTestNewDocument = async() => {
+        let locationPath = "Barangay ID.pdf"; // Default path for Barangay Certificate
+
+        let reqData = {
+            "Text1": "John Doe",
+            "Text2": "1234",
+            "Text3": "1234 Street Name, Barangay, City",
+            "Text4": "1234567890",
+            "Text5": "1234567890",
+            "Text6": "1234567890",
+            "Text7": "1234567890",
+            "Text8": "1234567890",
+            "Text9": "1234567890",
+            "Text10": "1234567890",
+            "Text11": "1234567890",
+            "Text12": "1234567890",
+        }
+
+        
+        const response = await fetch("/api/fillPDF", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                location: "/ServiceRequests/templates",
+                pdfTemplate: locationPath,
+                data: reqData,
+            })
+        });
+        if(!response.ok)throw new Error("Failed to generate PDF");
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download=`test.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+        link.remove();
+    }
+
     useEffect(() => {
         const collectionRef = collection(db, "OtherDocuments");
         const unsubscribe = onSnapshot(collectionRef, (snapshot) => {
@@ -78,6 +120,10 @@ export default function GenerateDocument() {
                             Edit New Document
                         </button>
                         */}
+                        
+                        {/* <button className="action-edit-new-doc"  onClick={handleTestNewDocument}>
+                            Test Document
+                        </button> */}
                     </div>
                 </div>
 
