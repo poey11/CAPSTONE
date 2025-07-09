@@ -1193,7 +1193,10 @@ export default function EditLuponIncident() {
 
               <div className="yesno-container-continue">
                 <button
-                  onClick={() => setShowContinuePopup(false)}
+                  onClick={() => {
+                    setShowContinuePopup(false);
+                    router.push(`/dashboard/IncidentModule/Department?id=${departmentId}`);
+                  }}
                   className="no-button-continue"
                 >
                   Cancel
