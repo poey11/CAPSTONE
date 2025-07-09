@@ -276,28 +276,24 @@ export default function ResidentModule() {
   return (
     <main className="resident-module-main-container" /* edited this class*/>
     
-    
-
-     <div className="resident-module-section-1">
+      <div className="resident-module-section-1">
         {isAuthorized ? (
           <Link href="/dashboard/ResidentModule/AddResident">
-            <button className="add-announcement-btn add-incident-animated" /* edited this class*/ onClick={handleAddResidentClick}>Import Residents from Excel</button>
+            <button className="add-announcement-btn add-incident-animated">
+              Add New Resident
+            </button>
           </Link>
         ) : (
-          <button className="add-announcement-btn opacity-0 cursor-not-allowed add-incident-animated" /* edited this class*/ disabled>Import Residents from Excel</button>
+          <button
+            className="add-announcement-btn add-incident-animated"
+            style={{ visibility: "hidden" }}
+            disabled
+          >
+            Add New Resident
+          </button>
         )}
+      </div>
 
-        
-        {isAuthorized ? (
-          <Link href="/dashboard/ResidentModule/AddResident">
-            <button className="add-announcement-btn add-incident-animated" /* edited this class*/ onClick={handleAddResidentClick}>Add New Resident</button>
-          </Link>
-        ) : (
-          <button className="add-announcement-btn opacity-0 cursor-not-allowed add-incident-animated " /* edited this class*/ disabled>Add New Resident</button>
-        )}
-
-   
-    </div>
   
     <div className={`resident-module-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
       <input

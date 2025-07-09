@@ -227,11 +227,23 @@ export default function JobSeekerListModule() {
     <main className="resident-module-main-container">
    
       <div className="resident-module-section-1">
-
-        <Link href="/dashboard/ResidentModule/FirstTimeJobSeeker/AddFirstTimeJobSeeker">
-          <button className="add-announcement-btn add-incident-animated">Add New Job Seeker</button>
-        </Link>
+        {isAuthorized ? (
+          <Link href="/dashboard/ResidentModule/jobSeekerList/AddJobSeeker">
+            <button className="add-announcement-btn add-incident-animated">
+              Add New Jobseeker
+            </button>
+          </Link>
+        ) : (
+          <button
+            className="add-announcement-btn add-incident-animated"
+            style={{ visibility: "hidden" }}
+            disabled
+          >
+            Add New Jobseeker
+          </button>
+        )}
       </div>
+
 
       <div className={`resident-module-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
         <input

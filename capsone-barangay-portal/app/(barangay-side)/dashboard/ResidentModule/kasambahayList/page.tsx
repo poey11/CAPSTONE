@@ -248,16 +248,23 @@ const [filterEmploymentArrangement, setFilterEmploymentArrangement] = useState("
 
   return (
     <main className="resident-module-main-container">
-      <div className="resident-module-section-1">
-
-        {isAuthorized ? (
-        <Link href="/dashboard/ResidentModule/kasambahayList/AddKasambahay">
-          <button className="add-announcement-btn add-incident-animated">Add New Kasambahay</button>
-        </Link>
-        ) : (
-          <button className="add-announcement-btn opacity-0 cursor-not-allowed add-incident-animated" disabled>Add New Kasambahay</button>
-        )}
-      </div>
+        <div className="resident-module-section-1">
+          {isAuthorized ? (
+            <Link href="/dashboard/ResidentModule/voterList/AddVoter">
+              <button className="add-announcement-btn add-incident-animated">
+                Add New Voter
+              </button>
+            </Link>
+          ) : (
+            <button
+              className="add-announcement-btn add-incident-animated"
+              style={{ visibility: "hidden" }}
+              disabled
+            >
+              Add New Voter
+            </button>
+          )}
+        </div>
 
       <div className={`resident-module-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
         <input
