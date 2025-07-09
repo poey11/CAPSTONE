@@ -156,7 +156,7 @@ export default function TopMenu() {
       }
     }
 
-    if (notification.transactionType === "Online Incident"  ) {
+    if (notification.transactionType === "Online Assigned Incident" || notification.transactionType === "Online Incident"   ) {
       router.push(`/dashboard/IncidentModule/OnlineReports/ViewOnlineReport?id=${notification.incidentID}`);
     } else if ( notification.transactionType === "Assigned Incident") {
       router.push(`/dashboard/IncidentModule/EditIncident?id=${notification.incidentID}`);
