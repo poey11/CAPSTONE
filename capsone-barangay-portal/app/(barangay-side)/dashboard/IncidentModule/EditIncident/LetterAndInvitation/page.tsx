@@ -766,36 +766,46 @@ export default function GenerateDialogueLetter() {
 
 
 
-            {showSubmitPopup.show && (
-            <div className="popup-backdrop">
-                <div className="popup-content">
-                    
-                        <img
-                            src="/Images/check.png"
-                            alt="warning icon"
-                            className="successful-icon-popup-letter"
-                        />
-                        <p>{showSubmitPopup.message}</p>
-                        <h2>{showSubmitPopup.message2}</h2>
-        
-                <button
-                    onClick={() => {
-                    setShowSubmitPopup({ show: false, message: "", message2: "",letterType: undefined });
-                    if (showSubmitPopup.letterType === "dialogue") {
-                        router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
-                    } else if (showSubmitPopup.letterType === "summon") {
-                        router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
-                    } else {
-                        router.back();
-                    }
-                    }}
-                    className="close-button-letter"
-                >
-                    Close
-                </button>
+                {showSubmitPopup.show && (
+                <div className="popup-backdrop">
+                    <div className="popup-content">
+                    <img
+                        src="/Images/check.png"
+                        alt="check icon"
+                        className="successful-icon-popup-letter"
+                    />
+                    <p>{showSubmitPopup.message}</p>
+                    <h2>{showSubmitPopup.message2}</h2>
+
+                    {showSubmitPopup.letterType === "summon" ? (
+                        <button
+                        onClick={() => {
+                            sendSMSForSummons();
+                            setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+                        }}
+                        className="letter-announcement-btn"
+                        >
+                        Send SMS
+                        </button>
+                    ) : (
+                        <button
+                        onClick={() => {
+                            setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+                            if (showSubmitPopup.letterType === "dialogue") {
+                            router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
+                            } else {
+                            router.back();
+                            }
+                        }}
+                        className="close-button-letter"
+                        >
+                        Close
+                        </button>
+                    )}
+                    </div>
                 </div>
-            </div>
-            )}
+                )}
+
 
             {isLoading && (
                     <div className="popup-backdrop">
