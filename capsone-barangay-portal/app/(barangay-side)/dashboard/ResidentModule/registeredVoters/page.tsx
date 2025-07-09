@@ -453,28 +453,37 @@ export default function RegisteredVotersModule() {
 
   return (
     <main className="resident-module-main-container">
+
       <div className="resident-module-section-1">
-        
-        <button
-          className="add-announcement-btn add-incident-animated"
-          onClick={() => {
-            if (isAuthorized) {
-              fileInputRef.current?.click();
-            } else {
-              alert("You are not authorized to import voters.");
-            }
-          }}
-        >
-          Import Voters from Excel
-        </button>
-        <input
-          type="file"
-          accept=".xlsx, .xls"
-          onChange={handleExcelUpload}
-          ref={fileInputRef}
-          style={{ display: "none" }}
-        />
+        {isAuthorized ? (
+          <>
+            <button
+              className="add-announcement-btn add-incident-animated"
+              onClick={() => {
+                fileInputRef.current?.click();
+              }}
+            >
+              Import Voters from Excel
+            </button>
+            <input
+              type="file"
+              accept=".xlsx, .xls"
+              onChange={handleExcelUpload}
+              ref={fileInputRef}
+              style={{ display: "none" }}
+            />
+          </>
+        ) : (
+          <button
+            className="add-announcement-btn add-incident-animated"
+            style={{ visibility: "hidden" }}
+            disabled
+          >
+            Import Voters from Excel
+          </button>
+        )}
       </div>
+
 
       <div className={`resident-module-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
         <input
