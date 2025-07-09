@@ -36,7 +36,8 @@ interface ClearanceInput {
     toAddress?: string;
     businessLocation?: string;
     businessNature?: string;
-    noOfVechicles?: string;
+    noOfVehicles?: string;
+    noOfTricycles?: string;
     vehicleMake?: string;
     vehicleType?: string;
     vehiclePlateNo?: string;
@@ -117,6 +118,7 @@ export default function action() {
     const router = useRouter();
     const searchParam = useSearchParams();
     const docType = searchParam.get("docType");
+    const docPurpose = searchParam.get("purpose");
     const [showDiscardPopup, setShowDiscardPopup] = useState(false);
     const [showCreatePopup, setShowCreatePopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
@@ -270,7 +272,7 @@ export default function action() {
       residentId: "",
       requestType: "",
       requestId: "",
-      purpose: "",
+      purpose: docPurpose|| "",
       fullName: "",
       dateOfResidency: "",
       dateofdeath: "",
@@ -279,7 +281,8 @@ export default function action() {
       toAddress: "",
       businessLocation: "",
       businessNature: "",
-      noOfVechicles: "",
+      noOfVehicles: "",
+      noOfTricycles: "",
       vehicleMake: "",
       vehicleType: "",
       vehiclePlateNo: "",
@@ -542,8 +545,19 @@ export default function action() {
     };
 
     const handleValidIDUpload = (
-      e: React.ChangeEvent<HTMLInputElement>
+      e: React.ChangeEvent<HTMLInputElement> |string
     ) => {
+      // If a string is passed (URL from resident DB)
+      if (typeof e === "string") {
+        setFiles3([{ name: "Uploaded ID from Resident List", preview: e }]);
+
+        setClearanceInput((prev: any) => ({
+          ...prev,
+          validIDjpg: e, // URL string
+        }));
+
+        return;
+      }
       const file = e.target.files?.[0];
       if (!file) return;
     
@@ -847,15 +861,26 @@ export default function action() {
           }
         }
         let sendTo ="";
-        if(clearanceInput.docType === "Barangay Certificate" || clearanceInput.docType === "Barangay Clearance" 
-          || clearanceInput.docType === "Barangay Indigency" || clearanceInput.docType === "Temporary Business Permit"
-          || clearanceInput.docType === "Construction Permit" 
+        if (
+          clearanceInput.docType === "Barangay Certificate" ||
+          clearanceInput.docType === "Barangay Clearance" ||
+          clearanceInput.docType === "Barangay Indigency" ||
+          clearanceInput.docType === "Temporary Business Permit" ||
+          clearanceInput.docType === "Construction" ||
+          (docType === "Barangay Permit" && docPurpose) ||
+          (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
         ) {
-
           sendTo = "SAS";
-        } 
-        else if(clearanceInput.docType === "Business Permit" || clearanceInput.purpose === "Barangay ID"){
+        } else if (
+          clearanceInput.docType === "Business Permit" ||
+          (clearanceInput.docType === "Other Documents" && clearanceInput.purpose === "Barangay ID")
+        ) {
           sendTo = "Admin Staff";
+        }
+
+        let documentTypeIs = "";
+        if(otherDocPurposes[clearanceInput.docType || '']?.includes(clearanceInput.purpose || "")) {
+          documentTypeIs = "OtherDocuments";
         }
 
         const docData = {
@@ -863,10 +888,16 @@ export default function action() {
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
           sendTo: sendTo,
           docPrinted: false,
+          ...(clearanceInput.purpose ==="Garage/PUV" && {
+            noOfVehicles: clearanceInput.noOfVehicles,
+          }),
+          ...(documentTypeIs !== "" && {
+            documentTypeIs: documentTypeIs,
+          }),
           ...uploadedFileUrls,
         };
-    
-        console.log("Document Data:", docData);
+        console.log("Uploaded", docData);
+
         const doc = await addDoc(docRef, docData);
         console.log("Document written with ID: ", doc.id);
 
@@ -1022,6 +1053,9 @@ export default function action() {
 
         await handleUploadClick(); // changed by dirick note para if may maging bug haha
 
+        handleUploadClick().then(() => {
+          router.push(`/dashboard/ServicesModule/InBarangayRequests`);
+        });
         // Hide the popup after 3 seconds
         setTimeout(() => {
             setShowPopup(false);
@@ -1256,7 +1290,6 @@ const handleChange = (
     const today = new Date();
     const minDateTyphoon = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0]; // 1st of this month
     const maxDateTyphoon = today.toISOString().split("T")[0];
-
     return (
         <main className="createRequest-main-container">
           {/* NEW */}
@@ -1264,7 +1297,7 @@ const handleChange = (
             <div className="createRequest-inbrgy-main-content">
               <div className="createRequest-inbrgy-main-section1">
                 <div className="createRequest-inbrgy-main-section1-left">
-                  <button onClick={handleBack}>
+                  <button type="button"onClick={handleBack}>
                     <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
                   </button>
 
@@ -1272,7 +1305,7 @@ const handleChange = (
                 </div>
 
                 <div className="action-btn-section">
-                  <button type="button" className="discard-btn" onClick={handleDiscardClick}>
+                  <button type="reset" className="discard-btn" onClick={handleDiscardClick}>
                     Discard
                   </button>
                   <button type="submit" className="save-btn">
@@ -1318,7 +1351,7 @@ const handleChange = (
                           />
                         </div>
 
-                        {docType !== "Construction" && !otherDocPurposes["Barangay Permit"]?.includes(docType || "") && (
+                        {docType !== "Construction" && !docPurpose && !otherDocPurposes["Barangay Permit"]?.includes(docType || "") && (
                         <>
                         <div className="fields-section">
                           <h1>Purpose<span className="required">*</span></h1>
@@ -1394,7 +1427,7 @@ const handleChange = (
                                 <option value="Barangay ID">Barangay ID</option>
                                 <option value="First Time Jobseeker">First Time Jobseeker</option>
 
-                                {otherDocPurposes["Other"]?.map((title, index) => (
+                                {otherDocPurposes["Other Documents"]?.map((title, index) => (
                                   <option key={index} value={title}>{title}</option>
                                 ))}
                               </>
@@ -1959,11 +1992,11 @@ const handleChange = (
                                 <h1>Nos of Tricycle<span className="required">*</span></h1>
                                 <input 
                                   type="number"  
-                                  id="noOfVechicles"  
-                                  name="noOfVechicles"  
+                                  id="noOfVehicles"  
+                                  name="noOfVehicles"  
                                   className="createRequest-input-field"  
                                   required 
-                                  value={clearanceInput.noOfVechicles||1}
+                                  value={clearanceInput.noOfVehicles||1}
                                   onChange={handleChange}
                                   min={1}
                                   onKeyDown={(e)=> {
@@ -2636,14 +2669,14 @@ const handleChange = (
                           {clearanceInput.purpose === "Garage/PUV" && (
                             <>
                               <div className="fields-section">
-                                <h1>Nos of Vehicle/s<span className="required">*</span></h1>
+                                {/* <h1>Nos of Vehicle/s<span className="required">*</span></h1>
                                 <input 
                                   type="number"  
-                                  id="noOfVechicles"  
-                                  name="noOfVechicles"  
+                                  id="noOfVehicles"  
+                                  name="noOfVehicles"  
                                   className="createRequest-input-field"  
                                   required 
-                                  value={clearanceInput.noOfVechicles || 1}
+                                  value={clearanceInput.noOfVehicles || 1}
                                   onChange={handleChange}
                                   min={1}
                                   onKeyDown={(e)=> {
@@ -2652,7 +2685,24 @@ const handleChange = (
                                   }
                                   }
                                   } // Prevent manual input
-                                  />
+                                  /> */}
+                                  <h1>Nos of Vehicle/s<span className="required">*</span></h1>
+                                  <input 
+                                  type="number"  
+                                  id="noOfVehicles"  
+                                  name="noOfVehicles"  
+                                  className="createRequest-input-field"  
+                                  required 
+                                  value={clearanceInput.noOfVehicles || 1}
+                                  onChange={handleChange}
+                                  min={1}
+                                  onKeyDown={(e)=> {
+                                    if (e.key === 'e' || e.key === '-' || e.key === '+') {
+                                      e.preventDefault(); // Prevent scientific notation and negative/positive signs
+                                    }
+                                  }
+                                  } // Prevent manual input
+                                />
                               </div>
                             </>
                           )}
@@ -4047,7 +4097,9 @@ const handleChange = (
                                               dateOfResidency: resident.dateOfResidency || '',
                                               citizenship: resident.citizenship || '',
                                             };
-                                      
+                                            
+                                            handleValidIDUpload(resident.verificationFilesURLs[0] || '');
+                                            
                                             // Only clear fromAddress if purpose is NOT Occupancy
                                             if (purpose !== "Occupancy /  Moving Out") {
                                               update.fromAddress = "";

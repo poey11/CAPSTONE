@@ -337,8 +337,9 @@ export default function HearingSection() {
                                                 <Hearing
                                                     key={i}
                                                     index={i}
-                                                    generatedHearingSummons={reportData?.generatedHearingSummons || 0}
+                                                    hearing={reportData?.hearing || 0}
                                                     id={docId || ""}
+                                                    status={reportData?.status || ""}
                                                 />
                                             ))}
                                         </>
@@ -350,8 +351,9 @@ export default function HearingSection() {
                                                 <Hearing
                                                     key={i}
                                                     index={i}
-                                                    generatedHearingSummons={reportData?.generatedHearingSummons || 0}
+                                                    hearing={reportData?.hearing || 0}
                                                     id={docId || ""}
+                                                    status={reportData?.status || ""}
                                                 />
                                             ))}
                                         </>
@@ -363,8 +365,9 @@ export default function HearingSection() {
                                                 <Hearing
                                                     key={i}
                                                     index={i}
-                                                    generatedHearingSummons={reportData?.generatedHearingSummons || 0}
+                                                    hearing={reportData?.hearing || 0}
                                                     id={docId || ""}
+                                                    status={reportData?.status || ""}
                                                 />
                                             ))}
                                         </>

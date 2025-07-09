@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { collection, onSnapshot, orderBy, query, where, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
-
+import { useSession } from "next-auth/react";
 
 
 
@@ -16,7 +16,8 @@ import { db } from "@/app/db/firebase";
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
-
+    const { data: session } = useSession();
+    const user = session?.user || null; // Get user from session or set to null if not available
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [onlineRequests, setOnlineRequests] = useState([]);
@@ -40,6 +41,14 @@ import { db } from "@/app/db/firebase";
     };
     
     useEffect(() => {
+      let position ="";
+      if(user?.position === "Admin Staff") {
+        position = "Admin Staff";
+      }
+      else if (user?.position === "Secretary" || user?.position === "Assistant Secretary") {
+        position = "SAS";
+      }
+      console.log("User Position:", position);
       try {
         const Collection = query(
           collection(db, "ServiceRequests"),
@@ -55,7 +64,55 @@ import { db } from "@/app/db/firebase";
             ...doc.data(),
             isNew: doc.data().isViewed === false,  // Tag new ones
           }));
+          
+          // Filter reports based on user position
+          const filteredReports = reports.filter((report) => report.sendTo === position);
+
+          // Now sort client-side: Pending (1) first, then Pickup (2), etc.
+          filteredReports.sort((a, b) => {
+            if (a.statusPriority !== b.statusPriority) {
+              return a.statusPriority - b.statusPriority; // status priority asc
+            }
+          
+            // Convert string dates to timestamps
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          });
         
+          setRequestData(filteredReports);
+          setFilteredOnlineRequests(filteredReports); 
+
+        setLoading(false);
+        setError(null);
+        });
+      
+        return unsubscribe;
+      } catch (error: any) {
+        console.log(error.message);
+      }
+    }, [user]);
+    console.log(requestData);
+
+    const [allOnlineRequests, setAllOnlineRequests] = useState<any[]>([]);
+
+    useEffect(() => {
+      
+      try {
+        const Collection = query(
+          collection(db, "ServiceRequests"),
+          where("accID", "!=", "INBRGY-REQ"), // Filter for Online requests
+          orderBy("createdAt", "desc") // First, sort by latest
+        );
+
+        const viewed = getViewedRequests();
+      
+        const unsubscribe = onSnapshot(Collection, (snapshot) => {
+          let reports: any[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            isNew: doc.data().isViewed === false,  // Tag new ones
+          }));
+          
+
           // Now sort client-side: Pending (1) first, then Pickup (2), etc.
           reports.sort((a, b) => {
             if (a.statusPriority !== b.statusPriority) {
@@ -66,9 +123,8 @@ import { db } from "@/app/db/firebase";
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
           });
         
-          setRequestData(reports);
-          setFilteredOnlineRequests(reports); 
-
+          setAllOnlineRequests(reports);
+          
         setLoading(false);
         setError(null);
         });
@@ -77,8 +133,7 @@ import { db } from "@/app/db/firebase";
       } catch (error: any) {
         console.log(error.message);
       }
-    }, []);
-    console.log(requestData);
+    }, [user]);
 
     useEffect(() => {
       let filtered = requestData;
@@ -295,6 +350,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
 
          </div>
+          Assigned Requests: {requestData.length}
 
          <div className="onlinereq-main-section" /* edited this class*/>
           
@@ -308,7 +364,6 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
               <p className="no-results-services" /* edited this class */>No Results Found</p>
             </div>
           ) : (
-
           <table>
             <thead /* edited this class */>
               <tr>
@@ -367,6 +422,62 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
         ))}
         <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
       </div>
+
+      All Online Requests: {allOnlineRequests.length}
+      <div className="onlinereq-main-section">
+              {loading ? (
+            <p>Loading Online Requests...</p>
+          ) : error ? (
+            <p className="error">{error}</p>
+          ) : currentOnlineRequests.length === 0 ? (
+            <div className="no-result-card-services">
+              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-services" />
+              <p className="no-results-services">No Results Found</p>
+            </div>
+          ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Document Type</th>
+                <th>Request ID</th>
+                <th>Request Date</th>
+                <th>Requestor</th>
+                <th>Purpose</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+          {allOnlineRequests.map((request, index) => (
+              <tr key={index} className={`${request.isNew ? "highlight-new-request" : ""} ${highlightedId && request.id === highlightedId ? "highlighted-row" : ""}`}>
+
+                <td>{request.docType}</td>
+                <td>{request.requestId}</td>
+                <td>{request.createdAt}</td>
+                <td>{request.requestor}</td>
+                <td>{request.purpose}</td>
+                <td>
+                    <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
+                        {request.status}
+                    </span>
+                </td>
+                <td>
+                  <div className="actions">
+                    <button
+                        className="action-view-services"
+                        onClick={() => handleView(request)}
+                    >
+                       <img src="/Images/view.png" alt="View" />
+                    </button>
+
+                  </div>
+                </td>
+              </tr>
+            ))}
+            </tbody>
+          </table>
+            )}
+        </div>
 
       </main>
         

@@ -5,14 +5,15 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { db } from "@/app/db/firebase";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore"; // ✅ fix
+import { collection, getDocs, onSnapshot} from "firebase/firestore";
 
 export default function Services() {
   const user = useAuth().user;
   const router = useRouter();
 
-  const [permitOptions, setPermitOptions] = useState<string[]>([]);
   const [isGuest, setIsGuest] = useState(!user);  // ✅ fix
   const [userData, setUserData] = useState<any>(null);  // ✅ optional
+    const [permitOptions, setPermitOptions] = useState<any[]>([]);
 
   //  Fetch ResidentUser document to determine if guest
   useEffect(() => {
@@ -78,6 +79,47 @@ export default function Services() {
     if (isGuest && !isAllowedForGuest(action)) return;
     router.push(`/services/action?doc=${action}`);
   };
+
+  const handleSubmitOther = (e: any) => {
+        console.log("Selected Document:", e);
+        router.push(`/services/action?doc=${e.type}&purpose=${e.title}`);
+    }
+
+  const gotoOtherDocuments = () => {
+    router.push("/services/other-documents");
+  }
+
+
+
+  useEffect(() => {
+    const collectionRef = collection(db, "OtherDocuments");
+    
+    const unsubscribe = onSnapshot(collectionRef, (snapshot) => {
+      const permits = snapshot.docs
+        .filter(doc => {
+          const data = doc.data();
+        
+          if (data.type !== "Barangay Permit") return false;
+        
+          const forResidentOnly = data.forResidentOnly ?? false;
+        
+          // Show if:
+          // - user is logged in (show all)
+          // - OR user is guest and it's not for residents only
+          return !isGuest || (isGuest && forResidentOnly === false);
+        })
+        .map(doc => ({
+          id: doc.id,
+          title: doc.data().title,
+          type: doc.data().type,
+        }));
+      
+      setPermitOptions(permits);
+    });
+  
+    return () => unsubscribe(); // Cleanup listener
+  }, [isGuest]);
+
 
   return (
     <main className="services-container-document">

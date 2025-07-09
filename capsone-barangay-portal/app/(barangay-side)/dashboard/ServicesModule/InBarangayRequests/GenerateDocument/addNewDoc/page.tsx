@@ -193,7 +193,7 @@ export default function AddNewDoc() {
                 <div className="addNewDoc-inbrgy-main-content">
                     <div className="addNewDoc-inbrgy-main-section1">
                         <div className="addNewDoc-inbrgy-main-section1-left">
-                            <button onClick={handleBack}>
+                            <button type="button" onClick={handleBack}>
                                 <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
                             </button>
 
@@ -239,7 +239,7 @@ export default function AddNewDoc() {
                                         <option value="Barangay Clearance">Clearance</option>
                                         <option value="Barangay Indigency">Indigency</option>                     
                                         <option value="Barangay Permit">Permit</option>
-                                        <option value="Other">Other</option>
+                                        <option value="Other Documents">Other</option>
                                     </select>
                                 </div>
                                 <div className="addNewDoc-checkbox-container">

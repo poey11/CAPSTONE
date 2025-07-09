@@ -943,7 +943,7 @@ export default function GenerateDialogueLetter() {
                       {actionId === "summon" ? <h1 className="NewOfficial">Summon Letter ({hearingB} Hearing)</h1> : <h1 className="NewOfficial">Dialogue Letter</h1>}
                 </div>
             
-            
+            {userInfo?.status === "pending" && (
                 <div className="actions-letter">
                           {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                         {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Generate Letter</button>)}
@@ -951,6 +951,9 @@ export default function GenerateDialogueLetter() {
                        {/* this button should disappear base on hearingSMS and summonsSMS and when pressed the button should disappear but for summon needs to be press 3 times before disppear */}
                         <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
                 </div>
+
+            )}
+                
 
              </div>
 
