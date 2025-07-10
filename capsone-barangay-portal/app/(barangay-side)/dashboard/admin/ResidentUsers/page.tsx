@@ -110,6 +110,36 @@ const closePopup = () => {
 };
 
 
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    const clickedTarget = event.target as Node;
+
+    // Close main user popup
+    if (
+      isPopupOpen &&
+      popupRef.current &&
+      !popupRef.current.contains(clickedTarget)
+    ) {
+      closePopup();
+    }
+
+    // Close residents popup
+    if (
+      showResidentsPopup &&
+      residentPopupRef.current &&
+      !residentPopupRef.current.contains(clickedTarget)
+    ) {
+      setShowResidentsPopup(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [isPopupOpen, showResidentsPopup]);
+
 // Mark as viewed
   const markAsViewed = async (id: string) => {
     try {
@@ -800,7 +830,7 @@ const confirmAccept = async () => {
         {showResidentsPopup && (
                 <div className="view-residentuser-confirmation-popup-overlay">
                     <div className="resident-table-popup" ref={residentPopupRef}>
-    
+                        
                         <h2>
                             Resident Database Verification
                         </h2>
@@ -1064,6 +1094,7 @@ const confirmAccept = async () => {
                                     <th className="verification-table-firsttitle">First Name</th>
                                     <th className="verification-table-firsttitle">Middle Name</th>
                                     <th className="verification-table-firsttitle">Last Name</th>
+                                    <th className="verification-table-firsttitle">Date Of Birth</th>
                                 </tr>
                                 </thead>
                                 <tbody>

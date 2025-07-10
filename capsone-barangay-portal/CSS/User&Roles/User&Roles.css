@@ -812,7 +812,7 @@ filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-
     text-transform: capitalize;   
     text-align: center;    
     
-    width: 80px; /* edited this line */
+    width: 100px; /* edited this line */
     padding: 5px 10px;   /* edited this line */    
 }
 
