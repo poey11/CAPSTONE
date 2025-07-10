@@ -22,11 +22,8 @@ html, body {
   padding-right: 20px; /* edited */
 
 
-  padding-top: 15.2%; /* new d*/
+  padding-top: 13.2%; /* new d*/
   padding-bottom: 3%; /* new d*/
-   
-
-
 }
 
 
@@ -40,7 +37,7 @@ html, body {
     overflow: auto; /* Allow scrolling if content overflows */
     width: 100%;
     
-    max-height: 70%;
+
     border: 1px solid rgba(36, 53, 76, 0.7);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     background-color: #ffffff;
@@ -49,8 +46,28 @@ html, body {
     scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 
 
-    margin-top: 2rem; /* edited this line */
-    height: 67%; /* edited this line */
+    margin-top: 1.5rem; /* edited this line */
+    height: 75%; /* edited this line */
+    max-height: 75%;
+}
+
+
+
+
+
+.resident-module-section-1 {
+    display: flex;
+    justify-content: flex-end; /*Gawin space between if sa taas yung pagination*/ 
+    width: 100%;
+    gap: 1rem; 
+}
+
+.resident-module-section-1 h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
 }
 
 
@@ -171,22 +188,6 @@ html, body {
 
 
 
-
-
-.resident-module-section-1 {
-    display: flex;
-    justify-content: flex-end; /*Gawin space between if sa taas yung pagination*/ 
-    width: 100%;
-    gap: 1rem; 
-}
-
-.resident-module-section-1 h1 {
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: #333;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.5rem;
-}
 
 /* NEW UPDATED */
 .redirection-section {

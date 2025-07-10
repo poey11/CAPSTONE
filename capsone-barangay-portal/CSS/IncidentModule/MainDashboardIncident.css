@@ -21,7 +21,8 @@ html, body {
   padding-right: 20px; /* edited */
 
 
-    padding-top: 15.2%; /* new d*/
+
+  padding-top: 13.2%; /* new d*/
   padding-bottom: 3%; /* new d*/
 }
 
@@ -45,9 +46,17 @@ html, body {
     scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 
 
-    margin-top: 2rem; /* edited this line */
-    height: 67%; /* edited this line */
+    margin-top: 1.5rem; /* edited this line */
+    height: 75%; /* edited this line */
+    max-height: 75%;
 }
+
+
+.expand-when-no-section1 {
+  height: calc(75% + 7%); /* Increase height when section-1 is missing */
+  max-height: calc(75% + 7%); /* or 40px pwede din*/
+}
+
 
 /* NEW UPDATED */
 .main-section-departments thead {
