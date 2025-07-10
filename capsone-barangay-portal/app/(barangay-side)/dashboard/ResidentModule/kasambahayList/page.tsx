@@ -250,9 +250,9 @@ const [filterEmploymentArrangement, setFilterEmploymentArrangement] = useState("
     <main className="resident-module-main-container">
         <div className="resident-module-section-1">
           {isAuthorized ? (
-            <Link href="/dashboard/ResidentModule/voterList/AddVoter">
+            <Link href="/dashboard/ResidentModule/kasambahayList/AddKasambahay">
               <button className="add-announcement-btn add-incident-animated">
-                Add New Voter
+                Add New Kasambahay
               </button>
             </Link>
           ) : (
@@ -261,7 +261,7 @@ const [filterEmploymentArrangement, setFilterEmploymentArrangement] = useState("
               style={{ visibility: "hidden" }}
               disabled
             >
-              Add New Voter
+              Add New Kasambahay
             </button>
           )}
         </div>
