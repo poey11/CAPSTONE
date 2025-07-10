@@ -17,9 +17,11 @@ interface dbBarangayUser{
     role: string;
     createdBy: string;
     createdAt: string;
+    updatedBy: string;
     address: string;
     phone: string;
     firstName: string;
+    middleName: string;
     lastName: string;
     birthDate: string;
     sex: string;
@@ -55,7 +57,11 @@ const BarangayUsers = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showAddUserPopup, setShowAddUserPopup] = useState(false);
-  
+    const [viewUser, setViewUser] = useState<dbBarangayUser | null>(null);
+    const [showViewPopup, setShowViewPopup] = useState(false);
+    const [activeSection, setActiveSection] = useState("full");
+    const popupRef = useRef<HTMLDivElement | null>(null);
+
 
     
     const handleAddBarangayUserClick = () => {
@@ -67,9 +73,49 @@ const BarangayUsers = () => {
         }
     };
 
+    /*
     const handleViewBarangayUserClick = (id: string) => {  
         router.push(`/dashboard/admin/viewBarangayUser?id=${id}`);   
-    };
+    };*/
+
+      const handleViewBarangayUserClick = (id: string) => {
+        const selected = barangayUsers.find((user) => user.id === id);
+        if (selected) {
+          setViewUser(selected);
+          setShowViewPopup(true);
+          
+          
+          const params = new URLSearchParams(window.location.search);
+          params.set("id", id);
+          const newUrl = `${window.location.pathname}?${params.toString()}`;
+          router.replace(newUrl, { scroll: false });
+        }
+      };
+
+      useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+              setShowViewPopup(false);
+              setViewUser(null);
+        
+           
+              const params = new URLSearchParams(window.location.search);
+              params.delete("id");
+              const newUrl = `${window.location.pathname}?${params.toString()}`;
+              router.replace(newUrl, { scroll: false });
+            }
+          };
+      
+        if (showViewPopup) {
+          document.addEventListener("mousedown", handleClickOutside);
+        } else {
+          document.removeEventListener("mousedown", handleClickOutside);
+        }
+      
+        return () => {
+          document.removeEventListener("mousedown", handleClickOutside);
+        };
+      }, [showViewPopup]);
 
     const handleEditBarangayUserClick = (id: string) => {
         if (isAuthorized) {
@@ -343,9 +389,14 @@ useEffect(() => {
 
 
     const handleBack = () => {
-        window.location.href = "/dashboard/admin/BarangayUsers";
+        setShowViewPopup(false);
+        setViewUser(null);
+    
+        const params = new URLSearchParams(window.location.search);
+        params.delete("id");
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        router.replace(newUrl, { scroll: false });
     };
-
     const GenerateID = async (e: any) => {
         e.preventDefault();
         
@@ -740,6 +791,134 @@ useEffect(() => {
                         <button className="user-roles-yes-button" onClick={handleSubmitClick} disabled={loading}>
                             {loading ? "Saving..." : "Save"}
                         </button>
+                    </div>
+                </div>
+            </div>
+            )}
+
+            {showViewPopup && viewUser && (
+            <div className="user-roles-view-popup-overlay">
+                <div className="view-barangayuser-popup" ref={popupRef}>
+                    <div className="view-user-main-section1">
+                        <div className="view-user-header-first-section">
+                            <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                        </div>
+                        <div className="view-user-header-second-section">
+                            <h2 className="gov-info">Republic of the Philippines</h2>
+                            <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+                            <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+                            <h2 className="contact">930-0040 / 428-9030</h2>
+                        </div>
+                        <div className="view-user-header-third-section">
+                            <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
+                        </div>
+                    </div>
+                    <div className="view-user-header-body">
+                        <div className="view-user-header-body-top-section">
+                            <div className="view-user-backbutton-container">
+                                <button onClick={handleBack}>
+                                    <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident"/> 
+                                </button>
+                            </div>
+                            <div className="view-user-info-toggle-wrapper">
+                                {[ "full" , "history"].map((section) => (
+                                <button
+                                    key={section}
+                                    type="button"
+                                    className={`user-info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                                    onClick={() => setActiveSection(section)}
+                                >
+                        
+                                    {section === "full" && "Full Info"}
+                                    {section === "history" && "History"}
+                                </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="view-user-header-body-bottom-section">
+                            <div className="user-photo-section">
+                                <span className="user-details-label">Barangay User Details</span>
+                                <div className="user-profile-container">
+                                    {/*
+                                    <img
+                                        src={formData.identificationFileURL || "/Images/default-identificationpic.jpg"}
+                                        alt="Resident"
+                                        className={
+                                            formData.identificationFileURL
+                                            ? "resident-picture uploaded-picture"
+                                            : "resident-picture default-picture"
+                                        }
+                                    />
+                                    <div className="user-name-section">
+                                        <h2>
+                                            {formData.firstName || "N/A"} {formData.lastName || "N/A"}
+                                        </h2>
+                                        </div>
+                                        */}
+                                </div>
+                            </div>
+                            <div className="view-user-info-main-container">
+                                <div className="view-user-info-main-content">
+                                {activeSection === "full" && (
+                                    <>
+                                        <div className="view-main-user-content-left-side">
+                                            <div className="view-user-fields-section">
+                                                <p>User Id</p>
+                                                <input type="text" className="view-user-input-field" name="residentNumber" value={viewUser.userid} readOnly/>
+                                            </div>
+                                            <div className="view-user-fields-section">
+                                                <p>Official Full Name</p>
+                                                <input type="text" className="view-user-input-field" name="firstName"value={`${viewUser.firstName || ""} ${viewUser.middleName || ""} ${viewUser.lastName || ""}`} readOnly/>
+                                            </div>
+                                            <div className="view-user-fields-section">
+                                                <p>Sex</p>
+                                                <input type="input" className="view-user-input-field" name="gender" value={viewUser.sex  || "N/A"} readOnly/>
+                                            </div>
+                                            <div className="view-user-fields-section">
+                                                <p>Birthday</p>
+                                                <input type="date" className="view-user-input-field" name="birthDate" value={viewUser.birthDate} readOnly/>
+                                            </div>
+                                        </div>
+                                        <div className="view-main-user-content-right-side">
+                                            <div className="view-user-fields-section">
+                                                <p>Position</p>
+                                                <input type="text" className="view-user-input-field" name="position" value={viewUser.position} readOnly/>
+                                            </div>
+                                            <div className="view-user-fields-section">
+                                                <p>Contact Number</p>
+                                                <input type="input" className="view-user-input-field" name="phone" value={viewUser.phone || "N/A"} readOnly/>
+                                            </div>
+                                            <div className="view-user-fields-section">
+                                                <p>Address</p>
+                                                <input type="input" className="view-user-input-field" name="address" value={viewUser.address || "N/A"} readOnly/>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                                {activeSection === "history" && (
+                                    <>
+                                        <div className="view-main-user-content-left-side">
+                                            <div className="view-user-fields-section">
+                                                <p>Created By</p>
+                                                <input type="text" className="view-user-input-field" name="residentNumber" value={viewUser.createdBy} readOnly/>
+                                            </div>
+                                            <div className="view-user-fields-section">
+                                                <p>Created At</p>
+                                                <input type="text" className="view-user-input-field" name="residentNumber" value={viewUser.createdAt} readOnly/>
+                                            </div>
+                                        </div>
+                                        <div className="view-main-user-content-right-side">
+                                            <div className="view-user-fields-section">
+                                                <p>Updated By</p>
+                                                <input type="text" className="view-user-input-field" name="residentNumber" value={viewUser.updatedBy} readOnly/>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                                </div>
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
             </div>
