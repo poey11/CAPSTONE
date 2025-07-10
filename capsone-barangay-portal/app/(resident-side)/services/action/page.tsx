@@ -741,11 +741,25 @@ const handleFileChange = (
 
     }
     const newDoc = await addDoc(docRef, updates);
-    console.log("Report uploaded with ID:", newDoc.id);
-    console.log("Report data to upload:", updates);
+    console.log("Request uploaded with ID:", newDoc.id);
+    console.log("Request data to upload:", updates);
     router.push("/services/notification");
+
+    const notificationRef = collection(db, "BarangayNotifications");
+    await addDoc(notificationRef, {
+      message: `New ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
+      timestamp: new Date(),
+      requestorId: userData?.residentId,
+      isRead: false,
+      transactionType: "Online Service Request",
+      recipientRole: clearanceInput.purpose === "First Time Jobseeker"
+        ? "Assistant Secretary"
+        : "Admin Staff",
+        // need to change this to the actual ID and not the request id number
+      requestID: newDoc.id,
+    });
   } catch (e: any) {
-    console.error("Error uploading report:", e);
+    console.error("Error uploading request:", e);
   }
 };
 
@@ -1281,21 +1295,6 @@ const handleFileChange = (
 
       handleReportUpload(clearanceVars, storageRefs);
       }
-
-      const notificationRef = collection(db, "BarangayNotifications");
-      await addDoc(notificationRef, {
-        message: `New ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
-        timestamp: new Date(),
-        requestorId: userData?.residentId,
-        isRead: false,
-        transactionType: "Online Service Request",
-        recipientRole: clearanceInput.purpose === "First Time Jobseeker"
-          ? "Assistant Secretary"
-          : "Admin Staff",
-        requestId: clearanceInput.requestId,
-      });
-      
-
      // alert("Document request submitted successfully!");
       router.push('/services/notification'); 
     //  router.push("/services");

@@ -354,7 +354,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): 
         timestamp: new Date(),
         isRead: false,
         incidentID: formData.id,
-        transactionType: "Assigned Incident"
+        transactionType: "Online Assigned Incident"
       });
     }
 

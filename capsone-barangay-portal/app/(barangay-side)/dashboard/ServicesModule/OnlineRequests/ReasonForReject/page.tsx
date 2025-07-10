@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams} from "next/navigation";
 import { useEffect, useState } from "react";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc, setDoc, collection } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import "@/CSS/User&Roles/ReasonForRejection.css";
 
@@ -109,6 +109,19 @@ export default function reasonForRejection() {
                 sendTo: "Admin Staff",
             };
             await updateDoc(docRef, updatedData);
+
+            const notificationRef = doc(collection(db, "Notifications"));
+            await setDoc(notificationRef, {
+                residentID: data?.accID,       // the user id linked to this request
+                requestID: id,                 // the Firestore UID
+                message: `Your Document Request (${data?.requestId}) has been rejected. Reason: (${rejectionReason.reason})`,
+                timestamp: new Date(),
+                transactionType: "Online Request",
+                isRead: false,
+            });
+
+
+
             router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${id}`);
         } catch (error) {
             console.error("Error updating status:", error);
