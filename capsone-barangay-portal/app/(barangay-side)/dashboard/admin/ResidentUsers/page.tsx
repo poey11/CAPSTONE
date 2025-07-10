@@ -1,7 +1,7 @@
 "use client"
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { db } from "../../../../db/firebase";
-import { collection, onSnapshot, query ,updateDoc, doc, orderBy} from "firebase/firestore";
+import { collection, onSnapshot, query ,updateDoc, doc, orderBy, getDocs} from "firebase/firestore";
 import "@/CSS/User&Roles/User&Roles.css";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -15,12 +15,16 @@ interface ResidentUser {
   address: string;
   phone: string;
   sex: string;
+  dateOfBirth: string;
   validIdDoc: string;
   role: string;
   email: string;
+  residentId: string;
   status: string;
   isNew?: boolean;
    createdAt?: string;
+   upload?: string;
+  reupload?: string;
 }
 
 const ResidentUsers = () => {
@@ -56,7 +60,33 @@ const ResidentUsers = () => {
   const [pendingShowCount, setPendingShowCount] = useState(0);
 
 
+const [selectedUser, setSelectedUser] = useState<ResidentUser | null>(null);
+const [isPopupOpen, setIsPopupOpen] = useState(false);
+const [viewActiveSection, setViewActiveSection] = useState("basic");
+const popupRef = useRef<HTMLDivElement | null>(null);
+const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+const [linkedResidentId, setLinkedResidentId] = useState<string | null>(null);
+const [showResidentsPopup, setShowResidentsPopup] = useState(false);
+const [residents, setResidents] = useState<any[]>([]);
+const [showNoMatchResidentsPopup, setShowNoMatchResidentsPopup] = useState(false);
+const residentPopupRef = useRef<HTMLDivElement>(null);
+const [showAcceptPopup, setShowAcceptPopup] = useState(false); 
 
+const openPopup = (user: ResidentUser) => {
+  setSelectedUser(user);
+  setViewActiveSection("basic");
+  setIsPopupOpen(true);
+  router.push(`?id=${user.id}`, { scroll: false });
+};
+
+const closePopup = () => {
+  setSelectedUser(null);
+  setIsPopupOpen(false);
+  const params = new URLSearchParams(window.location.search);
+  params.delete("id");
+  const newUrl = `${window.location.pathname}?${params.toString()}`;
+  router.replace(newUrl, { scroll: false });
+};
 
 
 // Mark as viewed
@@ -68,64 +98,6 @@ const ResidentUsers = () => {
       console.error("Error updating isViewed:", error);
     }
   };
-
-
-/*
-OLD
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const residentCollection = collection(db, "ResidentUsers");
-        const unsubscribeResidents = onSnapshot(residentCollection, (snapshot) => {
-          const residentData: ResidentUser[] = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            isNew: doc.data().isViewed === false,
-          })) as ResidentUser[];
-          setResidentUsers(residentData);
-        });
-        return () => unsubscribeResidents();
-      } catch (err: any) {
-        console.log(err.message);
-        setError("Failed to load residents");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUsers();
-  }, []);
-*/
-
-  /*
-
-  // Highlight scroll and reset
-  useEffect(() => {
-    if (highlightUserId && residentUsers.length > 0) {
-      setHighlightedId(highlightUserId);
-      const userIndex = filteredUser.findIndex(user => user.id === highlightUserId);
-      if (userIndex !== -1) {
-        const newPage = Math.floor(userIndex / UserPerPage) + 1;
-        if (currentPage !== newPage) setCurrentPage(newPage);
-        setTimeout(() => {
-          const targetElement = document.querySelector(`tr.highlighted-row`);
-          if (targetElement) targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 500);
-        const timeoutId = setTimeout(() => {
-          setHighlightedId(null);
-          const params = new URLSearchParams(window.location.search);
-          params.delete("highlight");
-          const newUrl = `${window.location.pathname}?${params.toString()}`;
-          router.replace(newUrl, { scroll: false });
-        }, 3000);
-        return () => clearTimeout(timeoutId);
-      }
-    }
-  }, [highlightUserId, residentUsers, filteredUser, currentPage]);
-*/
-
-
-
-
 
 // Fetch users
 useEffect(() => {
@@ -166,9 +138,44 @@ useEffect(() => {
 }, []);
 
 
+const handleVerifyClick = async (user: ResidentUser) => {
+  setSelectedUserId(user.id);
+  try {
+    const residentsCollection = collection(db, "Residents");
+    const residentsSnapshot = await getDocs(residentsCollection);
+    const residentsList = residentsSnapshot.docs.map(doc => {
+      const data = doc.data() as {
+        firstName: string;
+        middleName: string;
+        lastName: string;
+        dateOfBirth: string;
+      };
 
+      return {
+        id: doc.id,
+        ...data
+      };
+    });
 
+    setResidents(residentsList);
 
+    const matchingResident = residentsList.find(resident =>
+      resident.firstName?.toLowerCase().trim() === user.first_name?.toLowerCase().trim() &&
+      resident.lastName?.toLowerCase().trim() === user.last_name?.toLowerCase().trim() &&
+      resident.dateOfBirth?.trim() === user.dateOfBirth?.trim()
+    );
+
+    if (matchingResident) {
+      setLinkedResidentId(matchingResident.id);
+      setSearchTerm(`${matchingResident.firstName} ${matchingResident.middleName} ${matchingResident.lastName}`);
+      setShowResidentsPopup(true);
+    } else {
+      setShowNoMatchResidentsPopup(true);
+    }
+  } catch (error) {
+    console.error("Error verifying resident:", error);
+  }
+};
 
   // Scroll + temporary highlight
   useEffect(() => {
@@ -195,6 +202,9 @@ useEffect(() => {
   }, [highlightUserId, residentUsers, filteredUser, currentPage]);
 
 
+  const handleRejectClick = (userId: string ) => {
+    router.push(`/dashboard/admin/reasonForReject?id=${userId}`);
+};
 
   
   // Main table filtering
@@ -268,6 +278,10 @@ useEffect(() => {
 
 
 
+  const handleAcceptClick = (userId: string) => {
+    setShowAcceptPopup(true);
+    setSelectedUserId(userId);
+};
 
     /* NEW UPDATED ADDED */
     const [filtersLoaded, setFiltersLoaded] = useState(false);
@@ -387,7 +401,7 @@ useEffect(() => {
                       </span></td>
                     <td>
                       <div className="admin-actions">
-                        <button className="admin-action-view" onClick={() => router.push(`/dashboard/admin/viewResidentUser?id=${user.id}`)}>
+                      <button className="admin-action-view" onClick={() => openPopup(user)}>
                           <img src="/Images/view.png" alt="View" />
                         </button>
                       </div>
@@ -451,6 +465,7 @@ useEffect(() => {
                               onClick={() => {
                                 markAsViewed(user.id);
                                 router.push(`/dashboard/admin/viewResidentUser?id=${user.id}&highlight=${user.id}`);
+                                //openPopup(user);
                               }}
                             >
                               <img src="/Images/view.png" alt="View" />
@@ -479,7 +494,572 @@ useEffect(() => {
           </>
         )}
 
+        {isPopupOpen && selectedUser && (
+          <div className="user-roles-view-popup-overlay">
+            <div className="view-barangayuser-popup" ref={popupRef}>
+              <div className="view-user-main-section1">
+                <div className="view-user-header-first-section">
+                  <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                </div>
+                <div className="view-user-header-second-section">
+                  <h2 className="gov-info">Republic of the Philippines</h2>
+                  <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+                  <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+                  <h2 className="contact">930-0040 / 428-9030</h2>
+                </div>
+                <div className="view-user-header-third-section">
+                  <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
+                </div>
+              </div>
+
+              <div className="view-user-header-body">
+                <div className="view-user-header-body-top-section">
+                  <div className="view-user-backbutton-container">
+                    <button onClick={closePopup}>
+                      <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
+                    </button>
+                  </div>
+                  <div className="view-resident-user-info-toggle-wrapper">
+                    {["basic", "account", "others"].map((section) => (
+                      <button
+                        key={section}
+                        type="button"
+                        className={`user-info-toggle-btn ${viewActiveSection === section ? "active" : ""}`}
+                        onClick={() => setViewActiveSection(section)}
+                      >
+                        {section === "basic" && "Basic Info"}
+                        {section === "account" && "Account Info"}
+                        {section === "others" && "Other Info"}
+                      </button>
+                    ))}
+                  </div>
+                  {isAuthorized && selectedUser?.status !== "Verified" && (
+                    <div className="action-btn-section-verify-section">
+                      <div className="action-btn-section-verify">
+                      
+                        <button 
+                          className="viewadmin-action-accept" 
+                          onClick={() => handleVerifyClick(selectedUser)}
+                        >
+                          Verify
+                        </button>
+                      
+                      </div>
+                    </div>
+                  )}
+                  
+                </div>
+
+                <div className="view-user-header-body-bottom-section">
+                
+                  <div className="view-resident-user-info-main-container">
+                    <div className="view-user-info-main-content">
+                      {viewActiveSection  === "basic" && (
+                        <>
+                          <div className="view-resident-user-content-left-side">
+                            <div className="view-user-fields-section">
+                              <p>Last Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.last_name || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>First Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.first_name || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Middle Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.middle_name || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Sex</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.sex || "N/A"}
+                                readOnly
+                              />
+                            </div>
+                          </div>
+                          <div className="view-resident-user-content-right-side">
+                            <div className="view-user-fields-section">
+                              <p>Address</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.address || "N/A"}
+                                readOnly
+                              />
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Contact Number</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.phone || "N/A"}
+                                readOnly
+                              />
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Email Address</p>
+                              <input
+                                type="email"
+                                className="view-user-input-field"
+                                value={selectedUser.email || "N/A"}
+                                readOnly
+                              />
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Date of Birth</p>
+                              <input
+                                type="email"
+                                className="view-user-input-field"
+                                value={selectedUser.dateOfBirth || "N/A"}
+                                readOnly
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {viewActiveSection === "account" && (
+                        <>
+                          <div className="view-main-user-content-left-side">
+                            <div className="view-user-fields-section">
+                              <p>Created At</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.createdAt || "N/A"}
+                                readOnly
+                              />
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Role</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.role || "N/A"}
+                                readOnly
+                              />
+                            </div>
+                          </div>
+                          <div className="view-main-user-content-right-side">
+                            <div className="view-user-fields-section">
+                              <p>Status</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.status || "N/A"}
+                                readOnly
+                              />
+                            </div>
+                            {selectedUser?.status === "Verified" && (
+                            <div className="view-user-fields-section">
+                              <p>Linked Resident</p>
+                              {selectedUser?.residentId ? (
+                                <a
+                                  href={`/dashboard/ResidentModule/ViewResident?id=${selectedUser.residentId}`}
+                                  className="view-user-input-field"
+                                  style={{
+                                    display: 'inline-block',
+                                    padding: '8px 12px',
+                                    borderRadius: '4px',
+                                    backgroundColor: '#f5f5f5',
+                                    textDecoration: 'none',
+                                    color: '#007bff',
+                                  }}
+                                >
+                                  Show Resident Info
+                                </a>
+                              ) : (
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  value="N/A"
+                                  readOnly
+                                />
+                              )}
+                            </div>
+                          )}
+                          </div>
+                        </>
+                      )}
+
+                      {viewActiveSection === "others" && (
+                        <>
+                        {/* will fix the css of image */}
+                          <div className="user-uploaded-photo-section">
+                            <div className="box-container-outer-natureoffacts">
+                              <div className="title-remarks-partyA">
+                                Uploaded Valid ID
+                              </div>
+                              <div className="box-container-incidentimage-2">
+                                {selectedUser?.upload ? (
+                                  <a
+                                    href={selectedUser.upload}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <img
+                                      alt="Verification Requirement"
+                                      className="incident-img-view uploaded-pic"
+                                      style={{ cursor: 'pointer' }}
+                                      src={selectedUser.upload}
+                                    />
+                                  </a>
+                                ) : (
+                                  <p className="no-image-text-view">No image available</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        {/* Popup for With Resident Match */}
+        {showResidentsPopup && (
+                <div className="view-residentuser-confirmation-popup-overlay">
+                    <div className="resident-table-popup" ref={residentPopupRef}>
+    
+                        <h2>
+                            Resident Database Verification
+                        </h2>
+
+                        <h1>
+                        {
+                            residents.filter(resident =>
+                            `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+                                .toLowerCase()
+                                .includes(searchTerm.toLowerCase())
+                            ).length > 0
+                            ? `* ${residents.filter(resident =>
+                                `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+                                .toLowerCase()
+                                .includes(searchTerm.toLowerCase())
+                                ).map(resident => `Resident Number ${resident.residentNumber || "N/A"}`).join(", ")} *`
+                            : ""
+                        }
+                        </h1>
+               
+                    
+            
+                        <div className="matched-table-container">
+                            <table className="resident-table">
+                            <thead>
+                                <tr>
+                                <th className="verification-table-firsttitle">First Name</th>
+                                <th className="verification-table-firsttitle">Middle Name</th>
+                                <th className="verification-table-firsttitle">Last Name</th>
+                                <th className="verification-table-firsttitle">Date Of Birth</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {residents
+                                .filter(resident =>
+                                    `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+                                    .toLowerCase()
+                                    .includes(searchTerm.toLowerCase())
+                                )
+                                .map(resident => (
+                                    <tr
+                                    key={resident.id}
+                                    className="resident-table-row"
+                                    onClick={() => {
+                                        setSelectedUserId(selectedUser?.id || "");
+                                        setLinkedResidentId(resident.id);     // ✅ this is the critical part
+                                        setShowResidentsPopup(false);
+                                        setShowAcceptPopup(true);
+                                    }}
+                                    >
+                                    <td>{resident.firstName}</td>
+                                    <td>{resident.middleName}</td> 
+                                    <td>{resident.lastName}</td>
+                                    <td>{resident.dateOfBirth}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                            </table>
+                        </div>
+
+
+
+                        <div className="verification-section">
+
+                            {/* Resident Database */}
+                            <div className="resident-table-container">
+                            {residents
+                                .filter(resident =>
+                                `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+                                    .toLowerCase()
+                                    .includes(searchTerm.toLowerCase())
+                                )
+                                .map(resident => (
+                                <table
+                                    key={resident.id}
+                                    className="resident-table individual-resident-table"
+                                >
+                                    <thead>
+                                    <tr>
+                                        <th colSpan={2} className="verification-table-title sticky-table-title">
+                                            Resident Database
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <th>Address</th>
+                                        <td>{resident.address || "N/A"}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Date of Birth</th>
+                                        <td>{resident.dateOfBirth || "N/A"}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Contact Number</th>
+                                        <td>{resident.contactNumber || "N/A"}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Sex</th>
+                                        <td>{resident.sex || "N/A"}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Valid ID</th>
+                                        <td>
+                                            {resident.verificationFilesURLs ? (
+                                                <div className="resident-id-container">
+                                                    <img
+                                                        src={resident.verificationFilesURLs}
+                                                        alt="Resident's Valid ID"
+                                                        className="resident-id-image"
+                                                    />
+                                                    <a
+                                                        href={resident.verificationFilesURLs}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="view-image-link"
+                                                    >
+                                                        View Image
+                                                    </a>
+                                                </div>
+                                            ) : (
+                                                "No ID uploaded"
+                                            )}
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                ))}
+                            </div>
+
+
+                            {/* Resident Users */}
+                            <div className="resident-table-container">
+                            <table
+                                key={selectedUser?.residentId}
+                                className="resident-table individual-resident-table"
+                            >
+                                <thead>
+                                <tr>
+                                    <th colSpan={2} className="verification-table-title">
+                                    Pending Resident User
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <th>Address</th>
+                                    <td>{selectedUser?.address || "N/A"}</td>
+                                </tr>
+                                <tr>
+                                    <th>Date of Birth</th>
+                                    <td>{selectedUser?.dateOfBirth || "N/A"}</td>
+                                </tr>
+                                <tr>
+                                    <th>Contact Number</th>
+                                    <td>{selectedUser?.phone || "N/A"}</td>
+                                </tr>
+                                <tr>
+                                    <th>Sex</th>
+                                    <td>{selectedUser?.sex || "N/A"}</td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        {selectedUser?.status === "Resubmission" ? "Reupload Valid ID" : "Valid ID"}
+                                    </th>
+                                    <td>
+                                        {selectedUser?.status === "Resubmission"
+                                        ? selectedUser?.reupload
+                                            ? (
+                                            <div className="resident-id-container">
+                                                <img
+                                                src={selectedUser?.reupload}
+                                                alt="Reuploaded Valid ID"
+                                                className="resident-id-image"
+                                                />
+                                                <a
+                                                href={selectedUser?.reupload}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="view-image-link"
+                                                >
+                                                View Image
+                                                </a>
+                                            </div>
+                                            )
+                                            : "No reuploaded ID"
+                                        : selectedUser?.upload
+                                            ? (
+                                            <div className="resident-id-container">
+                                                <img
+                                                src={selectedUser?.upload}
+                                                alt="Resident's Valid ID"
+                                                className="resident-id-image"
+                                                />
+                                                <a
+                                                href={selectedUser?.upload}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="view-image-link"
+                                                >
+                                                View Image
+                                                </a>
+                                            </div>
+                                            )
+                                            : "No ID uploaded"
+                                        }
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+                    
+                  
+                        <div className="verification-buttons-section">
+                            <div className="verification-action-buttons">
+                                <button 
+                                            className="viewadmin-action-accept" 
+                                            onClick={() => handleAcceptClick(selectedUser?.id || "")}
+                                        >
+                                            Accept
+                                </button>
+                        
+                                <button 
+                                            className="viewadmin-action-reject" 
+                                            onClick={() => handleRejectClick(selectedUser?.id || "")}
+                                        >
+                                            Reject
+                                </button>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                )}
+
+        {/* Popup for No match Residents */}
+        {showNoMatchResidentsPopup && (
+                    <div className="view-residentuser-confirmation-popup-overlay">
+                        <div className="resident-table-popup">
+                        <h2>Resident Database Verification</h2>
+
+                    {(() => {
+                        const selectedName = `${selectedUser?.first_name || ""} ${selectedUser?.middle_name || ""} ${selectedUser?.last_name || ""}`.toLowerCase().trim();
+
+                        const matchingResidents = residents.filter(resident => {
+                        const residentName = `${resident.firstName} ${resident.middleName} ${resident.lastName}`.toLowerCase().trim();
+                        return residentName === selectedName;
+                        });
+
+                        return (
+                        <>
+                            <h1>{matchingResidents.length === 0 ? "* 0 Matches *" : `* ${matchingResidents.length} Match(es) *`}</h1>
+                            
+                            {/* Table will always render, even with no matches */}
+                            <div className="matched-table-container">
+                            <table className="resident-table">
+                                <thead>
+                                <tr>
+                                    <th className="verification-table-firsttitle">First Name</th>
+                                    <th className="verification-table-firsttitle">Middle Name</th>
+                                    <th className="verification-table-firsttitle">Last Name</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {matchingResidents.length === 0 ? (
+                                    <tr>
+                                    <td colSpan={3} className="no-matches">No matches found</td>
+                                    </tr>
+                                ) : (
+                                    matchingResidents.map(resident => (
+                                    <tr
+                                        key={resident.id}
+                                        className="resident-table-row"
+                                        onClick={() =>
+                                        router.push(`/dashboard/ResidentModule/ViewResident?id=${resident.id}`)
+                                        }
+                                    >
+                                        <td>{resident.firstName}</td>
+                                        <td>{resident.middleName}</td>
+                                        <td>{resident.lastName}</td>
+                                        <td>{resident.dateOfBirth}</td>
+                                    </tr>
+                                    ))
+                                )}
+                                </tbody>
+                            </table>
+                            </div>
+                        </>
+                        );
+                })
+                ()}
+
+                <div className="verification-buttons-section">
+                  <div className="verification-action-buttons">
+                    <button
+                      onClick={() => setShowNoMatchResidentsPopup(false)}
+                      className="viewadmin-action-cancel"
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      className="viewadmin-action-reject"
+                      onClick={() => handleRejectClick(selectedUser?.id || "")}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
     </main>
+    
   );
 };
 
