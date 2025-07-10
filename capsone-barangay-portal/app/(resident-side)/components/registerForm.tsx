@@ -189,7 +189,7 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
         isRead: false,
         transactionType: "Resident Registration",
         recipientRole: "Assistant Secretary",
-        accID: user?.uid,
+        accID: docRef.id,
         });
         
     
