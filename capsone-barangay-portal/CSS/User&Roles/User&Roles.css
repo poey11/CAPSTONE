@@ -956,6 +956,7 @@ UPDATE
 .user-roles-module-section-1-resident-users {
     display: flex;
   justify-content: center;
+  padding: 0.5rem 0;
   background: transparent;
   border: none;
   box-shadow: none;

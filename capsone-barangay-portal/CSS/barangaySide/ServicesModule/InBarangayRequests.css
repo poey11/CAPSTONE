@@ -22,7 +22,7 @@ html, body {
   padding-left: 20px; /* edited */
   padding-right: 20px; /* edited */
 
-   padding-top: 14.2%;
+   padding-top: 13.2%;
   padding-bottom: 3%;
 
 }
@@ -238,7 +238,7 @@ Values
   overflow: auto; /* Allow scrolling if content overflows */
   width: 100%;
   
-  max-height: 70%;
+
   border: 1px solid rgba(36, 53, 76, 0.7);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   background-color: #ffffff;
@@ -247,8 +247,14 @@ Values
   scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 
 
-  margin-top: 2rem; /* edited this line */
-  height: 67%; /* edited this line */
+    margin-top: 1.5rem; /* edited this line */
+    height: 75%; /* edited this line */
+    max-height: 75%;
+}
+
+.expand-when-no-section1-inbarangayreq {
+  height: calc(75% + 7%); /* Increase height when section-1 is missing */
+  max-height: calc(75% + 7%); /* or 40px pwede din*/
 }
 
 /* NEW UPDATED */
