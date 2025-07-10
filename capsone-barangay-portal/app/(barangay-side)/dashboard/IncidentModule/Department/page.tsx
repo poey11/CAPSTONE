@@ -317,6 +317,7 @@ if (incidentType) {
 
   return (
     <main className="main-container-departments"  /* edited this class*/>
+      
       <div className="section-1-departments">
         {isAuthorized && (
           <button className="add-announcement-btn-departments add-incident-animated"  /* edited this class*/ onClick={() => router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`)}>

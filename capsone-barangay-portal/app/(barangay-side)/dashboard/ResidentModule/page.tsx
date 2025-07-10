@@ -276,28 +276,21 @@ export default function ResidentModule() {
   return (
     <main className="resident-module-main-container" /* edited this class*/>
     
-    
+        <div className="resident-module-section-1">
+          {isAuthorized && (
+            <Link href="/dashboard/ResidentModule/AddResident">
+              <button
+                className="add-announcement-btn add-incident-animated"
+                onClick={handleAddResidentClick}
+              >
+                Add New Resident
+              </button>
+            </Link>
+          )}
+        </div>
 
-     <div className="resident-module-section-1">
-        {isAuthorized ? (
-          <Link href="/dashboard/ResidentModule/AddResident">
-            <button className="add-announcement-btn add-incident-animated" /* edited this class*/ onClick={handleAddResidentClick}>Import Residents from Excel</button>
-          </Link>
-        ) : (
-          <button className="add-announcement-btn opacity-0 cursor-not-allowed add-incident-animated" /* edited this class*/ disabled>Import Residents from Excel</button>
-        )}
 
-        
-        {isAuthorized ? (
-          <Link href="/dashboard/ResidentModule/AddResident">
-            <button className="add-announcement-btn add-incident-animated" /* edited this class*/ onClick={handleAddResidentClick}>Add New Resident</button>
-          </Link>
-        ) : (
-          <button className="add-announcement-btn opacity-0 cursor-not-allowed add-incident-animated " /* edited this class*/ disabled>Add New Resident</button>
-        )}
 
-   
-    </div>
   
     <div className={`resident-module-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
       <input
@@ -358,7 +351,12 @@ export default function ResidentModule() {
 
     </div>
   
-    <div className="resident-module-main-section"  /* edited this class*/>
+            <div
+              className={`resident-module-main-section ${
+                !isAuthorized ? "expand-when-no-section1-resident-module" : ""
+              }`}
+            >
+    
   
     {loading ? (
       <p>Loading residents...</p>
