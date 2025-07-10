@@ -195,25 +195,49 @@ export default function ResidentModule() {
     if (!deleteUserId) return;
   
     try {
-      //  Delete related records that match the residentId (Firestore document ID)
       const collectionsToClean = ["JobSeekerList", "KasambahayList", "VotersList"];
-      for (const collectionName of collectionsToClean) {
-        const q = query(
-          collection(db, collectionName),
-          where("residentId", "==", deleteUserId)
-        );
-        const querySnapshot = await getDocs(q);
   
-        const deletePromises = querySnapshot.docs.map((docSnap) =>
+      for (const collectionName of collectionsToClean) {
+        let allDocs = [];
+  
+        if (collectionName === "KasambahayList") {
+          // Get docs where residentId matches
+          const q1 = query(
+            collection(db, collectionName),
+            where("residentId", "==", deleteUserId)
+          );
+          const snapshot1 = await getDocs(q1);
+          allDocs.push(...snapshot1.docs);
+  
+          // Get docs where employerId matches
+          const q2 = query(
+            collection(db, collectionName),
+            where("employerId", "==", deleteUserId)
+          );
+          const snapshot2 = await getDocs(q2);
+          allDocs.push(...snapshot2.docs);
+  
+        } else {
+          // delete residentId from other tables
+          const q = query(
+            collection(db, collectionName),
+            where("residentId", "==", deleteUserId)
+          );
+          const snapshot = await getDocs(q);
+          allDocs.push(...snapshot.docs);
+        }
+  
+        // Delete all matching docs
+        const deletePromises = allDocs.map((docSnap) =>
           deleteDoc(doc(db, collectionName, docSnap.id))
         );
         await Promise.all(deletePromises);
       }
   
-      // ✅ Delete from "Residents"
+
+      // delee the main resident
       await deleteDoc(doc(db, "Residents", deleteUserId));
   
-      // ✅ Update UI
       setResidents((prev) => prev.filter(resident => resident.id !== deleteUserId));
       setDeleteUserId(null);
       setShowDeletePopup(false);
@@ -229,6 +253,7 @@ export default function ResidentModule() {
       setTimeout(() => setShowPopup(false), 3000);
     }
   };
+  
   
   
 
