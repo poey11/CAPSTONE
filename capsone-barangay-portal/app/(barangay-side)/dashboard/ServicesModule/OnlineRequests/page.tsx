@@ -40,6 +40,13 @@ import { useSession } from "next-auth/react";
         }
     };
     
+
+        const canSeeTasks =
+      user?.position === "Admin Staff" ||
+      user?.position === "Secretary" ||
+      user?.position === "Assistant Secretary";
+
+
     useEffect(() => {
       let position ="";
       if(user?.position === "Admin Staff") {
@@ -168,6 +175,8 @@ import { useSession } from "next-auth/react";
 
 
     console.log(requestData);
+
+    
     const [currentPage, setCurrentPage] = useState(1);
     const residentsPerPage = 10; //pwede paltan 
 
@@ -269,9 +278,49 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
     return () => clearTimeout(timeout);
   }, [searchParams.toString()]);
 
+
+    
+  const [activeSection, setActiveSection] = useState("main");
+
     return (
 
         <main className="onlinereq-main-container" /* edited this class*/>
+
+          <div className="onlinereq-section-1">
+
+
+                {canSeeTasks && (
+                  <div className={`assigned-incident-info-toggle-wrapper-online ${filtersLoaded ? "filters-animated" : ""}`}>
+                    {["main", "tasks"].map((section) => (
+                      <button
+                        key={section}
+                        type="button"
+                        className={`info-toggle-btn-assigned-online assigned-tasks-online ${activeSection === section ? "active" : ""}`}
+                        onClick={() => setActiveSection(section)}
+                      >
+                        {section === "main" && "All Requests"}
+                        {section === "tasks" && (
+                          <>
+                            <span className="badge-container-online">
+                              Assigned Tasks
+                              {currentOnlineRequests.length > 0 && (
+                                <span className="task-badge-online">{requestData.length}</span>
+                              )}
+                            </span>
+                          </>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+         
+
+                </div>
+
+
+          {activeSection === "main" && (
+          <>      
+
 
          <div className={`onlinereq-section-2 ${filtersLoaded ? "filters-animated" : ""}`}  /* edited this class*/>
 
@@ -344,15 +393,92 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
             </div>
 
               
-
-
-
-
-
          </div>
-          Assigned Requests: {requestData.length}
 
-         <div className="onlinereq-main-section" /* edited this class*/>
+
+
+       
+      <div className="onlinereq-main-section">
+              {loading ? (
+            <p>Loading Online Requests...</p>
+          ) : error ? (
+            <p className="error">{error}</p>
+          ) : allOnlineRequests.length === 0 ? (
+            <div className="no-result-card-services">
+              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-services" />
+              <p className="no-results-services">No Results Found</p>
+            </div>
+          ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Document Type</th>
+                <th>Request ID</th>
+                <th>Request Date</th>
+                <th>Requestor</th>
+                <th>Purpose</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+          {allOnlineRequests.map((request, index) => (
+              <tr key={index} className={`${request.isNew ? "highlight-new-request" : ""} ${highlightedId && request.id === highlightedId ? "highlighted-row" : ""}`}>
+
+                <td>{request.docType}</td>
+                <td>{request.requestId}</td>
+                <td>{request.createdAt}</td>
+                <td>{request.requestor}</td>
+                <td>{request.purpose}</td>
+                <td>
+                    <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
+                        {request.status}
+                    </span>
+                </td>
+                <td>
+                  <div className="actions">
+                    <button
+                        className="action-view-services"
+                        onClick={() => handleView(request)}
+                    >
+                       <img src="/Images/view.png" alt="View" />
+                    </button>
+
+                  </div>
+                </td>
+              </tr>
+            ))}
+            </tbody>
+          </table>
+            )}
+        </div>
+
+
+
+      <div className="redirection-section-services">
+          <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+          {getPageNumbers().map((number, index) => (
+            <button
+              key={index}
+              onClick={() => typeof number === 'number' && paginate(number)}
+              className={currentPage === number ? "active" : ""}
+            >
+              {number}
+            </button>
+          ))}
+          <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+      </div>
+
+                        </>
+        )}
+ 
+
+
+
+        {canSeeTasks && activeSection === "tasks" && (
+          <>
+
+      <div className="onlinereq-main-section" /* edited this class*/>
           
               {loading ? (
             <p>Loading Online Requests...</p>
@@ -410,74 +536,20 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
         </div>
 
         <div className="redirection-section-services">
-        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {getPageNumbers().map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === 'number' && paginate(number)}
-            className={currentPage === number ? "active" : ""}
-          >
-            {number}
-          </button>
-        ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-      </div>
-
-      All Online Requests: {allOnlineRequests.length}
-      <div className="onlinereq-main-section">
-              {loading ? (
-            <p>Loading Online Requests...</p>
-          ) : error ? (
-            <p className="error">{error}</p>
-          ) : currentOnlineRequests.length === 0 ? (
-            <div className="no-result-card-services">
-              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-services" />
-              <p className="no-results-services">No Results Found</p>
-            </div>
-          ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Document Type</th>
-                <th>Request ID</th>
-                <th>Request Date</th>
-                <th>Requestor</th>
-                <th>Purpose</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-          {allOnlineRequests.map((request, index) => (
-              <tr key={index} className={`${request.isNew ? "highlight-new-request" : ""} ${highlightedId && request.id === highlightedId ? "highlighted-row" : ""}`}>
-
-                <td>{request.docType}</td>
-                <td>{request.requestId}</td>
-                <td>{request.createdAt}</td>
-                <td>{request.requestor}</td>
-                <td>{request.purpose}</td>
-                <td>
-                    <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
-                        {request.status}
-                    </span>
-                </td>
-                <td>
-                  <div className="actions">
-                    <button
-                        className="action-view-services"
-                        onClick={() => handleView(request)}
-                    >
-                       <img src="/Images/view.png" alt="View" />
-                    </button>
-
-                  </div>
-                </td>
-              </tr>
+            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+            {getPageNumbers().map((number, index) => (
+              <button
+                key={index}
+                onClick={() => typeof number === 'number' && paginate(number)}
+                className={currentPage === number ? "active" : ""}
+              >
+                {number}
+              </button>
             ))}
-            </tbody>
-          </table>
-            )}
+            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
         </div>
+                </>
+        )}
 
       </main>
         
