@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect, useRef } from "react";
 import { db } from "../../../../db/firebase";
-import { collection, onSnapshot, query ,updateDoc, doc, orderBy, getDocs} from "firebase/firestore";
+import { collection, onSnapshot, query ,updateDoc, doc, orderBy, getDocs, setDoc} from "firebase/firestore";
 import "@/CSS/User&Roles/User&Roles.css";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -71,6 +71,8 @@ const [residents, setResidents] = useState<any[]>([]);
 const [showNoMatchResidentsPopup, setShowNoMatchResidentsPopup] = useState(false);
 const residentPopupRef = useRef<HTMLDivElement>(null);
 const [showAcceptPopup, setShowAcceptPopup] = useState(false); 
+const [showPopup, setShowPopup] = useState(false);
+const [popupMessage, setPopupMessage] = useState("");
 
 const openPopup = (user: ResidentUser) => {
   setSelectedUser(user);
@@ -205,6 +207,43 @@ const handleVerifyClick = async (user: ResidentUser) => {
   const handleRejectClick = (userId: string ) => {
     router.push(`/dashboard/admin/reasonForReject?id=${userId}`);
 };
+
+const confirmAccept = async () => {
+        if (!selectedUserId) return;
+    
+        try {
+            await updateDoc(doc(db, "ResidentUsers", selectedUserId), {
+                status: "Verified",
+                residentId: linkedResidentId,
+                
+            });
+    
+            setPopupMessage("User accepted and linked successfully!");
+            setShowPopup(true);
+
+            // Create a notification for the resident
+            const notificationRef = doc(collection(db, "Notifications"));
+            await setDoc(notificationRef, {
+            residentId: selectedUserId, // == user id
+            message: `Your account is now VERIFIED and linked to your resident record.`,
+            transactionType: "Verification",
+            timestamp: new Date(),
+            isRead: false,
+            });
+            
+            // Hide the popup after 3 seconds
+            setTimeout(() => {
+                setShowPopup(false);
+                //router.push("/dashboard/admin");
+                router.push(`/dashboard/admin/ResidentUsers?highlight=${selectedUserId}`);
+            }, 3000);
+        } catch (error) {
+            console.error("Error updating user status:", error);
+        } finally {
+            setShowAcceptPopup(false);
+            setSelectedUserId(null);
+        }
+    };
 
   
   // Main table filtering
@@ -464,8 +503,8 @@ const handleVerifyClick = async (user: ResidentUser) => {
                               className="admin-action-view"
                               onClick={() => {
                                 markAsViewed(user.id);
-                                router.push(`/dashboard/admin/viewResidentUser?id=${user.id}&highlight=${user.id}`);
-                                //openPopup(user);
+                                //router.push(`/dashboard/admin/viewResidentUser?id=${user.id}&highlight=${user.id}`);
+                                openPopup(user);
                               }}
                             >
                               <img src="/Images/view.png" alt="View" />
@@ -1057,6 +1096,32 @@ const handleVerifyClick = async (user: ResidentUser) => {
               </div>
             </div>
           )}
+
+          {showAcceptPopup && (
+                        <div className="view-residentuser-confirmation-popup-overlay-yesno">
+                            <div className="view-residentuser-confirmation-popup">
+                                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                                <p>Are you sure you want to accept this user?</p>
+                                <div className="yesno-container">
+                                    <button onClick={() => setShowAcceptPopup(false)} className="no-button">No</button>
+                                    <button onClick={() => {
+                                        confirmAccept();
+                                        setShowResidentsPopup(false);
+                                        }} className="yes-button">Yes
+                                    </button>
+                                </div> 
+                            </div>
+                        </div>
+            )}
+
+            {showPopup && (
+                <div className={`view-residentuser-popup-overlay show`}>
+                    <div className="view-residentuser-popup">
+                        <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                        <p>{popupMessage}</p>
+                    </div>
+                </div>
+            )}
 
     </main>
     

@@ -1911,3 +1911,138 @@ height: 300px;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(249, 115, 22, 0.2);
 }
+
+
+.view-residentuser-confirmation-popup-overlay-yesno {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.view-residentuser-confirmation-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  width: 400px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+}
+
+.view-residentuser-confirmation-popup p{
+  color: rgb(97, 97, 97);
+}
+
+.view-residentuser-confirmation-popup h2{
+  margin-top: 10px;
+  color: #f44336;
+  font-size: 15px;
+}
+
+.yes-button,
+.no-button{
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 150px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+}
+
+.yes-button {
+  background-color: #4caf50; 
+}
+
+.yes-button:hover {
+  background-color: #3d8c40; 
+} 
+
+.no-button {
+  background-color: #f44336;
+}
+
+.no-button:hover {
+  background-color:  #c2352b; 
+} 
+
+.view-residentuser-popup-overlay {
+  position: fixed;
+  top: 13%;
+  right: -3px;
+  background: #777575;
+  color: white;
+  width: 400px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 15px solid #403f3e;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+
+.view-residentuser-popup-overlay.show {
+  animation: slideIn 0.5s ease-out;
+}
+
+.view-residentuser-popup-overlay.hide {
+  animation: slideOut 0.5s ease-out;
+}
+
+.view-residentuser-popup{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.view-residentuser-popup p {
+  margin: 0;
+  text-align: left;
+
+}

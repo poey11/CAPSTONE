@@ -35,7 +35,7 @@ export default function reasonForRejection() {
 
 
     const handleBack = () => {
-        router.push(`/dashboard/admin/viewResidentUser?id=${userId}`);
+        router.push(`/dashboard/admin/ResidentUsers?id=${userId}`);
     };
 
     const handleSubmitClick = async () => {
