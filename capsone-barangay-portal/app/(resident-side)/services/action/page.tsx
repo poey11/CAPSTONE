@@ -746,16 +746,24 @@ const handleFileChange = (
     router.push("/services/notification");
 
     const notificationRef = collection(db, "BarangayNotifications");
+    
     await addDoc(notificationRef, {
       message: `New ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
       timestamp: new Date(),
       requestorId: userData?.residentId,
       isRead: false,
       transactionType: "Online Service Request",
-      recipientRole: clearanceInput.purpose === "First Time Jobseeker"
+      recipientRole: (
+        clearanceInput.purpose === "First Time Jobseeker" ||
+        clearanceInput.docType === "Barangay Certificate" ||
+        clearanceInput.docType === "Barangay Clearance" ||
+        clearanceInput.docType === "Barangay Indigency" ||
+        clearanceInput.docType === "Barangay Permit" ||
+        clearanceInput.docType === "Temporary Business Permit" ||
+        clearanceInput.docType === "Construction"
+      )
         ? "Assistant Secretary"
         : "Admin Staff",
-        // need to change this to the actual ID and not the request id number
       requestID: newDoc.id,
     });
   } catch (e: any) {
