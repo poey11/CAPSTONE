@@ -175,6 +175,8 @@ import { useSession } from "next-auth/react";
 
 
     console.log(requestData);
+
+    
     const [currentPage, setCurrentPage] = useState(1);
     const residentsPerPage = 10; //pwede paltan 
 
@@ -401,7 +403,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
             <p>Loading Online Requests...</p>
           ) : error ? (
             <p className="error">{error}</p>
-          ) : currentOnlineRequests.length === 0 ? (
+          ) : allOnlineRequests.length === 0 ? (
             <div className="no-result-card-services">
               <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-services" />
               <p className="no-results-services">No Results Found</p>
@@ -450,6 +452,22 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
           </table>
             )}
         </div>
+
+
+
+      <div className="redirection-section-services">
+          <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+          {getPageNumbers().map((number, index) => (
+            <button
+              key={index}
+              onClick={() => typeof number === 'number' && paginate(number)}
+              className={currentPage === number ? "active" : ""}
+            >
+              {number}
+            </button>
+          ))}
+          <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+      </div>
 
                         </>
         )}
@@ -518,18 +536,18 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
         </div>
 
         <div className="redirection-section-services">
-        <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-        {getPageNumbers().map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === 'number' && paginate(number)}
-            className={currentPage === number ? "active" : ""}
-          >
-            {number}
-          </button>
-        ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-      </div>
+            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
+            {getPageNumbers().map((number, index) => (
+              <button
+                key={index}
+                onClick={() => typeof number === 'number' && paginate(number)}
+                className={currentPage === number ? "active" : ""}
+              >
+                {number}
+              </button>
+            ))}
+            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+        </div>
                 </>
         )}
 
