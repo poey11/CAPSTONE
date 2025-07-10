@@ -219,7 +219,9 @@ const confirmAccept = async () => {
             });
     
             setPopupMessage("User accepted and linked successfully!");
+            setIsPopupOpen(false);
             setShowPopup(true);
+            
 
             // Create a notification for the resident
             const notificationRef = doc(collection(db, "Notifications"));
