@@ -22,6 +22,7 @@ type BarangayNotification = {
   isRead?: boolean;
   requestID: string;
   department: string;
+  accID: string;
 };
 
 interface User {
@@ -160,6 +161,8 @@ export default function TopMenu() {
       router.push(`/dashboard/IncidentModule/OnlineReports/ViewOnlineReport?id=${notification.incidentID}`);
     } else if ( notification.transactionType === "Assigned Incident") {
       router.push(`/dashboard/IncidentModule/EditIncident?id=${notification.incidentID}`);
+    } else if ( notification.transactionType === "Resident Registration") {
+      router.push(`/dashboard/admin/viewResidentUser?id=${notification.accID}`);
     }
   };
 
