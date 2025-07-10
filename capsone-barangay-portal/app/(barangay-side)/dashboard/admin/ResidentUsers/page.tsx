@@ -103,11 +103,15 @@ const openPopup = (user: ResidentUser) => {
 const closePopup = () => {
   setSelectedUser(null);
   setIsPopupOpen(false);
+  setShowResidentsPopup(false);
+  setSearchTerm("");
   const params = new URLSearchParams(window.location.search);
   params.delete("id");
   const newUrl = `${window.location.pathname}?${params.toString()}`;
   router.replace(newUrl, { scroll: false });
 };
+
+
 
 
 // Mark as viewed
@@ -454,7 +458,7 @@ const confirmAccept = async () => {
                   <tr key={user.id} className={highlightedId === user.id ? "highlighted-row" : ""}>
                     <td>{user.last_name}, {user.first_name} {user.middle_name}</td>
                     <td>{user.address}</td><td>{user.phone}</td><td>{user.sex}</td><td>{user.role}</td><td>{user.email}</td>
-                    <td><span className={`status-badge ${user.status.toLowerCase().replace(" ", "-")}`}>
+                    <td><span className={`status-badge-residentuser ${user.status.toLowerCase().replace(" ", "-")}`}>
                       <p>{user.status}</p>
                       </span></td>
                     <td>
@@ -515,7 +519,7 @@ const confirmAccept = async () => {
                         <td>{user.address}</td>
                         <td>{user.phone}</td>
                         <td>{user.email}</td>
-                        <td><span className={`status-badge ${user.status.toLowerCase().replace(" ", "-")}`}>{user.status}</span></td>
+                        <td><span className={`status-badge-residentuser ${user.status.toLowerCase().replace(" ", "-")}`}>{user.status}</span></td>
                         <td>
                           <div className="admin-actions">
                             <button
@@ -800,7 +804,12 @@ const confirmAccept = async () => {
         {showResidentsPopup && (
                 <div className="view-residentuser-confirmation-popup-overlay">
                     <div className="resident-table-popup" ref={residentPopupRef}>
-    
+
+                  <div className="view-user-backbutton-container">
+                    <button onClick={closePopup}>
+                      <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
+                    </button>
+                  </div>
                         <h2>
                             Resident Database Verification
                         </h2>
@@ -1042,6 +1051,7 @@ const confirmAccept = async () => {
         {showNoMatchResidentsPopup && (
                     <div className="view-residentuser-confirmation-popup-overlay">
                         <div className="resident-table-popup">
+                          
                         <h2>Resident Database Verification</h2>
 
                     {(() => {
@@ -1121,12 +1131,12 @@ const confirmAccept = async () => {
                             <div className="view-residentuser-confirmation-popup">
                                 <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
                                 <p>Are you sure you want to accept this user?</p>
-                                <div className="yesno-container">
-                                    <button onClick={() => setShowAcceptPopup(false)} className="no-button">No</button>
+                                <div className="yesno-container-residentuser">
+                                    <button onClick={() => setShowAcceptPopup(false)} className="no-button-residentuser">No</button>
                                     <button onClick={() => {
                                         confirmAccept();
                                         setShowResidentsPopup(false);
-                                        }} className="yes-button">Yes
+                                        }} className="yes-button-residentuser">Yes
                                     </button>
                                 </div> 
                             </div>

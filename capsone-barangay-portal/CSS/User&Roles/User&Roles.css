@@ -717,6 +717,11 @@ filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-
     display: flex;
     gap: 20px;
   }
+
+   .yesno-container-residentuser{
+    display: flex;
+    gap: 20px;
+  }
   
   .user-roles-yes-button,
   .user-roles-no-button{
@@ -815,24 +820,39 @@ filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-
     width: 80px; /* edited this line */
     padding: 5px 10px;   /* edited this line */    
 }
+  .status-badge-residentuser {
+    border-radius: 5px;                     
+    color: white;                
+    display: inline-block;        
+    text-transform: capitalize;   
+    text-align: center;    
+    
+    width: 100px; /* edited this line */
+    padding: 5px 10px;   /* edited this line */    
+}
 
-.status-badge p{
+.status-badge p,
+.status-badge-residentuser p{
   font-size: 13px;
 }
 
-.status-badge.unverified {
+.status-badge.unverified,
+.status-badge-residentuser.unverified {
   background-color: #ffd700;    
 }
 
-.status-badge.verified {
+.status-badge.verified,
+.status-badge-residentuser.verified {
   background-color: #2a7db0;    
 }
 
-.status-badge.rejected {
+.status-badge.rejected,
+.status-badge-residentuser.rejected {
   background-color: #f73333;    
 }
 
-.status-badge.resubmission {
+.status-badge.resubmission,
+.status-badge-residentuser.resubmission {
   background-color: #e47f22;    
 }
 
@@ -1880,7 +1900,7 @@ height: 300px;
   text-align: center;
   border-radius: 6px;
   transition: all 0.2s ease;
-  width: 90px;
+  width: 70px;
   color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -1980,6 +2000,35 @@ height: 300px;
 }
 
 .no-button:hover {
+  background-color:  #c2352b; 
+} 
+
+.yes-button-residentuser,
+.no-button-residentuser{
+  padding: 7px 0px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 100px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+}
+
+.yes-button-residentuser {
+  background-color: #4caf50; 
+}
+
+.yes-button-residentuser:hover {
+  background-color: #3d8c40; 
+} 
+
+.no-button-residentuser {
+  background-color: #f44336;
+}
+
+.no-button-residentuser:hover {
   background-color:  #c2352b; 
 } 
 
