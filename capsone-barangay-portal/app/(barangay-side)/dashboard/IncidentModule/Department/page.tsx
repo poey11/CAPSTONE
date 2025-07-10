@@ -317,6 +317,7 @@ if (incidentType) {
 
   return (
     <main className="main-container-departments"  /* edited this class*/>
+      
       <div className="section-1-departments">
         {isAuthorized && (
           <button className="add-announcement-btn-departments add-incident-animated"  /* edited this class*/ onClick={() => router.push(`/dashboard/IncidentModule/AddIncident?departmentId=${departmentId}`)}>
@@ -395,7 +396,11 @@ if (incidentType) {
       </div>
 
 
-      <div className="main-section-departments"  /* edited this class*/>
+          <div
+              className={`main-section-departments ${
+                !isAuthorized ? "expand-when-no-section1" : ""
+              }`}
+            >
         {currentIncidents.length === 0 ? (
           <div className="no-result-card-departments" /* edited this class */>
             <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-departments" /* edited this class *//>

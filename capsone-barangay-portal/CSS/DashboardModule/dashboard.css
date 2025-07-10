@@ -1,13 +1,26 @@
+
+
+
+/*
+new
+*/
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+
 .main-container {
     width: 100%;
     height: auto;
-   background-color: #F0F2F8; 
-    padding-left:10px;
-    padding-right:10px;
-    padding-bottom:30px;
-    padding-top: 30px;
+    background-color: #F0F2F8; 
     margin-left: 1rem;
     overflow-x: hidden;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10%;
+   padding-bottom: 3%;
 }
 
 

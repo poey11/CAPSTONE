@@ -26,7 +26,7 @@ import { report } from "process";
     const [taskAssignedData, setTaskAssignedData] = useState<any[]>([]);
     const [filteredMainRequests, setFilteredMainRequests] = useState<any[]>([]);
 
-
+ const isAuthorized = ["Assistant Secretary", "Secretary", "Admin Staff"].includes(user?.position || "");
 
   
   
@@ -299,29 +299,30 @@ useEffect(() => {
 
           <div className="inbarangayreq-section-1">
             <div className="center-wrapper">
-              <div className={`assigned-incident-info-toggle-wrapper ${filtersLoaded ? "filters-animated" : ""}`}>
-               
-                      {["main", ...(canSeeTasks ? ["tasks"] : [])].map((section) => (
-                  <button
-                    key={section}
-                    type="button"
-                    className={`info-toggle-btn-assigned assigned-tasks ${activeSection === section ? "active" : ""}`}
-                    onClick={() => setActiveSection(section)}
-                  >
-                    {section === "main" && "All Requests"}
-                    {section === "tasks" && (
-                      <>
-                        <span className="badge-container">
-                          Assigned Tasks
-                          {taskAssignedData.length > 0 && (
-                            <span className="task-badge">{taskAssignedData.length}</span>
-                          )}
-                        </span>
-                      </>
-                    )}
-                  </button>
-                ))}
-              </div>
+                {canSeeTasks && (
+                  <div className={`assigned-incident-info-toggle-wrapper ${filtersLoaded ? "filters-animated" : ""}`}>
+                    {["main", "tasks"].map((section) => (
+                      <button
+                        key={section}
+                        type="button"
+                        className={`info-toggle-btn-assigned assigned-tasks ${activeSection === section ? "active" : ""}`}
+                        onClick={() => setActiveSection(section)}
+                      >
+                        {section === "main" && "All Requests"}
+                        {section === "tasks" && (
+                          <>
+                            <span className="badge-container">
+                              Assigned Tasks
+                              {taskAssignedData.length > 0 && (
+                                <span className="task-badge">{taskAssignedData.length}</span>
+                              )}
+                            </span>
+                          </>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
             </div>
 
             
@@ -409,7 +410,11 @@ useEffect(() => {
               </div>
 
 
-            <div className="inbarangayreq-main-section"  /* edited this class*/>
+                <div
+              className={`inbarangayreq-main-section ${
+              !isAuthorized ? "expand-when-no-section1-inbarangayreq" : ""
+                }`}
+              >
               {loading ? (
                   <p>Loading Online Requests...</p>
                 ) : error ? (

@@ -1,3 +1,14 @@
+/*
+new
+*/
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  
+}
+
+
 /* Main Container */
 .report-main-container {
   width: 100%;
@@ -312,6 +323,8 @@
   margin-left: 1rem; 
   padding-top: 11.2%;
   padding-bottom:30px;
+    padding-top: 14.2%;
+  padding-bottom: 3%;
 }
 
 .generatereport-redirectionpage-section {

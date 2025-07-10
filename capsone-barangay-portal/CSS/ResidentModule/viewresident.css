@@ -1,12 +1,27 @@
-  .viewresident-main-container {
+
+/*
+new
+*/
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  
+}
+
+
+
+.viewresident-main-container {
 
     width: 100%;
-    height: 100vh;
+    height: 100%;
     background-color: #F0F2F8; 
     /*padding-top: 150px;*/
-    padding-top: 11.2%;
     margin-left: 1rem;
     overflow-y: auto; 
+
+  padding-top: 15.2%; /* new d*/
+  padding-bottom: 3%; /* new d*/
    
 }
 

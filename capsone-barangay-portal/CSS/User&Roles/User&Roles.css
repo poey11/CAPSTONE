@@ -1,4 +1,21 @@
-  /* NEW UPDATED */
+
+
+
+/*
+new
+*/
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  
+}
+/*
+
+
+
+
+/* NEW UPDATED */
   .barangayusers-page-main-container,
   .residentusers-page-main-container,
   .pendingresidentusers-page-main-container{
@@ -7,22 +24,34 @@
   background-color: #F0F2F8; 
   margin-left: 1rem;
 
-  padding-top: 80px; /* edited this line */ 
+  
   padding-left: 20px; /* edited */
   padding-right: 20px; /* edited */
-  padding-bottom: 20px; /* edited */
+
+    padding-top: 13.2%;
+  padding-bottom: 3%;
 }
+
+
 
 
 /* NEW UPDATED */
 .barangayusers-page-section-2,
-.residentusers-page-section-2,
 .pendingresidentusers-page-section-2{
   display: flex;
   gap: 20px;
   padding: 0;
   
-  margin-top: 10px; /* edited this line */ /* 10px kapag may redirection section buttons sa taas ng filters*/
+  margin-top: 20px; /* edited this line */ /* 10px kapag may redirection section buttons sa taas ng filters*/
+}
+
+.residentusers-page-section-2 {
+
+    display: flex;
+  gap: 20px;
+  padding: 0;
+  
+  margin-top: 10px; 
 }
 
 /* NEW UPDATED */
@@ -70,7 +99,6 @@
     overflow: auto; /* Allow scrolling if content overflows */
     width: 100%;
     
-    max-height: 70%;
     border: 1px solid rgba(36, 53, 76, 0.7);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     background-color: #ffffff;
@@ -79,9 +107,25 @@
     scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 
 
-    margin-top: 2rem; /* edited this line */
-    height: 67%; /* edited this line */
+    margin-top: 1.5rem; /* edited this line */
+    height: 75%; /* edited this line */
+    max-height: 75%;
 }
+
+
+
+
+.expand-when-no-section1-barangay-users {
+  height: calc(75% + 7%); /* Increase height when section-1 is missing */
+  max-height: calc(75% + 7%); /* or 40px pwede din*/
+}
+
+.expand-when-no-section1-resident-users {
+  height: calc(75% + 9%); /* Increase height when section-1 is missing */
+  max-height: calc(75% + 9%); /* or 40px pwede din*/
+}
+
+
 
 
 .barangayusers-page-main-section table,
@@ -341,6 +385,11 @@ SCROLL FOR CHROME ETC
 
 /* NEW UPDATED ADDED THIS */
 .barangayusers-page-main-section tbody tr {
+  height: 50px; 
+}
+
+/* NEW UPDATED ADDED THIS */
+.resident-users-main-section tbody tr {
   height: 50px; 
 }
 

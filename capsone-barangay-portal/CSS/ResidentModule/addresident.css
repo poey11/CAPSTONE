@@ -1,26 +1,55 @@
 
-.add-resident-main-container{
-    width: 100%;
-    height: 100vh;
-    background-color: #F0F2F8; 
-    margin-left: 1rem; 
-    /*padding-top: 150px;*/
-  padding-top: 11.2%;
-  padding-bottom:30px;
+/*
+new
+*/
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  
+}
+/*
+new
+*/
+.add-resident-main-container {
+  width: 100%;
+  height: 100vh; 
+  background-color: #F0F2F8;
+  margin-left: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 14.2%;
+  padding-bottom: 3%;
 }
 
 
+
+
+/*
+new
+*/
 .add-resident-main-content {
-    display: flex;
-    flex-direction: column;
-    width: 90%;
-    border-radius: 1rem;
-    border: 2px solid rgba(36, 53, 76, 0.7);
-    margin:  auto; 
-    background-color: #ffffff;
-    overflow: hidden; 
-    height: 600px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  background-color: #ffffff;
+  border-radius: 1rem;
+  border: 2px solid rgba(36, 53, 76, 0.7);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+
+  /* height: 100%; */
+   /* No height para let the content find the height*/
+}
+/*
+new
+*/
+/* Scrollable bottom section */
+.add-resident-bottom-section-scroll {
+  flex: 2; /* Takes remaining height relative to parent */
+  overflow-y: auto;
+  padding: 1rem 1rem 40px 1rem;
 }
 
 

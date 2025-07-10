@@ -26,7 +26,7 @@ interface ResidentUser {
 const ResidentUsers = () => {
   const { data: session } = useSession();
   const userPosition = session?.user?.position;
-  const isAuthorized = ["Assistant Secretary"].includes(userPosition || "");
+  const isAuthorized = ["Assistant Secretary", "Secretary"].includes(userPosition || "");
   const [residentUsers, setResidentUsers] = useState<ResidentUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -283,22 +283,26 @@ useEffect(() => {
     
   return (
     <main className="residentusers-page-main-container">
-      {["Assistant Secretary", "Secretary"].includes(userPosition || "") && (
-        <div className="user-roles-module-section-1-resident-users">
-          <div className={`assigned-tasks-info-toggle-wrapper ${filtersLoaded ? "filters-animated" : ""}`}>
-            {["main", "pending"].map(section => (
-              <button
-                key={section}
-                className={`info-toggle-btn-assigned-resident verified-pending-users ${activeSection === section ? "active" : ""}`}
-                onClick={() => { setActiveSection(section); setCurrentPage(1); }}
-              >
-                {section === "main" && "Verified Users"}
-                {section === "pending" && "Pending Users"}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+
+  {isAuthorized &&(
+      <div className="user-roles-module-section-1-resident-users">
+             
+                <div className={`assigned-tasks-info-toggle-wrapper ${filtersLoaded ? "filters-animated" : ""}`}>
+                  {["main", "pending"].map(section => (
+                    <button
+                      key={section}
+                      className={`info-toggle-btn-assigned-resident verified-pending-users ${activeSection === section ? "active" : ""}`}
+                      onClick={() => { setActiveSection(section); setCurrentPage(1); }}
+                    >
+                      {section === "main" && "Verified Users"}
+                      {section === "pending" && "Pending Users"}
+                    </button>
+                  ))}
+                </div>
+                
+      </div>
+         )}
+
 
       {/* Filters for main */}
 
@@ -357,7 +361,12 @@ useEffect(() => {
       {/* Main verified users */}
       {activeSection === "main" && (
         <>
-        <div className="residentusers-page-main-section">
+      
+    <div
+     className={`residentusers-page-main-section ${
+    !isAuthorized ? "expand-when-no-section1-resident-users" : ""
+      }`}
+    >
           {currentUser.length === 0 ? (
             <div className="no-result-card">
               <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
