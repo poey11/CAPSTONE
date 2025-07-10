@@ -74,6 +74,25 @@ const [showAcceptPopup, setShowAcceptPopup] = useState(false);
 const [showPopup, setShowPopup] = useState(false);
 const [popupMessage, setPopupMessage] = useState("");
 
+
+const [filtersLoaded, setFiltersLoaded] = useState(false);
+const hasAnimatedOnce = useRef(false);
+
+useEffect(() => {
+  // Animate filters only once on initial page load
+  if (!hasAnimatedOnce.current) {
+    hasAnimatedOnce.current = true;
+    setFiltersLoaded(false);
+    const timeout = setTimeout(() => {
+      setFiltersLoaded(true);
+    }, 50);
+    return () => clearTimeout(timeout);
+  } else {
+    // Never retrigger animation again
+    setFiltersLoaded(true);
+  }
+}, []);
+
 const openPopup = (user: ResidentUser) => {
   setSelectedUser(user);
   setViewActiveSection("basic");
@@ -182,6 +201,7 @@ const handleVerifyClick = async (user: ResidentUser) => {
   // Scroll + temporary highlight
   useEffect(() => {
     if (highlightUserId && residentUsers.length > 0) {
+      setActiveSection("main");
       setHighlightedId(highlightUserId);
       const userIndex = filteredUser.findIndex(user => user.id === highlightUserId);
       if (userIndex !== -1) {
@@ -208,6 +228,7 @@ const handleVerifyClick = async (user: ResidentUser) => {
     router.push(`/dashboard/admin/reasonForReject?id=${userId}`);
 };
 
+
 const confirmAccept = async () => {
         if (!selectedUserId) return;
     
@@ -218,10 +239,17 @@ const confirmAccept = async () => {
                 
             });
     
-            setPopupMessage("User accepted and linked successfully!");
+            const params = new URLSearchParams(window.location.search);
+            params.delete("id"); // Remove the ?id
+            params.set("highlight", selectedUserId); // Add ?highlight
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            router.replace(newUrl, { scroll: false });
+        
+            // Close popup after URL cleanup
+            setSearchTerm("");
             setIsPopupOpen(false);
             setShowPopup(true);
-            
+            setPopupMessage("User accepted and linked successfully!");
 
             // Create a notification for the resident
             const notificationRef = doc(collection(db, "Notifications"));
@@ -233,12 +261,11 @@ const confirmAccept = async () => {
             isRead: false,
             });
             
-            // Hide the popup after 3 seconds
+            // Hide the green popup after 3 seconds
             setTimeout(() => {
-                setShowPopup(false);
-                //router.push("/dashboard/admin");
-                router.push(`/dashboard/admin/ResidentUsers?highlight=${selectedUserId}`);
+              setShowPopup(false);
             }, 3000);
+
         } catch (error) {
             console.error("Error updating user status:", error);
         } finally {
@@ -324,17 +351,7 @@ const confirmAccept = async () => {
     setSelectedUserId(userId);
 };
 
-    /* NEW UPDATED ADDED */
-    const [filtersLoaded, setFiltersLoaded] = useState(false);
-  
-    /* NEW UPDATED ADDED */
-    useEffect(() => {
-      setFiltersLoaded(false); // reset animation
-      const timeout = setTimeout(() => {
-        setFiltersLoaded(true); // retrigger
-      }, 50); // adjust delay as needed
-      return () => clearTimeout(timeout);
-    }, [searchParams.toString()]);
+
     
   return (
     <main className="residentusers-page-main-container">
