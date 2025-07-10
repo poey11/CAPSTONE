@@ -20,10 +20,11 @@ import { useSession } from "next-auth/react";
     const user = session?.user || null; // Get user from session or set to null if not available
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [onlineRequests, setOnlineRequests] = useState([]);
 
+    const [allOnlineRequests, setAllOnlineRequests] = useState<any[]>([]);
+    const [taskAssignedData, setTaskAssignedData] = useState<any[]>([]);
 
-
+     const isAuthorized = ["Assistant Secretary", "Secretary", "Admin Staff"].includes(user?.position || "");
 
     // Helpers to manage viewed requests
       const getViewedRequests = (): string[] => {
@@ -86,7 +87,7 @@ import { useSession } from "next-auth/react";
           });
         
           setRequestData(filteredReports);
-          setFilteredOnlineRequests(filteredReports); 
+         setTaskAssignedData(filteredReports);
 
         setLoading(false);
         setError(null);
@@ -99,7 +100,7 @@ import { useSession } from "next-auth/react";
     }, [user]);
     console.log(requestData);
 
-    const [allOnlineRequests, setAllOnlineRequests] = useState<any[]>([]);
+   
 
     useEffect(() => {
       
@@ -143,7 +144,7 @@ import { useSession } from "next-auth/react";
     }, [user]);
 
     useEffect(() => {
-      let filtered = requestData;
+      let filtered = allOnlineRequests;
       
 
       // Filter by Document Type
@@ -169,47 +170,49 @@ import { useSession } from "next-auth/react";
       }
 
       setFilteredOnlineRequests(filtered);
-      setCurrentPage(1); // reset to first page when filters change
-    }, [searchType, dateFrom, dateTo, statusFilter, requestData]);
+      setMainCurrentPage(1); // reset to first page when filters change
+    }, [searchType, dateFrom, dateTo, statusFilter, allOnlineRequests]);
 
 
 
     console.log(requestData);
 
     
-    const [currentPage, setCurrentPage] = useState(1);
-    const residentsPerPage = 10; //pwede paltan 
+    const [mainCurrentPage, setMainCurrentPage] = useState(1);
+    const [taskCurrentPage, setTaskCurrentPage] = useState(1);
+     const [filteredOnlineRequests, setFilteredOnlineRequests] = useState<any[]>([]);
 
-    const [filteredOnlineRequests, setFilteredOnlineRequests] = useState<any[]>([]);
+    const requestsPerPage = 10;
 
-    const indexOfLastRequest = currentPage * residentsPerPage;
-    const indexOfFirstRequest = indexOfLastRequest - residentsPerPage;
-    const currentOnlineRequests = filteredOnlineRequests.slice(indexOfFirstRequest, indexOfLastRequest);
+    // MAIN pagination
+    const mainIndexOfLast = mainCurrentPage * requestsPerPage;
+    const mainIndexOfFirst = mainIndexOfLast - requestsPerPage;
+    const currentMainRequests = filteredOnlineRequests.slice(mainIndexOfFirst, mainIndexOfLast);
+    const mainTotalPages = Math.ceil(filteredOnlineRequests.length / requestsPerPage);
 
-    const totalPages = Math.ceil(filteredOnlineRequests.length / residentsPerPage);
+    // TASK pagination
+    const taskIndexOfLast = taskCurrentPage * requestsPerPage;
+    const taskIndexOfFirst = taskIndexOfLast - requestsPerPage;
+    const currentTaskRequests = taskAssignedData.slice(taskIndexOfFirst, taskIndexOfLast);
+    const taskTotalPages = Math.ceil(taskAssignedData.length / requestsPerPage);
 
 
-    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-    const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
-    const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
 
-    const getPageNumbers = () => {
-      const totalPagesArray = [];
-      const pageNumbersToShow = [];
+   const getPageNumbers = (currentPage: number, totalPages: number) => {
+  const pageNumbersToShow = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+      pageNumbersToShow.push(i);
+    } else if (
+      (i === currentPage - 2 || i === currentPage + 2) &&
+      pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
+    ) {
+      pageNumbersToShow.push("...");
+    }
+  }
+  return pageNumbersToShow;
+};
 
-      for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-          pageNumbersToShow.push(i);
-        } else if (
-          (i === currentPage - 2 || i === currentPage + 2) &&
-          pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
-        ) {
-          pageNumbersToShow.push("...");
-        }
-      }
-
-      return pageNumbersToShow;
-    };
 
     const handleView = (request: any) => {
       console.log("Viewing request:", request);
@@ -236,9 +239,9 @@ import { useSession } from "next-auth/react";
     if (highlightResidentId && filteredOnlineRequests.length > 0) {
       const targetIndex = filteredOnlineRequests.findIndex(resident => resident.id === highlightResidentId);
       if (targetIndex !== -1) {
-        const targetPage = Math.floor(targetIndex / residentsPerPage) + 1;
+        const targetPage = Math.floor(targetIndex / requestsPerPage) + 1;
         setHighlightedId(highlightResidentId);
-        setCurrentPage(targetPage);
+        setMainCurrentPage(targetPage);
 
         setTimeout(() => {
           const targetElement = document.querySelector(`tr[data-id="${highlightResidentId}"]`);
@@ -303,7 +306,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                           <>
                             <span className="badge-container-online">
                               Assigned Tasks
-                              {currentOnlineRequests.length > 0 && (
+                              {taskAssignedData.length > 0 && (
                                 <span className="task-badge-online">{requestData.length}</span>
                               )}
                             </span>
@@ -364,14 +367,12 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                   value={searchType}
                   onChange={(e) => setSearchType(e.target.value)}
                 >
-                  <option value="All">All Document Types</option>
-                  <option value="Barangay Certificate">Barangay Certificate</option>
-                  <option value="Barangay Indigency">Barangay Indigency</option>
-                  <option value="Barangay ID">Barangay ID</option>
-                  <option value="Barangay Permits">Barangay Permits</option>
-                  <option value="Barangay Clearance">Barangay Clearance</option>
-                  <option value="First Time Jobseeker">First Time Jobseeker</option>
-                  <option value="Other">Other Documents</option>
+                        <option value="All">All Document Types</option>
+                        <option value="Barangay Certificate">Barangay Certificate</option>
+                        <option value="Barangay Indigency">Barangay Indigency</option>
+                        <option value="Business Permit">Barangay Business Permits</option>
+                        <option value="Barangay Clearance">Barangay Clearance</option>
+                        <option value="Other">Other Documents</option>
                 </select>
 
             </div>
@@ -398,12 +399,18 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
 
        
-      <div className="onlinereq-main-section">
+      
+
+                <div
+              className={`onlinereq-main-section ${
+              !isAuthorized ? "expand-when-no-section1-onlinereq" : ""
+                }`}
+              >
               {loading ? (
             <p>Loading Online Requests...</p>
           ) : error ? (
             <p className="error">{error}</p>
-          ) : allOnlineRequests.length === 0 ? (
+          ) : filteredOnlineRequests.length === 0 ? (
             <div className="no-result-card-services">
               <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-services" />
               <p className="no-results-services">No Results Found</p>
@@ -422,7 +429,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
               </tr>
             </thead>
             <tbody>
-          {allOnlineRequests.map((request, index) => (
+          {currentMainRequests.map((request, index) => (
               <tr key={index} className={`${request.isNew ? "highlight-new-request" : ""} ${highlightedId && request.id === highlightedId ? "highlighted-row" : ""}`}>
 
                 <td>{request.docType}</td>
@@ -455,19 +462,24 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
 
 
-      <div className="redirection-section-services">
-          <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-          {getPageNumbers().map((number, index) => (
-            <button
-              key={index}
-              onClick={() => typeof number === 'number' && paginate(number)}
-              className={currentPage === number ? "active" : ""}
-            >
-              {number}
+          <div className="redirection-section-services">
+            <button onClick={() => setMainCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={mainCurrentPage === 1}>
+              &laquo;
             </button>
-          ))}
-          <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
-      </div>
+            {getPageNumbers(mainCurrentPage, mainTotalPages).map((number, index) => (
+              <button
+                key={index}
+                onClick={() => typeof number === "number" && setMainCurrentPage(number)}
+                className={mainCurrentPage === number ? "active" : ""}
+              >
+                {number}
+              </button>
+            ))}
+            <button onClick={() => setMainCurrentPage((prev) => Math.min(prev + 1, mainTotalPages))} disabled={mainCurrentPage === mainTotalPages}>
+              &raquo;
+            </button>
+          </div>
+
 
                         </>
         )}
@@ -484,7 +496,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
             <p>Loading Online Requests...</p>
           ) : error ? (
             <p className="error">{error}</p>
-          ) : currentOnlineRequests.length === 0 ? (
+          ) : currentTaskRequests.length === 0 ? (
             <div className="no-result-card-services" /* edited this class */>
               <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-services" /* edited this class *//>
               <p className="no-results-services" /* edited this class */>No Results Found</p>
@@ -503,7 +515,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
               </tr>
             </thead>
             <tbody>
-          {currentOnlineRequests.map((request, index) => (
+          {currentTaskRequests.map((request, index) => (
               <tr /* edited this class*/
               key={index} className={`${request.isNew ? "highlight-new-request" : ""} ${highlightedId && request.id === highlightedId ? "highlighted-row" : ""}`}>
 
@@ -536,18 +548,23 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
         </div>
 
         <div className="redirection-section-services">
-            <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
-            {getPageNumbers().map((number, index) => (
-              <button
-                key={index}
-                onClick={() => typeof number === 'number' && paginate(number)}
-                className={currentPage === number ? "active" : ""}
-              >
-                {number}
-              </button>
-            ))}
-            <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
+          <button onClick={() => setTaskCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={taskCurrentPage === 1}>
+            &laquo;
+          </button>
+          {getPageNumbers(taskCurrentPage, taskTotalPages).map((number, index) => (
+            <button
+              key={index}
+              onClick={() => typeof number === "number" && setTaskCurrentPage(number)}
+              className={taskCurrentPage === number ? "active" : ""}
+            >
+              {number}
+            </button>
+          ))}
+          <button onClick={() => setTaskCurrentPage((prev) => Math.min(prev + 1, taskTotalPages))} disabled={taskCurrentPage === taskTotalPages}>
+            &raquo;
+          </button>
         </div>
+
                 </>
         )}
 
