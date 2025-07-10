@@ -1280,7 +1280,7 @@ const ViewOnlineRequest = () => {
             const notificationRef = doc(collection(db, "Notifications"));
             await setDoc(notificationRef, {
                 residentID: requestData?.accID,
-                requestID: requestData?.requestId,
+                requestID: id,
                 message: `Your Document Request (${requestData?.requestId}) has been updated to "${newStatus}".`,
                 timestamp: new Date(),
                 transactionType: "Online Request",
