@@ -1,11 +1,26 @@
 
+
+/*
+new
+*/
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  
+}
+
+
+
 .main-container-letter{
   width: 100%;
   height: auto;
   background-color: #F0F2F8; 
   margin-left: 1rem; 
-  padding-top: 11.2%;
-  padding-bottom:30px;
+
+
+  padding-top: 14.2%;
+  padding-bottom: 3%;
 }
 
 .main-content-title-section {

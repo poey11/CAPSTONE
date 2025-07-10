@@ -321,7 +321,11 @@ useEffect(() => {
                 </div>
 
 
-<div className="barangayusers-page-main-section" /* edited this class*/>
+    <div
+     className={`barangayusers-page-main-section ${
+    !isAuthorized ? "expand-when-no-section1-barangay-users" : ""
+      }`}
+    >
   <>
    
     {currentUser.length === 0 ? (
