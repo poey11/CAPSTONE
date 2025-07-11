@@ -13,9 +13,9 @@ interface rejectProp {
 
 export default function reasonForRejection() {
 
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const id = searchParams.get("id");
+    const router = useRouter(); //check
+    const searchParams = useSearchParams(); //check
+    const id = searchParams.get("id"); //check
 
 
     const [rejectionReason, setRejectionReason] = useState<rejectProp>({
@@ -27,6 +27,7 @@ export default function reasonForRejection() {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [popupErrorMessage, setPopupErrorMessage] = useState("");
     const [data, setData] = useState<any>();
+
     useEffect(() => {
         if (!id) return
         try {
@@ -130,6 +131,7 @@ export default function reasonForRejection() {
    
 
     return (
+        
  
         <main className="reasonforrejection-main-container">
         <form onSubmit={handleSubmitClick}>
