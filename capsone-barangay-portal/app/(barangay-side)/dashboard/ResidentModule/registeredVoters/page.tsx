@@ -781,7 +781,7 @@ export default function RegisteredVotersModule() {
                         <>
                           <div className="view-mainresident-content-left-side">
                             <div className="view-user-fields-section">
-                              <p>Resident Number</p>
+                              <p>Voter Number</p>
                               <input
                                 type="text"
                                 className="view-user-input-field"
