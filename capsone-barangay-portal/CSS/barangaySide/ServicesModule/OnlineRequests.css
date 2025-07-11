@@ -304,6 +304,12 @@ Values
     max-height: 75%;
 }
 
+
+.expand-when-no-section1-onlinereq {
+  height: calc(75% + 7%); /* Increase height when section-1 is missing */
+  max-height: calc(75% + 7%); /* or 40px pwede din*/
+}
+
 /* NEW UPDATED */
 .onlinereq-main-section thead {
   position: sticky;

@@ -140,48 +140,48 @@ export default function ViewUser() {
                     </div>
 
 
-                <div className="view-user-info-toggle-wrapper">
-                    {[ "full" , "history"].map((section) => (
-                    <button
-                        key={section}
-                        type="button"
-                        className={`user-info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                        onClick={() => setActiveSection(section)}
-                    >
-            
-                        {section === "full" && "Full Info"}
-                        {section === "history" && "History"}
-                    </button>
-                    ))}
-                </div>  
+                    <div className="view-user-info-toggle-wrapper">
+                        {[ "full" , "history"].map((section) => (
+                        <button
+                            key={section}
+                            type="button"
+                            className={`user-info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                            onClick={() => setActiveSection(section)}
+                        >
+                
+                            {section === "full" && "Full Info"}
+                            {section === "history" && "History"}
+                        </button>
+                        ))}
+                    </div>  
                 </div>
 
 
                 <div className="view-user-header-body-bottom-section">
 
                 <div className="user-photo-section">
-            <span className="user-details-label">Barangay User Details</span>
+                    <span className="user-details-label">Barangay User Details</span>
 
-            <div className="user-profile-container">
+                    <div className="user-profile-container">
 
-                {/*
-              <img
-                  src={formData.identificationFileURL || "/Images/default-identificationpic.jpg"}
-                  alt="Resident"
-                  className={
-                    formData.identificationFileURL
-                      ? "resident-picture uploaded-picture"
-                      : "resident-picture default-picture"
-                  }
-              />
-              <div className="user-name-section">
-                  <h2>
-                    {formData.firstName || "N/A"} {formData.lastName || "N/A"}
-                  </h2>
+                        {/*
+                    <img
+                        src={formData.identificationFileURL || "/Images/default-identificationpic.jpg"}
+                        alt="Resident"
+                        className={
+                            formData.identificationFileURL
+                            ? "resident-picture uploaded-picture"
+                            : "resident-picture default-picture"
+                        }
+                    />
+                    <div className="user-name-section">
+                        <h2>
+                            {formData.firstName || "N/A"} {formData.lastName || "N/A"}
+                        </h2>
+                        </div>
+                        */}
+                    </div>
                 </div>
-                */}
-            </div>
-          </div>
 
 
           <div className="view-user-info-main-container">

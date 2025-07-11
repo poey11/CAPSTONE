@@ -947,7 +947,7 @@ const sortedDepartments = Object.entries(departmentTotals)
                           </div>
 
                           <div className="card-right-side">
-                            <ResponsiveContainer width={700} height={280}>
+                            <ResponsiveContainer width={700} height={270}>
                               <BarChart
                                 data={totalIncidentReportsChart.data}
                                 layout="vertical"
