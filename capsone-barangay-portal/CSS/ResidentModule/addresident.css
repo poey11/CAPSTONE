@@ -24,7 +24,16 @@ new
 }
 
 
-
+@keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 /*
 new
@@ -38,6 +47,9 @@ new
 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   overflow: hidden;
+
+
+animation: fadeSlideIn 0.5s ease-out;
 
   /* height: 100%; */
    /* No height para let the content find the height*/
