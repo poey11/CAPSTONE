@@ -1,27 +1,52 @@
 
+
+/*
+new
+*/
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  
+}
+
+
 .main-container-add{
   width: 100%;
-  height: 100%;
+  height: 100vh;
   background-color: #F0F2F8; 
   margin-left: 1rem; 
   /*padding-top: 150px;*/
-  padding-top: 11.2%;
+
   padding-left:30px;
-padding-right:30px;
-padding-bottom:30px;
+  padding-right:30px;
+
+
+    padding-top: 14.2%;
+    padding-bottom: 3%;
 }
 
 .main-content-add {
   display: flex;
   flex-direction: column;
-  width: 80%;
+  width: 90%;
   border-radius: 1rem;
-  border: 2px solid rgba(36, 53, 76, 0.7);
+  
   margin:  auto; 
   background-color: #ffffff;
   overflow: hidden; 
-  height: 750px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);  
+
+
+  /* NO HEIGHT */
+}
+
+
+.add-incindent-bottom-section-scroll{
+  flex: 2; 
+  overflow-y: auto;
+  padding: 1rem 1rem 40px 1rem;
+  height: 360px;
 }
 
 .main-content-add hr {
@@ -73,7 +98,7 @@ padding-bottom:30px;
   justify-content: center;
   gap: 15px;
   margin-top: 5px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   border-bottom: 2px solid #e0e0e0;
 }
 
@@ -99,14 +124,7 @@ padding-bottom:30px;
   background-color: transparent;
 }
 
-.add-incindent-bottom-section-scroll{
-  overflow-y: auto;
-  height: 500px;
-  padding-bottom: 40px;
-    padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 20px;
-}
+
 
 
 .add-incident-full-top{
