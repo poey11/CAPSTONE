@@ -758,7 +758,6 @@ const handleFileChange = (
         clearanceInput.docType === "Barangay Certificate" ||
         clearanceInput.docType === "Barangay Clearance" ||
         clearanceInput.docType === "Barangay Indigency" ||
-        clearanceInput.docType === "Barangay Permit" ||
         clearanceInput.docType === "Temporary Business Permit" ||
         clearanceInput.docType === "Construction"
       )
