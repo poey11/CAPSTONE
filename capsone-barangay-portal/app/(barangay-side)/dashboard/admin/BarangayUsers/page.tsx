@@ -824,12 +824,12 @@ useEffect(() => {
                                     <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident"/> 
                                 </button>
                             </div>
-                            <div className="view-user-info-toggle-wrapper">
+                            <div className="view-resident-user-info-toggle-wrapper">
                                 {[ "full" , "history"].map((section) => (
                                 <button
                                     key={section}
                                     type="button"
-                                    className={`user-info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                                    className={`barangayuser-info-toggle-btn ${activeSection === section ? "active" : ""}`}
                                     onClick={() => setActiveSection(section)}
                                 >
                         
@@ -859,6 +859,14 @@ useEffect(() => {
                                         </h2>
                                         </div>
                                         */}
+
+                                        
+                                        <img
+                                            src={"/Images/default-identificationpic.jpg"}
+                                            alt="Identification"
+                                            className="resident-id-photo"
+                                        />
+
                                 </div>
                             </div>
                             <div className="view-user-info-main-container">

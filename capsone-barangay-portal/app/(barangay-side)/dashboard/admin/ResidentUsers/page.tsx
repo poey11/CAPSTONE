@@ -595,7 +595,7 @@ const confirmAccept = async () => {
                       <button
                         key={section}
                         type="button"
-                        className={`user-info-toggle-btn ${viewActiveSection === section ? "active" : ""}`}
+                        className={`residentuser-info-toggle-btn ${viewActiveSection === section ? "active" : ""}`}
                         onClick={() => setViewActiveSection(section)}
                       >
                         {section === "basic" && "Basic Info"}

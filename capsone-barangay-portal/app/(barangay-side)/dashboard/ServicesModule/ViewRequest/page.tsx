@@ -115,6 +115,14 @@ interface File {
     name?: string;
 }
 
+/*
+For Reason For Rejection
+*/
+
+interface rejectProp {
+    reason: string;
+}
+
 
 const ViewOnlineRequest = () => {
     const user = useSession().data?.user;
@@ -136,6 +144,171 @@ const ViewOnlineRequest = () => {
       { type: string; title: string; fields: { name: string }[] }[]
     >([]);
     const [files1, setFiles1] = useState<{ name: string; preview: string }[]>([]);
+
+
+
+
+
+
+/*
+For Reason for Reject
+*/
+
+  const [rejectionReason, setRejectionReason] = useState<rejectProp>({
+        reason: "",
+    });
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
+  const [data, setData] = useState<any>();
+  const [showRejectPopup, setShowRejectPopup] = useState(false);
+  const [showSubmitRejectPopup, setShowSubmitRejectPopup] = useState(false); 
+
+
+
+/*
+Functions for Reason for Reject
+*/
+
+  useEffect(() => {
+        if (!id) return
+        try {
+            const fetchData = async () => {
+                // Fetch the document from Firestore
+                const docRef = doc(db, "ServiceRequests", id);
+                const docSnapshot = await getDoc(docRef);
+                
+                if (docSnapshot.exists()) {
+                    const data = docSnapshot.data();
+                    setData(data);
+                } else {
+                    console.error("Document does not exist");
+                }
+            };
+            fetchData();
+        } catch (error: any) {
+            console.error("Error fetching data:", error.message);
+            
+        }
+
+    },[]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setRejectionReason({
+            ...rejectionReason,
+            [e.target.name]: e.target.value,
+        });
+    };
+
+    const handleSubmitClick = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+    
+        if (rejectionReason.reason.trim() === "") {
+            setPopupErrorMessage("Please fill up all the fields.");
+            setShowErrorPopup(true);
+            setTimeout(() => {
+                setShowErrorPopup(false);
+            }, 3000);
+            return;
+        }
+
+      
+        setShowSubmitRejectPopup(true); // change
+    };
+    
+
+{/*}
+    const confirmSubmit = () => {
+        try {
+            handleRejection();
+            setShowSubmitRejectPopup(false); // change
+
+
+            setTimeout(() => {
+                  setPopupMessage("Reason for Rejection submitted successfully!");
+                  setShowPopup(true); // ✅ show success popup after hiding
+              }, 100); // slight delay to allow DOM transition (optional)
+
+            setTimeout(() => {
+                setShowPopup(false);
+                if(data?.reqType === "In Barangay") {
+                    router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${id}`);
+                }
+                else{
+                    router.push(`/dashboard/ServicesModule/OnlineRequests?highlight=${id}`);
+                }
+                
+            }, 3000);
+        } catch (error) {
+            console.error("Error updating rejection reason:", error);
+        }
+    };
+*/}
+
+
+      const confirmSubmit = () => {
+          try {
+              handleRejection();
+              setShowSubmitRejectPopup(false); // close confirmation
+
+              setShowRejectPopup(false); 
+
+              setTimeout(() => {
+                  setPopupMessage("Reason for Rejection submitted successfully!");
+                  setShowPopup(true); // ✅ show success popup after hiding
+              }, 100); // slight delay to allow DOM transition (optional)
+
+              setTimeout(() => {
+                  setShowPopup(false);
+                  if (data?.reqType === "In Barangay") {
+                      router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${id}`);
+                  } else {
+                      router.push(`/dashboard/ServicesModule/OnlineRequests?highlight=${id}`);
+                  }
+              }, 3000);
+          } catch (error) {
+              console.error("Error updating rejection reason:", error);
+          }
+      };
+
+
+
+    const handleRejection = async () => {
+        try {
+            if (!id) return;
+            const docRef = doc(db, "ServiceRequests", id);
+            const updatedData = {
+                status: "Rejected",
+                statusPriority: 5,
+                rejectionReason: rejectionReason.reason,
+                sendTo: "Admin Staff",
+            };
+            await updateDoc(docRef, updatedData);
+
+            const notificationRef = doc(collection(db, "Notifications"));
+            await setDoc(notificationRef, {
+                residentID: data?.accID,       // the user id linked to this request
+                requestID: id,                 // the Firestore UID
+                message: `Your Document Request (${data?.requestId}) has been rejected. Reason: (${rejectionReason.reason})`,
+                timestamp: new Date(),
+                transactionType: "Online Request",
+                isRead: false,
+            });
+
+
+
+        //    router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${id}`);
+        } catch (error) {
+            console.error("Error updating status:", error);
+        }
+    };
+
+
+
+
+  /*
+    EXISTING FUNCTIONS FOR VIEW REQUESTS
+  */
+
 
     useEffect(() => {
         if (user) {
@@ -1260,7 +1433,8 @@ const ViewOnlineRequest = () => {
     };
 
     const handlerejection = () => {
-        router.push("/dashboard/ServicesModule/OnlineRequests/ReasonForReject/?id=" + id);
+        setShowRejectPopup(true);
+       /* router.push("/dashboard/ServicesModule/OnlineRequests/ReasonForReject/?id=" + id); */
     };
 
     const handleSave = async (newStatus: string) => {
@@ -1516,6 +1690,82 @@ const ViewOnlineRequest = () => {
 
     return (  
         <main className="main-container-services-onlinereq">
+
+
+
+           {/*
+            POP UP FOR REJECT
+           */}
+
+
+                {showRejectPopup && (
+                  <div className="reasonfor-recject-popup-overlay">
+                    <div className="reasonfor-reject-confirmation-popup">
+                      <h2>Reject Request</h2>
+
+                      <form onSubmit={handleSubmitClick} className="reject-container" >
+                        <div className="box-container-outer-reasonforreject">
+                          <div className="title-remarks-reasonforreject">Reason For Reject</div>
+                          <div className="box-container-reasonforreject">
+                            <textarea
+                              className="reasonforreject-input-field"
+                              name="reason"
+                              id="reason"
+                              placeholder="Enter the reason for denial (e.g., incomplete details, invalid ID)..."
+                              value={rejectionReason.reason}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="reject-reason-yesno-container">
+                          <button type="button" onClick={() => setShowRejectPopup(false)} className="reject-reason-no-button">
+                            Cancel
+                          </button>
+                          <button type="submit" className="reject-reason-yes-button" disabled={loading}>
+                            {loading ? "Saving..." : "Save"}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+
+              {showSubmitRejectPopup && (
+                <div className="confirmation-popup-overlay-services-onlinereq-reject">
+                    <div className="confirmation-popup-services-onlinereq-status">
+                        <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                        <p>Are you sure you want to Submit? </p>
+                        <div className="yesno-container-add">
+                            <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">No</button>
+                            <button onClick={confirmSubmit} className="yes-button-add">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+                {showPopup && (
+                <div className={`popup-overlay-services-onlinereq show`}>
+                    <div className="popup-services-onlinereq">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+                
+                
+            {showErrorPopup && (
+                    <div className={`rejectrequest-error-popup-overlay show`}>
+                        <div className="rejectrequest-popup">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                            <p>{popupErrorMessage}</p>
+                        </div>
+                    </div>
+                    )}
+    
 
         
             {
@@ -1935,6 +2185,10 @@ const ViewOnlineRequest = () => {
             )}
 
 
+
+
+
+
             
 
         {showReceivalForm && (
@@ -2091,14 +2345,7 @@ const ViewOnlineRequest = () => {
           </div>
         )}
 
-            {showPopup && (
-                <div className={`popup-overlay-services-onlinereq show`}>
-                    <div className="popup-services-onlinereq">
-                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
-                      <p>{popupMessage}</p>
-                    </div>
-                </div>
-                )}
+
         </main>
     );
 
