@@ -1275,3 +1275,240 @@ color: white;
   width: 20px;
   height: 20px;
 }
+
+
+
+
+
+
+/*
+For Reason of reject
+*/
+
+@keyframes slideDownFadeIn {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+
+  .reasonfor-recject-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000; 
+  }
+
+
+
+
+    .reasonfor-reject-confirmation-popup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60%;
+    width: 50%;
+    background: linear-gradient(to bottom right, #ffffff, #f2f5f8);
+    border-radius: 20px;
+    border: 2px solid rgb(168, 161, 158);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: lighter;
+    position: fixed;
+    animation: slideDownFadeIn 0.4s ease-out;
+  }
+
+  .reasonfor-reject-confirmation-popup h2 {
+  font-size: 1.80rem;
+  font-weight: bolder;
+  text-align: center;
+  font-weight: bold;
+  color: #214666;
+  width: 100%;
+}
+
+  .reasonfor-reject-confirmation-popup p{
+    color: rgb(97, 97, 97);
+  }
+
+  .reject-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
+
+
+   .reject-reason-yesno-container{
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+  }
+
+  
+  .reject-reason-yes-button,
+  .reject-reason-no-button{
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer; 
+    width: 150px;
+    box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+    margin-top: 20px;
+  }
+  
+  .reject-reason-yes-button {
+    background-color: #4caf50; 
+  }
+
+  .reject-reason-yes-button:hover {
+    background-color: #3d8c40; 
+  } 
+
+  .reject-reason-no-button {
+    background-color: #f44336;
+  }
+
+  .reject-reason-no-button:hover {
+    background-color:  #c2352b; 
+  } 
+
+
+  
+
+.box-container-outer-reasonforreject {
+  position: relative; 
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title-remarks-reasonforreject {
+  position: absolute;
+  left: 50%; 
+  top: 20px; 
+  transform: translate(-50%, -50%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 50%;
+  text-align: center;
+}
+
+.box-container-reasonforreject {
+  position: relative;
+  width: 80%;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  margin-top: 30px;
+  height: 100%;
+}
+
+
+.reasonforreject-input-field {
+  padding: 8px;
+  width: 100%;
+  border-radius: 5px;
+  color: #000000;
+  text-align: left;
+  height: 310px;
+  margin-top: 20px;
+  resize: none;
+}
+
+.reasonforreject-input-field:focus {
+  outline: none;
+  border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
+  box-shadow: none;
+}
+
+
+
+/*
+2nd pop up for rejecting requests
+*/
+
+.confirmation-popup-overlay-services-onlinereq-reject {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+
+    backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(px);
+  transition: background 0.3s ease-in-out;
+}
+
+
+
+/*
+For error pop up
+*/
+
+
+.rejectrequest-error-popup-overlay{
+  position: fixed;
+  top: 13%;
+  right: -3px;
+  color: white;
+  width: 400px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 3000;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.rejectrequest-error-popup-overlay{
+  background: #cc3434;
+  border-left: 10px solid #8a0f0f;
+}
+
+.rejectrequest-error-popup-overlay.show {
+  animation: slideIn 0.5s ease-out;
+}
+
+.rejectrequest-error-popup-overlay.hide {
+  animation: slideOut 0.5s ease-out;
+}
+
+.rejectrequest-popup{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
