@@ -1709,10 +1709,17 @@ Functions for Reason for Reject
                 </div>
                 )}
 
-
-
-
-
+                
+                
+            {showErrorPopup && (
+                    <div className={`rejectrequest-error-popup-overlay show`}>
+                        <div className="rejectrequest-popup">
+                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                            <p>{popupErrorMessage}</p>
+                        </div>
+                    </div>
+                    )}
+    
 
         
             {
