@@ -1,6 +1,6 @@
 "use client";
 import "@/CSS/ResidentModule/module.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef} from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -39,6 +39,45 @@ export default function JobSeekerListModule() {
   const searchParams = useSearchParams();
   const highlightResidentId = searchParams.get("highlight");
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+    const [viewActiveSection, setViewActiveSection] = useState("basic");
+  const hasAnimatedOnce = useRef(false);
+    const [filtersLoaded, setFiltersLoaded] = useState(false);
+  
+    const openPopup = (user: any) => {
+      setSelectedUser(user);
+      setViewActiveSection("basic");
+      setIsPopupOpen(true);
+      router.push(`?id=${user.id}`, { scroll: false });
+    };
+  
+    const closePopup = () => {
+      setSelectedUser(null);
+      setIsPopupOpen(false);
+      const params = new URLSearchParams(window.location.search);
+      params.delete("id");
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      router.replace(newUrl, { scroll: false });
+    };
+  
+    useEffect(() => {
+      // Animate filters only once on initial page load
+      if (!hasAnimatedOnce.current) {
+        hasAnimatedOnce.current = true;
+        setFiltersLoaded(false);
+        const timeout = setTimeout(() => {
+          setFiltersLoaded(true);
+        }, 50);
+        return () => clearTimeout(timeout);
+      } else {
+        // Never retrigger animation again
+        setFiltersLoaded(true);
+      }
+    }, []);
+  
 
   useEffect(() => {
     if (highlightResidentId && filteredJobSeekers.length > 0) {
@@ -211,17 +250,7 @@ export default function JobSeekerListModule() {
     return pageNumbersToShow;
   };
 
-   /* NEW UPDATED ADDED */
-   const [filtersLoaded, setFiltersLoaded] = useState(false);
   
-   /* NEW UPDATED ADDED */
-   useEffect(() => {
-     setFiltersLoaded(false); // reset animation
-     const timeout = setTimeout(() => {
-       setFiltersLoaded(true); // retrigger
-     }, 50); // adjust delay as needed
-     return () => clearTimeout(timeout);
-   }, [searchParams.toString()]);
 
   return (
     <main className="resident-module-main-container">
@@ -313,11 +342,8 @@ export default function JobSeekerListModule() {
             <div className="residentmodule-actions">
               <button
                 className="residentmodule-action-view"
-                onClick={() =>
-                  router.push(
-                    `/dashboard/ResidentModule/FirstTimeJobSeeker/ViewFirstTimeJobSeeker?id=${seeker.id}`
-                  )
-                }
+                //onClick={() => router.push(`/dashboard/ResidentModule/FirstTimeJobSeeker/ViewFirstTimeJobSeeker?id=${seeker.id}`)}
+                 onClick={() => openPopup(seeker)}
               >
                 <img src="/Images/view.png" alt="View" />
               </button>
@@ -422,6 +448,234 @@ export default function JobSeekerListModule() {
                             </div>
                         </div>
        )}  
+
+       {isPopupOpen && selectedUser && (
+        <div className="user-roles-view-popup-overlay">
+          <div className="view-barangayuser-popup">
+            <div className="view-user-main-section1">
+                <div className="view-user-header-first-section">
+                  <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                </div>
+                <div className="view-user-header-second-section">
+                  <h2 className="gov-info">Republic of the Philippines</h2>
+                  <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+                  <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+                  <h2 className="contact">930-0040 / 428-9030</h2>
+                </div>
+                <div className="view-user-header-third-section">
+                  <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
+                </div>
+            </div>
+            <div className="view-user-header-body">
+              <div className="view-user-header-body-top-section">
+                  <div className="view-user-backbutton-container">
+                    <button onClick={closePopup}>
+                      <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
+                    </button>
+                  </div>
+                  <div className="view-resident-user-info-toggle-wrapper">
+                    {[ "basic", "others", "history"].map((section) => (
+                      <button
+                        key={section}
+                        type="button"
+                        className={`main-resident-info-toggle-btn ${viewActiveSection === section ? "active" : ""}`}
+                        onClick={() => setViewActiveSection(section)}
+                      >
+                        {section === "basic" && "Basic"}
+                        {section === "employment" && "Employment"}
+                        {section === "others" && "Others"}
+                        {section === "history" && "History"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="view-user-header-body-bottom-section">
+                  <div className="mainresident-photo-section">
+                    <span className="user-details-label">Resident Details</span>
+                    <div className="user-profile-container">
+                      <img
+                        src={selectedUser.identificationFileURL || "/Images/default-identificationpic.jpg"}
+                        alt="Identification"
+                        className="resident-id-photo"
+                        />
+                    </div>
+                  </div>
+                  <div className="view-main-resident-info-main-container">
+                    <div className="view-user-info-main-content">
+                      {viewActiveSection  === "basic" && (
+                        <>
+                        
+                          <div className="view-mainresident-content-left-side">
+                            <div className="view-user-fields-section">
+                              <p>Last Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.lastName || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>First Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.firstName || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Middle Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.middleName || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                          </div>
+                          <div className="view-mainresident-content-right-side">
+                            <div className="view-user-fields-section">
+                              <p>Sex</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.sex || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Age</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.age || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Date of Birth</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.dateOfBirth || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {viewActiveSection  === "others" && (
+                        <>
+                          <div className="others-main-section">
+                            <div className="others-top-section">
+                              <div className="view-main-user-content-left-side">
+                                <div className="view-user-fields-section">
+                                  <p>Date Applied</p>
+                                  <input
+                                    type="text"
+                                    className="view-user-input-field"
+                                    value={selectedUser.dateApplied || "N/A"}
+                                    readOnly
+                                  /> 
+                                </div>
+                              </div>
+                              <div className="view-main-user-content-right-side">
+                                <div className="view-user-fields-section">
+                                  <p>Remarks</p>
+                                  <input
+                                    type="text"
+                                    className="view-user-input-field"
+                                    value={selectedUser.remarks || "N/A"}
+                                    readOnly
+                                  /> 
+                                </div>
+                              </div>
+                            </div>
+                            <div className="others-bottom-section">
+                              {selectedUser.verificationFilesURLs?.length > 0 ? (
+                                (selectedUser.verificationFilesURLs as string[]).map((url: string, index: number) => (
+                                <div key={index} className="services-onlinereq-verification-requirements-section">
+                                  <span className="verification-requirements-label">
+                                    {selectedUser.verificationFilesURLs.length === 1
+                                      ? 'Verification Requirement'
+                                      : `Verification Requirement ${index + 1}`}
+                                  </span>
+
+                                  <div className="services-onlinereq-verification-requirements-container">
+                                    <div className="file-name-image-display">
+                                      <a
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <img
+                                          src={url}
+                                          alt={`Verification Requirement ${index + 1}`}
+                                          className="verification-reqs-pic uploaded-pic"
+                                          style={{ cursor: 'pointer' }}
+                                        />
+                                      </a>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="services-onlinereq-verification-requirements-section">
+                                <span className="verification-requirements-label">Verification Requirements</span>
+                                <div className="services-onlinereq-verification-requirements-container">
+                                  <div className="no-verification-files-text">
+                                    <p>No verification requirements uploaded.</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {viewActiveSection  === "history" && (
+                        <>
+                          <div className="view-mainresident-content-left-side">
+                            <div className="view-user-fields-section">
+                              <p>Created By</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.createdBy || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Created At</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.createdAt || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                          </div>
+                          <div className="view-mainresident-content-left-side">
+                            <div className="view-user-fields-section">
+                              <p>Last Updated By</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.updatedBy || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </main>
   );
