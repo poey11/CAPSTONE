@@ -1437,7 +1437,6 @@ p .required {
   display: flex;
   justify-content: flex-end; 
   gap: 30px;
-  margin-bottom: 20px;
   width: 50%;
   align-items: center;
 }
@@ -1450,20 +1449,23 @@ p .required {
   align-items: center;
 }
 
-.user-info-toggle-btn {
+.residentuser-info-toggle-btn,
+.barangayuser-info-toggle-btn {
   background-color: transparent;
   border: none;
   padding: 12px 20px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   color: #333;
   border-bottom: 3px solid #ccc;
   transition: all 0.3s ease;
 }
 
-.user-info-toggle-btn:hover,
-.user-info-toggle-btn.active {
+.residentuser-info-toggle-btn:hover,
+.barangayuser-info-toggle-btn:hover,
+.residentuser-info-toggle-btn.active,
+.barangayuser-info-toggle-btn.active {
   color: #ff6600;
   border-bottom: 3px solid #ff6600;
 }
@@ -1472,7 +1474,7 @@ p .required {
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 300px;
+  height: 390px;
 }
 
 .user-photo-section {
@@ -1480,11 +1482,10 @@ p .required {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-left: 60px;
-  padding-right: 50px;
-  padding-bottom: 40px;
-  width: 40%;
-  height: 365px;
+  padding-bottom: 20px;
+  width: 35%;
+  height: 390px;
+
 }
 
 .user-uploaded-photo-section {
@@ -1538,13 +1539,12 @@ p .required {
 }
 
 .view-user-info-main-container{
-  width: 63%;
+  width: 65%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-bottom: 20px;
-  height: 365px;
-  padding-right: 50px;
+  height: 390px;
+  padding-right: 55px;
 }
 
 .view-resident-user-info-main-container{
@@ -1552,9 +1552,8 @@ p .required {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-bottom: 20px;
-  height: 365px;
-  padding-left: 95px;
+  height: 390px;
+  padding-left: 50px;
   padding-right: 50px;
 }
 
@@ -1562,19 +1561,26 @@ p .required {
   width: 100%;
   display: flex;
   flex-direction: row;
-  height: 300px;
+  height: 320px;
+  border-radius: 5px;
+  background-color: #F0F2F8;
+  border: 1px solid #eaecf2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+  overflow-y: auto;
 }
 
 .view-main-user-content-left-side{
   display: flex;
   flex-direction: column;
   width: 50%;
+  /*padding-top: 22px;*/
 } 
 
 .view-main-user-content-right-side {
   display: flex;
   flex-direction: column;
   width: 50%;
+  /*padding-top: 22px;*/
 } 
 
 .view-resident-user-content-left-side{
@@ -1605,7 +1611,7 @@ p .required {
   flex-direction: column;
   width: 100%;
   justify-content: center;
-  align-items: left;
+  align-items: center;
   margin-bottom: 13px;
 }
 
@@ -1614,7 +1620,7 @@ p .required {
   color: #2C3E50;
   font-weight: bold;
   align-self: flex-start; /* Left-aligns the label */
-
+  margin-left: 5%;
 }
 
 .view-user-input-field {
@@ -1624,6 +1630,7 @@ p .required {
   border-radius: 5px;
   color: #000000;
   text-align: left;
+  height: 33px;
 }
 
 .view-user-input-field:focus {
@@ -2143,4 +2150,11 @@ height: 300px;
   margin: 0;
   text-align: left;
 
+}
+
+.resident-id-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
 }

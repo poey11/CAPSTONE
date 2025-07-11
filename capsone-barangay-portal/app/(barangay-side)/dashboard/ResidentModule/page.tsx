@@ -44,7 +44,28 @@ export default function ResidentModule() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showDeletePopup, setShowDeletePopup] = useState(false); 
-  const [showAlertPopup, setshowAlertPopup] = useState(false); 
+  const [showAlertPopup, setshowAlertPopup] = useState(false);
+  
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [viewActiveSection, setViewActiveSection] = useState("basic");
+
+
+    const openPopup = (user: any) => {
+    setSelectedUser(user);
+    setViewActiveSection("basic");
+    setIsPopupOpen(true);
+    router.push(`?id=${user.id}`, { scroll: false });
+  };
+
+  const closePopup = () => {
+    setSelectedUser(null);
+    setIsPopupOpen(false);
+    const params = new URLSearchParams(window.location.search);
+    params.delete("id");
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    router.replace(newUrl, { scroll: false });
+  };
 
   const handleResidentTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setResidentType(e.target.value);
@@ -436,11 +457,12 @@ export default function ResidentModule() {
                         <div className="residentmodule-actions">
                          <button
                           className="residentmodule-action-view" /* edited this class */
-                          onClick={() =>
+                          /*onClick={() => {
                             router.push(
                               `/dashboard/ResidentModule/ViewResident?id=${resident.id}`
                             )
-                          }
+                          }}*/
+                          onClick={() => openPopup(resident)}
                         >
                           <img src="/Images/view.png" alt="View" />
                         </button>
@@ -505,6 +527,372 @@ export default function ResidentModule() {
             <button onClick={nextPage} disabled={currentPage === totalPages}>&raquo;</button>
           </div>
 
+
+          {isPopupOpen && selectedUser && (
+        <div className="user-roles-view-popup-overlay">
+          <div className="view-barangayuser-popup">
+            <div className="view-user-main-section1">
+                <div className="view-user-header-first-section">
+                  <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                </div>
+                <div className="view-user-header-second-section">
+                  <h2 className="gov-info">Republic of the Philippines</h2>
+                  <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+                  <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+                  <h2 className="contact">930-0040 / 428-9030</h2>
+                </div>
+                <div className="view-user-header-third-section">
+                  <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
+                </div>
+            </div>
+            <div className="view-user-header-body">
+              <div className="view-user-header-body-top-section">
+                  <div className="view-user-backbutton-container">
+                    <button onClick={closePopup}>
+                      <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
+                    </button>
+                  </div>
+                  <div className="view-resident-user-info-toggle-wrapper">
+                    {["basic", "full", "others", "history", "incidents", "services"].map((section) => (
+                      <button
+                        key={section}
+                        type="button"
+                        className={`main-resident-info-toggle-btn ${viewActiveSection === section ? "active" : ""}`}
+                        onClick={() => setViewActiveSection(section)}
+                      >
+                        {section === "basic" && "Basic"}
+                        {section === "full" && "Full"}
+                        {section === "others" && "Others"}
+                        {section === "history" && "History"}
+                        {section === "incidents" && "Incidents"}
+                        {section === "services" && "Services"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+            </div>
+            <div className="view-user-header-body-bottom-section">
+              <div className="mainresident-photo-section">
+                <span className="user-details-label">Resident Details</span>
+                <div className="user-profile-container">
+                  <img
+                    src={selectedUser.identificationFileURL || "/Images/default-identificationpic.jpg"}
+                    alt="Identification"
+                    className="resident-id-photo"
+                  />
+                </div>
+              </div>
+              <div className="view-main-resident-info-main-container">
+                <div className="view-user-info-main-content">
+                  {viewActiveSection  === "basic" && (
+                        <>
+                          <div className="view-mainresident-content-left-side">
+                            <div className="view-user-fields-section">
+                              <p>Resident Number</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.residentNumber || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Date of Residency</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.dateOfResidency || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Address</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.address || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Location</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.generalLocation || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                          </div>
+                          <div className="view-mainresident-content-right-side">
+                            <div className="view-user-fields-section">
+                              <p>Last Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.lastName || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>First Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.firstName || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Middle Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.middleName || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Cluster</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.cluster || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                          </div>
+                        </>
+                  )}
+                  {viewActiveSection  === "full" && (
+                        <>
+                        <div className="mainresident-scroll">
+                          <div className="view-main-user-content-left-side">
+                            <div className="view-user-fields-section">
+                              <p>Contact Number</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.contactNumber || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Email Address</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.emailAddress || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Civil Status</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.civilStatus || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Occupation</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.occupation || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Precinct Number</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.precinctNumber || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                          </div>
+                          <div className="view-main-user-content-right-side">
+                              <div className="view-user-fields-section">
+                                <p>Date of Birth</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  value={selectedUser.dateOfBirth || "N/A"}
+                                  readOnly
+                                /> 
+                              </div>
+                              <div className="view-user-fields-section">
+                                <p>Place of Birth</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  value={selectedUser.placeOfBirth || "N/A"}
+                                  readOnly
+                                /> 
+                              </div>
+                              <div className="view-user-fields-section">
+                                <p>Age</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  value={selectedUser.age || "N/A"}
+                                  readOnly
+                                /> 
+                              </div>
+                              <div className="view-user-fields-section">
+                                <p>Sex</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  value={selectedUser.sex || "N/A"}
+                                  readOnly
+                                /> 
+                              </div>
+                              <div className="view-user-fields-section">
+                                <p>Citizenship</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  value={selectedUser.citizenship || "N/A"}
+                                  readOnly
+                                /> 
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                  )}
+                  {viewActiveSection  === "others" && (
+                    <>
+                        <div className="others-main-section">
+                          <div className="others-top-section">
+                            <div className="view-main-user-content-left-side">
+                              <div className="view-user-fields-section">
+                                <p>Student</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  value={selectedUser.isStudent ? 'Yes' : 'No'}
+                                  readOnly
+                                /> 
+                              </div>
+                              <div className="view-user-fields-section">
+                                <p>Senior Citizen</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  value={selectedUser.isSeniorCitizen ? 'Yes' : 'No'}
+                                  readOnly
+                                /> 
+                              </div>
+                            </div>
+                            <div className="view-main-user-content-right-side">
+                              <div className="view-user-fields-section">
+                                <p>PWD</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  value={selectedUser.isPWD ? 'Yes' : 'No'}
+                                  readOnly
+                                /> 
+                              </div>
+                              <div className="view-user-fields-section">
+                                <p>Solo Parent</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  value={selectedUser.isSoloParent ? 'Yes' : 'No'}
+                                  readOnly
+                                /> 
+                              </div>
+                            </div>
+                          </div>
+                          <div className="others-bottom-section">
+                            {(selectedUser.verificationFilesURLs as string[]).length > 0 ? (
+                              (selectedUser.verificationFilesURLs as string[]).map((url: string, index: number) => (
+                              <div key={index} className="services-onlinereq-verification-requirements-section">
+                                <span className="verification-requirements-label">
+                                  {selectedUser.verificationFilesURLs.length === 1
+                                    ? 'Verification Requirement'
+                                    : `Verification Requirement ${index + 1}`}
+                                </span>
+
+                                <div className="services-onlinereq-verification-requirements-container">
+                                  <div className="file-name-image-display">
+                                    <a
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <img
+                                        src={url}
+                                        alt={`Verification Requirement ${index + 1}`}
+                                        className="verification-reqs-pic uploaded-pic"
+                                        style={{ cursor: 'pointer' }}
+                                      />
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="services-onlinereq-verification-requirements-section">
+                              <span className="verification-requirements-label">Verification Requirements</span>
+                              <div className="services-onlinereq-verification-requirements-container">
+                                <div className="no-verification-files-text">
+                                  <p>No verification requirements uploaded.</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          </div>
+                        </div>
+                    </>
+                  )}
+                  {viewActiveSection  === "history" && (
+                    <>
+                      <div className="view-mainresident-content-left-side">
+                        <div className="view-user-fields-section">
+                          <p>Created By</p>
+                          <input
+                            type="text"
+                            className="view-user-input-field"
+                            value={selectedUser.createdBy || "N/A"}
+                            readOnly
+                          /> 
+                        </div>
+                        <div className="view-user-fields-section">
+                          <p>Created At</p>
+                          <input
+                            type="text"
+                            className="view-user-input-field"
+                            value={selectedUser.createdAt || "N/A"}
+                            readOnly
+                          /> 
+                        </div>
+                      </div>
+                      <div className="view-mainresident-content-left-side">
+                        <div className="view-user-fields-section">
+                          <p>Updated By</p>
+                          <input
+                            type="text"
+                            className="view-user-input-field"
+                            value={selectedUser.updatedBy || "N/A"}
+                            readOnly
+                          /> 
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
   
     {showDeletePopup && (
       <div className="confirmation-popup-overlay-module-main-res">
@@ -539,6 +927,8 @@ export default function ResidentModule() {
         </div>
       </div>
     )}
+
+
   </main>
   
   );
