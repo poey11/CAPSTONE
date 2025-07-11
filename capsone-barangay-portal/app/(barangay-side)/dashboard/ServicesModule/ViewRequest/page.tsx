@@ -210,18 +210,24 @@ Functions for Reason for Reject
             }, 3000);
             return;
         }
-    
+
+      
         setShowSubmitRejectPopup(true); // change
     };
     
 
-
+{/*}
     const confirmSubmit = () => {
         try {
             handleRejection();
-            setShowSubmitRejectPopup(false) // change
-            setPopupMessage("Reason for Rejection submitted successfully!");
-            setShowPopup(true);
+            setShowSubmitRejectPopup(false); // change
+
+
+            setTimeout(() => {
+                  setPopupMessage("Reason for Rejection submitted successfully!");
+                  setShowPopup(true); // ✅ show success popup after hiding
+              }, 100); // slight delay to allow DOM transition (optional)
+
             setTimeout(() => {
                 setShowPopup(false);
                 if(data?.reqType === "In Barangay") {
@@ -236,6 +242,35 @@ Functions for Reason for Reject
             console.error("Error updating rejection reason:", error);
         }
     };
+*/}
+
+
+      const confirmSubmit = () => {
+          try {
+              handleRejection();
+              setShowSubmitRejectPopup(false); // close confirmation
+
+              setShowRejectPopup(false); 
+
+              setTimeout(() => {
+                  setPopupMessage("Reason for Rejection submitted successfully!");
+                  setShowPopup(true); // ✅ show success popup after hiding
+              }, 100); // slight delay to allow DOM transition (optional)
+
+              setTimeout(() => {
+                  setShowPopup(false);
+                  if (data?.reqType === "In Barangay") {
+                      router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${id}`);
+                  } else {
+                      router.push(`/dashboard/ServicesModule/OnlineRequests?highlight=${id}`);
+                  }
+              }, 3000);
+          } catch (error) {
+              console.error("Error updating rejection reason:", error);
+          }
+      };
+
+
 
     const handleRejection = async () => {
         try {
@@ -261,7 +296,7 @@ Functions for Reason for Reject
 
 
 
-            router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${id}`);
+        //    router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${id}`);
         } catch (error) {
             console.error("Error updating status:", error);
         }
@@ -1665,6 +1700,14 @@ Functions for Reason for Reject
             )}
 
 
+                {showPopup && (
+                <div className={`popup-overlay-services-onlinereq show`}>
+                    <div className="popup-services-onlinereq">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
 
 
 
@@ -2249,14 +2292,7 @@ Functions for Reason for Reject
           </div>
         )}
 
-            {showPopup && (
-                <div className={`popup-overlay-services-onlinereq show`}>
-                    <div className="popup-services-onlinereq">
-                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
-                      <p>{popupMessage}</p>
-                    </div>
-                </div>
-                )}
+
         </main>
     );
 
