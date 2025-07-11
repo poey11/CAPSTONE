@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
-import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc } from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc, addDoc } from "firebase/firestore";
 import { handlePrint,handleGenerateDocument } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
 
@@ -1277,8 +1277,8 @@ const ViewOnlineRequest = () => {
             };
         
             // Create notification
-            const notificationRef = doc(collection(db, "Notifications"));
-            await setDoc(notificationRef, {
+            const notificationRef = collection(db, "BarangayNotifications");
+            await addDoc(notificationRef, {
                 residentID: requestData?.accID,
                 requestID: id,
                 message: `Your Document Request (${requestData?.requestId}) has been updated to "${newStatus}".`,
@@ -1368,6 +1368,16 @@ const ViewOnlineRequest = () => {
     
       await updateDoc(docRef, updatedData);
     
+      const notificationRef = collection(db, "Notifications");
+      await addDoc(notificationRef, {
+        residentID: requestData?.accID,
+        requestID: id,
+        message: `Your document request (${requestData?.requestId}) has been completed and received. Thank you!`,
+        timestamp: new Date(),
+        transactionType: "Online Request",
+        isRead: false,
+    });
+
       setShowReceivalForm(false);
       handleRequestIsDone();
     };
@@ -1427,6 +1437,19 @@ const ViewOnlineRequest = () => {
          updatedData = {
           sendTo: "Admin Staff",
         }
+                
+        const notificationRef = collection(db, "BarangayNotifications");
+        await addDoc(notificationRef, {
+          message: `You have been assigned a new task for ${requestData.purpose} requested by ${requestData.requestorFname}.`,
+          timestamp: new Date(),
+          requestorId: requestData?.accID,
+          isRead: false,
+          transactionType: "Online Assigned Service Request",
+          recipientRole: "Admin Staff",
+          requestID: id,
+        });
+        
+
       }else{
         /* This part will handle ung pag notify kay resident na to pickup na ung  doc */
         //handleSMS(); Admin Staff will handle the sending of SMS to the resident
@@ -1434,6 +1457,19 @@ const ViewOnlineRequest = () => {
           status: "Pick-up",
           statusPriority: 3,
         }
+
+        // notifs resident na for pick up na yung document
+        const notificationRef = collection(db, "Notifications");
+        await addDoc(notificationRef, {
+          residentID: requestData?.accID,
+          requestID: id,
+          message: `Your document request (${requestData?.requestId}) is now ready for pickup. Please visit the barangay hall to collect it.`,
+          timestamp: new Date(),
+          transactionType: "Online Request",
+          isRead: false,
+      });
+      
+
       }
       if(requestData?.reqType === "Online"){
         router.push("/dashboard/ServicesModule/OnlineRequests");
