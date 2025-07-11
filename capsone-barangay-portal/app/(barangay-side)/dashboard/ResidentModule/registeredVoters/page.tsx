@@ -50,13 +50,13 @@ export default function RegisteredVotersModule() {
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
-  const [viewActiveSection, setViewActiveSection] = useState("basic");
+  const [viewActiveSection, setViewActiveSection] = useState("full");
   const hasAnimatedOnce = useRef(false);
   const [filtersLoaded, setFiltersLoaded] = useState(false);
 
   const openPopup = (user: any) => {
     setSelectedUser(user);
-    setViewActiveSection("basic");
+    setViewActiveSection("full");
     setIsPopupOpen(true);
     router.push(`?id=${user.id}`, { scroll: false });
   };
@@ -777,7 +777,7 @@ export default function RegisteredVotersModule() {
                   </div>
                   <div className="view-main-resident-info-main-container">
                     <div className="view-user-info-main-content">
-                      {viewActiveSection  === "basic" && (
+                      {viewActiveSection  === "full" && (
                         <>
                           <div className="view-mainresident-content-left-side">
                             <div className="view-user-fields-section">
