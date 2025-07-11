@@ -1,6 +1,6 @@
 "use client";
 import "@/CSS/ResidentModule/module.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "../../../db/firebase";
 import { collection, getDocs, query, where, doc, deleteDoc } from "firebase/firestore";
@@ -50,6 +50,9 @@ export default function ResidentModule() {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [viewActiveSection, setViewActiveSection] = useState("basic");
 
+    const hasAnimatedOnce = useRef(false);
+    const [filtersLoaded, setFiltersLoaded] = useState(false);
+
 
     const openPopup = (user: any) => {
     setSelectedUser(user);
@@ -66,6 +69,21 @@ export default function ResidentModule() {
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     router.replace(newUrl, { scroll: false });
   };
+
+  useEffect(() => {
+    // Animate filters only once on initial page load
+    if (!hasAnimatedOnce.current) {
+      hasAnimatedOnce.current = true;
+      setFiltersLoaded(false);
+      const timeout = setTimeout(() => {
+        setFiltersLoaded(true);
+      }, 50);
+      return () => clearTimeout(timeout);
+    } else {
+      // Never retrigger animation again
+      setFiltersLoaded(true);
+    }
+  }, []);
 
   const handleResidentTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setResidentType(e.target.value);
@@ -307,17 +325,7 @@ export default function ResidentModule() {
     return pageNumbersToShow;
   };
 
-   /* NEW UPDATED ADDED */
-    const [filtersLoaded, setFiltersLoaded] = useState(false);
-  
-    /* NEW UPDATED ADDED */
-    useEffect(() => {
-      setFiltersLoaded(false); // reset animation
-      const timeout = setTimeout(() => {
-        setFiltersLoaded(true); // retrigger
-      }, 50); // adjust delay as needed
-      return () => clearTimeout(timeout);
-    }, [searchParams.toString()]);
+
 
   return (
     <main className="resident-module-main-container" /* edited this class*/>

@@ -48,6 +48,42 @@ export default function RegisteredVotersModule() {
 
   const [searchPrecinct, setSearchPrecinct] = useState<string>("");
 
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [viewActiveSection, setViewActiveSection] = useState("basic");
+  const hasAnimatedOnce = useRef(false);
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
+
+  const openPopup = (user: any) => {
+    setSelectedUser(user);
+    setViewActiveSection("basic");
+    setIsPopupOpen(true);
+    router.push(`?id=${user.id}`, { scroll: false });
+  };
+
+  const closePopup = () => {
+    setSelectedUser(null);
+    setIsPopupOpen(false);
+    const params = new URLSearchParams(window.location.search);
+    params.delete("id");
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    router.replace(newUrl, { scroll: false });
+  };
+
+  useEffect(() => {
+    // Animate filters only once on initial page load
+    if (!hasAnimatedOnce.current) {
+      hasAnimatedOnce.current = true;
+      setFiltersLoaded(false);
+      const timeout = setTimeout(() => {
+        setFiltersLoaded(true);
+      }, 50);
+      return () => clearTimeout(timeout);
+    } else {
+      // Never retrigger animation again
+      setFiltersLoaded(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (highlightResidentId && filteredResidents.length > 0) {
@@ -439,17 +475,8 @@ export default function RegisteredVotersModule() {
     return pageNumbersToShow;
   };
 
-   /* NEW UPDATED ADDED */
-   const [filtersLoaded, setFiltersLoaded] = useState(false);
-  
-   /* NEW UPDATED ADDED */
-   useEffect(() => {
-     setFiltersLoaded(false); // reset animation
-     const timeout = setTimeout(() => {
-       setFiltersLoaded(true); // retrigger
-     }, 50); // adjust delay as needed
-     return () => clearTimeout(timeout);
-   }, [searchParams.toString()]);
+
+ 
 
   return (
     <main className="resident-module-main-container">
@@ -571,7 +598,8 @@ export default function RegisteredVotersModule() {
               <div className="residentmodule-actions">
                 <button
                   className="residentmodule-action-view"
-                  onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}
+                  //onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}
+                  onClick={() => openPopup(resident)}
                 >
                    <img src="/Images/view.png" alt="View" />
                 </button>
@@ -694,6 +722,126 @@ export default function RegisteredVotersModule() {
                 handleAddSelectedResidents();
               }} className="yes-button-module-confirmation">Add All</button>
               <button onClick={() => setShowMissingPopup(false)} className="no-button-module-confirmation">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isPopupOpen && selectedUser && (
+        <div className="user-roles-view-popup-overlay">
+          <div className="view-barangayuser-popup">
+            <div className="view-user-main-section1">
+                <div className="view-user-header-first-section">
+                  <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                </div>
+                <div className="view-user-header-second-section">
+                  <h2 className="gov-info">Republic of the Philippines</h2>
+                  <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+                  <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+                  <h2 className="contact">930-0040 / 428-9030</h2>
+                </div>
+                <div className="view-user-header-third-section">
+                  <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
+                </div>
+            </div>
+            <div className="view-user-header-body">
+              <div className="view-user-header-body-top-section">
+                  <div className="view-user-backbutton-container">
+                    <button onClick={closePopup}>
+                      <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
+                    </button>
+                  </div>
+                  <div className="view-resident-user-info-toggle-wrapper">
+                    {[ "full"].map((section) => (
+                      <button
+                        key={section}
+                        type="button"
+                        className={`main-resident-info-toggle-btn ${viewActiveSection === section ? "active" : ""}`}
+                        onClick={() => setViewActiveSection(section)}
+                      >
+                        {section === "full" && "Details"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="view-user-header-body-bottom-section">
+                  <div className="mainresident-photo-section">
+                    <span className="user-details-label">Resident Details</span>
+                    <div className="user-profile-container">
+                      <img
+                        src={selectedUser.identificationFileURL || "/Images/default-identificationpic.jpg"}
+                        alt="Identification"
+                        className="resident-id-photo"
+                        />
+                    </div>
+                  </div>
+                  <div className="view-main-resident-info-main-container">
+                    <div className="view-user-info-main-content">
+                      {viewActiveSection  === "basic" && (
+                        <>
+                          <div className="view-mainresident-content-left-side">
+                            <div className="view-user-fields-section">
+                              <p>Resident Number</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.voterNumber || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Precinct Number</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.precinctNumber || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Address</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.homeAddress || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                          </div>
+                          <div className="view-mainresident-content-right-side">
+                            <div className="view-user-fields-section">
+                              <p>Last Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.lastName || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>First Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.firstName || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Middle Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.middleName || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
             </div>
           </div>
         </div>

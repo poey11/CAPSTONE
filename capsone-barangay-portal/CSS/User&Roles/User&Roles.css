@@ -1573,14 +1573,14 @@ p .required {
   display: flex;
   flex-direction: column;
   width: 50%;
-  /*padding-top: 22px;*/
+  padding-top: 22px;
 } 
 
 .view-main-user-content-right-side {
   display: flex;
   flex-direction: column;
   width: 50%;
-  /*padding-top: 22px;*/
+  padding-top: 22px;
 } 
 
 .view-resident-user-content-left-side{
