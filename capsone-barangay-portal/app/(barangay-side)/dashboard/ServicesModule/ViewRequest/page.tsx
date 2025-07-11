@@ -1404,6 +1404,16 @@ const ViewOnlineRequest = () => {
       };
 
      await updateDoc(docRef, updatedData);
+
+     const notificationRef = collection(db, "Notifications");
+     await addDoc(notificationRef, {
+       residentID: requestData?.accID,
+       requestID: id,
+       message: `Your document request (${requestData?.requestId}) has been updated to (${requestData?.status}) We will notify you once it's ready for pickup.`,
+       timestamp: new Date(),
+       transactionType: "Online Request",
+       isRead: false,
+     });
     }
 
     useEffect(() => {
@@ -1440,7 +1450,7 @@ const ViewOnlineRequest = () => {
                 
         const notificationRef = collection(db, "BarangayNotifications");
         await addDoc(notificationRef, {
-          message: `You have been assigned a new task for ${requestData.purpose} requested by ${requestData.requestorFname}.`,
+          message: `You have been assigned a new task for ${requestData.purpose} document requested by ${requestData.requestorFname}.`,
           timestamp: new Date(),
           requestorId: requestData?.accID,
           isRead: false,
