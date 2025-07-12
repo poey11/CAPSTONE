@@ -229,6 +229,7 @@ export default function Header() {
       },
     };
 
+    
     // Check for dynamic IncidentModule main page route
     if (pathname === "/dashboard/IncidentModule/Department" && departmentId) {
       return dynamicIncidentModuleMap[departmentId] || {
@@ -237,6 +238,7 @@ export default function Header() {
       };
     }
 
+    
     // Check for dynamic IncidentModule view page route
     if (pathname === "/dashboard/IncidentModule/ViewIncident" && departmentId && departmentLabels[departmentId]) {
       return {
@@ -244,6 +246,8 @@ export default function Header() {
         breadcrumb: ["Incident Management", departmentLabels[departmentId], "View Incident"],
       };
     }
+
+    
 
     // Override dynamically for viewResidentUser if Firestore status loaded
     if (pathname === "/dashboard/admin/viewResidentUser" && viewedResidentStatus) {
