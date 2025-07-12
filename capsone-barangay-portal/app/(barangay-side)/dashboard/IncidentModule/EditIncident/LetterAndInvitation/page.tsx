@@ -284,6 +284,7 @@ export default function GenerateDialogueLetter() {
         }   finally {  //ADDED
              setTimeout(() => {
             setIsLoading(false); // End loading after 2 seconds
+            setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
         }, 2000);
        }
     }
@@ -751,6 +752,15 @@ export default function GenerateDialogueLetter() {
 // const hearingLabels = ["First", "Second", "Third"];
 // const hearingB = hearingLabels[hearing] || "First";
 
+
+useEffect(() => {
+    if (reportData?.status === "archived" && reportData?.departmentId) {
+      router.push(`/dashboard/IncidentModule/Department?id=${reportData?.departmentId}`);
+    }
+  }, [reportData?.status, reportData?.departmentId]);
+  
+
+
   return (
     <main className="main-container-letter">
 
@@ -780,7 +790,7 @@ export default function GenerateDialogueLetter() {
                     {showSubmitPopup.letterType === "summon" ? (
                         <button
                         onClick={() => {
-                            sendSMSForSummons();
+                            //sendSMSForSummons();
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
                         }}
                         className="letter-announcement-btn"
@@ -788,6 +798,23 @@ export default function GenerateDialogueLetter() {
                         Send SMS
                         </button>
                     ) : (
+
+                        // CODE BLOCK FOR SEND SMS BUTTON INSIDE POP UP
+                        // need to fix redirection timer, no time for the sms success pop up to show if ever na this way yung gawin
+                        // <button
+                        // onClick={() => {
+                        //     sendSMSForDialogue();
+                        //     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+                        //     if (showSubmitPopup.letterType === "dialogue") {
+                        //     router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
+                        //     } else {
+                        //     router.back();
+                        //     }
+                        // }}
+                        // className="letter-announcement-btn"
+                        // >
+                        // Send SMS
+                        // </button>
                         <button
                         onClick={() => {
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
@@ -800,7 +827,7 @@ export default function GenerateDialogueLetter() {
                         className="close-button-letter"
                         >
                         Close
-                        </button>
+                        </button>                        
                     )}
                     </div>
                 </div>
