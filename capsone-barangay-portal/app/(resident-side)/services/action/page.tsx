@@ -1515,8 +1515,8 @@ const handleFileChange = (
                               )}
 
                               {/* Dynamically added */}
-                              {otherDocPurposes["Other"]
-                                ?.filter(title => !isGuest || (isGuest && forResidentOnlyMap[title] === false))
+                              {otherDocPurposes["Other Documents"]
+                                ?.filter(title => !isGuest || (isGuest && forResidentOnlyMap[title] === false) || (userData?.status === "Unverified" && forResidentOnlyMap[title] === false))
                                 .map((title, index) => (
                                   <option key={index} value={title}>{title}</option>
                               ))}
