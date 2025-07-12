@@ -2344,65 +2344,77 @@ const handleChange = (
 
                           {(
                             (
-                              (!isOtherDocumentPurpose &&
-                                !excludedPurposesFullName.includes(clearanceInput.purpose || "")) ||
-                              (isOtherDocumentPurpose &&
-                                otherDocFields[clearanceInput.purpose || ""]?.includes("fullName"))
-                            ) &&
-                            !allExistingPermits.includes(docType || "") &&
-                            !otherDocPurposes["Barangay Permit"]?.includes(docType || "")
-                          ) && (
-                            <>
-                              <div className="fields-section">
-                                <h1>{addOn}Full Name<span className="required">*</span></h1>
+                              (
+                                (!isOtherDocumentPurpose &&
+                                  !excludedPurposesFullName.includes(clearanceInput.purpose || "")) ||
+                                (isOtherDocumentPurpose &&
+                                  otherDocFields[clearanceInput.purpose || ""]?.includes("fullName"))
+                              ) &&
+                              !allExistingPermits.includes(docType || "") &&
+                              !otherDocPurposes["Barangay Permit"]?.includes(docType || "")
+                            ) && (
+                              <>
+                                <div className="fields-section">
+                                  <h1>{addOn}Full Name<span className="required">*</span></h1>
 
-                                <div className="createRequest-input-wrapper">
-                                  <div className="createRequest-input-with-clear">
-                                    <input 
-                                      type="text" 
-                                      className="createRequest-select-resident-input-field" 
-                                      placeholder={`Enter ${addOn}Full Name`}
-                                      value={
-                                        isResidentSelected
-                                          ? clearanceInput.fullName
-                                          : clearanceInput.fullName || ""
-                                      }
-                                      onClick={() => {
-                                        setSelectingFor("fullName");
-                                        setShowResidentsPopup(true);
-                                      }}
-                                      onChange={handleChange}
-                                      required
-                                      id="fullName"
-                                      name="fullName"
-                                      readOnly
-                                      disabled={false} // Keep enabled to allow onClick even if readOnly
-                                    />
-
-                                    {isResidentSelected && (
-                                      <span
-                                        className="clear-icon"
-                                        title="Click to clear selected resident"
+                                  <div className="createRequest-input-wrapper">
+                                    <div className="createRequest-input-with-clear">
+                                      <input
+                                        type="text"
+                                        className="createRequest-select-resident-input-field"
+                                        placeholder={`Enter ${addOn}Full Name`}
+                                        value={clearanceInput.fullName || ""}
+                                        onChange={handleChange}
+                                        required
+                                        id="fullName"
+                                        name="fullName"
+                                        readOnly={
+                                          !(
+                                            docType === "Barangay Certificate" &&
+                                            ["Death Residency", "Estate Tax", "Guardianship", "Occupancy /  Moving Out"].includes(clearanceInput.purpose || "")
+                                          )
+                                        }
                                         onClick={() => {
-                                          const updatedInput = {
-                                            ...clearanceInput,
-                                            fullName: "",
-                                            fromAddress: ""
-                                          };
-                                    
-                                      
-                                          setClearanceInput(updatedInput);
-                                          setIsResidentSelected(false);
+                                          if (
+                                            !(
+                                              docType === "Barangay Certificate" &&
+                                              ["Death Residency", "Estate Tax", "Guardianship", "Occupancy /  Moving Out"].includes(clearanceInput.purpose || "")
+                                            )
+                                          ) {
+                                            setSelectingFor("fullName");
+                                            setShowResidentsPopup(true);
+                                          }
                                         }}
-                                      >
-                                        ×
-                                      </span>
-                                    )}
+                                      />
+
+                                      {isResidentSelected &&
+                                        !(
+                                          docType === "Barangay Certificate" &&
+                                          ["Death Residency", "Estate Tax", "Guardianship", "Occupancy /  Moving Out"].includes(clearanceInput.purpose || "")
+                                        ) && (
+                                          <span
+                                            className="clear-icon"
+                                            title="Click to clear selected resident"
+                                            onClick={() => {
+                                              const updatedInput = {
+                                                ...clearanceInput,
+                                                fullName: "",
+                                                fromAddress: "",
+                                              };
+                                              setClearanceInput(updatedInput);
+                                              setIsResidentSelected(false);
+                                            }}
+                                          >
+                                            ×
+                                          </span>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </>
+                              </>
+                            )
                           )}
+
 
                           {clearanceInput.purpose === "Guardianship" && (
                             <>           
