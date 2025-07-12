@@ -772,7 +772,7 @@ const confirmAccept = async () => {
 
                       {viewActiveSection === "others" && (
                         <>
-                        {/* will fix the css of image */}
+                      
                           <div className="user-uploaded-photo-section">
                             <div className="box-container-outer-natureoffacts">
                               <div className="title-remarks-partyA">

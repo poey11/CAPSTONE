@@ -191,6 +191,7 @@ margin-top: 3rem;
   padding-right: 20px;
 }
 
+
 .view-incident-header-second-section {
   background-color: #214666;
   padding-top: 0.5rem;
@@ -219,6 +220,7 @@ margin-top: 3rem;
   font-size: 11px;
 }
   
+  
 .logo1-image-side-bar-1{
   width: 170px;
   height: 100px;
@@ -230,10 +232,12 @@ margin-top: 3rem;
   margin-right: 45px;
 }
 
+
 .view-incident-header-body{
   display: flex;
   flex-direction: column;
 }
+
 
 .view-incident-header-body-top-section{
   display: flex;
@@ -241,6 +245,7 @@ margin-top: 3rem;
   justify-content: center;
   padding-top: 20px;
 }
+
 
 .view-incident-backbutton-container{
   width: 30%;
@@ -282,6 +287,7 @@ margin-top: 3rem;
   color: #ff6600;
   border-bottom: 3px solid #ff6600;
 }
+
 
 .view-incident-header-body-bottom-section{
   display: flex;
@@ -871,4 +877,54 @@ SHRINKING
 .uploaded-pic {
   width: 100%;
   height: 300px;
+}
+
+.incident-main-section {
+  width: 100%;
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+  padding-top: 22px;
+}
+
+.incident-top-section {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.view-main-user-content-left-side{
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+} 
+
+.view-main-user-content-right-side {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+} 
+
+.view-main-user-content-left-side p,
+.view-main-user-content-right-side p {
+ color: grey;
+ font-weight: bold;
+ font-size: 1rem;
+}
+
+.view-user-fields-section{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 13px;
+}
+
+.view-user-fields-section p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 15px;
 }

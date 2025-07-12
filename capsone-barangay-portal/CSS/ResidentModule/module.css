@@ -994,12 +994,6 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   width: 50%;
 } 
 
-.view-main-user-content-left-side p,
-.view-main-user-content-right-side p {
- color: grey;
- font-weight: bold;
- font-size: 1rem;
-}
 
 .view-user-fields-section{
   display: flex;
@@ -1058,24 +1052,13 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-left: 60px;
   padding-bottom: 20px;
   width: 100%;
-  padding-right: 60px;
   margin-top: 30px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
-.services-onlinereq-verification-requirements-container {
-  border: 1px solid rgba(44, 62, 80, 0.7);
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  width: 100%;
-  text-align: center;
-  margin-top: -8px; /* Pulls the card up under the label */
-  height: 300px;
-}
 
 .verification-requirements-label {
   background-color: #1f3b57;
@@ -1092,31 +1075,6 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   width: 250px;
 }
 
-.services-onlinereq-verification-requirements-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-left: 60px;
-  padding-bottom: 20px;
-  width: 100%;
-  padding-right: 60px;
-  margin-top: 30px;
-}
-
-.verification-requirements-label {
-  background-color: #1f3b57;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-weight: bold;
-  font-size: 15px;
-  position: relative;
-  top: 12px; /* Pushes it closer to the card */
-  z-index: 1;
-  left: 0px;
-  text-align: center;
-  width: 250px;
-}
 
 
 .services-onlinereq-verification-requirements-container {
