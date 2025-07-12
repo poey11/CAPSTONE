@@ -645,7 +645,7 @@ if (incidentType) {
     )}
 
     {isPopupOpen && selectedIncident && (
-      <div className="incident-view-popup-overlay">
+      <div className="incident-view-popup-overlay add-incident-animated">
         <div className="view-incident-popup">
           <div className="view-incident-main-section1">
             <div className="view-user-header-first-section">
