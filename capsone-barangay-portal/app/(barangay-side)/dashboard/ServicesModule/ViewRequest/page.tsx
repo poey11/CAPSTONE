@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
-import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc, addDoc } from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc, addDoc, where } from "firebase/firestore";
 import { handlePrint,handleGenerateDocument } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
 
@@ -146,7 +146,122 @@ const ViewOnlineRequest = () => {
     const [files1, setFiles1] = useState<{ name: string; preview: string }[]>([]);
 
 
+      // matic first time jobseeker checker
 
+      const [showJobseekerPopup, setShowJobseekerPopup] = useState(false);
+      const [jobseekerPopupMessage, setJobseekerPopupMessage] = useState("");
+      const [askAddToList, setAskAddToList] = useState(false);
+  
+  useEffect(() => {
+    const checkJobseeker = async () => {
+      if (!requestData) return;
+      if (requestData.purpose !== "First Time Jobseeker") return;
+  
+      try {
+        const jobSeekerRef = collection(db, "JobSeekerList");
+  
+        // Check by residentId first
+        const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.accID));
+        const byResidentIdSnap = await getDocs(byResidentIdQuery);
+  
+        if (!byResidentIdSnap.empty) {
+          setJobseekerPopupMessage("This applicant is already in the Jobseeker List. Payment will be required.");
+          setShowJobseekerPopup(true);
+          return;
+        }
+  
+        // Fallback check by splitting requestorFname into first, middle, last
+        let firstName = "";
+        let middleName = "";
+        let lastName = "";
+        if (requestData.requestorFname) {
+          const parts = requestData.requestorFname.trim().split(" ");
+          firstName = parts[0] || "";
+          middleName = parts.length === 3 ? parts[1] : "";
+          lastName = parts.length >= 2 ? parts[parts.length - 1] : "";
+        }
+  
+        // Check by name + DOB
+        const snapshot = await getDocs(jobSeekerRef);
+        const match = snapshot.docs.find(doc => {
+          const data = doc.data();
+          return data.firstName?.toLowerCase() === firstName.toLowerCase() &&
+                 data.lastName?.toLowerCase() === lastName.toLowerCase() &&
+                 data.dateOfBirth === requestData.birthday;
+        });
+  
+        if (match) {
+          setJobseekerPopupMessage("This applicant is already in the Jobseeker List. Payment will be required.");
+          setShowJobseekerPopup(true);
+        } else {
+          setJobseekerPopupMessage(
+            "This applicant is not yet in the First Time Jobseeker List.\n" +
+            "Under RA 11261, this means the request will not be paid for unless added.\n" +
+            "Do you want to add them now to the Jobseeker List?"
+          );
+          setShowJobseekerPopup(true);
+          setAskAddToList(true);
+        }
+      } catch (err) {
+        console.error("Error checking JobSeekerList:", err);
+      }
+    };
+  
+    checkJobseeker();
+  }, [requestData]);
+  
+  
+  // handle function for matic jobseeker
+  const handleAddToJobseekerList = async () => {
+    try {
+      if (!requestData) return;
+  
+      // Split the requestorFname into first, middle, last
+      let firstName = "";
+      let middleName = "";
+      let lastName = "";
+      if (requestData.requestorFname) {
+        const parts = requestData.requestorFname.trim().split(" ");
+        firstName = parts[0] || "";
+        middleName = parts.length === 3 ? parts[1] : "";
+        lastName = parts.length >= 2 ? parts[parts.length - 1] : "";
+      }
+  
+      // Build new jobseeker data for Firestore
+      const newDoc = {
+        dateApplied: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+        lastName,
+        firstName,
+        middleName,
+        age: parseInt(requestData.age || "0"),
+        dateOfBirth: requestData.birthday || "",
+        monthOfBirth: requestData.birthday ? (new Date(requestData.birthday).getMonth() + 1).toString() : "",
+        dayOfBirth: requestData.birthday ? new Date(requestData.birthday).getDate().toString() : "",
+        yearOfBirth: requestData.birthday ? new Date(requestData.birthday).getFullYear().toString() : "",
+        sex: requestData.gender || "",
+        remarks: "",
+        residentId: requestData.accID || "",
+        identificationFileURL: requestData.validIDjpg || "",
+      };
+  
+      // Save to Firestore
+      await addDoc(collection(db, "JobSeekerList"), newDoc);
+  
+      // If you want, also set it to your form state
+  
+      // Show success feedback
+      setShowJobseekerPopup(false);
+      setAskAddToList(false);
+      setPopupMessage("Added to Jobseeker List successfully!");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+  
+    } catch (err) {
+      console.error("Failed to add to JobSeekerList:", err);
+    }
+  };
+  
+      
 
 
 
@@ -1411,7 +1526,6 @@ Functions for Reason for Reject
           </div>
         );
       };
-    
       return (
         <div className="services-onlinereq-content" style={{ display: 'flex', gap: '2rem' }}>
           <div className="services-onlinereq-content-left-side" style={{ flex: 1 }}>
@@ -1753,6 +1867,26 @@ Functions for Reason for Reject
                       <p>{popupMessage}</p>
                     </div>
                 </div>
+                )}
+
+
+                {showJobseekerPopup && (
+                  <div className="confirmation-popup-overlay-services-onlinereq-status">
+                    <div className="confirmation-popup-services-onlinereq-status">
+                      <img src="/Images/question.png" alt="info icon" className="successful-icon-popup" />
+                      <p style={{ whiteSpace: "pre-line" }}>{jobseekerPopupMessage}</p>
+                      {askAddToList ? (
+                        <div className="yesno-container-add">
+                          <button onClick={() => setShowJobseekerPopup(false)} className="no-button-add">No</button>
+                          <button onClick={() => handleAddToJobseekerList()} className="yes-button-add">Yes</button>
+                        </div>
+                      ) : (
+                        <div className="yesno-container-add">
+                          <button onClick={() => setShowJobseekerPopup(false)} className="yes-button-add">Close</button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
 
                 
