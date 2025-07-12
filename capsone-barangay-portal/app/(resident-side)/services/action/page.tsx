@@ -746,9 +746,13 @@ const handleFileChange = (
     router.push("/services/notification");
 
     const notificationRef = collection(db, "BarangayNotifications");
-    
+
+    const useDocTypeAsMessage = 
+  clearanceInput.docType === "Business Permit" || 
+  clearanceInput.docType === "Temporary Business Permit";
+
     await addDoc(notificationRef, {
-      message: `New ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
+      message: `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
       timestamp: new Date(),
       requestorId: userData?.residentId,
       isRead: false,
