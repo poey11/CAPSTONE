@@ -798,25 +798,10 @@ useEffect(() => {
                         Send SMS
                         </button>
                     ) : (
-
                         // CODE BLOCK FOR SEND SMS BUTTON INSIDE POP UP
-                        // need to fix redirection timer, no time for the sms success pop up to show if ever na this way yung gawin
-                        // <button
-                        // onClick={() => {
-                        //     sendSMSForDialogue();
-                        //     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
-                        //     if (showSubmitPopup.letterType === "dialogue") {
-                        //     router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
-                        //     } else {
-                        //     router.back();
-                        //     }
-                        // }}
-                        // className="letter-announcement-btn"
-                        // >
-                        // Send SMS
-                        // </button>
                         <button
                         onClick={() => {
+                            // sendSMSForDialogue();
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
                             if (showSubmitPopup.letterType === "dialogue") {
                             router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
@@ -824,10 +809,11 @@ useEffect(() => {
                             router.back();
                             }
                         }}
-                        className="close-button-letter"
+                        className="letter-announcement-btn"
                         >
-                        Close
-                        </button>                        
+                        Send SMS
+                        </button>
+                 
                     )}
                     </div>
                 </div>
