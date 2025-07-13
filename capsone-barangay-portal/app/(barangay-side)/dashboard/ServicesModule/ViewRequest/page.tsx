@@ -1426,7 +1426,7 @@ Functions for Reason for Reject
 
       if (sectionName === "others") {
         return (
-          <div className="others-image-section" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
+          <div className="others-image-section">
             {requestData?.reqType === "InBarangay" ? (
               <>
                 {requestData?.docsRequired?.map((file, index) => (
