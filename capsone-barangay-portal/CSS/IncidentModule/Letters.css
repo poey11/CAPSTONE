@@ -67,8 +67,6 @@ html, body {
   overflow: hidden; 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   animation: fadeSlideIn 0.5s ease-out;
-  
-
 
 }
 
@@ -96,10 +94,7 @@ Scroll
   background-color: rgba(59, 130, 246, 0.7);
 }
 
-.container-letters {
-  width: 100%;
-  height: 100%;
-}
+
 
 
 
@@ -140,26 +135,50 @@ Scroll
   color: #ffffff;
 }
 
+
+
+
+
+.main-content-letter {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  border-radius: 1rem;
+  background-color: #ffffff;
+  overflow: hidden; 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  animation: fadeSlideIn 0.5s ease-out;
+
+}
+
+
 .section-2-letter {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 450px;
+  
 }
 
 
 .scroll-letter {
  width: 100%;
-  border: 1px solid rgba(44, 62, 80, 0.7);
-  border-radius: 8px;
   overflow-y: auto;
   height: 100%;
 
+    overflow-y: auto;
+  flex: 1; /* Takes all remaining vertical space */
+  padding-bottom: 2rem; /* Optional: adds space at bottom */
   scrollbar-width: thin;
   scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 
+}
+
+.container-letters {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 
@@ -220,6 +239,7 @@ Scroll
   margin-top: 10px;
   width: 100%;
 }
+
 .fields-section-letter p{
   font-size: 15px;
   color: #2C3E50;
