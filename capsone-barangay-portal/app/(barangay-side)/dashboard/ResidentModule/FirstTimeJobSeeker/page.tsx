@@ -255,7 +255,9 @@ export default function JobSeekerListModule() {
   return (
     <main className="resident-module-main-container">
    
-      <div className="resident-module-section-1">
+   
+      <div className="jobseeker-section-1">
+      {/*
         {isAuthorized ? (
           <Link href="/dashboard/ResidentModule/jobSeekerList/AddJobSeeker">
             <button className="add-announcement-btn add-incident-animated">
@@ -271,6 +273,7 @@ export default function JobSeekerListModule() {
             Add New Jobseeker
           </button>
         )}
+          */}
       </div>
 
 
