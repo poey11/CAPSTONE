@@ -23,7 +23,8 @@ const BMenu: React.FC = () => {
           onMouseLeave={() => setHoveredDropdown(null)}
       >
 
-        <div className="dropdown-button-brgyside">
+        {/*<div className="dropdown-button-brgyside">*/}
+        <div className={`dropdown-button-brgyside ${hoveredDropdown === "dashboard" ? "dropdown-active" : ""}`}>
           <Link href="/dashboard">Dashboard</Link>
           <img 
               src={hoveredDropdown === "dashboard" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
