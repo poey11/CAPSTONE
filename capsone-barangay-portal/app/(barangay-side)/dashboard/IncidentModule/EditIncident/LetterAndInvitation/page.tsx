@@ -1186,7 +1186,7 @@ export default function GenerateDialogueLetter() {
                                             <div className="fields-section-letter">
                                                 <p>Delivered By</p>      
                                                 <select
-                                                        className="generate-letter-input-field"
+                                                        className="generate-letter-input-field-dropdown"
                                                         value={safeData[0]?.LuponStaff || otherInfo.LuponStaff}
                                                         onChange={(e) => {
                                                             const select = e.target;
