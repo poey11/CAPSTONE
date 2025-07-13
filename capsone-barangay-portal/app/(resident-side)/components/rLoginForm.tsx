@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { auth } from '../../db/firebase';
 import { signInWithEmailAndPassword,signOut, sendPasswordResetEmail, fetchSignInMethodsForEmail} from 'firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -69,6 +69,35 @@ const rLoginForm:React.FC = () => {
               });
         }
     }
+
+  
+    const messages = [
+        "Log in to access services, updates, and connect with Barangay Fairview.",
+        "Easily request documents and certificates online.",
+        "Stay informed with barangay announcements and notices.",
+        "Reach out to your local leaders anytime.",
+        "Your community, your digital access starts here."
+    ];
+
+    const [index, setIndex] = useState(0);
+    const [fadeState, setFadeState] = useState("fade-in"); // 'fade-in' or 'fade-out'
+
+    useEffect(() => {
+        const visibleDuration = 3200; // how long it's visible
+        const fadeDuration = 500; // how long fade in/out lasts
+
+        const timer = setTimeout(() => {
+        setFadeState("fade-out");
+
+        setTimeout(() => {
+            setIndex((prev) => (prev + 1) % messages.length);
+            setFadeState("fade-in");
+        }, fadeDuration); // change text after fade-out finishes
+
+        }, visibleDuration + fadeDuration); // wait before starting fade-out
+
+        return () => clearTimeout(timer);
+    }, [index]);
 
 /*
         const handleLogin = async(e: React.FormEvent<HTMLFormElement>) => {    
@@ -234,7 +263,9 @@ const rLoginForm:React.FC = () => {
                 <div className="login-right-panel">
                      <img src="/Images/QClogo.png" alt="Quezon City Logo" className="qc-logo" />
                          <h2>WELCOME TO <br />BARANGAY FAIRVIEW</h2>
-                         <p>Log in to access services, updates, and connect with Barangay Fairview.</p>        
+                         <p className={`fade-text ${fadeState}`}>
+                            {messages[index]}
+                        </p>
                 </div>
 
             </div>
