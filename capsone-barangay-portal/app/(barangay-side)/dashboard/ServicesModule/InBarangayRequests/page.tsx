@@ -47,6 +47,15 @@ import { report } from "process";
      setFiltersLoaded(true);
    }
  }, []);
+
+ useEffect(() => {
+  const section = searchParams.get("section");
+  if (!section) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("section", "allrequest");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }
+}, []);
   
       useEffect(() => {
         let position = "";
@@ -314,7 +323,16 @@ useEffect(() => {
                         key={section}
                         type="button"
                         className={`info-toggle-btn-assigned assigned-tasks ${activeSection === section ? "active" : ""}`}
-                        onClick={() => setActiveSection(section)}
+                        onClick={() => {
+                          setActiveSection(section);
+                          const params = new URLSearchParams(searchParams.toString());
+                          if (section === "main") {
+                            params.set("section", "allrequest");
+                          } else if (section === "tasks") {
+                            params.set("section", "assignedtasks");
+                          }
+                          router.push(`?${params.toString()}`, { scroll: false });
+                        }}
                       >
                         {section === "main" && "All Requests"}
                         {section === "tasks" && (

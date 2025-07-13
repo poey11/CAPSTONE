@@ -302,6 +302,22 @@ export default function Header() {
       }
     }
 
+    // Check if pathname is InBarangayRequests and look at 'section' query param
+    if (pathname === "/dashboard/ServicesModule/InBarangayRequests") {
+      const section = searchParams.get("section");
+      if (section === "allrequest") {
+        return {
+          title: "In Barangay Requests",
+          breadcrumb: ["Services Management", "In Barangay Requests", "All Requests"],
+        };
+      } else if (section === "assignedtasks") {
+        return {
+          title: "In Barangay Requests",
+          breadcrumb: ["Services Management", "In Barangay Requests", "Assigned Tasks"],
+        };
+      }
+    }
+
     // Fallback to static routes
     return staticMap[pathname] || {
       title: "Undefined",
