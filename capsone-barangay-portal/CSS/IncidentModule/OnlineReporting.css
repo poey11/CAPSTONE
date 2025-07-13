@@ -377,14 +377,18 @@ FOR ONLINE INCIDENT REPORTING CSS
 */
 
   .main-container-view-report{
-   width: 100%;
+  width: 100%;
   height: 100vh;
- background-color: #F0F2F8; 
-  padding-left:30px;
-  padding-right:30px;
-  padding-bottom:30px;
-  padding-top: 150px;
+  background-color: #F0F2F8; 
   margin-left: 1rem; 
+
+  
+  padding-left: 20px; /* edited */
+  padding-right: 20px; /* edited */
+
+
+  padding-top: 13.2%;
+  padding-bottom: 3%;
   }
   
 
@@ -393,7 +397,6 @@ FOR ONLINE INCIDENT REPORTING CSS
   flex-direction: column;
   width: 80%;
   border-radius: 1rem;
-  border: 2px solid rgba(36, 53, 76, 0.7);
   margin:  auto; 
   background-color: #ffffff;
   overflow: hidden; 
@@ -517,6 +520,8 @@ FOR ONLINE INCIDENT REPORTING CSS
   overflow-y: auto;
   height: 450px;
   padding-bottom: 40px;
+      scrollbar-width: thin;
+    scrollbar-color:rgba(36, 53, 76, 0.7) transparent;
 }
 
 .online-report-section-2 {
@@ -525,12 +530,15 @@ FOR ONLINE INCIDENT REPORTING CSS
   justify-content: center;
   align-items: center;
   width: 100%;
+  
 }
 
 .online-report-full-top {
    display: flex;
   flex-direction: row;
   width: 100%;
+  
+
 }
 
 .online-report-section-left-side {
@@ -556,6 +564,10 @@ FOR ONLINE INCIDENT REPORTING CSS
   font-weight: bold;
   font-size: 1rem;
 }
+
+
+
+
 
 .fields-section-online {
   display: flex;
@@ -617,7 +629,7 @@ FOR ONLINE INCIDENT REPORTING CSS
 }
 
 .online-report-box-container{
-width: 50%;
+width: 100%;
 margin-top: 2rem;
 }
 
@@ -1480,4 +1492,40 @@ FILE UPLOAD SECTION DAMI KASI TANGINA!
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+
+
+
+.online-report-section-left-side-report {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+
+}
+
+.online-report-section-left-sid-report p {
+  color: grey;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.online-report-section-right-side-report {
+    display: flex;
+  flex-direction: column;
+    display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+
+}
+
+.online-report-section-right-side-report p {
+  color: grey;
+  font-weight: bold;
+  font-size: 1rem;
 }

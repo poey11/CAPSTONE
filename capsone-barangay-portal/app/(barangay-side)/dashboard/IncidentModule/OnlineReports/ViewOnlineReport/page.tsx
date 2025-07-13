@@ -723,7 +723,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                           {activeSection === "action" && (
                             <>
                               <div className="online-report-full-top">
-                                <div className="online-report-section-left-side">
+                                <div className="online-report-section-left-side-report">
 
                                   {/*}
                                   <div className="fields-section-online">
@@ -779,7 +779,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 </div>
 
                                 {initialRespondent.respondentName !== "" && (
-                                  <div className="online-report-section-right-side">
+                                  <div className="online-report-section-right-side-report">
                                     <div className="online-report-box-container">
                                       <div className="box-container-outer-image">
                                         <div className="title-image">Investigation Photo</div>
