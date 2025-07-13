@@ -102,7 +102,7 @@ export default function Header() {
         title: "Barangay Users",
         breadcrumb: ["User and Roles", "Barangay Users", "Edit Barangay User"],
       },
-      // ResidentUsers
+      // ResidentUsers 
       "/dashboard/admin/ResidentUsers": {
         title: "Resident Users",
         breadcrumb: ["User and Roles", "Resident Users"],
@@ -282,6 +282,22 @@ export default function Header() {
         return {
           title: "Reports Module",
           breadcrumb: ["Dashboard", "Reports Module", "Download Form"],
+        };
+      }
+    }
+
+    // Check if pathname is ResidentUsers and look at 'section' query param
+    if (pathname === "/dashboard/admin/ResidentUsers") {
+      const section = searchParams.get("section");
+      if (section === "verified") {
+        return {
+          title: "Resident Users",
+          breadcrumb: ["User and Roles", "Resident Users", "Verified Users"],
+        };
+      } else if (section === "pending") {
+        return {
+          title: "Resident Users",
+          breadcrumb: ["Dashboard", "Resident Users", "Pending Users"],
         };
       }
     }
