@@ -320,16 +320,100 @@ export default function Header() {
 
      // Check if pathname is ViewRequest and look at 'reqType' query param
     if (pathname === "/dashboard/ServicesModule/ViewRequest") {
-      const section = searchParams.get("reqType");
-      if (section === "inbarangay") {
+      const reqType = searchParams.get("reqType");
+      if (reqType === "inbarangay") {
         return {
           title: "In Barangay Requests",
           breadcrumb: ["Services Management", "In Barangay Requests", "View Request Details"],
         };
-      } else if (section === "online") {
+      } else if (reqType === "online") {
         return {
           title: "Online Requests",
           breadcrumb: ["Services Management", "Online Requests", "View Request Details"],
+        };
+      }
+    }
+
+    // Check if pathname is OnlineReports and look at 'section' query param
+    if (pathname === "/dashboard/IncidentModule/OnlineReports") {
+      const section = searchParams.get("section");
+      if (section === "allrecords") {
+        return {
+          title: "Online Incident Reports",
+          breadcrumb: ["Incident Management", "Online Incident Reports", "All Records"],
+        };
+      } else if (section === "assignedtasks") {
+        return {
+          title: "Online Incident Reports",
+          breadcrumb: ["Incident Management", "Online Incident Reports", "Assigned Tasks"],
+        };
+      }
+    }
+
+    // Check if pathname is OnlineReports and look at 'section' query param
+    if (pathname === "/dashboard/IncidentModule/OnlineReports") {
+      const section = searchParams.get("section");
+      if (section === "allrecords") {
+        return {
+          title: "Online Incident Reports",
+          breadcrumb: ["Incident Management", "Online Incident Reports", "All Records"],
+        };
+      } else if (section === "assignedtasks") {
+        return {
+          title: "Online Incident Reports",
+          breadcrumb: ["Incident Management", "Online Incident Reports", "Assigned Tasks"],
+        };
+      }
+    }
+
+    // Check if pathname is AddIncident and look at 'departmentId' query param
+    if (pathname === "/dashboard/IncidentModule/AddIncident") {
+      const departmentId = searchParams.get("departmentId");
+      if (departmentId === "VAWC") {
+        return {
+          title: "Lupon Tagapamayapa: VAWC",
+          breadcrumb: ["Incident Management", "VAWC", "Add New Incident"],
+        };
+      } else if (departmentId === "GAD") {
+        return {
+          title: "Lupon Tagapamayapa: GAD",
+          breadcrumb: ["Incident Management", "GAD", "Add New Incident"],
+        };
+      } else if (departmentId === "BCPC") {
+        return {
+          title: "Lupon Tagapamayapa: BCPC",
+          breadcrumb: ["Incident Management", "BCPC", "Add New Incident"],
+        };
+      } else if (departmentId === "Lupon") {
+        return {
+          title: "Lupon Tagapamayapa: LUPON",
+          breadcrumb: ["Incident Management", "LUPON", "Add New Incident"],
+        };
+      }
+    }
+
+    // Check if pathname is EditIncident and look at 'department' query param
+    if (pathname === "/dashboard/IncidentModule/EditIncident") {
+      const department = searchParams.get("department");
+      if (department === "VAWC") {
+        return {
+          title: "Lupon Tagapamayapa: VAWC",
+          breadcrumb: ["Incident Management", "VAWC", "Edit Incident"],
+        };
+      } else if (department === "GAD") {
+        return {
+          title: "Lupon Tagapamayapa: GAD",
+          breadcrumb: ["Incident Management", "GAD", "Edit Incident"],
+        };
+      } else if (department === "BCPC") {
+        return {
+          title: "Lupon Tagapamayapa: BCPC",
+          breadcrumb: ["Incident Management", "BCPC", "Edit Incident"],
+        };
+      } else if (department === "Lupon") {
+        return {
+          title: "Lupon Tagapamayapa: LUPON",
+          breadcrumb: ["Incident Management", "LUPON", "Edit Incident"],
         };
       }
     }
