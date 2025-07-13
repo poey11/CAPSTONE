@@ -108,6 +108,7 @@ interface ClearanceInput {
     approvedBldgPlan: File | null;
     deathCertificate: File | null;
     identificationPic: File | null;
+    twoByTwoPicture: File | null;
 }
 
 
@@ -148,6 +149,7 @@ export default function action() {
     const [files9, setFiles9] = useState<{ name: string, preview: string | undefined }[]>([]);
     const [files10, setFiles10] = useState<{ name: string, preview: string | undefined }[]>([]);
     const [files11, setFiles11] = useState<{ name: string, preview: string | undefined }[]>([]);
+    const [files12, setFiles12] = useState<{ name: string, preview: string | undefined }[]>([]);
 
     
     const employerPopupRef = useRef<HTMLDivElement>(null);
@@ -266,6 +268,7 @@ export default function action() {
       approvedBldgPlan: null,
       deathCertificate: null,
       identificationPic: null,
+      twoByTwoPicture: null,  
       isResident: false,
     
       // ADD THESE TO AVOID WARNINGS
@@ -437,6 +440,9 @@ export default function action() {
         setFiles5((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
       };
 
+      const handle2x2IDDelete = (fileName: string) => {
+        setFiles12((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      }
       const handleDTIDelete = (fileName: string) => {
         setFiles6((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
       };
@@ -543,6 +549,32 @@ export default function action() {
       // Optional: revoke URL after timeout
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
     };
+
+    const handle2x2IDUpload = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        alert("Only JPG, JPEG, and PNG files are allowed.");
+        return;
+      }
+    
+      const preview = URL.createObjectURL(file);
+      setFiles12([{ name: file.name, preview }]);
+    
+      setClearanceInput((prev: any) => ({
+        ...prev,
+        twoByTwoPicture: file,
+      }));
+
+      e.target.value = "";
+    
+      // Optional: revoke URL after timeout
+      setTimeout(() => URL.revokeObjectURL(preview), 10000);
+    }
 
     const handleValidIDUpload = (
       e: React.ChangeEvent<HTMLInputElement> |string
@@ -829,7 +861,8 @@ export default function action() {
           "taxDeclaration",
           "approvedBldgPlan",
           "deathCertificate",
-          "identificationPic"
+          "identificationPic",
+          "twoByTwoPicture"
         ];
     
         for (const key of fileKeys) {
@@ -951,19 +984,22 @@ export default function action() {
         isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "First Time Jobseeker";
     
       //  If it's a Barangay Permit type, require at least one of the three
-      if (isBarangayDocumentAndNewPermit) {
+      if (
+        isBarangayDocumentAndNewPermit &&
+        clearanceInput.purpose !== "Barangay ID"
+      ) {
         const hasBarangayID = files2 && files2.length > 0;
         const hasValidID = files3 && files3.length > 0;
         const hasLetter = files4 && files4.length > 0;
-    
-        if (!hasBarangayID && !hasValidID && !hasLetter) {
+
+        if (!hasValidID && !hasLetter) {
           setPopupErrorMessage("Please upload at least one of: Barangay ID, Valid ID, or Endorsement Letter.");
           setShowErrorPopup(true);
           setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
-      } else {
-        // Only check Endorsement Letter if not in the Barangay Permit category
+      } else if (clearanceInput.purpose !== "Barangay ID") {
+        // Only check Endorsement Letter if not in the Barangay Permit category and not Barangay ID
         if (!files4 || files4.length === 0) {
           setPopupErrorMessage("Please upload Endorsement Letter.");
           setShowErrorPopup(true);
@@ -975,6 +1011,15 @@ export default function action() {
       if (["Barangay ID", "First Time Jobseeker"].includes(clearanceInput.purpose || "")) {
         if (!files3 || files3.length === 0) {
           setPopupErrorMessage("Please upload Valid ID.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+          return;
+        }
+      }
+
+      if(clearanceInput.docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") {
+        if(!files12 || files12.length === 0) {
+          setPopupErrorMessage("Please upload 2x2 ID Picture.");
           setShowErrorPopup(true);
           setTimeout(() => setShowErrorPopup(false), 3000);
           return;
@@ -3293,7 +3338,69 @@ const handleChange = (
                             </div>
                           </div>
                         </div>
+                          {(docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") && (
+                              <>
+                              <div className="box-container-outer-inbrgy">
+                                <div className="title-verificationdocs-barangayID">
+                                  2x2 Barangay ID Picture
+                                </div>
 
+                                <div className="box-container-inbrgy">
+                                  <span className="required-asterisk">*</span>
+
+                                  {/* File Upload Section */}
+                                  <div className="file-upload-container-inbrgy">
+                                    <label htmlFor="file-upload12"  className="upload-link">Click to Upload File</label>
+                                      <input
+                                        id="file-upload12"
+                                        type="file"
+                                        className="file-upload-input" 
+                                        multiple
+                                        accept=".jpg,.jpeg,.png"
+                                        onChange={handle2x2IDUpload}
+                                      />
+
+                                      {/* Display the file names with image previews */}
+                                      {files12.length > 0 && (
+                                        <div className="file-name-image-display">
+                                          {files12.map((file, index) => (
+                                            <div className="file-name-image-display-indiv" key={index}>
+                                              <li className="file-item"> 
+                                                {/* Display the image preview */}
+                                                {file.preview && (
+                                                  <div className="filename-image-container">
+                                                    <img
+                                                      src={file.preview}
+                                                      alt={file.name}
+                                                      className="file-preview"
+                                                    />
+                                                  </div>
+                                                )}
+                                                <span className="file-name">{file.name}</span>  
+                                                <div className="delete-container">
+                                                  {/* Delete button with image */}
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => handle2x2IDDelete(file.name)}
+                                                    className="delete-button"
+                                                  >
+                                                  <img
+                                                    src="/images/trash.png"  
+                                                    alt="Delete"
+                                                    className="delete-icon"
+                                                  />
+                                                  </button>
+                                                </div>
+                                              </li>
+                                            </div>
+                                          ))}           
+                                        </div>
+                                      )}
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          )}
                         
 
                         {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "First Time Jobseeker") && (
@@ -3360,7 +3467,7 @@ const handleChange = (
                           </>
                         )}
 
-                        {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "Barangay ID" || clearanceInput.purpose === "First Time Jobseeker") && (
+                        {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "Barangay ID" || clearanceInput.purpose === "First Time Jobseeker" || docType === "Construction") && (
                               <>
                                 <div className="box-container-outer-inbrgy">
                                   <div className="title-verificationdocs-validID">
@@ -3423,6 +3530,7 @@ const handleChange = (
                                 </div>
                               </>
                             )}
+                        {(docType !== "Construction" &&  clearanceInput.purpose !== "Barangay ID") && (
 
                         <div className="box-container-outer-inbrgy">
                           <div className="title-verificationdocs-endorsement">
@@ -3483,7 +3591,7 @@ const handleChange = (
                             </div>
                           </div>
                         </div>
-
+                        )}
                         {isBusinessPermit && (
                           <>
                             <div className="box-container-outer-inbrgy">
