@@ -941,388 +941,396 @@ export default function GenerateDialogueLetter() {
 
 
         <div className="main-content-letter">
-        <form onSubmit={onSubmit}>
+                    <form onSubmit={onSubmit} className="container-letters">
 
-            <div className="section-1-letter">
+                        <div className="section-1-letter">
 
-                <div className="section-left-side-letter">
-                    <button type="button" onClick={handleAddLupon}>
-                        <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-letter"/> 
-                    </button>
+                            <div className="section-left-side-letter">
+                                <button type="button" onClick={handleAddLupon}>
+                                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-letter"/> 
+                                </button>
 
-                      {actionId === "summon" ? <h1 className="NewOfficial">Summon Letter ({hearingB} Hearing)</h1> : <h1 className="NewOfficial">Dialogue Letter</h1>}
-                </div>
-            
-            {userInfo?.status === "pending" && (
-                <div className="actions-letter">
-                          {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
-                        {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Generate Letter</button>)}
-                       
-                       {/* this button should disappear base on hearingSMS and summonsSMS and when pressed the button should disappear but for summon needs to be press 3 times before disppear */}
-                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
-                </div>
-
-            )}
-                
-
-             </div>
-
-       
-             <div className="section-2-letter">
-
-            {/*
-              <div className="section-4">
-                        {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
-                        {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
-                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> 
-             </div>
-            */}
-                
-                <div className="section-2-letter-upper">
-
-                    <div className="section-2-letter-left-side">
-
-                                        <div className="section-2-information-section">
-
-                    <div className="section-2-information-top">
-
-                          <div className="section-title-letter">
-                                <h1>Complainant’s Information</h1>
-                        </div>
-                    </div>
-
-                 <div className="section-2-information-bottom-upper">
-
-                    <div className="information-bottom-first-section ">
-
-                    <div className="fields-section-letter">
-                          <p>Name</p>
-                             <input 
-                            type="text" 
-                            className="generate-letter-input-field" 
-                            placeholder={otherInfo.complainant.fname}
-                            value={otherInfo.complainant.fname}
-                            id="complainant.fname"
-                            name="complainant.fname"
-                            disabled
-                        />
-                        </div>
-
-                                <div className="fields-section-letter">
-                            <p>Contact Nos</p>
-                            <input 
-                            type="text" 
-                            className="generate-letter-input-field" 
-                            placeholder= {otherInfo.complainant.contact}
-                            value={otherInfo.complainant.contact}
-                            id="complainant.contact"
-                            name="complainant.contact"
-                            disabled
-                            />
-
-                        </div>
-
-  
-
-                    </div>
-
-
-                    <div className="information-bottom-second-section">
-
-                
-
-                        <div className="fields-section-letter-address">
-                            <p>Address</p>
-                                <input 
-                                type="text" 
-                                className="generate-letter-input-field-address" 
-                                placeholder= {otherInfo.complainant.address}
-                                value={otherInfo.complainant.address}
-                                id="complainant.address"
-                                name="complainant.address"
-                                disabled
-                                />
-                        </div>
-                        
-                    </div>
-
-                      
-
-
-                 
-                 </div>       
-            
-
-              
-                </div>
-
-                    </div>
-
-      <div className="section-2-letter-right-side">
-
-              <div className="section-2-information-section">
-
-                    <div className="section-2-information-top">
-
-                          <div className="section-title-letter">
-                                <h1>Respondent’s Information</h1>
-                        </div>
-                    </div>
-
-                 <div className="section-2-information-bottom-upper">
-
-
-                    <div className="information-bottom-first-section ">
-                       
-                        <div className="fields-section-letter">
-                          <p>Name</p>
-                            
-                            <input 
-                            type="text" 
-                            className="generate-letter-input-field" 
-                            placeholder={otherInfo.respondent.fname}
-                            value={otherInfo.respondent.fname}
-                            id="respondent.fname"
-                            name="respondent.fname"
-                            disabled
-                            />
-
-                        </div>
-
-
-
-                        
-                        <div className="fields-section-letter">
-                            <p>Contact Nos</p>
-                            <input 
-                            type="text" 
-                            className="generate-letter-input-field" 
-                            placeholder= {otherInfo.respondent.contact}
-                            value={otherInfo.respondent.contact}
-                            id="respondent.contact"
-                            name="respondent.contact"
-                            disabled
-                            />
-
-                        </div>
-
-                    </div>
-
-                    <div className="information-bottom-second-section ">
-
-                    <div className="fields-section-letter-address">
-                            <p>Address</p>
-                                   <input 
-                                type="text" 
-                                className="generate-letter-input-field-address" 
-                                placeholder= {otherInfo.respondent.address}
-                                value={otherInfo.respondent.address}
-                                id="respondent.address"
-                                name="respondent.address"
-                                disabled
-                                />
-                
-                        </div>
-                        
-                    </div>
-
-
-
-                 
-                 </div>       
-            
-
-              
-                </div>
-
-                    </div>
-
-
-                </div>
-
-
-
-                <div className="section-2-letter-lower">
-
-                                     <div className="section-2-information-section">
-                        <div className="section-2-information-top">
-                            <div className="section-title-letter">
-                            <h1>Other Information</h1>
+                                {actionId === "summon" ? <h1 className="NewOfficial">Summon Letter ({hearingB} Hearing)</h1> : <h1 className="NewOfficial">Dialogue Letter</h1>}
                             </div>
-                        </div>
-
-                        <div className="section-2-information-bottom">
-                            {actionId === "dialogue" ? (
-                            <>
-                                <div className="fields-section-letter">
-                                      <p>Date of Delivery</p>
-                                    <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
-                                    value={safeData[0]?.DateOfDelivery||otherInfo.DateOfDelivery}
-                                    id="DateOfDelivery"
-                                    name="DateOfDelivery"
-                                    min={today}
-                                    onKeyDown={(e) => e.preventDefault()}
-                                    onChange={handleChange}
-                                    required
-                                    disabled = {safeData[0]?.DateOfDelivery ? true : false}
-                                    />
-                                </div>
-                                <div className="fields-section-letter">
-                                     <p>Date and Time of Meeting</p>
-                                    <input type="datetime-local" className="generate-letter-input-field" 
-                                    value={safeData[0]?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
-                                    onKeyDown={(e) => e.preventDefault()}
-                                    id="DateTimeOfMeeting"
-                                    name="DateTimeOfMeeting"
-                                    onChange={handleChange}
-                                    min={todayWithTime}
-                                    required
-                                    disabled = {safeData[0]?.DateTimeOfMeeting ? true : false}
-                                    />
-
-                                </div>
-                                <div className="fields-section-letter">
-                                      <p>Delivered By</p>      
-                                      <select
-                                            className="generate-letter-input-field-dropdown"
-                                            value={safeData[0]?.LuponStaff || otherInfo.LuponStaff}
-                                            onChange={(e) => {
-                                                const select = e.target;
-                                                const selectedOption = select.options[select.selectedIndex];
-                                                const selectedName = selectedOption.value;
-                                                const selectedId = selectedOption.getAttribute("data-staffid") || "";
-                                                console.log("DEBUG SELECT:", selectedName, selectedId);
-
-                                                setOtherInfo(prev => ({
-                                                    ...prev,
-                                                    LuponStaff: selectedName,
-                                                    LuponStaffId: selectedId
-                                                }));
-                                            }}
-                                            required
-                                            disabled={!!safeData[0]?.LuponStaff}
-                                        >
-                                            <option value="">Select Official/Kagawad</option>
-                                            {listOfStaffs.map((staff, index) => (
-                                                <option
-                                                    key={index}
-                                                    value={`${staff.firstName} ${staff.lastName}`}
-                                                    data-staffid={staff.id}
-                                                >
-                                                    {staff.firstName} {staff.lastName}
-                                                </option>
-                                            ))}
-                                        </select>
-
-
-                                </div>
-
-                                <div className="fields-section-letter">
-                                    <p>Date Filed</p>
-                                 <input type="date" className="generate-letter-input-field" 
-                                    value={otherInfo.DateFiled}
-                                    max={today}
-                                    id="DateFiled"
-                                    name="DateFiled"
-                                    onKeyDown={(e) => e.preventDefault()}
-                                    onChange={handleChange}
-                                    disabled
-                                    />
-                                </div>
-                            </>
-                            ) : (
-                            <>
-                                <div className="fields-section-letter">
-                                     <p>Date of Delivery</p>
-                                     <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
-                                    value={otherInfo.DateOfDelivery}
-                                    id="DateOfDelivery"
-                                    name="DateOfDelivery"
-                                    min={today}
-                                    onKeyDown={(e) => e.preventDefault()}
-                                    onChange={handleChange}
-                                    required
+                        
+                        {userInfo?.status === "pending" && (
+                            <div className="actions-letter">
+                                    {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
+                                    {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Generate Letter</button>)}
                                 
-                                    />
+                                {/* this button should disappear base on hearingSMS and summonsSMS and when pressed the button should disappear but for summon needs to be press 3 times before disppear */}
+                                    <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
+                            </div>
 
+                        )}
+                            
+
+                        </div>
+
+
+
+                   <div className="scroll-letter">
+                        <div className="section-2-letter">
+
+                        {/*
+                        <div className="section-4">
+                                    {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
+                                    {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
+                                    <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> 
+                        </div>
+                        */}
+
+                            <div className="section-2-letter-upper">
+
+                                <div className="section-2-letter-left-side">
+
+                                <div className="section-2-information-section">
+
+                                <div className="section-2-information-top">
+
+                                    <div className="section-title-letter">
+                                            <h1>Complainant’s Information</h1>
+                                    </div>
                                 </div>
+
+                                <div className="section-2-information-bottom-upper">
+
+                                <div className="information-bottom-first-section ">
 
                                 <div className="fields-section-letter">
-                                     <p>Date and Time of Meeting</p>
-                                        <input type="datetime-local" className="generate-letter-input-field" 
-                                        value={otherInfo.DateTimeOfMeeting}
-                                        onKeyDown={(e) => e.preventDefault()}
-                                        id="DateTimeOfMeeting"
-                                        name="DateTimeOfMeeting"
-                                        onChange={handleChange}
-                                        min={todayWithTime}
-                                        required              />
-
-                                </div>
-
-                                 <div className="fields-section-letter">
-                                    <p>Delivered By</p>
-                                    <select
-                                        className="generate-letter-input-field-dropdown"
-                                        value={otherInfo.LuponStaff}
-                                        onChange={(e) => {
-                                            const select = e.target;
-                                            const selectedOption = select.options[select.selectedIndex];
-                                            const selectedName = selectedOption.value;
-                                            const selectedId = selectedOption.getAttribute("data-staffid") || "";
-
-                                            console.log("DEBUG SELECT HEARING:", selectedName, selectedId);
-
-                                            setOtherInfo(prev => ({
-                                            ...prev,
-                                            LuponStaff: selectedName,
-                                            LuponStaffId: selectedId
-                                            }));
-                                        }}
-                                        required
-                                        >
-                                        <option value="">Select Official/Kagawad</option>
-                                        {listOfStaffs.map((staff, index) => (
-                                            <option
-                                            key={index}
-                                            value={`${staff.firstName} ${staff.lastName}`}
-                                            data-staffid={staff.id}
-                                            >
-                                            {staff.firstName} {staff.lastName}
-                                            </option>
-                                        ))}
-                                        </select>
-
-
-                                </div>
-
-                                 <div className="fields-section-letter">
-                                    <p>Date Filed</p>
-                                    <input type="date" className="generate-letter-input-field" 
-                                    value={otherInfo.DateFiled}
-                                    max={today}
-                                    id="DateFiled"
-                                    name="DateFiled"
-                                    onKeyDown={(e) => e.preventDefault()}
-                                    onChange={handleChange}
-                                    disabled
+                                    <p>Name</p>
+                                        <input 
+                                        type="text" 
+                                        className="generate-letter-input-field" 
+                                        placeholder={otherInfo.complainant.fname}
+                                        value={otherInfo.complainant.fname}
+                                        id="complainant.fname"
+                                        name="complainant.fname"
+                                        disabled
                                     />
+                                    </div>
 
-                                </div>
-                            </>
-                            )}
-                        </div>
-                        </div>
+                                            <div className="fields-section-letter">
+                                        <p>Contact Nos</p>
+                                        <input 
+                                        type="text" 
+                                        className="generate-letter-input-field" 
+                                        placeholder= {otherInfo.complainant.contact}
+                                        value={otherInfo.complainant.contact}
+                                        id="complainant.contact"
+                                        name="complainant.contact"
+                                        disabled
+                                        />
 
-                </div>
+                                    </div>
 
             
 
-                
+                                </div>
+
+
+                                <div className="information-bottom-second-section">
+
+                            
+
+                                    <div className="fields-section-letter-address">
+                                        <p>Address</p>
+                                            <input 
+                                            type="text" 
+                                            className="generate-letter-input-field-address" 
+                                            placeholder= {otherInfo.complainant.address}
+                                            value={otherInfo.complainant.address}
+                                            id="complainant.address"
+                                            name="complainant.address"
+                                            disabled
+                                            />
+                                    </div>
+                                    
+                                </div>
+
+                                
+
+
+                            
+                            </div>       
+                        
+
+                        
+                            </div>
+
+                                </div>
+
+                        <div className="section-2-letter-right-side">
+
+                        <div className="section-2-information-section">
+
+                                <div className="section-2-information-top">
+
+                                    <div className="section-title-letter">
+                                            <h1>Respondent’s Information</h1>
+                                    </div>
+                                </div>
+
+                            <div className="section-2-information-bottom-upper">
+
+
+                                <div className="information-bottom-first-section ">
+                                
+                                    <div className="fields-section-letter">
+                                    <p>Name</p>
+                                        
+                                        <input 
+                                        type="text" 
+                                        className="generate-letter-input-field" 
+                                        placeholder={otherInfo.respondent.fname}
+                                        value={otherInfo.respondent.fname}
+                                        id="respondent.fname"
+                                        name="respondent.fname"
+                                        disabled
+                                        />
+
+                                    </div>
 
 
 
-  
+                                    
+                                    <div className="fields-section-letter">
+                                        <p>Contact Nos</p>
+                                        <input 
+                                        type="text" 
+                                        className="generate-letter-input-field" 
+                                        placeholder= {otherInfo.respondent.contact}
+                                        value={otherInfo.respondent.contact}
+                                        id="respondent.contact"
+                                        name="respondent.contact"
+                                        disabled
+                                        />
+
+                                    </div>
+
+                                </div>
+
+                                <div className="information-bottom-second-section ">
+
+                                <div className="fields-section-letter-address">
+                                        <p>Address</p>
+                                            <input 
+                                            type="text" 
+                                            className="generate-letter-input-field-address" 
+                                            placeholder= {otherInfo.respondent.address}
+                                            value={otherInfo.respondent.address}
+                                            id="respondent.address"
+                                            name="respondent.address"
+                                            disabled
+                                            />
+                            
+                                    </div>
+                                    
+                                </div>
+
+
+
+                            
+                            </div>       
+                        
+
+                        
+                            </div>
+
+                                </div>
+
+
+                            </div>
+
+
+
+                            <div className="section-2-letter-lower">
+
+                                                <div className="section-2-information-section">
+                                    <div className="section-2-information-top">
+                                        <div className="section-title-letter">
+                                        <h1>Other Information</h1>
+                                        </div>
+                                    </div>
+
+                                    <div className="section-2-information-bottom">
+                                        {actionId === "dialogue" ? (
+                                        <>
+                                            <div className="fields-section-letter">
+                                                <p>Date of Delivery</p>
+                                                <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
+                                                value={safeData[0]?.DateOfDelivery||otherInfo.DateOfDelivery}
+                                                id="DateOfDelivery"
+                                                name="DateOfDelivery"
+                                                min={today}
+                                                onKeyDown={(e) => e.preventDefault()}
+                                                onChange={handleChange}
+                                                required
+                                                disabled = {safeData[0]?.DateOfDelivery ? true : false}
+                                                />
+                                            </div>
+                                            <div className="fields-section-letter">
+                                                <p>Date and Time of Meeting</p>
+                                                <input type="datetime-local" className="generate-letter-input-field" 
+                                                value={safeData[0]?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
+                                                onKeyDown={(e) => e.preventDefault()}
+                                                id="DateTimeOfMeeting"
+                                                name="DateTimeOfMeeting"
+                                                onChange={handleChange}
+                                                min={todayWithTime}
+                                                required
+                                                disabled = {safeData[0]?.DateTimeOfMeeting ? true : false}
+                                                />
+
+                                            </div>
+                                            <div className="fields-section-letter">
+                                                <p>Delivered By</p>      
+                                                <select
+                                                        className="generate-letter-input-field-dropdown"
+                                                        value={safeData[0]?.LuponStaff || otherInfo.LuponStaff}
+                                                        onChange={(e) => {
+                                                            const select = e.target;
+                                                            const selectedOption = select.options[select.selectedIndex];
+                                                            const selectedName = selectedOption.value;
+                                                            const selectedId = selectedOption.getAttribute("data-staffid") || "";
+                                                            console.log("DEBUG SELECT:", selectedName, selectedId);
+
+                                                            setOtherInfo(prev => ({
+                                                                ...prev,
+                                                                LuponStaff: selectedName,
+                                                                LuponStaffId: selectedId
+                                                            }));
+                                                        }}
+                                                        required
+                                                        disabled={!!safeData[0]?.LuponStaff}
+                                                    >
+                                                        <option value="">Select Official/Kagawad</option>
+                                                        {listOfStaffs.map((staff, index) => (
+                                                            <option
+                                                                key={index}
+                                                                value={`${staff.firstName} ${staff.lastName}`}
+                                                                data-staffid={staff.id}
+                                                            >
+                                                                {staff.firstName} {staff.lastName}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+
+
+                                            </div>
+
+                                            <div className="fields-section-letter">
+                                                <p>Date Filed</p>
+                                            <input type="date" className="generate-letter-input-field" 
+                                                value={otherInfo.DateFiled}
+                                                max={today}
+                                                id="DateFiled"
+                                                name="DateFiled"
+                                                onKeyDown={(e) => e.preventDefault()}
+                                                onChange={handleChange}
+                                                disabled
+                                                />
+                                            </div>
+                                        </>
+                                        ) : (
+                                        <>
+                                            <div className="fields-section-letter">
+                                                <p>Date of Delivery</p>
+                                                <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
+                                                value={otherInfo.DateOfDelivery}
+                                                id="DateOfDelivery"
+                                                name="DateOfDelivery"
+                                                min={today}
+                                                onKeyDown={(e) => e.preventDefault()}
+                                                onChange={handleChange}
+                                                required
+                                            
+                                                />
+
+                                            </div>
+
+                                            <div className="fields-section-letter">
+                                                <p>Date and Time of Meeting</p>
+                                                    <input type="datetime-local" className="generate-letter-input-field" 
+                                                    value={otherInfo.DateTimeOfMeeting}
+                                                    onKeyDown={(e) => e.preventDefault()}
+                                                    id="DateTimeOfMeeting"
+                                                    name="DateTimeOfMeeting"
+                                                    onChange={handleChange}
+                                                    min={todayWithTime}
+                                                    required              />
+
+                                            </div>
+
+                                            <div className="fields-section-letter">
+                                                <p>Delivered By</p>
+                                                <select
+                                                    className="generate-letter-input-field-dropdown"
+                                                    value={otherInfo.LuponStaff}
+                                                    onChange={(e) => {
+                                                        const select = e.target;
+                                                        const selectedOption = select.options[select.selectedIndex];
+                                                        const selectedName = selectedOption.value;
+                                                        const selectedId = selectedOption.getAttribute("data-staffid") || "";
+
+                                                        console.log("DEBUG SELECT HEARING:", selectedName, selectedId);
+
+                                                        setOtherInfo(prev => ({
+                                                        ...prev,
+                                                        LuponStaff: selectedName,
+                                                        LuponStaffId: selectedId
+                                                        }));
+                                                    }}
+                                                    required
+                                                    >
+                                                    <option value="">Select Official/Kagawad</option>
+                                                    {listOfStaffs.map((staff, index) => (
+                                                        <option
+                                                        key={index}
+                                                        value={`${staff.firstName} ${staff.lastName}`}
+                                                        data-staffid={staff.id}
+                                                        >
+                                                        {staff.firstName} {staff.lastName}
+                                                        </option>
+                                                    ))}
+                                                    </select>
+
+
+                                            </div>
+
+                                            <div className="fields-section-letter">
+                                                <p>Date Filed</p>
+                                                <input type="date" className="generate-letter-input-field" 
+                                                value={otherInfo.DateFiled}
+                                                max={today}
+                                                id="DateFiled"
+                                                name="DateFiled"
+                                                onKeyDown={(e) => e.preventDefault()}
+                                                onChange={handleChange}
+                                                disabled
+                                                />
+
+                                            </div>
+                                        </>
+                                        )}
+                                    </div>
+                                    </div>
+
+                            </div>
+
+                        </div>
+
+                            
+                            
+
+
+                        
+
+                            
+
+
+
+            
 
 
 
@@ -1330,15 +1338,14 @@ export default function GenerateDialogueLetter() {
 
 
 
+            
+                        
 
- 
-               
+                        
+                        </div>
 
-               
-            </div>
-
-          
-           </form>
+                    
+                    </form>
 
         </div> 
         {/* {data && data.length > 0 && (

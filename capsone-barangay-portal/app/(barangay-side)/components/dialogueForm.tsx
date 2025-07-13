@@ -287,8 +287,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     return (
         <>
             
-        <form onSubmit={handleSaveClick}>
-            <div className="edit-incident-main-content">
+        <form onSubmit={handleSaveClick} className="dialogue-hearing-container">
+            <div className="edit-incident-main-content-dialogue-hearing">
                 <div className="edit-incident-main-section1">
                     <div className="edit-incident-main-section1-left">
                         <button type="button" onClick={handleBack}>
@@ -308,7 +308,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                     
                 </div>
 
-                <div className="edit-incident-header-body">
+                <div className="edit-incident-header-body-dialogue">
                     <div className="dialogue-header-body-top-section">
                         <div className="edit-incident-info-toggle-wrapper">
                             {["meeting", "minutes" ].map((section) => (
@@ -434,17 +434,17 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                                         </div>
                                                     </div>
                                                 </div> 
-                                                <div className="edit-incident-content-dialogue-rightsection">
-                                                    <div className="view-incident-dialogue-remarks-container">
-                                                        <div className="box-container-outer-remarks-dialogue">
-                                                            <div className="title-remarks-dialogue">
+                                                <div className="edit-incident-content-dialogue-rightsection-update">
+                                                    <div className="view-incident-dialogue-remarks-container-update">
+                                                        <div className="box-container-outer-remarks-dialogue-update">
+                                                            <div className="title-remarks-dialogue-update">
                                                                 Remarks
                                                             </div>
                                                          {/*<div className="box-container-remarks-dialogue">*/}   
-                                                             <div className={`box-container-remarks-dialogue ${invalidFields.includes("remarks") ? "input-error" : ""}`}>
-                                                                <span className="required-asterisk-incident">*</span>    
+                                                             <div className={`box-container-remarks-dialogue-update ${invalidFields.includes("remarks") ? "input-error" : ""}`}>
+                                                                <span className="required-asterisk-incident-update">*</span>    
                                                                 <textarea 
-                                                                    className="remarks-input-field-dialogue" 
+                                                                    className="remarks-input-field-dialogue-update" 
                                                                     name="remarks" 
                                                                     id="remarks"
                                                                     value={details.remarks||""}
