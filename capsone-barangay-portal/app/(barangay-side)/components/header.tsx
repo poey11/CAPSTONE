@@ -72,9 +72,14 @@ export default function Header() {
         breadcrumb: ["Dashboard", "Summaries"],
       },
       // Generate Report
-      "/dashboard/ReportsModule": {
+      "/dashboard/ReportsModule?section=generate": {
         title: "Reports Module",
-        breadcrumb: ["Dashboard", "Reports Module"],
+        breadcrumb: ["Dashboard", "Reports Module", "Generate Report"],
+      },
+      // Download Form
+      "/dashboard/ReportsModule?section=download": {
+        title: "Reports Module",
+        breadcrumb: ["Dashboard", "Reports Module", "Download Form"],
       },
 
     /* 
@@ -264,6 +269,23 @@ export default function Header() {
       }
     }
 
+
+    // Check if pathname is ReportsModule and look at 'section' query param
+    if (pathname === "/dashboard/ReportsModule") {
+      const section = searchParams.get("section");
+      if (section === "generate") {
+        return {
+          title: "Reports Module",
+          breadcrumb: ["Dashboard", "Reports Module", "Generate Report"],
+        };
+      } else if (section === "download") {
+        return {
+          title: "Reports Module",
+          breadcrumb: ["Dashboard", "Reports Module", "Download Form"],
+        };
+      }
+    }
+
     // Fallback to static routes
     return staticMap[pathname] || {
       title: "Undefined",
@@ -283,16 +305,10 @@ export default function Header() {
             const href = "/" + pathSegments.slice(0, index + 1).join("/");
 
             return (
-              <Tag className="breadcrumb" key={index}>
-                {!isLast && index !== 0 ? (
-                  <Link href={href} className="breadcrumb-link">
-                    {crumb}
-                  </Link>
-                ) : (
-                  crumb
-                )}
-                {!isLast && <span className="chevron">/</span>}
-              </Tag>
+             <Tag className="breadcrumb" key={index}>
+              {crumb}
+              {!isLast && <span className="chevron">/</span>}
+            </Tag>
             );
           })}
         </div>
