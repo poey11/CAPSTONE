@@ -984,7 +984,7 @@ export default function GenerateDialogueLetter() {
 
                                 <div className="section-2-letter-left-side">
 
-                                                    <div className="section-2-information-section">
+                                <div className="section-2-information-section">
 
                                 <div className="section-2-information-top">
 
@@ -993,7 +993,7 @@ export default function GenerateDialogueLetter() {
                                     </div>
                                 </div>
 
-                            <div className="section-2-information-bottom-upper">
+                                <div className="section-2-information-bottom-upper">
 
                                 <div className="information-bottom-first-section ">
 
@@ -1060,7 +1060,7 @@ export default function GenerateDialogueLetter() {
 
                                 </div>
 
-                <div className="section-2-letter-right-side">
+                        <div className="section-2-letter-right-side">
 
                         <div className="section-2-information-section">
 
@@ -1186,7 +1186,7 @@ export default function GenerateDialogueLetter() {
                                             <div className="fields-section-letter">
                                                 <p>Delivered By</p>      
                                                 <select
-                                                        className="generate-letter-input-field-dropdown"
+                                                        className="generate-letter-input-field"
                                                         value={safeData[0]?.LuponStaff || otherInfo.LuponStaff}
                                                         onChange={(e) => {
                                                             const select = e.target;

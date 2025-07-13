@@ -109,8 +109,8 @@ Scroll
   align-items: center;
   justify-content: space-between;
   background-color: #214666;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding-top: 15px;
+  padding-bottom: 15px;
    position: sticky;
   top: 0;
 }
@@ -158,7 +158,6 @@ Scroll
   justify-content: center;
   align-items: center;
   width: 100%;
-  
 }
 
 
@@ -166,13 +165,11 @@ Scroll
  width: 100%;
   overflow-y: auto;
   height: 100%;
-
-    overflow-y: auto;
+  overflow-y: auto;
   flex: 1; /* Takes all remaining vertical space */
   padding-bottom: 2rem; /* Optional: adds space at bottom */
   scrollbar-width: thin;
   scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
-
 }
 
 .container-letters {
@@ -196,6 +193,7 @@ Scroll
    display: flex;
    justify-content: center;
   width: 100%;
+  margin-bottom: 80px;
 }
 
 .section-2-letter-left-side {
@@ -216,21 +214,20 @@ Scroll
 
 .section-2-information-section {
   background-color: #ffffff;
-  
   border: 1px solid #d1d5db;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  padding: 2rem;
+  padding: 20px;
   margin-top: 2rem;
   width: 90%;
   max-width: 1000px;
+  height: 230px;
 }
 
 .section-2-information-top {
   background-color: #1e3a56;
-  padding: 1rem 2rem;
+  padding: 10px 2rem;
   border-radius: 12px;
-  margin-bottom: 1.5rem;
 }
 
 .fields-section-letter {
@@ -262,11 +259,12 @@ Scroll
 .generate-letter-input-field {
   padding: 8px;
   width: 85%;
-  margin-top: 10px;
+
   border: 1px solid rgba(36, 53, 76, 0.7);
   border-radius: 5px;
   color: #000000;
   text-align: left;
+  height: 35px;
 }
 
 
@@ -309,7 +307,7 @@ For Dropdowns
 .fields-section-letter-address {
   display: flex;
   flex-direction: column;
-  margin-top: 30px;
+  margin-top: 10px;
   width: 100%;
 }
 .fields-section-letter-address p{
@@ -327,7 +325,6 @@ For Dropdowns
 .generate-letter-input-field-address {
   padding: 8px;
   width: 92%;
-  margin-top: 10px;
   border: 1px solid rgba(36, 53, 76, 0.7);
   border-radius: 5px;
   color: #000000;
@@ -353,7 +350,6 @@ For Dropdowns
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 25px;
 }
 
 
@@ -374,7 +370,7 @@ For Dropdowns
   text-align: center;
   color: #ffffff;
   font-weight: bolder;
-  font-size: 20px;
+  font-size: 15px;
   text-align: center;
   display: flex;
   align-items: center;
@@ -402,8 +398,8 @@ For Dropdowns
   background-color: #e56723;
   color: #fff;
   border: none;
-  padding: 12px 24px;
-  font-size: 15px;
+  padding: 10px 15px;
+  font-size: 13px;
   font-weight: 550;
   cursor: pointer;
   border-radius: 8px;
