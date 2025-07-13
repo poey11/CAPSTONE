@@ -1138,6 +1138,7 @@ html, body {
   overflow: hidden; 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   animation: fadeSlideIn 0.5s ease-out;
+  height: 100%;
 }
 
 
@@ -2144,10 +2145,11 @@ border-left: 10px solid #8a0f0f;
 }
 
 
+/* here*/
 .edit-incident-redirection-buttons-selected-dialogue-hearing {
   width: 220px;
   height: 40px;
-  background-color: #ffffff;
+  background-color: #F0F2F8;
   border-radius: 6px;
   border: 1px solid #ccc;
   box-shadow: 0 1px 3px rgba(0, 0, 10, 0.2);
