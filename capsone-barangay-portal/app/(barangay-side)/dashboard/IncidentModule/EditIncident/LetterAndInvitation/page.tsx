@@ -220,7 +220,7 @@ export default function GenerateDialogueLetter() {
 
            setShowSubmitPopup({
                 show: true,
-                message: "SMS message for both parties sent succesfuly!",
+                message: "SMS message for both parties sent succesfully!",
                 message2: "",
                 letterType: "dialogue",
             });
@@ -233,8 +233,8 @@ export default function GenerateDialogueLetter() {
         console.log(err);
       }  finally {  //ADDED
              setTimeout(() => {
-            setIsLoading(false); // End loading after 2 seconds
-        }, 2000);
+            setIsLoading(false); // End loading after 1 seconds
+        }, 1000);
        }
       
     }
@@ -792,7 +792,17 @@ useEffect(() => {
                         onClick={() => {
                             //sendSMSForSummons();
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
-                        }}
+
+                            if (showSubmitPopup.letterType === "summon") {
+                                setTimeout(() => {
+                                  router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
+                                }, 3000); // wait 3 seconds
+                              } else {
+                                setTimeout(() => {
+                                  router.back();
+                                }, 3000); // wait 3 seconds
+                              }
+                            }}
                         className="letter-announcement-btn"
                         >
                         Send SMS
@@ -803,12 +813,17 @@ useEffect(() => {
                         onClick={() => {
                             // sendSMSForDialogue();
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+
                             if (showSubmitPopup.letterType === "dialogue") {
-                            router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
-                            } else {
-                            router.back();
-                            }
-                        }}
+                                setTimeout(() => {
+                                  router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
+                                }, 3000); // wait 3 seconds
+                              } else {
+                                setTimeout(() => {
+                                  router.back();
+                                }, 3000); // wait 3 seconds
+                              }
+                            }}
                         className="letter-announcement-btn"
                         >
                         Send SMS
@@ -972,7 +987,12 @@ useEffect(() => {
                         {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Generate Letter</button>)}
                        
                        {/* this button should disappear base on hearingSMS and summonsSMS and when pressed the button should disappear but for summon needs to be press 3 times before disppear */}
-                        <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
+                        {/* 
+                        <button className="letter-announcement-btn" type="submit" name="sendSMS">
+                        Send SMS
+                        </button> 
+                        */}                       
+                            {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
                 </div>
 
             )}
