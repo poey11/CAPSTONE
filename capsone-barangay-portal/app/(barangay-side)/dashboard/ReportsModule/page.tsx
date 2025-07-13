@@ -329,7 +329,9 @@ useEffect(() => {
 
 const [activeSectionForms, setActiveSectionForms] = useState("resident");
 
-
+useEffect(() => {
+  setCurrentPageForms(0);
+}, [viewingFolder]);
 
 const uploadForms = async (url: string): Promise<void> => {
   setIsLoading({ status: true, message: "Downloading Form, please wait..." });
@@ -5300,40 +5302,40 @@ const handleGenerateIncidentSummaryPDF = async (
                       </button>
 
                       <>
-  <button
-    type="button"
-    onClick={() => setShowKasambahayModal(true)}
-    disabled={loadingKasambahay}
-    className={`report-tile ${loadingKasambahay ? "disabled" : ""}`}
-    aria-busy={loadingKasambahay}
-    aria-label="Generate Kasambahay Masterlist Report"
-  >
-    <img
-      src="/images/form.png"
-      alt="Kasambahay icon"
-      className="report-icon"
-      aria-hidden="true"
-    />
-    <p className="report-title">
-      {loadingKasambahay ? "Generating..." : "Kasambahay Masterlist"}
-    </p>
-  </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowKasambahayModal(true)}
+                          disabled={loadingKasambahay}
+                          className={`report-tile ${loadingKasambahay ? "disabled" : ""}`}
+                          aria-busy={loadingKasambahay}
+                          aria-label="Generate Kasambahay Masterlist Report"
+                        >
+                          <img
+                            src="/images/form.png"
+                            alt="Kasambahay icon"
+                            className="report-icon"
+                            aria-hidden="true"
+                          />
+                          <p className="report-title">
+                            {loadingKasambahay ? "Generating..." : "Kasambahay Masterlist"}
+                          </p>
+                        </button>
 
-  <NatureOfWorkModal
-    show={showKasambahayModal}
-    onClose={() => setShowKasambahayModal(false)}
-    onGenerate={handleGenerateKasambahayPDF}
-    loading={loadingKasambahay}
-    title="Generate Kasambahay Masterlist"
-    options={[
-      { key: "All", value: "All" },
-      ...Object.entries(natureOfWorkMap).map(([key, value]) => ({
-        key,
-        value
-      }))
-    ]}    
-  />
-</>
+                        <NatureOfWorkModal
+                          show={showKasambahayModal}
+                          onClose={() => setShowKasambahayModal(false)}
+                          onGenerate={handleGenerateKasambahayPDF}
+                          loading={loadingKasambahay}
+                          title="Generate Kasambahay Masterlist"
+                          options={[
+                            { key: "All", value: "All" },
+                            ...Object.entries(natureOfWorkMap).map(([key, value]) => ({
+                              key,
+                              value
+                            }))
+                          ]}    
+                        />
+                      </>
 
 
                       <button onClick={handleGenerateJobSeekerPDF} disabled={loadingJobSeeker} className="report-tile">
@@ -5366,6 +5368,8 @@ const handleGenerateIncidentSummaryPDF = async (
                           className="report-icon"
                           aria-hidden="true"
                         />
+
+                        
                         <p className="report-title">
                           {loadingIncidentSummary
                             ? "Generating..."
@@ -5615,7 +5619,7 @@ const handleGenerateIncidentSummaryPDF = async (
 
 
 
-    {/* downloadable forms area  */}
+    {/* downloadable forms area  here*/}
 
     {activeSection === "download" && (
       <>
@@ -5653,14 +5657,14 @@ const handleGenerateIncidentSummaryPDF = async (
                     className={`info-toggle-btn ${viewingFolder === "ReportsModule/AdminStaff/" ? "active" : ""}`}
                     onClick={() => setViewingFolder("ReportsModule/AdminStaff/")}
                   >
-                    Admin Files
+                    Admin Staff Files
                   </button>
                   <button
                     type="button"
                     className={`info-toggle-btn ${viewingFolder === "ReportsModule/LFStaff/" ? "active" : ""}`}
                     onClick={() => setViewingFolder("ReportsModule/LFStaff/")}
                   >
-                    LF Files
+                    LF Staff Files
                   </button>
                 </>
               )}
@@ -5704,7 +5708,6 @@ const handleGenerateIncidentSummaryPDF = async (
             </div>
 
 
-
             <div className="downloadble-report-header-body-bottom-section">
 
                   <div className="downloadble-forms-info-main-container">
@@ -5719,8 +5722,10 @@ const handleGenerateIncidentSummaryPDF = async (
                       </button>
                     </div>
 
+
                     <div className="downloadble-forms-grid">
-                    {paginatedFiles.map((file, index)=> (
+                   {/* {paginatedFiles.map((file, index)=> ( */}
+                      {paginatedFiles.slice(0, 4).map((file, index) => (
                         <div className="form-card" key={index}>
                           <div className="form-icon-label">
                             <img src="/images/form.png" alt="Form Icon" />
