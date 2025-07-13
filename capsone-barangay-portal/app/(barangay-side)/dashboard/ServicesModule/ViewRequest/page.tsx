@@ -264,6 +264,17 @@ const ViewOnlineRequest = () => {
       
 
 
+useEffect(() => {
+  const id = searchParams.get("id");
+  const reqType = searchParams.get("reqType");
+
+  if (!id) return;
+
+  if (!reqType) {
+    router.replace(`/dashboard/ServicesModule/ViewRequest?reqType=online&id=${id}`, { scroll: false });
+  }
+}, [searchParams, router]);
+
 
 /*
 For Reason for Reject
@@ -2245,7 +2256,7 @@ Functions for Reason for Reject
                                   </>
                                 )}  
 
-{/* gohere*/}
+
                                 {activeSection === "or" && (
                                   <>
                                     <div className="services-onlinereq-content">

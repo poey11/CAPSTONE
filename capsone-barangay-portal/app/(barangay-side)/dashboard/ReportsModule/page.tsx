@@ -6,7 +6,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MonthYearModal } from "@/app/(barangay-side)/components/MonthYearModal"; 
 import { NatureOfWorkModal } from "@/app/(barangay-side)/components/NatureOfWorkModal"; 
 
@@ -104,6 +104,8 @@ const ReportsPage = () => {
 
 const [selectedFolder, setSelectedFolder] = useState<string>("ReportsModule/");
 const [viewingFolder, setViewingFolder] = useState<string>("ReportsModule/");
+
+
 
 
 const fetchDownloadLinks = async () => {
@@ -235,6 +237,15 @@ const handleDownload = (file: FileData) => {
 };
 
 const router = useRouter();
+  const searchParams = useSearchParams();
+
+useEffect(() => {
+    const section = searchParams.get("section");
+    if (!section) {
+      router.push("/dashboard/ReportsModule?section=generate");
+    }
+  }, [searchParams, router]);
+  
 const hasInitialized = useRef(false);
 const [isGenerating, setIsGenerating] = useState(false);
 const [generatingMessage, setGeneratingMessage] = useState("");
@@ -5049,7 +5060,12 @@ const handleGenerateIncidentSummaryPDF = async (
       <div className="generatereport-redirectionpage-section">
         <button 
           className={` ${activeSection === "generate" ? "generate-reports-download-forms-selected" : "generatereport-redirection-buttons"}`}
-          onClick={() => setActiveSection("generate")}
+          /*onClick={() => setActiveSection("generate")}*/
+
+          onClick={() => {
+            setActiveSection("generate");
+            router.push("/dashboard/ReportsModule?section=generate");
+          }}
         >
           <div className="generatereport-redirection-icons-section">
             <img src="/images/report.png" alt="user info" className="redirection-icons-generatereport"/> 
@@ -5061,6 +5077,7 @@ const handleGenerateIncidentSummaryPDF = async (
             className={` ${activeSection === "download" ? "generate-reports-download-forms-selected " : "generatereport-redirection-buttons"}`}
             onClick={() => {
               setActiveSection("download");
+              router.push("/dashboard/ReportsModule?section=download");
 
               // ⬇️ set the folder automatically based on their position
               if (session?.user?.position === "Secretary" ||

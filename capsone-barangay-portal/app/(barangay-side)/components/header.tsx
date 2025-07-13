@@ -72,9 +72,14 @@ export default function Header() {
         breadcrumb: ["Dashboard", "Summaries"],
       },
       // Generate Report
-      "/dashboard/ReportsModule": {
+      "/dashboard/ReportsModule?section=generate": {
         title: "Reports Module",
-        breadcrumb: ["Dashboard", "Reports Module"],
+        breadcrumb: ["Dashboard", "Reports Module", "Generate Report"],
+      },
+      // Download Form
+      "/dashboard/ReportsModule?section=download": {
+        title: "Reports Module",
+        breadcrumb: ["Dashboard", "Reports Module", "Download Form"],
       },
 
     /* 
@@ -97,7 +102,7 @@ export default function Header() {
         title: "Barangay Users",
         breadcrumb: ["User and Roles", "Barangay Users", "Edit Barangay User"],
       },
-      // ResidentUsers
+      // ResidentUsers 
       "/dashboard/admin/ResidentUsers": {
         title: "Resident Users",
         breadcrumb: ["User and Roles", "Resident Users"],
@@ -264,6 +269,155 @@ export default function Header() {
       }
     }
 
+
+    // Check if pathname is ReportsModule and look at 'section' query param
+    if (pathname === "/dashboard/ReportsModule") {
+      const section = searchParams.get("section");
+      if (section === "generate") {
+        return {
+          title: "Reports Module",
+          breadcrumb: ["Dashboard", "Reports Module", "Generate Report"],
+        };
+      } else if (section === "download") {
+        return {
+          title: "Reports Module",
+          breadcrumb: ["Dashboard", "Reports Module", "Download Form"],
+        };
+      }
+    }
+
+    // Check if pathname is ResidentUsers and look at 'section' query param
+    if (pathname === "/dashboard/admin/ResidentUsers") {
+      const section = searchParams.get("section");
+      if (section === "verified") {
+        return {
+          title: "Resident Users",
+          breadcrumb: ["User and Roles", "Resident Users", "Verified Users"],
+        };
+      } else if (section === "pending") {
+        return {
+          title: "Resident Users",
+          breadcrumb: ["Dashboard", "Resident Users", "Pending Users"],
+        };
+      }
+    }
+
+    // Check if pathname is InBarangayRequests and look at 'section' query param
+    if (pathname === "/dashboard/ServicesModule/InBarangayRequests") {
+      const section = searchParams.get("section");
+      if (section === "allrequest") {
+        return {
+          title: "In Barangay Requests",
+          breadcrumb: ["Services Management", "In Barangay Requests", "All Requests"],
+        };
+      } else if (section === "assignedtasks") {
+        return {
+          title: "In Barangay Requests",
+          breadcrumb: ["Services Management", "In Barangay Requests", "Assigned Tasks"],
+        };
+      }
+    }
+
+     // Check if pathname is ViewRequest and look at 'reqType' query param
+    if (pathname === "/dashboard/ServicesModule/ViewRequest") {
+      const reqType = searchParams.get("reqType");
+      if (reqType === "inbarangay") {
+        return {
+          title: "In Barangay Requests",
+          breadcrumb: ["Services Management", "In Barangay Requests", "View Request Details"],
+        };
+      } else if (reqType === "online") {
+        return {
+          title: "Online Requests",
+          breadcrumb: ["Services Management", "Online Requests", "View Request Details"],
+        };
+      }
+    }
+
+    // Check if pathname is OnlineReports and look at 'section' query param
+    if (pathname === "/dashboard/IncidentModule/OnlineReports") {
+      const section = searchParams.get("section");
+      if (section === "allrecords") {
+        return {
+          title: "Online Incident Reports",
+          breadcrumb: ["Incident Management", "Online Incident Reports", "All Records"],
+        };
+      } else if (section === "assignedtasks") {
+        return {
+          title: "Online Incident Reports",
+          breadcrumb: ["Incident Management", "Online Incident Reports", "Assigned Tasks"],
+        };
+      }
+    }
+
+    // Check if pathname is OnlineReports and look at 'section' query param
+    if (pathname === "/dashboard/IncidentModule/OnlineReports") {
+      const section = searchParams.get("section");
+      if (section === "allrecords") {
+        return {
+          title: "Online Incident Reports",
+          breadcrumb: ["Incident Management", "Online Incident Reports", "All Records"],
+        };
+      } else if (section === "assignedtasks") {
+        return {
+          title: "Online Incident Reports",
+          breadcrumb: ["Incident Management", "Online Incident Reports", "Assigned Tasks"],
+        };
+      }
+    }
+
+    // Check if pathname is AddIncident and look at 'departmentId' query param
+    if (pathname === "/dashboard/IncidentModule/AddIncident") {
+      const departmentId = searchParams.get("departmentId");
+      if (departmentId === "VAWC") {
+        return {
+          title: "Lupon Tagapamayapa: VAWC",
+          breadcrumb: ["Incident Management", "VAWC", "Add New Incident"],
+        };
+      } else if (departmentId === "GAD") {
+        return {
+          title: "Lupon Tagapamayapa: GAD",
+          breadcrumb: ["Incident Management", "GAD", "Add New Incident"],
+        };
+      } else if (departmentId === "BCPC") {
+        return {
+          title: "Lupon Tagapamayapa: BCPC",
+          breadcrumb: ["Incident Management", "BCPC", "Add New Incident"],
+        };
+      } else if (departmentId === "Lupon") {
+        return {
+          title: "Lupon Tagapamayapa: LUPON",
+          breadcrumb: ["Incident Management", "LUPON", "Add New Incident"],
+        };
+      }
+    }
+
+    // Check if pathname is EditIncident and look at 'department' query param
+    if (pathname === "/dashboard/IncidentModule/EditIncident") {
+      const department = searchParams.get("department");
+      if (department === "VAWC") {
+        return {
+          title: "Lupon Tagapamayapa: VAWC",
+          breadcrumb: ["Incident Management", "VAWC", "Edit Incident"],
+        };
+      } else if (department === "GAD") {
+        return {
+          title: "Lupon Tagapamayapa: GAD",
+          breadcrumb: ["Incident Management", "GAD", "Edit Incident"],
+        };
+      } else if (department === "BCPC") {
+        return {
+          title: "Lupon Tagapamayapa: BCPC",
+          breadcrumb: ["Incident Management", "BCPC", "Edit Incident"],
+        };
+      } else if (department === "Lupon") {
+        return {
+          title: "Lupon Tagapamayapa: LUPON",
+          breadcrumb: ["Incident Management", "LUPON", "Edit Incident"],
+        };
+      }
+    }
+
     // Fallback to static routes
     return staticMap[pathname] || {
       title: "Undefined",
@@ -283,16 +437,10 @@ export default function Header() {
             const href = "/" + pathSegments.slice(0, index + 1).join("/");
 
             return (
-              <Tag className="breadcrumb" key={index}>
-                {!isLast && index !== 0 ? (
-                  <Link href={href} className="breadcrumb-link">
-                    {crumb}
-                  </Link>
-                ) : (
-                  crumb
-                )}
-                {!isLast && <span className="chevron">/</span>}
-              </Tag>
+             <Tag className="breadcrumb" key={index}>
+              {crumb}
+              {!isLast && <span className="chevron">/</span>}
+            </Tag>
             );
           })}
         </div>

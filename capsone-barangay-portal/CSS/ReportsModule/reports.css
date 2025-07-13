@@ -917,12 +917,14 @@ border: 1px solid rgba(44, 62, 80, 0.7);
  
 }
 
+
 .download-btn, .delete-btn {
   padding: 8px 12px;
   font-size: 13px;
   border-radius: 5px;
   cursor: pointer;
   border: none;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 .download-btn {
@@ -933,6 +935,16 @@ border: 1px solid rgba(44, 62, 80, 0.7);
 .delete-btn {
   background-color: #e74c3c;
   color: white;
+}
+
+.download-btn:hover {
+  background-color: #1d3d59;
+  transform: scale(1.05);
+}
+
+.delete-btn:hover {
+  background-color: #d84838;
+  transform: scale(1.10);
 }
 
 

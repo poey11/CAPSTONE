@@ -2,7 +2,7 @@
 import "@/CSS/IncidentModule/OnlineReporting.css";
 import { useState, useEffect } from "react";
 import { getAllSpecificDocument } from "@/app/helpers/firestorehelper";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams} from "next/navigation";
 import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import {db} from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
@@ -21,7 +21,7 @@ export default function OnlineReports() {
   const [showCount, setShowCount] = useState<number>(0);
 
   const [taskAssignedData, setTaskAssignedData] = useState<any[]>([]);
-  
+  const searchParams = useSearchParams();
 
     // Helpers to manage viewed requests
 const getViewedRequests = (): string[] => {
@@ -40,6 +40,16 @@ const getViewedRequests = (): string[] => {
   };
 
   
+  useEffect(() => {
+  const section = searchParams.get("section");
+  if (!section) {
+    const params = new URLSearchParams(window.location.search);
+    params.set("section", "allrecords");
+
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    router.replace(newUrl, { scroll: false });
+  }
+}, []);
 
   useEffect(() => {
     const Collection = query(
@@ -283,24 +293,36 @@ const getViewedRequests = (): string[] => {
 
 
               {["main", "tasks"].map((section) => (
-            <button
-              key={section}
-              type="button"
-              className={`info-toggle-btn-assigned ${activeSection === section ? "active" : ""}`}
-              onClick={() => setActiveSection(section)}
-              style={{ position: "relative" }}
-            >
-              {section === "main" && "Online Records"}
-              {section === "tasks" && (
-                <>
-                  Assigned Tasks
-                  {taskAssignedData.length > 0 && (
-                    <span className="task-badge">{taskAssignedData.length}</span>
+                <button
+                  key={section}
+                  type="button"
+                  className={`info-toggle-btn-assigned ${activeSection === section ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveSection(section);
+
+                    // Preserve existing query params
+                    const params = new URLSearchParams(window.location.search);
+                    params.set(
+                      "section",
+                      section === "main" ? "allrecords" : "assignedtasks"
+                    );
+
+                    const newUrl = `${window.location.pathname}?${params.toString()}`;
+                    router.push(newUrl, { scroll: false });
+                  }}
+                  style={{ position: "relative" }}
+                >
+                  {section === "main" && "Online Records"}
+                  {section === "tasks" && (
+                    <>
+                      Assigned Tasks
+                      {taskAssignedData.length > 0 && (
+                        <span className="task-badge">{taskAssignedData.length}</span>
+                      )}
+                    </>
                   )}
-                </>
-              )}
-            </button>
-          ))}
+                </button>
+              ))}
 
 
 

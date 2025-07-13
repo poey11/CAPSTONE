@@ -22,6 +22,8 @@ export default function EditLuponIncident() {
     const [loading , setLoading] = useState(true);
     const router = useRouter();
     const searchParam = useSearchParams();
+
+
     
     const docId = searchParam.get("id");
     const [reportData, setReportData] = useState<any>();
@@ -105,6 +107,19 @@ export default function EditLuponIncident() {
         });
       }
     },[reportData]);
+
+
+    useEffect(() => {
+  const id = searchParam.get("id");
+  const department = reportData?.department;
+
+  // Only update if both exist and department not yet in URL
+  if (id && department && !searchParam.get("department")) {
+    // Manually build the ordered query string
+    const newUrl = `${window.location.pathname}?department=${encodeURIComponent(department)}&id=${encodeURIComponent(id)}`;
+    router.replace(newUrl, { scroll: false });
+  }
+}, [reportData]);
 
 
     const department =  reportData?.department;

@@ -250,7 +250,7 @@ export default function EditVoter() {
               </div>
           </div>
 
-          <div className="add-resident-bottom-section">
+          <div className="add-voter-bottom-section">
           <nav className="voters-info-toggle-wrapper">
               {["details"].map((section) => (
                 <button
