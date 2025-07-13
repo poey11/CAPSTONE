@@ -318,6 +318,22 @@ export default function Header() {
       }
     }
 
+     // Check if pathname is ViewRequest and look at 'reqType' query param
+    if (pathname === "/dashboard/ServicesModule/ViewRequest") {
+      const section = searchParams.get("reqType");
+      if (section === "inbarangay") {
+        return {
+          title: "In Barangay Requests",
+          breadcrumb: ["Services Management", "In Barangay Requests", "View Request Details"],
+        };
+      } else if (section === "online") {
+        return {
+          title: "Online Requests",
+          breadcrumb: ["Services Management", "Online Requests", "View Request Details"],
+        };
+      }
+    }
+
     // Fallback to static routes
     return staticMap[pathname] || {
       title: "Undefined",
