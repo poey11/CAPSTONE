@@ -1051,12 +1051,8 @@ export default function action() {
         console.log("Files:", files);
         console.log("Clearance Input:", clearanceInput);
 
-        await handleUploadClick(); // changed by dirick note para if may maging bug haha
+        const wait = await handleUploadClick(); // changed by dirick note para if may maging bug haha
 
-        handleUploadClick().then(() => {
-          router.push(`/dashboard/ServicesModule/InBarangayRequests`);
-        });
-        // Hide the popup after 3 seconds
         setTimeout(() => {
             setShowPopup(false);
         }, 3000);

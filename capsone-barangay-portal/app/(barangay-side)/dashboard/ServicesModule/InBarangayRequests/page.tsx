@@ -82,9 +82,6 @@ import { report } from "process";
               (report) => report.sendTo === position
             );
 
-            if (user?.position === "Admin Staff") {
-              filterReports = filterReports.filter((report) => report.status === "Pick-up");
-            }
 
             filterReports.sort((a, b) => {
               if (a.statusPriority !== b.statusPriority) {
