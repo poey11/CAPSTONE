@@ -1,3 +1,4 @@
+
 /*
 new
 */
@@ -461,7 +462,7 @@ html, body {
   overflow: hidden; 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   animation: fadeSlideIn 0.5s ease-out;
-  height: 650px;
+  height: 100%;
 }
 
 .generatereport-main-section1{
