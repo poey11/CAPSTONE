@@ -450,7 +450,7 @@ export default function JobSeekerListModule() {
        )}  
 
        {isPopupOpen && selectedUser && (
-        <div className="user-roles-view-popup-overlay">
+        <div className="user-roles-view-popup-overlay add-incident-animated">
           <div className="view-barangayuser-popup">
             <div className="view-user-main-section1">
                 <div className="view-user-header-first-section">
