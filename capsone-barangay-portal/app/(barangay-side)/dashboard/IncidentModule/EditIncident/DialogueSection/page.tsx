@@ -106,9 +106,9 @@ export default function DialogueSection() {
 
 
     return (
-        <main className="main-container-edit">
+        <main className="main-container-dialogue-hearing">
             <div className="edit-incident-redirectionpage-section">
-                <button className="edit-incident-redirection-buttons" onClick={handleInformationSection}>
+                <button className="edit-incident-redirection-buttons-selected" onClick={handleInformationSection}>
                     <div className="edit-incident-redirection-icons-section">
                     <img src="/images/profile-user.png" alt="user info" className="redirection-icons-info" /> 
                     </div>

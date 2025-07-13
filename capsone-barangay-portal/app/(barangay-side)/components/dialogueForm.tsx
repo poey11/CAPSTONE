@@ -287,8 +287,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     return (
         <>
             
-        <form onSubmit={handleSaveClick}>
-            <div className="edit-incident-main-content">
+        <form onSubmit={handleSaveClick} className="dialogue-hearing-container">
+            <div className="edit-incident-main-content-dialogue-hearing">
                 <div className="edit-incident-main-section1">
                     <div className="edit-incident-main-section1-left">
                         <button type="button" onClick={handleBack}>
@@ -308,7 +308,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                     
                 </div>
 
-                <div className="edit-incident-header-body">
+                <div className="edit-incident-header-body-dialogue">
                     <div className="dialogue-header-body-top-section">
                         <div className="edit-incident-info-toggle-wrapper">
                             {["meeting", "minutes" ].map((section) => (
