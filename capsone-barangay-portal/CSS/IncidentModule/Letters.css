@@ -10,13 +10,28 @@ html, body {
   
 }
 
+@keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 
 .main-container-letter{
   width: 100%;
-  height: auto;
+  height: 100vh;
   background-color: #F0F2F8; 
   margin-left: 1rem; 
+   display: flex;
+   flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
 
   padding-top: 14.2%;
@@ -46,18 +61,15 @@ html, body {
 .main-content-letter {
   display: flex;
   flex-direction: column;
-  width: 80%;
+  width: 90%;
   border-radius: 1rem;
-  border: 2px solid rgba(36, 53, 76, 0.7);
-  margin:  auto; 
   background-color: #ffffff;
   overflow: hidden; 
-  height: 650px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); 
-  overflow-y: auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  animation: fadeSlideIn 0.5s ease-out;
+  
 
-    scrollbar-width: thin;
-  scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+
 }
 
 
@@ -84,6 +96,10 @@ Scroll
   background-color: rgba(59, 130, 246, 0.7);
 }
 
+.container-letters {
+  width: 100%;
+  height: 100%;
+}
 
 
 
@@ -130,9 +146,25 @@ Scroll
   justify-content: center;
   align-items: center;
   width: 100%;
-  padding: 2rem;
-  height: auto;
+  height: 450px;
 }
+
+
+.scroll-letter {
+ width: 100%;
+  border: 1px solid rgba(44, 62, 80, 0.7);
+  border-radius: 8px;
+  overflow-y: auto;
+  height: 100%;
+
+  scrollbar-width: thin;
+  scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+
+}
+
+
+
+
 
 .section-2-letter-upper {
   display: flex;
@@ -161,29 +193,7 @@ Scroll
 
 }
 
-/*
-.section-2-information-section {
-    display: flex;
-    flex-direction: column;
-    width: 90%;
-    justify-content: space-between;
-     border: 1px solid rgba(36, 53, 76, 0.7);
-     margin-top: 2rem;
-     border-radius: 20px;
-}
 
-.section-2-information-top {
- background-color: #214666; 
-  padding-top: 10px;
-  padding-right: 10px;
-  padding-bottom: 10px;
-  padding-left: 60px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  border-radius: 20px;
-}
-*/
 
 .section-2-information-section {
   background-color: #ffffff;
@@ -928,78 +938,93 @@ POP UPS
 /* redirection section */
 .edit-incident-redirectionpage-section {
   width: 80%;
-  height: 100px;
-  margin:  auto;
-  margin-bottom: 30px;
+  height: 75px;
+  margin: auto;
+  margin-bottom: 20px;
   display: flex;
   flex-direction: row;
-  gap: 30px;
+  gap: 20px;
   align-items: center;
   justify-content: center;
   background-color: #ffffff;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #ccc;
+  padding: 10px 0;
 }
 
 .edit-incident-redirection-buttons {
-  width: 270px;
-  height: 50px;
+  width: 220px;
+  height: 40px;
   background-color: #ffffff;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid #ccc;
-  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 10, 0.2);
   display: flex;
   flex-direction: row;
   align-items: center;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 0 8px;
+}
+
+.edit-incident-redirection-buttons-selected {
+  background-color: #F0F2F8;
+  cursor: auto;
 }
 
 .edit-incident-redirection-buttons:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+  transform: scale(1.03);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.edit-incident-redirection-icons-section {
+  width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .edit-incident-redirection-icons-section img {
-  width: 30px;
-  height: 30px;
-  transition: transform 0.25s ease;
+  width: 22px;
+  height: 22px;
+  transition: transform 0.2s ease;
 }
 
 .edit-incident-redirection-buttons:not(:disabled):hover .edit-incident-redirection-icons-section img {
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
 .edit-incident-redirection-buttons h1,
 .edit-incident-redirection-buttons-selected h1,
 .edit-incident-redirection-buttons-selected-dialogue-hearing h1{
+  font-size: 14px;
+  font-weight: 600;
   color: #2C3E50;
-  font-weight: bolder;
-  font-size: 16px;
+  margin-left: 6px;
 }
 
 .redirection-icons-info
  {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   filter: invert(53%) sepia(89%) saturate(2143%) hue-rotate(1deg) brightness(90%) contrast(95%);
 }
 
 .redirection-icons-dialogue
  {
-  width: 25px;
-  height: 25px;
+  width: 22px;
+  height: 22px;
   filter: invert(53%) sepia(89%) saturate(2143%) hue-rotate(1deg) brightness(90%) contrast(95%);
 }
 
 .redirection-icons-hearing
  {
-  width: 33px;
-  height: 33px;
+  width: 22px;
+  height: 22px;
   filter: invert(53%) sepia(89%) saturate(2143%) hue-rotate(1deg) brightness(90%) contrast(95%);
 }
 
 .edit-incident-redirection-icons-section {
-  width: 70px;
+  width: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1033,23 +1058,24 @@ POP UPS
 .hearing-submenu {
   position: absolute;
   top: 100%;
-  left: -4;
+  left: 0;
   z-index: 10;
   background-color: white;
-  border-top: none;
-  border-radius: 0 0 0.5rem 0.5rem;
-  padding: 0.5rem 0;
   border: 1px solid #ccc;
-  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
-  min-width: 278px;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  padding: 0.3rem 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 10, 0.2);
+  min-width: 220px; /* ⬅️ smaller width */
   opacity: 0;
   transform: scale(0.95);
   transform-origin: top;
   transition: transform 0.2s ease, opacity 0.2s ease;
   pointer-events: none;
   visibility: hidden;
+  font-size: 0.85rem;
   color: #214666;
-  font-weight: bolder;
+  font-weight: 600;
 }
 
 .dialogue-dropdown:hover .dialogue-submenu,
@@ -1066,12 +1092,12 @@ POP UPS
   width: 100%;
   background: none;
   border: none;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   text-align: left;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   cursor: pointer;
   color: #214666;
-  transition: background-color 0.2s, color 0.4s;
+  transition: background-color 0.2s, color 0.3s;
   
 }
 
@@ -1087,8 +1113,8 @@ POP UPS
 .dialogue-dropdown:hover .edit-incident-redirection-buttons-selected-dialogue-hearing,
 .hearing-dropdown:hover .edit-incident-redirection-buttons-selected-dialogue-hearing
  {
-  transform: scale(1.03);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transform: scale(1.02);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -1096,8 +1122,8 @@ POP UPS
 
 .redirection-icons-dialogue,
 .redirection-icons-hearing {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   transition: transform 0.2s ease;
 }
 
@@ -1113,15 +1139,32 @@ POP UPS
 
 
 .edit-incident-redirection-buttons-selected-dialogue-hearing {
-  width: 270px;
-  height: 50px;
-  background-color: #F0F2F8;
-  border-radius: 8px;
+  width: 220px;
+  height: 40px;
+  background-color: #ffffff;
+  border-radius: 6px;
   border: 1px solid #ccc;
-  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 10, 0.2);
   display: flex;
   flex-direction: row;
   align-items: center;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 0 8px;
+
+}
+
+
+.edit-incident-redirection-buttons-selected-dialogue-hearing:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.edit-incident-redirection-buttons-selected-dialogue-hearing:not(:disabled):hover .edit-incident-redirection-icons-section img {
+  transform: scale(1.08);
+}
+
+.edit-incident-redirection-buttons-selected-dialogue-hearing h1{
+  font-size: 14px;
+  font-weight: 600;
+  color: #2C3E50;
+  margin-left: 6px;
 }
