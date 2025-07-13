@@ -9,6 +9,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { MonthYearModal } from "@/app/(barangay-side)/components/MonthYearModal"; 
 import { NatureOfWorkModal } from "@/app/(barangay-side)/components/NatureOfWorkModal"; 
+import { ServiceMonthYearModal } from "@/app/(barangay-side)/components/ServiceMonthYearModal"; 
+
 
 
 
@@ -4325,720 +4327,220 @@ const handleGenerateIncidentSummaryPDF = async (
 
     // Services Module
 
-  // Barangay Cert pending
+    const generateServiceRequestReport = async (
+      month: number,
+      year: number,
+      allTime: boolean,
+      docType: string,
+      status: string
+    ) => {
+      setLoadingBarangayCertMonthly(true);
+      setIsGenerating(true);
+    
+      try {
+        const startOfMonth = new Date(year, month, 1);
+        const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
+    
+        const reportTitle = allTime
+          ? `AS OF ALL TIME`
+          : `AS OF ${startOfMonth.toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+            }).toUpperCase()}`;
+    
+        const serviceRef = collection(db, "ServiceRequests");
+        const querySnapshot = await getDocs(serviceRef);
+    
+        const requests = querySnapshot.docs
+          .map((doc) => doc.data())
+          .filter((req) => {
+            const created = new Date(req.createdAt);
+            const matchesTime = allTime || (created >= startOfMonth && created <= endOfMonth);
+            const matchesDocType =
+              docType === "All" || req.docType?.toLowerCase().includes(docType.toLowerCase());
+            const matchesStatus =
+              status === "All" || req.status?.toLowerCase() === status.toLowerCase();
+            return matchesTime && matchesDocType && matchesStatus;
+          })
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+        if (requests.length === 0) {
+          alert("No service requests found for the selected criteria.");
+          setShowCertMonthlyModal(false);
+          setIsGenerating(false);
+          return null;
+        }
+    
+        // Load template
+        const templateRef = ref(storage, "ReportsModule/Barangay Requests_Template.xlsx");
+        const templateURL = await getDownloadURL(templateRef);
+        const templateResponse = await fetch(templateURL);
+        const templateBuffer = await templateResponse.arrayBuffer();
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(templateBuffer);
+        const worksheet = workbook.worksheets[0];
+    
 
-  const generateBarangayCertPendingMonthlyReport = async (
-    month: number,
-    year: number,
-    allTime: boolean = false
-  ) => {
-    setLoadingBarangayCertPending(true);
-    setIsGenerating(true);
-  
-    try {
-      const startOfMonth = new Date(year, month, 1);
-      const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
-  
-      const reportTitle = allTime
-        ? `AS OF ALL TIME`
-        : `AS OF ${startOfMonth.toLocaleDateString("en-US", {
+        worksheet.getCell("A1").value = allTime
+          ? "BARANGAY FAIRVIEW\nALL TIME SUMMARY OF SERVICE REQUESTS"
+          : "BARANGAY FAIRVIEW\nMONTHLY SUMMARY OF SERVICE REQUESTS";
+        worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };        
+
+        // Update subheader
+        worksheet.getCell("A2").value = reportTitle;
+    
+        // Insert data rows
+        const startRow = 4;
+        requests.forEach((req, idx) => {
+          const row = worksheet.getRow(startRow + idx);
+          row.height = 45;
+    
+          row.getCell(1).value = idx + 1;
+          row.getCell(2).value = req.requestId || "";
+          row.getCell(3).value = req.requestor || "";
+          row.getCell(4).value = req.purpose || "";
+          row.getCell(5).value = req.address || "";
+          row.getCell(6).value = req.contact || "";
+          row.getCell(7).value = new Date(req.createdAt).toLocaleDateString("en-US", {
             year: "numeric",
-            month: "long",
-          }).toUpperCase()}`;
-  
-      const serviceRef = collection(db, "ServiceRequests");
-      const q = query(serviceRef);
-      const querySnapshot = await getDocs(q);
-  
-      const requests = querySnapshot.docs
-        .map((doc) => doc.data())
-        .filter((req) => {
-          const isCert = req.docType === "Barangay Certificate";
-          const isCompleted = req.status?.toLowerCase() === "pending";
-          const created = new Date(req.createdAt);
-          return (
-            isCert &&
-            isCompleted &&
-            (allTime || (created >= startOfMonth && created <= endOfMonth))
-          );
-        })
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  
-      if (requests.length === 0) {
-        alert(
-          allTime
-            ? "No pending Barangay Certificate requests found."
-            : "No pending Barangay Certificate requests for the selected month."
-        );
-        setShowPendingCertModal(false);
-        setIsGenerating(false);
-        return null;
-      }
-  
-      const templateRef = ref(
-        storage,
-        "ReportsModule/Barangay Certificate Requests_Template.xlsx"
-      );
-      const url = await getDownloadURL(templateRef);
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-  
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(arrayBuffer);
-      const worksheet = workbook.worksheets[0];
-  
-      worksheet.getCell("A1").alignment = { horizontal: "center", wrapText: true };
-      worksheet.getCell("A3").value = reportTitle;
-      worksheet.getCell("A3").alignment = { horizontal: "center", wrapText: true };
-  
-      const originalFooterStartRow = 21;
-      const originalFooterEndRow = 25;
-      const footerDrawings = worksheet.getImages().filter((img) => {
-        const row = img.range?.tl?.nativeRow;
-        return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
-      });
-  
-      let insertionRow = 4;
-      const rowsNeeded = requests.length;
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));
-  
-      let count = 1;
-      requests.forEach((req) => {
-        const row = worksheet.getRow(insertionRow);
-        row.height = 45;
-  
-        const formattedCreatedAt = new Date(req.createdAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          });
+          row.getCell(8).value = req.status || "";
+    
+          for (let i = 1; i <= 8; i++) {
+            row.getCell(i).font = { name: "Calibri", size: 12 };
+            row.getCell(i).alignment = { horizontal: "center", wrapText: true };
+            row.getCell(i).border = {
+              top: { style: "medium" },
+              bottom: { style: "medium" },
+              left: { style: "medium" },
+              right: { style: "medium" },
+            };
+          }
+    
+          row.commit();
+        });
+    
+        // Move signature images / footer if present
+        if (worksheet.getImages) {
+          const footerDrawings = worksheet.getImages().filter((img) => img.range?.tl?.nativeRow >= 20);
+          footerDrawings.forEach((drawing) => {
+            const offset = requests.length;
+            if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+            if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+          });
+        }
+    
+        // Insert date row 3 rows below the last data + signatures
+        const lastFooterRow = 24 + requests.length;  // default signatures start at 24, adjust by inserted rows
+        const newDateRow = lastFooterRow + 3;
+    
+        worksheet.insertRow(newDateRow, []);
+        worksheet.mergeCells(`C${newDateRow}:D${newDateRow}`);
+        worksheet.mergeCells(`E${newDateRow}:F${newDateRow}`);
+    
+        const currentDate = new Date().toLocaleDateString("en-US", {
           year: "numeric",
-          month: "short",
+          month: "long",
           day: "numeric",
         });
-  
-        const cells = [
-          count,
-          req.requestId || "",
-          req.requestor || "",
-          req.purpose || "",
-          req.address || "",
-          req.contact || "",
-          formattedCreatedAt,
-          req.status || "",
-        ];
-  
-        cells.forEach((value, index) => {
-          const cell = row.getCell(index + 1);
-          cell.value = value;
-          cell.font = { name: "Calibri", size: 12 };
-          cell.alignment = { horizontal: "center", wrapText: true };
-          cell.border = {
-            top: { style: "medium" },
-            bottom: { style: "medium" },
-            left: { style: "medium" },
-            right: { style: "medium" },
-          };
+    
+        worksheet.getCell(`C${newDateRow}`).value = `${currentDate}\nDate`;
+        worksheet.getCell(`C${newDateRow}`).alignment = { wrapText: true, horizontal: "left" };
+        worksheet.getCell(`C${newDateRow}`).font = { name: "Calibri", size: 11, italic: true, bold: true };
+    
+        worksheet.getCell(`E${newDateRow}`).value = `${currentDate}\nDate`;
+        worksheet.getCell(`E${newDateRow}`).alignment = { wrapText: true, horizontal: "left" };
+        worksheet.getCell(`E${newDateRow}`).font = { name: "Calibri", size: 11, italic: true, bold: true };
+    
+        // Page setup
+        worksheet.pageSetup = {
+          horizontalCentered: true,
+          orientation: "landscape",
+          fitToPage: true,
+          fitToWidth: 1,
+          fitToHeight: 0,
+        };
+    
+        // Upload
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-  
-        row.commit();
-        insertionRow++;
-        count++;
-      });
-  
-      footerDrawings.forEach((drawing) => {
-        const offset = rowsNeeded;
-        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
-        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
-      });
-  
-      const footerShift = rowsNeeded;
-      const newDateRowIndex = originalFooterEndRow + footerShift + 1;
-  
-      worksheet.insertRow(newDateRowIndex - 1, []);
-      worksheet.insertRow(newDateRowIndex, []);
-  
-      const dateRow = worksheet.getRow(newDateRowIndex + 1);
-      dateRow.height = 40;
-  
-      const currentDate = new Date();
-      const formattedDate = currentDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-  
-      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(3);
-      dateCell1.value = `${formattedDate}\nDate`;
-      dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-      dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
-  
-      worksheet.mergeCells(`E${dateRow.number}:F${dateRow.number}`);
-      const dateCell2 = dateRow.getCell(5);
-      dateCell2.value = `${formattedDate}\nDate`;
-      dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-      dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
-  
-      dateRow.commit();
-  
-      worksheet.pageSetup = {
-        horizontalCentered: true,
-        verticalCentered: false,
-        orientation: "landscape",
-        paperSize: 9,
-        fitToPage: true,
-        fitToWidth: 1,
-        fitToHeight: 0,
-      };
-  
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-  
-      const paddedMonth = String(month + 1).padStart(2, "0");
-      const fileName = allTime
-        ? `BarangayCertificate_Pending_ALLTIME.xlsx`
-        : `BarangayCertificate_Pending_${year}_${paddedMonth}.xlsx`;
-      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
-      await uploadBytes(storageRef, blob);
-  
-      const fileUrl = await getDownloadURL(storageRef);
-      setGeneratingMessage("Generating Pending Barangay Certificate Report...");
-      return fileUrl;
-    } catch (error) {
-      console.error("Error generating report:", error);
-      setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate report");
-  
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
-      return null;
-    } finally {
-      setLoadingBarangayCertPending(false);
-      setShowPendingCertModal(false);
-    }
-  };
-  
-  const handleGenerateBarangayCertMonthlyPendingPDF = async (
-    month: number,
-    year: number,
-    allTime: boolean = false
-  ) => {
-    setLoadingBarangayCertPending(true);
-  
-    try {
-      const fileUrl = await generateBarangayCertPendingMonthlyReport(month, year, allTime);
-  
-      if (!fileUrl) {
-        alert(allTime
-          ? "No pending Barangay Certificate requests found."
-          : "No pending Barangay Certificate requests for the selected month."
-        );
-        return;
-      }
-  
-      const response = await fetch("/api/convertPDF", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileUrl }),
-      });
-  
-      if (!response.ok) throw new Error("PDF conversion failed");
-  
-      const blob = await response.blob();
-  
-      const label = allTime
-        ? "ALLTIME"
-        : new Date(year, month).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-          }).replace(" ", "");
-  
-      saveAs(blob, `BarangayCertificate_Pending_${label}.pdf`);
-    } catch (err) {
-      console.error("Error:", err);
-      alert("Failed to generate PDF");
-    } finally {
-      setLoadingBarangayCertPending(false);
-      setShowPendingCertModal(false);
-      setIsGenerating(false);
-
-    }
-  };
-  // barangay cert completed
-
-  const generateBarangayCertCompletedMonthlyReport = async (
-    month: number,
-    year: number,
-    allTime: boolean = false
-  ) => {
-    setLoadingBarangayCertCompleted(true);
-    setIsGenerating(true);
-  
-    try {
-      const startOfMonth = new Date(year, month, 1);
-      const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
-  
-      const reportTitle = allTime
-        ? `AS OF ALL TIME`
-        : `AS OF ${startOfMonth.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-          }).toUpperCase()}`;
-  
-      const serviceRef = collection(db, "ServiceRequests");
-      const q = query(serviceRef);
-      const querySnapshot = await getDocs(q);
-  
-      const requests = querySnapshot.docs
-        .map((doc) => doc.data())
-        .filter((req) => {
-          const isCert = req.docType === "Barangay Certificate";
-          const isCompleted = req.status?.toLowerCase() === "completed";
-          const created = new Date(req.createdAt);
-          return (
-            isCert &&
-            isCompleted &&
-            (allTime || (created >= startOfMonth && created <= endOfMonth))
-          );
-        })
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  
-      if (requests.length === 0) {
-        alert(
-          allTime
-            ? "No completed Barangay Certificate requests found."
-            : "No completed Barangay Certificate requests for the selected month."
-        );
-        setShowCompletedCertModal(false);
-        setIsGenerating(false);
+    
+        const paddedMonth = String(month + 1).padStart(2, "0");
+        const fileName = allTime
+          ? `Service Request Report_ALLTIME.xlsx`
+          : `Service Request Report_${year}_${paddedMonth}.xlsx`;
+    
+        const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+        await uploadBytes(storageRef, blob);
+    
+        const finalFileUrl = await getDownloadURL(storageRef);
+        setGeneratingMessage("Generating Service Request Report...");
+        return finalFileUrl;
+      } catch (err) {
+        console.error("Error generating report:", err);
+        setShowErrorGenerateReportPopup(true);
+        setPopupErrorGenerateReportMessage("Failed to generate report");
+        setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
         return null;
-      }
-  
-      const templateRef = ref(
-        storage,
-        "ReportsModule/Barangay Certificate Requests_Template.xlsx"
-      );
-      const url = await getDownloadURL(templateRef);
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-  
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(arrayBuffer);
-      const worksheet = workbook.worksheets[0];
-  
-      worksheet.getCell("A1").alignment = { horizontal: "center", wrapText: true };
-      worksheet.getCell("A3").value = reportTitle;
-      worksheet.getCell("A3").alignment = { horizontal: "center", wrapText: true };
-  
-      const originalFooterStartRow = 21;
-      const originalFooterEndRow = 25;
-      const footerDrawings = worksheet.getImages().filter((img) => {
-        const row = img.range?.tl?.nativeRow;
-        return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
-      });
-  
-      let insertionRow = 4;
-      const rowsNeeded = requests.length;
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));
-  
-      let count = 1;
-      requests.forEach((req) => {
-        const row = worksheet.getRow(insertionRow);
-        row.height = 45;
-  
-        const formattedCreatedAt = new Date(req.createdAt).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-  
-        const cells = [
-          count,
-          req.requestId || "",
-          req.requestor || "",
-          req.purpose || "",
-          req.address || "",
-          req.contact || "",
-          formattedCreatedAt,
-          req.status || "",
-        ];
-  
-        cells.forEach((value, index) => {
-          const cell = row.getCell(index + 1);
-          cell.value = value;
-          cell.font = { name: "Calibri", size: 12 };
-          cell.alignment = { horizontal: "center", wrapText: true };
-          cell.border = {
-            top: { style: "medium" },
-            bottom: { style: "medium" },
-            left: { style: "medium" },
-            right: { style: "medium" },
-          };
-        });
-  
-        row.commit();
-        insertionRow++;
-        count++;
-      });
-  
-      footerDrawings.forEach((drawing) => {
-        const offset = rowsNeeded;
-        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
-        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
-      });
-  
-      const footerShift = rowsNeeded;
-      const newDateRowIndex = originalFooterEndRow + footerShift + 1;
-  
-      worksheet.insertRow(newDateRowIndex - 1, []);
-      worksheet.insertRow(newDateRowIndex, []);
-  
-      const dateRow = worksheet.getRow(newDateRowIndex + 1);
-      dateRow.height = 40;
-  
-      const currentDate = new Date();
-      const formattedDate = currentDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-  
-      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(3);
-      dateCell1.value = `${formattedDate}\nDate`;
-      dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-      dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
-  
-      worksheet.mergeCells(`E${dateRow.number}:F${dateRow.number}`);
-      const dateCell2 = dateRow.getCell(5);
-      dateCell2.value = `${formattedDate}\nDate`;
-      dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-      dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
-  
-      dateRow.commit();
-  
-      worksheet.pageSetup = {
-        horizontalCentered: true,
-        verticalCentered: false,
-        orientation: "landscape",
-        paperSize: 9,
-        fitToPage: true,
-        fitToWidth: 1,
-        fitToHeight: 0,
-      };
-  
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-  
-      const paddedMonth = String(month + 1).padStart(2, "0");
-      const fileName = allTime
-        ? `BarangayCertificate_Completed_ALLTIME.xlsx`
-        : `BarangayCertificate_Completed_${year}_${paddedMonth}.xlsx`;
-      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
-      await uploadBytes(storageRef, blob);
-  
-      const fileUrl = await getDownloadURL(storageRef);
-      setGeneratingMessage("Generating Completed Barangay Certificate Report...");
-      return fileUrl;
-    } catch (error) {
-      console.error("Error generating report:", error);
-      setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate report");
-  
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
-      return null;
-    } finally {
-      setLoadingBarangayCertCompleted(false);
-      setShowCompletedCertModal(false);
-    }
-  };
-  
-  const handleGenerateBarangayCertMonthlyCompletedPDF = async (
-    month: number,
-    year: number,
-    allTime: boolean = false
-  ) => {
-    setLoadingBarangayCertCompleted(true);
-  
-    try {
-      const fileUrl = await generateBarangayCertCompletedMonthlyReport(month, year, allTime);
-  
-      if (!fileUrl) {
-        alert(allTime
-          ? "No completed Barangay Certificate requests found."
-          : "No completed Barangay Certificate requests for the selected month."
-        );
-        return;
-      }
-  
-      const response = await fetch("/api/convertPDF", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileUrl }),
-      });
-  
-      if (!response.ok) throw new Error("PDF conversion failed");
-  
-      const blob = await response.blob();
-  
-      const label = allTime
-        ? "ALLTIME"
-        : new Date(year, month).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-          }).replace(" ", "");
-  
-      saveAs(blob, `BarangayCertificate_Completed_${label}.pdf`);
-    } catch (err) {
-      console.error("Error:", err);
-      alert("Failed to generate PDF");
-    } finally {
-      setLoadingBarangayCertCompleted(false);
-      setShowCompletedCertModal(false);
-      setIsGenerating(false);
-
-    }
-  };
-  
-  const generateBarangayCertMonthlyReport = async (
-    month: number,
-    year: number,
-    allTime: boolean = false
-  ) => {
-    setLoadingBarangayCertMonthly(true);
-    setIsGenerating(true);
-  
-    try {
-      const startOfMonth = new Date(year, month, 1);
-      const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
-  
-      const reportTitle = allTime
-        ? `AS OF ALL TIME`
-        : `AS OF ${startOfMonth.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-          }).toUpperCase()}`;
-  
-      const serviceRef = collection(db, "ServiceRequests");
-      const q = query(serviceRef);
-      const querySnapshot = await getDocs(q);
-  
-      const requests = querySnapshot.docs
-        .map((doc) => doc.data())
-        .filter((req) => {
-          const isCert = req.docType === "Barangay Certificate";
-          const created = new Date(req.createdAt);
-          return (
-            isCert &&
-            (allTime || (created >= startOfMonth && created <= endOfMonth))
-          );
-        })
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  
-      if (requests.length === 0) {
-        alert(
-          allTime
-            ? "No Barangay Certificate requests found."
-            : "No Barangay Certificate requests for the selected month."
-        );
+      } finally {
+        setLoadingBarangayCertMonthly(false);
         setShowCertMonthlyModal(false);
-        setIsGenerating(false);
-        return null;
       }
+    };
+    
+      
+      
   
-      const templateRef = ref(
-        storage,
-        "ReportsModule/Barangay Certificate Requests_Template.xlsx"
-      );
-      const url = await getDownloadURL(templateRef);
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-  
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(arrayBuffer);
-      const worksheet = workbook.worksheets[0];
-  
-      worksheet.getCell("A1").alignment = { horizontal: "center", wrapText: true };
-      worksheet.getCell("A3").value = reportTitle;
-      worksheet.getCell("A3").alignment = { horizontal: "center", wrapText: true };
-  
-      const originalFooterStartRow = 21;
-      const originalFooterEndRow = 25;
-      const footerDrawings = worksheet.getImages().filter((img) => {
-        const row = img.range?.tl?.nativeRow;
-        return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
-      });
-  
-      let insertionRow = 4;
-      const rowsNeeded = requests.length;
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));
-  
-      let count = 1;
-      requests.forEach((req) => {
-        const row = worksheet.getRow(insertionRow);
-        row.height = 45;
-  
-        const formattedCreatedAt = new Date(req.createdAt).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-  
-        const cells = [
-          count,
-          req.requestId || "",
-          req.requestor || "",
-          req.purpose || "",
-          req.address || "",
-          req.contact || "",
-          formattedCreatedAt,
-          req.status || "",
-        ];
-  
-        cells.forEach((value, index) => {
-          const cell = row.getCell(index + 1);
-          cell.value = value;
-          cell.font = { name: "Calibri", size: 12 };
-          cell.alignment = { horizontal: "center", wrapText: true };
-          cell.border = {
-            top: { style: "medium" },
-            bottom: { style: "medium" },
-            left: { style: "medium" },
-            right: { style: "medium" },
-          };
-        });
-  
-        row.commit();
-        insertionRow++;
-        count++;
-      });
-  
-      footerDrawings.forEach((drawing) => {
-        const offset = rowsNeeded;
-        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
-        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
-      });
-  
-      const footerShift = rowsNeeded;
-      const newDateRowIndex = originalFooterEndRow + footerShift + 1;
-  
-      worksheet.insertRow(newDateRowIndex - 1, []);
-      worksheet.insertRow(newDateRowIndex, []);
-  
-      const dateRow = worksheet.getRow(newDateRowIndex + 1);
-      dateRow.height = 40;
-  
-      const currentDate = new Date();
-      const formattedDate = currentDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-  
-      worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
-      const dateCell1 = dateRow.getCell(3);
-      dateCell1.value = `${formattedDate}\nDate`;
-      dateCell1.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-      dateCell1.font = { name: "Calibri", size: 11, italic: true, bold: true };
-  
-      worksheet.mergeCells(`E${dateRow.number}:F${dateRow.number}`);
-      const dateCell2 = dateRow.getCell(5);
-      dateCell2.value = `${formattedDate}\nDate`;
-      dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-      dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
-  
-      dateRow.commit();
-  
-      worksheet.pageSetup = {
-        horizontalCentered: true,
-        verticalCentered: false,
-        orientation: "landscape",
-        paperSize: 9,
-        fitToPage: true,
-        fitToWidth: 1,
-        fitToHeight: 0,
+      const handleGenerateServiceRequestPDF = async (
+        month: number,
+        year: number,
+        allTime: boolean,
+        docType: string,
+        status: string
+      ) => {
+        setLoadingBarangayCertMonthly(true);
+      
+        try {
+          const fileUrl = await generateServiceRequestReport(month, year, allTime, docType, status);
+      
+          if (!fileUrl) {
+            alert("No service requests found for the selected criteria.");
+            return;
+          }
+      
+          const response = await fetch("/api/convertPDF", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fileUrl }),
+          });
+      
+          if (!response.ok) throw new Error("PDF conversion failed");
+      
+          const blob = await response.blob();
+      
+          const label = allTime
+            ? "ALLTIME"
+            : new Date(year, month).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+              }).replace(" ", "");
+      
+          saveAs(blob, `ServiceRequestReport_${label}.pdf`);
+        } catch (err) {
+          console.error("Error:", err);
+          alert("Failed to generate PDF");
+        } finally {
+          setLoadingBarangayCertMonthly(false);
+          setShowCertMonthlyModal(false);
+          setIsGenerating(false);
+        }
       };
-  
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-  
-      const paddedMonth = String(month + 1).padStart(2, "0");
-      const fileName = allTime
-        ? `BarangayCertificate_ALLTIME.xlsx`
-        : `BarangayCertificate_${year}_${paddedMonth}.xlsx`;
-      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
-      await uploadBytes(storageRef, blob);
-  
-      const fileUrl = await getDownloadURL(storageRef);
-      setGeneratingMessage("Generating Barangay Certificate Report...");
-      return fileUrl;
-    } catch (error) {
-      console.error("Error generating report:", error);
-      setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate report");
-  
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
-      return null;
-    } finally {
-      setLoadingBarangayCertCompleted(false);
-      setShowCompletedCertModal(false);
-    }
-  };
-  
-  const handleGenerateBarangayCertMonthlyPDF = async (
-    month: number,
-    year: number,
-    allTime: boolean = false
-  ) => {
-    setLoadingBarangayCertMonthly(true);
-  
-    try {
-      const fileUrl = await generateBarangayCertMonthlyReport(month, year, allTime);
-  
-      if (!fileUrl) {
-        alert(allTime
-          ? "No Barangay Certificate requests found."
-          : "No Barangay Certificate requests for the selected month."
-        );
-        return;
-      }
-  
-      const response = await fetch("/api/convertPDF", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileUrl }),
-      });
-  
-      if (!response.ok) throw new Error("PDF conversion failed");
-  
-      const blob = await response.blob();
-  
-      const label = allTime
-        ? "ALLTIME"
-        : new Date(year, month).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-          }).replace(" ", "");
-  
-      saveAs(blob, `BarangayCertificate_${label}.pdf`);
-    } catch (err) {
-      console.error("Error:", err);
-      alert("Failed to generate PDF");
-    } finally {
-      setLoadingBarangayCertMonthly(false);
-      setShowCertMonthlyModal(false);
-      setIsGenerating(false);
-
-    }
-  };
+      
 
 
   return (
@@ -5462,104 +4964,42 @@ const handleGenerateIncidentSummaryPDF = async (
                 <>
                   {currentPage === 1 && (
                     <div className="report-grid">
-                      <button  className="report-tile">
-                        <img src="/images/services.png" alt="user info" className="report-icon"/> 
-                          <p className="report-title">
-                            Most Requested Services Lists
-                          </p>
-                      </button>
-                        <>
-                              <button
-                                type="button"
-                                onClick={() => setShowPendingCertModal(true)}
-                                disabled={loadingBarangayCertPending}
-                                className={`report-tile ${loadingBarangayCertPending ? "disabled" : ""}`}
-                                aria-busy={loadingBarangayCertPending}
-                                aria-label="Generate Monthly Pending Barangay Certificate Report"
-                              >
-                                <img
-                                  src="/images/services.png"
-                                  alt="Barangay Certificate Icon"
-                                  className="report-icon"
-                                  aria-hidden="true"
-                                />
-                                <p className="report-title">
-                                  {loadingBarangayCertCompleted
-                                    ? "Generating..."
-                                    : "Monthly Barangay Certificate - Pending Status Report"}
-                                </p>
-                              </button>
-
-                              <MonthYearModal
-                                show={showPendingCertModal}
-                                onClose={() => setShowPendingCertModal(false)}
-                                onGenerate={handleGenerateBarangayCertMonthlyPendingPDF}
-                                loading={loadingBarangayCertPending}
-                                title="Generate Monthly Pending Barangay Certificate Report"
-                              />
-                            </>
-                
-                        <>
-                              <button
-                                type="button"
-                                onClick={() => setShowCompletedCertModal(true)}
-                                disabled={loadingBarangayCertCompleted}
-                                className={`report-tile ${loadingBarangayCertCompleted ? "disabled" : ""}`}
-                                aria-busy={loadingBarangayCertCompleted}
-                                aria-label="Generate Monthly Completed Barangay Certificate Report"
-                              >
-                                <img
-                                  src="/images/services.png"
-                                  alt="Barangay Certificate Icon"
-                                  className="report-icon"
-                                  aria-hidden="true"
-                                />
-                                <p className="report-title">
-                                  {loadingBarangayCertCompleted
-                                    ? "Generating..."
-                                    : "Monthly Barangay Certificate - Completed Status Report"}
-                                </p>
-                              </button>
-
-                              <MonthYearModal
-                                show={showCompletedCertModal}
-                                onClose={() => setShowCompletedCertModal(false)}
-                                onGenerate={handleGenerateBarangayCertMonthlyCompletedPDF}
-                                loading={loadingBarangayCertCompleted}
-                                title="Generate Monthly Completed Barangay Certificate Report"
-                              />
-                            </>
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => setShowCertMonthlyModal(true)}
-                            disabled={loadingBarangayCertMonthly}
-                            className={`report-tile ${loadingBarangayCertMonthly ? "disabled" : ""}`}
-                            aria-busy={loadingBarangayCertMonthly}
-                            aria-label="Generate Monthly Barangay Certificate Report"
-                          >
-                            <img
-                              src="/images/services.png"
-                              alt="Barangay Certificate Icon"
-                              className="report-icon"
-                              aria-hidden="true"
-                            />
-                            <p className="report-title">
-                              {loadingBarangayCertMonthly ? "Generating..." : "Monthly Barangay Certificate Report"}
-                            </p>
-                          </button>
-
-                          {/* Modal Triggered by the Button Above */}
-                          <MonthYearModal
-                            show={showCertMonthlyModal}
-                            onClose={() => setShowCertMonthlyModal(false)}
-                            onGenerate={handleGenerateBarangayCertMonthlyPDF}
-                            loading={loadingBarangayCertMonthly}
-                            title="Generate Monthly Barangay Certificate Report"
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setShowCertMonthlyModal(true)}
+                          disabled={loadingBarangayCertMonthly}
+                          className={`report-tile ${loadingBarangayCertMonthly ? "disabled" : ""}`}
+                          aria-busy={loadingBarangayCertMonthly}
+                          aria-label="Generate Custom Service Request Report"
+                        >
+                          <img
+                            src="/images/services.png"
+                            alt="Service Icon"
+                            className="report-icon"
+                            aria-hidden="true"
                           />
-                        </>
+                          <p className="report-title">
+                            {loadingBarangayCertMonthly ? "Generating..." : "Custom Service Request Report"}
+                          </p>
+                        </button>
 
-
+                        <ServiceMonthYearModal
+                          show={showCertMonthlyModal}
+                          onClose={() => setShowCertMonthlyModal(false)}
+                          onGenerate={(month, year, allTime, docType, status) => {
+                            void handleGenerateServiceRequestPDF(
+                              month,
+                              year,
+                              allTime ?? false,
+                              docType ?? "All",
+                              status ?? "All"
+                            );
+                          }}
+                          loading={loadingBarangayCertMonthly}
+                          title="Generate Custom Service Request Report"
+                        />
+                      </>
 
 
                     </div>
