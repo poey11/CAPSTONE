@@ -1808,7 +1808,9 @@ html, body {
 .dialogue-info-main-container{
   width: 90%;
   display: flex;
-   padding-bottom: 20px;
+  padding-bottom: 30px;
+  padding-top: 30px;
+
   
 }
 
@@ -2074,7 +2076,12 @@ s
 
 
 .hearing-main-section {
-  width: 100%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-left: 1rem;
+    justify-content: center;
 }
 
 
@@ -2085,9 +2092,8 @@ s
   justify-content: center; 
   gap: 30px;
   margin-bottom: 20px;
-  width: 70%;
+  width: 100%;
   align-items: center;
-
 }
 
 
@@ -2430,8 +2436,6 @@ For hearing main
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding-top: 20px;
-  width: 100%;
 }
 
 
@@ -2439,6 +2443,7 @@ For hearing main
   width: 100%;
   display:flex;
   justify-content: center;
+  padding-left: 40px;
 }
 
 .hearing-edit-section-2 {
