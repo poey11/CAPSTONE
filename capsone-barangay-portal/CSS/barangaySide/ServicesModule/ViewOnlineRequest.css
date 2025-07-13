@@ -518,7 +518,7 @@ html, body {
 
 .services-onlinereq-info-container-scrollable{
   width: 100%;
-  height: 350px;
+  height: 335px;
   border: 1px solid rgba(44, 62, 80, 0.7);
   border-radius: 8px;
   margin-right: 45px;
@@ -775,17 +775,7 @@ html, body {
   display: flex;
 }
 
-.services-onlinereq-info-container-scrollable{
-  width: 100%;
-  height: 350px;
-  border: 1px solid rgba(44, 62, 80, 0.7);
-  border-radius: 8px;
-  margin-right: 45px;
-  overflow-y: auto;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 20px;
-}
+
 
 .services-onlinereq-info-main-content{
   width: 100%;
