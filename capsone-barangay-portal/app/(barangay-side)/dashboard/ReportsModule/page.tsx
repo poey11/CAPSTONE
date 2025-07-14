@@ -3817,23 +3817,23 @@ const handleGenerateIncidentSummaryPDF = async (
       }
 
       
-      while (luponSettledReports.length < 30) {
-        const index = luponSettledReports.length + 1;
-        luponSettledReports.push({
-          caseNumber: `LSN-${String(index).padStart(4, '0')}`,
-          complainant: { fname: "Test", lname: `User${index}` },
-          respondent: { fname: "Dummy", lname: `Person${index}` },
-          nature: index % 2 === 0 ? "Criminal" : "Civil",
-          specifyNature: index % 3 === 0 ? "Physical Injury" : "",
-          isMediation: index % 4 === 0,
-          isConciliation: index % 5 === 0,
-          isArbitration: index % 6 === 0,
-          remarks: "Simulated settled entry",
-          status: "settled"
-        });
-      }
+      // while (luponSettledReports.length < 30) {
+      //   const index = luponSettledReports.length + 1;
+      //   luponSettledReports.push({
+      //     caseNumber: `LSN-${String(index).padStart(4, '0')}`,
+      //     complainant: { fname: "Test", lname: `User${index}` },
+      //     respondent: { fname: "Dummy", lname: `Person${index}` },
+      //     nature: index % 2 === 0 ? "Criminal" : "Civil",
+      //     specifyNature: index % 3 === 0 ? "Physical Injury" : "",
+      //     isMediation: index % 4 === 0,
+      //     isConciliation: index % 5 === 0,
+      //     isArbitration: index % 6 === 0,
+      //     remarks: "Simulated settled entry",
+      //     status: "settled"
+      //   });
+      // }
       
-      console.log("✅ Added test Lupon Settled Reports:", luponSettledReports);
+      // console.log("✅ Added test Lupon Settled Reports:", luponSettledReports);
       
   
       const templateRef = ref(storage, "ReportsModule/Lupon Tagapamayapa Settled Report Template.xlsx");
@@ -4045,18 +4045,18 @@ const handleGenerateIncidentSummaryPDF = async (
       const luponPendingReports = querySnapshot.docs.map((doc) => doc.data());
   
       // For testing - fill up to 30 if DB is empty or has few
-      while (luponPendingReports.length < 30) {
-        const index = luponPendingReports.length + 1;
-        luponPendingReports.push({
-          caseNumber: `LPN-${String(index).padStart(4, '0')}`,
-          complainant: { fname: "Test", lname: `User${index}` },
-          respondent: { fname: "Dummy", lname: `Person${index}` },
-          nature: index % 2 === 0 ? "Criminal" : "Civil",
-          isRepudiated: index % 4 === 0,
-          status: "Pending",
-          remarks: "Simulated pending entry"
-        });
-      }
+      // while (luponPendingReports.length < 30) {
+      //   const index = luponPendingReports.length + 1;
+      //   luponPendingReports.push({
+      //     caseNumber: `LPN-${String(index).padStart(4, '0')}`,
+      //     complainant: { fname: "Test", lname: `User${index}` },
+      //     respondent: { fname: "Dummy", lname: `Person${index}` },
+      //     nature: index % 2 === 0 ? "Criminal" : "Civil",
+      //     isRepudiated: index % 4 === 0,
+      //     status: "Pending",
+      //     remarks: "Simulated pending entry"
+      //   });
+      // }
   
       console.log("✅ Added test Lupon Pending Reports:", luponPendingReports);
   
