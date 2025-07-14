@@ -3324,6 +3324,28 @@ const uploadForms = async (url: string): Promise<void> => {
         );
         return null;
       }
+
+      // test data block
+
+
+      // while (incidentReports.length < 40) {
+      //   const idx = incidentReports.length + 1;
+      //   incidentReports.push({
+      //     caseNumber: `IR-${String(idx).padStart(4, '0')}`,
+      //     complainant: { fname: "Test", lname: `User${idx}` },
+      //     respondent: { fname: "Dummy", lname: `Person${idx}` },
+      //     department: ["Lupon", "VAWC", "BCPC", "GAD", "Online"][idx % 5],
+      //     nature: idx % 2 === 0 ? "Criminal" : "Civil",
+      //     concerns: idx % 3 === 0 ? "Noise Complaint" : "Dispute",
+      //     status: ["In - Progress", "Settled", "Archived"][idx % 3],
+      //     dateFiled: new Date().toLocaleDateString("en-US"),
+      //     timeFiled: new Date().toLocaleTimeString("en-US"),
+      //     createdAt: new Date()
+      //   });
+      // }
+
+
+      // end of test data block
   
       const templateRef = ref(storage, "ReportsModule/Summary of Incidents Template.xlsx");
       const url = await getDownloadURL(templateRef);
@@ -4483,6 +4505,33 @@ const handleGenerateIncidentSummaryPDF = async (
           return null;
         }
     
+        // test dummy data uncomment the part below only (ctrl + /) after highlighting
+
+        // while (requests.length < 30) {
+        //   const idx = requests.length + 1;
+          
+        //   let simulatedStatus;
+        //   if (status === "All") {
+        //     const statusOptions = ["Pending", "In - Progress", "Pick-up", "Completed", "Rejected"];
+        //     simulatedStatus = statusOptions[idx % statusOptions.length];
+        //   } else {
+        //     simulatedStatus = status;
+        //   }
+        
+        //   requests.push({
+        //     requestId: `SR-${String(idx).padStart(4, '0')}`,
+        //     requestor: `Test User ${idx}`,
+        //     purpose: idx % 2 === 0 ? "Employment" : "Scholarship",
+        //     address: `Test Address ${idx}`,
+        //     contact: `0917-0000${idx}`,
+        //     createdAt: new Date(),
+        //     status: simulatedStatus
+        //   });
+        // }
+        
+
+        // end of test block
+
         // Load template
         const templateRef = ref(storage, "ReportsModule/Barangay Requests_Template.xlsx");
         const templateURL = await getDownloadURL(templateRef);
