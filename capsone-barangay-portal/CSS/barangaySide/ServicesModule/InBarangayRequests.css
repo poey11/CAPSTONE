@@ -606,7 +606,7 @@ NO RESULTS POPUP IN TABLE
 ***/
 
 /* NEW UPDATED */
-.status-badge {
+.status-badge-inbarangay {
 padding: 5px 10px;            
 border-radius: 5px;          
 font-size: 13px;              
@@ -621,22 +621,22 @@ width: 100px;
 
 /* Colors for different statuses */
 
-.status-badge.pending {
+.status-badge-inbarangay.pending {
   background-color: #d4d64f;    
 }
 
-.status-badge.in-progress {
+.status-badge-inbarangay.in-progress {
     background-color: #dd5312;    
 }
-.status-badge.rejected {
+.status-badge-inbarangay.rejected {
   background-color: #e22929;    
 }
 
-.status-badge.pick-up {
+.status-badge-inbarangay.pick-up {
     background-color: #be5cb6;    
 }
 
-.status-badge.completed {
+.status-badge-inbarangay.completed {
   background-color: #4caf50;    
 }
 

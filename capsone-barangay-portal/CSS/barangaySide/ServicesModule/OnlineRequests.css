@@ -452,7 +452,7 @@ SCROLL FOR CHROME ETC
 
 
 /* NEW UPDATED */
-.status-badge {
+.status-badge-online-request {
 padding: 5px 10px;            
 border-radius: 5px;          
 font-size: 13px;              
@@ -469,22 +469,22 @@ width: 100px;
 
 /* Colors for different statuses */
 
-.status-badge.pending {
+.status-badge-online-request.pending {
   background-color: #d4d64f;    
 }
 
-.status-badge.in-progress {
+.status-badge-online-request.in-progress {
     background-color: #dd5312;    
 }
-.status-badge.rejected {
+.status-badge-online-request.rejected {
   background-color: #e22929;    
 }
 
-.status-badge.pick-up {
+.status-badge-online-request.pick-up {
     background-color: #be5cb6;    
 }
 
-.status-badge.completed {
+.status-badge-online-request.completed {
   background-color: #4caf50;    
 }
 

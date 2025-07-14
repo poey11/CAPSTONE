@@ -443,7 +443,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                 <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
                 <td>
-                    <span className={`status-badge ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
+                    <span className={`status-badge-online-request ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
                         {request.status}
                     </span>
                 </td>
@@ -530,7 +530,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                 <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
                 <td>
-                    <span className={`status-badge ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
+                    <span className={`status-badge-online-request ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
                         {request.status}
                     </span>
                 </td>

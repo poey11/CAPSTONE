@@ -485,7 +485,7 @@ useEffect(() => {
                         <td>{request.requestor}</td>
                         <td>{request.purpose}</td>
                         <td>
-                        <span className={`status-badge ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
+                        <span className={`status-badge-inbarangay ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
                             <p>{request.status}</p>
                           </span>
                         </td>
@@ -561,7 +561,7 @@ useEffect(() => {
                         <td>{request.requestor}</td>
                         <td>{request.purpose}</td>
                         <td>
-                          <span className={`status-badge ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
+                          <span className={`status-badge-inbarangay ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
                             {request.status}
                           </span>
                         </td>
