@@ -1,9 +1,9 @@
 
 
 .services-container-document {
-      height: 100vh;
+      height: 100%;
     width: 100%;
-     background-image: url('/Images/bghome.jpg');
+     /*background-image: url('/Images/bghome.jpg');*/
 }
 
 .headerpic-services {
@@ -33,6 +33,8 @@
   width: 100%;
   margin: 5rem auto;
 }
+
+
 
 
 
@@ -91,8 +93,8 @@ padding-top: 30px;
     border: 1px solid rgba(44, 62, 80, 0.7);
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.142);
-    transition: transform 0.2s, box-shadow 0.2s;
-    height: 70px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 80px;
     margin-bottom: 20px;
     margin-left: 20px;
     display: flex;
@@ -111,10 +113,16 @@ padding-top: 30px;
     font-size: 16px;
 }
 
+
+
 .documents-card:hover {
-      transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.444);
-    cursor: pointer;
+  /* not sure why di gumagana to for permits and other docs
+  transform: scale(1.08) translateY(-10px);*/
+
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.444);
+  cursor: pointer;
+  z-index: 20;
 }
 
 
@@ -266,6 +274,8 @@ to {
 
 
 
+
+
 .documents-container-column {
       margin-top: 20px;
     display: block;
@@ -300,3 +310,136 @@ to {
   gap: 55px;
   transform: translateY(-5px); /* move icon+text up inside the box */
 }
+
+
+.services-section-withbg {
+  position: relative;
+  height: 700px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.center-images {
+  position: relative;
+  width: 750px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Image styles */
+.background-services {
+  position: relative;
+  width: 750px;
+  z-index: 1;
+}
+
+.kap-services {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: 550px;
+}
+
+@keyframes fadeSlideInServices {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -70%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.services-explore-title {
+  position: absolute;
+  top: 15%; /* Adjust this to move up/down */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3; /* Above the kapitan image */
+  width: 100%;
+  text-align: center;
+  animation: fadeSlideInServices 1s ease-out forwards;
+}
+
+.services-explore-title h1 {
+  font-size: 40px;
+  color: #214666;
+  text-shadow:
+    1px 1px 3px rgba(0, 0, 0, 0.3),
+    0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Button columns */
+.button-column {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  top: 35%;
+  transform: translateY(-50%);
+  z-index: 3;
+}
+
+/* Move closer to center */
+.button-left {
+  left: 10%; /* adjust as needed */
+}
+
+.button-right {
+  right: 10%; /* adjust as needed */
+}
+
+/* Button styles */
+.button-column button {
+  padding: 12px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  background-color: #2C3E50;
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease;
+}
+
+.button-column button:hover {
+  background-color: #1A242F;
+}
+
+/* Left column alternate positions */
+.button-left .tooltip-wrapper:nth-child(odd) {
+  transform: translateX(15px);
+}
+.button-left .tooltip-wrapper:nth-child(even) {
+  transform: translateX(-15px);
+}
+
+/* Right column alternate positions */
+.button-right .documents-card:nth-child(odd) {
+  transform: translateX(-15px);  /* push right */
+}
+.button-right .documents-card:nth-child(even) {
+  transform: translateX(15px); /* push left */
+}
+
+
+
+/* Hidden initially */
+.slide-in {
+  opacity: 0;
+  transform: scale(0.8) translateY(30px);
+  transition: all 0.6s ease-out;
+}
+
+/* Animate in when in view */
+.slide-in-visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
