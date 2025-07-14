@@ -36,6 +36,7 @@ export default function SettingsPage() {
         profileImage: "",
         position:"",
         department: "",
+        userid: "",
     });
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -59,6 +60,7 @@ export default function SettingsPage() {
                     position: docSnap.data().position || "",
                     profileImage: docSnap.data().profileImage || "/images/user.png",
                     department: docSnap.data().department || "",
+                    userid: docSnap.data().userid || "",
                 });
 
                 setPreview(docSnap.data().fileURL || null);
@@ -342,23 +344,23 @@ export default function SettingsPage() {
                                         </select>
                                     </div>
 
+                             <div className="fields-section-settings">
+                                    <p>User ID</p>
+                                    <input
+                                    id="userid"
+                                    name="userid"
+                                    type="text"
+                                    className="input-field-settings"
+                                    value={userData.userid}
+                                    disabled
+                                    />
 
-                                    {userData.position === "LF Staff" && (
+                                </div>
 
-                                        <>
-                                        <div className="fields-section-settings">
-                                        <p>Department</p>
-                                        <input
-                                        id="department"
-                                        name="department"
-                                        type="text" 
-                                        className="input-field-settings"
-                                        value={userData.department} 
-                                        readOnly 
-                                        onChange={handleChange} />
-                                        </div>
-                                        </>
-                                        )}
+
+
+
+                            
                                     </div>
                             </div>
                             <div className="section-right-settings">
@@ -388,6 +390,23 @@ export default function SettingsPage() {
                                       readOnly 
                                       onChange={handleChange} />
                                 </div>
+
+                                        {userData.position === "LF Staff" && (
+
+                                        <>
+                                        <div className="fields-section-settings">
+                                        <p>Department</p>
+                                        <input
+                                        id="department"
+                                        name="department"
+                                        type="text" 
+                                        className="input-field-settings"
+                                        value={userData.department} 
+                                        readOnly 
+                                        onChange={handleChange} />
+                                        </div>
+                                        </>
+                                        )}
 
 
 
