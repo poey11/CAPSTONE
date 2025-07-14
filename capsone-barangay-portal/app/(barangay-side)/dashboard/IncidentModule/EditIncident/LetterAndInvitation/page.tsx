@@ -12,7 +12,9 @@ export default function GenerateDialogueLetter() {
     const user = useSession().data?.user;
     const searchParam = useSearchParams();
     const docId = searchParam.get("id")?.split("?")[0];
-    const actionId = searchParam.get("id")?.split("?")[1].split("=")[1];
+    const actionId = searchParam.get("action");
+    const department = searchParam.get("department");
+    /*const actionId = searchParam.get("id")?.split("?")[1].split("=")[1];*/
     const today = getLocalDateString(new Date());
     const [listOfStaffs, setListOfStaffs] = useState<any[]>([]);
     const [userInfo, setUserInfo] = useState<any | null>(null);
@@ -732,20 +734,20 @@ export default function GenerateDialogueLetter() {
       },[reportData]);
 
     const handleInformationSection = (e:any) => {
-        router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
+        router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
     };
 
-    const handleGenerateLetterAndInvitation = (e:any) => {
-        const action = e.currentTarget.name;
-        router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}?action=${action}`);
+    const handleGenerateLetterAndInvitation = (e: any) => {
+    const action = e.currentTarget.name;
+    router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=${action}&department=${department}`);
     };
-  
+
     const handleDialogueSection = () => {
-        router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
+    router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
     };
 
     const handleHearingSection = () => {
-        router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
+    router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
     };
 
 // const hearingLabels = ["First", "Second", "Third"];

@@ -232,6 +232,12 @@ export default function Header() {
         title: "Scheduled Appointments",
         breadcrumb: ["Services Management", "Appointments"],
       },
+
+      // Account Settings
+      "/dashboard/settingsPage": {
+        title: "Account Settings",
+        breadcrumb: ["Settings", "Account"],
+      },
     };
 
     
@@ -398,22 +404,106 @@ export default function Header() {
       if (department === "VAWC") {
         return {
           title: "Lupon Tagapamayapa: VAWC",
-          breadcrumb: ["Incident Management", "VAWC", "Edit Incident"],
+          breadcrumb: ["Incident Management", "VAWC", "Incident Details"],
         };
       } else if (department === "GAD") {
         return {
           title: "Lupon Tagapamayapa: GAD",
-          breadcrumb: ["Incident Management", "GAD", "Edit Incident"],
+          breadcrumb: ["Incident Management", "GAD", "Incident Details"],
         };
       } else if (department === "BCPC") {
         return {
           title: "Lupon Tagapamayapa: BCPC",
-          breadcrumb: ["Incident Management", "BCPC", "Edit Incident"],
+          breadcrumb: ["Incident Management", "BCPC", "Incident Details"],
         };
       } else if (department === "Lupon") {
         return {
           title: "Lupon Tagapamayapa: LUPON",
-          breadcrumb: ["Incident Management", "LUPON", "Edit Incident"],
+          breadcrumb: ["Incident Management", "LUPON", "Incident Details"],
+        };
+      }
+    }
+
+    // Check if pathname is LetterAndInvitation and look at 'department' query param
+    if (pathname === "/dashboard/IncidentModule/EditIncident/LetterAndInvitation") {
+    const action = searchParams.get("action");
+    const department = searchParams.get("department");
+
+    if (action === "summon" || action === "dialogue") {
+      const letterType = action === "summon" ? "Summon Letter" : "Dialogue Letter";
+
+      if (department === "VAWC") {
+        return {
+          title: "Lupon Tagapamayapa: VAWC",
+          breadcrumb: ["Incident Management", "VAWC", "Incident Details", letterType],
+        };
+      } else if (department === "GAD") {
+        return {
+          title: "Lupon Tagapamayapa: GAD",
+          breadcrumb: ["Incident Management", "GAD", "Incident Details", letterType],
+        };
+      } else if (department === "BCPC") {
+        return {
+          title: "Lupon Tagapamayapa: BCPC",
+          breadcrumb: ["Incident Management", "BCPC", "Incident Details", letterType],
+        };
+      } else if (department === "Lupon") {
+        return {
+          title: "Lupon Tagapamayapa: LUPON",
+          breadcrumb: ["Incident Management", "LUPON", "Incident Details", letterType],
+        };
+      }
+    }
+  }
+
+  // Check if pathname is DialogueSection and look at 'department' query param
+    if (pathname === "/dashboard/IncidentModule/EditIncident/DialogueSection") {
+      const department = searchParams.get("department");
+      if (department === "VAWC") {
+        return {
+          title: "Lupon Tagapamayapa: VAWC",
+          breadcrumb: ["Incident Management", "LUPON", "Incident Details", "Dialogue Section"],
+        };
+      } else if (department === "GAD") {
+        return {
+          title: "Lupon Tagapamayapa: GAD",
+          breadcrumb: ["Incident Management", "GAD", "Incident Details", "Dialogue Section"],
+        };
+      } else if (department === "BCPC") {
+        return {
+          title: "Lupon Tagapamayapa: BCPC",
+          breadcrumb: ["Incident Management", "BCPC", "Incident Details", "Dialogue Section"],
+        };
+      } else if (department === "Lupon") {
+        return {
+          title: "Lupon Tagapamayapa: LUPON",
+          breadcrumb: ["Incident Management", "LUPON", "Incident Details", "Dialogue Section"],
+        };
+      }
+    }
+
+    // Check if pathname is HearingSection and look at 'department' query param
+    if (pathname === "/dashboard/IncidentModule/EditIncident/HearingSection") {
+      const department = searchParams.get("department");
+      if (department === "VAWC") {
+        return {
+          title: "Lupon Tagapamayapa: VAWC",
+          breadcrumb: ["Incident Management", "LUPON", "Incident Details", "Hearing Section"],
+        };
+      } else if (department === "GAD") {
+        return {
+          title: "Lupon Tagapamayapa: GAD",
+          breadcrumb: ["Incident Management", "GAD", "Incident Details", "Hearing Section"],
+        };
+      } else if (department === "BCPC") {
+        return {
+          title: "Lupon Tagapamayapa: BCPC",
+          breadcrumb: ["Incident Management", "BCPC", "Incident Details", "Hearing Section"],
+        };
+      } else if (department === "Lupon") {
+        return {
+          title: "Lupon Tagapamayapa: LUPON",
+          breadcrumb: ["Incident Management", "LUPON", "Incident Details", "Hearing Section"],
         };
       }
     }
