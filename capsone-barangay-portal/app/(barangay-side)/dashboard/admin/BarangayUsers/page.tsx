@@ -487,7 +487,9 @@ useEffect(() => {
           createdAt: new Date().toISOString().split("T")[0],
           firstTimelogin: true,
           firstName: "User",
-          lastName: ""
+          lastName: "",
+          createdBy: user?.fullName || user?.name || "Unknown",
+
         });
     
         setPopupMessage("Barangay User created successfully!");
