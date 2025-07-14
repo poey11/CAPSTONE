@@ -220,7 +220,7 @@ export default function GenerateDialogueLetter() {
 
            setShowSubmitPopup({
                 show: true,
-                message: "SMS message for both parties sent succesfuly!",
+                message: "SMS message for both parties sent succesfully!",
                 message2: "",
                 letterType: "dialogue",
             });
@@ -233,8 +233,8 @@ export default function GenerateDialogueLetter() {
         console.log(err);
       }  finally {  //ADDED
              setTimeout(() => {
-            setIsLoading(false); // End loading after 2 seconds
-        }, 2000);
+            setIsLoading(false); // End loading after 1 seconds
+        }, 1000);
        }
       
     }
@@ -284,6 +284,7 @@ export default function GenerateDialogueLetter() {
         }   finally {  //ADDED
              setTimeout(() => {
             setIsLoading(false); // End loading after 2 seconds
+            setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
         }, 2000);
        }
     }
@@ -751,6 +752,15 @@ export default function GenerateDialogueLetter() {
 // const hearingLabels = ["First", "Second", "Third"];
 // const hearingB = hearingLabels[hearing] || "First";
 
+
+useEffect(() => {
+    if (reportData?.status === "archived" && reportData?.departmentId) {
+      router.push(`/dashboard/IncidentModule/Department?id=${reportData?.departmentId}`);
+    }
+  }, [reportData?.status, reportData?.departmentId]);
+  
+
+
   return (
     <main className="main-container-letter">
 
@@ -780,27 +790,45 @@ export default function GenerateDialogueLetter() {
                     {showSubmitPopup.letterType === "summon" ? (
                         <button
                         onClick={() => {
-                            sendSMSForSummons();
+                            //sendSMSForSummons();
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
-                        }}
+
+                            if (showSubmitPopup.letterType === "summon") {
+                                setTimeout(() => {
+                                  router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
+                                }, 3000); // wait 3 seconds
+                              } else {
+                                setTimeout(() => {
+                                  router.back();
+                                }, 3000); // wait 3 seconds
+                              }
+                            }}
                         className="letter-announcement-btn"
                         >
                         Send SMS
                         </button>
                     ) : (
+                        // CODE BLOCK FOR SEND SMS BUTTON INSIDE POP UP
                         <button
                         onClick={() => {
+                            // sendSMSForDialogue();
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+
                             if (showSubmitPopup.letterType === "dialogue") {
-                            router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
-                            } else {
-                            router.back();
-                            }
-                        }}
-                        className="close-button-letter"
+                                setTimeout(() => {
+                                  router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
+                                }, 3000); // wait 3 seconds
+                              } else {
+                                setTimeout(() => {
+                                  router.back();
+                                }, 3000); // wait 3 seconds
+                              }
+                            }}
+                        className="letter-announcement-btn"
                         >
-                        Close
+                        Send SMS
                         </button>
+                 
                     )}
                     </div>
                 </div>

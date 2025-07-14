@@ -74,14 +74,17 @@ export default function Dashboard() {
 // for online document request
   const [documentRequestOnlinePendingCount, setdocumentRequestOnlinePendingCount] = useState(0);
   const [documentRequestOnlineCompletedCount, setdocumentRequestOnlineCompletedCount] = useState(0);
+  const [documentRequestOnlineInProgressCount, setdocumentRequestOnlineInProgressCount] = useState(0);
   const [documentRequestOnlinePickUpCount, setdocumentRequestOnlinePickUpCount] = useState(0);
   const [documentRequestOnlineRejectedCount, setdocumentRequestOnlineRejectedCount] = useState(0);
 
 
   // for in barangay document request 
-  const [documentRequestNewCount, setdocumentRequestNewCount] = useState(0);
+  const [documentRequestPendingCount, setdocumentRequestPendingCount] = useState(0);
   const [documentRequestInProgressCount, setdocumentRequestInProgressCount] = useState(0);
+  const [documentRequestPickUpCount, setdocumentRequestPickUpCount] = useState(0);
   const [documentRequestCompletedCount, setdocumentRequestCompletedCount] = useState(0);
+  const [documentRequestRejectedCount, setdocumentRequestRejectedCount] = useState(0);
 
 
   const [firstTimeJobSeekersCount, setFirstTimeJobSeekersCount] = useState(0);
@@ -90,6 +93,7 @@ export default function Dashboard() {
   const [barangayIDCount, setBarangayIDCount] = useState(0);
   const [barangayClearanceCount, setBarangayClearanceCount] = useState(0);
   const [barangayCertificateCount, setBarangayCertificateCount] = useState(0);
+  const [barangayOtherDocumentsCount, setBarangayOtherDocumentsCount] = useState(0);
 
   const documentRequestsTypeData: { name: string; value: number }[] = [
     { name: "First Time Jobseeker", value: firstTimeJobSeekersCount },
@@ -98,15 +102,22 @@ export default function Dashboard() {
     { name: "Barangay ID", value: barangayIDCount },
     { name: "Barangay Permit", value: barangayPermitsCount },
     { name: "Barangay Certificate", value: barangayCertificateCount },
+    { name: "Other Documents", value: barangayOtherDocumentsCount },
   ];
   
-  const COLORS: string[] = ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#F44336", "#00BCD4"];
+  const COLORS: string[] = ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#F44336", "#00BCD4", "#CDDC39"];
   
 
 []>([]);
 
 const [incidentData, setIncidentData] = useState<any[]>([]);
 const [filteredIncidents, setFilteredIncidents] = useState<any[]>([]);
+
+
+// for appointments
+
+const [pendingAppointmentsCount, setPendingAppointmentsCount] = useState(0);
+const [completedAppointmentsCount, setCompletedAppointmentsCount] = useState(0);
   
 
 // site visits
@@ -143,18 +154,26 @@ useEffect(() => {
         barangayID = 0,
         clearance = 0,
         certificate = 0,
-        permit = 0;
+        permit = 0,
+        otherdocuments = 0;
 
     documentRequestsSnapshots.docs.forEach((doc) => {
+      
         const documentType = doc.data().docType;
-        if (documentType === "First Time Jobseeker") firsttimejobseeker++;
+        const purpose = doc.data().purpose;
+        if (purpose === "First Time Jobseeker") firsttimejobseeker++;
         else if (documentType === "Barangay Clearance") clearance++;
         else if (documentType === "Barangay Indigency") indigency++;
-        else if (documentType === "Barangay ID") barangayID++;
+        else if (purpose === "Barangay ID") barangayID++;
         else if (documentType === "Business Permit") permit++;
+        else if (documentType === "Barangay Permit") permit++;
         else if (documentType === "Temporary Business Permit") permit++;
-        else if (documentType === "Construction Permit") permit++;
+        else if (documentType === "Construction") permit++;
         else if (documentType === "Barangay Certificate") certificate++;
+        else {
+          otherdocuments++;
+          console.warn(`📂 Added to Other Documents — ID: ${doc.id}`, doc.data());
+        }
       });
 
       setFirstTimeJobSeekersCount(firsttimejobseeker);
@@ -162,42 +181,57 @@ useEffect(() => {
       setBarangayIndigencyCount(indigency);
       setBarangayIDCount(barangayID);
       setBarangayClearanceCount(clearance);
-      setBarangayCertificateCount(certificate)
+      setBarangayCertificateCount(certificate);
+      setBarangayIDCount(barangayID);
+      setBarangayOtherDocumentsCount(otherdocuments);
 
 
       let documentOnlinePending = 0,
       documentOnlinePickUp = 0,
+      documentOnlineInProgress = 0,
       documentOnlineCompleted = 0,
       documentOnlineRejected = 0,
-      documentNew = 0,
+      documentPending = 0,
       documentInProgress = 0,
-      documentCompleted = 0;
+      documentPickUp = 0,
+      documentCompleted = 0,
+      documentRejected = 0;
 
       documentRequestsSnapshots.docs.forEach((doc) => {
         const data = doc.data();
         const documentStatus = data.status;
         const accID = data.accID;
+        const reqType = data.reqType;
       
-        if (accID && accID != "Guest") { // if accID exists then online request
+        if (reqType === "Online" ) { // if accID exists then online request
           if (documentStatus === "Pending") documentOnlinePending++;
           else if (documentStatus === "Pick-up") documentOnlinePickUp++;
+          else if (documentStatus === "In - Progress") documentOnlineInProgress++;
           else if (documentStatus === "Completed") documentOnlineCompleted++;
           else if (documentStatus === "Rejected") documentOnlineRejected++;
-        } else {
+        
+        } else if (reqType === "In Barangay") {
+          
             // If accID does NOT exist then in-barangay
-            if (documentStatus === "Pending") documentNew++;
-            else if (documentStatus === "Pick-up") documentInProgress++;
+            if (documentStatus === "Pending") documentPending++;
+            else if (documentStatus === "In - Progress") documentInProgress++;
+            else if (documentStatus === "Pick-up") documentPickUp++;
             else if (documentStatus === "Completed") documentCompleted++;
+            else if (documentStatus === "Rejected") documentRejected++;
           }
         });
 
       setdocumentRequestOnlinePendingCount(documentOnlinePending);
+      setdocumentRequestOnlineInProgressCount(documentOnlineInProgress);
       setdocumentRequestOnlinePickUpCount(documentOnlinePickUp);
       setdocumentRequestOnlineCompletedCount(documentOnlineCompleted);
       setdocumentRequestOnlineRejectedCount(documentOnlineRejected);
-      setdocumentRequestNewCount(documentNew);
+
+      setdocumentRequestPendingCount(documentPending);
       setdocumentRequestInProgressCount(documentInProgress);
+      setdocumentRequestPickUpCount(documentPickUp);
       setdocumentRequestCompletedCount(documentCompleted);
+      setdocumentRequestRejectedCount(documentRejected);
 
       const DocumentRequestsWeeklyCounts: Record<string, { [key: string]: number }> = {};
 
@@ -278,7 +312,7 @@ useEffect(() => {
         seteastResidentsCount(eastCount);
         setwestResidentsCount(westCount);
         setsouthResidentsCount(southCount);
-  
+
         // for demographics pie chart
         const residents = residentsSnapshot.docs.map((doc) => doc.data());
 
@@ -410,6 +444,22 @@ useEffect(() => {
     // Increment the count for the department
     incidentMonthlyCounts[monthKey][report.department] += 1;
   });
+
+
+  // for appointments
+  let pendingAppointments = 0;
+  let completedAppointments = 0;
+  
+  documentRequestsSnapshots.docs.forEach((doc) => {
+    const data = doc.data();
+    if (data.appointmentDate && data.approvedBySAS === true) {
+      if (data.status === "Pending") pendingAppointments++;
+      else if (data.status === "Completed") completedAppointments++;
+    }
+  });
+  
+  setPendingAppointmentsCount(pendingAppointments);
+  setCompletedAppointmentsCount(completedAppointments);
   
 
   const formattedMonthlyData = Object.keys(incidentMonthlyCounts).map((month) => ({
@@ -442,6 +492,16 @@ useEffect(() => {
     ],
     colors: ["#4CAF50", "#2196F3", "#FF9800"],
   };
+
+  const appointmentsChart = {
+    title: "Pending or Completed Appointments",
+    count: pendingAppointmentsCount + completedAppointmentsCount,
+    data: [
+      { name: "Pending", value: pendingAppointmentsCount },
+      { name: "Completed", value: completedAppointmentsCount },
+    ],
+    colors: ["#FF9800", "#4CAF50"],
+  };
   
   const barangayDemographicsChart = {
     title: "Barangay Demographics",
@@ -463,20 +523,23 @@ useEffect(() => {
     
     // Dynamic count based on request type
     count: selectedRequestType === 'online'
-      ? documentRequestOnlinePendingCount + documentRequestOnlinePickUpCount + documentRequestOnlineCompletedCount + documentRequestOnlineRejectedCount
-      : documentRequestNewCount + documentRequestInProgressCount + documentRequestCompletedCount,
+      ? documentRequestOnlinePendingCount + documentRequestOnlineInProgressCount + documentRequestOnlinePickUpCount + documentRequestOnlineCompletedCount + documentRequestOnlineRejectedCount
+      : documentRequestPendingCount + documentRequestInProgressCount + documentRequestPickUpCount + documentRequestCompletedCount + documentRequestRejectedCount,
   
     data: selectedRequestType === 'online'
       ? [
-          { name: "Pending", value: documentRequestOnlinePendingCount },
-          { name: "For Pick-Up", value: documentRequestOnlinePickUpCount },
-          { name: "Completed", value: documentRequestOnlineCompletedCount },
-          { name: "Rejected", value: documentRequestOnlineRejectedCount},
+        { name: "Pending", value: documentRequestOnlinePendingCount },
+        { name: "In - Progress", value: documentRequestOnlinePendingCount },
+        { name: "For Pick-Up", value: documentRequestOnlinePickUpCount },
+        { name: "Completed", value: documentRequestOnlineCompletedCount },
+        { name: "Rejected", value: documentRequestOnlineRejectedCount},
         ]
       : [
-          { name: "New", value: documentRequestNewCount },
-          { name: "In Progress", value: documentRequestInProgressCount },
+          { name: "Pending", value: documentRequestPendingCount },
+          { name: "In - Progress", value: documentRequestInProgressCount },
+          { name: "For Pick-Up", value: documentRequestPickUpCount },
           { name: "Completed", value: documentRequestCompletedCount },
+          { name: "Rejected", value: documentRequestRejectedCount },
         ],
     
     colors: ["#4CAF50", "#2196F3", "#FF9800", "#D32F2F"],
@@ -663,6 +726,13 @@ const sortedDepartments = Object.entries(departmentTotals)
     return () => clearTimeout(timer);
   }, []);
 
+const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
+
+if (!mounted) return null;
   return (
     <main className="main-container">
       
@@ -801,39 +871,34 @@ const sortedDepartments = Object.entries(departmentTotals)
 
         {index === 2 && (
           <>
-            <div className="card-left-side">
-              <Link href="/dashboard/ServicesModule/Appointments">
-                <p
-                  className="title"
-                  style={{ cursor: "pointer", textDecoration: "underline" }}
-                >
-                    Pending or Completed Appointments {/*(to be implemented)*/}
-                </p>
-              </Link>
-              <p className="count">
-                {residentsCount}
-              </p>
-            </div>
 
-            <div className="card-right-side">
+          <div className="card-left-side">
+            <Link href="/dashboard/ServicesModule/Appointments">
+              <p className="title" style={{ cursor: "pointer", textDecoration: "underline" }}>
+                {appointmentsChart.title}
+              </p>
+            </Link>
+            <p className="count">{appointmentsChart.count}</p>
+          </div>
+          <div className="card-right-side">
               <ResponsiveContainer width={300} height={300}>
                 <PieChart>
                   <Pie
-                    data={barangayDemographics}
+                    data={appointmentsChart.data}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
+                    innerRadius={40}
+                    label
                   >
-                    {barangayDemographics.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={DEMOGRAPHICS_COLORS[index % DEMOGRAPHICS_COLORS.length]} />
+                    {appointmentsChart.data.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={appointmentsChart.colors[index % appointmentsChart.colors.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
-                  <Legend 
-                    wrapperStyle={{ fontSize: '13px' }}
-                  />
+                  <Legend wrapperStyle={{ fontSize: '13px' }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>

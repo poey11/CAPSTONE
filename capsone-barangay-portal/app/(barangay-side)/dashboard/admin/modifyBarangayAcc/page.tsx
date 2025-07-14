@@ -32,6 +32,8 @@ interface BarangayUser {
     phone: string;
     sex: string;
     department: string;
+    updatedBy?: string;
+    updatedAt?: string;
   }
 
 export default function EditBarangayAccount() {
@@ -131,7 +133,7 @@ export default function EditBarangayAccount() {
             }
         }
     
-        const contactPattern = /^0917\d{7}$/;
+        const contactPattern = /^091\d{8}$/;
         if (!contactPattern.test(formData.phone)) {
             setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
             setShowErrorPopup(true);
@@ -161,23 +163,29 @@ export default function EditBarangayAccount() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!userId || !formData) return;
-    
+      
         setLoading(true);
         try {
           const docRef = doc(db, "BarangayUsers", userId);
-          let updatedData: Partial<BarangayUser> = { ...formData };
-
+          let updatedData: Partial<BarangayUser> = { 
+            ...formData,
+            updatedBy: session?.user?.fullName || "Unknown",
+            updatedAt: new Date().toISOString(),          // optional: track time
+          };
+      
           if (password) { 
             updatedData.password = await hash(password, 12);
-        }
-            await updateDoc(docRef, updatedData);
-
+          }
+      
+          await updateDoc(docRef, updatedData);
+      
         } catch (err) {
           console.error(err);
-          setError("Failed to update job seeker");
+          setError("Failed to update barangay user");
         }
         setLoading(false);
-    };
+      };
+      
 
 
     const [showRecordDetails, setShowRecordDetails] = useState(false); 
