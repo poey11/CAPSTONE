@@ -74,7 +74,7 @@ import { useSession } from "next-auth/react";
           }));
           
           // Filter reports based on user position
-          const filteredReports = reports.filter((report) => report.sendTo === position);
+          const filteredReports = reports.filter((report) => report.sendTo === position && (report.status !== "Completed" && report.status !== "Rejected"));
 
           // Now sort client-side: Pending (1) first, then Pickup (2), etc.
           filteredReports.sort((a, b) => {

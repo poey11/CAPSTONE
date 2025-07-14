@@ -79,7 +79,7 @@ import { report } from "process";
 
              // Filter based on sendTo field
             let filterReports = reports.filter(
-              (report) => report.sendTo === position
+              (report) => report.sendTo === position && (report.status !== "Completed" && report.status !== "Rejected")
             );
 
 

@@ -834,6 +834,8 @@ const handleFileChange = (
     const getRequiredFields = (docType: string, purpose: string): string[] => {
     const required: string[] = [];
 
+    required.push("dateOfResidency");
+
     switch (purpose) {
       case "Residency":
         required.push("CYFrom", "CYTo", "attestedBy", "appointmentDate");

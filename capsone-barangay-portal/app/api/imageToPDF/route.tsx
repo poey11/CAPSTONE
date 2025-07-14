@@ -41,9 +41,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 try {
                     const imageUrlRef = ref(storage, `/ServiceRequests/${imageUrl}`);
                     const imageUrlB = await getDownloadURL(imageUrlRef);
-                    console.log("imageUrlRef:", imageUrlRef);
-                    console.log("Image URL:", imageUrlB);
-                    
                     const imageResponse = await fetch(imageUrlB);
                     const imageBytes = await imageResponse.arrayBuffer();
                     const byteArray = new Uint8Array(imageBytes);
