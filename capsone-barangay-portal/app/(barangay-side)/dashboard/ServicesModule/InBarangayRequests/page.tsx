@@ -521,7 +521,7 @@ useEffect(() => {
 
         {canSeeTasks && activeSection === "tasks" && (
           <>
-            <div className="inbarangayreq-main-section">
+            <div className="inbarangayreq-main-section-tasks">
               {loading ? (
                   <p>Loading Online Requests...</p>
                 ) : error ? (

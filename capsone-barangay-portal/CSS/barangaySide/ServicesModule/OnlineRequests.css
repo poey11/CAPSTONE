@@ -635,3 +635,114 @@ SCROLL FOR CHROME ETC
 
 
 
+
+
+.onlinereq-main-section-tasks {
+  flex: 1; /* Makes it take up remaining space */
+  display: flex; /* Ensures proper alignment */
+  flex-direction: column;
+  padding: 0;
+  margin: 0; /* Remove default margin */
+  overflow: auto; /* Allow scrolling if content overflows */
+  width: 100%;
+  
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background-color: #ffffff;
+  border-radius: 6px;
+  scrollbar-width: thin;
+  scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+
+
+
+    margin-top: 1.5rem; /* edited this line */
+    height:85%; /* edited this line */
+    max-height: 85%;
+}
+
+.onlinereq-main-section-tasks thead {
+  position: sticky;
+  top: 0;
+  background-color: #214666; /* Ensures it's visible when scrolled */
+  z-index: 10; /* Ensures it stays above other content */
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
+  
+  
+  height: 50px; /* edited this line */
+}
+
+.onlinereq-main-section-tasks table {
+    width: 100%; /* Ensures the table spans the full width */
+    border-collapse: collapse; /* Removes unnecessary spacing between table cells */
+}
+
+/* NEW UPDATED */
+.onlinereq-main-section-tasks td {
+  padding: 1rem; 
+  text-align: center; 
+  border-bottom: 2px solid #ddd;
+  color: rgb(44, 42, 42);
+  font-weight: normal;
+
+  font-size: 14px; /* added this line */
+}
+
+/* NEW UPDATED */
+.onlinereq-main-section-tasks th {
+  padding: 1rem; 
+  text-align: left; 
+  border-bottom: 2px solid #ddd;
+  color: #FFFFFF;
+  text-align: center;
+    
+  font-size: 14px; /* added this line */
+}
+
+/* NEW UPDATED ADDED THIS */
+.onlinereq-main-section-tasks tbody tr {
+  height: 50px; 
+}
+
+.onlinereq-main-section-tasks tbody tr:nth-child(even) {
+  background-color: #f0f4f8; /* Softer modern gray-blue tone */
+}
+
+.onlinereq-main-section-tasks tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* Crisp white */
+}
+
+.onlinereq-main-section-tasks tbody tr:hover { 
+   background-color: #d0e4f5 !important; /* Light pastel blue hover */
+
+  transition: background-color 0.2s ease;
+}
+
+
+
+
+
+
+
+
+/*
+SCROLL FOR CHROME ETC
+*/
+
+.onlinereq-main-section-tasks::-webkit-scrollbar {
+  width: 8px;
+}
+
+.onlinereq-main-section-tasks::-webkit-scrollbar-track {
+  background: transparent; 
+}
+
+.onlinereq-main-section-tasks::-webkit-scrollbar-thumb {
+  background-color: rgba(96, 165, 250, 0.5); 
+  border-radius: 8px;
+  border: 2px solid transparent; 
+  background-clip: content-box;  
+}
+
+.onlinereq-main-section-tasks::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(59, 130, 246, 0.7);
+}

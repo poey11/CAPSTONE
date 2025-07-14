@@ -490,7 +490,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
         {canSeeTasks && activeSection === "tasks" && (
           <>
 
-      <div className="onlinereq-main-section" /* edited this class*/>
+      <div className="onlinereq-main-section-tasks" /* edited this class*/>
           
               {loading ? (
             <p>Loading Online Requests...</p>
