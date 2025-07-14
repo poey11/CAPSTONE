@@ -7,7 +7,7 @@ import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "f
 import {db} from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 
-const statusOptions = ["All", "Settled  ", "pending", "In - Progress"];
+const statusOptions = ["All", "Settled", "pending", "In - Progress"];
 
 export default function OnlineReports() {
   const [incidentData, setIncidentData] = useState<any[]>([]);
@@ -19,6 +19,7 @@ export default function OnlineReports() {
   const user = useSession().data?.user;
   const [caseNumberSearch, setCaseNumberSearch] = useState("");
   const [showCount, setShowCount] = useState<number>(0);
+  const isAuthorized = ["LF Staff"].includes(user?.position || "");
 
   const [taskAssignedData, setTaskAssignedData] = useState<any[]>([]);
   const searchParams = useSearchParams();
@@ -268,30 +269,25 @@ const getViewedRequests = (): string[] => {
 
     const [activeSection, setActiveSection] = useState("main");
 
+
+
+    const canSeeTasks =
+      user?.position === "LF Staff";
+
+      /* NEW UPDATED ADDED */
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
+
+
   return (
     <main className="main-container-online-reports">
 
 
       <div className="section-1-online-reports">
-            <div className="assigned-incident-info-toggle-wrapper">
-
-              {/*
-
-               {["main", "tasks" ].map((section) => (
-                    <button
-                      key={section}
-                      type="button"
-                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                      onClick={() => setActiveSection(section)}
-                    >
-                      {section === "main" && "Online Records"}
-                      {section === "tasks" && "Assigned Tasks"}
-                    </button>
-                  ))}
-              
-              */}
 
 
+          {canSeeTasks && (
+    
+          <div className={`assigned-incident-info-toggle-wrapper ${filtersLoaded ? "filters-animated" : ""}`}>
               {["main", "tasks"].map((section) => (
                 <button
                   key={section}
@@ -322,19 +318,18 @@ const getViewedRequests = (): string[] => {
                     </>
                   )}
                 </button>
-              ))}
-
-
-
-                  
+              ))}   
           </div> 
+          )}
+
 
       </div>
 
       {activeSection === "main" && (
         <>
 
-      <div className="section-2-online-reports">
+   
+        <div className={`section-2-online-reports ${filtersLoaded ? "filters-animated" : ""}`}  /* edited this class*/>
         <input
           type="text"
           className="online-reports-filter"
@@ -372,7 +367,12 @@ const getViewedRequests = (): string[] => {
 
       </div>
 
-      <div className="main-section-online-reports">
+  
+        <div
+          className={`main-section-online-reports ${
+          !isAuthorized ? "expand-when-no-section1-onlinereports" : ""
+          }`}
+       >
         {currentIncidents.length === 0 ? (
           <div className="no-result-card">
             <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
@@ -395,7 +395,7 @@ const getViewedRequests = (): string[] => {
               </tr>
             </thead>
             <tbody>
-              {currentIncidents.map((incident, index) => {
+              {currentIncidents.map((incident, index) => {  
                 const fullName = `${incident.lastname || ""}, ${incident.firstname || ""}`.trim();
                 return (
                    <tr key={index} className={incident.isNew ? "highlight-new-request" : ""}>
