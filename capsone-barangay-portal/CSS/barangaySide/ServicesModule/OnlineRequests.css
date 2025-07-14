@@ -407,25 +407,29 @@ SCROLL FOR CHROME ETC
     justify-content: center;
 }
 
+/* Shared button styles */
 .action-view-services {
   border: none;
   cursor: pointer;
-
-
-  width: 20px;  /* edited this line */
-  height: 20px; /* edited this line */
+  width: 20px;
+  height: 20px;
   transition: transform 0.2s ease, filter 0.2s ease;
 }
 
-/* NEW UPDATED ADDED */
 .action-view-services:hover {
-  transform: scale(1.2); /* Slight zoom-in */
-  filter: brightness(1.3); /* Make icon a bit brighter */
+  transform: scale(1.2);
+  filter: brightness(1.3);
 }
 
-.action-view-services img {
-    filter: brightness(0) saturate(100%) invert(38%) sepia(78%) saturate(374%) hue-rotate(81deg) brightness(91%) contrast(92%);
+/* Image-specific filters */
+.view-icon {
+  filter: brightness(0) saturate(100%) invert(38%) sepia(78%) saturate(374%) hue-rotate(81deg) brightness(91%) contrast(92%);
 }
+
+.edit-icon {
+  filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-rotate(189deg) brightness(91%) contrast(101%);
+}
+
 
 
 .highlight-new-request {

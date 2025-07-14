@@ -491,8 +491,12 @@ useEffect(() => {
                         </td>
                         <td>
                           <div className="actions-inbarangay">
-                            <button className="action-inbarangay-view" /* edited this class */onClick={() => handleView(request.id, request.reqType)}>
-                                <img src="/Images/view.png" alt="View" />
+                            <button className="action-inbarangay-services" /* edited this class */onClick={() => handleView(request.id, request.reqType)}>
+                             <img
+                                className={isAuthorized ? "action-inbarangay-edit" : "action-inbarangay-view"}
+                                src={isAuthorized ? "/Images/edit.png" : "/Images/view.png"}
+                                alt={isAuthorized ? "Edit" : "View"}
+                              />
                             </button>
                           </div>
                         </td>
@@ -567,8 +571,8 @@ useEffect(() => {
                         </td>
                         <td>
                           <div className="actions-inbarangay">
-                            <button className="action-inbarangay-view" onClick={() => handleView(request.id, request.reqType)}>
-                                <img src="/Images/view.png" alt="View" />
+                            <button className="action-inbarangay-services" onClick={() => handleView(request.id, request.reqType)}>
+                               <img src="/Images/edit.png" alt="Edit" className="action-inbarangay-edit" />
                             </button>
                           </div>
                         </td>

@@ -453,7 +453,11 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                         className="action-view-services"
                         onClick={() => handleView(request)}
                     >
-                       <img src="/Images/view.png" alt="View" />
+                    <img
+                      className={isAuthorized ? "edit-icon" : "view-icon"}
+                      src={isAuthorized ? "/Images/edit.png" : "/Images/view.png"}
+                      alt={isAuthorized ? "Edit" : "View"}
+                    />
                     </button>
 
                   </div>
@@ -540,7 +544,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                         className="action-view-services"
                         onClick={() => handleView(request)}
                     >
-                       <img src="/Images/view.png" alt="View" />
+                         <img src="/Images/edit.png" alt="Edit" className="edit-icon" />
                     </button>
 
                   </div>
