@@ -4967,12 +4967,12 @@ const handleGenerateIncidentSummaryPDF = async (
 
                       {(session?.user?.department === "GAD" || session?.user?.department === "BCPC" || session?.user?.position === "Assistant Secretary")  && (
                         <>
-                          <button  className="report-tile">
+                          {/* <button  className="report-tile">
                             <img src="/images/genders.png" alt="user info" className="report-icon"/> 
                             <p className="report-title">
                               GADRCO Quarterly Monitoring Report
                             </p>
-                          </button>
+                          </button> */}
                         </>
                       )}
 
