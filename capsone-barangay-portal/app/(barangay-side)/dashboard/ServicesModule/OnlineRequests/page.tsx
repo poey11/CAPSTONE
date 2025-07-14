@@ -74,7 +74,7 @@ import { useSession } from "next-auth/react";
           }));
           
           // Filter reports based on user position
-          const filteredReports = reports.filter((report) => report.sendTo === position);
+          const filteredReports = reports.filter((report) => report.sendTo === position && (report.status !== "Completed" && report.status !== "Rejected"));
 
           // Now sort client-side: Pending (1) first, then Pickup (2), etc.
           filteredReports.sort((a, b) => {
@@ -143,35 +143,39 @@ import { useSession } from "next-auth/react";
       }
     }, [user]);
 
-    useEffect(() => {
-      let filtered = allOnlineRequests;
-      
+    
+const normalizeStatus = (status: string): string =>
+  status.toLowerCase().replace(/\s*-\s*/g, "-").trim();
 
-      // Filter by Document Type
-      if (searchType !== "" && searchType !== "All") {
-      filtered = filtered.filter((req) =>
-        req.docType.toLowerCase().includes(searchType.toLowerCase())
-      );
-    }
+useEffect(() => {
+  let filtered = allOnlineRequests;
 
-      // Filter by Date Range
-      if (dateFrom && dateTo) {
-        filtered = filtered.filter((req) => {
-          const requestDate = new Date(req.createdAt);
-          return requestDate >= new Date(dateFrom) && requestDate <= new Date(dateTo);
-        });
-      }
+  // Filter by Document Type
+  if (searchType !== "" && searchType !== "All") {
+    filtered = filtered.filter((req) =>
+      req.docType.toLowerCase().includes(searchType.toLowerCase())
+    );
+  }
 
-      // Filter by Status
-      if (statusFilter !== "") {
-        filtered = filtered.filter(
-          (req) => req.status.toLowerCase() === statusFilter.toLowerCase()
-        );
-      }
+  // Filter by Date Range
+  if (dateFrom && dateTo) {
+    filtered = filtered.filter((req) => {
+      const requestDate = new Date(req.createdAt);
+      return requestDate >= new Date(dateFrom) && requestDate <= new Date(dateTo);
+    });
+  }
 
-      setFilteredOnlineRequests(filtered);
-      setMainCurrentPage(1); // reset to first page when filters change
-    }, [searchType, dateFrom, dateTo, statusFilter, allOnlineRequests]);
+  // Filter by Status
+  if (statusFilter !== "") {
+    filtered = filtered.filter(
+      (req) => normalizeStatus(req.status) === normalizeStatus(statusFilter)
+    );
+  }
+
+  setFilteredOnlineRequests(filtered);
+  setMainCurrentPage(1);
+}, [searchType, dateFrom, dateTo, statusFilter, allOnlineRequests]);
+
 
 
 
@@ -385,10 +389,11 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
                   <option value="">Select Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="completed">Completed</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="forpickup">For Pick Up</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Rejected">Rejected</option>
+                  <option value="Pick-up">For Pick Up</option>
+                  <option value="In-Progress">In - Progress</option>
                 </select>
 
             </div>
@@ -438,7 +443,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                 <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
                 <td>
-                    <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
+                    <span className={`status-badge-online-request ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
                         {request.status}
                     </span>
                 </td>
@@ -448,7 +453,11 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                         className="action-view-services"
                         onClick={() => handleView(request)}
                     >
-                       <img src="/Images/view.png" alt="View" />
+                    <img
+                      className={isAuthorized ? "edit-icon" : "view-icon"}
+                      src={isAuthorized ? "/Images/edit.png" : "/Images/view.png"}
+                      alt={isAuthorized ? "Edit" : "View"}
+                    />
                     </button>
 
                   </div>
@@ -490,7 +499,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
         {canSeeTasks && activeSection === "tasks" && (
           <>
 
-      <div className="onlinereq-main-section" /* edited this class*/>
+      <div className="onlinereq-main-section-tasks" /* edited this class*/>
           
               {loading ? (
             <p>Loading Online Requests...</p>
@@ -525,8 +534,8 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                 <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
                 <td>
-                    <span className={`status-badge ${request.status.toLowerCase().replace(" ", "-")}`}>
-                        <p>{request.status}</p>
+                    <span className={`status-badge-online-request ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
+                        {request.status}
                     </span>
                 </td>
                 <td>
@@ -535,7 +544,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                         className="action-view-services"
                         onClick={() => handleView(request)}
                     >
-                       <img src="/Images/view.png" alt="View" />
+                         <img src="/Images/edit.png" alt="Edit" className="edit-icon" />
                     </button>
 
                   </div>

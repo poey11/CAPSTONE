@@ -132,7 +132,7 @@ export default function GenerateDocument() {
                 <div className="generatedocument-inbrgy-info-main-container">
                     <div className="generatedocument-inbrgy-top-section">
                         <div className="generate-documents-container">
-                            <div className="generate-documents-container-column"  >
+                            <div className="generate-documents-container-column">
                                 <div className="generate-documents-documents-card" onClick={handleSubmit} id="Barangay Certificate">
                                     <h1>Barangay Certificate</h1>
                                 </div>

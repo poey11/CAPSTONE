@@ -13,6 +13,7 @@ export default function HearingSection() {
     const router = useRouter();
     const searchParam = useSearchParams();
     const docId = searchParam.get("id");
+    const department = searchParam.get("department");
     const [reportData, setReportData] = useState<any>();
 
     const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
@@ -30,21 +31,21 @@ export default function HearingSection() {
     const [filledHearings, setFilledHearings] = useState<boolean[]>([false, false, false]);
 
     const handleInformationSection = (e:any) => {
-        router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
+        router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
     };
 
-    const handleGenerateLetterAndInvitation = (e:any) => {
-        const action = e.currentTarget.name;
-        router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}?action=${action}`);
+    const handleGenerateLetterAndInvitation = (e: any) => {
+    const action = e.currentTarget.name;
+    router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=${action}&department=${department}`);
     };
-  
+
     const handleDialogueSection = () => {
-        router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
+    router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
     };
-  
+
     const handleHearingSection = () => {
-        router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
-    };
+    router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
+    }
 
     useEffect(() => {
         if(docId){

@@ -272,7 +272,7 @@ export default function EditLuponIncident() {
       }
     };
     
-
+    
 
   const confirmSubmit = async () => {
     setShowSubmitPopup(false);
@@ -302,6 +302,8 @@ export default function EditLuponIncident() {
       router.back();
     };
     
+
+    /*
     const handleGenerateLetterAndInvitation = (e:any) => {
       const action = e.currentTarget.name;
       router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}?action=${action}`);
@@ -313,8 +315,21 @@ export default function EditLuponIncident() {
 
     const handleHearingSection = () => {
       router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
-    };
+    };*/
 
+
+const handleGenerateLetterAndInvitation = (e: any) => {
+  const action = e.currentTarget.name;
+  router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=${action}&department=${departmentId}`);
+};
+
+const handleDialogueSection = () => {
+  router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${departmentId}`);
+};
+
+const handleHearingSection = () => {
+  router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${departmentId}`);
+};
       
 
     useEffect(() => {
@@ -662,7 +677,7 @@ export default function EditLuponIncident() {
                   <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                 </button>
 
-                <h1> Edit Incident </h1>
+                <h1> Incident Details </h1>
               </div>
 
               <div className="action-btn-section">

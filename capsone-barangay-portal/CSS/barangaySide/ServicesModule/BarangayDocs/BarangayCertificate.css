@@ -794,7 +794,7 @@ html, body {
 /* NEW */
 .createRequest-main-container{
   width: 100%;
-  height: 100%;
+  height: 100vh;
   background-color: #F0F2F8; 
   margin-left: 1rem; 
 
@@ -807,11 +807,11 @@ html, body {
   flex-direction: column;
   width: 90%;
   border-radius: 1rem;
-  border: 2px solid rgba(36, 53, 76, 0.7);
+
   margin:  auto; 
   background-color: #ffffff;
   overflow: hidden; 
-  height: 650px;
+  height: 610px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   margin-top: 20px;
 }
