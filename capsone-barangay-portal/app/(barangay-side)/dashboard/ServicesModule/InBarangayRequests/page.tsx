@@ -79,12 +79,9 @@ import { report } from "process";
 
              // Filter based on sendTo field
             let filterReports = reports.filter(
-              (report) => report.sendTo === position
+              (report) => report.sendTo === position && (report.status !== "Completed" && report.status !== "Rejected")
             );
 
-            if (user?.position === "Admin Staff") {
-              filterReports = filterReports.filter((report) => report.status === "Pick-up");
-            }
 
             filterReports.sort((a, b) => {
               if (a.statusPriority !== b.statusPriority) {

@@ -38,18 +38,60 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
             // 🔽 Embed PNG from imageUrl (Firebase Storage public link)
             if (imageUrl) {
-                const imageResponse = await fetch(imageUrl);
-                const imageBytes = await imageResponse.arrayBuffer();
-                const pngImage = await pdfDoc.embedPng(imageBytes);
+                try {
+                    const imageUrlRef = ref(storage, `/ServiceRequests/${imageUrl}`);
+                    const imageUrlB = await getDownloadURL(imageUrlRef);
+                    const imageResponse = await fetch(imageUrlB);
+                    const imageBytes = await imageResponse.arrayBuffer();
+                    const byteArray = new Uint8Array(imageBytes);
+                    let embeddedImage;
+                                
+                    const isPng = byteArray[0] === 0x89 && byteArray[1] === 0x50; // PNG signature
+                    const isJpg = byteArray[0] === 0xff && byteArray[1] === 0xd8; // JPEG signature
+                                
+                    if (isPng) {
+                      embeddedImage = await pdfDoc.embedPng(imageBytes);
+                    } else if (isJpg) {
+                      embeddedImage = await pdfDoc.embedJpg(imageBytes);
+                    } else {
+                      throw new Error("Unsupported image format: Only PNG and JPG are supported");
+                    }
+                    
+                    const page = pdfDoc.getPages()[0];
+                    page.drawImage(embeddedImage, {
+                      x: 25,
+                      y: 108,
+                      width: 130,
+                      height: 105,
+                    });
 
-                const page = pdfDoc.getPages()[0]; // or choose specific page
+                    
+                } catch (error) {
+                    const imageResponse = await fetch(imageUrl);
+                    const imageBytes = await imageResponse.arrayBuffer();
+                    const byteArray = new Uint8Array(imageBytes);
+                    let embeddedImage;
+                                
+                    const isPng = byteArray[0] === 0x89 && byteArray[1] === 0x50; // PNG signature
+                    const isJpg = byteArray[0] === 0xff && byteArray[1] === 0xd8; // JPEG signature
+                                
+                    if (isPng) {
+                      embeddedImage = await pdfDoc.embedPng(imageBytes);
+                    } else if (isJpg) {
+                      embeddedImage = await pdfDoc.embedJpg(imageBytes);
+                    } else {
+                      throw new Error("Unsupported image format: Only PNG and JPG are supported");
+                    }
+                    
+                    const page = pdfDoc.getPages()[0];
+                    page.drawImage(embeddedImage, {
+                      x: 25,
+                      y: 108,
+                      width: 130,
+                      height: 105,
+                    });
+                }
 
-                page.drawImage(pngImage, {
-                    x: 25,
-                    y: 108, // Adjust placement as needed
-                    width:130,
-                    height:105,
-                });
             }
 
             const pdfBytes = await pdfDoc.save();

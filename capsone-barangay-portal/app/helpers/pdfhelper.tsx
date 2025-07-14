@@ -261,7 +261,7 @@ const handlePrint = async(requestData:any) => {
                 location: "/ServiceRequests/templates",
                 pdfTemplate: locationPath,
                 data: reqData,
-                imageUrl: requestData?.validIDjpg,
+                imageUrl: requestData?.twoByTwoPicture,
             })
         });
         if(!responseB.ok)throw new Error("Failed to generate PDF");

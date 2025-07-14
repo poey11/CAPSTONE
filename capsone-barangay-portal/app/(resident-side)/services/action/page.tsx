@@ -101,6 +101,7 @@ interface ClearanceInput {
   taxDeclaration: File | null;
   approvedBldgPlan: File | null;
   deathCertificate: File | null;
+  twoByTwoPicture: File | null;
 
   isViewed: boolean;
 }
@@ -116,7 +117,7 @@ export default function Action() {
   const docType = searchParam.get("doc") || "";
   const docPurpose = searchParam.get("purpose") || "";
   const router = useRouter();
-  const [nos, setNos] = useState(0);
+  const [nos, setNos] = useState(1);
 
   const [userData, setUserData] = useState<any>(null); // moved UP here
   const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
@@ -215,6 +216,7 @@ export default function Action() {
     taxDeclaration: null,
     approvedBldgPlan:null,
     deathCertificate: null,
+    twoByTwoPicture: null,
   })
 
   useEffect(() => {
@@ -548,6 +550,8 @@ const [files8, setFiles8] = useState<{ name: string, preview: string | undefined
 
 const [files9, setFiles9] = useState<{ name: string, preview: string | undefined }[]>([]);
 const [files10, setFiles10] = useState<{ name: string, preview: string | undefined }[]>([]);
+const [files11, setFiles11] = useState<{ name: string, preview: string | undefined }[]>([]);
+
 // const minDate = new Date().toISOString().split("T")[0]; 
 
 const [minDate, setMinDate] = useState<string>("");
@@ -704,6 +708,7 @@ const handleFileChange = (
 
     // Upload files to Firebase Storage if there are any
      for (const [key, storageRef] of Object.entries(storageRefs)) {
+      console
           const file = clearanceInput[key];
           if (file instanceof File && storageRef) {
             // Upload each file to storage
@@ -716,7 +721,9 @@ const handleFileChange = (
     let sendTo ="";
       if(clearanceInput.docType === "Barangay Certificate" || clearanceInput.docType === "Barangay Clearance" 
         || clearanceInput.docType === "Barangay Indigency" || clearanceInput.docType === "Temporary Business Permit"
-        || clearanceInput.docType === "Construction" || (docType === "Barangay Permit" && docPurpose)
+        || clearanceInput.docType === "Construction" || (docType === "Barangay Permit" && docPurpose)||
+        (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
+
       ) {
         sendTo = "SAS";
       } 
@@ -824,88 +831,84 @@ const handleFileChange = (
   });
 };
     
-    /* just add here to enable more warnings*/
     const getRequiredFields = (docType: string, purpose: string): string[] => {
-      const required: string[] = [
-        "requestorFname", 
-        "contact", 
-        "age", 
-        "birthday"
-      ];
-      if (purpose === "Residency") {
+    const required: string[] = [];
+
+    required.push("dateOfResidency");
+
+    switch (purpose) {
+      case "Residency":
         required.push("CYFrom", "CYTo", "attestedBy", "appointmentDate");
-      }
-      
-      if( purpose === "Occupancy / Moving Out") {
-        required.push("fromAddress", "toAddress", "fullName",);
+        break;
 
-      } 
+      case "Occupancy / Moving Out":
+        required.push("fromAddress", "toAddress", "fullName");
+        break;
 
-      if(purpose === "Estate Tax") {
-        required.push("deceasedEstateName", "estateSince","dateofdeath");
-      }
+      case "Estate Tax":
+        required.push("deceasedEstateName", "estateSince", "dateofdeath", "fullName");
+        break;
 
-      if(purpose === "Death Residency") {
+      case "Death Residency":
         required.push("dateofdeath", "fullName");
-      }
+        break;
 
-      if (purpose === "Garage/PUV") {
+      case "Garage/PUV":
         required.push("vehicleType", "noOfVechicles", "goodMoralOtherPurpose");
-      }
+        break;
 
-      if (purpose === "First Time Jobseeker") {
+      case "First Time Jobseeker":
         required.push("educationalAttainment", "course", "isBeneficiary");
-      }
+        break;
 
-      if(purpose==="No Income") {
+      case "No Income":
         required.push("noIncomePurpose", "noIncomeChildFName");
-      }
+        break;
 
-      if (purpose === "Cohabitation") {
-        required.push(
-          "partnerWifeHusbandFullName", "cohabitationStartDate", "cohabitationRelationship",
-        );
-      }
+      case "Cohabitation":
+        required.push("partnerWifeHusbandFullName", "cohabitationStartDate", "cohabitationRelationship");
+        break;
 
-      if (purpose === "Guardianship") {
-        required.push(
-          "wardFname", "wardRelationship", "guardianshipType", "fullName", "wardRelationship"
-        );
-      }
-    
-      if (purpose === "Garage/TRU") {
+      case "Guardianship":
+        required.push("wardFname", "wardRelationship", "guardianshipType", "fullName");
+        break;
+
+      case "Garage/TRU":
         required.push(
           "businessName", "businessLocation", "businessNature", "noOfVechicles",
           "vehicleMake", "vehicleType", "vehiclePlateNo", "vehicleSerialNo",
           "vehicleChassisNo", "vehicleEngineNo", "vehicleFileNo"
         );
-      }
-    
-      if (purpose === "Barangay ID") {
+        break;
+
+      case "Barangay ID":
         required.push(
           "birthplace", "religion", "nationality", "height", "weight", "bloodtype",
           "occupation", "precinctnumber",
           "emergencyDetails.fullName", "emergencyDetails.contactNumber",
-          "emergencyDetails.address", "emergencyDetails.relationship",
+          "emergencyDetails.address", "emergencyDetails.relationship"
         );
-      }
+        break;
 
-      if(docType === "Business Permit" || docType === "Temporary Business Permit") {
-        required.push(
-          "businessName", "businessLocation", "businessNature", "estimatedCapital",
-        );
-      }
+      default:
+        break;
+    }
 
-      if( docType === "Construction") {
-        required.push(
-          "typeofconstruction", "typeofbldg", "othersTypeofbldg", "projectName",
-          "projectLocation", "homeOrOfficeAddress",
-        );
+  // Add document-type-specific required fields
+  if (docType === "Business Permit" || docType === "Temporary Business Permit") {
+    required.push("businessName", "businessLocation", "businessNature", "estimatedCapital");
+  }
 
-      }
-    
-      return required;
-    };
+  if (docType === "Construction") {
+    required.push(
+      "typeofconstruction", "typeofbldg", "projectName", "projectLocation",
+      "homeOrOfficeAddress", "othersTypeofbldg"
+    );
+  }
+
+  return required;
+};
+
 
   
     // Handle form submission
@@ -928,12 +931,6 @@ const handleFileChange = (
       // Gather required fields for this docType/purpose
       const requiredFields = getRequiredFields(docType, clearanceInput.purpose);
 
-      // Add always-required fields for all forms
-      const alwaysRequired = [
-      "requestorFname", "requestorMrMs", "contact", "age", "birthday", "gender", "civilStatus", "citizenship", "address", "purpose" ,"dateOfResidency", "signaturejpg"
-      ];
-      requiredFields.push(...alwaysRequired);
-
       // Add dynamic fields (from filteredDynamicFields)
       requiredFields.push(...filteredDynamicFields);
 
@@ -947,10 +944,13 @@ const handleFileChange = (
       docType === "Barangay Certificate" ||
       docType === "Barangay Clearance" ||
       docType === "Barangay Indigency" ||
-      clearanceInput.purpose === "Barangay ID" ||
       clearanceInput.purpose === "First Time Jobseeker"
       ) {
         requiredImageFields.push("barangayIDjpg", "validIDjpg", "letterjpg");
+      }
+      if(clearanceInput.purpose === "Barangay ID"){
+        requiredImageFields.push("signaturejpg", "twoByTwoPicture");
+
       }
       if (docType === "Temporary Business Permit" || docType === "Business Permit") {
         requiredImageFields.push("copyOfPropertyTitle", "dtiRegistration", "isCCTV", "letterjpg");
@@ -1023,7 +1023,7 @@ const handleFileChange = (
       ...Object.keys(dynamicFileStates), // Add dynamic image fields
       "barangayIDjpg", "validIDjpg", "letterjpg", "signaturejpg",
       "copyOfPropertyTitle", "dtiRegistration", "isCCTV",
-      "taxDeclaration", "approvedBldgPlan", "deathCertificate"
+      "taxDeclaration", "approvedBldgPlan", "deathCertificate", "twoByTwoPicture"
       ];
 
       const filenames: Record<string, string> = {};
@@ -1159,7 +1159,8 @@ const handleFileChange = (
           address: clearanceInput.emergencyDetails?.address || "",
           contactNumber: clearanceInput.emergencyDetails?.contactNumber || "",
           relationship: clearanceInput.emergencyDetails?.relationship || "",
-        }
+        },
+        ...(clearanceInput.twoByTwoPicture && { twoByTwoPicture: filenames.twoByTwoPicture }),
         }),
         ...(clearanceInput.purpose === "First Time Jobseeker" && {
         educationalAttainment: clearanceInput.educationalAttainment,
@@ -1170,7 +1171,7 @@ const handleFileChange = (
 
       filteredDynamicFields.forEach((fieldName) => {
         if (
-        !["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg"].includes(fieldName) &&
+        !["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg", "twoByTwoPicture"].includes(fieldName) &&
         clearanceInput[fieldName] !== undefined
         ) {
         clearanceVars[fieldName] = clearanceInput[fieldName];
@@ -3496,7 +3497,7 @@ const handleFileChange = (
                           <input
                             id="file-upload8"
                             type="file"
-                            required
+                            //required
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                               handleFileChange(e, setFiles10, 'deathCertificate');
                             }}
@@ -3549,6 +3550,75 @@ const handleFileChange = (
                     </div>
                   </>
                 )}
+
+                {(docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") && (
+                  <div className="required-documents-container">
+                    <label className="form-label-required-documents"> 2x2 Barangay ID picture<span className="required">*</span></label>
+
+                    <div className="file-upload-container-required-documents">
+                      <label htmlFor="file-upload11"  className="upload-link">Click to Upload File</label>
+                        <input
+                          id="file-upload11"
+                          type="file"
+                          accept=".jpg,.jpeg,.png"
+                          name="twoByTwoPicture"
+                          //required={(docType === "Temporary Business Permit" || docType === "Business Permit"|| docType === "Construction")}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            handleFileChange(e,setFiles11, 'twoByTwoPicture');
+                          
+                          }} // Handle file selection
+
+                          style={{ display: "none" }}
+                        />
+
+                      <div className="uploadedFiles-container">
+                        {/* Display the file names with image previews */}
+                        {files11.length > 0 && (
+                          <div className="file-name-image-display">
+                            <ul>
+                              {files11.map((file, index) => (
+                                <div className="file-name-image-display-indiv" key={index}>
+                                  <li> 
+                                      {/* Display the image preview */}
+                                      {file.preview && (
+                                        <div className="filename&image-container">
+                                          <img
+                                            src={file.preview}
+                                            alt={file.name}
+                                            style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                          />
+                                        </div>
+                                        )}
+                                      {file.name}  
+                                    <div className="delete-container">
+                                      {/* Delete button with image */}
+                                      <button
+                                          type="button"
+                                          onClick={() => handleFileDelete('file-upload11', setFiles11)}
+                                          className="delete-button"
+                                        >
+                                          <img
+                                            src="/images/trash.png"  
+                                            alt="Delete"
+                                            className="delete-icon"
+                                          />
+                                        </button>
+
+                                    </div>
+
+                                      
+                                  </li>
+                                </div>
+                              ))}  
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+
                 <div className="required-documents-container">
                   <label className="form-label-required-documents"> Upload Signature Over Printed Name<span className="required">*</span></label>
 
@@ -3816,79 +3886,87 @@ const handleFileChange = (
                     </div>
                   </>
                 )}
+                    
 
+                {(docType !== "Construction" &&  clearanceInput.purpose !== "Barangay ID") && (
+                  <>
+                    <div className="required-documents-container">
+                    <label className="form-label-required-documents"> Endorsement Letter from Homeowner/Sitio President</label>
+                    <label className="form-sub-label-required-documents"> (for residents of Barangay Fairview for less than 6 months)</label>
 
-                <div className="required-documents-container">
-                  <label className="form-label-required-documents"> Endorsement Letter from Homeowner/Sitio President</label>
-                  <label className="form-sub-label-required-documents"> (for residents of Barangay Fairview for less than 6 months)</label>
+                    <div className="file-upload-container-required-documents">
+                      <label htmlFor="file-upload4"  className="upload-link">Click to Upload File</label>
+                        <input
+                          id="file-upload4"
+                          type="file"
+                          accept=".jpg,.jpeg,.png"
+                          name="letterjpg"
+                          //required={(docType === "Temporary Business Permit" || docType === "Business Permit"|| docType === "Construction")}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            handleFileChange(e,setFiles4, 'letterjpg');
+                          
+                          }} // Handle file selection
 
-                  <div className="file-upload-container-required-documents">
-                    <label htmlFor="file-upload4"  className="upload-link">Click to Upload File</label>
-                      <input
-                        id="file-upload4"
-                        type="file"
-                        accept=".jpg,.jpeg,.png"
-                        name="letterjpg"
-                        //required={(docType === "Temporary Business Permit" || docType === "Business Permit"|| docType === "Construction")}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          handleFileChange(e,setFiles4, 'letterjpg');
-                        
-                        }} // Handle file selection
+                          style={{ display: "none" }}
+                        />
 
-                        style={{ display: "none" }}
-                      />
+                      <div className="uploadedFiles-container">
+                        {/* Display the file names with image previews */}
+                        {files4.length > 0 && (
+                          <div className="file-name-image-display">
+                            <ul>
+                              {files4.map((file, index) => (
+                                <div className="file-name-image-display-indiv" key={index}>
+                                  <li> 
+                                      {/* Display the image preview */}
+                                      {file.preview && (
+                                        <div className="filename&image-container">
+                                          <img
+                                            src={file.preview}
+                                            alt={file.name}
+                                            style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                          />
+                                        </div>
+                                        )}
+                                      {file.name}  
+                                    <div className="delete-container">
+                                      {/* Delete button with image */}
+                                      <button
+                                          type="button"
+                                          onClick={() => handleFileDelete('file-upload4', setFiles4)}
+                                          className="delete-button"
+                                        >
+                                          <img
+                                            src="/images/trash.png"  
+                                            alt="Delete"
+                                            className="delete-icon"
+                                          />
+                                        </button>
 
-                    <div className="uploadedFiles-container">
-                      {/* Display the file names with image previews */}
-                      {files4.length > 0 && (
-                        <div className="file-name-image-display">
-                          <ul>
-                            {files4.map((file, index) => (
-                              <div className="file-name-image-display-indiv" key={index}>
-                                <li> 
-                                    {/* Display the image preview */}
-                                    {file.preview && (
-                                      <div className="filename&image-container">
-                                        <img
-                                          src={file.preview}
-                                          alt={file.name}
-                                          style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                        />
-                                      </div>
-                                      )}
-                                    {file.name}  
-                                  <div className="delete-container">
-                                    {/* Delete button with image */}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleFileDelete('file-upload4', setFiles4)}
-                                        className="delete-button"
-                                      >
-                                        <img
-                                          src="/images/trash.png"  
-                                          alt="Delete"
-                                          className="delete-icon"
-                                        />
-                                      </button>
+                                    </div>
 
-                                  </div>
-                                              
-                                    
-                                </li>
-                              </div>
-                            ))}  
-                          </ul>
-                        </div>
-                      )}
+                                      
+                                  </li>
+                                </div>
+                              ))}  
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-
+                  </>
+                  )}
+                    
 
                 
+
+                
+
               </div>
             </>
           )}
+          
 
           <button type="submit" className="submit-button-document-req">Submit</button>
 
