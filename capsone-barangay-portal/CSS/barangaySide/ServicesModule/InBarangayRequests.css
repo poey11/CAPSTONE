@@ -607,21 +607,17 @@ NO RESULTS POPUP IN TABLE
 
 /* NEW UPDATED */
 .status-badge {
-  border-radius: 5px;                     
-  color: white;                
-  display: inline-block;        
-  text-transform: capitalize;   
-  text-align: center;    
-  
-  width: 80px; /* edited this line */
-  padding: 5px 10px;   /* edited this line */
+padding: 5px 10px;            
+border-radius: 5px;          
+font-size: 13px;              
+color: white;                
+display: inline-block;        
+text-transform: capitalize;   
+text-align: center;    
+width: 100px; 
 }
 
-/* NEW UPDATED ADDED THIS */
-/* also put status inside <p></p>*/
-.status-badge p{
-  font-size: 13px;
-}
+
 
 /* Colors for different statuses */
 

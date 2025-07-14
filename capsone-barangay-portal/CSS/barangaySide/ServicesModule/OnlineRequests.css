@@ -453,39 +453,41 @@ SCROLL FOR CHROME ETC
 
 /* NEW UPDATED */
 .status-badge {
-  border-radius: 5px;                     
-    color: white;                
-    display: inline-block;        
-    text-transform: capitalize;   
-    text-align: center;    
-    
-    width: 80px; /* edited this line */
-    padding: 5px 10px;   /* edited this line */    
+padding: 5px 10px;            
+border-radius: 5px;          
+font-size: 13px;              
+color: white;                
+display: inline-block;        
+text-transform: capitalize;   
+text-align: center;    
+width: 100px;   
 }
 
-/* NEW UPDATED ADDED THIS */
-/* also put status inside <p></p>*/
-.status-badge p{
-  font-size: 13px;
-}
+
+
+
 
 /* Colors for different statuses */
 
-.status-badge.rejected {
-    background-color: #e22929;    
+.status-badge.pending {
+  background-color: #d4d64f;    
 }
 
-.status-badge.completed {
-    background-color: #4caf50;    
+.status-badge.in-progress {
+    background-color: #dd5312;    
+}
+.status-badge.rejected {
+  background-color: #e22929;    
 }
 
 .status-badge.pick-up {
     background-color: #be5cb6;    
 }
 
-.status-badge.pending {
-    background-color: #d4d64f;    
+.status-badge.completed {
+  background-color: #4caf50;    
 }
+
 
 /* NEW UPDATED */
 .redirection-section-services {
