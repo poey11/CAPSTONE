@@ -161,6 +161,11 @@ import { report } from "process";
       user?.position === "Assistant Secretary";
 
 
+
+const normalizeStatus = (status: string): string =>
+  status.toLowerCase().replace(/\s*-\s*/g, "-").trim();
+
+
       useEffect(() => {
         let filtered = allRequests;
       
@@ -177,9 +182,10 @@ import { report } from "process";
           });
         }
       
+        // Filter by Status
         if (statusFilter !== "") {
           filtered = filtered.filter(
-            (req) => req.status.toLowerCase() === statusFilter.toLowerCase()
+            (req) => normalizeStatus(req.status) === normalizeStatus(statusFilter)
           );
         }
       
@@ -418,12 +424,13 @@ useEffect(() => {
                         className={`inbarangay-services-module-filter-dropdown ${searchType ? "has-value" : ""}`}
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                      >
+                          >
                         <option value="">Select Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="completed">Completed</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="inProgress">In Progress</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Pick-up">For Pick Up</option>
+                        <option value="In-Progress">In - Progress</option>
                       </select>
 
                     </div>
@@ -478,14 +485,18 @@ useEffect(() => {
                         <td>{request.requestor}</td>
                         <td>{request.purpose}</td>
                         <td>
-                        <span className={`status-badge ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
+                        <span className={`status-badge-inbarangay ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
                             <p>{request.status}</p>
                           </span>
                         </td>
                         <td>
                           <div className="actions-inbarangay">
-                            <button className="action-inbarangay-view" /* edited this class */onClick={() => handleView(request.id, request.reqType)}>
-                                <img src="/Images/view.png" alt="View" />
+                            <button className="action-inbarangay-services" /* edited this class */onClick={() => handleView(request.id, request.reqType)}>
+                             <img
+                                className={isAuthorized ? "action-inbarangay-edit" : "action-inbarangay-view"}
+                                src={isAuthorized ? "/Images/edit.png" : "/Images/view.png"}
+                                alt={isAuthorized ? "Edit" : "View"}
+                              />
                             </button>
                           </div>
                         </td>
@@ -521,7 +532,7 @@ useEffect(() => {
 
         {canSeeTasks && activeSection === "tasks" && (
           <>
-            <div className="inbarangayreq-main-section">
+            <div className="inbarangayreq-main-section-tasks">
               {loading ? (
                   <p>Loading Online Requests...</p>
                 ) : error ? (
@@ -554,14 +565,14 @@ useEffect(() => {
                         <td>{request.requestor}</td>
                         <td>{request.purpose}</td>
                         <td>
-                          <span className={`status-badge ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
+                          <span className={`status-badge-inbarangay ${request.status.toLowerCase().replace(/\s*-\s*/g, "-")}`}>
                             {request.status}
                           </span>
                         </td>
                         <td>
                           <div className="actions-inbarangay">
-                            <button className="action-inbarangay-view" onClick={() => handleView(request.id, request.reqType)}>
-                                <img src="/Images/view.png" alt="View" />
+                            <button className="action-inbarangay-services" onClick={() => handleView(request.id, request.reqType)}>
+                               <img src="/Images/edit.png" alt="Edit" className="action-inbarangay-edit" />
                             </button>
                           </div>
                         </td>

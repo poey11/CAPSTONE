@@ -556,7 +556,7 @@ NO RESULTS POPUP IN TABLE
 
 
 
-.action-inbarangay-view {   
+.action-inbarangay-services {   
   border: none;
   cursor: pointer;
 
@@ -566,14 +566,19 @@ NO RESULTS POPUP IN TABLE
   transition: transform 0.2s ease, filter 0.2s ease;
 }
 
-.action-inbarangay-view:hover {
+.action-inbarangay-services:hover {
   transform: scale(1.2); /* Slight zoom-in */
   filter: brightness(1.3); /* Make icon a bit brighter */
 }
 
-.action-inbarangay-view img {
+.action-inbarangay-view {
     filter: brightness(0) saturate(100%) invert(38%) sepia(78%) saturate(374%) hue-rotate(81deg) brightness(91%) contrast(92%);
 }
+
+.action-inbarangay-edit{
+   filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-rotate(189deg) brightness(91%) contrast(101%);
+}
+
 
 
 
@@ -606,41 +611,37 @@ NO RESULTS POPUP IN TABLE
 ***/
 
 /* NEW UPDATED */
-.status-badge {
-  border-radius: 5px;                     
-  color: white;                
-  display: inline-block;        
-  text-transform: capitalize;   
-  text-align: center;    
-  
-  width: 80px; /* edited this line */
-  padding: 5px 10px;   /* edited this line */
+.status-badge-inbarangay {
+padding: 5px 10px;            
+border-radius: 5px;          
+font-size: 13px;              
+color: white;                
+display: inline-block;        
+text-transform: capitalize;   
+text-align: center;    
+width: 100px; 
 }
 
-/* NEW UPDATED ADDED THIS */
-/* also put status inside <p></p>*/
-.status-badge p{
-  font-size: 13px;
-}
+
 
 /* Colors for different statuses */
 
-.status-badge.pending {
+.status-badge-inbarangay.pending {
   background-color: #d4d64f;    
 }
 
-.status-badge.in-progress {
+.status-badge-inbarangay.in-progress {
     background-color: #dd5312;    
 }
-.status-badge.rejected {
+.status-badge-inbarangay.rejected {
   background-color: #e22929;    
 }
 
-.status-badge.pick-up {
+.status-badge-inbarangay.pick-up {
     background-color: #be5cb6;    
 }
 
-.status-badge.completed {
+.status-badge-inbarangay.completed {
   background-color: #4caf50;    
 }
 
@@ -936,4 +937,124 @@ NO RESULTS POPUP IN TABLE
   opacity: 0;
   animation: dropDownFromTop 0.6s ease-out forwards;
   animation-delay: 0.8s;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.inbarangayreq-main-section-tasks {
+  flex: 1; /* Makes it take up remaining space */
+  display: flex; /* Ensures proper alignment */
+  flex-direction: column;
+  padding: 0;
+  margin: 0; /* Remove default margin */
+  overflow: auto; /* Allow scrolling if content overflows */
+  width: 100%;
+  
+
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background-color: #ffffff;
+  border-radius: 6px;
+  scrollbar-width: thin;
+  scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+
+
+    margin-top: 1.5rem; /* edited this line */
+    height: 85%; /* edited this line */
+    max-height: 85%;
+}
+
+
+
+/* NEW UPDATED */
+.inbarangayreq-main-section-tasks thead {
+  position: sticky;
+  top: 0;
+  background-color: #214666;
+  z-index: 10; 
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); 
+  
+  height: 50px; /* edited this line */
+}
+
+
+.inbarangayreq-main-section-tasks table {
+   width: 100%; /* Ensures the table spans the full width */
+  border-collapse: collapse; /* Removes unnecessary spacing between table cells */
+}
+
+/* NEW UPDATED */
+.inbarangayreq-main-section-tasks td {
+  padding: 1rem; 
+  text-align: center; 
+  border-bottom: 2px solid #ddd;
+  color: rgb(44, 42, 42);
+  font-weight: normal;
+  
+  font-size: 14px; /* added this line */
+}
+
+/* NEW UPDATED */
+.inbarangayreq-main-section-tasks th {
+  padding: 1rem; 
+  text-align: left; 
+  border-bottom: 2px solid #ddd;
+  color: #FFFFFF;
+  text-align: center;
+    
+  font-size: 14px; /* added this line */
+}
+
+/* NEW UPDATED ADDED THIS */
+.inbarangayreq-main-section-tasks tbody tr {
+  height: 50px; 
+}
+
+
+.inbarangayreq-main-section-tasks tbody tr:nth-child(even) {
+  background-color: #f0f4f8; /* Softer modern gray-blue tone */
+}
+
+.inbarangayreq-main-section-tasks tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* Crisp white */
+}
+
+.inbarangayreq-main-section-tasks tbody tr:hover { 
+   background-color: #d0e4f5 !important; /* Light pastel blue hover */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+
+
+/*
+SCROLL FOR CHROME ETC
+*/
+
+.inbarangayreq-main-section-tasks::-webkit-scrollbar {
+  width: 8px;
+}
+
+.inbarangayreq-main-section-tasks::-webkit-scrollbar-track {
+  background: transparent; 
+}
+
+.inbarangayreq-main-section-tasks::-webkit-scrollbar-thumb {
+  background-color: rgba(96, 165, 250, 0.5); 
+  border-radius: 8px;
+  border: 2px solid transparent; 
+  background-clip: content-box;  
+}
+
+.inbarangayreq-main-section-tasks::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(59, 130, 246, 0.7);
 }
