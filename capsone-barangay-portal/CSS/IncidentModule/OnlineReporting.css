@@ -1,6 +1,7 @@
 
 
 
+
 /*
 new
 */
@@ -1528,4 +1529,72 @@ FILE UPLOAD SECTION DAMI KASI TANGINA!
   color: grey;
   font-weight: bold;
   font-size: 1rem;
+}
+
+
+
+
+
+
+
+
+
+
+ .main-section-online-reports-tasks {
+  flex: 1; /* Makes it take up remaining space */
+    display: flex; /* Ensures proper alignment */
+    flex-direction: column;
+    padding: 0;
+    margin: 0; /* Remove default margin */
+    overflow: auto; /* Allow scrolling if content overflows */
+    width: 100%;
+    
+
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
+    border-radius: 6px;
+    scrollbar-width: thin;
+    scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+
+
+    margin-top: 1.5rem; /* edited this line */
+    height: 85%; /* edited this line */
+    max-height: 85%;
+}
+
+
+.main-section-online-reports-tasks  table {
+    width: 100%; /* Ensures the table spans the full width */
+    border-collapse: collapse; /* Removes unnecessary spacing between table cells */
+}
+
+.main-section-online-reports-tasks  td {
+   padding: 1rem; 
+  text-align: center; 
+color: rgb(44, 42, 42);
+  font-weight: normal;
+  border-bottom: 1px solid #ddd; /* update*/
+
+   font-size: 14px; /* added this line */
+  
+}
+
+.main-section-online-reports-tasks  th {
+  padding: 1rem; 
+  text-align: left; 
+  border-bottom: 2px solid #ddd;
+  color: #FFFFFF;
+  text-align: center;
+
+   font-size: 14px; /* added this line */
+}
+
+.main-section-online-reports-tasks  thead {
+ position: sticky;
+  top: 0;
+  background-color: #214666; /* Ensures it's visible when scrolled */
+  z-index: 10; /* Ensures it stays above other content */
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* Simulates a fixed border */
+   height: 50px; /* edited this line */
 }

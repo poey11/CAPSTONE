@@ -454,7 +454,7 @@ const getViewedRequests = (): string[] => {
 
      {activeSection === "tasks" && (
         <>
-        <div className="main-section-online-reports">
+        <div className="main-section-online-reports-tasks ">
         {taskAssignedData.length === 0 ? (
           <div className="no-task-card">
             <img src="/images/customer-service.png" alt="No results icon" className="no-task-icon" />
