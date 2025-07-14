@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { MonthYearModal } from "@/app/(barangay-side)/components/MonthYearModal"; 
 import { NatureOfWorkModal } from "@/app/(barangay-side)/components/NatureOfWorkModal"; 
 import { ServiceMonthYearModal } from "@/app/(barangay-side)/components/ServiceMonthYearModal"; 
+import { DepartmentalReportModal } from "@/app/(barangay-side)/components/DepartmentalReportModal"; 
 
 
 
@@ -59,7 +60,12 @@ const ReportsPage = () => {
   const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(null);
 
   // for incident reports
-  const [loadingVAWCReport, setLoadingVAWCReport] = useState(false);    
+  const [loadingVAWCReport, setLoadingVAWCReport] = useState(false);
+
+  const [showDepartmentModal, setShowDepartmentModal] = useState(false);
+  const [showAdminDepartmentModal, setShowAdminDepartmentModal] = useState(false);
+
+  
   const [loadingLuponSettledReport, setLoadingLuponSettledReport] = useState(false);    
   const [loadingLuponPendingReport, setLoadingLuponPendingReport] = useState(false);    
   const [loadingIncidentSummary, setLoadingIncidentSummary] = useState(false);    
@@ -3286,19 +3292,25 @@ const uploadForms = async (url: string): Promise<void> => {
       const querySnapshot = await getDocs(q);
   
       const incidentReports = querySnapshot.docs
-        .map((doc) => doc.data())
-        .filter((rep) => {
-          if (!rep.createdAt) return false;
-          if (allTime) return true;
-          const date = new Date(rep.createdAt);
-          return date.getFullYear() === year && date.getMonth() === month;
-        });
+      .map((doc) => doc.data())
+      .filter((rep) => {
+        if (!rep.createdAt) return false;
+        if (allTime) return true;
+    
+        const date =
+          rep.createdAt?.toDate?.() ??
+          (rep.createdAt instanceof Date ? rep.createdAt : new Date(rep.createdAt));
+    
+        return date.getFullYear() === year && date.getMonth() === month;
+      });
   
       const departmentGroups = {
         Lupon: incidentReports.filter((rep) => rep.department === "Lupon"),
         VAWC: incidentReports.filter((rep) => rep.department === "VAWC"),
         BCPC: incidentReports.filter((rep) => rep.department === "BCPC"),
         GAD: incidentReports.filter((rep) => rep.department === "GAD"),
+        Online: incidentReports.filter((rep) => rep.department === "Online"),
+
       };
   
       const filteredGroups = Object.entries(departmentGroups).filter(
@@ -3373,14 +3385,14 @@ const uploadForms = async (url: string): Promise<void> => {
   
           const complainant = report.complainant || {};
           const respondent = report.respondent || {};
-          const complainantFullName = `${complainant.fname || ""} ${complainant.lname || ""}`.trim();
+          const complainantFullName = `${(complainant.fname || report.firstname || "")} ${(complainant.lname || report.lastname || "")}`.trim();
           const respondentFullName = `${respondent.fname || ""} ${respondent.lname || ""}`.trim();
   
           const cells = [
             report.caseNumber,
             ` C- ${complainantFullName}\n\n R- ${respondentFullName}`,
             `${report.dateFiled || ""} ${report.timeFiled || ""}`,
-            report.nature || "",
+            report.nature || report.concerns || "",
             report.status || "",
           ];
   
@@ -3488,6 +3500,7 @@ const uploadForms = async (url: string): Promise<void> => {
       return null;
     } finally {
       setLoadingIncidentSummary(false);
+      setShowIncidentSummaryModal(false);
     }
   };
   
@@ -3552,10 +3565,12 @@ const handleGenerateIncidentSummaryPDF = async (
 
   // vawc monthly report
 
-  const generateVAWCReport = async (
+  const generateDepartmentalReport = async (
     month: number,
     year: number,
-    allTime: boolean = false
+    allTime: boolean = false,
+    department: string,
+    status: string
   ): Promise<string | null> => {
     setLoadingVAWCReport(true);
     setIsGenerating(true);
@@ -3564,30 +3579,37 @@ const handleGenerateIncidentSummaryPDF = async (
       const monthName = new Date(year, month).toLocaleString("default", { month: "long" });
       const reportLabel = allTime ? "ALL TIME" : `${monthName.toUpperCase()} ${year}`;
       const reportTitle = `FOR ${allTime ? "ALL TIME" : `THE MONTH OF ${monthName.toUpperCase()} ${year}`}`;
+      const reportHeaderTitle = allTime
+      ? `ALL TIME REPORT OF ${department} "${status !== "ALL" ? status : "ALL STATUS"}" CASES`
+      : `MONTHLY REPORT OF ${department} "${status !== "ALL" ? status : "ALL STATUS"}" CASES`;
+    
   
-      // Get IncidentReports for VAWC
       const reportsRef = collection(db, "IncidentReports");
       const q = query(reportsRef);
       const querySnapshot = await getDocs(q);
   
-      const vawcReports = querySnapshot.docs
+      const filteredReports = querySnapshot.docs
         .map((doc) => doc.data())
         .filter((rep) => {
-          if (rep.department !== "VAWC") return false;
+          if (department !== "ALL" && rep.department !== department) return false;
+          if (status !== "ALL" && rep.status !== status) return false;
           if (allTime) return true;
-          const date = new Date(rep.createdAt);
-          return date.getFullYear() === year && date.getMonth() === month;
+          const date =
+          rep.createdAt?.toDate?.() ??
+          (rep.createdAt instanceof Date ? rep.createdAt : new Date(rep.createdAt));
+        
+        return date.getFullYear() === year && date.getMonth() === month;
         });
   
-      if (vawcReports.length === 0) {
+      if (filteredReports.length === 0) {
         alert(allTime
-          ? "No VAWC reports found."
-          : `No VAWC reports found for ${monthName} ${year}.`
+          ? `No reports found for ${department === "ALL" ? "any department" : department}.`
+          : `No reports found for ${department === "ALL" ? "any department" : department} in ${monthName} ${year}.`
         );
         return null;
       }
   
-      const templateRef = ref(storage, "ReportsModule/VAWC Report Template.xlsx");
+      const templateRef = ref(storage, "ReportsModule/Departmental Incident Reports Template.xlsx");
       const url = await getDownloadURL(templateRef);
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
@@ -3596,18 +3618,25 @@ const handleGenerateIncidentSummaryPDF = async (
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
   
+      worksheet.getCell("A2").value = reportHeaderTitle;
       worksheet.getCell("A3").value = reportTitle;
   
-      const headerEndRow = 3;
       const dataStartRow = 5;
       const footerStartRow = 17;
   
-      const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow < dataStartRow);
+      const existingDataRows = footerStartRow - dataStartRow;
+      const extraRowsNeeded = filteredReports.length - existingDataRows;
+  
+      // Insert or delete rows to adjust table space
+      if (extraRowsNeeded > 0) {
+        worksheet.insertRows(footerStartRow - 1, new Array(extraRowsNeeded).fill([]));
+      } else if (extraRowsNeeded < 0) {
+        worksheet.spliceRows(footerStartRow + extraRowsNeeded, -extraRowsNeeded);
+      }
+  
       const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= footerStartRow);
   
-      worksheet.insertRows(footerStartRow - 1, new Array(vawcReports.length).fill([]));
-  
-      vawcReports.forEach((report, index) => {
+      filteredReports.forEach((report, index) => {
         const rowIndex = dataStartRow + index;
         const row = worksheet.getRow(rowIndex);
         row.height = 55;
@@ -3615,23 +3644,32 @@ const handleGenerateIncidentSummaryPDF = async (
         const complainant = report.complainant || {};
         const respondent = report.respondent || {};
   
-        const complainantFullName = `${complainant.fname || ""} ${complainant.lname || ""}`.trim();
+        const complainantFullName = 
+        (complainant.fname || complainant.lname) 
+          ? `${complainant.fname || ""} ${complainant.lname || ""}`.trim()
+          : `${report.firstname || ""} ${report.lastname || ""}`.trim();
         const complainantAge = complainant.age || "";
-        const complainantAddress = complainant.address || "";
+        const complainantAddress = complainant.address || report.address || "";
   
         const respondentFullName = `${respondent.fname || ""} ${respondent.lname || ""}`.trim();
         const respondentAge = respondent.age || "";
         const respondentAddress = respondent.address || "";
+
+        let remarks = report.remarks || "";
+        if (report.typeOfIncident === "Minor") {
+          remarks = "Referred to program";
+        } else if (report.typeOfIncident === "Major" && report.DialogueMeeting?.remarks) {
+          remarks = report.DialogueMeeting.remarks;
+        }
   
         const cells = [
           report.dateFiled || "",
           `C- ${complainantFullName}\nR- ${respondentFullName}`,
           `C- ${complainantAge}\nR- ${respondentAge}`,
           `C- ${complainantAddress}\nR- ${respondentAddress}`,
-          report.nature || "",
-          report.occupation || "",
-          report.educationalAttainment || "",
-          report.remarks || "",
+          report.nature || report.concerns || "",
+          report.status,
+          remarks || "",
         ];
   
         cells.forEach((val, colIdx) => {
@@ -3650,11 +3688,20 @@ const handleGenerateIncidentSummaryPDF = async (
         row.commit();
       });
   
+      // Move footer drawings to stay attached
       footerDrawings.forEach(drawing => {
-        const offset = vawcReports.length;
+        const offset = Math.max(extraRowsNeeded, 0);
         if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
         if (drawing.range?.br) drawing.range.br.nativeRow += offset;
       });
+  
+      // FINAL cleanup: remove any extra blank rows at the bottom
+      for (let i = worksheet.rowCount; i > footerStartRow; i--) {
+        const row = worksheet.getRow(i);
+        if (!row.hasValues) {
+          worksheet.spliceRows(i, 1);
+        }
+      }
   
       worksheet.pageSetup = {
         horizontalCentered: true,
@@ -3671,88 +3718,90 @@ const handleGenerateIncidentSummaryPDF = async (
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
   
-      const fileName = `VAWC_Report_${reportLabel.replace(/\s+/g, "_")}.xlsx`;
+      const fileName = `Department_Report_${department}_${status}_${reportLabel.replace(/\s+/g, "_")}.xlsx`;
       const storageRef = ref(storage, `GeneratedReports/${fileName}`);
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      setGeneratingMessage("Generating VAWC Report...");
+      setGeneratingMessage("Generating Department Report...");
       return fileUrl;
     } catch (error) {
-      console.error("Error generating VAWC report:", error);
+      console.error("Error generating report:", error);
       setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate VAWC Report");
+      setPopupErrorGenerateReportMessage("Failed to generate Department Report");
       setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
       return null;
     } finally {
       setLoadingVAWCReport(false);
     }
   };
-
-  const handleGenerateVAWCPDF = async (
-  month: number,
-  year: number,
-  allTime: boolean = false
-) => {
-  setLoadingVAWCReport(true);
-
-  try {
-    const fileUrl = await generateVAWCReport(month, year, allTime);
-
-    if (!fileUrl) {
+  
+  
+  const handleGenerateDepartmentalPDF = async (
+    month: number,
+    year: number,
+    allTime: boolean = false,
+    department: string,
+    status: string
+  ) => {
+    setLoadingVAWCReport(true);
+  
+    try {
+      const fileUrl = await generateDepartmentalReport(month, year, allTime, department, status);
+  
+      if (!fileUrl) {
+        setIsGenerating(false);
+        setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+        setShowErrorGenerateReportPopup(true);
+        setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
+        return;
+      }
+  
+      const response = await fetch("/api/convertPDF", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to convert to PDF");
+  
+      const blob = await response.blob();
+  
+      const label = allTime
+        ? "ALL_TIME"
+        : `${new Date(year, month).toLocaleString("default", { month: "long" })}_${year}`;
+  
+      saveAs(blob, `Department_Report_${department}_${status}_${label}.pdf`);
+  
       setIsGenerating(false);
-      setPopupErrorGenerateReportMessage("Failed to generate Excel report");
+      setGeneratingMessage("");
+      setPopupSuccessGenerateReportMessage("Department Report generated successfully");
+      setShowSuccessGenerateReportPopup(true);
+      setTimeout(() => setShowSuccessGenerateReportPopup(false), 5000);
+    } catch (error) {
+      console.error("Error:", error);
       setShowErrorGenerateReportPopup(true);
+      setPopupErrorGenerateReportMessage("Failed to generate Department Report PDF");
       setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
-      return;
+    } finally {
+      setLoadingVAWCReport(false);
+      setIsGenerating(false);
     }
-
-    const response = await fetch("/api/convertPDF", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fileUrl }),
-    });
-
-    if (!response.ok) throw new Error("Failed to convert to PDF");
-
-    const blob = await response.blob();
-
-    const label = allTime
-      ? "ALL_TIME"
-      : `${new Date(year, month).toLocaleString("default", { month: "long" })}_${year}`;
-
-    saveAs(blob, `VAWC_Report_${label}.pdf`);
-
-    setIsGenerating(false);
-    setGeneratingMessage("");
-    setPopupSuccessGenerateReportMessage("VAWC Report generated successfully");
-    setShowSuccessGenerateReportPopup(true);
-    setTimeout(() => setShowSuccessGenerateReportPopup(false), 5000);
-  } catch (error) {
-    console.error("Error:", error);
-    setShowErrorGenerateReportPopup(true);
-    setPopupErrorGenerateReportMessage("Failed to generate VAWC Report PDF");
-    setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
-  } finally {
-    setLoadingVAWCReport(false);
-    setIsGenerating(false); 
-
-  }
-};
-
+  };
+  
 
   // lupon settled cases
 
   const generateLuponSettledReport = async () => {
     setLoadingLuponSettledReport(true);
     setIsGenerating(true);
+  
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
       const month = currentDate.toLocaleString("default", { month: "long" });
-      const reportTitle = `FOR THE MONTH OF ${month.toUpperCase()} ${year}`;
+      const reportTitle = `DATE ACCOMPLISHED ${month.toUpperCase()} ${year}`;
   
-      //  Get Lupon Settled IncidentReports
       const reportsRef = collection(db, "IncidentReports");
       const q = query(
         reportsRef,
@@ -3766,9 +3815,28 @@ const handleGenerateIncidentSummaryPDF = async (
         alert("No Lupon Settled reports found.");
         return;
       }
+
+      
+      while (luponSettledReports.length < 30) {
+        const index = luponSettledReports.length + 1;
+        luponSettledReports.push({
+          caseNumber: `LSN-${String(index).padStart(4, '0')}`,
+          complainant: { fname: "Test", lname: `User${index}` },
+          respondent: { fname: "Dummy", lname: `Person${index}` },
+          nature: index % 2 === 0 ? "Criminal" : "Civil",
+          specifyNature: index % 3 === 0 ? "Physical Injury" : "",
+          isMediation: index % 4 === 0,
+          isConciliation: index % 5 === 0,
+          isArbitration: index % 6 === 0,
+          remarks: "Simulated settled entry",
+          status: "settled"
+        });
+      }
+      
+      console.log("✅ Added test Lupon Settled Reports:", luponSettledReports);
+      
   
-      //  Load Excel template
-      const templateRef = ref(storage, "ReportsModule/Lupon Tagapamayapa Report Template.xlsx");
+      const templateRef = ref(storage, "ReportsModule/Lupon Tagapamayapa Settled Report Template.xlsx");
       const url = await getDownloadURL(templateRef);
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
@@ -3777,34 +3845,27 @@ const handleGenerateIncidentSummaryPDF = async (
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
   
-      //  Update report title
-      worksheet.getCell("A3").value = reportTitle;
+      worksheet.getCell("A2").value = reportTitle;
   
-      const headerEndRow = 3;
-      const dataStartRow = 7;
-      const footerStartRow = 23;
+      const dataStartRow = 5;
+      const originalFooterStartRow = 21;
+      const originalFooterCount = 4;
   
-      //  Handle header/footer images
-      const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow < dataStartRow);
-      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= footerStartRow);
+      // Remove original footer rows (21-24)
+      worksheet.spliceRows(originalFooterStartRow, originalFooterCount);
   
-      // to save footer
-      worksheet.insertRows(footerStartRow - 1, new Array(luponSettledReports.length).fill([]));
+      let insertionRow = dataStartRow;
   
-      //  Insert dynamic data
-      luponSettledReports.forEach((report, index) => {
-        const rowIndex = dataStartRow + index;
-        const row = worksheet.getRow(rowIndex);
+      // Insert all settled records dynamically
+      for (const report of luponSettledReports) {
+        worksheet.insertRow(insertionRow, []);
+        const row = worksheet.getRow(insertionRow);
         row.height = 55;
   
         const complainant = report.complainant || {};
         const respondent = report.respondent || {};
-  
         const complainantFullName = `${complainant.fname || ""} ${complainant.lname || ""}`.trim();
         const respondentFullName = `${respondent.fname || ""} ${respondent.lname || ""}`.trim();
-
-        const specificNature = report.specifyNature;
-
   
         const cells = [
           report.caseNumber || "",
@@ -3815,12 +3876,9 @@ const handleGenerateIncidentSummaryPDF = async (
           report.isMediation ? "*" : "",
           report.isConciliation ? "*" : "",
           report.isArbitration ? "*" : "",
-          "", // blank
-          "", // blank
-          "", // blank
-          "", // blank
           report.remarks || "",
         ];
+  
         cells.forEach((val, colIdx) => {
           const cell = row.getCell(colIdx + 1);
           cell.value = val;
@@ -3835,27 +3893,53 @@ const handleGenerateIncidentSummaryPDF = async (
         });
   
         row.commit();
-      });
+        insertionRow++;
+      }
   
-      //  Move footer images
-      footerDrawings.forEach(drawing => {
-        const offset = luponSettledReports.length;
-        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
-        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
-      });
+      // Insert clean footer block with merges, right after last data row
+      worksheet.insertRows(insertionRow, [[], [], [], []]);
   
-      //  Save and upload
+      // Row 1: APPROVED BY | NOTED BY
+      worksheet.getRow(insertionRow).getCell(2).value = "APPROVED BY:";
+      worksheet.getRow(insertionRow).getCell(6).value = "NOTED BY:";
+      worksheet.mergeCells(`B${insertionRow}:D${insertionRow}`);
+      worksheet.mergeCells(`F${insertionRow}:H${insertionRow}`);
+  
+      // Row 2: Names & Titles
+      worksheet.getRow(insertionRow + 1).getCell(2).value = "LEONARDO C. BALINO JR.\nBARANGAY SECRETARY";
+      worksheet.getRow(insertionRow + 1).getCell(6).value = "JOSE ARNEL L. QUEBAL\nPUNONG BARANGAY";
+      worksheet.mergeCells(`B${insertionRow + 1}:D${insertionRow + 1}`);
+      worksheet.mergeCells(`F${insertionRow + 1}:H${insertionRow + 1}`);
+  
+      // Align and style
+      for (let i = 0; i < 2; i++) {
+        const row = worksheet.getRow(insertionRow + i);
+        [2, 6].forEach(cellIdx => {
+          const cell = row.getCell(cellIdx);
+          cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+          cell.font = { name: "Calibri", size: 12, bold: true };
+        });
+      }
+  
+      // Insert spacing rows after
+      worksheet.insertRow(insertionRow + 2, []);
+      worksheet.insertRow(insertionRow + 3, []);
 
+      const lastFooterRow = insertionRow + 3;
+      worksheet.spliceRows(lastFooterRow + 1, worksheet.rowCount - lastFooterRow);      
+  
+      // Ensure print-friendly layout
       worksheet.pageSetup = {
         horizontalCentered: true,
         verticalCentered: false,
         orientation: "landscape",
-        paperSize: 9, 
+        paperSize: 9,
         fitToPage: true,
         fitToWidth: 1,
-        fitToHeight: 0, 
+        fitToHeight: 0,
       };
-
+  
+      // Export and upload
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -3866,25 +3950,18 @@ const handleGenerateIncidentSummaryPDF = async (
       await uploadBytes(storageRef, blob);
       const fileUrl = await getDownloadURL(storageRef);
   
-      /*alert("Lupon Settled Report generated successfully! Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating Lupon Settled Report...");
       return fileUrl;
     } catch (error) {
-      setIsGenerating(false);
-
       console.error("Error generating Lupon Settled report:", error);
-
       setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate Lupon Settled Report");  
-      
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
-      /*alert("Failed to generate Lupon Settled Report.");*/
+      setPopupErrorGenerateReportMessage("Failed to generate Lupon Settled Report");
+      setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
     } finally {
       setLoadingLuponSettledReport(false);
     }
   };
+  
   
   
   const handleGenerateLuponSettledPDF = async () => {
@@ -3951,13 +4028,13 @@ const handleGenerateIncidentSummaryPDF = async (
   const generateLuponPendingReport = async () => {
     setLoadingLuponPendingReport(true);
     setIsGenerating(true);
+  
     try {
       const currentDate = new Date();
       const year = currentDate.getFullYear();
       const month = currentDate.toLocaleString("default", { month: "long" });
-      const reportTitle = `FOR THE MONTH OF ${month.toUpperCase()} ${year}`;
+      const reportTitle = `DATE ACCOMPLISHED ${month.toUpperCase()} ${year}`;
   
-      //  Get Lupon Pending IncidentReports
       const reportsRef = collection(db, "IncidentReports");
       const q = query(
         reportsRef,
@@ -3965,15 +4042,25 @@ const handleGenerateIncidentSummaryPDF = async (
         where("status", "in", ["Pending", "pending"])
       );
       const querySnapshot = await getDocs(q);
-      const luponSettledReports = querySnapshot.docs.map((doc) => doc.data());
+      const luponPendingReports = querySnapshot.docs.map((doc) => doc.data());
   
-      if (luponSettledReports.length === 0) {
-        alert("No Lupon Pending reports found.");
-        return;
+      // For testing - fill up to 30 if DB is empty or has few
+      while (luponPendingReports.length < 30) {
+        const index = luponPendingReports.length + 1;
+        luponPendingReports.push({
+          caseNumber: `LPN-${String(index).padStart(4, '0')}`,
+          complainant: { fname: "Test", lname: `User${index}` },
+          respondent: { fname: "Dummy", lname: `Person${index}` },
+          nature: index % 2 === 0 ? "Criminal" : "Civil",
+          isRepudiated: index % 4 === 0,
+          status: "Pending",
+          remarks: "Simulated pending entry"
+        });
       }
   
-      //  Load Excel template
-      const templateRef = ref(storage, "ReportsModule/Lupon Tagapamayapa Report Template.xlsx");
+      console.log("✅ Added test Lupon Pending Reports:", luponPendingReports);
+  
+      const templateRef = ref(storage, "ReportsModule/Lupon Tagapamayapa Pending Report Template.xlsx");
       const url = await getDownloadURL(templateRef);
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
@@ -3982,33 +4069,25 @@ const handleGenerateIncidentSummaryPDF = async (
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
   
-      //  Update report title
-      worksheet.getCell("A3").value = reportTitle;
+      worksheet.getCell("A2").value = reportTitle;
   
-      const headerEndRow = 3;
-      const dataStartRow = 7;
-      const footerStartRow = 23;
+      const dataStartRow = 5;
   
-      //  Handle header/footer images
-      const headerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow < dataStartRow);
-      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= footerStartRow);
+      // Remove original footer rows to avoid duplicate blocks
+      worksheet.spliceRows(19, 20); // aggressively clears to remove any leftover template footer
   
-      // to save footer
-      worksheet.insertRows(footerStartRow - 1, new Array(luponSettledReports.length).fill([]));
+      let insertionRow = dataStartRow;
   
-      //  Insert dynamic data
-      luponSettledReports.forEach((report, index) => {
-        const rowIndex = dataStartRow + index;
-        const row = worksheet.getRow(rowIndex);
+      // Insert all pending records dynamically
+      for (const report of luponPendingReports) {
+        worksheet.insertRow(insertionRow, []);
+        const row = worksheet.getRow(insertionRow);
         row.height = 55;
   
         const complainant = report.complainant || {};
         const respondent = report.respondent || {};
-  
         const complainantFullName = `${complainant.fname || ""} ${complainant.lname || ""}`.trim();
         const respondentFullName = `${respondent.fname || ""} ${respondent.lname || ""}`.trim();
-
-
   
         const cells = [
           report.caseNumber || "",
@@ -4016,15 +4095,13 @@ const handleGenerateIncidentSummaryPDF = async (
           report.nature === "Criminal" ? "*" : "",
           report.nature === "Civil" ? "*" : "",
           !["Civil", "Criminal"].includes(report.nature) ? report.nature : "",
-          report.isMediation ? "*" : "",
-          report.isConciliation ? "*" : "",
-          report.isArbitration ? "*" : "",
-          "", // blank
-          "*", // blank
-          "", // blank
-          "", // blank
+          report.isRepudiated ? "*" : "",
+          report.status === "Pending" ? "*" : "",
+          report.status === "archived" ? "*" : "",
+          report.status === "CFA" ? "*" : "",
           report.remarks || "",
         ];
+  
         cells.forEach((val, colIdx) => {
           const cell = row.getCell(colIdx + 1);
           cell.value = val;
@@ -4039,27 +4116,53 @@ const handleGenerateIncidentSummaryPDF = async (
         });
   
         row.commit();
-      });
+        insertionRow++;
+      }
   
-      //  Move footer images
-      footerDrawings.forEach(drawing => {
-        const offset = luponSettledReports.length;
-        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
-        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
-      });
+      // Insert clean footer block with merges, right after last data row
+      worksheet.insertRows(insertionRow, [[], [], [], []]);
   
-      //  Save and upload
-
+      // Row 1: APPROVED BY / NOTED BY
+      worksheet.getRow(insertionRow).getCell(2).value = "APPROVED BY:";
+      worksheet.getRow(insertionRow).getCell(6).value = "NOTED BY:";
+      worksheet.mergeCells(`B${insertionRow}:D${insertionRow}`);
+      worksheet.mergeCells(`F${insertionRow}:H${insertionRow}`);
+  
+      // Row 2: Names & Titles
+      worksheet.getRow(insertionRow + 1).getCell(2).value = "LEONARDO C. BALINO JR.\nBARANGAY SECRETARY";
+      worksheet.getRow(insertionRow + 1).getCell(6).value = "JOSE ARNEL L. QUEBAL\nPUNONG BARANGAY";
+      worksheet.mergeCells(`B${insertionRow + 1}:D${insertionRow + 1}`);
+      worksheet.mergeCells(`F${insertionRow + 1}:H${insertionRow + 1}`);
+  
+      // Align and style
+      for (let i = 0; i < 2; i++) {
+        const row = worksheet.getRow(insertionRow + i);
+        [2, 6].forEach(cellIdx => {
+          const cell = row.getCell(cellIdx);
+          cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+          cell.font = { name: "Calibri", size: 12, bold: true };
+        });
+      }
+  
+      // Insert spacing rows after
+      worksheet.insertRow(insertionRow + 2, []);
+      worksheet.insertRow(insertionRow + 3, []);
+  
+      // Then clear anything after footer
+      const lastFooterRow = insertionRow + 3;
+      worksheet.spliceRows(lastFooterRow + 1, worksheet.rowCount - lastFooterRow);
+  
+      // Ensure print-friendly layout
       worksheet.pageSetup = {
         horizontalCentered: true,
         verticalCentered: false,
         orientation: "landscape",
-        paperSize: 9, 
+        paperSize: 9,
         fitToPage: true,
         fitToWidth: 1,
-        fitToHeight: 0, 
+        fitToHeight: 0,
       };
-
+  
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -4070,25 +4173,19 @@ const handleGenerateIncidentSummaryPDF = async (
       await uploadBytes(storageRef, blob);
       const fileUrl = await getDownloadURL(storageRef);
   
-      /*alert("Lupon Pending Report generated successfully! Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating Lupon Pending Report...");
       return fileUrl;
     } catch (error) {
       setIsGenerating(false);
-
       console.error("Error generating Lupon Pending report:", error);
-
       setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate Lupon Pending Report");  
-      
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
-      /*alert("Failed to generate Lupon Pending Report.");*/
+      setPopupErrorGenerateReportMessage("Failed to generate Lupon Pending Report");
+      setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
     } finally {
       setLoadingLuponPendingReport(false);
     }
   };
+  
   
   
   const handleGenerateLuponPendingPDF = async () => {
@@ -4180,11 +4277,13 @@ const handleGenerateIncidentSummaryPDF = async (
         );
         return {
           department: dept,
-          pending: filtered.filter((i) => i.status === "Pending").length,
-          resolved: filtered.filter((i) => i.status === "Resolved").length,
-          settled: filtered.filter((i) => i.status === "Settled").length,
-          archived: filtered.filter((i) => i.status === "Archived").length,
-          acknowledged: filtered.filter((i) => i.status === "Acknowledged").length,
+          pending: filtered.filter((i) => i.status === "pending").length,
+          settled: filtered.filter((i) => i.status === "settled").length,
+          archived: filtered.filter((i) => i.status === "archived").length,
+          acknowledged: filtered.filter((i) => i.status === "acknowledged").length,
+          cfa: filtered.filter((i) => i.status === "CFA").length,
+          inprogress: filtered.filter((i) => i.status === "In - Progress").length,
+
         };
       });
   
@@ -4209,10 +4308,10 @@ const handleGenerateIncidentSummaryPDF = async (
         const row = worksheet.getRow(startRow + index);
         row.getCell(1).value = item.department;
         row.getCell(2).value = item.pending;
-        row.getCell(3).value = item.resolved;
+        row.getCell(3).value = item.inprogress;
         row.getCell(4).value = item.settled;
         row.getCell(5).value = item.archived;
-        row.getCell(6).value = item.acknowledged;
+        row.getCell(6).value = item.cfa;
   
         // Style
         for (let col = 1; col <= 6; col++) {
@@ -4931,39 +5030,70 @@ const handleGenerateIncidentSummaryPDF = async (
                         </>
                       )}
 
-                      {(session?.user?.department === "VAWC" || session?.user?.position === "Assistant Secretary") && (
                         <>
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => setShowVAWCModal(true)}
-                              disabled={loadingVAWCReport}
-                              className={`report-tile ${loadingVAWCReport ? "disabled" : ""}`}
-                              aria-busy={loadingVAWCReport}
-                              aria-label="Generate Monthly VAWC Report"
-                            >
-                              <img
-                                src="/images/womenandchildren.png"
-                                alt="VAWC icon"
-                                className="report-icon-bigger"
-                                aria-hidden="true"
+                          {/* BUTTON FOR STAFF DEPARTMENTS */}
+                          {(session?.user?.department === "VAWC" ||
+                            session?.user?.department === "Lupon" ||
+                            session?.user?.department === "BCPC" ||
+                            session?.user?.department === "GAD") && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => setShowDepartmentModal(true)}
+                                disabled={loadingVAWCReport}
+                                className={`report-tile ${loadingVAWCReport ? "disabled" : ""}`}
+                                aria-busy={loadingVAWCReport}
+                                aria-label="Generate Monthly Department Report"
+                              >
+                                <img src="/images/womenandchildren.png" alt="icon" className="report-icon-bigger" />
+                                <p className="report-title">
+                                  {loadingVAWCReport ? "Generating..." : "Monthly Department Report"}
+                                </p>
+                              </button>
+
+                              <DepartmentalReportModal
+                                show={showDepartmentModal}
+                                onClose={() => setShowDepartmentModal(false)}
+                                onGenerate={handleGenerateDepartmentalPDF}
+                                loading={loadingVAWCReport}
+                                allowedDepartments={[session?.user?.department ?? "VAWC", "Online"]}
+                                title={`Generate ${session?.user?.department} Report`}
                               />
-                              <p className="report-title">
-                                {loadingVAWCReport ? "Generating..." : "Monthly VAWC Report"}
-                              </p>
-                            </button>
+                            </>
+                          )}
 
-                            <MonthYearModal
-                              show={showVAWCModal}
-                              onClose={() => setShowVAWCModal(false)}
-                              onGenerate={handleGenerateVAWCPDF}
-                              loading={loadingVAWCReport}
-                              title="Generate Monthly VAWC Report"
-                            />
-                          </>
+                          {/* BUTTON FOR ADMIN POSITIONS */}
+                          {(session?.user?.position === "Assistant Secretary" ||
+                            session?.user?.position === "Secretary" ||
+                            session?.user?.position === "Punong Barangay") && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => setShowAdminDepartmentModal(true)}
+                                disabled={loadingVAWCReport}
+                                className={`report-tile ${loadingVAWCReport ? "disabled" : ""}`}
+                                aria-busy={loadingVAWCReport}
+                                aria-label="Generate Department Report"
+                              >
 
+                                {/* change icon */}
+                                <img src="/images/womenandchildren.png" alt="icon" className="report-icon-bigger" />
+                                <p className="report-title">
+                                  {loadingVAWCReport ? "Generating..." : "Admin All Departments Monthly Report"}
+                                </p>
+                              </button>
+
+                              <DepartmentalReportModal
+                                show={showAdminDepartmentModal}
+                                onClose={() => setShowAdminDepartmentModal(false)}
+                                onGenerate={handleGenerateDepartmentalPDF}
+                                loading={loadingVAWCReport}
+                                allowedDepartments={["ALL", "Lupon", "VAWC", "BCPC", "GAD", "Online"]}
+                                title="Generate All Department Report"
+                              />
+                            </>
+                          )}
                         </>
-                      )}
 
                       {(session?.user?.department === "GAD" || session?.user?.department === "BCPC" || session?.user?.position === "Assistant Secretary")  && (
                         <>
