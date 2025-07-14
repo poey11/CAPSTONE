@@ -97,7 +97,10 @@ const openPopup = (user: ResidentUser) => {
   setSelectedUser(user);
   setViewActiveSection("basic");
   setIsPopupOpen(true);
-  router.push(`?id=${user.id}`, { scroll: false });
+  const params = new URLSearchParams(window.location.search);
+  params.set("id", user.id);
+  
+  router.push(`?${params.toString()}`, { scroll: false });
 };
 
 const closePopup = () => {
@@ -112,7 +115,12 @@ const closePopup = () => {
 };
 
 
-
+useEffect(() => {
+  const section = searchParams.get("section");
+  if (!section) {
+    router.replace("/dashboard/admin/ResidentUsers?section=verified");
+  }
+}, [searchParams, router]);
 
 // Mark as viewed
   const markAsViewed = async (id: string) => {
@@ -368,7 +376,15 @@ const confirmAccept = async () => {
                     <button
                       key={section}
                       className={`info-toggle-btn-assigned-resident verified-pending-users ${activeSection === section ? "active" : ""}`}
-                      onClick={() => { setActiveSection(section); setCurrentPage(1); }}
+                      onClick={() => {
+                        setActiveSection(section);
+                        setCurrentPage(1);
+                        if (section === "main") {
+                          router.push("/dashboard/admin/ResidentUsers?section=verified");
+                        } else if (section === "pending") {
+                          router.push("/dashboard/admin/ResidentUsers?section=pending");
+                        }
+                      }}
                     >
                       {section === "main" && "Verified Users"}
                       {section === "pending" && "Pending Users"}
@@ -772,7 +788,7 @@ const confirmAccept = async () => {
 
                       {viewActiveSection === "others" && (
                         <>
-                        {/* will fix the css of image */}
+                      
                           <div className="user-uploaded-photo-section">
                             <div className="box-container-outer-natureoffacts">
                               <div className="title-remarks-partyA">

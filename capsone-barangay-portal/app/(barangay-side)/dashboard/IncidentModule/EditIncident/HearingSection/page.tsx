@@ -267,7 +267,7 @@ export default function HearingSection() {
                     
                 </div>
 
-                <div className="edit-incident-header-body">
+                <div className="edit-incident-header-body-dialogue">
                     <div className="hearing-header-body-top-section-main-hearing">
 
                     {/*

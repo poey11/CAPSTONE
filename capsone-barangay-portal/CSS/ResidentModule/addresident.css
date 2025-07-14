@@ -1004,6 +1004,13 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 }
 
 .add-voter-bottom-section{
+  padding-top: 35px;
+  padding-left: 35px;
+  padding-right: 35px;
+  height: 500px;
+}
+
+.add-voter-bottom-section{
   padding-top: 20px;
   padding-left: 35px;
   padding-right: 35px;
@@ -1367,7 +1374,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     align-items: center;
     padding-left: 30px;
     padding-bottom: 50px;
-    width: 100%;
+    width: 300px;
     padding-right: 15px;
     padding-top: 50px;
   }
@@ -1405,22 +1412,22 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     width: 100%;
     text-align: center;
     margin-top: -8px; /* Pulls the card up under the label */
-    height: 200px;
+    height: 250px;
   }
 
   .resident-picture{
     width: 255px;
-    height: 200px;
+    height: 250px;
   }
   
   .uploaded-picture {
     width: 100%;
-    height: 200px;
+    height: 250px;
   }
   
   .default-picture {
     width: 100%;
-    height: 200px;
+    height: 250px;
   }
 
   .addvoter-outer-container-main{
@@ -1450,6 +1457,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   .addvoter-outer-container{
     display: flex;
     width: 100%;
+    height: 410px;
   }
 
   .addvoter-outer-container-left{
@@ -1459,7 +1467,9 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   .addvoter-outer-container-right{
     display: flex;
     flex-direction: column;
+    justify-content: center;
     width: 70%;
+    height: 350px;
   }
 
   .input-wrapper {

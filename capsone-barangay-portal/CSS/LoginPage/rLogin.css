@@ -1,15 +1,12 @@
 
 
 .login-container-resident {
-    height: 100%;
+    height: 100vh;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    overflow: hidden; /* Prevent scrolling */
-    padding-top: 150px;
-    padding-bottom: 150px;
       background-image: url('/Images/bghome.jpg');
   }
 
@@ -31,7 +28,7 @@ NEW
 .login-card-wrapper {
   display: flex;
   width: 900px;
-  height: 500px;
+  height: 480px;
   background: linear-gradient(to right, #1b3840, #214666, #2c5e73);
   border-radius: 20px;
   overflow: hidden;
@@ -41,9 +38,10 @@ NEW
   animation: fadeSlideIn 0.6s ease forwards;
 }
 
+/*
 .login-card-wrapper:hover {
   transform: translateY(-5px) scale(1) !important;
-}
+}*/
 
 .login-left-panel {
   flex: 1;
@@ -56,10 +54,13 @@ NEW
 }
 
 .login-right-panel {
+  position: relative;
   flex: 1;
   color: #2C3E50;
-    /*background: #F0F2F8;*/
-    background: #FFFFFF;
+  background-image: url('/Images/barangay_fairview.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   padding: 40px;
   display: flex;
   flex-direction: column;
@@ -67,30 +68,91 @@ NEW
   align-items: center;
   text-align: center;
   gap: 1rem;
+  overflow: hidden; /* to keep ::before inside */
+  z-index: 0; /* base layer */
 }
 
+.login-right-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0; /* shorthand for top: 0; right: 0; bottom: 0; left: 0 */
+  /*background-color: rgba(255, 255, 255, 0.3); /* white with 60% opacity */
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 1; /* above background image but below content */
+}
+
+/* make sure your content is above the overlay */
+.login-right-panel > * {
+  position: relative;
+  z-index: 2;
+}
+
+/*
 .login-right-panel h2 {
   font-size: 35px;
   font-weight: 800;
   font-family: 'Poppins', sans-serif;
   letter-spacing: 1px;
-  color: #1f3f4f;
+  color: #ffffff;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
   line-height: 1.3;
   text-transform: uppercase;
+}*/
+
+.login-right-panel h2 {
+  font-size: 35px;
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 2px;
+  color: #ffffff;
+  line-height: 1.3;
+  text-transform: uppercase;
+
+  /* Stronger shadow for better contrast */
+  text-shadow:
+    2px 2px 6px rgba(0, 0, 0, 0.6),
+    0 0 10px rgba(0, 0, 0, 0.4);
+  
+  
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Optional keyframes for entrance effect */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .login-right-panel p {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 500;
   font-family: 'Open Sans', sans-serif;
-  color: #4a4a4a;
-  width: 80%;
-  margin-top: 8px;
+  color: #ffffff;
+  width: 90%;
+  margin-top: 30px;
   line-height: 1.6;
   text-shadow: 0.5px 0.5px rgba(0,0,0,0.05);
+  animation: fadeInUp 0.8s ease-out;
 }
 
+.fade-text {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.fade-in {
+  opacity: 1;
+}
+
+.fade-out {
+  opacity: 0;
+}
 
   .form-group-resident {
     margin-top: 13px;
@@ -102,6 +164,10 @@ NEW
   margin-bottom: 20px;
   font-weight: bold;
   text-align: center;
+
+  text-shadow:
+    2px 2px 6px rgba(0, 0, 0, 0.6),
+    0 0 10px rgba(0, 0, 0, 0.4);
 }
 
 .form-label-resident {
@@ -113,6 +179,7 @@ NEW
 
 .form-input-resident {
   width: 450px;
+  height: 40px;
   padding: 12px 40px 12px 12px;
   font-size: 16px;
   border: 1px solid #ccc;
@@ -169,7 +236,7 @@ NEW
 
 .section2options-resident{
   font-size: 15px;
-  color: #4e769b;
+  color: #5a88b3;
   font-weight: bold;
   cursor: pointer;
 }
@@ -185,14 +252,14 @@ NEW
 }
 
 .submit-button-resident {
-  padding: 12px 20px;
+  padding: 10px 50px;
   font-size: 16px;
   background-color: #DF7426;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  width: 200px;
+
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   transition: all 0.3s ease;
 }
@@ -278,8 +345,9 @@ NEW
 .qc-logo {
   width: 150px;      /* Adjust size as needed */
   height: auto;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   filter: drop-shadow(0 0 5px rgba(0,0,0,0.3));
+  animation: fadeInUp 0.8s ease-out;
 }
 
 

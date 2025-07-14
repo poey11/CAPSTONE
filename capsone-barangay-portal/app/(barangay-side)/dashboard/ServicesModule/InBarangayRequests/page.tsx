@@ -1,6 +1,6 @@
 "use client"
 import { useRouter, useSearchParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useRef } from "react";
 import "@/CSS/barangaySide/ServicesModule/InBarangayRequests.css";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
@@ -29,6 +29,33 @@ import { report } from "process";
  const isAuthorized = ["Assistant Secretary", "Secretary", "Admin Staff"].includes(user?.position || "");
 
   
+
+ const [filtersLoaded, setFiltersLoaded] = useState(false);
+ const hasAnimatedOnce = useRef(false);
+ 
+ useEffect(() => {
+   // Animate filters only once on initial page load
+   if (!hasAnimatedOnce.current) {
+     hasAnimatedOnce.current = true;
+     setFiltersLoaded(false);
+     const timeout = setTimeout(() => {
+       setFiltersLoaded(true);
+     }, 50);
+     return () => clearTimeout(timeout);
+   } else {
+     // Never retrigger animation again
+     setFiltersLoaded(true);
+   }
+ }, []);
+
+ useEffect(() => {
+  const section = searchParams.get("section");
+  if (!section) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("section", "allrequest");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }
+}, []);
   
       useEffect(() => {
         let position = "";
@@ -279,17 +306,7 @@ useEffect(() => {
 
 {console.log("Assigned Tasks:", taskAssignedData)}
 
-    /* NEW UPDATED ADDED */
-    const [filtersLoaded, setFiltersLoaded] = useState(false);
-  
-    /* NEW UPDATED ADDED */
-    useEffect(() => {
-      setFiltersLoaded(false); // reset animation
-      const timeout = setTimeout(() => {
-        setFiltersLoaded(true); // retrigger
-      }, 50); // adjust delay as needed
-      return () => clearTimeout(timeout);
-    }, [searchParams.toString()]);
+
 
 
     return (
@@ -306,7 +323,16 @@ useEffect(() => {
                         key={section}
                         type="button"
                         className={`info-toggle-btn-assigned assigned-tasks ${activeSection === section ? "active" : ""}`}
-                        onClick={() => setActiveSection(section)}
+                        onClick={() => {
+                          setActiveSection(section);
+                          const params = new URLSearchParams(searchParams.toString());
+                          if (section === "main") {
+                            params.set("section", "allrequest");
+                          } else if (section === "tasks") {
+                            params.set("section", "assignedtasks");
+                          }
+                          router.push(`?${params.toString()}`, { scroll: false });
+                        }}
                       >
                         {section === "main" && "All Requests"}
                         {section === "tasks" && (

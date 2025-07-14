@@ -6,7 +6,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from "file-saver";
 import "@/CSS/ReportsModule/reports.css";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MonthYearModal } from "@/app/(barangay-side)/components/MonthYearModal"; 
 import { NatureOfWorkModal } from "@/app/(barangay-side)/components/NatureOfWorkModal"; 
 import { ServiceMonthYearModal } from "@/app/(barangay-side)/components/ServiceMonthYearModal"; 
@@ -106,6 +106,8 @@ const ReportsPage = () => {
 
 const [selectedFolder, setSelectedFolder] = useState<string>("ReportsModule/");
 const [viewingFolder, setViewingFolder] = useState<string>("ReportsModule/");
+
+
 
 
 const fetchDownloadLinks = async () => {
@@ -237,6 +239,15 @@ const handleDownload = (file: FileData) => {
 };
 
 const router = useRouter();
+  const searchParams = useSearchParams();
+
+useEffect(() => {
+    const section = searchParams.get("section");
+    if (!section) {
+      router.push("/dashboard/ReportsModule?section=generate");
+    }
+  }, [searchParams, router]);
+  
 const hasInitialized = useRef(false);
 const [isGenerating, setIsGenerating] = useState(false);
 const [generatingMessage, setGeneratingMessage] = useState("");
@@ -331,7 +342,9 @@ useEffect(() => {
 
 const [activeSectionForms, setActiveSectionForms] = useState("resident");
 
-
+useEffect(() => {
+  setCurrentPageForms(0);
+}, [viewingFolder]);
 
 const uploadForms = async (url: string): Promise<void> => {
   setIsLoading({ status: true, message: "Downloading Form, please wait..." });
@@ -4549,7 +4562,12 @@ const handleGenerateIncidentSummaryPDF = async (
       <div className="generatereport-redirectionpage-section">
         <button 
           className={` ${activeSection === "generate" ? "generate-reports-download-forms-selected" : "generatereport-redirection-buttons"}`}
-          onClick={() => setActiveSection("generate")}
+          /*onClick={() => setActiveSection("generate")}*/
+
+          onClick={() => {
+            setActiveSection("generate");
+            router.push("/dashboard/ReportsModule?section=generate");
+          }}
         >
           <div className="generatereport-redirection-icons-section">
             <img src="/images/report.png" alt="user info" className="redirection-icons-generatereport"/> 
@@ -4561,6 +4579,7 @@ const handleGenerateIncidentSummaryPDF = async (
             className={` ${activeSection === "download" ? "generate-reports-download-forms-selected " : "generatereport-redirection-buttons"}`}
             onClick={() => {
               setActiveSection("download");
+              router.push("/dashboard/ReportsModule?section=download");
 
               // ⬇️ set the folder automatically based on their position
               if (session?.user?.position === "Secretary" ||
@@ -4802,40 +4821,40 @@ const handleGenerateIncidentSummaryPDF = async (
                       </button>
 
                       <>
-  <button
-    type="button"
-    onClick={() => setShowKasambahayModal(true)}
-    disabled={loadingKasambahay}
-    className={`report-tile ${loadingKasambahay ? "disabled" : ""}`}
-    aria-busy={loadingKasambahay}
-    aria-label="Generate Kasambahay Masterlist Report"
-  >
-    <img
-      src="/images/form.png"
-      alt="Kasambahay icon"
-      className="report-icon"
-      aria-hidden="true"
-    />
-    <p className="report-title">
-      {loadingKasambahay ? "Generating..." : "Kasambahay Masterlist"}
-    </p>
-  </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowKasambahayModal(true)}
+                          disabled={loadingKasambahay}
+                          className={`report-tile ${loadingKasambahay ? "disabled" : ""}`}
+                          aria-busy={loadingKasambahay}
+                          aria-label="Generate Kasambahay Masterlist Report"
+                        >
+                          <img
+                            src="/images/form.png"
+                            alt="Kasambahay icon"
+                            className="report-icon"
+                            aria-hidden="true"
+                          />
+                          <p className="report-title">
+                            {loadingKasambahay ? "Generating..." : "Kasambahay Masterlist"}
+                          </p>
+                        </button>
 
-  <NatureOfWorkModal
-    show={showKasambahayModal}
-    onClose={() => setShowKasambahayModal(false)}
-    onGenerate={handleGenerateKasambahayPDF}
-    loading={loadingKasambahay}
-    title="Generate Kasambahay Masterlist"
-    options={[
-      { key: "All", value: "All" },
-      ...Object.entries(natureOfWorkMap).map(([key, value]) => ({
-        key,
-        value
-      }))
-    ]}    
-  />
-</>
+                        <NatureOfWorkModal
+                          show={showKasambahayModal}
+                          onClose={() => setShowKasambahayModal(false)}
+                          onGenerate={handleGenerateKasambahayPDF}
+                          loading={loadingKasambahay}
+                          title="Generate Kasambahay Masterlist"
+                          options={[
+                            { key: "All", value: "All" },
+                            ...Object.entries(natureOfWorkMap).map(([key, value]) => ({
+                              key,
+                              value
+                            }))
+                          ]}    
+                        />
+                      </>
 
 
                       <button onClick={handleGenerateJobSeekerPDF} disabled={loadingJobSeeker} className="report-tile">
@@ -4868,6 +4887,8 @@ const handleGenerateIncidentSummaryPDF = async (
                           className="report-icon"
                           aria-hidden="true"
                         />
+
+                        
                         <p className="report-title">
                           {loadingIncidentSummary
                             ? "Generating..."
@@ -5055,7 +5076,7 @@ const handleGenerateIncidentSummaryPDF = async (
 
 
 
-    {/* downloadable forms area  */}
+    {/* downloadable forms area  here*/}
 
     {activeSection === "download" && (
       <>
@@ -5093,14 +5114,14 @@ const handleGenerateIncidentSummaryPDF = async (
                     className={`info-toggle-btn ${viewingFolder === "ReportsModule/AdminStaff/" ? "active" : ""}`}
                     onClick={() => setViewingFolder("ReportsModule/AdminStaff/")}
                   >
-                    Admin Files
+                    Admin Staff Files
                   </button>
                   <button
                     type="button"
                     className={`info-toggle-btn ${viewingFolder === "ReportsModule/LFStaff/" ? "active" : ""}`}
                     onClick={() => setViewingFolder("ReportsModule/LFStaff/")}
                   >
-                    LF Files
+                    LF Staff Files
                   </button>
                 </>
               )}
@@ -5144,7 +5165,6 @@ const handleGenerateIncidentSummaryPDF = async (
             </div>
 
 
-
             <div className="downloadble-report-header-body-bottom-section">
 
                   <div className="downloadble-forms-info-main-container">
@@ -5159,8 +5179,10 @@ const handleGenerateIncidentSummaryPDF = async (
                       </button>
                     </div>
 
+
                     <div className="downloadble-forms-grid">
-                    {paginatedFiles.map((file, index)=> (
+                   {/* {paginatedFiles.map((file, index)=> ( */}
+                      {paginatedFiles.slice(0, 4).map((file, index) => (
                         <div className="form-card" key={index}>
                           <div className="form-icon-label">
                             <img src="/images/form.png" alt="Form Icon" />

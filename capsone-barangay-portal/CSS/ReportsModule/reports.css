@@ -1,3 +1,4 @@
+
 /*
 new
 */
@@ -317,33 +318,46 @@ html, body {
 
   /* NEW */
 .generatereport-main-container {
-  width: 100%;
+  /*width: 100%;
   height: 100%;
   background-color: #F0F2F8; 
   margin-left: 1rem; 
   padding-top: 11.2%;
   padding-bottom:30px;
     padding-top: 14.2%;
+  padding-bottom: 3%;*/
+
+  width: 100%;
+  height: 100vh; 
+  background-color: #F0F2F8;
+  margin-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 14.2%;
   padding-bottom: 3%;
 }
 
 .generatereport-redirectionpage-section {
   width: 80%;
-  height: 100px;
-  margin:  auto;
-  margin-bottom: 30px;
+  height: 75px;
+  margin: auto;
+  margin-bottom: 20px;
   display: flex;
   flex-direction: row;
-  gap: 30px;
+  gap: 20px;
   align-items: center;
   justify-content: center;
   background-color: #ffffff;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #ccc;
+  padding: 10px 0;
+
 }
 
 .generatereport-redirection-buttons {
-  width: 270px;
+  /*width: 270px;
   height: 50px;
   background-color: #ffffff;
   border-radius: 8px;
@@ -352,7 +366,19 @@ html, body {
   display: flex;
   flex-direction: row;
   align-items: center;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;*/
+
+   width: 220px;
+  height: 40px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-shadow: 0 1px 3px rgba(0, 0, 10, 0.2);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  transition: transform 0.25s ease, box-shadow 0.2s ease;
+  padding: 0 8px;
 }
 
 .generatereport-redirection-buttons:hover {
@@ -365,9 +391,10 @@ html, body {
 }
 
 .generatereport-redirection-buttons h1 {
+     font-size: 14px;
+  font-weight: 600;
   color: #2C3E50;
-  font-weight: bolder;
-  font-size: 16px;
+  margin-left: 6px;
 }
 
 .generatereport-redirection-buttons:disabled {
@@ -390,40 +417,52 @@ html, body {
 
 
 .generatereport-redirection-icons-section {
-  width: 70px;
+   width: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
+
 }
 
 .generatereport-redirection-icons-section img {
-  width: 30px;
-  height: 30px;
-  transition: transform 0.25s ease;
+   width: 22px;
+  height: 22px;
+  transition: transform 0.2s ease;
 }
 
 .generatereport-redirection-buttons:not(:disabled):hover .generatereport-redirection-icons-section img {
-  transform: scale(1.1);
+   transform: scale(1.08);
 }
 
 .redirection-icons-generatereport {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   filter: invert(53%) sepia(89%) saturate(2143%) hue-rotate(1deg) brightness(90%) contrast(95%);
+}
+
+
+@keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 
 .generatereport-main-content {
   display: flex;
   flex-direction: column;
-  width: 80%;
+  width: 90%;
   border-radius: 1rem;
-  border: 2px solid rgba(36, 53, 76, 0.7);
-  margin:  auto; 
   background-color: #ffffff;
   overflow: hidden; 
-  height: 600px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  animation: fadeSlideIn 0.5s ease-out;
+  height: 100%;
 }
 
 .generatereport-main-section1{
@@ -458,6 +497,8 @@ html, body {
   display: flex;
   flex-direction: column;
   padding: 20px;
+  height: 100%;
+
 }
 
 .downloadble-report-header-body {
@@ -473,7 +514,6 @@ html, body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding-top: 20px;
 }
 
 .generatereport-header-body-top-section p {
@@ -486,19 +526,20 @@ html, body {
 .moduleDropdown-container {
   display: flex;
   justify-content: center;
-  width: 100%;
+  width: 80%;
 }
 
 .moduleDropdown {
   padding: 10px;
   width: 70%;
-  margin-bottom: 1rem;
+  margin-bottom: 5px;
   border: 1.5px solid #f49028;
   border-radius: 8px;
   outline: none;
   transition: 0.3s;
   text-align: center;
   font-weight: bold;
+  font-size: 15px;
   color: #2C3E50;
 }
 
@@ -514,7 +555,7 @@ html, body {
   display: flex;
   flex-direction: row;
   height: 100%;
-  height: 400px;
+  height: 100%;
 }
 
 .generatereport-button-redirection-container {
@@ -526,8 +567,10 @@ html, body {
 
 .generatereport-main-reports-section {
   width: 80%;
+  height: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 
@@ -556,6 +599,7 @@ html, body {
   grid-template-columns: repeat(3, 1fr); 
   gap: 25px;
   padding: 20px;
+  height: 370px;
 }
 
 .report-tile {
@@ -753,10 +797,10 @@ DOWNLOADABLE FORMS
   display: flex;
   justify-content: center; /* horizontally centers */
   gap: 1.5rem;             /* spacing between buttons */
-  margin-bottom: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
   width: 100%;
   align-items: center;
-  border-bottom: 2px solid #e0e0e0;
 }
 
 
@@ -792,11 +836,13 @@ DOWNLOADABLE FORMS
     height: 100%;
     display: flex;
     padding: 1rem;
+    display: flex;
+    align-items: center;
 }
 
 
 
-
+/*
 .downloadble-forms-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr); 
@@ -804,6 +850,18 @@ DOWNLOADABLE FORMS
   gap: 20px;
   width: 100%;
   height: 100%;
+  background-color: yellow;
+}*/
+
+.downloadble-forms-grid {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);  /* 2 columns */
+  grid-template-rows: repeat(2, auto);    /* 2 rows */
+  column-gap: 20px; 
+  width: 100%;
+  height: 350px;
+  margin: 0 auto;         /* Center the grid */
 }
 
 
@@ -818,8 +876,8 @@ DOWNLOADABLE FORMS
   flex-direction: column;
   justify-content: space-between;
 border: 1px solid rgba(44, 62, 80, 0.7);
-  height: 115px; 
-  min-height: 115px;
+  height: 130px; 
+  min-height: 130px;
 }
 
 .form-card:hover {
@@ -860,12 +918,14 @@ border: 1px solid rgba(44, 62, 80, 0.7);
  
 }
 
+
 .download-btn, .delete-btn {
   padding: 8px 12px;
   font-size: 13px;
   border-radius: 5px;
   cursor: pointer;
   border: none;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 .download-btn {
@@ -876,6 +936,16 @@ border: 1px solid rgba(44, 62, 80, 0.7);
 .delete-btn {
   background-color: #e74c3c;
   color: white;
+}
+
+.download-btn:hover {
+  background-color: #1d3d59;
+  transform: scale(1.05);
+}
+
+.delete-btn:hover {
+  background-color: #d84838;
+  transform: scale(1.10);
 }
 
 
@@ -1414,24 +1484,27 @@ tinangal
 
 
   .generate-reports-download-forms-selected {
-      width: 270px;
-  height: 50px;
+    width: 220px;
+  height: 40px;
   background-color: #F0F2F8;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid #ccc;
-  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 10, 0.2);
   display: flex;
   flex-direction: row;
   align-items: center;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.2s ease;
+  padding: 0 8px;
+  cursor: auto;
   }
 
   
   .generate-reports-download-forms-selected h1{
-    color: #2C3E50;
-  font-weight: bolder;
-  font-size: 16px;
+   font-size: 14px;
+  font-weight: 600;
+  color: #2C3E50;
+  margin-left: 6px;
+
   
   }
 

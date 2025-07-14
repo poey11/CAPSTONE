@@ -264,6 +264,17 @@ const ViewOnlineRequest = () => {
       
 
 
+useEffect(() => {
+  const id = searchParams.get("id");
+  const reqType = searchParams.get("reqType");
+
+  if (!id) return;
+
+  if (!reqType) {
+    router.replace(`/dashboard/ServicesModule/ViewRequest?reqType=online&id=${id}`, { scroll: false });
+  }
+}, [searchParams, router]);
+
 
 /*
 For Reason for Reject
@@ -1426,7 +1437,7 @@ Functions for Reason for Reject
 
       if (sectionName === "others") {
         return (
-          <div className="others-image-section" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
+         <div className="others-image-section">
             {requestData?.reqType === "InBarangay" ? (
               <>
                 {requestData?.docsRequired?.map((file, index) => (
@@ -1903,6 +1914,7 @@ Functions for Reason for Reject
 
         
             {
+              
               (
                 (userPosition === "Admin Staff" && requestData?.sendTo === "Admin Staff") ||
                 (["Assistant Secretary", "Secretary"].includes(userPosition || "") && requestData?.sendTo === "SAS")
@@ -1992,7 +2004,23 @@ Functions for Reason for Reject
                 </>
             )}
 
-            <div className="services-onlinereq-main-content">
+         {/*}   <div className="services-onlinereq-main-content"> */}
+
+
+                <div
+                  className="services-onlinereq-main-content"
+                  style={{
+                    height:
+                      ((userPosition === "Admin Staff" && requestData?.sendTo === "Admin Staff") ||
+                        (["Assistant Secretary", "Secretary"].includes(userPosition || "") &&
+                          requestData?.sendTo === "SAS")) &&
+                      status !== "Completed" &&
+                      status !== "Rejected"
+                        ? "100%"
+                        : "85%",
+                  }}
+                >
+
                 <div className="services-onlinereq-main-section1">
                     <div className="services-onlinereq-main-section1-left">
                         <button onClick={handleBack}>
@@ -2245,7 +2273,7 @@ Functions for Reason for Reject
                                   </>
                                 )}  
 
-{/* gohere*/}
+
                                 {activeSection === "or" && (
                                   <>
                                     <div className="services-onlinereq-content">
