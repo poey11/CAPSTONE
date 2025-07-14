@@ -407,7 +407,6 @@ html, body {
     flex-direction: column;
     width: 90%;
     border-radius: 1rem;
-    border: 2px solid rgba(36, 53, 76, 0.7);
     margin:  auto; 
     background-color: #ffffff;
     overflow: hidden; 
