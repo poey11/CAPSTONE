@@ -11,6 +11,7 @@ export default function DialogueSection() {
     const router = useRouter();
     const searchParam = useSearchParams();
     const docId = searchParam.get("id");
+    const department = searchParam.get("department");
     const [reportData, setReportData] = useState<any>();
 
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
@@ -27,22 +28,21 @@ export default function DialogueSection() {
     };
 
     const handleInformationSection = (e:any) => {
-        router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
+        router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
     };
 
-    const handleGenerateLetterAndInvitation = (e:any) => {
-        const action = e.currentTarget.name;
-        router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}?action=${action}`);
+    const handleGenerateLetterAndInvitation = (e: any) => {
+    const action = e.currentTarget.name;
+    router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=${action}&department=${department}`);
     };
-  
+
     const handleDialogueSection = () => {
-        router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
-    };
-  
-    const handleHearingSection = () => {
-        router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
+    router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
     };
 
+    const handleHearingSection = () => {
+    router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
+    }
     useEffect(() => {
         if(docId){
           getSpecificDocument("IncidentReports", docId, setReportData).then(() => setLoading(false));
