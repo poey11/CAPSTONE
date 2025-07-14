@@ -342,7 +342,7 @@ to {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 2;
-  width: 400px;
+  width: 550px;
 }
 
 @keyframes fadeSlideInServices {
