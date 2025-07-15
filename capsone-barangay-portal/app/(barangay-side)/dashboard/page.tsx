@@ -117,6 +117,7 @@ const [filteredIncidents, setFilteredIncidents] = useState<any[]>([]);
 // for appointments
 
 const [pendingAppointmentsCount, setPendingAppointmentsCount] = useState(0);
+const [inprogressAppointmentsCount, setInProgressAppointmentsCount] = useState(0);
 const [completedAppointmentsCount, setCompletedAppointmentsCount] = useState(0);
   
 
@@ -448,6 +449,7 @@ useEffect(() => {
 
   // for appointments
   let pendingAppointments = 0;
+  let inprogressAppointments = 0;
   let completedAppointments = 0;
   
   documentRequestsSnapshots.docs.forEach((doc) => {
@@ -455,10 +457,12 @@ useEffect(() => {
     if (data.appointmentDate && data.approvedBySAS === true) {
       if (data.status === "Pending") pendingAppointments++;
       else if (data.status === "Completed") completedAppointments++;
+      else if (data.status === "In - Progress") inprogressAppointments++;
     }
   });
   
   setPendingAppointmentsCount(pendingAppointments);
+  setInProgressAppointmentsCount(inprogressAppointments);
   setCompletedAppointmentsCount(completedAppointments);
   
 
@@ -495,12 +499,13 @@ useEffect(() => {
 
   const appointmentsChart = {
     title: "Pending or Completed Appointments",
-    count: pendingAppointmentsCount + completedAppointmentsCount,
+    count: pendingAppointmentsCount + inprogressAppointmentsCount + completedAppointmentsCount,
     data: [
       { name: "Pending", value: pendingAppointmentsCount },
+      { name: "In - Progress", value: inprogressAppointmentsCount },
       { name: "Completed", value: completedAppointmentsCount },
     ],
-    colors: ["#FF9800", "#4CAF50"],
+    colors: ["#FF9800", "#4CAF50", "#2196F3"],
   };
   
   const barangayDemographicsChart = {
