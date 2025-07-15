@@ -155,64 +155,116 @@ const ViewOnlineRequest = () => {
       const [showJobseekerPopup, setShowJobseekerPopup] = useState(false);
       const [jobseekerPopupMessage, setJobseekerPopupMessage] = useState("");
       const [askAddToList, setAskAddToList] = useState(false);
+      const [firstTimeClaimed, setFirstTimeClaimed] = useState<boolean | null>(null);
+
+      useEffect(() => {
+        const checkFirstTimeClaimedStatus = async () => {
+          if (!requestData) return;
+          if (requestData.purpose !== "First Time Jobseeker") return;
+      
+          const jobSeekerRef = collection(db, "JobSeekerList");
+      
+          // Try by residentId first
+          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.accID));
+          const byResidentIdSnap = await getDocs(byResidentIdQuery);
+      
+          if (!byResidentIdSnap.empty) {
+            const data = byResidentIdSnap.docs[0].data();
+            setFirstTimeClaimed(data.firstTimeClaimed ?? null);
+            return;
+          }
+      
+          // Fallback by name + DOB
+          const snapshot = await getDocs(jobSeekerRef);
+          const match = snapshot.docs.find(doc => {
+            const data = doc.data();
+            return data.firstName?.toLowerCase() === requestData.requestorFname?.split(" ")[0]?.toLowerCase() &&
+                   data.lastName?.toLowerCase() === requestData.requestorFname?.split(" ").slice(-1)[0]?.toLowerCase() &&
+                   data.dateOfBirth === requestData.birthday;
+          });
+      
+          if (match) {
+            setFirstTimeClaimed(match.data().firstTimeClaimed ?? null);
+          }
+        };
+      
+        checkFirstTimeClaimedStatus();
+      }, [requestData]);
+      
   
-  useEffect(() => {
-    const checkJobseeker = async () => {
-      if (!requestData) return;
-      if (requestData.purpose !== "First Time Jobseeker") return;
-  
-      try {
-        const jobSeekerRef = collection(db, "JobSeekerList");
-  
-        // Check by residentId first
-        const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.accID));
-        const byResidentIdSnap = await getDocs(byResidentIdQuery);
-  
-        if (!byResidentIdSnap.empty) {
-          setJobseekerPopupMessage("This applicant is already in the Jobseeker List. Payment will be required.");
-          setShowJobseekerPopup(true);
-          return;
-        }
-  
-        // Fallback check by splitting requestorFname into first, middle, last
-        let firstName = "";
-        let middleName = "";
-        let lastName = "";
-        if (requestData.requestorFname) {
-          const parts = requestData.requestorFname.trim().split(" ");
-          firstName = parts[0] || "";
-          middleName = parts.length === 3 ? parts[1] : "";
-          lastName = parts.length >= 2 ? parts[parts.length - 1] : "";
-        }
-  
-        // Check by name + DOB
-        const snapshot = await getDocs(jobSeekerRef);
-        const match = snapshot.docs.find(doc => {
-          const data = doc.data();
-          return data.firstName?.toLowerCase() === firstName.toLowerCase() &&
-                 data.lastName?.toLowerCase() === lastName.toLowerCase() &&
-                 data.dateOfBirth === requestData.birthday;
-        });
-  
-        if (match) {
-          setJobseekerPopupMessage("This applicant is already in the Jobseeker List. Payment will be required.");
-          setShowJobseekerPopup(true);
-        } else {
-          setJobseekerPopupMessage(
-            "This applicant is not yet in the First Time Jobseeker List.\n" +
-            "Under RA 11261, this means the request will not be paid for unless added.\n" +
-            "Do you want to add them now to the Jobseeker List?"
-          );
-          setShowJobseekerPopup(true);
-          setAskAddToList(true);
-        }
-      } catch (err) {
-        console.error("Error checking JobSeekerList:", err);
-      }
-    };
-  
-    checkJobseeker();
-  }, [requestData]);
+      useEffect(() => {
+        const checkJobseeker = async () => {
+          if (!requestData) return;
+      
+          // ✅ if already Completed, no need to show popup
+          if (requestData.status === "Completed" || requestData.status === "In - Progress") return;
+      
+          if (requestData.purpose !== "First Time Jobseeker") return;
+      
+          try {
+            const jobSeekerRef = collection(db, "JobSeekerList");
+      
+            // Check by residentId first
+            const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.accID));
+            const byResidentIdSnap = await getDocs(byResidentIdQuery);
+      
+            if (!byResidentIdSnap.empty) {
+              // 🔥 if exists, check firstTimeClaimed
+              const existingDoc = byResidentIdSnap.docs[0].data();
+              if (existingDoc.firstTimeClaimed === false) {
+                // already added but not yet claimed - skip popup
+                return;
+              }
+      
+              setJobseekerPopupMessage("This applicant is already in the Jobseeker List. Payment will be required.");
+              setShowJobseekerPopup(true);
+              return;
+            }
+      
+            // Fallback check by splitting requestorFname into first, middle, last
+            let firstName = "";
+            let middleName = "";
+            let lastName = "";
+            if (requestData.requestorFname) {
+              const parts = requestData.requestorFname.trim().split(" ");
+              firstName = parts[0] || "";
+              middleName = parts.length === 3 ? parts[1] : "";
+              lastName = parts.length >= 2 ? parts[parts.length - 1] : "";
+            }
+      
+            // Check by name + DOB
+            const snapshot = await getDocs(jobSeekerRef);
+            const match = snapshot.docs.find(doc => {
+              const data = doc.data();
+              return data.firstName?.toLowerCase() === firstName.toLowerCase() &&
+                     data.lastName?.toLowerCase() === lastName.toLowerCase() &&
+                     data.dateOfBirth === requestData.birthday;
+            });
+      
+            if (match) {
+              if (match.data().firstTimeClaimed === false) {
+                // already added but not yet claimed - skip popup
+                return;
+              }
+              setJobseekerPopupMessage("This applicant is already in the Jobseeker List. Payment will be required.");
+              setShowJobseekerPopup(true);
+            } else {
+              setJobseekerPopupMessage(
+                "This applicant is not yet in the First Time Jobseeker List.\n" +
+                "Under RA 11261, this means the request will not be paid for unless added.\n" +
+                "Do you want to add them now to the Jobseeker List?"
+              );
+              setShowJobseekerPopup(true);
+              setAskAddToList(true);
+            }
+          } catch (err) {
+            console.error("Error checking JobSeekerList:", err);
+          }
+        };
+      
+        checkJobseeker();
+      }, [requestData]);
+      
   
   
   // handle function for matic jobseeker
@@ -246,6 +298,7 @@ const ViewOnlineRequest = () => {
         remarks: "",
         residentId: requestData.accID || "",
         identificationFileURL: requestData.validIDjpg || "",
+        firstTimeClaimed: false,
       };
   
       // Save to Firestore
@@ -1599,7 +1652,7 @@ Functions for Reason for Reject
             };
         
             // Create notification
-            const notificationRef = collection(db, "BarangayNotifications");
+            const notificationRef = collection(db, "Notifications");
             await addDoc(notificationRef, {
                 residentID: requestData?.accID,
                 requestID: id,
@@ -1689,6 +1742,40 @@ Functions for Reason for Reject
       }
     
       await updateDoc(docRef, updatedData);
+
+      // update firsttimeclaimed to true if it was false
+
+      if (requestData?.purpose === "First Time Jobseeker") {
+        try {
+          const jobSeekerRef = collection(db, "JobSeekerList");
+    
+          // Check by residentId first
+          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.accID));
+          const byResidentIdSnap = await getDocs(byResidentIdQuery);
+    
+          if (!byResidentIdSnap.empty) {
+            const jobDoc = byResidentIdSnap.docs[0];
+            const data = jobDoc.data();
+            if (!data.firstTimeClaimed) {
+              await updateDoc(jobDoc.ref, { firstTimeClaimed: true });
+            }
+          } else {
+            // Fallback by name + DOB
+            const snapshot = await getDocs(jobSeekerRef);
+            const match = snapshot.docs.find(doc => {
+              const data = doc.data();
+              return data.firstName?.toLowerCase() === requestData.requestorFname?.split(" ")[0]?.toLowerCase() &&
+                     data.lastName?.toLowerCase() === requestData.requestorFname?.split(" ").slice(-1)[0]?.toLowerCase() &&
+                     data.dateOfBirth === requestData.birthday;
+            });
+            if (match && !match.data().firstTimeClaimed) {
+              await updateDoc(match.ref, { firstTimeClaimed: true });
+            }
+          }
+        } catch (err) {
+          console.error("Failed to update firstTimeClaimed:", err);
+        }
+      }
     
       const notificationRef = collection(db, "Notifications");
       await addDoc(notificationRef, {
@@ -1731,7 +1818,7 @@ Functions for Reason for Reject
      await addDoc(notificationRef, {
        residentID: requestData?.accID,
        requestID: id,
-       message: `Your document request (${requestData?.requestId}) has been updated to (${requestData?.status}) We will notify you once it's ready for pickup.`,
+       message: `Your document request (${requestData?.requestId}) has been updated to (${updatedData.status}) We will notify you once it's ready for pickup.`,
        timestamp: new Date(),
        transactionType: "Online Request",
        isRead: false,
@@ -1780,6 +1867,15 @@ Functions for Reason for Reject
           recipientRole: "Admin Staff",
           requestID: id,
         });
+
+        // await addDoc(collection(db, "Notifications"), {
+        //   residentID: requestData?.accID,
+        //   requestID: id,
+        //   message: `Your document request (${requestData?.requestId}) is now (In - Progress). We will notify you once it progresses.`,
+        //   timestamp: new Date(),
+        //   transactionType: "Online Service Request",
+        //   isRead: false,
+        // });        
         
 
       }else{
@@ -1832,6 +1928,41 @@ Functions for Reason for Reject
           }),
       };
       await updateDoc(docRef, updatedData);
+
+      await addDoc(collection(db, "Notifications"), {
+        residentID: requestData?.accID,
+        requestID: id,
+        message: `Your proposed appointment for (${requestData?.requestId}) has been approved. Please arrive to the barangay hall on time.`,
+        timestamp: new Date(),
+        transactionType: "Online Service Request",
+        isRead: false,
+      });
+
+      const notificationRef = collection(db, "BarangayNotifications");
+
+      if (requestData?.purpose === "Residency") {
+        await addDoc(notificationRef, {
+          message: `You have been assigned an appointment for picture taking for ${requestData?.purpose} for ${requestData?.requestorFname}.`,
+          timestamp: new Date(),
+          requestorId: requestData?.accID,
+          isRead: false,
+          transactionType: "Online Service Request",
+          recipientRole: "Admin Staff",
+          requestID: id,
+        });
+      } else if (requestData?.docType === "Barangay Indigency") {
+        await addDoc(notificationRef, {
+          message: `You have been assigned an appointment for interview for ${requestData?.docType} ${requestData?.purpose} for ${requestData?.requestorFname}.`,
+          timestamp: new Date(),
+          requestorId: requestData?.accID,
+          isRead: false,
+          transactionType: "Online Service Request",
+          recipientRole: "Admin Staff",
+          requestID: id,
+        });
+      }
+      
+    
     }
 
     const [showInterviewForm, setShowInterviewForm] = useState(false);
@@ -1850,7 +1981,16 @@ Functions for Reason for Reject
       };
       await updateDoc(docRef, updatedData);
 
-
+      const notificationRef = collection(db, "BarangayNotifications");
+      await addDoc(notificationRef, {
+        message: `You have been assigned a new task for ${requestData?.purpose} document requested by ${requestData?.requestorFname}.`,
+        timestamp: new Date(),
+        requestorId: requestData?.accID,
+        isRead: false,
+        transactionType: "Online Assigned Service Request",
+        recipientRole: "Assistant Secretary",
+        requestID: id,
+      });
 
       setShowInterviewForm(false);
     }
@@ -2550,7 +2690,14 @@ Functions for Reason for Reject
 
                 // Hide "OR Section" if docType is in the excluded list
                 const isPayment = section === "payment";
-                const shouldHidePayment = isPayment && excludedDocTypes.includes(requestData?.docType || "");
+                const shouldHidePayment =
+                isPayment &&
+                (
+                  (excludedDocTypes.includes(requestData?.docType || "") &&
+                   requestData?.purpose !== "First Time Jobseeker") ||
+                  (requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false)
+                );
+              
 
                 if (shouldHidePayment) return null;
 
@@ -2603,6 +2750,17 @@ Functions for Reason for Reject
                       />
                     </div>
                   </div>
+
+                  {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false && (
+                      <p style={{ color: "green", fontWeight: "bold", marginTop: "1rem" }}>
+                        * This request will not require payment as per RA 11261 (First Time Jobseeker).
+                      </p>
+                    )}                       
+                  {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === true && (
+                    <p style={{ color: "red", fontWeight: "bold", marginTop: "1rem" }}>
+                      * This request will require payment as they have already claimed their RA 11261 (First Time Jobseeker).
+                    </p>
+                  )}                  
                 </>
                )}
 

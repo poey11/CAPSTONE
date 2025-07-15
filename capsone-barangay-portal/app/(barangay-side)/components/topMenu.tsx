@@ -139,8 +139,9 @@ export default function TopMenu() {
         const afterCreated = filtered.filter(notif => {
           const notifDate = notif.timestamp?.toDate?.() 
             ?? (notif.timestamp instanceof Date ? notif.timestamp : new Date(notif.timestamp));
-          console.log("Checking notification:", { notifDate, createdDate, passed: notifDate > createdDate });
-          return notifDate > createdDate;
+        
+          const sameDay = notifDate.toDateString() === createdDate.toDateString();
+          return notifDate >= createdDate || sameDay;
         });
 
         if (userPosition === "Assistant Secretary" || userPosition === "Admin Staff") {
@@ -215,7 +216,7 @@ export default function TopMenu() {
       router.push(`/dashboard/IncidentModule/EditIncident?id=${notification.incidentID}`);
     } else if (notification.transactionType === "Resident Registration") {
       router.push(`/dashboard/admin/viewResidentUser?id=${notification.accID}`);
-    } else if (notification.transactionType === "Online Service Request" || "Online Assigned Service") {
+    } else if (notification.transactionType === "Online Service Request" || "Online Assigned Service Request" || "Service Request" || "Assigned Service Request") {
       router.push(`/dashboard/ServicesModule/ViewRequest?id=${notification.requestID}`);
     }
   };
