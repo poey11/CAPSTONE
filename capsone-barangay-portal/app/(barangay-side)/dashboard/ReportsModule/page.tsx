@@ -3631,8 +3631,18 @@ const handleGenerateIncidentSummaryPDF = async (
         return null;
       }
   
-      const templateRef = ref(storage, "ReportsModule/Departmental Incident Reports Template.xlsx");
-      const url = await getDownloadURL(templateRef);
+      let templatePath = "ReportsModule/Departmental Incident Reports Template.xlsx";
+
+      if (department === "BCPC") {
+        templatePath = "ReportsModule/Departmental Incident BCPC Reports Template.xlsx";
+      } else if (department === "VAWC") {
+        templatePath = "ReportsModule/Departmental Incident VAWC Reports Template.xlsx";
+      } else if (department === "GAD") {
+        templatePath = "ReportsModule/Departmental Incident GAD Reports Template.xlsx";
+      }
+      // 'ALL', 'Online', 'Lupon', or anything else defaults to general template
+      
+      const templateRef = ref(storage, templatePath);      const url = await getDownloadURL(templateRef);
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
   
