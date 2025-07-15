@@ -109,6 +109,34 @@ const handlePrint = async(requestData:any) => {
             "Text6": dayToday,
             "Text7": `${monthToday} ${yearToday}`,
         };
+        const responseB = await fetch("/api/imageToPDF", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                location: "/ServiceRequests/templates",
+                pdfTemplate: locationPath,
+                data: reqData,
+                imageUrl: requestData?.photoUploaded,
+                imageX:10,
+                imageY:550,
+                imageWidth:130,
+                imageHeight:105,
+            })
+        });
+        if(!responseB.ok)throw new Error("Failed to generate PDF");
+        const blobB = await responseB.blob();
+        const urlB = URL.createObjectURL(blobB);
+        const linkB = document.createElement("a");
+        linkB.href = urlB;
+        linkB.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_ID.pdf`;
+        linkB.click();
+        URL.revokeObjectURL(urlB);
+        linkB.remove();
+        return;
+
+
     }
     else if(requestData?.purpose === "Good Moral and Probation"){
         if(requestData?.goodMoralPurpose === "Other Legal Purpose and Intent") locationPath = "certificate of goodmoral_a.pdf";
@@ -225,6 +253,7 @@ const handlePrint = async(requestData:any) => {
             "Text8": requestData?.citizenship.toUpperCase(),
             "Text9": yearToday,
         };
+        
     }
 
     const nextYear = (parseInt(yearToday) + 1).toString();
@@ -262,6 +291,10 @@ const handlePrint = async(requestData:any) => {
                 pdfTemplate: locationPath,
                 data: reqData,
                 imageUrl: requestData?.twoByTwoPicture,
+                imageX:25,
+                imageY:108,
+                imageWidth:130,
+                imageHeight:105,
             })
         });
         if(!responseB.ok)throw new Error("Failed to generate PDF");

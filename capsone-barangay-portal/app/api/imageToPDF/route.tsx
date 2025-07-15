@@ -6,7 +6,7 @@ import { ref, getDownloadURL } from 'firebase/storage';
 export async function POST(req: NextRequest, res: NextResponse) {
     try {
         const body = await req.json();
-        const { location, pdfTemplate, data, imageUrl, centerField = [] } = body;
+        const { location, pdfTemplate, data, imageUrl, centerField =[], imageX, imageY, imageWidth,imageHeight} = body;
 
         if (!location || !pdfTemplate || !data) {
             return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
@@ -85,10 +85,10 @@ export async function POST(req: NextRequest, res: NextResponse) {
                     
                     const page = pdfDoc.getPages()[0];
                     page.drawImage(embeddedImage, {
-                      x: 25,
-                      y: 108,
-                      width: 130,
-                      height: 105,
+                      x: imageX,
+                      y: imageY,
+                      width: imageWidth,
+                      height: imageHeight,
                     });
                 }
 

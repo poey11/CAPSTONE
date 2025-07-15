@@ -38,6 +38,8 @@ const AppointmentCalendar: React.FC<Props> = ({ appointments }) => {
     switch (status) {
       case 'Pending':
         return [...base, 'bg-blue-500'];
+      case 'In - Progress':
+        return [...base, 'bg-orange-400'];
       case 'Pick-up':
         return [...base, 'bg-fuchsia-500'];
       case 'Completed':

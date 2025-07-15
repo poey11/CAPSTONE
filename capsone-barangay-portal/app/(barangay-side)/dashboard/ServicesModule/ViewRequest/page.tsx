@@ -452,11 +452,30 @@ Functions for Reason for Reject
         if(!id) return
         const serviceRef = doc(db, "ServiceRequests", id);
         const unsubscribe = onSnapshot(serviceRef, (doc) => {
-          if(doc.exists()) {
+            if (doc.exists()) {
             const data = doc.data() as OnlineRequest;
+
+            // If appointmentDate exists, format time string
+            if (data.appointmentDate) {
+              const isoDate = data.appointmentDate;
+              const dateObj = new Date(isoDate);
+              // Get time in HH:mm AM/PM format
+              const timeString = dateObj.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+              timeZone: "Asia/Manila",
+              });
+              // You can add this to the data object if you want to use it in your UI
+              setRequestData({
+                ...data,
+                appointmentDate: timeString,
+              });
+            }
+
             setRequestData(data);
             setLoading(false);
-          }
+            }
         })
         return () => {
           unsubscribe(); // Clean up the listener
