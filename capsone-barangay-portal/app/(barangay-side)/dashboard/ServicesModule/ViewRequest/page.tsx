@@ -113,7 +113,6 @@ interface EmergencyDetails {
     orImageUpload: string;
     photoUploaded: string; // For Residency purpose
     interviewRemarks: string; // For Barangay Indigency
-    residentId: string;
 }
 
 interface File {
@@ -1869,14 +1868,14 @@ Functions for Reason for Reject
           requestID: id,
         });
 
-        await addDoc(collection(db, "Notifications"), {
-          residentID: requestData?.residentId,
-          requestID: id,
-          message: `Your document request (${requestData?.requestId}) is now (In - Progress). We will notify you once it progresses.`,
-          timestamp: new Date(),
-          transactionType: "Online Service Request",
-          isRead: false,
-        });        
+        // await addDoc(collection(db, "Notifications"), {
+        //   residentID: requestData?.accID,
+        //   requestID: id,
+        //   message: `Your document request (${requestData?.requestId}) is now (In - Progress). We will notify you once it progresses.`,
+        //   timestamp: new Date(),
+        //   transactionType: "Online Service Request",
+        //   isRead: false,
+        // });        
         
 
       }else{
@@ -1931,7 +1930,7 @@ Functions for Reason for Reject
       await updateDoc(docRef, updatedData);
 
       await addDoc(collection(db, "Notifications"), {
-        residentID: requestData?.residentId,
+        residentID: requestData?.accID,
         requestID: id,
         message: `Your proposed appointment for (${requestData?.requestId}) has been approved. Please arrive to the barangay hall on time.`,
         timestamp: new Date(),
@@ -1945,7 +1944,7 @@ Functions for Reason for Reject
         await addDoc(notificationRef, {
           message: `You have been assigned an appointment for picture taking for ${requestData?.purpose} for ${requestData?.requestorFname}.`,
           timestamp: new Date(),
-          requestorId: requestData?.residentId,
+          requestorId: requestData?.accID,
           isRead: false,
           transactionType: "Online Service Request",
           recipientRole: "Admin Staff",
@@ -1955,7 +1954,7 @@ Functions for Reason for Reject
         await addDoc(notificationRef, {
           message: `You have been assigned an appointment for interview for ${requestData?.docType} ${requestData?.purpose} for ${requestData?.requestorFname}.`,
           timestamp: new Date(),
-          requestorId: requestData?.residentId,
+          requestorId: requestData?.accID,
           isRead: false,
           transactionType: "Online Service Request",
           recipientRole: "Admin Staff",
