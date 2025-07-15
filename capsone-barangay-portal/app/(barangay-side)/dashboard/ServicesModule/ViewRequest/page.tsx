@@ -2206,10 +2206,19 @@ Functions for Reason for Reject
                             "others",
                             ...(requestData?.status === "Rejected" ? ["rejected"] : []),
                             ...(requestData?.status === "Completed" ? ["received"] : []),
-                            ...(requestData?.status === "Completed" &&
+                            /*...(requestData?.status === "Completed" &&
                               !["Barangay Clearance", "Barangay Certificate", "Barangay Indigency", "Other Documents"].includes(requestData?.docType || "")
                               ? ["or"]
-                              : [])
+                              : [])*/
+                            ...(
+  requestData?.status === "Completed" &&
+  (
+    requestData?.purpose === "First Time Jobseeker" ||
+    !["Barangay Clearance", "Barangay Certificate", "Barangay Indigency", "Other Documents"].includes(requestData?.docType || "")
+  )
+    ? ["or"]
+    : []
+)
                           ].map((section) => (
                             <button
                               key={section}
@@ -2531,7 +2540,15 @@ Functions for Reason for Reject
 
                 // Hide "OR Section" if docType is in the excluded list
                 const isPayment = section === "payment";
-                const shouldHidePayment = isPayment && excludedDocTypes.includes(requestData?.docType || "");
+                
+                // NEW LOGIC: Only hide payment if it's excluded AND not "First Time Jobseeker" under "Other Documents"
+                const shouldHidePayment =
+                  isPayment &&
+                  excludedDocTypes.includes(requestData?.docType || "") &&
+                  !(
+                    requestData?.docType === "Other Documents" &&
+                    requestData?.purpose === "First Time Jobseeker"
+                  );
 
                 if (shouldHidePayment) return null;
 
