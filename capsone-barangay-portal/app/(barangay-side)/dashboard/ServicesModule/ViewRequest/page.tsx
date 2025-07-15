@@ -1918,7 +1918,16 @@ Functions for Reason for Reject
       };
       await updateDoc(docRef, updatedData);
 
-
+      const notificationRef = collection(db, "BarangayNotifications");
+      await addDoc(notificationRef, {
+        message: `You have been assigned a new task for ${requestData?.purpose} document requested by ${requestData?.requestorFname}.`,
+        timestamp: new Date(),
+        requestorId: requestData?.accID,
+        isRead: false,
+        transactionType: "Online Assigned Service Request",
+        recipientRole: "Assistant Secretary",
+        requestID: id,
+      });
 
       setShowInterviewForm(false);
     }
