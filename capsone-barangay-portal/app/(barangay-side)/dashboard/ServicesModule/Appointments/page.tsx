@@ -50,17 +50,30 @@ type Appointment = {
           if (a.statusPriority !== b.statusPriority) {
             return a.statusPriority - b.statusPriority;
           }
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          })
+          .map((item) => {
+            // Parse ISO string and convert to local time (Philippines is UTC+8)
+            const isoDate = item.appointmentDate;
+            const dateObj = new Date(isoDate);
+            // Get time in HH:mm AM/PM format
+            const timeString = dateObj.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+            timeZone: "Asia/Manila",
+            });
+
+            return {
+            id: item.id,
+            title: `${item.requestId.split("-")[1]} - ${item.requestId.split("-")[2]} : ${timeString}`,
+            date: isoDate,
+            requestStatus: item.status,
+            statusPriority: item.statusPriority,
+            approvedBySAS: item.approvedBySAS,
+            };
         })
-        .map((item) => ({
-          id: item.id,
-          title: `${item.docType} - ${item.purpose}`,
-          date:
-            item.appointmentDate,
-          requestStatus: item.status,
-          statusPriority: item.statusPriority,
-          approvedBySAS: item.approvedBySAS,
-        })).filter((item) => item.approvedBySAS === true );
+        .filter((item) => item.approvedBySAS === true);
         
     }, [data]);
 
