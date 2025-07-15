@@ -255,7 +255,7 @@ case "document":
     }
 
      // NAVIGATION for Documents
-    if (notification.transactionType === "Online Request") {
+    if (notification.transactionType === "Online Request" || "Online Service Request") {
       const targetUrl = `/ResidentAccount/Transactions/DocumentTransactions?id=${notification.requestID}`;
       router.push(targetUrl);
     } else {
