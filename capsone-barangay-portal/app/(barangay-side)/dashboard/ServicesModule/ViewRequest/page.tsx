@@ -156,63 +156,79 @@ const ViewOnlineRequest = () => {
       const [jobseekerPopupMessage, setJobseekerPopupMessage] = useState("");
       const [askAddToList, setAskAddToList] = useState(false);
   
-  useEffect(() => {
-    const checkJobseeker = async () => {
-      if (!requestData) return;
-      if (requestData.purpose !== "First Time Jobseeker") return;
-  
-      try {
-        const jobSeekerRef = collection(db, "JobSeekerList");
-  
-        // Check by residentId first
-        const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.accID));
-        const byResidentIdSnap = await getDocs(byResidentIdQuery);
-  
-        if (!byResidentIdSnap.empty) {
-          setJobseekerPopupMessage("This applicant is already in the Jobseeker List. Payment will be required.");
-          setShowJobseekerPopup(true);
-          return;
-        }
-  
-        // Fallback check by splitting requestorFname into first, middle, last
-        let firstName = "";
-        let middleName = "";
-        let lastName = "";
-        if (requestData.requestorFname) {
-          const parts = requestData.requestorFname.trim().split(" ");
-          firstName = parts[0] || "";
-          middleName = parts.length === 3 ? parts[1] : "";
-          lastName = parts.length >= 2 ? parts[parts.length - 1] : "";
-        }
-  
-        // Check by name + DOB
-        const snapshot = await getDocs(jobSeekerRef);
-        const match = snapshot.docs.find(doc => {
-          const data = doc.data();
-          return data.firstName?.toLowerCase() === firstName.toLowerCase() &&
-                 data.lastName?.toLowerCase() === lastName.toLowerCase() &&
-                 data.dateOfBirth === requestData.birthday;
-        });
-  
-        if (match) {
-          setJobseekerPopupMessage("This applicant is already in the Jobseeker List. Payment will be required.");
-          setShowJobseekerPopup(true);
-        } else {
-          setJobseekerPopupMessage(
-            "This applicant is not yet in the First Time Jobseeker List.\n" +
-            "Under RA 11261, this means the request will not be paid for unless added.\n" +
-            "Do you want to add them now to the Jobseeker List?"
-          );
-          setShowJobseekerPopup(true);
-          setAskAddToList(true);
-        }
-      } catch (err) {
-        console.error("Error checking JobSeekerList:", err);
-      }
-    };
-  
-    checkJobseeker();
-  }, [requestData]);
+      useEffect(() => {
+        const checkJobseeker = async () => {
+          if (!requestData) return;
+      
+          // ✅ if already Completed, no need to show popup
+          if (requestData.status === "Completed" || requestData.status === "In - Progress") return;
+      
+          if (requestData.purpose !== "First Time Jobseeker") return;
+      
+          try {
+            const jobSeekerRef = collection(db, "JobSeekerList");
+      
+            // Check by residentId first
+            const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.accID));
+            const byResidentIdSnap = await getDocs(byResidentIdQuery);
+      
+            if (!byResidentIdSnap.empty) {
+              // 🔥 if exists, check firstTimeClaimed
+              const existingDoc = byResidentIdSnap.docs[0].data();
+              if (existingDoc.firstTimeClaimed === false) {
+                // already added but not yet claimed - skip popup
+                return;
+              }
+      
+              setJobseekerPopupMessage("This applicant is already in the Jobseeker List. Payment will be required.");
+              setShowJobseekerPopup(true);
+              return;
+            }
+      
+            // Fallback check by splitting requestorFname into first, middle, last
+            let firstName = "";
+            let middleName = "";
+            let lastName = "";
+            if (requestData.requestorFname) {
+              const parts = requestData.requestorFname.trim().split(" ");
+              firstName = parts[0] || "";
+              middleName = parts.length === 3 ? parts[1] : "";
+              lastName = parts.length >= 2 ? parts[parts.length - 1] : "";
+            }
+      
+            // Check by name + DOB
+            const snapshot = await getDocs(jobSeekerRef);
+            const match = snapshot.docs.find(doc => {
+              const data = doc.data();
+              return data.firstName?.toLowerCase() === firstName.toLowerCase() &&
+                     data.lastName?.toLowerCase() === lastName.toLowerCase() &&
+                     data.dateOfBirth === requestData.birthday;
+            });
+      
+            if (match) {
+              if (match.data().firstTimeClaimed === false) {
+                // already added but not yet claimed - skip popup
+                return;
+              }
+              setJobseekerPopupMessage("This applicant is already in the Jobseeker List. Payment will be required.");
+              setShowJobseekerPopup(true);
+            } else {
+              setJobseekerPopupMessage(
+                "This applicant is not yet in the First Time Jobseeker List.\n" +
+                "Under RA 11261, this means the request will not be paid for unless added.\n" +
+                "Do you want to add them now to the Jobseeker List?"
+              );
+              setShowJobseekerPopup(true);
+              setAskAddToList(true);
+            }
+          } catch (err) {
+            console.error("Error checking JobSeekerList:", err);
+          }
+        };
+      
+        checkJobseeker();
+      }, [requestData]);
+      
   
   
   // handle function for matic jobseeker
@@ -246,6 +262,7 @@ const ViewOnlineRequest = () => {
         remarks: "",
         residentId: requestData.accID || "",
         identificationFileURL: requestData.validIDjpg || "",
+        firstTimeClaimed: false,
       };
   
       // Save to Firestore
@@ -1580,7 +1597,7 @@ Functions for Reason for Reject
             };
         
             // Create notification
-            const notificationRef = collection(db, "BarangayNotifications");
+            const notificationRef = collection(db, "Notifications");
             await addDoc(notificationRef, {
                 residentID: requestData?.accID,
                 requestID: id,
@@ -1712,7 +1729,7 @@ Functions for Reason for Reject
      await addDoc(notificationRef, {
        residentID: requestData?.accID,
        requestID: id,
-       message: `Your document request (${requestData?.requestId}) has been updated to (${requestData?.status}) We will notify you once it's ready for pickup.`,
+       message: `Your document request (${requestData?.requestId}) has been updated to (${updatedData.status}) We will notify you once it's ready for pickup.`,
        timestamp: new Date(),
        transactionType: "Online Request",
        isRead: false,
