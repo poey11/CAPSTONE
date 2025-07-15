@@ -215,7 +215,7 @@ export default function TopMenu() {
       router.push(`/dashboard/IncidentModule/EditIncident?id=${notification.incidentID}`);
     } else if (notification.transactionType === "Resident Registration") {
       router.push(`/dashboard/admin/viewResidentUser?id=${notification.accID}`);
-    } else if (notification.transactionType === "Online Service Request" || "Online Assigned Service") {
+    } else if (notification.transactionType === "Online Service Request" || "Online Assigned Service Request") {
       router.push(`/dashboard/ServicesModule/ViewRequest?id=${notification.requestID}`);
     }
   };
