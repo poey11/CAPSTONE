@@ -10,6 +10,7 @@ import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import { useSession } from "next-auth/react";
+import { clear } from "console";
 
 
 interface EmergencyDetails {
@@ -326,7 +327,7 @@ export default function action() {
       guardianshipType: "",
       CYFrom: "",
       CYTo: "",
-      attestedBy: "",
+      attestedBy: "Jose Arnel L. Quebal",
       goodMoralPurpose: "",
       goodMoralOtherPurpose: "",
       noIncomePurpose: "",
@@ -895,9 +896,8 @@ export default function action() {
         }
         let sendTo ="";
         if (
-          clearanceInput.docType === "Barangay Certificate" ||
+          (clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose !=="Residency" )||
           clearanceInput.docType === "Barangay Clearance" ||
-          clearanceInput.docType === "Barangay Indigency" ||
           clearanceInput.docType === "Temporary Business Permit" ||
           clearanceInput.docType === "Construction" ||
           (docType === "Barangay Permit" && docPurpose) ||
@@ -906,7 +906,9 @@ export default function action() {
           sendTo = "SAS";
         } else if (
           clearanceInput.docType === "Business Permit" ||
-          (clearanceInput.docType === "Other Documents" && clearanceInput.purpose === "Barangay ID")
+          (clearanceInput.docType === "Other Documents" && clearanceInput.purpose === "Barangay ID")||
+          clearanceInput.docType === "Barangay Indigency" ||
+          clearanceInput.purpose === "Residency"
         ) {
           sendTo = "Admin Staff";
         }
@@ -926,6 +928,13 @@ export default function action() {
           }),
           ...(documentTypeIs !== "" && {
             documentTypeIs: documentTypeIs,
+          }),
+
+          ...(clearanceInput.docType === "Barangay Indigency" && {
+            interviewRemarks:""
+          }),
+          ...(clearanceInput.purpose === "Residency" && {
+            photoUploaded: "",
           }),
           ...uploadedFileUrls,
         };
@@ -1097,6 +1106,7 @@ export default function action() {
         console.log("Clearance Input:", clearanceInput);
 
         const wait = await handleUploadClick(); // changed by dirick note para if may maging bug haha
+        console.log("Wait:", wait);
 
         setTimeout(() => {
             setShowPopup(false);
@@ -2669,6 +2679,7 @@ const handleChange = (
                                   className="createRequest-input-field"  
                                   required 
                                   placeholder="Enter Hon Kagawad's Full Name"  
+                                  disabled
                                 />
                               </div>             
                             </>

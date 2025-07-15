@@ -10,6 +10,8 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc, addDoc, where } from "firebase/firestore";
 import { handlePrint,handleGenerateDocument } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
+import { set } from "date-fns";
+import { request } from "http";
 
 interface EmergencyDetails {
     fullName: string;
@@ -109,6 +111,8 @@ interface EmergencyDetails {
     rejectionReason: string;
     orNumber: string;
     orImageUpload: string;
+    photoUploaded: string; // For Residency purpose
+    interviewRemarks: string; // For Barangay Indigency
 }
 
 interface File {
@@ -1798,9 +1802,90 @@ Functions for Reason for Reject
       const docRef = doc(db, "ServiceRequests", id);
       const updatedData = {
           approvedBySAS: true,
+          sendTo: "Admin Staff",
+          status: "In - Progress",
+          statusPriority: 2,
+          ...(requestData?.docType === "Barangay Indigency" && {
+            interviewRemarks:""
+          }),
+          ...(requestData?.purpose === "Residency" && {
+            photoUploaded: "",
+          }),
       };
       await updateDoc(docRef, updatedData);
     }
+
+    const [showInterviewForm, setShowInterviewForm] = useState(false);
+    const [interviewRemarks, setInterviewRemarks] = useState("");
+    const handleInterviewRemarks = async(e:any) => {
+      e.preventDefault();
+      console.log("Interview Remarks: ", interviewRemarks);
+      if(!id) return;
+      const docRef = doc(db, "ServiceRequests", id);
+      const updatedData = {
+          interviewRemarks: interviewRemarks,
+          status: "In - Progress",
+          statusPriority: 2,
+          sendTo: "SAS",
+          remarksCreated: new Date(),
+      };
+      await updateDoc(docRef, updatedData);
+
+
+
+      setShowInterviewForm(false);
+    }
+
+    
+    const [showPhotoUpload, setshowPhotoUpload] = useState(false);
+    const [files2, setFiles2] = useState<{ name: string, preview: string | undefined }[]>([]);
+   
+    const handlePhotoDelete = (fileName: string) => {
+        setFiles2((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+      };
+    
+    const handlePhotoUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedFiles = Array.from(e.target.files || []);
+      const newFiles = selectedFiles.map((file) => ({
+        name: file.name,
+        preview: URL.createObjectURL(file),
+      }));
+      setFiles2(newFiles);
+    };
+
+    const handlePhotoUpload = async(e:any) => {
+      e.preventDefault();
+      if(!id) return;
+      const docRef = doc(db, "ServiceRequests", id);
+      const updatedData: any = {
+          photoUploaded: "",
+          status: "In - Progress",
+          statusPriority: 2,
+          sendTo: "SAS",
+      };
+      if (files2.length > 0) {
+        const file = files2[0];
+        if (!file.preview) return;
+        const response = await fetch(file.preview);
+        const blob = await response.blob();
+      
+        const storageRef = ref(storage, `ServiceRequests/${file.name}`);
+        await uploadBytes(storageRef, blob);
+        const downloadURL = await getDownloadURL(storageRef);
+      
+        updatedData.photoUploaded = downloadURL;
+      }
+      await updateDoc(docRef, updatedData);
+
+
+
+      setshowPhotoUpload(false); 
+    }
+
+
+    const [showUploadedID, setShowUploadedID] = useState(false);
+    const [showRemarksGiven, setShowRemarksGiven] = useState(false);
+
 
     const handleRequestIsDone = async() => {
       /* This part will handle ung pag update ng status to Completed and nareceive n ni resident yung document */
@@ -1927,12 +2012,29 @@ Functions for Reason for Reject
                         
                         {!docPrinted && (
                           <>
-                            <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
-                              <div className="services-onlinereq-redirection-icons-section">
-                                  <img src="/images/rejected.png" alt="user info" className="redirection-icons-info" />
-                              </div>
-                              <h1>Reject Request</h1>
-                            </button>
+                          
+                            {requestData?.appointmentDate && !requestData?.approvedBySAS && (
+                              <>
+                                
+                                <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
+                                  <div className="services-onlinereq-redirection-icons-section">
+                                      <img src="/images/rejected.png" alt="user info" className="redirection-icons-info" />
+                                  </div>
+                                  <h1>Reject Request</h1>
+                                </button>
+                              </>
+                            )}
+                            {!requestData?.appointmentDate && !(requestData?.purpose ==="Residency" || requestData?.docType === "Barangay Indigency") && (
+                              <>
+                                <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
+                                  <div className="services-onlinereq-redirection-icons-section">
+                                      <img src="/images/rejected.png" alt="user info" className="redirection-icons-info" />
+                                  </div>
+                                  <h1>Reject Request</h1>
+                                </button>
+                              </>
+                            )}
+                        
                             {!requestData?.approvedBySAS && requestData?.appointmentDate ? (
                               <button className="services-onlinereq-redirection-buttons" onClick={handleApprovedBySAS}>
                               <div className="services-onlinereq-redirection-icons-section">
@@ -1941,17 +2043,79 @@ Functions for Reason for Reject
                               <h1>Approve Appointment</h1>
                             </button>
                             ):(
-                              <button className="services-onlinereq-redirection-buttons" onClick={print}>
-                              <div className="services-onlinereq-redirection-icons-section">
-                                  <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
-                              </div>
-                                <h1>Generate Document</h1>
-                              </button>
-
+                              <>
+                                {((requestData?.docType === "Barangay Indigency" || requestData?.purpose==="Residency") && (user?.position === "Secretary" || user?.position === "Assistant Secretary" )) &&(
+                                  <>
+                                    <button className="services-onlinereq-redirection-buttons" onClick={print}>
+                                    <div className="services-onlinereq-redirection-icons-section">
+                                        <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                    </div>
+                                      <h1>Generate Document</h1>
+                                    </button>
+                                  </>
+                                )}
+                                {!requestData?.appointmentDate && !(requestData?.docType === "Barangay Indigency" || requestData?.purpose==="Residency") && (
+                                  <button className="services-onlinereq-redirection-buttons" onClick={print}>
+                                    <div className="services-onlinereq-redirection-icons-section">
+                                        <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                    </div>
+                                      <h1>Generate Document</h1>
+                                  </button>
+                                )}
+                              </>
                             )}
                             
                           </>
                         )}
+
+                        {(requestData?.purpose==="Residency") && (requestData?.photoUploaded === "") &&( 
+                          <>
+                             <button className="services-onlinereq-redirection-buttons" onClick={()=>setshowPhotoUpload(true)}>
+                                <div className="services-onlinereq-redirection-icons-section">
+                                    <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                </div>
+                                  <h1>Upload ID Picture</h1>
+                              </button>
+                          </>
+                        )}
+                        
+                        {(requestData?.docType === "Barangay Indigency") &&(requestData?.interviewRemarks === "") &&( 
+                          <>
+                            <button className="services-onlinereq-redirection-buttons" onClick={() => setShowInterviewForm(true)}>
+                                <div className="services-onlinereq-redirection-icons-section">
+                                    <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                </div>
+                                  <h1>Interview Remarks</h1>
+                              </button>
+                          </>
+                        )}
+
+
+                        
+
+                        {(requestData?.purpose==="Residency") && (requestData?.photoUploaded) &&( 
+                          <>
+                             <button className="services-onlinereq-redirection-buttons" onClick={()=>setShowUploadedID(true)}>
+                                <div className="services-onlinereq-redirection-icons-section">
+                                    <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                </div>
+                                  <h1>Show ID Picture</h1>
+                              </button>
+                          </>
+                        )}
+                        
+                        {(requestData?.docType === "Barangay Indigency") &&(requestData?.interviewRemarks ) &&( 
+                          <>
+                            <button className="services-onlinereq-redirection-buttons" onClick={() => setShowRemarksGiven(true)}>
+                                <div className="services-onlinereq-redirection-icons-section">
+                                    <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                </div>
+                                  <h1>Interview Remarks</h1>
+                              </button>
+                          </>
+                        )}
+                        
+
                         {docPrinted && (userPosition !== "Admin Staff") ? (
                           <>
                             <button className="services-onlinereq-redirection-buttons" onClick={handleNextStep}>
@@ -2507,7 +2671,216 @@ Functions for Reason for Reject
           </div>
         )}
 
+        
+        {showInterviewForm && (
+          <>
+            <div className="view-doc-receival-form-popup-overlay">
+              <div className="doc-receival-popup">
+                <form onSubmit={handleInterviewRemarks} className="doc-receival-form">
+                  <div className="doc-receival-content">
+                    <div className="services-onlinereq-doc-receival-form-section">
+                      <p>Interview Remarks</p>
+                      <textarea
+                        className="services-onlinereq-input-field"
+                        placeholder="Enter Remarks"
+                        name="remarks"
+                        value={interviewRemarks}
+                        onChange={(e) => setInterviewRemarks(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
 
+                  <div className="doc-receivalform-buttons-section">
+                    <div className="doc-receivalform-action-buttons">
+                      <button
+                        className="doc-receivalform-action-close"
+                        type="button"
+                        onClick={() => setShowInterviewForm(false)}
+                      >
+                        Close
+                      </button>
+                      <button className="doc-receivalform-action-submit" type="submit">
+                        Submit
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </>
+        )}
+
+        {showPhotoUpload && (
+          <>
+            <div className="view-doc-receival-form-popup-overlay">
+              <div className="doc-receival-popup">
+                <form onSubmit={handlePhotoUpload} className="doc-receival-form">
+                  <div className="doc-receival-content p-4 border rounded-lg bg-white shadow">
+                    <div className="mb-4">
+                      <p className="font-semibold text-gray-700 mb-2">Upload Photo</p>
+                      <div className="space-y-2">
+                        <div>
+                          <label htmlFor="file-upload-photo" className="upload-link cursor-pointer text-blue-600 hover:underline">
+                            Click to Upload File
+                          </label>
+                          <input
+                            id="file-upload-photo"
+                            type="file"
+                            className="file-upload-input hidden"
+                            accept=".jpg,.jpeg,.png"
+                            onChange={handlePhotoUploadChange}
+                          />
+                        </div>
+
+                        {files2.length > 0 && (
+                          <div className="space-y-2">
+                            {files2.map((file, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center gap-4 p-3 border rounded bg-gray-50"
+                              >
+                                {/* Image */}
+                                {file.preview && (
+                                  <div className="w-16 h-16 flex-shrink-0">
+                                    <img
+                                      src={file.preview}
+                                      alt={file.name}
+                                      className="w-full h-full object-cover rounded"
+                                    />
+                                  </div>
+                                )}
+
+                                {/* File name */}
+                                <div className="flex-grow overflow-hidden">
+                                  <span
+                                    className="block text-sm text-gray-800 truncate"
+                                    title={file.name}
+                                  >
+                                    {file.name}
+                                  </span>
+                                </div>
+
+                                {/* Delete button */}
+                                <button
+                                  type="button"
+                                  onClick={() => handlePhotoDelete(file.name)}
+                                  className="p-2 hover:bg-red-100 rounded"
+                                >
+                                  <img src="/images/trash.png" alt="Delete" className="w-5 h-5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div className="doc-receivalform-buttons-section">
+                    <div className="doc-receivalform-action-buttons">
+                      <button
+                        className="doc-receivalform-action-close"
+                        type="button"
+                        onClick={() => setshowPhotoUpload(false)}
+                      >
+                        Close
+                      </button>
+                      <button className="doc-receivalform-action-submit" type="submit">
+                        Submit
+                      </button>
+                    </div>
+                  </div>
+                </form>
+                <div className="services-onlinereq-info-toggle-wrapper">
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+
+        {showUploadedID && (
+          <div className="view-doc-receival-form-popup-overlay">
+            <div className="doc-receival-popup">
+              <div className="services-onlinereq-info-toggle-wrapper">
+                <button
+                  type="button"
+                  className="info-toggle-btn active"
+                >
+                  Uploaded ID
+                </button>
+              </div>
+              <div className="doc-receival-content">
+                <div className="services-onlinereq-fields-section">
+                  <p>Uploaded ID</p>
+                  {requestData?.photoUploaded && (
+                    <a
+                      href={requestData.photoUploaded.startsWith("https://")
+                        ? requestData.photoUploaded
+                        : resolvedImageUrls["photoUploaded"]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src={requestData.photoUploaded.startsWith("https://")
+                          ? requestData.photoUploaded
+                          : resolvedImageUrls["photoUploaded"]}
+                        alt="Uploaded ID"
+                        className="verification-reqs-pic uploaded-picture"
+                        style={{ cursor: "pointer" }}
+                      />
+                    </a>
+                  )}
+                </div>
+              </div>
+              <button
+                className="doc-receivalform-action-close"
+                type="button"
+                onClick={() => setShowUploadedID(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showRemarksGiven && (
+          <div className="view-doc-receival-form-popup-overlay">
+            <div className="doc-receival-popup">
+              <div className="services-onlinereq-info-toggle-wrapper">
+                <button
+                  type="button"
+                  className="info-toggle-btn active"
+                >
+                  Interview Remarks
+                </button>
+              </div>
+              <div className="doc-receival-content">
+                <div className="services-onlinereq-fields-section">
+                  <p>Interview Remarks</p>
+                  <textarea
+                    className="services-onlinereq-input-field"
+                    placeholder="Enter Remarks"
+                    name="remarks"
+                    value={requestData?.interviewRemarks || ""}
+                    readOnly
+                  />
+                </div>
+              </div>
+              <button
+                className="doc-receivalform-action-close"
+                type="button"
+                onClick={() => setShowRemarksGiven(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
         </main>
     );
 
