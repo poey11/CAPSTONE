@@ -155,6 +155,42 @@ const ViewOnlineRequest = () => {
       const [showJobseekerPopup, setShowJobseekerPopup] = useState(false);
       const [jobseekerPopupMessage, setJobseekerPopupMessage] = useState("");
       const [askAddToList, setAskAddToList] = useState(false);
+      const [firstTimeClaimed, setFirstTimeClaimed] = useState<boolean | null>(null);
+
+      useEffect(() => {
+        const checkFirstTimeClaimedStatus = async () => {
+          if (!requestData) return;
+          if (requestData.purpose !== "First Time Jobseeker") return;
+      
+          const jobSeekerRef = collection(db, "JobSeekerList");
+      
+          // Try by residentId first
+          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.accID));
+          const byResidentIdSnap = await getDocs(byResidentIdQuery);
+      
+          if (!byResidentIdSnap.empty) {
+            const data = byResidentIdSnap.docs[0].data();
+            setFirstTimeClaimed(data.firstTimeClaimed ?? null);
+            return;
+          }
+      
+          // Fallback by name + DOB
+          const snapshot = await getDocs(jobSeekerRef);
+          const match = snapshot.docs.find(doc => {
+            const data = doc.data();
+            return data.firstName?.toLowerCase() === requestData.requestorFname?.split(" ")[0]?.toLowerCase() &&
+                   data.lastName?.toLowerCase() === requestData.requestorFname?.split(" ").slice(-1)[0]?.toLowerCase() &&
+                   data.dateOfBirth === requestData.birthday;
+          });
+      
+          if (match) {
+            setFirstTimeClaimed(match.data().firstTimeClaimed ?? null);
+          }
+        };
+      
+        checkFirstTimeClaimedStatus();
+      }, [requestData]);
+      
   
       useEffect(() => {
         const checkJobseeker = async () => {
@@ -1687,6 +1723,40 @@ Functions for Reason for Reject
       }
     
       await updateDoc(docRef, updatedData);
+
+      // update firsttimeclaimed to true if it was false
+
+      if (requestData?.purpose === "First Time Jobseeker") {
+        try {
+          const jobSeekerRef = collection(db, "JobSeekerList");
+    
+          // Check by residentId first
+          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.accID));
+          const byResidentIdSnap = await getDocs(byResidentIdQuery);
+    
+          if (!byResidentIdSnap.empty) {
+            const jobDoc = byResidentIdSnap.docs[0];
+            const data = jobDoc.data();
+            if (!data.firstTimeClaimed) {
+              await updateDoc(jobDoc.ref, { firstTimeClaimed: true });
+            }
+          } else {
+            // Fallback by name + DOB
+            const snapshot = await getDocs(jobSeekerRef);
+            const match = snapshot.docs.find(doc => {
+              const data = doc.data();
+              return data.firstName?.toLowerCase() === requestData.requestorFname?.split(" ")[0]?.toLowerCase() &&
+                     data.lastName?.toLowerCase() === requestData.requestorFname?.split(" ").slice(-1)[0]?.toLowerCase() &&
+                     data.dateOfBirth === requestData.birthday;
+            });
+            if (match && !match.data().firstTimeClaimed) {
+              await updateDoc(match.ref, { firstTimeClaimed: true });
+            }
+          }
+        } catch (err) {
+          console.error("Failed to update firstTimeClaimed:", err);
+        }
+      }
     
       const notificationRef = collection(db, "Notifications");
       await addDoc(notificationRef, {
@@ -2548,7 +2618,14 @@ Functions for Reason for Reject
 
                 // Hide "OR Section" if docType is in the excluded list
                 const isPayment = section === "payment";
-                const shouldHidePayment = isPayment && excludedDocTypes.includes(requestData?.docType || "");
+                const shouldHidePayment =
+                isPayment &&
+                (
+                  (excludedDocTypes.includes(requestData?.docType || "") &&
+                   requestData?.purpose !== "First Time Jobseeker") ||
+                  (requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false)
+                );
+              
 
                 if (shouldHidePayment) return null;
 
@@ -2601,6 +2678,17 @@ Functions for Reason for Reject
                       />
                     </div>
                   </div>
+
+                  {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false && (
+                      <p style={{ color: "green", fontWeight: "bold", marginTop: "1rem" }}>
+                        * This request will not require payment as per RA 11261 (First Time Jobseeker).
+                      </p>
+                    )}                       
+                  {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === true && (
+                    <p style={{ color: "red", fontWeight: "bold", marginTop: "1rem" }}>
+                      * This request will require payment as they have already claimed their RA 11261 (First Time Jobseeker).
+                    </p>
+                  )}                  
                 </>
                )}
 
