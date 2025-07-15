@@ -3745,7 +3745,8 @@ const generateDepartmentalReport = async (
       if (report.status === "CFA" || 
       report.status === "Settled" || 
       report.status === "settled" || 
-      report.status === "archived") {
+      report.status === "archived" ||
+      report.status === "pending" ) {
   
     const numHearings = report.hearing ?? 0;
   
@@ -3766,7 +3767,7 @@ const generateDepartmentalReport = async (
     }
   
   } else {
-    remarks = report.status ?? "";
+    remarks = "";
   }
         
 
