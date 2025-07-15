@@ -3587,188 +3587,260 @@ const handleGenerateIncidentSummaryPDF = async (
 
   // vawc monthly report
 
-  const generateDepartmentalReport = async (
-    month: number,
-    year: number,
-    allTime: boolean = false,
-    department: string,
-    status: string
-  ): Promise<string | null> => {
-    setLoadingVAWCReport(true);
-    setIsGenerating(true);
-  
-    try {
-      const monthName = new Date(year, month).toLocaleString("default", { month: "long" });
-      const reportLabel = allTime ? "ALL TIME" : `${monthName.toUpperCase()} ${year}`;
-      const reportTitle = `FOR ${allTime ? "ALL TIME" : `THE MONTH OF ${monthName.toUpperCase()} ${year}`}`;
-      const reportHeaderTitle = allTime
-      ? `ALL TIME REPORT OF ${department} "${status !== "ALL" ? status : "ALL STATUS"}" CASES`
-      : `MONTHLY REPORT OF ${department} "${status !== "ALL" ? status : "ALL STATUS"}" CASES`;
-    
-  
-      const reportsRef = collection(db, "IncidentReports");
-      const q = query(reportsRef);
-      const querySnapshot = await getDocs(q);
-  
-      const filteredReports = querySnapshot.docs
-        .map((doc) => doc.data())
-        .filter((rep) => {
-          if (department !== "ALL" && rep.department !== department) return false;
-          if (status !== "ALL" && rep.status !== status) return false;
-          if (allTime) return true;
-          const date =
-          rep.createdAt?.toDate?.() ??
-          (rep.createdAt instanceof Date ? rep.createdAt : new Date(rep.createdAt));
-        
-        return date.getFullYear() === year && date.getMonth() === month;
-        });
-  
-      if (filteredReports.length === 0) {
-        alert(allTime
-          ? `No reports found for ${department === "ALL" ? "any department" : department}.`
-          : `No reports found for ${department === "ALL" ? "any department" : department} in ${monthName} ${year}.`
-        );
-        return null;
-      }
-  
-      let templatePath = "ReportsModule/Departmental Incident Reports Template.xlsx";
 
-      if (department === "BCPC") {
-        templatePath = "ReportsModule/Departmental Incident BCPC Reports Template.xlsx";
-      } else if (department === "VAWC") {
-        templatePath = "ReportsModule/Departmental Incident VAWC Reports Template.xlsx";
-      } else if (department === "GAD") {
-        templatePath = "ReportsModule/Departmental Incident GAD Reports Template.xlsx";
-      }
-      // 'ALL', 'Online', 'Lupon', or anything else defaults to general template
-      
-      const templateRef = ref(storage, templatePath);      const url = await getDownloadURL(templateRef);
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-  
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(arrayBuffer);
-      const worksheet = workbook.worksheets[0];
-  
-      worksheet.getCell("A2").value = reportHeaderTitle;
-      worksheet.getCell("A3").value = reportTitle;
-  
-      const dataStartRow = 5;
-      const footerStartRow = 17;
-  
-      const existingDataRows = footerStartRow - dataStartRow;
-      const extraRowsNeeded = filteredReports.length - existingDataRows;
-      
-      // Insert or delete rows to adjust table space
-      if (extraRowsNeeded > 0) {
-        worksheet.insertRows(footerStartRow - 1, new Array(extraRowsNeeded).fill([]));
-      } else if (extraRowsNeeded < 0) {
-        worksheet.spliceRows(footerStartRow + extraRowsNeeded, -extraRowsNeeded);
-      }
-  
-      const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= footerStartRow);
-  
-      filteredReports.forEach((report, index) => {
-        const rowIndex = dataStartRow + index;
-        const row = worksheet.getRow(rowIndex);
-        row.height = 55;
-  
-        const complainant = report.complainant || {};
-        const respondent = report.respondent || {};
-  
-        const complainantFullName = 
-        (complainant.fname || complainant.lname) 
-          ? `${complainant.fname || ""} ${complainant.lname || ""}`.trim()
-          : `${report.firstname || ""} ${report.lastname || ""}`.trim();
-        const complainantAge = complainant.age || "";
-        const complainantAddress = complainant.address || report.address || "";
-  
-        const respondentFullName = `${respondent.fname || ""} ${respondent.lname || ""}`.trim();
-        const respondentAge = respondent.age || "";
-        const respondentAddress = respondent.address || "";
-
-        let remarks = report.remarks || "";
-        if (report.typeOfIncident === "Minor") {
-          remarks = "Referred to program";
-        } else if (report.typeOfIncident === "Major" && report.DialogueMeeting?.remarks) {
-          remarks = report.DialogueMeeting.remarks;
-        }
-  
-        const cells = [
-          report.dateFiled || "",
-          `C- ${complainantFullName}\nR- ${respondentFullName}`,
-          `C- ${complainantAge}\nR- ${respondentAge}`,
-          `C- ${complainantAddress}\nR- ${respondentAddress}`,
-          report.nature || report.concerns || "",
-          report.status,
-          remarks || "",
-        ];
-  
-        cells.forEach((val, colIdx) => {
-          const cell = row.getCell(colIdx + 1);
-          cell.value = val;
-          cell.font = { name: "Calibri", size: 12 };
-          cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-          cell.border = {
-            top: { style: "medium" },
-            bottom: { style: "medium" },
-            left: { style: "medium" },
-            right: { style: "medium" },
-          };
-        });
-  
-        row.commit();
-      });
-  
-      // Move footer drawings to stay attached
-      footerDrawings.forEach(drawing => {
-        const offset = Math.max(extraRowsNeeded, 0);
-        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
-        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
-      });
-  
-      // FINAL cleanup: remove any extra blank rows at the bottom
-      for (let i = worksheet.rowCount; i > footerStartRow; i--) {
-        const row = worksheet.getRow(i);
-        if (!row.hasValues) {
-          worksheet.spliceRows(i, 1);
-        }
-      }
-  
-      worksheet.pageSetup = {
-        horizontalCentered: true,
-        verticalCentered: false,
-        orientation: "landscape",
-        paperSize: 9,
-        fitToPage: true,
-        fitToWidth: 1,
-        fitToHeight: 0,
-      };
-  
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-  
-      const fileName = `Department_Report_${department}_${status}_${reportLabel.replace(/\s+/g, "_")}.xlsx`;
-      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
-      await uploadBytes(storageRef, blob);
-  
-      const fileUrl = await getDownloadURL(storageRef);
-      setGeneratingMessage("Generating Department Report...");
-      return fileUrl;
-    } catch (error) {
-      console.error("Error generating report:", error);
-      setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate Department Report");
-      setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
-      return null;
-    } finally {
-      setLoadingVAWCReport(false);
-    }
+  // Interfaces
+interface IncidentReport {
+  id: string;
+  areaOfIncident?: string;
+  caseNumber?: string;
+  complainant?: {
+    address?: string;
+    age?: number;
+    civilStatus?: string;
+    contact?: string;
+    fname?: string;
+    lname?: string;
+    sex?: string;
   };
+  createdAt: any;
+  dateFiled?: string;
+  dateReceived?: string;
+  department?: string;
+  file?: string;
+  generatedHearingSummons?: number;
+  hearing?: number;
+  isArbitration?: boolean;
+  isConciliation?: boolean;
+  isDialogue?: boolean;
+  isMediation?: boolean;
+  location?: string;
+  nature?: string;
+  concern?: string;
+  receivedBy?: string;
+  reopenRequester?: string;
+  respondent?: {
+    address?: string;
+    age?: number;
+    civilStatus?: string;
+    contact?: string;
+    fname?: string;
+    lname?: string;
+    sex?: string;
+  };
+  status?: string;
+  statusPriority?: number;
+  timeFiled?: string;
+  timeReceived?: string;
+  typeOfIncident?: string;
+  firstname?: string;
+  lastname?: string;
+}
+
+interface DialogueMeeting {
+  remarks?: string;
+}
+
+interface SummonsMeeting {
+  nos?: string;
+  remarks?: string;
+}
+
+// Your full generate function
+const generateDepartmentalReport = async (
+  month: number,
+  year: number,
+  allTime: boolean = false,
+  department: string,
+  status: string
+): Promise<string | null> => {
+  setLoadingVAWCReport(true);
+  setIsGenerating(true);
+
+  try {
+    const monthName = new Date(year, month).toLocaleString("default", { month: "long" });
+    const reportLabel = allTime ? "ALL TIME" : `${monthName.toUpperCase()} ${year}`;
+    const reportTitle = `FOR ${allTime ? "ALL TIME" : `THE MONTH OF ${monthName.toUpperCase()} ${year}`}`;
+    const reportHeaderTitle = allTime
+      ? `ALL TIME REPORT OF ${department} "${status !== "ALL" ? status : "ALL STATUS"}" CASES`
+      : `MONTHLY REPORT OF ${department} "${status !== "ALL" ? status : "ALL STATUS"}" CASES"`;
+
+    // FETCH MAIN REPORTS
+    const reportsRef = collection(db, "IncidentReports");
+    const q = query(reportsRef);
+    const querySnapshot = await getDocs(q);
+
+    const filteredReports: IncidentReport[] = querySnapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() } as IncidentReport))
+      .filter((rep) => {
+        if (department !== "ALL" && rep.department !== department) return false;
+        if (status !== "ALL" && rep.status !== status) return false;
+        if (allTime) return true;
+        const date = rep.createdAt?.toDate?.() ?? (rep.createdAt instanceof Date ? rep.createdAt : new Date(rep.createdAt ?? ""));
+        return date.getFullYear() === year && date.getMonth() === month;
+      });
+
+    if (filteredReports.length === 0) {
+      alert(allTime
+        ? `No reports found for ${department === "ALL" ? "any department" : department}.`
+        : `No reports found for ${department === "ALL" ? "any department" : department} in ${monthName} ${year}.`
+      );
+      return null;
+    }
+
+    // LOAD EXCEL TEMPLATE
+    let templatePath = "ReportsModule/Departmental Incident Reports Template.xlsx";
+    if (department === "BCPC") templatePath = "ReportsModule/Departmental Incident BCPC Reports Template.xlsx";
+    else if (department === "VAWC") templatePath = "ReportsModule/Departmental Incident VAWC Reports Template.xlsx";
+    else if (department === "GAD") templatePath = "ReportsModule/Departmental Incident GAD Reports Template.xlsx";
+
+    const templateRef = ref(storage, templatePath);
+    const url = await getDownloadURL(templateRef);
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(arrayBuffer);
+    const worksheet = workbook.worksheets[0];
+
+    worksheet.getCell("A2").value = reportHeaderTitle;
+    worksheet.getCell("A3").value = reportTitle;
+
+    const dataStartRow = 5;
+    const footerStartRow = 17;
+    const existingDataRows = footerStartRow - dataStartRow;
+    const extraRowsNeeded = filteredReports.length - existingDataRows;
+
+    if (extraRowsNeeded > 0) {
+      worksheet.insertRows(footerStartRow - 1, new Array(extraRowsNeeded).fill([]));
+    } else if (extraRowsNeeded < 0) {
+      worksheet.spliceRows(footerStartRow + extraRowsNeeded, -extraRowsNeeded);
+    }
+
+    const footerDrawings = worksheet.getImages().filter(img => img.range.tl.nativeRow >= footerStartRow);
+
+    // ITERATE REPORTS
+    for (const [index, report] of filteredReports.entries()) {
+      const rowIndex = dataStartRow + index;
+      const row = worksheet.getRow(rowIndex);
+      row.height = 55;
+
+      const complainant = report.complainant ?? {};
+      const respondent = report.respondent ?? {};
+
+      const complainantFullName = (complainant.fname || complainant.lname)
+        ? `${complainant.fname || ""} ${complainant.lname || ""}`.trim()
+        : `${report.firstname || ""} ${report.lastname || ""}`.trim();
+
+      const complainantAge = complainant.age ?? "";
+      const complainantAddress = complainant.address || report.location || "";
+
+      const respondentFullName = `${respondent.fname || ""} ${respondent.lname || ""}`.trim();
+      const respondentAge = respondent.age ?? "";
+      const respondentAddress = respondent.address ?? "";
+
+      // ==========================
+      // DETERMINE REMARKS SECTION
+      let remarks = "";
+
+      if (report.status === "CFA" || 
+      report.status === "Settled" || 
+      report.status === "settled" || 
+      report.status === "archived") {
   
+    const numHearings = report.hearing ?? 0;
   
+    if (numHearings === 0) {
+      const dialogueSnapshot = await getDocs(collection(db, "IncidentReports", report.id, "DialogueMeeting"));
+      dialogueSnapshot.forEach(doc => {
+        const data = doc.data() as DialogueMeeting;
+        if (data.remarks) remarks = data.remarks;
+      });
+    } else {
+      const summonsSnapshot = await getDocs(collection(db, "IncidentReports", report.id, "SummonsMeeting"));
+      summonsSnapshot.forEach(doc => {
+        const data = doc.data() as SummonsMeeting;
+        if (numHearings === 1 && data.nos === "First" && data.remarks) remarks = data.remarks;
+        if (numHearings === 2 && data.nos === "Second" && data.remarks) remarks = data.remarks;
+        if (numHearings === 3 && data.nos === "Third" && data.remarks) remarks = data.remarks;
+      });
+    }
+  
+  } else {
+    remarks = report.status ?? "";
+  }
+        
+
+      const cells = [
+        report.dateFiled ?? "",
+        `C- ${complainantFullName}\nR- ${respondentFullName}`,
+        `C- ${complainantAge}\nR- ${respondentAge}`,
+        `C- ${complainantAddress}\nR- ${respondentAddress}`,
+        report.nature ?? report.concern ?? "",
+        report.status ?? "",
+        remarks ?? "",
+      ];
+
+      cells.forEach((val, colIdx) => {
+        const cell = row.getCell(colIdx + 1);
+        cell.value = val;
+        cell.font = { name: "Calibri", size: 12 };
+        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        cell.border = {
+          top: { style: "medium" },
+          bottom: { style: "medium" },
+          left: { style: "medium" },
+          right: { style: "medium" },
+        };
+      });
+
+      row.commit();
+    }
+
+    footerDrawings.forEach(drawing => {
+      const offset = Math.max(extraRowsNeeded, 0);
+      if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
+      if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+    });
+
+    for (let i = worksheet.rowCount; i > footerStartRow; i--) {
+      const row = worksheet.getRow(i);
+      if (!row.hasValues) worksheet.spliceRows(i, 1);
+    }
+
+    worksheet.pageSetup = {
+      horizontalCentered: true,
+      verticalCentered: false,
+      orientation: "landscape",
+      paperSize: 9,
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+    };
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const fileName = `Department_Report_${department}_${status}_${reportLabel.replace(/\s+/g, "_")}.xlsx`;
+    const storageRef = ref(storage, `GeneratedReports/${fileName}`);
+    await uploadBytes(storageRef, blob);
+
+    const fileUrl = await getDownloadURL(storageRef);
+    setGeneratingMessage("Generating Department Report...");
+    return fileUrl;
+  } catch (error) {
+    console.error("Error generating report:", error);
+    setShowErrorGenerateReportPopup(true);
+    setPopupErrorGenerateReportMessage("Failed to generate Department Report");
+    setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
+    return null;
+  } finally {
+    setLoadingVAWCReport(false);
+  }
+};
+
+
   const handleGenerateDepartmentalPDF = async (
     month: number,
     year: number,
@@ -4310,12 +4382,15 @@ const handleGenerateIncidentSummaryPDF = async (
         return {
           department: dept,
           pending: filtered.filter((i) => i.status === "pending").length,
-          settled: filtered.filter((i) => i.status === "settled").length,
-          archived: filtered.filter((i) => i.status === "archived").length,
-          acknowledged: filtered.filter((i) => i.status === "acknowledged").length,
-          cfa: filtered.filter((i) => i.status === "CFA").length,
           inprogress: filtered.filter((i) => i.status === "In - Progress").length,
-
+          settled: filtered.filter((i) =>
+            dept === "Online"
+              ? i.status === "Settled"
+              : i.status === "settled" || i.status === "Settled"
+          ).length,
+          archived: filtered.filter((i) => i.status === "archived").length,
+          cfa: filtered.filter((i) => i.status === "CFA").length,
+          acknowledged: filtered.filter((i) => i.status === "acknowledged").length,
         };
       });
   
