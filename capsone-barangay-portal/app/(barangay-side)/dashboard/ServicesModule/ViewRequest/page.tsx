@@ -2032,7 +2032,7 @@ Functions for Reason for Reject
                         {!docPrinted && (
                           <>
                           
-                            {requestData?.appointmentDate && !requestData?.approvedBySAS && (
+                            {requestData?.appointmentDate  && (
                               <>
                                 
                                 <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
