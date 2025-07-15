@@ -139,8 +139,9 @@ export default function TopMenu() {
         const afterCreated = filtered.filter(notif => {
           const notifDate = notif.timestamp?.toDate?.() 
             ?? (notif.timestamp instanceof Date ? notif.timestamp : new Date(notif.timestamp));
-          console.log("Checking notification:", { notifDate, createdDate, passed: notifDate > createdDate });
-          return notifDate > createdDate;
+        
+          const sameDay = notifDate.toDateString() === createdDate.toDateString();
+          return notifDate >= createdDate || sameDay;
         });
 
         if (userPosition === "Assistant Secretary" || userPosition === "Admin Staff") {
