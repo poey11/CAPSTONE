@@ -3738,38 +3738,61 @@ const generateDepartmentalReport = async (
       const respondentAge = respondent.age ?? "";
       const respondentAddress = respondent.address ?? "";
 
-      // ==========================
-      // DETERMINE REMARKS SECTION
       let remarks = "";
-
       if (report.status === "CFA" || 
       report.status === "Settled" || 
       report.status === "settled" || 
       report.status === "archived" ||
-      report.status === "pending" ) {
+      report.status === "pending") {
   
     const numHearings = report.hearing ?? 0;
   
-    if (numHearings === 0) {
-      const dialogueSnapshot = await getDocs(collection(db, "IncidentReports", report.id, "DialogueMeeting"));
-      dialogueSnapshot.forEach(doc => {
-        const data = doc.data() as DialogueMeeting;
-        if (data.remarks) remarks = data.remarks;
-      });
-    } else {
-      const summonsSnapshot = await getDocs(collection(db, "IncidentReports", report.id, "SummonsMeeting"));
-      summonsSnapshot.forEach(doc => {
+    let foundRemark = false;
+  
+    const checkSummons = async (level: string) => {
+      const snapshot = await getDocs(collection(db, "IncidentReports", report.id, "SummonsMeeting"));
+      snapshot.forEach(doc => {
         const data = doc.data() as SummonsMeeting;
-        if (numHearings === 1 && data.nos === "First" && data.remarks) remarks = data.remarks;
-        if (numHearings === 2 && data.nos === "Second" && data.remarks) remarks = data.remarks;
-        if (numHearings === 3 && data.nos === "Third" && data.remarks) remarks = data.remarks;
+        if (!foundRemark && data.nos === level && data.remarks) {
+          remarks = data.remarks;
+          foundRemark = true;
+        }
       });
+    };
+  
+    const checkDialogue = async () => {
+      const snapshot = await getDocs(collection(db, "IncidentReports", report.id, "DialogueMeeting"));
+      snapshot.forEach(doc => {
+        const data = doc.data() as DialogueMeeting;
+        if (!foundRemark && data.remarks) {
+          remarks = data.remarks;
+          foundRemark = true;
+        }
+      });
+    };
+  
+    if (numHearings === 3) {
+      await checkSummons("Third");
+      if (!foundRemark) await checkSummons("Second");
+      if (!foundRemark) await checkSummons("First");
+      if (!foundRemark) await checkDialogue();
+    } else if (numHearings === 2) {
+      await checkSummons("Second");
+      if (!foundRemark) await checkSummons("First");
+      if (!foundRemark) await checkDialogue();
+    } else if (numHearings === 1) {
+      await checkSummons("First");
+      if (!foundRemark) await checkDialogue();
+    } else {
+      await checkDialogue();
     }
+  
+    if (!foundRemark) remarks = "";
   
   } else {
     remarks = "";
   }
-        
+  
 
       const cells = [
         report.dateFiled ?? "",
