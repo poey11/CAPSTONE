@@ -197,7 +197,7 @@ export default function Action() {
     guardianshipType: "",
     CYFrom: "",
     CYTo: "",
-    attestedBy: "",
+    attestedBy: "Jose Arnel L. Quebal",
     goodMoralPurpose: "",
     goodMoralOtherPurpose: "",
     nameOfTyphoon: "",
@@ -553,8 +553,8 @@ const [files10, setFiles10] = useState<{ name: string, preview: string | undefin
 const [files11, setFiles11] = useState<{ name: string, preview: string | undefined }[]>([]);
 
 // const minDate = new Date().toISOString().split("T")[0]; 
-
-const [minDate, setMinDate] = useState<string>("");
+const [lastSelectedDateOnly, setLastSelectedDateOnly] = useState<string | null>(null);
+const [minDate, setMinDate] = useState<any>(null);
 const [appointmentsMap, setAppointmentsMap] = useState<Record<string, number>>({});
 const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -562,7 +562,6 @@ useEffect(() => {
   const collectionRef = query(
     collection(db, "ServiceRequests"),
     where("appointmentDate", "!=", null),
-    where("approvedBySAS", "==", true), // Only include appointments approved by SAS
   );
   const unsubscribe = onSnapshot(collectionRef, (snapshot) => {
     const map: any = {};
@@ -612,16 +611,14 @@ const filterDate = (date: Date) => {
       const slot = new Date(date);
       slot.setHours(hour, min, 0, 0);
       const key = toPHISOString(slot);
-
       if ((appointmentsMap[key] || 0) >= 3) {
         fullCount++;
       }
     }
   }
-
-  // Total slots per day: 18 (9 hours * 2 slots per hour)
-  return fullCount  < 18; // Allow date if less than 18 slots are full
+  return fullCount < 18;
 };
+
 
 // Disable if that specific time slot already has 3 appointments
 const filterTime = (time: Date) => {
@@ -645,18 +642,38 @@ useEffect(() => {
   }
 }, [user]); // Runs when `user` changes
 
+
 useEffect(() => {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(8, 0, 0, 0); // Tomorrow at 08:00
+  tomorrow.setHours(0, 0, 0, 0);
 
-  const yyyy = tomorrow.getFullYear();
-  const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
-  const dd = String(tomorrow.getDate()).padStart(2, '0');
-  const min = `${yyyy}-${mm}-${dd}T08:00`;
+  const findFirstAvailableSlot = (): Date | null => {
+    for (let hour = 8; hour <= 16; hour++) {
+      for (let min of [0, 30]) {
+        const slot = new Date(tomorrow);
+        slot.setHours(hour, min, 0, 0);
+        const key = toPHISOString(slot);
+        if ((appointmentsMap[key] || 0) < 3) {
+          return slot;
+        }
+      }
+    }
+    return null;
+  };
 
-  setMinDate(min);
-}, []);
+  const firstAvailable = findFirstAvailableSlot();
+
+  if (firstAvailable) {
+    setSelectedDate(firstAvailable);
+    setLastSelectedDateOnly(firstAvailable.toDateString());
+    setClearanceInput((prev: any) => ({
+      ...prev,
+      appointmentDate: toPHISOString(firstAvailable),
+    }));
+    setMinDate(firstAvailable);
+  }
+}, [appointmentsMap]);
 
 
 
@@ -2324,15 +2341,61 @@ const handleFileChange = (
                           name="appointmentDate"
                           id="appointmentDate"
                           onChange={(date: Date | null) => {
-                            setSelectedDate(date);
-                            setClearanceInput((prev: any) => ({
-                              ...prev,
-                              appointmentDate: date ? toPHISOString(date) : ""
-                            }));
+                            if (!date) return;
+
+                            const selectedDateOnly = date.toDateString();
+
+                            // If the user picked a new date (not just changing time)
+                            if (selectedDateOnly !== lastSelectedDateOnly) {
+                              setLastSelectedDateOnly(selectedDateOnly);
+                            
+                              // Check if day is fully booked
+                              if (!filterDate(date)) {
+                                alert("This day is fully booked. Please choose another date.");
+                                return;
+                              }
+                            
+                              // Auto-pick first available time on that date
+                              for (let hour = 8; hour <= 16; hour++) {
+                                for (let min of [0, 30]) {
+                                  const slot = new Date(date);
+                                  slot.setHours(hour, min, 0, 0);
+                                  const key = toPHISOString(slot);
+                                
+                                  if ((appointmentsMap[key] || 0) < 3) {
+                                    setSelectedDate(slot);
+                                    setClearanceInput((prev: any) => ({
+                                      ...prev,
+                                      appointmentDate: toPHISOString(slot),
+                                    }));
+                                    return;
+                                  }
+                                }
+                              }
+                            
+                              // Shouldn't reach here if filterDate worked correctly
+                              alert("This day is unexpectedly full. Try a different date.");
+                            } else {
+                              // If just changing time, respect the selected time
+                              const key = toPHISOString(date);
+                              if ((appointmentsMap[key] || 0) >= 3) {
+                                return;
+                              }
+                            
+                              setSelectedDate(date);
+                              setClearanceInput((prev: any) => ({
+                                ...prev,
+                                appointmentDate: toPHISOString(date),
+                              }));
+                            }
                           }}
+
+
+
+
                           showTimeSelect // 👈 this enables time selection
                           timeIntervals={30}
-                          minDate={new Date(minDate)} // Set minimum date to today
+                          minDate={minDate} // Set minimum date to today
                           minTime={new Date(new Date().setHours(8, 0, 0, 0))}
                           maxTime={new Date(new Date().setHours(17, 0, 0, 0))}
                           placeholderText="Pick date and time"
@@ -2342,6 +2405,7 @@ const handleFileChange = (
                           filterDate={filterDate}
                           filterTime={filterTime}
                           onKeyDown={(e) => e.preventDefault()} 
+                          disabled= {!selectedDate} // Disable if selectedDate is null or if form is read-only
                           required
                         />
                       </div>
@@ -2505,7 +2569,7 @@ const handleFileChange = (
                     )}
                   </div>
 
-
+                {/* 
                   {clearanceInput.purpose === "Residency" && (
                     <>
                       <div className="form-group-document-req">
@@ -2522,7 +2586,7 @@ const handleFileChange = (
                         />
                       </div>
                     </>
-                  )}
+                  )} */}
 
                   {(clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Indigency") && (
                     <>
