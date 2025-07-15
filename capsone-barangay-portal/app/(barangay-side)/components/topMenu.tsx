@@ -88,7 +88,7 @@ export default function TopMenu() {
           if (!incidentSnap.exists()) return null;
   
           const incidentData = incidentSnap.data();
-          if (incidentData.status === "settled" || incidentData.status === "archived") {
+          if (incidentData.status === "settled" || incidentData.status === "archived" || incidentData.status === "CFA" || incidentData.status === "Settled") {
             return null;
           }
         }
@@ -98,7 +98,7 @@ export default function TopMenu() {
           if (!requestSnap.exists()) return null;
   
           const requestData = requestSnap.data();
-          if (requestData.status === "Completed") {
+          if (requestData.status === "Completed" || requestData.status === "Rejected") {
             return null;
           }
         }
