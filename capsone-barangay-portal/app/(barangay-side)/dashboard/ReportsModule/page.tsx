@@ -3658,7 +3658,7 @@ const handleGenerateIncidentSummaryPDF = async (
   
       const existingDataRows = footerStartRow - dataStartRow;
       const extraRowsNeeded = filteredReports.length - existingDataRows;
-  
+      
       // Insert or delete rows to adjust table space
       if (extraRowsNeeded > 0) {
         worksheet.insertRows(footerStartRow - 1, new Array(extraRowsNeeded).fill([]));
