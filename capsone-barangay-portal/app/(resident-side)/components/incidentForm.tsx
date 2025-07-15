@@ -410,15 +410,25 @@ const confirmSubmit = async () => {
 
 
 
-      const isOneWeekOrMore = (dateFiled: string | Date, createdAt: string | Date): boolean => {
-        const filedDate = new Date(dateFiled);
-        const createdDate = new Date(createdAt);
-    
-        const differenceInMilliseconds =  createdDate.getTime()-filedDate.getTime();
-        const differenceInDays = differenceInMilliseconds / (1000 * 60 * 60 * 24);
-    
-        return differenceInDays >= 1;
-      };
+      const isOneDayOrMore = (
+        dateFiled: string,     // e.g. "2025-07-13"
+        timeFiled: string,     // e.g. "21:06" or "21:06:00"
+        createdAt: string | Date
+        ): boolean => {
+          // Combine date + time into full ISO format
+          const filedDateTime = new Date(`${dateFiled}T${timeFiled}`);
+          const createdDate = new Date(createdAt);
+          console.log("filedDateTime", filedDateTime);
+          console.log("createdDate", createdDate);
+
+          const diff = createdDate.getTime() - filedDateTime.getTime();
+
+          console.log("Time difference in ms:", diff);
+          
+
+          return diff >= 24 * 60 * 60 * 1000; // 24 hours in ms
+        };
+
       
     
       const [isIncidentLate, setIsIncidentLate] = useState(false);
@@ -426,10 +436,13 @@ const confirmSubmit = async () => {
       useEffect(() => {
         if (!incidentReport?.dateFiled) return;
     
-        const dateFiled = new Date(incidentReport.dateFiled);
-        const createdAt = new Date(getLocalDateString(new Date())); // Use the current date as createdAt
+        const dateFiled = incidentReport.dateFiled;
+        const createdAt = new Date(); 
+        const timeFiled = incidentReport.time;
+        
     
-        const isLate = isOneWeekOrMore(dateFiled, createdAt);
+        const isLate = isOneDayOrMore(dateFiled, timeFiled,createdAt, );
+        console.log("isLate", isLate);
         setIsIncidentLate(isLate);
     
         if (isLate) {
@@ -438,7 +451,7 @@ const confirmSubmit = async () => {
             isReportLate: true,
           }));
         }
-      }, [incidentReport?.dateFiled]);
+      }, [incidentReport?.dateFiled, incidentReport?.time]);
     
 
     return(
