@@ -1,4 +1,5 @@
 // next-auth.d.ts
+import { Timestamp } from "firebase/firestore";
 import "next-auth";
 
 declare module "next-auth" {
@@ -12,6 +13,8 @@ declare module "next-auth" {
       fullName: string;
       department: string;
       profileImage: string;
+      createdAt: Timestamp;
+
     };
   }
 
