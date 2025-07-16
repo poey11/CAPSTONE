@@ -545,11 +545,23 @@ useEffect(() => {
                         <td>
                           <div className="actions-inbarangay">
                             <button className="action-inbarangay-services" /* edited this class */onClick={() => handleView(request.id, request.reqType)}>
-                             <img
-                                className={isAuthorized ? "action-inbarangay-edit" : "action-inbarangay-view"}
-                                src={isAuthorized ? "/Images/edit.png" : "/Images/view.png"}
-                                alt={isAuthorized ? "Edit" : "View"}
-                              />
+                                <img
+                                  className={
+                                    isAuthorized && request.status !== "Completed" && request.status !== "Rejected"
+                                      ? "action-inbarangay-edit"
+                                      : "action-inbarangay-view"
+                                  }
+                                  src={
+                                    isAuthorized && request.status !== "Completed" && request.status !== "Rejected"
+                                      ? "/Images/edit.png"
+                                      : "/Images/view.png"
+                                  }
+                                  alt={
+                                    isAuthorized && request.status !== "Completed" && request.status !== "Rejected"
+                                      ? "Edit"
+                                      : "View"
+                                  }
+                               />
                             </button>
                           </div>
                         </td>
