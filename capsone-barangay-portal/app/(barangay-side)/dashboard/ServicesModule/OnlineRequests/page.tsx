@@ -1,7 +1,7 @@
 "use client"
 import "@/CSS/barangaySide/ServicesModule/OnlineRequests.css";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef} from "react";
 import { collection, onSnapshot, orderBy, query, where, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
@@ -272,17 +272,23 @@ useEffect(() => {
 const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
 
-  /* NEW UPDATED ADDED */
-  const [filtersLoaded, setFiltersLoaded] = useState(false);
-
-  /* NEW UPDATED ADDED */
-  useEffect(() => {
-    setFiltersLoaded(false); // reset animation
-    const timeout = setTimeout(() => {
-      setFiltersLoaded(true); // retrigger
-    }, 50); // adjust delay as needed
-    return () => clearTimeout(timeout);
-  }, [searchParams.toString()]);
+ /* NEW UPDATED ADDED */
+   const [filtersLoaded, setFiltersLoaded] = useState(false);
+   const hasAnimatedOnce = useRef(false);
+ 
+   /* NEW UPDATED ADDED */
+   useEffect(() => {
+     if (!hasAnimatedOnce.current) {
+       hasAnimatedOnce.current = true;
+       setFiltersLoaded(false);
+       const timeout = setTimeout(() => {
+         setFiltersLoaded(true);
+       }, 50);
+       return () => clearTimeout(timeout);
+     } else {
+       setFiltersLoaded(true); // Always on after initial load
+     }
+   }, []);
 
 
     
