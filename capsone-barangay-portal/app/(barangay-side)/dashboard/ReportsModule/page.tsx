@@ -3305,13 +3305,53 @@ const uploadForms = async (url: string): Promise<void> => {
       });
   
       const departmentGroups = {
-        Lupon: incidentReports.filter((rep) => rep.department === "Lupon"),
-        VAWC: incidentReports.filter((rep) => rep.department === "VAWC"),
-        BCPC: incidentReports.filter((rep) => rep.department === "BCPC"),
-        GAD: incidentReports.filter((rep) => rep.department === "GAD"),
-        Online: incidentReports.filter((rep) => rep.department === "Online"),
-
+        Lupon: incidentReports
+          .filter((rep) => rep.department === "Lupon")
+          .sort((a, b) => {
+            const aDate = a.createdAt?.toDate?.() 
+              ?? (a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt));
+            const bDate = b.createdAt?.toDate?.() 
+              ?? (b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt));
+            return bDate.getTime() - aDate.getTime(); // DESC
+          }),
+        VAWC: incidentReports
+          .filter((rep) => rep.department === "VAWC")
+          .sort((a, b) => {
+            const aDate = a.createdAt?.toDate?.() 
+              ?? (a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt));
+            const bDate = b.createdAt?.toDate?.() 
+              ?? (b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt));
+            return bDate.getTime() - aDate.getTime();
+          }),
+        BCPC: incidentReports
+          .filter((rep) => rep.department === "BCPC")
+          .sort((a, b) => {
+            const aDate = a.createdAt?.toDate?.() 
+              ?? (a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt));
+            const bDate = b.createdAt?.toDate?.() 
+              ?? (b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt));
+            return bDate.getTime() - aDate.getTime();
+          }),
+        GAD: incidentReports
+          .filter((rep) => rep.department === "GAD")
+          .sort((a, b) => {
+            const aDate = a.createdAt?.toDate?.() 
+              ?? (a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt));
+            const bDate = b.createdAt?.toDate?.() 
+              ?? (b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt));
+            return bDate.getTime() - aDate.getTime();
+          }),
+        Online: incidentReports
+          .filter((rep) => rep.department === "Online")
+          .sort((a, b) => {
+            const aDate = a.createdAt?.toDate?.() 
+              ?? (a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt));
+            const bDate = b.createdAt?.toDate?.() 
+              ?? (b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt));
+            return bDate.getTime() - aDate.getTime();
+          }),
       };
+      
   
       const filteredGroups = Object.entries(departmentGroups).filter(
         ([, reports]) => reports.length > 0
@@ -3413,7 +3453,7 @@ const uploadForms = async (url: string): Promise<void> => {
           const cells = [
             report.caseNumber,
             ` C- ${complainantFullName}\n\n R- ${respondentFullName}`,
-            `${report.dateFiled || ""} ${report.timeFiled || ""}`,
+            `${report.dateReceived || ""} ${report.timeReceived || ""}`,
             report.nature || report.concerns || "",
             report.status || "",
           ];
@@ -3616,6 +3656,7 @@ interface IncidentReport {
   location?: string;
   nature?: string;
   concern?: string;
+  concerns?: string;
   receivedBy?: string;
   reopenRequester?: string;
   respondent?: {
@@ -3670,14 +3711,28 @@ const generateDepartmentalReport = async (
     const querySnapshot = await getDocs(q);
 
     const filteredReports: IncidentReport[] = querySnapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() } as IncidentReport))
-      .filter((rep) => {
-        if (department !== "ALL" && rep.department !== department) return false;
-        if (status !== "ALL" && rep.status !== status) return false;
-        if (allTime) return true;
-        const date = rep.createdAt?.toDate?.() ?? (rep.createdAt instanceof Date ? rep.createdAt : new Date(rep.createdAt ?? ""));
-        return date.getFullYear() === year && date.getMonth() === month;
-      });
+    .map((doc) => ({ id: doc.id, ...doc.data() } as IncidentReport))
+    .filter((rep) => {
+      if (!allTime) {
+        const date = rep.createdAt?.toDate?.() 
+          ?? (rep.createdAt instanceof Date ? rep.createdAt : new Date(rep.createdAt ?? ""));
+        if (date.getFullYear() !== year || date.getMonth() !== month) {
+          return false;
+        }
+      }
+  
+      if (department !== "ALL" && rep.department !== department) return false;
+      if (status !== "ALL" && rep.status !== status) return false;
+  
+      return true;
+    })
+    .sort((a, b) => {
+      const aDate = a.createdAt?.toDate?.()
+        ?? (a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt ?? ""));
+      const bDate = b.createdAt?.toDate?.()
+        ?? (b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt ?? ""));
+      return bDate.getTime() - aDate.getTime(); // DESCENDING
+    });
 
     if (filteredReports.length === 0) {
       alert(allTime
@@ -3749,57 +3804,71 @@ const generateDepartmentalReport = async (
   
     let foundRemark = false;
   
-    const checkSummons = async (level: string) => {
-      const snapshot = await getDocs(collection(db, "IncidentReports", report.id, "SummonsMeeting"));
-      snapshot.forEach(doc => {
-        const data = doc.data() as SummonsMeeting;
-        if (!foundRemark && data.nos === level && data.remarks) {
-          remarks = data.remarks;
-          foundRemark = true;
+        const checkSummons = async (level: string) => {
+          const snapshot = await getDocs(collection(db, "IncidentReports", report.id, "SummonsMeeting"));
+          snapshot.forEach(doc => {
+            const data = doc.data() as SummonsMeeting;
+            if (!foundRemark && data.nos === level && data.remarks) {
+              remarks = data.remarks;
+              foundRemark = true;
+            }
+          });
+        };
+      
+        const checkDialogue = async () => {
+          const snapshot = await getDocs(collection(db, "IncidentReports", report.id, "DialogueMeeting"));
+          snapshot.forEach(doc => {
+            const data = doc.data() as DialogueMeeting;
+            if (!foundRemark && data.remarks) {
+              remarks = data.remarks;
+              foundRemark = true;
+            }
+          });
+        };
+      
+        if (numHearings === 3) {
+          await checkSummons("Third");
+          if (!foundRemark) await checkSummons("Second");
+          if (!foundRemark) await checkSummons("First");
+          if (!foundRemark) await checkDialogue();
+        } else if (numHearings === 2) {
+          await checkSummons("Second");
+          if (!foundRemark) await checkSummons("First");
+          if (!foundRemark) await checkDialogue();
+        } else if (numHearings === 1) {
+          await checkSummons("First");
+          if (!foundRemark) await checkDialogue();
+        } else {
+          await checkDialogue();
         }
-      });
-    };
+      
+        if (!foundRemark) remarks = "";
+      
+      } else {
+        remarks = "";
+      }
+
+    const createdAtDate = report.createdAt?.toDate?.()
+      ?? (report.createdAt instanceof Date ? report.createdAt : new Date(report.createdAt ?? ""));
+
+    const createdAtStr = createdAtDate.toISOString().split("T")[0];
   
-    const checkDialogue = async () => {
-      const snapshot = await getDocs(collection(db, "IncidentReports", report.id, "DialogueMeeting"));
-      snapshot.forEach(doc => {
-        const data = doc.data() as DialogueMeeting;
-        if (!foundRemark && data.remarks) {
-          remarks = data.remarks;
-          foundRemark = true;
-        }
-      });
-    };
+    const concernValue = report.nature 
+    ?? report.concern 
+    ?? report.concerns 
+    ?? "";
   
-    if (numHearings === 3) {
-      await checkSummons("Third");
-      if (!foundRemark) await checkSummons("Second");
-      if (!foundRemark) await checkSummons("First");
-      if (!foundRemark) await checkDialogue();
-    } else if (numHearings === 2) {
-      await checkSummons("Second");
-      if (!foundRemark) await checkSummons("First");
-      if (!foundRemark) await checkDialogue();
-    } else if (numHearings === 1) {
-      await checkSummons("First");
-      if (!foundRemark) await checkDialogue();
-    } else {
-      await checkDialogue();
-    }
-  
-    if (!foundRemark) remarks = "";
-  
-  } else {
-    remarks = "";
-  }
-  
+  const concernWithOrWithoutDept = 
+    (department === "ALL") 
+      ? `${concernValue} (${report.department ?? ""})`
+      : concernValue;
 
       const cells = [
-        report.dateFiled ?? "",
+        createdAtStr,
         `C- ${complainantFullName}\nR- ${respondentFullName}`,
         `C- ${complainantAge}\nR- ${respondentAge}`,
         `C- ${complainantAddress}\nR- ${respondentAddress}`,
-        report.nature ?? report.concern ?? "",
+        concernWithOrWithoutDept,
         report.status ?? "",
         remarks ?? "",
       ];
@@ -4605,8 +4674,14 @@ const generateDepartmentalReport = async (
               status === "All" || req.status?.toLowerCase() === status.toLowerCase();
             return matchesTime && matchesDocType && matchesStatus;
           })
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
+          .sort((a, b) => {
+            const aDate = a.createdAt?.toDate?.()
+              ?? (a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt));
+            const bDate = b.createdAt?.toDate?.()
+              ?? (b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt));
+            return bDate.getTime() - aDate.getTime();
+          });
+
         if (requests.length === 0) {
           alert("No service requests found for the selected criteria.");
           setShowCertMonthlyModal(false);
