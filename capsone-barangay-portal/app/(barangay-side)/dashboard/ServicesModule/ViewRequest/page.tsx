@@ -1712,10 +1712,38 @@ Functions for Reason for Reject
 
     const handleReceivalSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
+    
+      // Receival validation
+      if (!receival.receivalName) {
+        setPopupSection("receival");
+        return;
+      }
+    
+      // Determine if Payment section should be hidden
+      const excludedDocTypes = [
+        "Barangay Clearance",
+        "Barangay Certificate",
+        "Barangay Indigency",
+        "Other Documents",
+      ];
+      const shouldHidePayment =
+        excludedDocTypes.includes(requestData?.docType || "") &&
+        requestData?.purpose !== "First Time Jobseeker" ||
+        (requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false);
+    
+      // Payment validation
+      if (!shouldHidePayment) {
+        if (!orNumber || files1.length === 0) {
+          setPopupSection("payment");
+          return;
+        }
+      }
+    
+      // ✅ Everything is validated, proceed with your original logic
       if (!id) return;
     
       const docRef = doc(db, "ServiceRequests", id);
-      const currentDateTime = new Date(); 
+      const currentDateTime = new Date();
     
       const updatedData: any = {
         receivalName: receival.receivalName,
@@ -1725,7 +1753,6 @@ Functions for Reason for Reject
         orNumber: orNumber,
       };
     
-      
       if (files1.length > 0) {
         const file = files1[0];
         const response = await fetch(file.preview);
@@ -1739,14 +1766,11 @@ Functions for Reason for Reject
       }
     
       await updateDoc(docRef, updatedData);
-
-      // update firsttimeclaimed to true if it was false
-
+    
+      // update firstTimeClaimed
       if (requestData?.purpose === "First Time Jobseeker") {
         try {
           const jobSeekerRef = collection(db, "JobSeekerList");
-    
-          // Check by residentId first
           const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.residentId));
           const byResidentIdSnap = await getDocs(byResidentIdQuery);
     
@@ -1757,7 +1781,6 @@ Functions for Reason for Reject
               await updateDoc(jobDoc.ref, { firstTimeClaimed: true });
             }
           } else {
-            // Fallback by name + DOB
             const snapshot = await getDocs(jobSeekerRef);
             const match = snapshot.docs.find(doc => {
               const data = doc.data();
@@ -1774,20 +1797,20 @@ Functions for Reason for Reject
         }
       }
     
-      const notificationRef = collection(db, "Notifications");
-      await addDoc(notificationRef, {
+      await addDoc(collection(db, "Notifications"), {
         residentID: requestData?.accID,
         requestID: id,
         message: `Your document request (${requestData?.requestId}) has been completed and received. Thank you!`,
         timestamp: new Date(),
         transactionType: "Online Request",
         isRead: false,
-    });
-
+      });
+    
       setShowReceivalForm(false);
       handleRequestIsDone();
       setShowCompletionPopup(true);
     };
+    
 
     const docPrinted = requestData?.docPrinted;
 
@@ -2828,7 +2851,7 @@ Functions for Reason for Reject
                         />
                       </div>
                       <div className="services-onlinereq-doc-receival-form-section">
-                        <p>Upload OR</p>
+                        <p>Upload OR<span className="required-asterisk">*</span></p>
                         <div className="box-container-OR">
                           <div className="file-upload-container-OR">
                             <label htmlFor="file-upload-OR" className="upload-link">Click to Upload File</label>
@@ -2838,6 +2861,7 @@ Functions for Reason for Reject
                               className="file-upload-input"
                               accept=".jpg,.jpeg,.png"
                               onChange={handleORUpload}
+                              required
                             />
                             {files1.length > 0 && (
                               <div className="file-name-image-display">
