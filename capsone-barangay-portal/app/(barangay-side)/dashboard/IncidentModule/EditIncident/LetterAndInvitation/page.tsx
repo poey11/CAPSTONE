@@ -801,12 +801,10 @@ useEffect(() => {
                     {showSubmitPopup.letterType === "summon" ? (
                         <button
                         onClick={() => {
-                            //sendSMSForSummons();
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
-
                             if (showSubmitPopup.letterType === "summon") {
                                 setTimeout(() => {
-                                  router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
+                                  router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${reportData?.department}`);
                                 }, 3000); // wait 3 seconds
                               } else {
                                 setTimeout(() => {
@@ -814,7 +812,7 @@ useEffect(() => {
                                 }, 3000); // wait 3 seconds
                               }
                             }}
-                        className="letter-announcement-btn"
+                        className="send-sms-btn"
                         >
                         Send SMS
                         </button>
@@ -822,7 +820,6 @@ useEffect(() => {
                         // CODE BLOCK FOR SEND SMS BUTTON INSIDE POP UP
                         <button
                         onClick={() => {
-                            // sendSMSForDialogue();
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
 
                             if (showSubmitPopup.letterType === "dialogue") {
@@ -835,7 +832,7 @@ useEffect(() => {
                                 }, 3000); // wait 3 seconds
                               }
                             }}
-                        className="letter-announcement-btn"
+                        className="send-sms-btn"
                         >
                         Send SMS
                         </button>
@@ -995,10 +992,18 @@ useEffect(() => {
                         {userInfo?.status === "pending" && (
                             <div className="actions-letter">
                                     {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
-                                    {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Generate Letter</button>)}
+                                    {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                                 
                                 {/* this button should disappear base on hearingSMS and summonsSMS and when pressed the button should disappear but for summon needs to be press 3 times before disppear */}
-                                    <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
+                             
+                                {/* 
+                                <button className="letter-announcement-btn" type="submit" name="sendSMS">
+                                    Send SMS
+                                </button> 
+                                Add condition when the user presses the button (once for dialogue and 3 times for summons before disabling)
+                                */}
+
+                                 
                             </div>
 
                         )}
@@ -1185,7 +1190,7 @@ useEffect(() => {
 
                             <div className="section-2-letter-lower">
 
-                                                <div className="section-2-information-section">
+                                 <div className="section-2-information-section">
                                     <div className="section-2-information-top">
                                         <div className="section-title-letter">
                                         <h1>Other Information</h1>
@@ -1195,33 +1200,42 @@ useEffect(() => {
                                     <div className="section-2-information-bottom">
                                         {actionId === "dialogue" ? (
                                         <>
-                                            <div className="fields-section-letter">
-                                                <p>Date of Delivery</p>
-                                                <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
-                                                value={safeData[0]?.DateOfDelivery||otherInfo.DateOfDelivery}
-                                                id="DateOfDelivery"
-                                                name="DateOfDelivery"
-                                                min={today}
-                                                onKeyDown={(e) => e.preventDefault()}
-                                                onChange={handleChange}
-                                                required
-                                                disabled = {safeData[0]?.DateOfDelivery ? true : false}
-                                                />
-                                            </div>
-                                            <div className="fields-section-letter">
-                                                <p>Date and Time of Meeting</p>
-                                                <input type="datetime-local" className="generate-letter-input-field" 
-                                                value={safeData[0]?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
-                                                onKeyDown={(e) => e.preventDefault()}
-                                                id="DateTimeOfMeeting"
-                                                name="DateTimeOfMeeting"
-                                                onChange={handleChange}
-                                                min={todayWithTime}
-                                                required
-                                                disabled = {safeData[0]?.DateTimeOfMeeting ? true : false}
-                                                />
 
+
+                                            <div className="section-2-letter-left-side-others">
+
+                                                <div className="fields-section-letter">
+                                                    <p>Date of Delivery</p>
+                                                    <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
+                                                    value={safeData[0]?.DateOfDelivery||otherInfo.DateOfDelivery}
+                                                    id="DateOfDelivery"
+                                                    name="DateOfDelivery"
+                                                    min={today}
+                                                    onKeyDown={(e) => e.preventDefault()}
+                                                    onChange={handleChange}
+                                                    required
+                                                    disabled = {safeData[0]?.DateOfDelivery ? true : false}
+                                                    />
+                                                </div>
+                                                <div className="fields-section-letter">
+                                                    <p>Date and Time of Meeting</p>
+                                                    <input type="datetime-local" className="generate-letter-input-field" 
+                                                    value={safeData[0]?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
+                                                    onKeyDown={(e) => e.preventDefault()}
+                                                    id="DateTimeOfMeeting"
+                                                    name="DateTimeOfMeeting"
+                                                    onChange={handleChange}
+                                                    min={todayWithTime}
+                                                    required
+                                                    disabled = {safeData[0]?.DateTimeOfMeeting ? true : false}
+                                                    />
+
+                                                </div>
                                             </div>
+
+
+                                            <div className="section-2-letter-right-side-others">
+
                                             <div className="fields-section-letter">
                                                 <p>Delivered By</p>      
                                                 <select
@@ -1270,10 +1284,18 @@ useEffect(() => {
                                                 disabled
                                                 />
                                             </div>
+
+                                            </div>
+
+
                                         </>
                                         ) : (
                                         <>
-                                            <div className="fields-section-letter">
+
+
+                                            <div className="section-2-letter-left-side-others">
+
+                                                                                            <div className="fields-section-letter">
                                                 <p>Date of Delivery</p>
                                                 <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
                                                 value={otherInfo.DateOfDelivery}
@@ -1301,7 +1323,11 @@ useEffect(() => {
 
                                             </div>
 
-                                            <div className="fields-section-letter">
+                                            </div>
+
+                                            <div className="section-2-letter-right-side-others">
+
+                                          <div className="fields-section-letter">
                                                 <p>Delivered By</p>
                                                 <select
                                                     className="generate-letter-input-field-dropdown"
@@ -1350,6 +1376,12 @@ useEffect(() => {
                                                 />
 
                                             </div>
+
+                                                
+
+                                            </div>
+
+
                                         </>
                                         )}
                                     </div>

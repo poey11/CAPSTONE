@@ -947,6 +947,10 @@ padding: 1rem;
 
 
 
+
+
+
+
 .popup-overlay-add,
 .error-popup-overlay-add{
     position: fixed;
@@ -1810,9 +1814,7 @@ html, body {
   width: 90%;
   display: flex;
   padding-bottom: 30px;
-  padding-top: 30px;
-
-  
+  /*padding-top: 30px;*/
 }
 
 .dialogue-info-container-scrollable{
@@ -2076,7 +2078,7 @@ s
 }
 
 
-.hearing-main-section {
+.hearing-main-section-form {
     width: 100%;
     height: 100%;
     display: flex;
@@ -2360,32 +2362,31 @@ border-left: 10px solid #8a0f0f;
 
 
 /*
-For hearing main
+For hearing main (moderately smaller)
 */
 .info-toggle-btn-main-hearing {
-  padding: 10px 20px;
- /* border: 1px solid transparent;*/
+  padding: 8px 16px;
   border: 1px solid #214666;
-  border-radius: 20px;
+  border-radius: 16px;
   background-color: transparent;
   color: #214666;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 14px;
+  font-size: 13px;
   text-transform: capitalize;
 }
 
 .info-toggle-btn-main-hearing:hover {
-    background-color: rgba(33, 70, 102, 0.1);
+  background-color: rgba(33, 70, 102, 0.1);
 }
-
 
 .info-toggle-btn-main-hearing.active {
   background-color: #214666;
   color: #ffffff;
   border: 1px solid #214666;
 }
+
 
 .hearing-header-body-top-section-main-hearing{
   display: flex;
@@ -2407,21 +2408,21 @@ For hearing main
 .info-toggle-btn-hearing {
   background-color: transparent;
   border: none;
-  padding: 12px 20px;
+  padding: 8px 16px; /* reduced from 12px 20px */
   cursor: pointer;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px; /* reduced from 14px */
   color: #333;
-  border-bottom: 3px solid #ccc;
+  border-bottom: 2px solid #ccc; /* slightly thinner */
   transition: all 0.3s ease;
-  
 }
 
 .info-toggle-btn-hearing:hover,
 .info-toggle-btn-hearing.active {
   color: #ff6600;
-  border-bottom: 3px solid #ff6600;
+  border-bottom: 2px solid #ff6600; /* match thinner border */
 }
+
 
 
 
@@ -2450,7 +2451,6 @@ For hearing main
 
 .hearing-edit-section-2 {
    width: 15%;
-
 }
 
 
@@ -2559,4 +2559,185 @@ For hearing main
   outline: none;
   border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
   box-shadow: none;
+}
+
+
+
+
+
+
+.action-save-edit-hearing {
+  border: none;
+  cursor: pointer;
+  padding: 10px 30px;
+  font-size: 13px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.action-save-edit-hearing {
+  background-color: #4caf50; 
+  color: white;
+}
+.action-save-edit-hearing:hover {
+  background-color: #45a049; /* slightly darker green */
+}
+
+
+
+
+
+
+
+
+.confirmation-popup-overlay-add-section {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.confirmation-popup-add-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  width: 500px;
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  text-align: center;
+  position: fixed;
+}
+
+.popup-title-section {
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.settlement-options-modern-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 20px;
+  
+}
+
+.settlement-card-section {
+  background: linear-gradient(135deg, #ffffff, #f5faff);
+  border: 2px solid #d0d7de;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 16px;
+  color: #2e3a59;
+  cursor: pointer;
+  transition: all 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 130px;
+  justify-content: center;
+  position: relative;
+}
+
+.settlement-card-section input[type="radio"] {
+  display: none;
+}
+
+.settlement-card-section:hover {
+  background: #e8f2fc;
+  border-color: #64b5f6;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(100, 181, 246, 0.2);
+}
+
+.settlement-card-section.selected-section {
+  border-color: #1565c0;
+  background: #d6eaff;
+  color: #0d47a1;
+  font-weight: 600;
+  box-shadow: 0 0 0 2px #1565c0 inset, 0 4px 12px rgba(21, 101, 192, 0.25);
+}
+
+
+.yesno-container-add-section {
+  display: flex;
+  gap: 20px;
+}
+
+.yes-button-add-section {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 150px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+  background-color: #4caf50;
+  transition: background-color 0.2s ease;
+}
+
+.yes-button-add-section:hover {
+  background-color: #3d8c40;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.error-popup-overlay-settled{
+    position: fixed;
+    top: 13%;
+    right: -3px;
+    color: white;
+    width: 450px;
+    height: 50px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    text-align: center;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 20000;
+  }
+
+
+    .error-popup-overlay-settled{
+    background: #cc3434;
+    border-left: 10px solid #8a0f0f;
+  }
+
+
+.error-popup-overlay-settled.show {
+  animation: slideIn 0.5s ease-out;
+}
+
+
+.error-popup-overlay-settled.hide {
+  animation: slideOut 0.5s ease-out;
 }
