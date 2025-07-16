@@ -166,41 +166,6 @@ const ViewOnlineRequest = () => {
       const [firstTimeClaimed, setFirstTimeClaimed] = useState<boolean | null>(null);
 
       useEffect(() => {
-        const checkFirstTimeClaimedStatus = async () => {
-          if (!requestData) return;
-          if (requestData.purpose !== "First Time Jobseeker") return;
-      
-          const jobSeekerRef = collection(db, "JobSeekerList");
-      
-          // Try by residentId first
-          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.residentId));
-          const byResidentIdSnap = await getDocs(byResidentIdQuery);
-      
-          if (!byResidentIdSnap.empty) {
-            const data = byResidentIdSnap.docs[0].data();
-            setFirstTimeClaimed(data.firstTimeClaimed ?? null);
-            return;
-          }
-      
-          // Fallback by name + DOB
-          const snapshot = await getDocs(jobSeekerRef);
-          const match = snapshot.docs.find(doc => {
-            const data = doc.data();
-            return data.firstName?.toLowerCase() === requestData.requestorFname?.split(" ")[0]?.toLowerCase() &&
-                   data.lastName?.toLowerCase() === requestData.requestorFname?.split(" ").slice(-1)[0]?.toLowerCase() &&
-                   data.dateOfBirth === requestData.birthday;
-          });
-      
-          if (match) {
-            setFirstTimeClaimed(match.data().firstTimeClaimed ?? null);
-          }
-        };
-      
-        checkFirstTimeClaimedStatus();
-      }, [requestData]);
-      
-  
-      useEffect(() => {
         const checkJobseeker = async () => {
           if (!requestData) return;
           if (requestData.status === "Completed" || requestData.status === "In - Progress") return;
@@ -215,39 +180,49 @@ const ViewOnlineRequest = () => {
       
             if (!byResidentIdSnap.empty) {
               const existingDoc = byResidentIdSnap.docs[0].data();
+              setFirstTimeClaimed(existingDoc?.firstTimeClaimed ?? null);
               if (existingDoc?.firstTimeClaimed === false) {
-                // No popup needed, since already in list & not yet claimed
-                return;
-              } else  {
+                setJobseekerPopupMessage(
+                  "This applicant is already in the Jobseeker List, but the document has not been claimed yet. Payment will NOT be required."
+                );
+              } else {
                 setJobseekerPopupMessage(
                   "This applicant is already in the Jobseeker List and has claimed a document before. Payment will be required."
                 );
-                setShowJobseekerPopup(true);
-                return;
               }
+              setShowJobseekerPopup(true);
+              return;
             }
       
             // 🔍 Fallback by split names + DOB
             let firstName = "";
-            let middleName = "";
             let lastName = "";
             if (requestData.requestorFname) {
               const parts = requestData.requestorFname.trim().split(" ");
               firstName = parts[0] || "";
-              middleName = parts.length === 3 ? parts[1] : "";
               lastName = parts.length >= 2 ? parts[parts.length - 1] : "";
             }
       
             const snapshot = await getDocs(jobSeekerRef);
             const matchDoc = snapshot.docs.find(doc => {
               const data = doc.data();
-              return data.firstName?.toLowerCase() === firstName.toLowerCase() &&
-                     data.lastName?.toLowerCase() === lastName.toLowerCase() &&
-                     data.dateOfBirth === requestData.birthday;
+      
+              const dbFirstName = (data.firstName || "").toLowerCase().trim();
+              const dbLastName = (data.lastName || "").toLowerCase().trim();
+              const dbDOB = (data.dateOfBirth || "").split("T")[0];
+      
+              const localFirstName = firstName.toLowerCase().trim();
+              const localLastName = lastName.toLowerCase().trim();
+              const localDOB = (requestData.birthday || "").split("T")[0];
+      
+              return dbFirstName === localFirstName &&
+                     dbLastName === localLastName &&
+                     dbDOB === localDOB;
             });
       
             if (matchDoc) {
               const data = matchDoc.data();
+              setFirstTimeClaimed(data?.firstTimeClaimed ?? null);
               if (data?.firstTimeClaimed === false) {
                 // No popup needed, since already in list & not yet claimed
                 return;
@@ -258,16 +233,24 @@ const ViewOnlineRequest = () => {
                 setShowJobseekerPopup(true);
                 return;
               }
+            } else {
+              if (userPosition === "Assistant Secretary") {
+                setJobseekerPopupMessage(
+                  "This applicant is not yet in the First Time Jobseeker List.\n" +
+                  "Under RA 11261, this means the request will not be paid for unless added.\n" +
+                  "Do you want to add them now to the Jobseeker List?"
+                );
+                setShowJobseekerPopup(true);
+                setAskAddToList(true);
+              } else {
+                setJobseekerPopupMessage(
+                  "This applicant is not yet in the First Time Jobseeker List. Under RA 11261, this means the request will not be paid for. Only the Assistant Secretary can add them to the list."
+                );
+                setShowJobseekerPopup(true);
+                setAskAddToList(false); // ✅ Make sure no Yes/No buttons show
+              }
             }
-      
-            // 🔥 Truly not in list, prompt to add
-            setJobseekerPopupMessage(
-              "This applicant is not yet in the First Time Jobseeker List.\n" +
-              "Under RA 11261, this means the request will not be paid for unless added.\n" +
-              "Do you want to add them now to the Jobseeker List?"
-            );
-            setShowJobseekerPopup(true);
-            setAskAddToList(true);
+            
       
           } catch (err) {
             console.error("Error checking JobSeekerList:", err);
@@ -276,6 +259,7 @@ const ViewOnlineRequest = () => {
       
         checkJobseeker();
       }, [requestData]);
+      
        
   
   
@@ -2784,7 +2768,7 @@ Functions for Reason for Reject
                   <>
                   <div className="doc-receival-content2">
                     <div className="services-onlinereq-doc-receival-form-section">
-                      <p>Name of Person Receiving</p>
+                      <p>Name of Person Receiving<span className="required-asterisk">*</span></p>
                       <select
                         value={receival.receivalName}
                         onChange={(e) => setReceival({ ...receival, receivalName: e.target.value })}
@@ -2831,12 +2815,13 @@ Functions for Reason for Reject
                   <>
                     <div className="doc-receival-content2">
                       <div className="services-onlinereq-doc-receival-form-section">
-                        <p>OR Number</p>
+                        <p>OR Number <span className="required-asterisk">*</span></p>
                         <input
                           type="number"
                           className="services-onlinereq-input-field"
                           value={orNumber}
                           onChange={(e) => setOrNumber(e.target.value)}
+                          required
                         />
                       </div>
                       <div className="services-onlinereq-doc-receival-form-section">
