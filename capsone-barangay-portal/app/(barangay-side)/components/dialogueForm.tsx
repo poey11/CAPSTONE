@@ -342,7 +342,12 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
             //window.location.reload(); // Reload the page to ensure all data is fresh
           }, 3000);
-          router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+          if(department !== "Lupon"){
+            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+          }
+          else{
+            setShowSubmitPopupB(true);
+          }
         }
         else{
           // If the case is not closed, update the status to "cfa"
@@ -840,9 +845,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 <button  
                   onClick={() => {
                     handleClosingCase(true)
-                    if(department === "Lupon"){
-                      setShowSubmitPopupB(true);
-                    }
+                    
                   }}
                   className="yes-button-add"
                 >

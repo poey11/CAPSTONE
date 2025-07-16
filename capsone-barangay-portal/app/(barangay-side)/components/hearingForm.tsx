@@ -397,7 +397,12 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
             //window.location.reload(); // Reload the page to ensure all data is fresh
           }, 3000);
-          router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+          if(department !== "Lupon"){
+            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+          }else{
+            setShowSubmitPopupB(true);
+          }
+
         }
         else{
           // If the case is not closed, update the status to "cfa"
@@ -790,9 +795,6 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                 <button  
                   onClick={() => {
                     handleClosingCase(true)
-                    if(department === "Lupon"){
-                      setShowSubmitPopupB(true);
-                    }
                   }}
                   className="yes-button-add"
                 >
