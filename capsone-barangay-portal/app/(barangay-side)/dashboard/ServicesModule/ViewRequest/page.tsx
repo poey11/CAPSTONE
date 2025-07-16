@@ -143,6 +143,13 @@ const ViewOnlineRequest = () => {
     const [pendingStatus, setPendingStatus] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+    const [showDocumentGeneratedPopup, setShowDocumentGeneratedPopup] = useState(false);
+    const [showNotifyAdminPopup, setShowNotifyAdminPopup] = useState(false);
+    const [showNotifyRequestorPopup, setShowNotifyRequestorPopup] = useState(false);
+    const [showAppointmentApprovedPopup, setShowAppointmentApprovedPopup] = useState(false);
+    const [showPhotoUploadSuccessPopup, setShowPhotoUploadSuccessPopup] = useState(false);
+    const [showInterviewRemarksSuccessPopup, setShowInterviewRemarksSuccessPopup] = useState(false);
+    const [showCompletionPopup, setShowCompletionPopup] = useState(false);
     const [matchedOtherDocFields, setMatchedOtherDocFields] = useState<string[]>([]);
     const [orNumber, setOrNumber] = useState("");
     const [otherDocuments, setOtherDocuments] = useState<
@@ -1794,6 +1801,7 @@ Functions for Reason for Reject
 
       setShowReceivalForm(false);
       handleRequestIsDone();
+      setShowCompletionPopup(true);
     };
 
     const docPrinted = requestData?.docPrinted;
@@ -1828,6 +1836,8 @@ Functions for Reason for Reject
        transactionType: "Online Request",
        isRead: false,
      });
+
+     setShowDocumentGeneratedPopup(true);
     }
 
     useEffect(() => {
@@ -1904,14 +1914,6 @@ Functions for Reason for Reject
       
 
       }
-      if(requestData?.reqType === "Online"){
-        router.push("/dashboard/ServicesModule/OnlineRequests");
-        
-      }
-      else{
-        router.push("/dashboard/ServicesModule/InBarangayRequests");
-
-      }
       
       await updateDoc(docRef, updatedData);
     }
@@ -1967,7 +1969,7 @@ Functions for Reason for Reject
         });
       }
       
-    
+    setShowAppointmentApprovedPopup(true);
     }
 
     const [showInterviewForm, setShowInterviewForm] = useState(false);
@@ -1999,6 +2001,7 @@ Functions for Reason for Reject
       });
 
       setShowInterviewForm(false);
+      setShowInterviewRemarksSuccessPopup(true);
     }
 
     
@@ -2055,10 +2058,10 @@ Functions for Reason for Reject
     
 
       setshowPhotoUpload(false); 
+      setShowPhotoUploadSuccessPopup(true);
     }
 
 
-    const [showUploadedID, setShowUploadedID] = useState(false);
     const [showRemarksGiven, setShowRemarksGiven] = useState(false);
 
 
@@ -2266,34 +2269,15 @@ Functions for Reason for Reject
                         )}
 
 
-                        
-
-                        {(requestData?.purpose==="Residency") && (requestData?.photoUploaded) &&( 
-                          <>
-                             <button className="services-onlinereq-redirection-buttons" onClick={()=>setShowUploadedID(true)}>
-                                <div className="services-onlinereq-redirection-icons-section">
-                                    <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
-                                </div>
-                                  <h1>Show ID Picture</h1>
-                              </button>
-                          </>
-                        )}
-                        
-                        {(requestData?.docType === "Barangay Indigency") &&(requestData?.interviewRemarks ) &&( 
-                          <>
-                            <button className="services-onlinereq-redirection-buttons" onClick={() => setShowRemarksGiven(true)}>
-                                <div className="services-onlinereq-redirection-icons-section">
-                                    <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
-                                </div>
-                                  <h1>Interview Remarks</h1>
-                              </button>
-                          </>
-                        )}
-                        
-
+                    
                         {docPrinted && (userPosition !== "Admin Staff") ? (
                           <>
-                            <button className="services-onlinereq-redirection-buttons" onClick={handleNextStep}>
+                            <button className="services-onlinereq-redirection-buttons"
+                            onClick={() => {
+                              handleNextStep();            
+                              setShowNotifyAdminPopup(true); // show popup
+                            }}
+                            >
                               <div className="services-onlinereq-redirection-icons-section">
                                   <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                               </div>
@@ -2302,11 +2286,16 @@ Functions for Reason for Reject
                           </>
                         ) : (docPrinted && !["Assistant Secretary", "Secretary"].includes(userPosition as string) && status !== "Pick-up") &&(
                           <>
-                            <button className="services-onlinereq-redirection-buttons" onClick={handleNextStep}>
+                            <button className="services-onlinereq-redirection-buttons"
+                              onClick={() => {
+                                handleNextStep();            
+                                setShowNotifyRequestorPopup(true); // show popup
+                              }}
+                            >
                               <div className="services-onlinereq-redirection-icons-section">
                                   <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                               </div>
-                              <h1>Notify Resident</h1>
+                              <h1>Notify Requestor</h1>
                             </button>
                           </>
                         )}
@@ -2384,6 +2373,12 @@ Functions for Reason for Reject
                             ...(requestData?.status === "Completed" &&
                               !["Barangay Clearance", "Barangay Certificate", "Barangay Indigency", "Other Documents"].includes(requestData?.docType || "")
                               ? ["or"]
+                              : []),
+                            ...((requestData?.purpose==="Residency") && (requestData?.photoUploaded)
+                              ? ["photo"]
+                              : []),
+                            ...((requestData?.docType === "Barangay Indigency") &&(requestData?.interviewRemarks)
+                              ? ["interview"]
                               : [])
                           ].map((section) => (
                             <button
@@ -2399,6 +2394,8 @@ Functions for Reason for Reject
                               {section === "rejected" && "Rejected"}
                               {section === "received" && "Received"}
                               {section === "or" && "OR Section"}
+                              {section === "photo" && "Photo Section"}
+                              {section === "interview" && "Interview Remarks"}
                             </button>
                           ))}
                         </div> 
@@ -2661,6 +2658,56 @@ Functions for Reason for Reject
                                   </>
                                 )}
 
+                                {activeSection === "photo" && (
+                                  <>
+                                    <div className="services-onlinereq-content">
+                                      {requestData?.photoUploaded && (
+                                        <div className="services-onlinereq-fields-section">
+                                          <div className="services-onlinereq-verification-requirements-section">
+                                            <span className="verification-requirements-label">Uploaded Photo</span>
+                                            <div className="services-onlinereq-verification-requirements-container">
+                                              <a
+                                                href={
+                                                  requestData.photoUploaded.startsWith("https://")
+                                                    ? requestData.photoUploaded
+                                                    : resolvedImageUrls["photoUploaded"]
+                                                }
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                              >
+                                                <img
+                                                  src={
+                                                    requestData.photoUploaded.startsWith("https://")
+                                                      ? requestData.photoUploaded
+                                                      : resolvedImageUrls["photoUploaded"]
+                                                  }
+                                                  alt="Uploaded Photo"
+                                                  className="verification-reqs-pic uploaded-picture"
+                                                  style={{ cursor: "pointer" }}
+                                                />
+                                              </a>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </>
+                                )}
+
+                                {activeSection === "interview" && (
+                                  <>
+                                    <div className="rejectedion-main-container">
+                                      <div className="box-container-outer-rejection">
+                                        <div className="title-remarks-rejected">
+                                          Interview Remarks
+                                        </div>
+                                        <div className="box-container-rejected">
+                                        <textarea className="rejected-input-field" placeholder="Enter Remarks" name="remarks" value={requestData?.interviewRemarks} readOnly/>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
                                 </div>
                             </div>
                         </div>
@@ -2735,7 +2782,7 @@ Functions for Reason for Reject
 
                 {popupSection === "receival" && (
                   <>
-                  <div className="doc-receival-content">
+                  <div className="doc-receival-content2">
                     <div className="services-onlinereq-doc-receival-form-section">
                       <p>Name of Person Receiving</p>
                       <select
@@ -2768,12 +2815,12 @@ Functions for Reason for Reject
                   </div>
 
                   {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false && (
-                      <p style={{ color: "green", fontWeight: "bold", marginTop: "1rem" }}>
+                      <p className="jobseeker-note-nopayment">
                         * This request will not require payment as per RA 11261 (First Time Jobseeker).
                       </p>
                     )}                       
                   {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === true && (
-                    <p style={{ color: "red", fontWeight: "bold", marginTop: "1rem" }}>
+                    <p className="jobseeker-note-payment">
                       * This request will require payment as they have already claimed their RA 11261 (First Time Jobseeker).
                     </p>
                   )}                  
@@ -2782,7 +2829,7 @@ Functions for Reason for Reject
 
                 {popupSection === "payment" && (
                   <>
-                    <div className="doc-receival-content">
+                    <div className="doc-receival-content2">
                       <div className="services-onlinereq-doc-receival-form-section">
                         <p>OR Number</p>
                         <input
@@ -2871,10 +2918,11 @@ Functions for Reason for Reject
               <div className="doc-receival-popup">
                 <form onSubmit={handleInterviewRemarks} className="doc-receival-form">
                   <div className="doc-receival-content">
-                    <div className="services-onlinereq-doc-receival-form-section">
-                      <p>Interview Remarks</p>
+                    <div className="services-onlinereq-doc-receival-form-section-interview">
+                      <h2>Interview Remarks</h2>
+                      <h3>Upload remarks from the interview appointment</h3>
                       <textarea
-                        className="services-onlinereq-input-field"
+                        className="interview-remarks-field-section"
                         placeholder="Enter Remarks"
                         name="remarks"
                         value={interviewRemarks}
@@ -2882,22 +2930,26 @@ Functions for Reason for Reject
                         required
                       />
                     </div>
+
+
+            
                   </div>
 
+                  
                   <div className="doc-receivalform-buttons-section">
-                    <div className="doc-receivalform-action-buttons">
-                      <button
-                        className="doc-receivalform-action-close"
-                        type="button"
-                        onClick={() => setShowInterviewForm(false)}
-                      >
-                        Close
-                      </button>
-                      <button className="doc-receivalform-action-submit" type="submit">
-                        Submit
-                      </button>
+                      <div className="doc-receivalform-action-buttons">
+                        <button
+                          className="doc-receivalform-action-close"
+                          type="button"
+                          onClick={() => setShowInterviewForm(false)}
+                        >
+                          Close
+                        </button>
+                        <button className="doc-receivalform-action-submit" type="submit">
+                          Submit
+                        </button>
+                      </div>
                     </div>
-                  </div>
                 </form>
               </div>
             </div>
@@ -2909,10 +2961,11 @@ Functions for Reason for Reject
             <div className="view-doc-receival-form-popup-overlay">
               <div className="doc-receival-popup">
                 <form onSubmit={handlePhotoUpload} className="doc-receival-form">
-                  <div className="doc-receival-content p-4 border rounded-lg bg-white shadow">
-                    <div className="mb-4">
-                      <p className="font-semibold text-gray-700 mb-2">Upload Photo</p>
-                      <div className="space-y-2">
+                  <div className="services-onlinereq-doc-receival-form-section">
+                    
+                      <h2>Identification Photo</h2>
+                      <h3>Upload picture taken from the picture appointment</h3>
+                      <div className="box-container-OR">
                         <div>
                           <label htmlFor="file-upload-photo" className="upload-link cursor-pointer text-blue-600 hover:underline">
                             Click to Upload File
@@ -2966,10 +3019,9 @@ Functions for Reason for Reject
                             ))}
                           </div>
                         )}
-
-
                       </div>
-                    </div>
+
+                 
                   </div>
 
 
@@ -2995,51 +3047,7 @@ Functions for Reason for Reject
           </>
         )}
 
-
-        {showUploadedID && (
-          <div className="view-doc-receival-form-popup-overlay">
-            <div className="doc-receival-popup">
-              <div className="services-onlinereq-info-toggle-wrapper">
-                <button
-                  type="button"
-                  className="info-toggle-btn active"
-                >
-                  Uploaded ID
-                </button>
-              </div>
-              <div className="doc-receival-content">
-                <div className="services-onlinereq-fields-section">
-                  <p>Uploaded ID</p>
-                  {requestData?.photoUploaded && (
-                    <a
-                      href={requestData.photoUploaded.startsWith("https://")
-                        ? requestData.photoUploaded
-                        : resolvedImageUrls["photoUploaded"]}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <img
-                        src={requestData.photoUploaded.startsWith("https://")
-                          ? requestData.photoUploaded
-                          : resolvedImageUrls["photoUploaded"]}
-                        alt="Uploaded ID"
-                        className="verification-reqs-pic uploaded-picture"
-                        style={{ cursor: "pointer" }}
-                      />
-                    </a>
-                  )}
-                </div>
-              </div>
-              <button
-                className="doc-receivalform-action-close"
-                type="button"
-                onClick={() => setShowUploadedID(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
+    
 
         {showRemarksGiven && (
           <div className="view-doc-receival-form-popup-overlay">
@@ -3074,6 +3082,190 @@ Functions for Reason for Reject
             </div>
           </div>
         )}
+
+
+        {showDocumentGeneratedPopup && (
+          <div className="documentgenerated-popup-overlay-services-onlinereq-status">
+            <div className="documentgenerated-popup-services-onlinereq-status">
+              <img
+                src="/Images/check.png"
+                alt="success icon"
+                className="successful-icon-popup"
+              />
+              <p>Document has been Generated.</p>
+
+              {requestData?.purpose === "Barangay ID" && requestData?.docType === "Other Documents" ? (
+                <h2>Next: Click the button "Notify Requestor" that the document is ready for pick-up.</h2>
+              ) : requestData?.docType === "Business Permit" ? (
+                <h2>Next: Click the button "Notify Requestor" once signature and dry seal has been completed.</h2>
+              ) : (
+                <h2>Next: Click the button "Notify Admin Staff" once signature and dry seal has been completed.</h2>
+              )}
+
+              <div className="yesno-container-add">
+                <button
+                  onClick={() => setShowDocumentGeneratedPopup(false)}
+                  className="yes-button-add"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showNotifyAdminPopup && (
+          <div className="documentgenerated-popup-overlay-services-onlinereq-status">
+            <div className="documentgenerated-popup-services-onlinereq-status">
+              <img
+                src="/Images/check.png"
+                alt="success icon"
+                className="successful-icon-popup"
+              />
+              <p>Admin Staff has been notified.</p>
+              <h2>Next: Wait for the Admin Staff to get the document from the office.</h2>
+              <div className="yesno-container-add">
+                <button
+                  onClick={() => {
+                    setShowNotifyAdminPopup(false);
+                    if (requestData?.reqType === "Online") {
+                      router.push("/dashboard/ServicesModule/OnlineRequests");
+                    } else {
+                      router.push("/dashboard/ServicesModule/InBarangayRequests");
+                    }
+                  }}
+                  className="yes-button-add"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        {showNotifyRequestorPopup && (
+          <div className="notifyrequestor-popup-overlay-services-onlinereq-status">
+            <div className="notifyrequestor-popup-services-onlinereq-status">
+              <img
+                src="/Images/check.png"
+                alt="success icon"
+                className="successful-icon-popup"
+              />
+              <p>Requestor has been notified that the document is for Pick-up.</p>
+              <h2>Next: Click the "Document Received" button once the requestor has pick-up the document.</h2>
+              <div className="yesno-container-add">
+                <button
+                  onClick={() => {
+                    setShowNotifyRequestorPopup(false);                   
+                  }}
+                  className="yes-button-add"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showAppointmentApprovedPopup && (
+          <div className="notifyrequestor-popup-overlay-services-onlinereq-status">
+            <div className="notifyrequestor-popup-services-onlinereq-status">
+              <img
+                src="/Images/check.png"
+                alt="success icon"
+                className="successful-icon-popup"
+              />
+              <p>Scheduled Appointment Approved.</p>
+              <h2>Next: Wait for the Admin Staff to conduct the scheduled appointment.</h2>
+              <div className="yesno-container-add">
+                <button
+                  onClick={() => setShowAppointmentApprovedPopup(false)}
+                  className="yes-button-add"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showPhotoUploadSuccessPopup && (
+        <div className="notifyrequestor-popup-overlay-services-onlinereq-status">
+          <div className="notifyrequestor-popup-services-onlinereq-status">
+            <img
+              src="/Images/check.png"
+              alt="success icon"
+              className="successful-icon-popup"
+            />
+            <p>Photo from the appointment successfully uploaded.</p>
+            <h2>Next: Wait for the document to be generated by Secretary/Assistant Secretary.</h2>
+            <div className="yesno-container-add">
+              <button
+                onClick={() => {
+                  setShowPhotoUploadSuccessPopup(false);
+                  setshowPhotoUpload(false); // optionally close upload modal too
+                }}
+                className="yes-button-add"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showInterviewRemarksSuccessPopup && (
+        <div className="notifyrequestor-popup-overlay-services-onlinereq-status">
+          <div className="notifyrequestor-popup-services-onlinereq-status">
+            <img
+              src="/Images/check.png"
+              alt="success icon"
+              className="successful-icon-popup"
+            />
+            <p>Interview Remarks successfully uploaded.</p>
+            <h2>Next: Wait for the document to be generated by Secretary/Assistant Secretary.</h2>
+            <div className="yesno-container-add">
+              <button
+                onClick={() => setShowInterviewRemarksSuccessPopup(false)}
+                className="yes-button-add"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+        {showCompletionPopup && (
+          <div className="documentgenerated-popup-overlay-services-onlinereq-status">
+            <div className="documentgenerated-popup-services-onlinereq-status">
+              <img
+                src="/Images/check.png"
+                alt="success icon"
+                className="successful-icon-popup"
+              />
+              <p>The Document Request has been completed.</p>
+              <div className="yesno-container-add">
+                <button
+                  className="yes-button-add"
+                  onClick={() => {
+                    setShowCompletionPopup(false);
+                    setShowReceivalForm(false); // hide form after completion
+                    if (requestData?.reqType === "Online") {
+                      router.push("/dashboard/ServicesModule/OnlineRequests");
+                    } else {
+                      router.push("/dashboard/ServicesModule/InBarangayRequests");
+                    }
+                  }}
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         </main>
     );
 
