@@ -731,7 +731,7 @@ Functions for Reason for Reject
         { key: "cohabitationStartDate", label: "Start of Cohabitation" },
         { key: "cohabitationRelationship", label: "Cohabitation Relationship"},
         { key: "noIncomePurpose", label: "No Income Purpose" },
-        { key: "noIncomeChildFName", label: "Son/Daughther's Name" },
+        { key: "noIncomeChildFName", label: "Son/Daughter's Name" },
         { key: "address", label: "Requestor's Address" },
         { key: "estateSince", label: "Estate Since" },
         { key: "guardianshipType", label: "Guardianship Type" },
@@ -1967,7 +1967,7 @@ Functions for Reason for Reject
 
     const [showInterviewForm, setShowInterviewForm] = useState(false);
     const [interviewRemarks, setInterviewRemarks] = useState("");
-    
+
     const handleInterviewRemarks = async(e:any) => {
       e.preventDefault();
       console.log("Interview Remarks: ", interviewRemarks);
