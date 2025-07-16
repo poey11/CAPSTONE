@@ -803,7 +803,7 @@ useEffect(() => {
                                 }, 3000); // wait 3 seconds
                               }
                             }}
-                        className="letter-announcement-btn"
+                        className="send-sms-btn"
                         >
                         Send SMS
                         </button>
@@ -1191,33 +1191,42 @@ useEffect(() => {
                                     <div className="section-2-information-bottom">
                                         {actionId === "dialogue" ? (
                                         <>
-                                            <div className="fields-section-letter">
-                                                <p>Date of Delivery</p>
-                                                <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
-                                                value={safeData[0]?.DateOfDelivery||otherInfo.DateOfDelivery}
-                                                id="DateOfDelivery"
-                                                name="DateOfDelivery"
-                                                min={today}
-                                                onKeyDown={(e) => e.preventDefault()}
-                                                onChange={handleChange}
-                                                required
-                                                disabled = {safeData[0]?.DateOfDelivery ? true : false}
-                                                />
-                                            </div>
-                                            <div className="fields-section-letter">
-                                                <p>Date and Time of Meeting</p>
-                                                <input type="datetime-local" className="generate-letter-input-field" 
-                                                value={safeData[0]?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
-                                                onKeyDown={(e) => e.preventDefault()}
-                                                id="DateTimeOfMeeting"
-                                                name="DateTimeOfMeeting"
-                                                onChange={handleChange}
-                                                min={todayWithTime}
-                                                required
-                                                disabled = {safeData[0]?.DateTimeOfMeeting ? true : false}
-                                                />
 
+
+                                            <div className="section-2-letter-left-side-others">
+
+                                                <div className="fields-section-letter">
+                                                    <p>Date of Delivery</p>
+                                                    <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
+                                                    value={safeData[0]?.DateOfDelivery||otherInfo.DateOfDelivery}
+                                                    id="DateOfDelivery"
+                                                    name="DateOfDelivery"
+                                                    min={today}
+                                                    onKeyDown={(e) => e.preventDefault()}
+                                                    onChange={handleChange}
+                                                    required
+                                                    disabled = {safeData[0]?.DateOfDelivery ? true : false}
+                                                    />
+                                                </div>
+                                                <div className="fields-section-letter">
+                                                    <p>Date and Time of Meeting</p>
+                                                    <input type="datetime-local" className="generate-letter-input-field" 
+                                                    value={safeData[0]?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
+                                                    onKeyDown={(e) => e.preventDefault()}
+                                                    id="DateTimeOfMeeting"
+                                                    name="DateTimeOfMeeting"
+                                                    onChange={handleChange}
+                                                    min={todayWithTime}
+                                                    required
+                                                    disabled = {safeData[0]?.DateTimeOfMeeting ? true : false}
+                                                    />
+
+                                                </div>
                                             </div>
+
+
+                                            <div className="section-2-letter-right-side-others">
+
                                             <div className="fields-section-letter">
                                                 <p>Delivered By</p>      
                                                 <select
@@ -1266,10 +1275,18 @@ useEffect(() => {
                                                 disabled
                                                 />
                                             </div>
+
+                                            </div>
+
+
                                         </>
                                         ) : (
                                         <>
-                                            <div className="fields-section-letter">
+
+
+                                            <div className="section-2-letter-left-side-others">
+
+                                                                                            <div className="fields-section-letter">
                                                 <p>Date of Delivery</p>
                                                 <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
                                                 value={otherInfo.DateOfDelivery}
@@ -1297,7 +1314,11 @@ useEffect(() => {
 
                                             </div>
 
-                                            <div className="fields-section-letter">
+                                            </div>
+
+                                            <div className="section-2-letter-right-side-others">
+
+                                          <div className="fields-section-letter">
                                                 <p>Delivered By</p>
                                                 <select
                                                     className="generate-letter-input-field-dropdown"
@@ -1346,6 +1367,12 @@ useEffect(() => {
                                                 />
 
                                             </div>
+
+                                                
+
+                                            </div>
+
+
                                         </>
                                         )}
                                     </div>

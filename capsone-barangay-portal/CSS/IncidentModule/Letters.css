@@ -211,6 +211,22 @@ Scroll
 }
 
 
+.section-2-letter-left-side-others {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 50%;
+
+}
+
+.section-2-letter-right-side-others {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 50%;
+}
+
+
 
 .section-2-information-section {
   background-color: #ffffff;
@@ -342,7 +358,10 @@ For Dropdowns
 .section-2-information-bottom {
   display: flex;
   width: 100%;
-  padding: 25px;
+  padding-top: 10px;
+  padding-left: 25px;
+  padding-right: 25px;
+  padding-bottom: 25px;
 }
 
 .section-2-information-bottom-upper {
