@@ -2815,7 +2815,7 @@ Functions for Reason for Reject
                   <>
                     <div className="doc-receival-content2">
                       <div className="services-onlinereq-doc-receival-form-section">
-                        <p>OR Number <span className="required-asterisk">*</span></p>
+                        <p>OR Number<span className="required-asterisk">*</span></p>
                         <input
                           type="number"
                           className="services-onlinereq-input-field"
