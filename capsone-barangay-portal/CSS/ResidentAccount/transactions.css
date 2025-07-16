@@ -63,16 +63,24 @@
 
 .table-section-transactions {
   width: 100%;
-   min-width: 1000px;
+   min-width: 1100px;
   overflow-x: hidden;
   height: 500px;
-  border: 2px solid rgba(36, 53, 76, 0.7);
+ 
   border-radius: 16px;
   text-align: center;
   background: #FFFFFF;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  
+
+    box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    0 12px 24px rgba(0, 0, 0, 0.15);
+    
   margin-top: 2rem;
   margin-bottom: 2.5rem;
+
+    scrollbar-width: thin;
+    scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 }
 
 .table-section-transactions table {
@@ -340,7 +348,7 @@
   }
 
   .pick-up{
-    background-color: #66bec4;
+    background-color: #be5cb6;
     color: white;
     font-size: 15px;
   }
