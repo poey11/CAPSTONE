@@ -1,11 +1,12 @@
 "use client"
 import "@/CSS/IncidentModule/EditIncident.css";
-import { ChangeEvent,use,useEffect, useState } from "react";
+import { ChangeEvent,useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getSpecificDocument, generateDownloadLink } from "../../../../helpers/firestorehelper";
+import { generateDownloadLink } from "../../../../helpers/firestorehelper";
 import { doc, updateDoc, collection, where, getDocs, query, onSnapshot, deleteDoc, orderBy} from "firebase/firestore";
 import { db } from "../../../../db/firebase";
 import React from "react";
+import { report } from "process";
 
 
 export default function EditLuponIncident() {
@@ -99,6 +100,8 @@ export default function EditLuponIncident() {
       
       
     }, [docId]);
+
+    console.log("Report Data:", reportData);
 
     useEffect(() => {
       if(reportData?.file){
@@ -396,23 +399,23 @@ const handleHearingSection = () => {
     fetchSummonLetterStatus();
   }, [docId]);
 
-
+  
   useEffect(() => {
-    if (!docId) return; // or use `id` or whatever your incident ID is called
-    const docRef = doc(db, "IncidentReports", docId, "DialogueMeeting", docId);
-  
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.filled === true) {
-          setIsDialogueSectionFilled(true);
-        }
-      }
-    });
-  
-    return () => unsubscribe();
-  }, [docId]);
-  
+  if (!docId) return;
+  const docRef = doc(db, "IncidentReports", docId, "DialogueMeeting", docId);
+
+  const unsubscribe = onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      setIsDialogueSectionFilled(data.filled); // true or false
+    } else {
+      setIsDialogueSectionFilled(false); // default to false if no doc
+    }
+  });
+
+  return () => unsubscribe();
+}, [docId]);
+
 
 
 
@@ -613,37 +616,54 @@ const handleHearingSection = () => {
                   </button>
 
                   <div className="hearing-submenu">
-                    {reportData.isDialogue ? (
-                      isDialogueSectionFilled ? (
-                        <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
-                          <h1>Generate Summon Letters</h1>
-                        </button>
-                      ) : (
-                        <button
-                          className="submenu-button"
-                          name="summon"
-                          onClick={() => {
-                            setPopupErrorMessage("Fill out the Dialogue Section first.");
-                            setShowErrorPopup(true);
-                            setTimeout(() => setShowErrorPopup(false), 3000);
-                          }}
-                        >
-                          <h1>Generate Summon Letters</h1>
-                        </button>
-                      )
-                    ) : (
-                      <button
-                        className="submenu-button"
-                        name="summon"
-                        onClick={() => {
+                    <button
+                      className="submenu-button"
+                      name="summon"
+                      onClick={(e) => {
+                        const lastSummon = summonLetterData[summonLetterData.length];
+                        const summonNo = ["First", "Second", "Third"];
+                      
+                        
+                        if (reportData?.isDialogue === false) {
                           setPopupErrorMessage("Generate a Dialogue Letter first.");
                           setShowErrorPopup(true);
                           setTimeout(() => setShowErrorPopup(false), 3000);
-                        }}
-                      >
-                        <h1>Generate Summon Letters</h1>
-                      </button>
-                    )}
+                          return;
+                        }
+                      
+                        // ✅ Step 2: Check if dialogue section is filled
+                        if (!isDialogueSectionFilled) {
+                          setPopupErrorMessage("Fill out the Dialogue Section first.");
+                          setShowErrorPopup(true);
+                          setTimeout(() => setShowErrorPopup(false), 3000);
+                          return;
+                        }
+                      
+                        // ✅ Step 3: Check if latest summon is not yet filled 
+                        if( 
+                            
+                          reportData?.generatedHearingSummons > 0 &&
+                          reportData?.generatedHearingSummons < 3 &&
+                          reportData?.generatedHearingSummons > summonLetterData.length
+
+                          ) {
+                          if ((!lastSummon?.filled)) {
+                            setPopupErrorMessage(`Fill out the ${summonNo[summonLetterData.length]} Hearing summons first.`);
+                            setShowErrorPopup(true);
+                            setTimeout(() => setShowErrorPopup(false), 3000);
+                            return;
+                          }
+                        }
+                      
+                        // ✅ All good
+                        handleGenerateLetterAndInvitation(e);
+                      }}
+                    >
+                      <h1>Generate Summon Letters</h1>
+                    </button>
+
+
+
 
                     {hasSummonLetter ? (
                       <button className="submenu-button" name="section" onClick={handleHearingSection}>
