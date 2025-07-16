@@ -174,7 +174,7 @@ const ViewOnlineRequest = () => {
           try {
             const jobSeekerRef = collection(db, "JobSeekerList");
       
-            // 🔍 Check by residentId first
+            // Check by residentId first
             const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.residentId));
             const byResidentIdSnap = await getDocs(byResidentIdQuery);
       
@@ -194,7 +194,7 @@ const ViewOnlineRequest = () => {
               return;
             }
       
-            // 🔍 Fallback by split names + DOB
+            // Fallback by split names + DOB
             let firstName = "";
             let lastName = "";
             if (requestData.requestorFname) {
@@ -247,7 +247,7 @@ const ViewOnlineRequest = () => {
                   "This applicant is not yet in the First Time Jobseeker List. Under RA 11261, this means the request will not be paid for. Only the Assistant Secretary can add them to the list."
                 );
                 setShowJobseekerPopup(true);
-                setAskAddToList(false); // ✅ Make sure no Yes/No buttons show
+                setAskAddToList(false); //  Make sure no Yes/No buttons show
               }
             }
             
@@ -404,7 +404,7 @@ Functions for Reason for Reject
 
             setTimeout(() => {
                   setPopupMessage("Reason for Rejection submitted successfully!");
-                  setShowPopup(true); // ✅ show success popup after hiding
+                  setShowPopup(true); //  show success popup after hiding
               }, 100); // slight delay to allow DOM transition (optional)
 
             setTimeout(() => {
@@ -433,7 +433,7 @@ Functions for Reason for Reject
 
               setTimeout(() => {
                   setPopupMessage("Reason for Rejection submitted successfully!");
-                  setShowPopup(true); // ✅ show success popup after hiding
+                  setShowPopup(true); //  show success popup after hiding
               }, 100); // slight delay to allow DOM transition (optional)
 
               setTimeout(() => {
@@ -1378,12 +1378,12 @@ Functions for Reason for Reject
             (doc) => doc.title === requestData?.docType
           );
         
-          // ✅ Match by (3) title === purpose (regardless of type)
+          //  Match by (3) title === purpose (regardless of type)
           const matchedByTitleOnly = otherDocuments.find(
             (doc) => doc.title === requestData?.purpose
           );
         
-          // ✅ Combine all matched fields
+          //  Combine all matched fields
           const combinedFields = Array.from(
             new Map(
               [
