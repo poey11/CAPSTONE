@@ -792,9 +792,7 @@ useEffect(() => {
                     {showSubmitPopup.letterType === "summon" ? (
                         <button
                         onClick={() => {
-                            //sendSMSForSummons();
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
-
                             if (showSubmitPopup.letterType === "summon") {
                                 setTimeout(() => {
                                   router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
@@ -813,7 +811,6 @@ useEffect(() => {
                         // CODE BLOCK FOR SEND SMS BUTTON INSIDE POP UP
                         <button
                         onClick={() => {
-                            // sendSMSForDialogue();
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
 
                             if (showSubmitPopup.letterType === "dialogue") {
@@ -826,7 +823,7 @@ useEffect(() => {
                                 }, 3000); // wait 3 seconds
                               }
                             }}
-                        className="letter-announcement-btn"
+                        className="send-sms-btn"
                         >
                         Send SMS
                         </button>
@@ -989,7 +986,15 @@ useEffect(() => {
                                     {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Generate Letter</button>)}
                                 
                                 {/* this button should disappear base on hearingSMS and summonsSMS and when pressed the button should disappear but for summon needs to be press 3 times before disppear */}
-                                    <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> {/*Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
+                             
+                                {/* 
+                                <button className="letter-announcement-btn" type="submit" name="sendSMS">
+                                    Send SMS
+                                </button> 
+                                Add condition when the user presses the button (once for dialogue and 3 times for summons before disabling)
+                                */}
+
+                                 
                             </div>
 
                         )}
@@ -1176,7 +1181,7 @@ useEffect(() => {
 
                             <div className="section-2-letter-lower">
 
-                                                <div className="section-2-information-section">
+                                 <div className="section-2-information-section">
                                     <div className="section-2-information-top">
                                         <div className="section-title-letter">
                                         <h1>Other Information</h1>
