@@ -42,6 +42,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
 
     const searchParam = useSearchParams();
     const docId = searchParam.get("id");
+    const department = searchParam.get("department");
 
     const [details, setDetails] = useState<DialogueDetails>({
         HearingOfficer: "",
@@ -238,9 +239,14 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 {
                     status: "archived",
                     statusPriority: 2
-                }
-            )
+                });
+            else{
+                setShowDoneIncidentPopup(true);
+
+            }
             
+        //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+
 
             
             console.log("Saving dialogue data:", details);
@@ -262,9 +268,11 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
       
           setTimeout(() => {
             setShowPopup(false);
-            router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
+            // router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
             
           }, 3000);
+
+
         } catch (error) {
           console.error("Error during confirmation submit:", error);
           setPopupErrorMessage("Error saving dialogue. Please try again.");
@@ -274,15 +282,84 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
       };
 
     const router = useRouter();
-    const [loading , setLoading] = useState(true);
 
     const handleBack = () => {
         router.back();
       };
 
+      const HandleEditDoc = async () => {
+
+        if (!docId) return;
+        const docRef = doc(db, "IncidentReports", docId);
+        const data = {
+            ...toUpdate
+        }
+        console.log("Data to update:", data);
+
+        await updateDoc(docRef, data);
+    }
+    
+
+    const confirmSubmitB = async () => {
+        setShowSubmitPopupB(false);
+
+        try {
+          await HandleEditDoc(); // ✅ Only update when Yes is clicked
+
+          setPopupMessage("Incident Successfully Updated!");
+          setShowPopup(true);
+
+          setTimeout(() => {
+            setShowPopup(false);
+            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+          }, 3000);
+        } catch (error) {
+          console.error("Error during confirmation submit:", error);
+          setPopupErrorMessage("Error updating incident. Please try again.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+        }
+    };
     const [activeSection, setActiveSection] = useState("meeting");
+    const [toUpdate, setToUpdate] = useState<any>(null);
 
-
+    const [showSubmitPopupB, setShowSubmitPopupB] = useState(false);
+    const [showDoneIncidentPopup, setShowDoneIncidentPopup] = useState(false);
+    const handleClosingCase = async(status:boolean) => {
+        if (!docId) return;
+        setShowDoneIncidentPopup(false);
+        const docRef = doc(db, "IncidentReports", docId);
+        if(status) {
+          // If the case is closed, update the status to "Settled" and reset other fields
+          setPopupMessage("Incident case has been Settled.");
+          setShowPopup(true);
+          await updateDoc(docRef, {
+            status: "settled",
+            statusPriority: 3,
+          });
+          setTimeout(() => {
+            setShowPopup(false);
+            //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
+            //window.location.reload(); // Reload the page to ensure all data is fresh
+          }, 3000);
+          router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+        }
+        else{
+          // If the case is not closed, update the status to "cfa"
+          setPopupMessage("Incident case has been set to CFA.");
+          setShowPopup(true);
+          await updateDoc(docRef, {
+            status: "CFA",
+            statusPriority: 4,
+          });
+          setTimeout(() => {
+            setShowPopup(false);
+            //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
+            //window.location.reload(); // Reload the page to ensure all data is fresh
+          }, 3000);
+          router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+        }
+      }
     
     return (
         <>
@@ -719,6 +796,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             
         </form>
 
+
         {showSubmitPopup && (
             <div className="confirmation-popup-overlay-add">
                 <div className="confirmation-popup-add">
@@ -731,7 +809,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                         >
                         No
                         </button>
-                        <button onClick={confirmSubmit} className="yes-button-add">
+                        <button onClick={confirmSubmit}
+                         className="yes-button-add">
                         Yes
                         </button>
                     </div>
@@ -740,6 +819,110 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             </div>
             )}
 
+        {showDoneIncidentPopup && (
+          <div className="confirmation-popup-overlay-add">
+            <div className="confirmation-popup-add">
+              <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
+              <p>Has the incident case been settled?</p>
+              <div className="yesno-container-add">
+                
+                <button
+                  onClick={() => {
+                    setShowDoneIncidentPopup(false)
+                    router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+                  }
+                }
+                  className="no-button-add"
+                >
+                  No
+                </button>
+                
+                <button  
+                  onClick={() => {
+                    handleClosingCase(true)
+                    if(department === "Lupon"){
+                      setShowSubmitPopupB(true);
+                    }
+                  }}
+                  className="yes-button-add"
+                >
+                  Yes
+                </button>
+              </div>
+            </div>
+          </div>    
+        )}
+
+
+        
+        {showSubmitPopupB && (
+          <div className="confirmation-popup-overlay-add">
+            <div className="confirmation-popup-add">
+
+                <>
+                  <p>How was the case settled?</p>
+                  <div className="settlement-options">
+                    <label>
+                      <input
+                        type="radio"
+                        name="settlementMethod"
+                        checked={toUpdate?.isMediation === true}
+                        onChange={() => setToUpdate((prev: any) => ({
+                          ...prev,
+                          isMediation: true,
+                          isConciliation: false,
+                          isArbitration: false,
+                        }))}
+                      />
+                      Mediation
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="settlementMethod"
+                        checked={toUpdate?.isConciliation === true}
+                        onChange={() => setToUpdate((prev: any) => ({
+                          ...prev,
+                          isMediation: false,
+                          isConciliation: true,
+                          isArbitration: false,
+                        }))}
+                      />
+                      Conciliation
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="settlementMethod"
+                        checked={toUpdate?.isArbitration === true}
+                        onChange={() => setToUpdate((prev: any) => ({
+                          ...prev,
+                          isMediation: false,
+                          isConciliation: false,
+                          isArbitration: true,
+                        }))}
+                      />
+                      Arbitration
+                    </label>
+                  </div>
+
+                  <div className="yesno-container-add">
+                    {/* <button
+                      onClick={() => setShowSubmitPopupB(false)}
+                      className="no-button-add"
+                    >
+                      Cancel
+                    </button> */}
+                    <button onClick={confirmSubmitB} className="yes-button-add">
+                      Submit
+                    </button>
+                  </div>
+                </>
+        
+
+            </div>
+          </div>
+        )}
 
         {showPopup && (
                 <div className={`popup-overlay-add show`}>
