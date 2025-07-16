@@ -870,6 +870,24 @@ html, body {
   width: 100%;
 }
 
+
+.jobseeker-note-payment {
+  color: #f44336;
+ margin-bottom: 20px;
+  font-size: 15px;
+  text-align: center;
+  width: 100%;
+}
+
+.jobseeker-note-nopayment {
+  color: #0c8332;
+ margin-bottom: 20px;
+  font-size: 15px;
+  text-align: center;
+  width: 100%;
+  font-weight: bold;
+}
+
 .services-onlinereq-input-field {
   padding: 8px;
   width: 85%;
@@ -1217,7 +1235,7 @@ html, body {
   padding: 1.5rem;
   max-width: 1000px;
   width: 60%;
-  height: 400px;
+  height: 440px;
   display: flex;
   flex-direction: column;
   justify-content: center;

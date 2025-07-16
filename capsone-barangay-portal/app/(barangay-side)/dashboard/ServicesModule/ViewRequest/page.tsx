@@ -2810,12 +2810,12 @@ Functions for Reason for Reject
                   </div>
 
                   {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false && (
-                      <p style={{ color: "green", fontWeight: "bold", marginTop: "1rem" }}>
+                      <p className="jobseeker-note-nopayment">
                         * This request will not require payment as per RA 11261 (First Time Jobseeker).
                       </p>
                     )}                       
                   {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === true && (
-                    <p style={{ color: "red", fontWeight: "bold", marginTop: "1rem" }}>
+                    <p className="jobseeker-note-payment">
                       * This request will require payment as they have already claimed their RA 11261 (First Time Jobseeker).
                     </p>
                   )}                  
