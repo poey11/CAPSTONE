@@ -720,69 +720,6 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
            
             
             
-         {/*
-            
-                  <div className="section-2-dialouge-edit">
-                  <p>Hearing  Information</p>
-                
-                    <p>Complainant's Name</p>
-                    <select className="input-group-edit" disabled={hearingDetails[index]?.filled}
-                    name="Cstatus"
-                    id="Cstatus"
-                    value={details.Cstatus||hearingDetails[index]?.Cstatus||""}
-                    onChange={handleChange}
-                    >
-                        <option value="Present">Present</option>
-                        <option value="Absent">Absent</option>
-                    </select>
-                     
-                  </div>
-                  <div className="section-2-dialouge-edit">
-                      <p>Respondents' Name</p>
-                      <select className="input-group-edit" disabled={hearingDetails[index]?.filled}
-                        name="Rstatus"
-                        id="Rstatus"
-                        value={details.Rstatus||hearingDetails[index]?.Rstatus||""}
-                        onChange={handleChange}
-                        >
-                            <option value="Present">Present</option>
-                            <option value="Absent">Absent</option>
-                      </select>
-
-                  </div>
-        
-             
-        
-               
-                  <div className="section-4-dialouge-edit">
-                 
-                      <div className="fields-section-edit">
-                     
-                            <p>Second Hearing Officer</p>
-                            <input type="text" 
-                            name="secondHearingOfficer"
-                            id="secondHearingOfficer"
-                            value={details.secondHearingOfficer||hearingDetails[index]?.secondHearingOfficer||""}
-                            onChange={handleChange}
-                            className="search-bar-edit" 
-                            placeholder="Enter Hearing Officer"
-                            disabled={hearingDetails[index]?.filled||false}
-                            />
-
-                            <p>Third Hearing Officer</p>
-                            <input type="text" 
-                            name="thirdHearingOfficer"
-                            id="thirdHearingOfficer"
-                            value={details.thirdHearingOfficer||hearingDetails[index]?.thirdHearingOfficer||""}
-                            onChange={handleChange}
-                            className="search-bar-edit" 
-                            disabled={hearingDetails[index]?.filled||false}
-                            placeholder="Enter Hearing Officer"
-                            />
-                      </div>
-
-                  </div>
-         */}
 
         {showDoneIncidentPopup && (
           <div className="confirmation-popup-overlay-add">
@@ -790,13 +727,32 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
               <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
               <p>Has the incident case been settled?</p>
               <div className="yesno-container-add">
+                {/*}
                 {hearing !==3 ? (
                   <button
                     onClick={() => setShowDoneIncidentPopup(false)}
                     className="no-button-add"
                   >
                     No
-                  </button>
+                  */}
+
+                   {hearing !== 3 ? (
+                    <button
+                      onClick={() => {
+                        setShowDoneIncidentPopup(false);
+                        setPopupMessage("If case is reopened, generate a letter again.");
+                        setShowPopup(true);
+
+                        // Auto-hide popup after 3 seconds (optional)
+                        setTimeout(() => {
+                          setShowPopup(false);
+                        }, 3000);
+                      }}
+                      className="no-button-add"
+                    >
+                      No
+                    </button>
+
                 ): hearing === 3  && (
                   <button
                     onClick={() => handleClosingCase(false)}
