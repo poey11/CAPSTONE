@@ -509,11 +509,26 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                         className="action-view-services"
                         onClick={() => handleView(request)}
                     >
-                    <img
-                      className={isAuthorized ? "edit-icon" : "view-icon"}
-                      src={isAuthorized ? "/Images/edit.png" : "/Images/view.png"}
-                      alt={isAuthorized ? "Edit" : "View"}
-                    />
+
+                           <img
+                                  className={
+                                    isAuthorized && request.status !== "Completed" && request.status !== "Rejected"
+                                      ? "edit-icon"
+                                      : "view-icon"
+                                  }
+                                  src={
+                                    isAuthorized && request.status !== "Completed" && request.status !== "Rejected"
+                                      ? "/Images/edit.png"
+                                      : "/Images/view.png"
+                                  }
+                                  alt={
+                                    isAuthorized && request.status !== "Completed" && request.status !== "Rejected"
+                                      ? "Edit"
+                                      : "View"
+                                  }
+                        />
+
+
                     </button>
 
                   </div>
