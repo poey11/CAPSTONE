@@ -113,6 +113,7 @@ interface EmergencyDetails {
     orImageUpload: string;
     photoUploaded: string; // For Residency purpose
     interviewRemarks: string; // For Barangay Indigency
+    residentId: string;
 }
 
 interface File {
@@ -165,7 +166,7 @@ const ViewOnlineRequest = () => {
           const jobSeekerRef = collection(db, "JobSeekerList");
       
           // Try by residentId first
-          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.accID));
+          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.residentId));
           const byResidentIdSnap = await getDocs(byResidentIdQuery);
       
           if (!byResidentIdSnap.empty) {
@@ -195,33 +196,31 @@ const ViewOnlineRequest = () => {
       useEffect(() => {
         const checkJobseeker = async () => {
           if (!requestData) return;
-      
-          // ✅ if already Completed, no need to show popup
           if (requestData.status === "Completed" || requestData.status === "In - Progress") return;
-      
           if (requestData.purpose !== "First Time Jobseeker") return;
       
           try {
             const jobSeekerRef = collection(db, "JobSeekerList");
       
-            // Check by residentId first
-            const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.accID));
+            // 🔍 Check by residentId first
+            const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.residentId));
             const byResidentIdSnap = await getDocs(byResidentIdQuery);
       
             if (!byResidentIdSnap.empty) {
-              // 🔥 if exists, check firstTimeClaimed
               const existingDoc = byResidentIdSnap.docs[0].data();
-              if (existingDoc.firstTimeClaimed === false) {
-                // already added but not yet claimed - skip popup
+              if (existingDoc?.firstTimeClaimed === false) {
+                // No popup needed, since already in list & not yet claimed
+                return;
+              } else  {
+                setJobseekerPopupMessage(
+                  "This applicant is already in the Jobseeker List and has claimed a document before. Payment will be required."
+                );
+                setShowJobseekerPopup(true);
                 return;
               }
-      
-              setJobseekerPopupMessage("This applicant is already in the Jobseeker List. Payment will be required.");
-              setShowJobseekerPopup(true);
-              return;
             }
       
-            // Fallback check by splitting requestorFname into first, middle, last
+            // 🔍 Fallback by split names + DOB
             let firstName = "";
             let middleName = "";
             let lastName = "";
@@ -232,31 +231,37 @@ const ViewOnlineRequest = () => {
               lastName = parts.length >= 2 ? parts[parts.length - 1] : "";
             }
       
-            // Check by name + DOB
             const snapshot = await getDocs(jobSeekerRef);
-            const match = snapshot.docs.find(doc => {
+            const matchDoc = snapshot.docs.find(doc => {
               const data = doc.data();
               return data.firstName?.toLowerCase() === firstName.toLowerCase() &&
                      data.lastName?.toLowerCase() === lastName.toLowerCase() &&
                      data.dateOfBirth === requestData.birthday;
             });
       
-            if (match) {
-              if (match.data().firstTimeClaimed === false) {
-                // already added but not yet claimed - skip popup
+            if (matchDoc) {
+              const data = matchDoc.data();
+              if (data?.firstTimeClaimed === false) {
+                // No popup needed, since already in list & not yet claimed
+                return;
+              } else {
+                setJobseekerPopupMessage(
+                  "This applicant is already in the Jobseeker List and has claimed a document before. Payment will be required."
+                );
+                setShowJobseekerPopup(true);
                 return;
               }
-              setJobseekerPopupMessage("This applicant is already in the Jobseeker List. Payment will be required.");
-              setShowJobseekerPopup(true);
-            } else {
-              setJobseekerPopupMessage(
-                "This applicant is not yet in the First Time Jobseeker List.\n" +
-                "Under RA 11261, this means the request will not be paid for unless added.\n" +
-                "Do you want to add them now to the Jobseeker List?"
-              );
-              setShowJobseekerPopup(true);
-              setAskAddToList(true);
             }
+      
+            // 🔥 Truly not in list, prompt to add
+            setJobseekerPopupMessage(
+              "This applicant is not yet in the First Time Jobseeker List.\n" +
+              "Under RA 11261, this means the request will not be paid for unless added.\n" +
+              "Do you want to add them now to the Jobseeker List?"
+            );
+            setShowJobseekerPopup(true);
+            setAskAddToList(true);
+      
           } catch (err) {
             console.error("Error checking JobSeekerList:", err);
           }
@@ -264,7 +269,7 @@ const ViewOnlineRequest = () => {
       
         checkJobseeker();
       }, [requestData]);
-      
+       
   
   
   // handle function for matic jobseeker
@@ -296,7 +301,7 @@ const ViewOnlineRequest = () => {
         yearOfBirth: requestData.birthday ? new Date(requestData.birthday).getFullYear().toString() : "",
         sex: requestData.gender || "",
         remarks: "",
-        residentId: requestData.accID || "",
+        residentId: requestData.residentId || "",
         identificationFileURL: requestData.validIDjpg || "",
         firstTimeClaimed: false,
       };
@@ -1750,7 +1755,7 @@ Functions for Reason for Reject
           const jobSeekerRef = collection(db, "JobSeekerList");
     
           // Check by residentId first
-          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.accID));
+          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.residentId));
           const byResidentIdSnap = await getDocs(byResidentIdQuery);
     
           if (!byResidentIdSnap.empty) {
