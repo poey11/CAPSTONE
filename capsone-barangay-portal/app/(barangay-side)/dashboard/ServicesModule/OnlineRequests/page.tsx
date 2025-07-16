@@ -42,7 +42,14 @@ const [taskSearchRequestId, setTaskSearchRequestId] = useState("");
 const [taskSearchRequestor, setTaskSearchRequestor] = useState("");
 
 
-
+useEffect(() => {
+  const section = searchParams.get("section");
+  if (!section) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("section", "allrequest");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }
+}, []);
 
 /*For Names*/
 const normalizeString = (str: string) =>
@@ -365,7 +372,16 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                         key={section}
                         type="button"
                         className={`info-toggle-btn-assigned-online assigned-tasks-online ${activeSection === section ? "active" : ""}`}
-                        onClick={() => setActiveSection(section)}
+                        onClick={() => {
+                          setActiveSection(section);
+                          const params = new URLSearchParams(searchParams.toString());
+                          if (section === "main") {
+                            params.set("section", "allrequest");
+                          } else if (section === "tasks") {
+                            params.set("section", "assignedtasks");
+                          }
+                          router.push(`?${params.toString()}`, { scroll: false });
+                        }}
                       >
                         {section === "main" && "All Requests"}
                         {section === "tasks" && (

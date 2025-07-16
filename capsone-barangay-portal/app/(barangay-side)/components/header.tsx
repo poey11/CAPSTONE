@@ -324,6 +324,22 @@ export default function Header() {
       }
     }
 
+    // Check if pathname is OnlineRequests and look at 'section' query param
+    if (pathname === "/dashboard/ServicesModule/OnlineRequests") {
+      const section = searchParams.get("section");
+      if (section === "allrequest") {
+        return {
+          title: "Online Requests",
+          breadcrumb: ["Services Management", "Online Requests", "All Requests"],
+        };
+      } else if (section === "assignedtasks") {
+        return {
+          title: "Online Requests",
+          breadcrumb: ["Services Management", "Online Requests", "Assigned Tasks"],
+        };
+      }
+    }
+
      // Check if pathname is ViewRequest and look at 'reqType' query param
     if (pathname === "/dashboard/ServicesModule/ViewRequest") {
       const reqType = searchParams.get("reqType");
