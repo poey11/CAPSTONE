@@ -786,9 +786,19 @@ html, body {
 
 .doc-receival-form {
   width: 100%;
+  height: 400px;
 }
 
 .doc-receival-content {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.doc-receival-content2 {
   width: 100%;
   height: 220px;
   display: flex;
@@ -806,6 +816,14 @@ html, body {
   justify-content: center;
   align-items: center;
   margin-bottom: 13px;
+}
+
+.services-onlinereq-doc-receival-form-section-interview{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
 }
 
 .services-onlinereq-fields-section p{
@@ -833,6 +851,43 @@ html, body {
   margin-left: 7%;
 }
 
+.services-onlinereq-doc-receival-form-section h2,
+.services-onlinereq-doc-receival-form-section-interview h2{
+  font-size: 1.80rem;
+  font-weight: bolder;
+  text-align: center;
+  font-weight: bold;
+  color: #214666;
+  width: 100%;
+}
+
+.services-onlinereq-doc-receival-form-section h3,
+.services-onlinereq-doc-receival-form-section-interview h3{
+ color: #f44336;
+ margin-bottom: 20px;
+  font-size: 15px;
+  text-align: center;
+  width: 100%;
+}
+
+
+.jobseeker-note-payment {
+  color: #f44336;
+ margin-bottom: 20px;
+  font-size: 15px;
+  text-align: center;
+  width: 100%;
+}
+
+.jobseeker-note-nopayment {
+  color: #0c8332;
+ margin-bottom: 20px;
+  font-size: 15px;
+  text-align: center;
+  width: 100%;
+  font-weight: bold;
+}
+
 .services-onlinereq-input-field {
   padding: 8px;
   width: 85%;
@@ -844,6 +899,23 @@ html, body {
 }
 
 .services-onlinereq-input-field:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+
+  .interview-remarks-field-section {
+  padding: 8px;
+  width: 85%;
+  margin-top: 10px;
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  color: #000000;
+  text-align: left;
+  height: 180px;
+}
+
+.interview-remarks-field-section:focus {
   border-color: #f49028;
   outline: none;
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
@@ -971,6 +1043,92 @@ html, body {
   margin-bottom: 10px;
 }
 
+.documentgenerated-popup-overlay-services-onlinereq-status {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+}
+
+
+.documentgenerated-popup-services-onlinereq-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 250px;
+  width: 470px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+}
+
+
+.documentgenerated-popup-services-onlinereq-status p{
+  color: rgb(97, 97, 97);
+}
+
+.documentgenerated-popup-services-onlinereq-status h2{
+  margin-top: 10px;
+ color: #f44336;
+  font-size: 15px;
+}
+
+.notifyrequestor-popup-overlay-services-onlinereq-status {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+}
+
+
+.notifyrequestor-popup-services-onlinereq-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 280px;
+  width: 550px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+}
+
+
+.notifyrequestor-popup-services-onlinereq-status p{
+  color: rgb(97, 97, 97);
+}
+
+.notifyrequestor-popup-services-onlinereq-status h2{
+  margin-top: 10px;
+ color: #f44336;
+  font-size: 15px;
+}
+
 .yesno-container-add{
   display: flex;
   gap: 20px;
@@ -978,15 +1136,15 @@ html, body {
 
 .yes-button-add,
 .no-button-add{
-  padding: 10px 20px;
+  padding: 7px 10px;
   font-size: 16px;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer; 
-  width: 150px;
   box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
   margin-top: 20px;
+  width: 120px;
 }
 
 .yes-button-add {
@@ -1077,7 +1235,7 @@ html, body {
   padding: 1.5rem;
   max-width: 1000px;
   width: 60%;
-  height: 400px;
+  height: 440px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1100,6 +1258,7 @@ html, body {
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  
 }
 
 .doc-receivalform-action-buttons{
@@ -1202,12 +1361,13 @@ color: white;
   border-radius: 10px;
   background-color: #ffffff;
   padding-top: 30px;
- padding-right: 20px;
- padding-bottom: 50px;
- padding-left: 20px;
- padding-top: 40px;
+  padding-right: 20px;
+  padding-bottom: 50px;
+  padding-left: 20px;
+  padding-top: 40px;
   margin-top: 10px;
   display: flex;
+  flex-direction: column;
  justify-content: center;
  align-items: center;
 }
@@ -1348,7 +1508,7 @@ For Reason of reject
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 60%;
+    height: 570px;
     width: 50%;
     background: linear-gradient(to bottom right, #ffffff, #f2f5f8);
     border-radius: 20px;
