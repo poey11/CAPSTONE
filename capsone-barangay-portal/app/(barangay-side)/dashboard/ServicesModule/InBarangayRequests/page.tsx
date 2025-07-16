@@ -372,7 +372,11 @@ useEffect(() => {
           <div className="inbarangayreq-section-1">
             <div className="center-wrapper">
                 {canSeeTasks && (
-                  <div className={`assigned-incident-info-toggle-wrapper ${filtersLoaded ? "filters-animated" : ""}`}>
+                  <div
+                    className={`assigned-incident-info-toggle-wrapper ${filtersLoaded ? "filters-animated" : ""} ${
+                      user?.position === "Admin Staff" ? "with-add-request" : ""
+                    }`}
+                  >
                     {["main", "tasks"].map((section) => (
                       <button
                         key={section}

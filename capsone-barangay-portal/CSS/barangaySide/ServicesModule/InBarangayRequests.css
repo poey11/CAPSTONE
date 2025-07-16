@@ -845,7 +845,14 @@ width: 100px;
   gap: 12px;
   flex-wrap: wrap;
   justify-content: center;
+
 }
+
+
+.assigned-incident-info-toggle-wrapper.with-add-request {
+  padding-left: 150px; 
+}
+
 
 /* NEW UPDATED*/
 .info-toggle-btn-assigned {
