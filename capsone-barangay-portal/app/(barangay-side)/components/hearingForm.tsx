@@ -420,7 +420,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
     return (
         <>
             
-   <form onSubmit={handleSaveClick} className="hearing-main-section">
+   <form onSubmit={handleSaveClick} className="hearing-main-section-form">
 
        <div className="hearing-edit-header-body-top-section">
             
@@ -443,7 +443,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
 
 
                   <div className="hearing-edit-section-2">
-                        {!hearingDetails[index]?.filled && (<button type="submit" className="action-save-edit">Save</button>)}
+                        {!hearingDetails[index]?.filled && (<button type="submit" className="action-save-edit-hearing">Save</button>)}
                   </div>
         </div>
 

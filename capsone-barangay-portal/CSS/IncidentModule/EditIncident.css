@@ -1810,9 +1810,7 @@ html, body {
   width: 90%;
   display: flex;
   padding-bottom: 30px;
-  padding-top: 30px;
-
-  
+  /*padding-top: 30px;*/
 }
 
 .dialogue-info-container-scrollable{
@@ -2076,7 +2074,7 @@ s
 }
 
 
-.hearing-main-section {
+.hearing-main-section-form {
     width: 100%;
     height: 100%;
     display: flex;
@@ -2360,32 +2358,31 @@ border-left: 10px solid #8a0f0f;
 
 
 /*
-For hearing main
+For hearing main (moderately smaller)
 */
 .info-toggle-btn-main-hearing {
-  padding: 10px 20px;
- /* border: 1px solid transparent;*/
+  padding: 8px 16px;
   border: 1px solid #214666;
-  border-radius: 20px;
+  border-radius: 16px;
   background-color: transparent;
   color: #214666;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 14px;
+  font-size: 13px;
   text-transform: capitalize;
 }
 
 .info-toggle-btn-main-hearing:hover {
-    background-color: rgba(33, 70, 102, 0.1);
+  background-color: rgba(33, 70, 102, 0.1);
 }
-
 
 .info-toggle-btn-main-hearing.active {
   background-color: #214666;
   color: #ffffff;
   border: 1px solid #214666;
 }
+
 
 .hearing-header-body-top-section-main-hearing{
   display: flex;
@@ -2407,21 +2404,21 @@ For hearing main
 .info-toggle-btn-hearing {
   background-color: transparent;
   border: none;
-  padding: 12px 20px;
+  padding: 8px 16px; /* reduced from 12px 20px */
   cursor: pointer;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px; /* reduced from 14px */
   color: #333;
-  border-bottom: 3px solid #ccc;
+  border-bottom: 2px solid #ccc; /* slightly thinner */
   transition: all 0.3s ease;
-  
 }
 
 .info-toggle-btn-hearing:hover,
 .info-toggle-btn-hearing.active {
   color: #ff6600;
-  border-bottom: 3px solid #ff6600;
+  border-bottom: 2px solid #ff6600; /* match thinner border */
 }
+
 
 
 
@@ -2450,7 +2447,6 @@ For hearing main
 
 .hearing-edit-section-2 {
    width: 15%;
-
 }
 
 
@@ -2559,4 +2555,26 @@ For hearing main
   outline: none;
   border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
   box-shadow: none;
+}
+
+
+
+
+
+
+.action-save-edit-hearing {
+  border: none;
+  cursor: pointer;
+  padding: 10px 30px;
+  font-size: 13px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.action-save-edit-hearing {
+  background-color: #4caf50; 
+  color: white;
+}
+.action-save-edit-hearing:hover {
+  background-color: #45a049; /* slightly darker green */
 }
