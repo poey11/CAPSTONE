@@ -804,7 +804,7 @@ useEffect(() => {
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
                             if (showSubmitPopup.letterType === "summon") {
                                 setTimeout(() => {
-                                  router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}`);
+                                  router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${reportData?.department}`);
                                 }, 3000); // wait 3 seconds
                               } else {
                                 setTimeout(() => {

@@ -335,14 +335,14 @@ const ViewOnlineRequest = () => {
 
 useEffect(() => {
   const id = searchParams.get("id");
-  const reqType = searchParams.get("reqType");
 
   if (!id) return;
 
-  if (!reqType) {
-    router.replace(`/dashboard/ServicesModule/ViewRequest?reqType=online&id=${id}`, { scroll: false });
+  if ( requestData?.reqType) {
+    const cleanedReqType = requestData.reqType === "In Barangay" ? "inbarangay" : "online";
+    router.replace(`/dashboard/ServicesModule/ViewRequest?reqType=${cleanedReqType}&id=${id}`, { scroll: false });
   }
-}, [searchParams, router]);
+}, [searchParams, router, requestData?.reqType]);
 
 
 /*
