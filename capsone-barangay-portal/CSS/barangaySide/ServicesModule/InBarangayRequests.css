@@ -119,6 +119,13 @@ html, body {
   padding-top: 20px;
 }
 
+  .input-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding-top: 20px;
+}
+
   
   .date-input-group {
   display: flex;
