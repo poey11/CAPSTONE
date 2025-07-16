@@ -160,27 +160,27 @@ const ViewOnlineRequest = () => {
 
       // matic first time jobseeker checker
 
-      const [showJobseekerPopup, setShowJobseekerPopup] = useState(false);
       const [jobseekerPopupMessage, setJobseekerPopupMessage] = useState("");
-      const [askAddToList, setAskAddToList] = useState(false);
+      const [showJobseekerPopup, setShowJobseekerPopup] = useState(false);
       const [firstTimeClaimed, setFirstTimeClaimed] = useState<boolean | null>(null);
+
 
       useEffect(() => {
         const checkJobseeker = async () => {
           if (!requestData) return;
-          if (requestData.status === "Completed" || requestData.status === "In - Progress") return;
+          if (requestData.status !== "Pick-up") return;
           if (requestData.purpose !== "First Time Jobseeker") return;
       
           try {
             const jobSeekerRef = collection(db, "JobSeekerList");
       
-            // Check by residentId first
             const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.residentId));
             const byResidentIdSnap = await getDocs(byResidentIdQuery);
       
             if (!byResidentIdSnap.empty) {
               const existingDoc = byResidentIdSnap.docs[0].data();
               setFirstTimeClaimed(existingDoc?.firstTimeClaimed ?? null);
+      
               if (existingDoc?.firstTimeClaimed === false) {
                 setJobseekerPopupMessage(
                   "This applicant is already in the Jobseeker List, but the document has not been claimed yet. Payment will NOT be required."
@@ -194,7 +194,7 @@ const ViewOnlineRequest = () => {
               return;
             }
       
-            // Fallback by split names + DOB
+            // Fallback by name & DOB
             let firstName = "";
             let lastName = "";
             if (requestData.requestorFname) {
@@ -206,51 +206,30 @@ const ViewOnlineRequest = () => {
             const snapshot = await getDocs(jobSeekerRef);
             const matchDoc = snapshot.docs.find(doc => {
               const data = doc.data();
-      
               const dbFirstName = (data.firstName || "").toLowerCase().trim();
               const dbLastName = (data.lastName || "").toLowerCase().trim();
               const dbDOB = (data.dateOfBirth || "").split("T")[0];
-      
               const localFirstName = firstName.toLowerCase().trim();
               const localLastName = lastName.toLowerCase().trim();
               const localDOB = (requestData.birthday || "").split("T")[0];
-      
-              return dbFirstName === localFirstName &&
-                     dbLastName === localLastName &&
-                     dbDOB === localDOB;
+              return dbFirstName === localFirstName && dbLastName === localLastName && dbDOB === localDOB;
             });
       
             if (matchDoc) {
               const data = matchDoc.data();
               setFirstTimeClaimed(data?.firstTimeClaimed ?? null);
+      
               if (data?.firstTimeClaimed === false) {
-                // No popup needed, since already in list & not yet claimed
-                return;
+                setJobseekerPopupMessage(
+                  "This applicant is already in the Jobseeker List, but the document has not been claimed yet. Payment will NOT be required."
+                );
               } else {
                 setJobseekerPopupMessage(
                   "This applicant is already in the Jobseeker List and has claimed a document before. Payment will be required."
                 );
-                setShowJobseekerPopup(true);
-                return;
               }
-            } else {
-              if (userPosition === "Assistant Secretary") {
-                setJobseekerPopupMessage(
-                  "This applicant is not yet in the First Time Jobseeker List.\n" +
-                  "Under RA 11261, this means the request will not be paid for unless added.\n" +
-                  "Do you want to add them now to the Jobseeker List?"
-                );
-                setShowJobseekerPopup(true);
-                setAskAddToList(true);
-              } else {
-                setJobseekerPopupMessage(
-                  "This applicant is not yet in the First Time Jobseeker List. Under RA 11261, this means the request will not be paid for. Only the Assistant Secretary can add them to the list."
-                );
-                setShowJobseekerPopup(true);
-                setAskAddToList(false); //  Make sure no Yes/No buttons show
-              }
+              setShowJobseekerPopup(true);
             }
-            
       
           } catch (err) {
             console.error("Error checking JobSeekerList:", err);
@@ -260,61 +239,83 @@ const ViewOnlineRequest = () => {
         checkJobseeker();
       }, [requestData]);
       
-       
-  
-  
-  // handle function for matic jobseeker
-  const handleAddToJobseekerList = async () => {
-    try {
-      if (!requestData) return;
-  
-      // Split the requestorFname into first, middle, last
-      let firstName = "";
-      let middleName = "";
-      let lastName = "";
-      if (requestData.requestorFname) {
-        const parts = requestData.requestorFname.trim().split(" ");
-        firstName = parts[0] || "";
-        middleName = parts.length === 3 ? parts[1] : "";
-        lastName = parts.length >= 2 ? parts[parts.length - 1] : "";
-      }
-  
-      // Build new jobseeker data for Firestore
-      const newDoc = {
-        dateApplied: new Date().toISOString().split("T")[0], // YYYY-MM-DD
-        lastName,
-        firstName,
-        middleName,
-        age: parseInt(requestData.age || "0"),
-        dateOfBirth: requestData.birthday || "",
-        monthOfBirth: requestData.birthday ? (new Date(requestData.birthday).getMonth() + 1).toString() : "",
-        dayOfBirth: requestData.birthday ? new Date(requestData.birthday).getDate().toString() : "",
-        yearOfBirth: requestData.birthday ? new Date(requestData.birthday).getFullYear().toString() : "",
-        sex: requestData.gender || "",
-        remarks: "",
-        residentId: requestData.residentId || "",
-        identificationFileURL: requestData.validIDjpg || "",
-        firstTimeClaimed: false,
-      };
-  
-      // Save to Firestore
-      await addDoc(collection(db, "JobSeekerList"), newDoc);
-  
-      // If you want, also set it to your form state
-  
-      // Show success feedback
-      setShowJobseekerPopup(false);
-      setAskAddToList(false);
-      setPopupMessage("Added to Jobseeker List successfully!");
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
-  
-    } catch (err) {
-      console.error("Failed to add to JobSeekerList:", err);
-    }
-  };
-  
+
+      const handleJobseekerAutoAdd = async () => {
+        try {
+          if (!requestData) return true; // just safely skip if no data
       
+          const jobSeekerRef = collection(db, "JobSeekerList");
+      
+          // Check by residentId
+          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.residentId));
+          const byResidentIdSnap = await getDocs(byResidentIdQuery);
+      
+          if (!byResidentIdSnap.empty) {
+            return true; // already exists by residentId
+          }
+      
+          // Fallback by split names + DOB
+          let firstName = "";
+          let lastName = "";
+          if (requestData.requestorFname) {
+            const parts = requestData.requestorFname.trim().split(" ");
+            firstName = parts[0] || "";
+            lastName = parts.length >= 2 ? parts[parts.length - 1] : "";
+          }
+      
+          const snapshot = await getDocs(jobSeekerRef);
+          const matchDoc = snapshot.docs.find(doc => {
+            const data = doc.data();
+            const dbFirstName = (data.firstName || "").toLowerCase().trim();
+            const dbLastName = (data.lastName || "").toLowerCase().trim();
+            const dbDOB = (data.dateOfBirth || "").split("T")[0];
+            const localFirstName = firstName.toLowerCase().trim();
+            const localLastName = lastName.toLowerCase().trim();
+            const localDOB = (requestData.birthday || "").split("T")[0];
+            return dbFirstName === localFirstName && dbLastName === localLastName && dbDOB === localDOB;
+          });
+      
+          if (matchDoc) {
+            console.log("Automatically added to Jobseeker List.");
+            setJobseekerPopupMessage("This applicant is already in the First Time Jobseeker List. Payment will be required");
+            setShowJobseekerPopup(true);
+            return true; 
+            
+          }
+      
+          // If not in the list, auto add
+          const newDoc = {
+            dateApplied: new Date().toISOString().split("T")[0],
+            lastName,
+            firstName,
+            middleName: "",
+            age: parseInt(requestData.age || "0"),
+            dateOfBirth: requestData.birthday || "",
+            monthOfBirth: requestData.birthday ? (new Date(requestData.birthday).getMonth() + 1).toString() : "",
+            dayOfBirth: requestData.birthday ? new Date(requestData.birthday).getDate().toString() : "",
+            yearOfBirth: requestData.birthday ? new Date(requestData.birthday).getFullYear().toString() : "",
+            sex: requestData.gender || "",
+            remarks: "",
+            residentId: requestData.residentId || "",
+            identificationFileURL: requestData.validIDjpg || "",
+            firstTimeClaimed: false,
+          };
+      
+          await addDoc(jobSeekerRef, newDoc);
+          console.log("Automatically added to Jobseeker List.");
+          setJobseekerPopupMessage("This applicant has been added to the First Time Jobseeker List.");
+          setShowJobseekerPopup(true);
+          return true;
+      
+        } catch (err) {
+          console.error("Error auto-adding to JobSeekerList:", err);
+          return false;
+        }
+      };
+      
+  
+  
+
 
 
 useEffect(() => {
@@ -1791,38 +1792,42 @@ Functions for Reason for Reject
     const docPrinted = requestData?.docPrinted;
 
     
-    const print = async() => {
-      /* This part will handle ung pag generate ng pdf and also updates the request's status to In - Progress */
-      if(!requestData?.documentTypeIs){
+    const print = async () => {
+       /* This part will handle ung pag generate ng pdf and also updates the request's status to In - Progress */
+      if (!requestData?.documentTypeIs) {
         handlePrint(requestData);
-      }
-      else{//if existing ung documentTypeIs, it will use the other generate document function
+      } else {//if existing ung documentTypeIs, it will use the other generate document function
         handleGenerateDocument(requestData);
         console.log("Existing documentTypeIs, using other generate document function");
       }
-      
-      if(!id) return;
+    
+      // Automatically add to Jobseeker List if needed
+      await handleJobseekerAutoAdd();
+
+    
+      if (!id) return;
       const docRef = doc(db, "ServiceRequests", id);
-      let updatedData: any = {
-          status: "In - Progress",
-          statusPriority: 2,
-          docPrinted: true,
+      let updatedData = {
+        status: "In - Progress",
+        statusPriority: 2,
+        docPrinted: true,
       };
-
-     await updateDoc(docRef, updatedData);
-
-     const notificationRef = collection(db, "Notifications");
-     await addDoc(notificationRef, {
-       residentID: requestData?.accID,
-       requestID: id,
-       message: `Your document request (${requestData?.requestId}) has been updated to (${updatedData.status}) We will notify you once it's ready for pickup.`,
-       timestamp: new Date(),
-       transactionType: "Online Request",
-       isRead: false,
-     });
-
-     setShowDocumentGeneratedPopup(true);
-    }
+    
+      await updateDoc(docRef, updatedData);
+    
+      const notificationRef = collection(db, "Notifications");
+      await addDoc(notificationRef, {
+        residentID: requestData?.accID,
+        requestID: id,
+        message: `Your document request (${requestData?.requestId}) has been updated to (${updatedData.status}) We will notify you once it's ready for pickup.`,
+        timestamp: new Date(),
+        transactionType: "Online Request",
+        isRead: false,
+      });
+    
+      setShowDocumentGeneratedPopup(true);
+    };
+    
 
     useEffect(() => {
       const fetchReceivalData = async () => {
@@ -2133,16 +2138,14 @@ Functions for Reason for Reject
                     <div className="confirmation-popup-services-onlinereq-status">
                       <img src="/Images/question.png" alt="info icon" className="successful-icon-popup" />
                       <p style={{ whiteSpace: "pre-line" }}>{jobseekerPopupMessage}</p>
-                      {askAddToList ? (
-                        <div className="yesno-container-add">
-                          <button onClick={() => setShowJobseekerPopup(false)} className="no-button-add">No</button>
-                          <button onClick={() => handleAddToJobseekerList()} className="yes-button-add">Yes</button>
-                        </div>
-                      ) : (
-                        <div className="yesno-container-add">
-                          <button onClick={() => setShowJobseekerPopup(false)} className="yes-button-add">Close</button>
-                        </div>
-                      )}
+                      <div className="yesno-container-add">
+                        <button 
+                          onClick={() => setShowJobseekerPopup(false)} 
+                          className="yes-button-add"
+                        >
+                          Close
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
