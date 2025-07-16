@@ -857,9 +857,28 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
       </div>
 
       <div className="yesno-container-add-section">
-        <button className="yes-button-add-section" onClick={confirmSubmitB}>
+        <button
+          className="yes-button-add-section"
+          onClick={() => {
+            const isAnySelected =
+              toUpdate?.isMediation || toUpdate?.isConciliation || toUpdate?.isArbitration;
+
+            if (!isAnySelected) {
+              setPopupErrorMessage("Please select a settlement method before submitting.");
+              setShowErrorPopup(true);
+
+              // Auto-hide after 3 seconds
+              setTimeout(() => {
+                setShowErrorPopup(false);
+              }, 3000);
+            } else {
+              confirmSubmitB();
+            }
+          }}
+        >
           Submit
         </button>
+
       </div>
     </div>
   </div>
@@ -899,7 +918,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             )}
 
             {showErrorPopup && (
-                <div className={`error-popup-overlay-add show`}>
+                <div className={`error-popup-overlay-settled show`}>
                     <div className="popup-add">
                       <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                       <p>{popupErrorMessage}</p>
