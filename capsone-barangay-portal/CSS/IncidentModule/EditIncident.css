@@ -2578,3 +2578,112 @@ For hearing main (moderately smaller)
 .action-save-edit-hearing:hover {
   background-color: #45a049; /* slightly darker green */
 }
+
+
+
+
+
+
+
+
+.confirmation-popup-overlay-add-section {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.confirmation-popup-add-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  width: 450px;
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  text-align: center;
+  position: fixed;
+}
+
+.popup-title-section {
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.settlement-options-modern-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.settlement-card-section {
+  background: #f9f9f9;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 16px;
+  color: #444;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+  justify-content: center;
+  position: relative;
+}
+
+.settlement-card-section input[type="radio"] {
+  display: none;
+}
+
+.settlement-card-section:hover {
+  background-color: #eef6fb;
+  border-color: #84c5f4;
+}
+
+.settlement-card-section.selected-section {
+  border-color: #2196f3;
+  background-color: #e3f2fd;
+  font-weight: 600;
+  color: #0d47a1;
+  box-shadow: 0 0 0 2px #2196f3 inset;
+}
+
+.yesno-container-add-section {
+  display: flex;
+  gap: 20px;
+}
+
+.yes-button-add-section {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 150px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+  background-color: #4caf50;
+  transition: background-color 0.2s ease;
+}
+
+.yes-button-add-section:hover {
+  background-color: #3d8c40;
+}

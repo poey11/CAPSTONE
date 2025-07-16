@@ -818,74 +818,53 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
           </div>    
         )}
 
-        {showSubmitPopupB && (
-          <div className="confirmation-popup-overlay-add">
-            <div className="confirmation-popup-add">
 
-                <>
-                  <p>How was the case settled?</p>
-                  <div className="settlement-options">
-                    <label>
-                      <input
-                        type="radio"
-                        name="settlementMethod"
-                        checked={toUpdate?.isMediation === true}
-                        onChange={() => setToUpdate((prev: any) => ({
-                          ...prev,
-                          isMediation: true,
-                          isConciliation: false,
-                          isArbitration: false,
-                        }))}
-                      />
-                      Mediation
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="settlementMethod"
-                        checked={toUpdate?.isConciliation === true}
-                        onChange={() => setToUpdate((prev: any) => ({
-                          ...prev,
-                          isMediation: false,
-                          isConciliation: true,
-                          isArbitration: false,
-                        }))}
-                      />
-                      Conciliation
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="settlementMethod"
-                        checked={toUpdate?.isArbitration === true}
-                        onChange={() => setToUpdate((prev: any) => ({
-                          ...prev,
-                          isMediation: false,
-                          isConciliation: false,
-                          isArbitration: true,
-                        }))}
-                      />
-                      Arbitration
-                    </label>
-                  </div>
 
-                  <div className="yesno-container-add">
-                    {/* <button
-                      onClick={() => setShowSubmitPopupB(false)}
-                      className="no-button-add"
-                    >
-                      Cancel
-                    </button> */}
-                    <button onClick={confirmSubmitB} className="yes-button-add">
-                      Submit
-                    </button>
-                  </div>
-                </>
-        
+{showSubmitPopupB && (
+  <div className="confirmation-popup-overlay-add-section">
+    <div className="confirmation-popup-add-section">
+      <p className="popup-title-section">How was the case settled?</p>
 
-            </div>
-          </div>
-        )}
+      <div className="settlement-options-modern-section">
+        {[
+          { label: "Mediation", key: "isMediation" },
+          { label: "Conciliation", key: "isConciliation" },
+          { label: "Arbitration", key: "isArbitration" },
+        ].map(({ label, key }) => {
+          const isSelected = toUpdate?.[key] === true;
+          return (
+            <label
+              className={`settlement-card-section ${isSelected ? "selected-section" : ""}`}
+              key={key}
+            >
+              <input
+                type="radio"
+                name="settlementMethod"
+                checked={isSelected}
+                onChange={() =>
+                  setToUpdate((prev: any) => ({
+                    ...prev,
+                    isMediation: key === "isMediation",
+                    isConciliation: key === "isConciliation",
+                    isArbitration: key === "isArbitration",
+                  }))
+                }
+              />
+              <span>{label}</span>
+            </label>
+          );
+        })}
+      </div>
+
+      <div className="yesno-container-add-section">
+        <button className="yes-button-add-section" onClick={confirmSubmitB}>
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
 
         {showSubmitPopup && (
