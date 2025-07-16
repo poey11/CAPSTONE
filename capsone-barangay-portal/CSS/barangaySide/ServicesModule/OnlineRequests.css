@@ -30,10 +30,13 @@ html, body {
 }
 
 .onlinereq-section-1{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .onlinereq-section-1 h1{
@@ -132,7 +135,7 @@ html, body {
     display: flex;
     gap: 20px;
     padding: 0;
-    margin-top: 5px; /*ADDDED TANDAAN MO TO DERICK*/
+  
   }
 
 
@@ -164,7 +167,7 @@ html, body {
 }
 
 .data-input-group-onlinereq {
-    display: flex;
+  display: flex;
   flex-direction: column;
   flex: 1;
 }
@@ -175,6 +178,13 @@ html, body {
   color: #214666;
 }
 
+
+.input-group-online {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding-top: 20px;
+}
 
 
 

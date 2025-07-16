@@ -48,6 +48,58 @@ import { report } from "process";
    }
  }, []);
 
+
+
+/* 
+Added Filters for Tasks 
+*/
+
+
+
+ const [taskStatusFilter, setTaskStatusFilter] = useState("");
+const [taskSearchType, setTaskSearchType] = useState("");
+const [filteredTaskRequests, setFilteredTaskRequests] = useState(taskAssignedData);
+const [taskSearchRequestId, setTaskSearchRequestId] = useState("");
+const [taskSearchRequestor, setTaskSearchRequestor] = useState("");
+
+
+/*For Names*/
+const normalizeString = (str: string) =>
+  str.toLowerCase().replace(/\s+/g, " ").trim();
+
+
+useEffect(() => {
+  let filtered = taskAssignedData;
+
+  if (taskSearchRequestId !== "") {
+    filtered = filtered.filter((req) =>
+      req.requestId.toLowerCase().includes(taskSearchRequestId.toLowerCase())
+    );
+  }
+
+    if (taskSearchRequestor !== "") {
+      const normalizedSearch = normalizeString(taskSearchRequestor);
+      filtered = filtered.filter((req) =>
+        normalizeString(req.requestor).includes(normalizedSearch)
+      );
+    }
+
+
+  if (taskStatusFilter !== "") {
+    filtered = filtered.filter(
+      (req) => normalizeStatus(req.status) === normalizeStatus(taskStatusFilter)
+    );
+  }
+
+  setFilteredTaskRequests(filtered);
+  setTaskCurrentPage(1);
+}, [taskAssignedData, taskSearchRequestId, taskSearchRequestor, taskStatusFilter]);
+
+
+
+
+
+
  useEffect(() => {
   const section = searchParams.get("section");
   if (!section) {
@@ -241,8 +293,8 @@ const mainTotalPages = Math.ceil(filteredMainRequests.length / requestsPerPage);
   // TASK pagination
   const taskIndexOfLast = taskCurrentPage * requestsPerPage;
   const taskIndexOfFirst = taskIndexOfLast - requestsPerPage;
-  const currentInBarangayRequests = taskAssignedData.slice(taskIndexOfFirst, taskIndexOfLast);
-  const taskTotalPages = Math.ceil(taskAssignedData.length / requestsPerPage);
+const currentInBarangayRequests = filteredTaskRequests.slice(taskIndexOfFirst, taskIndexOfLast);
+const taskTotalPages = Math.ceil(filteredTaskRequests.length / requestsPerPage);
 
   const getPageNumbers = (currentPage: number, totalPages: number) => {
     const pageNumbersToShow = [];
@@ -320,7 +372,11 @@ useEffect(() => {
           <div className="inbarangayreq-section-1">
             <div className="center-wrapper">
                 {canSeeTasks && (
-                  <div className={`assigned-incident-info-toggle-wrapper ${filtersLoaded ? "filters-animated" : ""}`}>
+                  <div
+                    className={`assigned-incident-info-toggle-wrapper ${filtersLoaded ? "filters-animated" : ""} ${
+                      user?.position === "Admin Staff" ? "with-add-request" : ""
+                    }`}
+                  >
                     {["main", "tasks"].map((section) => (
                       <button
                         key={section}
@@ -489,11 +545,23 @@ useEffect(() => {
                         <td>
                           <div className="actions-inbarangay">
                             <button className="action-inbarangay-services" /* edited this class */onClick={() => handleView(request.id, request.reqType)}>
-                             <img
-                                className={isAuthorized ? "action-inbarangay-edit" : "action-inbarangay-view"}
-                                src={isAuthorized ? "/Images/edit.png" : "/Images/view.png"}
-                                alt={isAuthorized ? "Edit" : "View"}
-                              />
+                                <img
+                                  className={
+                                    isAuthorized && request.status !== "Completed" && request.status !== "Rejected"
+                                      ? "action-inbarangay-edit"
+                                      : "action-inbarangay-view"
+                                  }
+                                  src={
+                                    isAuthorized && request.status !== "Completed" && request.status !== "Rejected"
+                                      ? "/Images/edit.png"
+                                      : "/Images/view.png"
+                                  }
+                                  alt={
+                                    isAuthorized && request.status !== "Completed" && request.status !== "Rejected"
+                                      ? "Edit"
+                                      : "View"
+                                  }
+                               />
                             </button>
                           </div>
                         </td>
@@ -529,7 +597,51 @@ useEffect(() => {
 
         {canSeeTasks && activeSection === "tasks" && (
           <>
-            <div className="inbarangayreq-main-section-tasks">
+
+          <div className="inbarangayreq-section-2 filters-animated">
+            <div className="input-group">
+              <input
+                type="text"
+                placeholder="Search by Request ID (e.g. LPLHOT - 0063)"
+                className="inbarangay-services-module-filter"
+                value={taskSearchRequestId}
+                onChange={(e) => setTaskSearchRequestId(e.target.value)}
+              />
+            </div>
+
+            <div className="input-group">
+              <input
+                type="text"
+                placeholder="Search by Requestor Name (e.g. Juan Dela Cruz)"
+                className="inbarangay-services-module-filter"
+                value={taskSearchRequestor}
+                onChange={(e) => setTaskSearchRequestor(e.target.value)}
+              />
+            </div>
+
+            {/*}
+              <div className="dropdown-group">
+                <select
+                  className={`inbarangay-services-module-filter-dropdown ${taskStatusFilter ? "has-value" : ""}`}
+                  value={taskStatusFilter}
+                  onChange={(e) => setTaskStatusFilter(e.target.value)}
+                >
+                  <option value="">Select Status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Rejected">Rejected</option>
+                  <option value="Pick-up">For Pick Up</option>
+                  <option value="In-Progress">In - Progress</option>
+                </select>
+              </div>
+              */}
+          </div>
+
+
+          
+
+
+            <div className="inbarangayreq-main-section">
               {loading ? (
                   <p>Loading Online Requests...</p>
                 ) : error ? (

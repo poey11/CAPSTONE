@@ -26,6 +26,63 @@ import { useSession } from "next-auth/react";
 
      const isAuthorized = ["Assistant Secretary", "Secretary", "Admin Staff"].includes(user?.position || "");
 
+
+
+
+/* 
+Added Filters for Tasks 
+*/
+
+
+
+ const [taskStatusFilter, setTaskStatusFilter] = useState("");
+const [taskSearchType, setTaskSearchType] = useState("");
+const [filteredTaskRequests, setFilteredTaskRequests] = useState(taskAssignedData);
+const [taskSearchRequestId, setTaskSearchRequestId] = useState("");
+const [taskSearchRequestor, setTaskSearchRequestor] = useState("");
+
+
+
+
+/*For Names*/
+const normalizeString = (str: string) =>
+  str.toLowerCase().replace(/\s+/g, " ").trim();
+
+
+useEffect(() => {
+  let filtered = taskAssignedData;
+
+  if (taskSearchRequestId !== "") {
+    filtered = filtered.filter((req) =>
+      req.requestId.toLowerCase().includes(taskSearchRequestId.toLowerCase())
+    );
+  }
+
+    if (taskSearchRequestor !== "") {
+      const normalizedSearch = normalizeString(taskSearchRequestor);
+      filtered = filtered.filter((req) =>
+        normalizeString(req.requestor).includes(normalizedSearch)
+      );
+    }
+
+
+  if (taskStatusFilter !== "") {
+    filtered = filtered.filter(
+      (req) => normalizeStatus(req.status) === normalizeStatus(taskStatusFilter)
+    );
+  }
+
+  setFilteredTaskRequests(filtered);
+  setTaskCurrentPage(1);
+}, [taskAssignedData, taskSearchRequestId, taskSearchRequestor, taskStatusFilter]);
+
+
+
+
+
+
+
+     
     // Helpers to manage viewed requests
       const getViewedRequests = (): string[] => {
         const data = localStorage.getItem("viewedRequests");
@@ -197,8 +254,8 @@ useEffect(() => {
     // TASK pagination
     const taskIndexOfLast = taskCurrentPage * requestsPerPage;
     const taskIndexOfFirst = taskIndexOfLast - requestsPerPage;
-    const currentTaskRequests = taskAssignedData.slice(taskIndexOfFirst, taskIndexOfLast);
-    const taskTotalPages = Math.ceil(taskAssignedData.length / requestsPerPage);
+    const currentTaskRequests = filteredTaskRequests.slice(taskIndexOfFirst, taskIndexOfLast);
+    const taskTotalPages = Math.ceil(filteredTaskRequests.length / requestsPerPage);
 
 
 
@@ -458,11 +515,26 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                         className="action-view-services"
                         onClick={() => handleView(request)}
                     >
-                    <img
-                      className={isAuthorized ? "edit-icon" : "view-icon"}
-                      src={isAuthorized ? "/Images/edit.png" : "/Images/view.png"}
-                      alt={isAuthorized ? "Edit" : "View"}
-                    />
+
+                           <img
+                                  className={
+                                    isAuthorized && request.status !== "Completed" && request.status !== "Rejected"
+                                      ? "edit-icon"
+                                      : "view-icon"
+                                  }
+                                  src={
+                                    isAuthorized && request.status !== "Completed" && request.status !== "Rejected"
+                                      ? "/Images/edit.png"
+                                      : "/Images/view.png"
+                                  }
+                                  alt={
+                                    isAuthorized && request.status !== "Completed" && request.status !== "Rejected"
+                                      ? "Edit"
+                                      : "View"
+                                  }
+                        />
+
+
                     </button>
 
                   </div>
@@ -504,7 +576,33 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
         {canSeeTasks && activeSection === "tasks" && (
           <>
 
-      <div className="onlinereq-main-section-tasks" /* edited this class*/>
+          <div className="onlinereq-section-2 filters-animated">
+
+              <div className="input-group-online">
+                  <input
+                    type="text"
+                    placeholder="Search by Request ID (e.g. LPLHOT - 0063)"
+                    className="online-services-module-filter"
+                    value={taskSearchRequestId}
+                    onChange={(e) => setTaskSearchRequestId(e.target.value)}
+                  />
+                </div>
+
+                <div className="input-group-online">
+                  <input
+                    type="text"
+                    placeholder="Search by Requestor Name (e.g. Juan Dela Cruz)"
+                    className="online-services-module-filter"
+                    value={taskSearchRequestor}
+                    onChange={(e) => setTaskSearchRequestor(e.target.value)}
+                  />
+                </div>
+
+          </div>
+
+
+
+      <div className="onlinereq-main-section" /* edited this class*/>
           
               {loading ? (
             <p>Loading Online Requests...</p>

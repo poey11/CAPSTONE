@@ -420,7 +420,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
     return (
         <>
             
-   <form onSubmit={handleSaveClick} className="hearing-main-section">
+   <form onSubmit={handleSaveClick} className="hearing-main-section-form">
 
        <div className="hearing-edit-header-body-top-section">
             
@@ -443,7 +443,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
 
 
                   <div className="hearing-edit-section-2">
-                        {!hearingDetails[index]?.filled && (<button type="submit" className="action-save-edit">Save</button>)}
+                        {!hearingDetails[index]?.filled && (<button type="submit" className="action-save-edit-hearing">Save</button>)}
                   </div>
         </div>
 
@@ -720,69 +720,6 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
            
             
             
-         {/*
-            
-                  <div className="section-2-dialouge-edit">
-                  <p>Hearing  Information</p>
-                
-                    <p>Complainant's Name</p>
-                    <select className="input-group-edit" disabled={hearingDetails[index]?.filled}
-                    name="Cstatus"
-                    id="Cstatus"
-                    value={details.Cstatus||hearingDetails[index]?.Cstatus||""}
-                    onChange={handleChange}
-                    >
-                        <option value="Present">Present</option>
-                        <option value="Absent">Absent</option>
-                    </select>
-                     
-                  </div>
-                  <div className="section-2-dialouge-edit">
-                      <p>Respondents' Name</p>
-                      <select className="input-group-edit" disabled={hearingDetails[index]?.filled}
-                        name="Rstatus"
-                        id="Rstatus"
-                        value={details.Rstatus||hearingDetails[index]?.Rstatus||""}
-                        onChange={handleChange}
-                        >
-                            <option value="Present">Present</option>
-                            <option value="Absent">Absent</option>
-                      </select>
-
-                  </div>
-        
-             
-        
-               
-                  <div className="section-4-dialouge-edit">
-                 
-                      <div className="fields-section-edit">
-                     
-                            <p>Second Hearing Officer</p>
-                            <input type="text" 
-                            name="secondHearingOfficer"
-                            id="secondHearingOfficer"
-                            value={details.secondHearingOfficer||hearingDetails[index]?.secondHearingOfficer||""}
-                            onChange={handleChange}
-                            className="search-bar-edit" 
-                            placeholder="Enter Hearing Officer"
-                            disabled={hearingDetails[index]?.filled||false}
-                            />
-
-                            <p>Third Hearing Officer</p>
-                            <input type="text" 
-                            name="thirdHearingOfficer"
-                            id="thirdHearingOfficer"
-                            value={details.thirdHearingOfficer||hearingDetails[index]?.thirdHearingOfficer||""}
-                            onChange={handleChange}
-                            className="search-bar-edit" 
-                            disabled={hearingDetails[index]?.filled||false}
-                            placeholder="Enter Hearing Officer"
-                            />
-                      </div>
-
-                  </div>
-         */}
 
         {showDoneIncidentPopup && (
           <div className="confirmation-popup-overlay-add">
@@ -790,13 +727,32 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
               <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
               <p>Has the incident case been settled?</p>
               <div className="yesno-container-add">
+                {/*}
                 {hearing !==3 ? (
                   <button
                     onClick={() => setShowDoneIncidentPopup(false)}
                     className="no-button-add"
                   >
                     No
-                  </button>
+                  */}
+
+                   {hearing !== 3 ? (
+                    <button
+                      onClick={() => {
+                        setShowDoneIncidentPopup(false);
+                        setPopupMessage("If case is reopened, generate a letter again.");
+                        setShowPopup(true);
+
+                        // Auto-hide popup after 3 seconds (optional)
+                        setTimeout(() => {
+                          setShowPopup(false);
+                        }, 3000);
+                      }}
+                      className="no-button-add"
+                    >
+                      No
+                    </button>
+
                 ): hearing === 3  && (
                   <button
                     onClick={() => handleClosingCase(false)}
@@ -818,74 +774,72 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
           </div>    
         )}
 
-        {showSubmitPopupB && (
-          <div className="confirmation-popup-overlay-add">
-            <div className="confirmation-popup-add">
 
-                <>
-                  <p>How was the case settled?</p>
-                  <div className="settlement-options">
-                    <label>
-                      <input
-                        type="radio"
-                        name="settlementMethod"
-                        checked={toUpdate?.isMediation === true}
-                        onChange={() => setToUpdate((prev: any) => ({
-                          ...prev,
-                          isMediation: true,
-                          isConciliation: false,
-                          isArbitration: false,
-                        }))}
-                      />
-                      Mediation
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="settlementMethod"
-                        checked={toUpdate?.isConciliation === true}
-                        onChange={() => setToUpdate((prev: any) => ({
-                          ...prev,
-                          isMediation: false,
-                          isConciliation: true,
-                          isArbitration: false,
-                        }))}
-                      />
-                      Conciliation
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="settlementMethod"
-                        checked={toUpdate?.isArbitration === true}
-                        onChange={() => setToUpdate((prev: any) => ({
-                          ...prev,
-                          isMediation: false,
-                          isConciliation: false,
-                          isArbitration: true,
-                        }))}
-                      />
-                      Arbitration
-                    </label>
-                  </div>
 
-                  <div className="yesno-container-add">
-                    {/* <button
-                      onClick={() => setShowSubmitPopupB(false)}
-                      className="no-button-add"
-                    >
-                      Cancel
-                    </button> */}
-                    <button onClick={confirmSubmitB} className="yes-button-add">
-                      Submit
-                    </button>
-                  </div>
-                </>
-        
+{showSubmitPopupB && (
+  <div className="confirmation-popup-overlay-add-section">
+    <div className="confirmation-popup-add-section">
+      <p className="popup-title-section">How was the case settled?</p>
 
-            </div>
-          </div>
-        )}
+      <div className="settlement-options-modern-section">
+        {[
+          { label: "Mediation", key: "isMediation" },
+          { label: "Conciliation", key: "isConciliation" },
+          { label: "Arbitration", key: "isArbitration" },
+        ].map(({ label, key }) => {
+          const isSelected = toUpdate?.[key] === true;
+          return (
+            <label
+              className={`settlement-card-section ${isSelected ? "selected-section" : ""}`}
+              key={key}
+            >
+              <input
+                type="radio"
+                name="settlementMethod"
+                checked={isSelected}
+                onChange={() =>
+                  setToUpdate((prev: any) => ({
+                    ...prev,
+                    isMediation: key === "isMediation",
+                    isConciliation: key === "isConciliation",
+                    isArbitration: key === "isArbitration",
+                  }))
+                }
+              />
+              <span>{label}</span>
+            </label>
+          );
+        })}
+      </div>
+
+      <div className="yesno-container-add-section">
+        <button
+          className="yes-button-add-section"
+          onClick={() => {
+            const isAnySelected =
+              toUpdate?.isMediation || toUpdate?.isConciliation || toUpdate?.isArbitration;
+
+            if (!isAnySelected) {
+              setPopupErrorMessage("Please select a settlement method before submitting.");
+              setShowErrorPopup(true);
+
+              // Auto-hide after 3 seconds
+              setTimeout(() => {
+                setShowErrorPopup(false);
+              }, 3000);
+            } else {
+              confirmSubmitB();
+            }
+          }}
+        >
+          Submit
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
+
 
 
         {showSubmitPopup && (
@@ -920,7 +874,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             )}
 
             {showErrorPopup && (
-                <div className={`error-popup-overlay-add show`}>
+                <div className={`error-popup-overlay-settled show`}>
                     <div className="popup-add">
                       <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
                       <p>{popupErrorMessage}</p>
