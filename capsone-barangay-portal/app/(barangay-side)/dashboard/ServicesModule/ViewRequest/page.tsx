@@ -731,7 +731,7 @@ Functions for Reason for Reject
         { key: "cohabitationStartDate", label: "Start of Cohabitation" },
         { key: "cohabitationRelationship", label: "Cohabitation Relationship"},
         { key: "noIncomePurpose", label: "No Income Purpose" },
-        { key: "noIncomeChildFName", label: "Son/Daughther's Name" },
+        { key: "noIncomeChildFName", label: "Son/Daughter's Name" },
         { key: "address", label: "Requestor's Address" },
         { key: "estateSince", label: "Estate Since" },
         { key: "guardianshipType", label: "Guardianship Type" },
@@ -1940,7 +1940,7 @@ Functions for Reason for Reject
 
       const notificationRef = collection(db, "BarangayNotifications");
 
-      if (requestData?.purpose === "Residency") {
+      if (requestData?.purpose === "Residency" && requestData?.reqType === "Online") {
         await addDoc(notificationRef, {
           message: `You have been assigned an appointment for picture taking for ${requestData?.purpose} for ${requestData?.requestorFname}.`,
           timestamp: new Date(),
@@ -1950,7 +1950,7 @@ Functions for Reason for Reject
           recipientRole: "Admin Staff",
           requestID: id,
         });
-      } else if (requestData?.docType === "Barangay Indigency") {
+      } else if (requestData?.docType === "Barangay Indigency" && requestData?.reqType === "Online") {
         await addDoc(notificationRef, {
           message: `You have been assigned an appointment for interview for ${requestData?.docType} ${requestData?.purpose} for ${requestData?.requestorFname}.`,
           timestamp: new Date(),
@@ -1967,6 +1967,7 @@ Functions for Reason for Reject
 
     const [showInterviewForm, setShowInterviewForm] = useState(false);
     const [interviewRemarks, setInterviewRemarks] = useState("");
+
     const handleInterviewRemarks = async(e:any) => {
       e.preventDefault();
       console.log("Interview Remarks: ", interviewRemarks);
@@ -2036,7 +2037,17 @@ Functions for Reason for Reject
       }
       await updateDoc(docRef, updatedData);
 
-
+      const notificationRef = collection(db, "BarangayNotifications");
+      await addDoc(notificationRef, {
+        message: `A picture has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.`,
+        timestamp: new Date(),
+        requestorId: requestData?.accID || "",  // adjust based on your actual data context
+        isRead: false,
+        transactionType: "Online Service Request",
+        recipientRole: "Assistant Secretary",
+        requestID: id,
+      });
+    
 
       setshowPhotoUpload(false); 
     }

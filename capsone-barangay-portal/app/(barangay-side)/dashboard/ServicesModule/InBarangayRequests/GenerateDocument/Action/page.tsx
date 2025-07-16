@@ -1116,30 +1116,31 @@ export default function action() {
         const notificationRef = collection(db, "BarangayNotifications");
 
         const useDocTypeAsMessage = 
-        clearanceInput.docType === "Business Permit" || 
-        clearanceInput.docType === "Temporary Business Permit";
+      clearanceInput.docType === "Business Permit" || 
+      clearanceInput.docType === "Temporary Business Permit";
       
-        await addDoc(notificationRef, {
-          message: `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
-          timestamp: new Date(),
-          requestorId: clearanceInput?.residentId,
-          isRead: false,
-          transactionType: "Online Service Request",
-          recipientRole: (
-            clearanceInput.purpose === "First Time Jobseeker" ||
-            clearanceInput.docType === "Barangay Certificate" ||
-            clearanceInput.docType === "Barangay Clearance" ||
-            clearanceInput.docType === "Barangay Indigency" ||
-            clearanceInput.docType === "Temporary Business Permit" ||
-            clearanceInput.docType === "Construction" ||
-            (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
-          )
-            ? "Assistant Secretary"
-            : "Admin Staff",
-          requestID: clearanceInput?.requestId,
-        });
-        
-        
+      await addDoc(notificationRef, {
+        message: 
+          clearanceInput.purpose === "Residency"
+            ? `New Residency requested by ${clearanceInput.requestorFname}.`
+            : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
+        timestamp: new Date(),
+        requestorId: clearanceInput.residentId,
+        isRead: false,
+        transactionType: "Online Service Request",
+        recipientRole: (
+          clearanceInput.purpose === "First Time Jobseeker" ||
+          clearanceInput.docType === "Barangay Certificate" ||
+          clearanceInput.docType === "Barangay Clearance" ||
+          clearanceInput.docType === "Temporary Business Permit" ||
+          clearanceInput.docType === "Construction" ||
+          (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
+        )
+          ? "Assistant Secretary"
+          : "Admin Staff",
+        requestID: id,
+      });
+              
                 
     };
 

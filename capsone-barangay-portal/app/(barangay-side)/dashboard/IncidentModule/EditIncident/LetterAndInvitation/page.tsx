@@ -69,20 +69,29 @@ export default function GenerateDialogueLetter() {
 
     useEffect(() => {
         const fetchStaffList = async () => {
+            if (!reportData?.department) return; // make sure we have the department first
             try {
-                const staffquery = query(collection(db, "BarangayUsers"), where("position", "==","LF Staff"), where("firstTimelogin", "==", false));
+                const staffquery = query(
+                    collection(db, "BarangayUsers"),
+                    where("position", "==", "LF Staff"),
+                    where("department", "==", reportData.department),
+                    where("firstTimelogin", "==", false)
+                );
                 const querySnapshot = await getDocs(staffquery);
-                
+    
+                const staffList: any[] = [];
                 querySnapshot.forEach((doc) => {
-                    setListOfStaffs((prev) => [...prev, { ...doc.data(), id: doc.id }]);
-                  });
-      
+                    staffList.push({ ...doc.data(), id: doc.id });
+                });
+                setListOfStaffs(staffList); // set once after loop
             } catch (error: any) {
-              console.error("Error fetching LT List:", error.message);
-            }    
-        }
+                console.error("Error fetching LT List:", error.message);
+            }
+        };
+    
         fetchStaffList();
-    },[]);
+    }, [reportData?.department]);
+    
 
 
     useEffect(() => {
