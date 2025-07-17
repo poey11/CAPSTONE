@@ -117,12 +117,20 @@ export default function TopMenu() {
     if (session && session?.user?.id && userPosition && createdDate) {
       console.log("Fetching notifications for user:", userPosition, "created after:", createdDate);
 
-      const qRole = query(
-        collection(db, "BarangayNotifications"),
-        where("recipientRole", "==", userPosition),
-        orderBy("timestamp", "desc")
-      );
-
+      let qRole;
+      if (userPosition === "Secretary") {
+        qRole = query(
+          collection(db, "BarangayNotifications"),
+          where("recipientRole", "in", ["Secretary", "Assistant Secretary"]),
+          orderBy("timestamp", "desc")
+        );
+      } else {
+        qRole = query(
+          collection(db, "BarangayNotifications"),
+          where("recipientRole", "==", userPosition),
+          orderBy("timestamp", "desc")
+        );
+      }
       const qRespondent = query(
         collection(db, "BarangayNotifications"),
         where("respondentID", "==", session?.user?.id),
@@ -227,6 +235,7 @@ export default function TopMenu() {
     ? notifications.filter(msg =>
         (!createdDate || (msg.timestamp?.toDate?.() ?? new Date(msg.timestamp)) > createdDate) &&
         (
+          (userPosition === "Secretary" && ["Secretary", "Assistant Secretary"].includes(msg.recipientRole)) ||
           (msg.recipientRole === userPosition && !msg.respondentID) ||  // for generic role messages
           msg.respondentID === session?.user?.id                       // or direct assignment
         )
