@@ -236,7 +236,7 @@ export default function TopMenu() {
         (!createdDate || (msg.timestamp?.toDate?.() ?? new Date(msg.timestamp)) > createdDate) &&
         (
           (userPosition === "Secretary" && ["Secretary", "Assistant Secretary"].includes(msg.recipientRole)) ||
-          (msg.recipientRole === userPosition && !msg.respondentID) ||  // for generic role messages
+          (msg.recipientRole === userPosition || msg.respondentID === session?.user?.id) ||  // for generic role messages
           msg.respondentID === session?.user?.id                       // or direct assignment
         )
       )
