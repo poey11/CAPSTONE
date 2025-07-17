@@ -130,7 +130,7 @@ const handlePrint = async(requestData:any) => {
         const urlB = URL.createObjectURL(blobB);
         const linkB = document.createElement("a");
         linkB.href = urlB;
-        linkB.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_ID.pdf`;
+        linkB.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`;
         linkB.click();
         URL.revokeObjectURL(urlB);
         linkB.remove();
@@ -302,7 +302,7 @@ const handlePrint = async(requestData:any) => {
         const urlB = URL.createObjectURL(blobB);
         const linkB = document.createElement("a");
         linkB.href = urlB;
-        linkB.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_ID.pdf`;
+        linkB.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`;
         linkB.click();
         URL.revokeObjectURL(urlB);
         linkB.remove();
@@ -351,7 +351,7 @@ const handlePrint = async(requestData:any) => {
         const urlB = URL.createObjectURL(blobB);
         const linkB = document.createElement("a");
         linkB.href = urlB;
-        linkB.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_certificate.pdf`;
+        linkB.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`;
         linkB.click();
         URL.revokeObjectURL(urlB);
         linkB.remove();
@@ -506,7 +506,7 @@ const handlePrint = async(requestData:any) => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_certificate.pdf`;
+    link.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`;
     link.click();
     URL.revokeObjectURL(url);
     link.remove();
