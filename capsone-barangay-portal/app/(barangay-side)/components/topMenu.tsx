@@ -217,31 +217,126 @@ export default function TopMenu() {
         console.error("Error marking notification as read:", error);
       }
     }
-
-    if (notification.transactionType === "Online Assigned Incident" || notification.transactionType === "Online Incident") {
-      router.push(`/dashboard/IncidentModule/OnlineReports/ViewOnlineReport?id=${notification.incidentID}`);
-    } else if (notification.transactionType === "Assigned Incident") {
-      router.push(`/dashboard/IncidentModule/EditIncident?id=${notification.incidentID}`);
-    } else if (notification.transactionType === "Resident Registration") {
-      router.push(`/dashboard/admin/viewResidentUser?id=${notification.accID}`);
-    } else if (notification.transactionType === "Online Service Request" || "Online Assigned Service Request" || "Service Request" || "Assigned Service Request") {
-      router.push(`/dashboard/ServicesModule/ViewRequest?id=${notification.requestID}`);
+  
+    const { transactionType, incidentID, requestID, accID, department } = notification;
+  
+    if (["Online Assigned Incident", "Online Incident"].includes(transactionType)) {
+      router.push(`/dashboard/IncidentModule/OnlineReports/ViewOnlineReport?id=${incidentID}`);
+    } else if (transactionType === "Assigned Incident" || transactionType === "Department Incident") {
+      router.push(`/dashboard/IncidentModule/EditIncident?id=${incidentID}`);
+    } else if (transactionType === "Resident Registration") {
+      router.push(`/dashboard/admin/viewResidentUser?id=${accID}`);
+    } else if (
+      ["Online Service Request", "Online Assigned Service Request", "Service Request", "Assigned Service Request"].includes(transactionType)
+    ) {
+      router.push(`/dashboard/ServicesModule/ViewRequest?id=${requestID}`);
     }
   };
+  
 
-  const unreadCount = notifications.filter((msg) => msg.isRead === false).length;
-  const filteredMessages =
+  const mergedNotifs = Array.from(
+    new Map([...notifications, ...tasks].map(msg => [msg.id, msg])).values()
+  );
+  
+  const unreadFiltered = mergedNotifs.filter(msg => {
+    if (msg.isRead) return false;
+  
+    const notifDate = msg.timestamp?.toDate?.() ?? new Date(msg.timestamp);
+    const isAfterCreated = !createdDate || notifDate >= createdDate || notifDate.toDateString() === createdDate.toDateString();
+  
+    const isMyDeptOrOnline = msg.department === session?.user?.department || msg.transactionType === "Online Incident";
+    const isSecretaryGroup =
+      userPosition === "Secretary" &&
+      ["Secretary", "Assistant Secretary"].includes(msg.recipientRole);
+  
+      const isGenericToMyRole =
+        msg.recipientRole === userPosition &&
+        !msg.respondentID &&
+        isMyDeptOrOnline;
+    
+      const isDirectlyAssignedToMe = msg.respondentID === session?.user?.id;
+
+  
+      const passes = isAfterCreated && (isSecretaryGroup || isGenericToMyRole || isDirectlyAssignedToMe || isMyDeptOrOnline);
+  
+    if (!passes) {
+      console.warn("🔍 Notification excluded from unreadCount:", {
+        id: msg.id,
+        isRead: msg.isRead,
+        timestamp: msg.timestamp,
+        recipientRole: msg.recipientRole,
+        department: msg.department,
+        respondentID: msg.respondentID,
+        userPosition,
+        userID: session?.user?.id,
+        userDepartment: session?.user?.department,
+        isGenericToMyRole,
+        isDirectlyAssignedToMe,
+        isSecretaryGroup,
+        isAfterCreated
+      });
+    }
+  
+    return passes;
+  });
+  
+  const unreadCount = unreadFiltered.length;
+  
+  
+    const filteredMessages =
   filter === "all"
-    ? notifications.filter(msg =>
-        (!createdDate || (msg.timestamp?.toDate?.() ?? new Date(msg.timestamp)) > createdDate) &&
-        (
-          (userPosition === "Secretary" && ["Secretary", "Assistant Secretary"].includes(msg.recipientRole)) ||
-          (msg.recipientRole === userPosition && !msg.respondentID) ||  // for generic role messages
-          msg.respondentID === session?.user?.id                       // or direct assignment
-        )
-      )
-    : filter === "false"
-    ? notifications.filter(msg => !msg.isRead)
+    ? Array.from(
+        new Map(
+          [...notifications, ...tasks].map(msg => [msg.id, msg]) // merge & deduplicate by ID
+        ).values()
+      ).filter(msg => {
+        const notifDate = msg.timestamp?.toDate?.() ?? new Date(msg.timestamp);
+        const isAfterCreated = !createdDate || notifDate >= createdDate || notifDate.toDateString() === createdDate.toDateString();
+
+        const isSecretaryGroup =
+          userPosition === "Secretary" &&
+          ["Secretary", "Assistant Secretary"].includes(msg.recipientRole);
+
+          const isGenericToMyRole =
+          msg.recipientRole === userPosition &&
+          !msg.respondentID &&
+          (msg.department === session?.user?.department || msg.transactionType === "Online Incident");
+        
+          const isDirectlyAssignedToMe = msg.respondentID === session?.user?.id;
+        
+
+          const isTaskAdded =
+            tasks.find(task => task.id === msg.id) !== undefined;
+
+        return isAfterCreated && (isSecretaryGroup || isGenericToMyRole || isDirectlyAssignedToMe || isTaskAdded);
+      }).sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
+      : filter === "false"
+      ? Array.from(
+          new Map([...notifications, ...tasks].map(msg => [msg.id, msg])).values()
+        ).filter(msg => {
+          if (msg.isRead) return false;
+      
+          const notifDate = msg.timestamp?.toDate?.() ?? new Date(msg.timestamp);
+          const isAfterCreated = !createdDate || notifDate >= createdDate || notifDate.toDateString() === createdDate.toDateString();
+      
+          const isMyDeptOrOnline = msg.department === session?.user?.department || msg.transactionType === "Online Incident";
+      
+          const isSecretaryGroup =
+            userPosition === "Secretary" &&
+            ["Secretary", "Assistant Secretary"].includes(msg.recipientRole);
+      
+          const isGenericToMyRole =
+            msg.recipientRole === userPosition &&
+            !msg.respondentID &&
+            isMyDeptOrOnline;
+      
+            const isDirectlyAssignedToMe = msg.respondentID === session?.user?.id;
+
+      
+          return isAfterCreated && (isSecretaryGroup || isGenericToMyRole || isDirectlyAssignedToMe);
+        })
+      
+      
     : filter === "tasks"
     ? tasks
     : filter === "department"
