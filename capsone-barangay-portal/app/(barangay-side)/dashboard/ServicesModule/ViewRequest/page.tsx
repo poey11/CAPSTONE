@@ -299,6 +299,7 @@ const ViewOnlineRequest = () => {
             residentId: requestData.residentId || "",
             identificationFileURL: requestData.validIDjpg || "",
             firstTimeClaimed: false,
+            createdBy: "Assistant Secretary",
           };
       
           await addDoc(jobSeekerRef, newDoc);
