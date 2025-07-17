@@ -300,6 +300,7 @@ const ViewOnlineRequest = () => {
             identificationFileURL: requestData.validIDjpg || "",
             firstTimeClaimed: false,
             createdBy: "Assistant Secretary",
+            createdAt: new Date().toISOString().split("T")[0], // "YYYY-MM-DD"
           };
       
           await addDoc(jobSeekerRef, newDoc);
