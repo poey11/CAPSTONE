@@ -56,8 +56,6 @@ export default function GenerateDialogueLetter() {
             address: "",
             contact: "",
         },
-        sendDialogueSms: false,
-        sendHearingSms: false,
     });
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -191,9 +189,7 @@ export default function GenerateDialogueLetter() {
     const sendSMSForDialogue = async () => {
      //dont forget to add the assing staff contact number
        setIsLoading(true); // Start loading
-
-
-      try{
+        try{
         const response = await fetch("/api/clickSendApi", {
             method: "POST",
             headers: {
@@ -201,7 +197,11 @@ export default function GenerateDialogueLetter() {
             },
             body: JSON.stringify({
                 to: otherInfo.complainant.contact,
-                message: `Good day Mr./Ms. ${otherInfo.complainant.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a dialogue invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled dialogue between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.\n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
+                message: `Good day Mr./Ms. ${otherInfo.complainant.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a
+                 dialogue invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important 
+                 details regarding the scheduled dialogue between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.
+                 \n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.
+                 \n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
             })
         });
         if (!response.ok) throw new Error("Failed to send SMS");
@@ -217,10 +217,37 @@ export default function GenerateDialogueLetter() {
             },
             body: JSON.stringify({
                 to: otherInfo.respondent.contact,
-               message: `Good day Mr./Ms. ${otherInfo.respondent.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a dialogue invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled dialogue between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.\n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
+               message: `Good day Mr./Ms. ${otherInfo.respondent.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a 
+               dialogue invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important 
+               details regarding the scheduled dialogue between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.
+               \n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,
+               \nLupon Tagapamayapa\nBarangay Fairview`
             })
         });
         if (!responseB.ok) throw new Error("Failed to send SMS");
+
+        
+        let  staffContactNos = filteredStaffs.find(staff => staff.id === otherInfo.LuponStaffId)?.phone;
+
+
+        const responseC = await fetch("/api/clickSendApi", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                to: staffContactNos,
+                message: `Good day Mr./Ms. ${otherInfo.LuponStaff},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview has prepared a 
+                dialogue letter that requires your attention.\n\nYou are requested to proceed to the Lupon office on ${otherInfo.DateOfDelivery} 
+                to retrieve the said document. Once received, kindly ensure its prompt delivery to both the respondent and the complainant involved in the case.
+                \n\nThis letter contains important information regarding the scheduled dialogue, and your assistance in facilitating its delivery is greatly appreciated.
+                \n\nShould you have any questions or need further clarification, please contact the Barangay Hall.\n\nThank you for your cooperation.
+                \n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
+
+            })
+
+        });
+        if (!responseC.ok) throw new Error("Failed to send SMS");
 
            setShowSubmitPopup({
                 show: true,
@@ -229,8 +256,9 @@ export default function GenerateDialogueLetter() {
                 letterType: "dialogue",
             });
 
-
+            
         const dataB = await responseB.json();
+
         console.log(dataB);
       }
       catch(err) {
@@ -252,7 +280,13 @@ export default function GenerateDialogueLetter() {
               },
               body: JSON.stringify({
                   to: otherInfo.respondent.contact,
-                     message: `Good day Mr./Ms. ${otherInfo.respondent.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a Hearing invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled hearing between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.\n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
+                     message: 
+                     `Good day Mr./Ms. ${otherInfo.respondent.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay 
+                     Fairview will be delivering a Hearing invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on 
+                     ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled hearing between parties involved. 
+                     We kindly ask for your attention and cooperation in receiving and acknowledging the said document.
+                     \n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.
+                     \n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
               })
           });
           if (!response.ok) throw new Error("Failed to send SMS");
@@ -267,10 +301,36 @@ export default function GenerateDialogueLetter() {
             },
             body: JSON.stringify({
                 to: otherInfo.complainant.contact,
-                 message: `Good day Mr./Ms. ${otherInfo.complainant.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a Hearing invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled hearing between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.\n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.\n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
+                 message: `Good day Mr./Ms. ${otherInfo.complainant.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview will be delivering a 
+                 Hearing invitation to you. The invitation will be handed personally by ${otherInfo.LuponStaff} on ${otherInfo.DateOfDelivery}.\n\nThis letter contains important details
+                  regarding the scheduled hearing between parties involved. We kindly ask for your attention and cooperation in receiving and acknowledging the said document.
+                  \n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.
+                  \n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
             })
         });
         if (!responseB.ok) throw new Error("Failed to send SMS");
+        
+        let  staffContactNos = filteredStaffs.find(staff => staff.id === otherInfo.LuponStaffId)?.phone;
+
+
+        const responseC = await fetch("/api/clickSendApi", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                to: staffContactNos,
+                message: `Good day Mr./Ms. ${otherInfo.LuponStaff},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview has prepared a 
+                hearing invitation letter that requires your attention.\n\nYou are requested to proceed to the Lupon office on ${otherInfo.DateOfDelivery} 
+                to retrieve the said document. Once received, kindly ensure its prompt delivery to both the respondent and the complainant involved in the case.
+                \n\nThis letter contains important information regarding the scheduled dialogue, and your assistance in facilitating its delivery is greatly appreciated.
+                \n\nShould you have any questions or need further clarification, please contact the Barangay Hall.\n\nThank you for your cooperation.
+                \n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
+
+            })
+
+        });
+        if (!responseC.ok) throw new Error("Failed to send SMS");
 
               setShowSubmitPopup({
                 show: true,
@@ -282,6 +342,8 @@ export default function GenerateDialogueLetter() {
 
         const dataB = await responseB.json();
         console.log(dataB);
+        
+        
         }
         catch(err) {
           console.log(err);
@@ -522,7 +584,6 @@ export default function GenerateDialogueLetter() {
                 LuponStaff: otherInfo.LuponStaff, // display name
                 LuponStaffId: otherInfo.LuponStaffId, // keep staffId here silently
                 DateFiled: otherInfo.DateFiled,
-                dialougeSMS: otherInfo.sendDialogueSms,
             });
     
             //  Add the barangay notification for assigned staff
@@ -584,7 +645,6 @@ export default function GenerateDialogueLetter() {
                 LuponStaffId: otherInfo.LuponStaffId,
                 DateFiled: otherInfo.DateFiled,
                 hearingNumber: hearing,
-                hearingSms: otherInfo.sendHearingSms,
             });
     
             // Update parent doc hearing info
@@ -660,13 +720,6 @@ export default function GenerateDialogueLetter() {
                  printDialogue()
             }
             clearForm();
-        } else if (action === "sendSMS") {
-            if(actionId === "summon"){
-                //sendSMSForSummons();
-            }
-            else{
-                //sendSMSForDialogue();
-            }
         }
         console.log(otherInfo);
     }
@@ -708,8 +761,6 @@ export default function GenerateDialogueLetter() {
                 address: userInfo.respondent?.address || "",
                 contact: userInfo.respondent?.contact || ""
             },
-            sendDialogueSms: false,
-            sendHearingSms: false,
         })
     }
     
@@ -849,6 +900,7 @@ export default function GenerateDialogueLetter() {
                             if (showSubmitPopup.letterType === "summon") {
                                 setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
+                                    sendSMSForSummons();
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
                                 }, 5000); // wait 3 seconds
                               } else {
@@ -870,6 +922,7 @@ export default function GenerateDialogueLetter() {
                             if (showSubmitPopup.letterType === "dialogue") {
                                 setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
+                                    sendSMSForDialogue();
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
                                 }, 5000); // wait 3 seconds
                               } else {
