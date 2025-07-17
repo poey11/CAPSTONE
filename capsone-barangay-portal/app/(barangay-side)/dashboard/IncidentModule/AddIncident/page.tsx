@@ -391,7 +391,7 @@ const delayedSubmit = (e: React.FormEvent) => {
   }, 0); 
 };
 
-const handleSubmit = (event: React.FormEvent) => {
+const handleSubmit = async (event: React.FormEvent) => {
   event.preventDefault(); 
 
   setShowFieldErrors(true);
@@ -569,6 +569,17 @@ const handleSubmit = (event: React.FormEvent) => {
       setHasSubmitted(true);
       const docId = await handleUpload();
       
+              // Create a notification for LF Staff's department
+              const notificationRef = collection(db, "BarangayNotifications");
+              await addDoc(notificationRef, {
+                message: `New incident report was reported to the ${user?.department} department by ${user?.fullName}.`,
+                timestamp: new Date(),
+                isRead: false,
+                transactionType: "Department Incident",
+                recipientRole: "LF Staff",
+                incidentID: docId?.id,
+                department: user?.department,
+              });
       
       setPopupMessage("Incident Successfully Submitted!");
       setShowPopup(true);
