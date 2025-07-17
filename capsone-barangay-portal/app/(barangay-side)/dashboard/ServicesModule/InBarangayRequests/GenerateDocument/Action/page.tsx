@@ -1129,15 +1129,21 @@ export default function action() {
         isRead: false,
         transactionType: "Online Service Request",
         recipientRole: (
-          clearanceInput.purpose === "First Time Jobseeker" ||
-          clearanceInput.docType === "Barangay Certificate" ||
-          clearanceInput.docType === "Barangay Clearance" ||
-          clearanceInput.docType === "Temporary Business Permit" ||
-          clearanceInput.docType === "Construction" ||
-          (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
-        )
-          ? "Assistant Secretary"
-          : "Admin Staff",
+          // Override for Barangay Certificate + Residency
+          (clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency")
+            ? "Admin Staff"
+            : (
+              clearanceInput.purpose === "First Time Jobseeker" ||
+              clearanceInput.docType === "Barangay Certificate" ||
+              clearanceInput.docType === "Barangay Clearance" ||
+              clearanceInput.docType === "Temporary Business Permit" ||
+              clearanceInput.docType === "Construction" ||
+              (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
+            )
+              ? "Assistant Secretary"
+              : "Admin Staff"
+        ),
+        
         requestID: id,
       });
               
