@@ -1,12 +1,14 @@
 "use client"
 import "@/CSS/IncidentModule/Letters.css";
 import { useRouter, useSearchParams } from "next/navigation";
-import {  useEffect,useState } from "react";
+import {  act, use, useEffect,useState } from "react";
 import { addDoc,collection,doc, getDocs, onSnapshot, orderBy, query, updateDoc, where, setDoc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
 import { getLocalDateString, getLocalDateTimeString } from "@/app/helpers/helpers";
 import { getSpecificDocument, generateDownloadLink } from "../../../../../helpers/firestorehelper";
+import { list } from "firebase/storage";
+import { set } from "date-fns";
 
 export default function GenerateDialogueLetter() {
     const user = useSession().data?.user;
@@ -65,51 +67,44 @@ export default function GenerateDialogueLetter() {
 
     const todayWithTime = getLocalDateTimeString(tomorrow);
     const [isDialogue, setIsDialogue] = useState(false);
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<any[]>([]);
 
     useEffect(() => {
-        const fetchStaffList = async () => {
-            if (!reportData?.department) return; // make sure we have the department first
-            try {
-                const staffquery = query(
-                    collection(db, "BarangayUsers"),
-                    where("position", "==", "LF Staff"),
-                    where("department", "==", reportData.department),
-                    where("firstTimelogin", "==", false)
-                );
-                const querySnapshot = await getDocs(staffquery);
-    
-                const staffList: any[] = [];
-                querySnapshot.forEach((doc) => {
-                    staffList.push({ ...doc.data(), id: doc.id });
-                });
-                setListOfStaffs(staffList); // set once after loop
-            } catch (error: any) {
-                console.error("Error fetching LT List:", error.message);
+        const staffquery = query(collection(db, "BarangayUsers"), where("position", "==","LF Staff"), where("firstTimelogin", "==", false));
+        const unsubscribe = onSnapshot(staffquery, (snapshot) => {
+            const staffList: any[] = [];
+            snapshot.forEach((doc) => {
+                staffList.push({ ...doc.data(), id: doc.id });
+            });
+            console.log("Staff List:", staffList);
+            setListOfStaffs(staffList);
+        });                     
+
+            
+        return () => { unsubscribe();  // Clean up the listener on unmount}
             }
-        };
-    
-        fetchStaffList();
-    }, [reportData?.department]);
-    
+        },[]);
 
+        const filteredStaffs = listOfStaffs.filter((staff) => staff.department === department);
 
-    useEffect(() => {
-        if (!docId) return; // or use `id` or whatever your incident ID is called
-        const docRef = doc(db, "IncidentReports", docId, "DialogueMeeting", docId);
-      
-        const unsubscribe = onSnapshot(docRef, (docSnap) => {
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data.filled === true) {
-              setIsDialogueSectionFilled(true);
+        console.log("Filtered Staffs:", filteredStaffs);
+        
+          useEffect(() => {
+          if (!docId) return;
+          const docRef = doc(db, "IncidentReports", docId, "DialogueMeeting", docId);
+        
+          const unsubscribe = onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              setIsDialogueSectionFilled(data.filled); // true or false
+            } else {
+              setIsDialogueSectionFilled(false); // default to false if no doc
             }
-          }
-        });
+          });
+        
+          return () => unsubscribe();
+        }, [docId]);
       
-        return () => unsubscribe();
-      }, [docId]);
-
     useEffect(() => {
         if(!docId) return;
         try {
@@ -131,9 +126,8 @@ export default function GenerateDialogueLetter() {
             
         }        
     
-    },[])
+    },[actionId])
 
-    const safeData = Array.isArray(data) ? data : [];
 
     useEffect(() => {
         if(!docId) return;
@@ -155,7 +149,6 @@ export default function GenerateDialogueLetter() {
             if (doc.exists()) {
                 const data = doc.data();
                 setUserInfo(data);
-                setLoading(false);
             } else {
                 console.log("No such document!");
             }
@@ -720,20 +713,25 @@ export default function GenerateDialogueLetter() {
         })
     }
     
-    console.log(safeData);
-    console.log(safeData.length)
 
 
     useEffect(() => {
-        if(docId){
-          getSpecificDocument("IncidentReports", docId, setReportData).then(() => setLoading(false));
-        }
-        else{
-          console.log("No document ID provided.");
-          setReportData(null);
-         
-        }
-      }, [docId]);
+      if(!docId) return;
+        const docRef = doc(db, "IncidentReports", docId);
+        const unsubscribe = onSnapshot(docRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setReportData(data);
+          } else {
+            console.log("No such document!");
+          }
+        });
+      setLoading(false);
+      // Cleanup function to unsubscribe from the snapshot listener
+        return () => unsubscribe();
+      
+      
+    }, [docId]);
   
       useEffect(() => {
         if(reportData?.file){
@@ -760,18 +758,64 @@ export default function GenerateDialogueLetter() {
     router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
     };
 
-// const hearingLabels = ["First", "Second", "Third"];
-// const hearingB = hearingLabels[hearing] || "First";
 
 
-useEffect(() => {
-    if (reportData?.status === "archived" && reportData?.departmentId) {
-      router.push(`/dashboard/IncidentModule/Department?id=${reportData?.departmentId}`);
-    }
-  }, [reportData?.status, reportData?.departmentId]);
-  
 
+    useEffect(() => {
+        if (reportData?.status === "archived" && reportData?.departmentId) {
+          router.push(`/dashboard/IncidentModule/Department?id=${reportData?.departmentId}`);
+        }
+    }, [reportData?.status, reportData?.departmentId]);
+    
+    type LetterSection = {
+        DateOfDelivery?: string;
+        DateTimeOfMeeting?: string;
+        LuponStaff?: string;
+        DateFiled?: string;
 
+    };
+
+    const [dialogueSection, setDialogueSection] = useState<LetterSection>({});
+    const [hearingSection, setHearingSection] = useState<LetterSection>({});
+    useEffect(() => {
+        if (actionId === "dialogue" && data.length > 0) {
+          const latestDoc = data[0]; // assuming latest is first due to orderBy desc
+          setDialogueSection({
+            DateOfDelivery: latestDoc.DateOfDelivery || "",
+            DateTimeOfMeeting: latestDoc.DateTimeOfMeeting || "",
+            LuponStaff: latestDoc.LuponStaff || "",
+            DateFiled: latestDoc.DateFiled || "",
+          });
+        }
+        else if((actionId === "summon" && data.length >= 3) ) {
+          const latestDoc = data[0]; // assuming latest is first due to orderBy desc
+          setHearingSection({
+            DateOfDelivery: latestDoc.DateOfDelivery || "",
+            DateTimeOfMeeting: latestDoc.DateTimeOfMeeting || "",
+            LuponStaff: latestDoc.LuponStaff || "",
+            DateFiled: latestDoc.DateFiled || "",
+          });
+
+        }
+    }, [actionId, data]);
+    console.log("data", data);
+    console.log("hearingSection", hearingSection);
+
+     const [summonLetterData, setSummonLetterData] = useState<any[]>([]);
+          useEffect(()=>{
+              if (!docId) return;
+              const colRef = query(
+                  collection(db, "IncidentReports", docId, "SummonsMeeting"),
+                  orderBy("createdAt", "desc")
+              );
+              const unsubscribe = onSnapshot(colRef, (snapshot) => {
+                  const fetchedData = snapshot.docs.map(doc => doc.data());
+                  setSummonLetterData(fetchedData);
+              });
+              return () => unsubscribe();
+          },[docId]);
+      
+    
   return (
     <main className="main-container-letter">
 
@@ -804,7 +848,8 @@ useEffect(() => {
                             setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
                             if (showSubmitPopup.letterType === "summon") {
                                 setTimeout(() => {
-                                  router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${reportData?.department}`);
+                                    router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
+
                                 }, 3000); // wait 3 seconds
                               } else {
                                 setTimeout(() => {
@@ -824,7 +869,7 @@ useEffect(() => {
 
                             if (showSubmitPopup.letterType === "dialogue") {
                                 setTimeout(() => {
-                                  router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}`);
+                                    router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
                                 }, 3000); // wait 3 seconds
                               } else {
                                 setTimeout(() => {
@@ -924,35 +969,48 @@ useEffect(() => {
                     </button>
 
                     <div className="hearing-submenu">
-                    {reportData?.isDialogue ? (
-                        isDialogueSectionFilled ? (
-                        <button className="submenu-button" name="summon" onClick={handleGenerateLetterAndInvitation}>
-                            <h1>Generate Summon Letters</h1>
-                        </button>
-                        ) : (
-                        <button
-                            className="submenu-button"
-                            name="summon"
-                            onClick={() => {
-                            setErrorPopup({ show: true, message: "Fill out the Dialogue Section first." });
+                    <button
+                      className="submenu-button"
+                      name="summon"
+                      onClick={(e) => {
+                        const lastSummon = summonLetterData[summonLetterData.length];
+                        const summonNo = ["First", "Second", "Third"];
+                      
+                        
+                        if (reportData?.isDialogue === false) {
+                          setErrorPopup({ show: true, message: "Generate a Dialogue Letter first." });
+                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                          return;
+                        }
+                      
+                        // ✅ Step 2: Check if dialogue section is filled
+                        if (!isDialogueSectionFilled) {
+                          
+                          setErrorPopup({ show: true, message: "Fill out the Dialogue Section first." });
+                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                          
+                          return;
+                        }
+                      
+                        // ✅ Step 3: Check if latest summon is not yet filled
+                        if(                          
+                          reportData?.generatedHearingSummons > 0 &&
+                          reportData?.generatedHearingSummons < 3 &&
+                          reportData?.generatedHearingSummons > summonLetterData.length 
+                        ) {
+                          if ((!lastSummon?.filled)) { 
+                            setErrorPopup({ show: true, message: `Fill out the ${summonNo[summonLetterData.length]} Hearing summons first.` });
                             setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                            }}
-                        >
-                            <h1>Generate Summon Letters</h1>
-                        </button>
-                        )
-                    ) : (
-                        <button
-                        className="submenu-button"
-                        name="summon"
-                        onClick={() => {
-                            setErrorPopup({ show: true, message: "Generate a Dialogue Letter First." });
-                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                        }}
-                        >
-                        <h1>Generate Summon Letters</h1>
-                        </button>
-                    )}
+                            return;
+                          }
+                        }
+                      
+                        // ✅ All good
+                        handleGenerateLetterAndInvitation(e);
+                      }}
+                    >
+                      <h1>Generate Summon Letters</h1>
+                    </button>
 
                     {hasSummonLetter ? (
                         <button className="submenu-button" name="section" onClick={handleHearingSection}>
@@ -994,16 +1052,8 @@ useEffect(() => {
                                     {(generatedHearingSummons < 3 && actionId==="summon") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                                     {(!isDialogue && actionId==="dialogue") && ( <button className="letter-announcement-btn" type="submit" name="print" >Print</button>)}
                                 
-                                {/* this button should disappear base on hearingSMS and summonsSMS and when pressed the button should disappear but for summon needs to be press 3 times before disppear */}
-                             
-                                {/* 
-                                <button className="letter-announcement-btn" type="submit" name="sendSMS">
-                                    Send SMS
-                                </button> 
-                                Add condition when the user presses the button (once for dialogue and 3 times for summons before disabling)
-                                */}
-
-                                 
+                                    
+                                    {/* <button className="letter-announcement-btn" type="submit" name="sendSMS">Send SMS</button> Add condition when the users presses the button will be disabled (once for dialogue and 3 times for summons before disabling) */}
                             </div>
 
                         )}
@@ -1198,49 +1248,41 @@ useEffect(() => {
                                     </div>
 
                                     <div className="section-2-information-bottom">
+                                         <div className="section-2-information-bottom">
                                         {actionId === "dialogue" ? (
                                         <>
-
-
-                                            <div className="section-2-letter-left-side-others">
-
-                                                <div className="fields-section-letter">
-                                                    <p>Date of Delivery</p>
-                                                    <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
-                                                    value={safeData[0]?.DateOfDelivery||otherInfo.DateOfDelivery}
-                                                    id="DateOfDelivery"
-                                                    name="DateOfDelivery"
-                                                    min={today}
-                                                    onKeyDown={(e) => e.preventDefault()}
-                                                    onChange={handleChange}
-                                                    required
-                                                    disabled = {safeData[0]?.DateOfDelivery ? true : false}
-                                                    />
-                                                </div>
-                                                <div className="fields-section-letter">
-                                                    <p>Date and Time of Meeting</p>
-                                                    <input type="datetime-local" className="generate-letter-input-field" 
-                                                    value={safeData[0]?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
-                                                    onKeyDown={(e) => e.preventDefault()}
-                                                    id="DateTimeOfMeeting"
-                                                    name="DateTimeOfMeeting"
-                                                    onChange={handleChange}
-                                                    min={todayWithTime}
-                                                    required
-                                                    disabled = {safeData[0]?.DateTimeOfMeeting ? true : false}
-                                                    />
-
-                                                </div>
+                                            <div className="fields-section-letter">
+                                                <p>Date of Delivery</p>
+                                                <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
+                                                value={dialogueSection?.DateOfDelivery||otherInfo.DateOfDelivery}
+                                                id="DateOfDelivery"
+                                                name="DateOfDelivery"
+                                                min={today}
+                                                onKeyDown={(e) => e.preventDefault()}
+                                                onChange={handleChange}
+                                                required
+                                                disabled = {dialogueSection?.DateOfDelivery ? true : false}
+                                                />
                                             </div>
+                                            <div className="fields-section-letter">
+                                                <p>Date and Time of Meeting</p>
+                                                <input type="datetime-local" className="generate-letter-input-field" 
+                                                value={dialogueSection?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
+                                                onKeyDown={(e) => e.preventDefault()}
+                                                id="DateTimeOfMeeting"
+                                                name="DateTimeOfMeeting"
+                                                onChange={handleChange}
+                                                min={todayWithTime}
+                                                required
+                                               disabled = {dialogueSection?.DateTimeOfMeeting ? true : false}
+                                                />
 
-
-                                            <div className="section-2-letter-right-side-others">
-
+                                            </div>
                                             <div className="fields-section-letter">
                                                 <p>Delivered By</p>      
                                                 <select
                                                         className="generate-letter-input-field-dropdown"
-                                                        value={safeData[0]?.LuponStaff || otherInfo.LuponStaff}
+                                                        value={dialogueSection?.LuponStaff||otherInfo.LuponStaff}
                                                         onChange={(e) => {
                                                             const select = e.target;
                                                             const selectedOption = select.options[select.selectedIndex];
@@ -1255,10 +1297,10 @@ useEffect(() => {
                                                             }));
                                                         }}
                                                         required
-                                                        disabled={!!safeData[0]?.LuponStaff}
+                                                       disabled={!!dialogueSection?.LuponStaff}
                                                     >
-                                                        <option value="">Select Official/Kagawad</option>
-                                                        {listOfStaffs.map((staff, index) => (
+                                                        <option disabled value="">Select Official/Kagawad</option>
+                                                        {filteredStaffs.map((staff, index) => (
                                                             <option
                                                                 key={index}
                                                                 value={`${staff.firstName} ${staff.lastName}`}
@@ -1275,7 +1317,7 @@ useEffect(() => {
                                             <div className="fields-section-letter">
                                                 <p>Date Filed</p>
                                             <input type="date" className="generate-letter-input-field" 
-                                                value={otherInfo.DateFiled}
+                                                value={dialogueSection?.DateFiled||otherInfo.DateFiled}
                                                 max={today}
                                                 id="DateFiled"
                                                 name="DateFiled"
@@ -1284,28 +1326,20 @@ useEffect(() => {
                                                 disabled
                                                 />
                                             </div>
-
-                                            </div>
-
-
                                         </>
                                         ) : (
                                         <>
-
-
-                                            <div className="section-2-letter-left-side-others">
-
-                                                                                            <div className="fields-section-letter">
+                                            <div className="fields-section-letter">
                                                 <p>Date of Delivery</p>
                                                 <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
-                                                value={otherInfo.DateOfDelivery}
+                                                value={hearingSection?.DateOfDelivery||otherInfo.DateOfDelivery}
                                                 id="DateOfDelivery"
                                                 name="DateOfDelivery"
                                                 min={today}
                                                 onKeyDown={(e) => e.preventDefault()}
                                                 onChange={handleChange}
                                                 required
-                                            
+                                                disabled = {hearingSection?.DateOfDelivery ? true : false}
                                                 />
 
                                             </div>
@@ -1313,25 +1347,23 @@ useEffect(() => {
                                             <div className="fields-section-letter">
                                                 <p>Date and Time of Meeting</p>
                                                     <input type="datetime-local" className="generate-letter-input-field" 
-                                                    value={otherInfo.DateTimeOfMeeting}
+                                                    value={hearingSection?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
                                                     onKeyDown={(e) => e.preventDefault()}
                                                     id="DateTimeOfMeeting"
                                                     name="DateTimeOfMeeting"
                                                     onChange={handleChange}
                                                     min={todayWithTime}
-                                                    required              />
+                                                    required             
+                                                    disabled = {hearingSection?.DateTimeOfMeeting ? true : false}
+                                                    />
 
                                             </div>
 
-                                            </div>
-
-                                            <div className="section-2-letter-right-side-others">
-
-                                          <div className="fields-section-letter">
+                                            <div className="fields-section-letter">
                                                 <p>Delivered By</p>
                                                 <select
                                                     className="generate-letter-input-field-dropdown"
-                                                    value={otherInfo.LuponStaff}
+                                                    value={hearingSection?.LuponStaff||otherInfo.LuponStaff}
                                                     onChange={(e) => {
                                                         const select = e.target;
                                                         const selectedOption = select.options[select.selectedIndex];
@@ -1346,10 +1378,12 @@ useEffect(() => {
                                                         LuponStaffId: selectedId
                                                         }));
                                                     }}
+                                                
+                                                    disabled={!!hearingSection?.LuponStaff}
                                                     required
                                                     >
-                                                    <option value="">Select Official/Kagawad</option>
-                                                    {listOfStaffs.map((staff, index) => (
+                                                    <option disabled value="">Select Official/Kagawad</option>
+                                                    {filteredStaffs.map((staff, index) => (
                                                         <option
                                                         key={index}
                                                         value={`${staff.firstName} ${staff.lastName}`}
@@ -1366,7 +1400,7 @@ useEffect(() => {
                                             <div className="fields-section-letter">
                                                 <p>Date Filed</p>
                                                 <input type="date" className="generate-letter-input-field" 
-                                                value={otherInfo.DateFiled}
+                                                value={hearingSection?.DateFiled || otherInfo.DateFiled}
                                                 max={today}
                                                 id="DateFiled"
                                                 name="DateFiled"
@@ -1376,14 +1410,9 @@ useEffect(() => {
                                                 />
 
                                             </div>
-
-                                                
-
-                                            </div>
-
-
                                         </>
                                         )}
+                                    </div>
                                     </div>
                                     </div>
 

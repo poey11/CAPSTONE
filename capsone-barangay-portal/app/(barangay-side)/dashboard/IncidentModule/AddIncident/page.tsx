@@ -635,26 +635,38 @@ const handleSubmit = (event: React.FormEvent) => {
     }
   };
 
-  const isOneWeekOrMore = (dateFiled: string | Date, createdAt: string | Date): boolean => {
-    const filedDate = new Date(dateFiled);
-    const createdDate = new Date(createdAt);
+  const isOneDayOrMore = (
+        dateFiled: string,     // e.g. "2025-07-13"
+        timeFiled: string,     // e.g. "21:06" or "21:06:00"
+        createdAt: string | Date
+        ): boolean => {
+          // Combine date + time into full ISO format
+          const filedDateTime = new Date(`${dateFiled}T${timeFiled}`);
+          const createdDate = new Date(createdAt);
+          console.log("filedDateTime", filedDateTime);
+          console.log("createdDate", createdDate);
 
-    const differenceInMilliseconds =  createdDate.getTime()-filedDate.getTime();
-    const differenceInDays = differenceInMilliseconds / (1000 * 60 * 60 * 24);
+          const diff = createdDate.getTime() - filedDateTime.getTime();
 
-    return differenceInDays >= 1;
-  };
-  
+          console.log("Time difference in ms:", diff);
+          
+
+          return diff >= 24 * 60 * 60 * 1000; // 24 hours in ms
+        };
+
 
   const [isIncidentLate, setIsIncidentLate] = useState(false);
 
   useEffect(() => {
     if (!reportInfo.dateFiled || !reportInfo.dateReceived) return;
 
-    const dateFiled = new Date(reportInfo.dateFiled);
-    const createdAt = new Date(reportInfo.dateReceived);
 
-    const isLate = isOneWeekOrMore(dateFiled, createdAt);
+    
+    const dateFiled = reportInfo.dateFiled;
+    const createdAt = new Date();
+    const timeFiled = reportInfo.timeFiled;
+
+    const isLate = isOneDayOrMore(dateFiled, timeFiled,createdAt);
     setIsIncidentLate(isLate);
 
     if (isLate) {
@@ -663,7 +675,7 @@ const handleSubmit = (event: React.FormEvent) => {
         isReportLate: true,
       }));
     }
-  }, [reportInfo.dateFiled, reportInfo.dateReceived]);
+  }, [reportInfo.dateFiled, reportInfo.timeFiled]);
 
 
   const handleBack = () => {

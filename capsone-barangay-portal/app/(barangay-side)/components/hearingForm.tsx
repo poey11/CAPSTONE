@@ -35,7 +35,6 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
     const user = useSession().data?.user;
     const [showHearingContent, setShowHearingContent] = useState(false); // Initially hidden
     const [hearingDetails, setHearingDetails] = useState<HearingDetails[]>([]);
-
     let nos ="";
     switch (index) {
         case 0:
@@ -161,7 +160,9 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
     };
     
     const searchParam = useSearchParams();
-        const docId = searchParam.get("id");
+    const docId = searchParam.get("id");
+    const department = searchParam.get("department");
+
 
     const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
     const [showPopup, setShowPopup] = useState(false);
@@ -256,8 +257,6 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             else{
                 setShowDoneIncidentPopup(true);
             }
-
-            
         } catch (error:any) {
             console.error("Error saving data:", error.message);
         }
@@ -368,6 +367,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
 
       setTimeout(() => {
         setShowPopup(false);
+        router.push(`/dashboard/IncidentModule/Department?id=${department}`);
       }, 3000);
     } catch (error) {
       console.error("Error during confirmation submit:", error);
@@ -375,7 +375,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
       setShowErrorPopup(true);
       setTimeout(() => setShowErrorPopup(false), 3000);
     }
-};
+  };
 
     const router = useRouter();
     const [showSubmitPopupB, setShowSubmitPopupB] = useState(false);
@@ -397,6 +397,12 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
             //window.location.reload(); // Reload the page to ensure all data is fresh
           }, 3000);
+          if(department !== "Lupon"){
+            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+          }else{
+            setShowSubmitPopupB(true);
+          }
+
         }
         else{
           // If the case is not closed, update the status to "cfa"
@@ -411,8 +417,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
             //window.location.reload(); // Reload the page to ensure all data is fresh
           }, 3000);
+          router.push(`/dashboard/IncidentModule/Department?id=${department}`);
         }
-    
       }
 
       const [activeSection, setActiveSection] = useState("meeting");
@@ -721,7 +727,28 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             
             
 
-        {showDoneIncidentPopup && (
+
+        {showSubmitPopup && (
+            <div className="confirmation-popup-overlay-add">
+                <div className="confirmation-popup-add">
+                    <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                    <p>Are you sure you want to submit?</p>
+                    <div className="yesno-container-add">
+                        <button
+                        onClick={() => setShowSubmitPopup(false)}
+                        className="no-button-add"
+                        >
+                        No
+                        </button>
+                        <button onClick={confirmSubmit} className="yes-button-add">
+                        Yes
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            )}
+                    {showDoneIncidentPopup && (
           <div className="confirmation-popup-overlay-add">
             <div className="confirmation-popup-add">
               <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
@@ -730,7 +757,11 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                 {/*}
                 {hearing !==3 ? (
                   <button
-                    onClick={() => setShowDoneIncidentPopup(false)}
+                    onClick={() => {
+                      setShowDoneIncidentPopup(false)
+                      router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+                    }
+                  }
                     className="no-button-add"
                   >
                     No
@@ -762,8 +793,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                   </button>  
                 )}
                 <button  
-                  onClick={() => {handleClosingCase(true)
-                                  setShowSubmitPopupB(true);
+                  onClick={() => {
+                    handleClosingCase(true)
                   }}
                   className="yes-button-add"
                 >
@@ -840,28 +871,6 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
   </div>
 )}
 
-
-
-        {showSubmitPopup && (
-            <div className="confirmation-popup-overlay-add">
-                <div className="confirmation-popup-add">
-                    <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
-                    <p>Are you sure you want to submit?</p>
-                    <div className="yesno-container-add">
-                        <button
-                        onClick={() => setShowSubmitPopup(false)}
-                        className="no-button-add"
-                        >
-                        No
-                        </button>
-                        <button onClick={confirmSubmit} className="yes-button-add">
-                        Yes
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-            )}
 
 
             {showPopup && (
