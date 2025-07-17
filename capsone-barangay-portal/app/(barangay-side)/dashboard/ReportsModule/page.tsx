@@ -684,7 +684,8 @@ const uploadForms = async (url: string): Promise<void> => {
   
       const qOldRecords = query(
         jobSeekerRef,
-        where("createdAt", "<", `${year}-${month}-01`)
+        where("createdAt", "<", `${year}-${month}-01`),
+        where("firstTimeClaimed", "==", true)
       );
       const oldRecordsSnapshot = await getDocs(qOldRecords);
       const oldSeekers = oldRecordsSnapshot.docs.map((doc) => doc.data());
@@ -692,7 +693,8 @@ const uploadForms = async (url: string): Promise<void> => {
       const qCurrentMonthRecords = query(
         jobSeekerRef,
         where("createdAt", ">=", `${year}-${month}-01`),
-        where("createdAt", "<=", `${year}-${month}-31`)
+        where("createdAt", "<=", `${year}-${month}-31`),
+        where("firstTimeClaimed", "==", true)
       );
       const currentMonthSnapshot = await getDocs(qCurrentMonthRecords);
       const currentMonthSeekers = currentMonthSnapshot.docs.map((doc) => doc.data());
