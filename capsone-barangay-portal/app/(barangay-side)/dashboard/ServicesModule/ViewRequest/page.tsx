@@ -1825,8 +1825,11 @@ Functions for Reason for Reject
       }
     
       // Automatically add to Jobseeker List if needed
-      await handleJobseekerAutoAdd();
-
+      if (requestData?.purpose === "First Time Jobseeker") {
+        await handleJobseekerAutoAdd();
+      }
+    
+      
     
       if (!id) return;
       const docRef = doc(db, "ServiceRequests", id);
