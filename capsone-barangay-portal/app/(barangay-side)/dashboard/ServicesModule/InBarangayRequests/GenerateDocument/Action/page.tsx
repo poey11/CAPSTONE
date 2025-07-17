@@ -2375,7 +2375,7 @@ const handleChange = (
                           {clearanceInput.purpose === "Financial Subsidy of Solo Parent"  && (
                             <>               
                               <div className="fields-section">
-                                <h1>Son/Daugther's Name<span className="required">*</span></h1>
+                                <h1>Son/Daughter's Name<span className="required">*</span></h1>
                                 <input 
                                   type="text"  
                                   id="noIncomeChildFName"  
@@ -2568,7 +2568,7 @@ const handleChange = (
                           {clearanceInput.purpose === "No Income"  && (
                             <>               
                               <div className="fields-section">
-                                <h1>Son/Daugther's Name<span className="required">*</span></h1>
+                                <h1>Son/Daughter's Name<span className="required">*</span></h1>
                                 <input 
                                   type="text"  
                                   id="noIncomeChildFName"  

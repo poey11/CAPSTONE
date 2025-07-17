@@ -849,8 +849,8 @@ export default function GenerateDialogueLetter() {
                             if (showSubmitPopup.letterType === "summon") {
                                 setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
-
-                                }, 3000); // wait 3 seconds
+                                    setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+                                }, 5000); // wait 3 seconds
                               } else {
                                 setTimeout(() => {
                                   router.back();
@@ -870,7 +870,8 @@ export default function GenerateDialogueLetter() {
                             if (showSubmitPopup.letterType === "dialogue") {
                                 setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
-                                }, 3000); // wait 3 seconds
+                                    setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+                                }, 5000); // wait 3 seconds
                               } else {
                                 setTimeout(() => {
                                   router.back();
@@ -1419,29 +1420,7 @@ export default function GenerateDialogueLetter() {
                             </div>
 
                         </div>
-
-                            
-                            
-
-
-                        
-
-                            
-
-
-
-            
-
-
-
-
-
-
-
-            
-                        
-
-                        
+                    
                         </div>
 
                     
