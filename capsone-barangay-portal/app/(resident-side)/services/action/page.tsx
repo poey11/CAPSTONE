@@ -4032,7 +4032,7 @@ const handleFileChange = (
 
                 {(docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") && (
                   <div className="required-documents-container">
-                    <label className="form-label-required-documents"> 2x2 Barangay ID picture</label>
+                    <label className="form-label-required-documents"> 2x2 ID picture</label>
 
                     <div className="file-upload-container-required-documents">
                       <label htmlFor="file-upload11"  className="upload-link">Click to Upload File</label>
