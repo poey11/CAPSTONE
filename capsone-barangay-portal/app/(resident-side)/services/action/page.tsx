@@ -146,7 +146,7 @@ export default function Action() {
     toAddress: "",// will be also the home address
     businessLocation: "",// will be project location
     businessNature: "",
-    noOfVehicles: "1",
+    noOfVehicles: "",
     vehicleMake: "",
     vehicleType: "",
     vehiclePlateNo: "",
@@ -755,52 +755,71 @@ const handleFileChange = (
       ...updates,
       sendTo: sendTo,
       ...(clearanceInput.appointmentDate && { 
-        approvedBySAS: false,
-       }),
-      ...(documentTypeIs !== "" && {
-        documentTypeIs: documentTypeIs,
+      approvedBySAS: false,
       }),
-      requestorMrMs:clearanceInput.requestorMrMs,
+      ...(documentTypeIs !== "" && {
+      documentTypeIs: documentTypeIs,
+      }),
+      requestorMrMs: clearanceInput.requestorMrMs,
       requestorFname: clearanceInput.requestorFname
-
+    };
+    
+    // Only go to notification if addDoc is 
+    let newDoc = "";
+    try {
+      const doc = await addDoc(docRef, updates);
+      console.log("Request uploaded with ID:", doc.id);
+      newDoc = doc.id;
+      router.push("/services/notification");
+    } catch (error) {
+      console.error("Failed to upload request:", error);
+      setErrorMessage("Failed to submit your request. Please try again.");
+      setShowErrorPopup(true);
+      return;
     }
-    const newDoc = await addDoc(docRef, updates);
-    console.log("Request uploaded with ID:", newDoc.id);
     console.log("Request data to upload:", updates);
-    router.push("/services/notification");
-
+    
     const notificationRef = collection(db, "BarangayNotifications");
 
     const useDocTypeAsMessage = 
-  clearanceInput.docType === "Business Permit" || 
-  clearanceInput.docType === "Temporary Business Permit";
-  
-  await addDoc(notificationRef, {
-    message: 
-      clearanceInput.purpose === "Residency"
-        ? `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate}.`
-        : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
-    timestamp: new Date(),
-    requestorId: userData?.residentId,
-    isRead: false,
-    transactionType: "Online Service Request",
-    recipientRole: (
-      clearanceInput.purpose === "First Time Jobseeker" ||
-      clearanceInput.docType === "Barangay Certificate" ||
-      clearanceInput.docType === "Barangay Clearance" ||
-      clearanceInput.docType === "Barangay Indigency" ||
-      clearanceInput.docType === "Temporary Business Permit" ||
-      clearanceInput.docType === "Construction" ||
-      (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
-    )
-      ? "Assistant Secretary"
-      : "Admin Staff",
-    requestID: newDoc.id,
-  });
+      clearanceInput.docType === "Business Permit" || 
+      clearanceInput.docType === "Temporary Business Permit";
+    
+    // Determine message
+    let notificationMessage = "";
+    
+    if (clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") {
+      notificationMessage = `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate} (Online).`;
+    } else if (clearanceInput.docType === "Barangay Indigency") {
+      notificationMessage = `New ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate} (Online).`;
+    } else {
+      notificationMessage = `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`;
+    }
+    
+    await addDoc(notificationRef, {
+      message: notificationMessage,
+      timestamp: new Date(),
+      requestorId: userData?.residentId,
+      isRead: false,
+      transactionType: "Online Service Request",
+      recipientRole: (
+        clearanceInput.purpose === "First Time Jobseeker" ||
+        clearanceInput.docType === "Barangay Certificate" ||
+        clearanceInput.docType === "Barangay Clearance" ||
+        clearanceInput.docType === "Barangay Indigency" ||
+        clearanceInput.docType === "Temporary Business Permit" ||
+        clearanceInput.docType === "Construction" ||
+        (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
+      )
+        ? "Assistant Secretary"
+        : "Admin Staff",
+      requestID: newDoc,
+    });
+    
   
   await addDoc(collection(db, "Notifications"), {
     residentID: userData?.residentId,
-    requestID: newDoc.id,
+    requestID: newDoc,
     message: `Your document request (${clearanceInput?.requestId}) is now (Pending). We will notify you once it progresses.`,
     timestamp: new Date(),
     transactionType: "Online Service Request",
@@ -863,82 +882,111 @@ const handleFileChange = (
   });
 };
     
-    const getRequiredFields = (docType: string, purpose: string): string[] => {
-    const required: string[] = [];
+  const getRequiredFields = (): string[] => {
+    const requiredFields: string[] = [];
 
-    required.push("dateOfResidency");
-
-    switch (purpose) {
-      case "Residency":
-        required.push("CYFrom", "CYTo", "attestedBy", "appointmentDate");
-        break;
-
-      case "Occupancy / Moving Out":
-        required.push("fromAddress", "toAddress", "fullName");
-        break;
-
-      case "Estate Tax":
-        required.push("deceasedEstateName", "estateSince", "dateofdeath", "fullName");
-        break;
-
-      case "Death Residency":
-        required.push("dateofdeath", "fullName");
-        break;
-
-      case "Garage/PUV":
-        required.push("vehicleType", "noOfVechicles", "goodMoralOtherPurpose");
-        break;
-
-      case "First Time Jobseeker":
-        required.push("educationalAttainment", "course", "isBeneficiary");
-        break;
-
-      case "No Income":
-        required.push("noIncomePurpose", "noIncomeChildFName");
-        break;
-
-      case "Cohabitation":
-        required.push("partnerWifeHusbandFullName", "cohabitationStartDate", "cohabitationRelationship");
-        break;
-
-      case "Guardianship":
-        required.push("wardFname", "wardRelationship", "guardianshipType", "fullName");
-        break;
-
-      case "Garage/TRU":
-        required.push(
-          "businessName", "businessLocation", "businessNature", "noOfVechicles",
-          "vehicleMake", "vehicleType", "vehiclePlateNo", "vehicleSerialNo",
-          "vehicleChassisNo", "vehicleEngineNo", "vehicleFileNo"
+    requiredFields.push("requestorFname",
+          "requestorMrMs", "address","dateOfResidency",
+          "birthday","age", "gender", "contact", "civilStatus",
+          "citizenship"
         );
-        break;
 
-      case "Barangay ID":
-        required.push(
-          "birthplace", "religion", "nationality", "height", "weight", "bloodtype",
-          "occupation", "precinctnumber",
-          "emergencyDetails.fullName", "emergencyDetails.contactNumber",
-          "emergencyDetails.address", "emergencyDetails.relationship"
+      if(clearanceInput.docType === "Barangay Certificate" ){
+        requiredFields.push("purpose")
+        if(clearanceInput.purpose === "Residency"){
+          requiredFields.push("CYFrom", "CYTo");
+        }
+        
+        if(clearanceInput.purpose === "Occupancy /  Moving Out") {
+          requiredFields.push("fromAddress", "toAddress","fullName");
+        }
+        if(clearanceInput.purpose === "Estate Tax" || clearanceInput.purpose === "Death Residency") {
+          requiredFields.push("fullName","dateofdeath" );
+          if(clearanceInput.purpose === "Estate Tax") {
+            requiredFields.push("estateSince");
+          }
+        }
+        
+        if(clearanceInput.purpose === "No Income") {
+          requiredFields.push("noIncomePurpose","noIncomeChildFName");
+
+        }
+        if(clearanceInput.purpose === "Cohabitation") {
+          requiredFields.push("partnerWifeHusbandFullName","cohabitationRelationship", "cohabitationStartDate");
+        }
+        if(clearanceInput.purpose === "Guardianship") {
+          requiredFields.push("goodMoralPurpose", );
+        
+        }
+        if(clearanceInput.purpose === "Good Moral and Probation") {
+          requiredFields.push("goodMoralPurpose",);
+          if(clearanceInput.goodMoralPurpose === "Others") {
+            requiredFields.push("goodMoralOtherPurpose");
+          }
+        }
+        if(clearanceInput.purpose === "Garage/PUV") {
+          requiredFields.push("goodMoralOtherPurpose",
+            "vehicleType","noOfVehicles"
+          );
+        }
+        if(clearanceInput.purpose === "Garage/TRU") {
+          requiredFields.push(
+            "businessName","businessNature", "businessLocation",
+            "noOfVehicles", "vehicleMake","vehicleType",
+            "vehiclePlateNo", "vehicleSerialNo", "vehicleChassisNo",
+            "vehicleEngineNo", "vehicleFileNo", 
+          );
+        }
+      }
+      
+      if (clearanceInput.docType === "Barangay Indigency") {
+        requiredFields.push("purpose");
+        if(clearanceInput.purpose === "No Income") {
+          requiredFields.push("noIncomePurpose","noIncomeChildFName");
+
+        }
+        if(clearanceInput.purpose === "Financial Subsidy of Solo Parent") {
+          requiredFields.push("noIncomeChildFName",)
+        }
+        if(clearanceInput.purpose === "Fire Victims") {
+          requiredFields.push("dateOfFireIncident")
+        }
+        if(clearanceInput.purpose === "Flood Victims") {
+          requiredFields.push("nameOfTyphoon", "dateOfTyphoon");
+        }
+      }
+
+      if(clearanceInput.docType === "Barangay Clearance") {
+        
+        if(clearanceInput.purpose === "Residency"){
+          requiredFields.push("CYFrom", "CYTo");
+        }
+      }
+
+      if(clearanceInput.docType === "Other Documents") {
+        if(clearanceInput.purpose === "Barangay ID") {
+          requiredFields.push("birthplace","religion","nationality","precinctnumber"
+            ,"occupation","height","weight","bloodtype"
+          );
+        }
+        if(clearanceInput.purpose === "First Time Jobseeker") {
+          requiredFields.push("emergencyDetails.fullName","emergencyDetails.address"
+            ,"emergencyDetails.contactNumber", "emergencyDetails.relationship"
+          )
+        }
+      }
+      // Barangay Permits
+      if(clearanceInput.docType === "Business Permit" || clearanceInput.docType === "Temporary Business Permit") {
+        requiredFields.push("purpose", "businessName", 
+          "businessNature", "businessLocation","estimatedCapital")
+      }
+      if(clearanceInput.docType === "Construction") {
+        requiredFields.push("typeofconstruction", "typeofbldg",
+          "homeOrOfficeAddress", "projectName", "projectLocation"
         );
-        break;
+      }
 
-      default:
-        break;
-    }
-
-  // Add document-type-specific required fields
-  if (docType === "Business Permit" || docType === "Temporary Business Permit") {
-    required.push("businessName", "businessLocation", "businessNature", "estimatedCapital");
-  }
-
-  if (docType === "Construction") {
-    required.push(
-      "typeofconstruction", "typeofbldg", "projectName", "projectLocation",
-      "homeOrOfficeAddress", "othersTypeofbldg"
-    );
-  }
-
-  return required;
+  return requiredFields;
 };
 
 
@@ -961,11 +1009,14 @@ const handleFileChange = (
       }
 
       // Gather required fields for this docType/purpose
-      const requiredFields = getRequiredFields(docType, clearanceInput.purpose);
+      const requiredFields = getRequiredFields();
 
-      // Add dynamic fields (from filteredDynamicFields)
       requiredFields.push(...filteredDynamicFields);
-
+      console.log("Required Fields:", requiredFields);
+      
+      if(!isAllRequiredFieldsFilledUp(requiredFields)){
+        return;
+      }
       // Add dynamic image fields
       const requiredImageFields = [
       ...Object.keys(dynamicFileStates),
@@ -994,31 +1045,8 @@ const handleFileChange = (
         requiredImageFields.push("deathCertificate");
       }
 
-      // Remove duplicates
-      const uniqueRequiredFields = Array.from(new Set(requiredFields));
-      const uniqueRequiredImageFields = Array.from(new Set(requiredImageFields));
 
-      // Check for missing text fields
-      for (const field of uniqueRequiredFields) {
-        // Emergency details are nested
-        if (field.startsWith("emergencyDetails.")) {
-          const subField = field.split(".")[1];
-          if (!clearanceInput.emergencyDetails || !clearanceInput.emergencyDetails[subField as keyof EmergencyDetails]) {
-        setErrorMessage(`Please fill in the emergency contact's ${subField.replace(/([A-Z])/g, ' $1').toLowerCase()}.`);
-        setShowErrorPopup(true);
-        return; // Stop further execution, do not upload images
-          }
-        } else if (
-          clearanceInput[field] === undefined ||
-          clearanceInput[field] === null ||
-          clearanceInput[field] === "" ||
-          (typeof clearanceInput[field] === "string" && clearanceInput[field].trim() === "")
-        ) {
-          setErrorMessage(`Please fill in the required field: ${field.replace(/([A-Z])/g, ' $1').replace(/\./g, ' ').toLowerCase()}.`);
-          setShowErrorPopup(true);
-          return; // Stop further execution, do not upload images
-        }
-      }
+      
 
       // Check for required image uploads (at least one for ID/letter if needed)
       if (
@@ -1037,14 +1065,15 @@ const handleFileChange = (
       }
 
       // Check all other required image fields
-      for (const imgField of uniqueRequiredImageFields) {
+      for (const imgField of requiredImageFields) {
       if (
         imgField !== "barangayIDjpg" &&
         imgField !== "validIDjpg" &&
-        imgField !== "letterjpg" &&
         (!clearanceInput[imgField] || !(clearanceInput[imgField] instanceof File))
       ) {
-        setErrorMessage(`Please upload the required image: ${imgField.replace(/([A-Z])/g, ' $1').replace(/jpg$/, '').toLowerCase()}.`);
+        if(imgField === "isCCTV") setErrorMessage("Please upload the required image of CCTV");
+        else if(imgField === "letterjpg") setErrorMessage("Please upload the required letter of endorsement.");
+        else setErrorMessage(`Please upload the required image: ${imgField.replace(/([A-Z])/g, ' $1').replace(/jpg$/, '').toLowerCase()}.`);
         setShowErrorPopup(true);
         return;
       }
@@ -1242,6 +1271,7 @@ const handleFileChange = (
         businessLocation: clearanceInput.businessLocation,
         businessNature: clearanceInput.businessNature,
         estimatedCapital: clearanceInput.estimatedCapital,
+
         copyOfPropertyTitle: filenames.copyOfPropertyTitle,
         dtiRegistration: filenames.dtiRegistration,
         isCCTV: filenames.isCCTV,
@@ -1344,7 +1374,79 @@ const handleFileChange = (
     //  router.push("/services");
     };
 
-    
+    const isAllRequiredFieldsFilledUp = (requiredFields:string []) => {
+
+    for (const key of requiredFields) {
+        const fieldValue = clearanceInput[key as keyof ClearanceInput];
+        if (
+          fieldValue === undefined ||
+          fieldValue === null ||
+          (typeof fieldValue === "string" && fieldValue.trim() === "") ||
+          (typeof fieldValue === "object" && Object.keys(fieldValue).length === 0)
+        ) {
+          let message = "";
+          if(key ==="CYFrom") message = "Cohabitation Year From";
+          else if(key ==="CYTo") message = "Cohabitation Year To";
+          else if(key ==="noIncomePurpose") message = "No Income Purpose";
+          else if(key ==="noIncomeChildFName") message = "No Income Child's First Name";
+          else if(key ==="goodMoralOtherPurpose") message = "Good Moral Other Purpose";
+          else if(key ==="cohabitationRelationship") message = "Cohabitation Relationship";
+          else if(key ==="cohabitationStartDate") message = "Cohabitation Start Date";
+          else if(key ==="goodMoralPurpose") message = "Good Moral Purpose";
+          else if(key ==="vehicleType") message = "Vehicle Type";
+          else if(key ==="vehicleMake") message = "Vehicle Make";
+          else if(key ==="vehiclePlateNo") message = "Vehicle Plate Number";
+          else if(key ==="vehicleSerialNo") message = "Vehicle Serial Number";
+          else if(key ==="vehicleChassisNo") message = "Vehicle Chassis Number";
+          else if(key ==="vehicleEngineNo") message = "Vehicle Engine Number";
+          else if(key ==="vehicleFileNo") message = "Vehicle File Number";
+          else if(key ==="businessName") message = "Business Name";
+          else if(key ==="businessNature") message = "Business Nature";
+          else if(key ==="businessLocation") message = "Business Location";
+          else if(key ==="estimatedCapital") message = "Estimated Capital";
+          else if(key ==="typeofconstruction") message = "Type of Construction";
+          else if(key ==="typeofbldg") message = "Type of Building";
+          else if(key ==="homeOrOfficeAddress") message = "Home or Office Address";
+          else if(key ==="projectName") message = "Project Name";
+          else if(key ==="projectLocation") message = "Project Location";
+          else if(key ==="dateOfFireIncident") message = "Date of Fire Incident";
+          else if(key ==="nameOfTyphoon") message = "Name of Typhoon";
+          else if(key ==="dateOfTyphoon") message = "Date of Typhoon";
+          else if(key ==="fullName") message = `${addOn}Full Name`;
+          else if (key === "emergencyDetails.fullName") message = "Emergency Contact Full Name";
+          else if (key === "emergencyDetails.address") message = "Emergency Contact Address";
+          else if (key === "emergencyDetails.contactNumber") message = "Emergency Contact Number";
+          else if (key === "emergencyDetails.relationship") message = "Emergency Contact Relationship";
+          else if (key === "requestorFname") message = "Requestor's First Name";
+          else if (key === "requestorMrMs") message = "Requestor's Mr/Ms";
+          else if (key === "address") message = "Address";
+          else if (key === "dateOfResidency") message = "Date of Residency";
+          else if (key=== "birthday") message = "Birthday";
+          else if (key === "age") message = "Age";
+          else if(key === "birthplace") message = "Place of Birth";
+          else if(key === "religion") message = "Religion";
+          else if(key === "nationality") message  = "Nationality";
+          else if(key === "precinctnumber") message = "Precinct Number";
+          else if(key === "occupation") message = "Occupation";
+          else if(key === "height") message = "Height";
+          else if(key === "weight") message = "Weight";
+          else if(key === "bloodtype") message = "Blood Type";
+          else if (key === "contact") message = "Contact Number";
+          else if (key === "civilStatus") message = "Civil Status";
+          else if (key === "citizenship") message = "Citizenship";
+          else if (key === "purpose") message = "Purpose";
+        else message = key
+          .replace(/([A-Z])/g, ' $1')   // Add space before capital letters
+          .replace(/[\.\-_]/g, ' ')     // Replace dot (.), dash (-), and underscore (_) with space
+          
+          setErrorMessage(`Please fill up ${message}.`);
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+          return false;
+        }
+      }
+      return true;
+    }    
 
     const [addOn, setAddOn] = useState<string>("");
     

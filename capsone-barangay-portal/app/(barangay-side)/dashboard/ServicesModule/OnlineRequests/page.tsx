@@ -282,18 +282,18 @@ useEffect(() => {
 };
 
 
-    const handleView = (request: any) => {
-      console.log("Viewing request:", request);
-      const id = request.id;
-      markAsViewed(id); // mark before navigating
-      if(request.type === "OtherDocument") {
-        router.push(`/dashboard/ServicesModule/OnlineRequests/ViewRequest/otherDocument?id=${id}`);
-      }
-      else{
-        router.push(`/dashboard/ServicesModule/ViewRequest?id=${id}`);
-        
-      }
-    };
+  const handleView = (request: any) => {
+  console.log("Viewing request:", request);
+  const id = request.id;
+  markAsViewed(id); // mark before navigating
+
+ 
+  const cleanedReqType = request.reqType === "In Barangay" ? "inbarangay" : "online";
+  router.push(`/dashboard/ServicesModule/ViewRequest?reqType=${cleanedReqType}&id=${id}`);
+
+};
+
+
 
 
   // Highlighting Logic based on the URL parameter

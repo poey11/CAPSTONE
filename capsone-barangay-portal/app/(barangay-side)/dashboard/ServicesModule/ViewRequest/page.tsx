@@ -1690,7 +1690,7 @@ Functions for Reason for Reject
               },
               body: JSON.stringify({
                   to: requestData?.contact,
-                  message: `Hello Mr/Ms. ${requestData?.requestorFname}, your 
+                  message: `Hello Mr/Ms. ${requestData?.requestor}, your 
                   document request with ID ${requestData?.requestId} 
                   is now ready for pick-up. Please visit the barangay hall 
                   to collect your document. Thank you!`,
@@ -1890,8 +1890,12 @@ Functions for Reason for Reject
         }
                 
         const notificationRef = collection(db, "BarangayNotifications");
+
+        const isOnline = requestData?.accID !== "INBRG-REQ";
+        const messageSuffix = isOnline ? " (Online)" : "";
+        
         await addDoc(notificationRef, {
-          message: `You have been assigned a new task for ${requestData.purpose} document requested by ${requestData.requestorFname}.`,
+          message: `You have been assigned a new task for ${requestData.purpose} document requested by ${requestData.requestorFname}.${messageSuffix}`,
           timestamp: new Date(),
           requestorId: requestData?.accID,
           isRead: false,
@@ -1899,7 +1903,7 @@ Functions for Reason for Reject
           recipientRole: "Admin Staff",
           requestID: id,
         });
-
+        
         // await addDoc(collection(db, "Notifications"), {
         //   residentID: requestData?.accID,
         //   requestID: id,
@@ -1912,7 +1916,7 @@ Functions for Reason for Reject
 
       }else{
         /* This part will handle ung pag notify kay resident na to pickup na ung  doc */
-        //handleSMS(); Admin Staff will handle the sending of SMS to the resident
+        //handleSMS();//Admin Staff will handle the sending of SMS to the resident
         updatedData = {
           status: "Pick-up",
           statusPriority: 3,
@@ -1964,7 +1968,7 @@ Functions for Reason for Reject
 
       const notificationRef = collection(db, "BarangayNotifications");
 
-      if (requestData?.purpose === "Residency" && requestData?.reqType === "Online") {
+      if ( requestData?.docType === "Barangay Certificate" && requestData?.purpose === "Residency" && requestData?.reqType === "Online") {
         await addDoc(notificationRef, {
           message: `You have been assigned an appointment for picture taking for ${requestData?.purpose} for ${requestData?.requestorFname}.`,
           timestamp: new Date(),
@@ -2007,8 +2011,12 @@ Functions for Reason for Reject
       await updateDoc(docRef, updatedData);
 
       const notificationRef = collection(db, "BarangayNotifications");
+
+      const isOnline = requestData?.accID !== "INBRG-REQ";
+      const messageSuffix = isOnline ? " (Online)" : "";
+      
       await addDoc(notificationRef, {
-        message: `You have been assigned a new task for ${requestData?.purpose} document requested by ${requestData?.requestorFname}.`,
+        message: `You have been assigned a new task for ${requestData?.purpose} document requested by ${requestData?.requestorFname}.${messageSuffix}`,
         timestamp: new Date(),
         requestorId: requestData?.accID,
         isRead: false,
@@ -2016,6 +2024,7 @@ Functions for Reason for Reject
         recipientRole: "Assistant Secretary",
         requestID: id,
       });
+      
 
       setShowInterviewForm(false);
       setShowInterviewRemarksSuccessPopup(true);
@@ -2063,15 +2072,20 @@ Functions for Reason for Reject
       await updateDoc(docRef, updatedData);
 
       const notificationRef = collection(db, "BarangayNotifications");
+
+      const isOnline = requestData?.accID !== "INBRG-REQ";
+      const messageSuffix = isOnline ? " (Online)" : "";
+      
       await addDoc(notificationRef, {
-        message: `A picture has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.`,
+        message: `A picture has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.${messageSuffix}`,
         timestamp: new Date(),
-        requestorId: requestData?.accID || "",  // adjust based on your actual data context
+        requestorId: requestData?.accID || "",
         isRead: false,
         transactionType: "Online Service Request",
         recipientRole: "Assistant Secretary",
         requestID: id,
       });
+      
     
 
       setshowPhotoUpload(false); 
